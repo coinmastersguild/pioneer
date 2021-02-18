@@ -22,10 +22,14 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
+          command:"curl -sL https://github.com/digitalocean/doctl/releases/download/v1.56.0/doctl-1.56.0-linux-amd64.tar.gz | tar -xzv"
+      - run:
+          command:"mv doctl /usr/local/bin"
+      - run:
           command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
       - run:
           name: build
-          command: "./doctl auth init -t $DIGITALOCEAN_TOKEN && ./doctl registry login && npm run build:rest"
+          command: "doctl auth init -t $DIGITALOCEAN_TOKEN && doctl registry login && npm run build:rest"
   deploy:
     executor: pulumi
     parameters:
@@ -71,9 +75,9 @@ workflows:
     jobs:
       - build:
           <<: *only_master
-          name: build containers
+          name: push image
           env: prod
       - deploy:
           <<: *only_master
-          name: build containers
+          name: deploy image
           env: prod
