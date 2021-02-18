@@ -12,13 +12,6 @@ kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registr
 http://engineering.conversantmedia.com/technology/2019/10/01/typescript-hot-reload/
 
 
-```
-kubectl config get-contexts
-kubectl config current-context
-kubectl config use-context skunkworks-stage
-```
-
-
 #registry secrets config
 
 https://www.digitalocean.com/docs/container-registry/how-to/use-registry-docker-kubernetes/#using-generated-secrets
