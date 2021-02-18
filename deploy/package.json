@@ -2,6 +2,6 @@
   "name": "deploy",
   "version": "1.0.0",
   "dependencies": {
-    "@pioneer-platform/leeroy-sdk": "^7.0.1"
+    "@pioneer-platform/leeroy-sdk": "latest"
   }
 }
