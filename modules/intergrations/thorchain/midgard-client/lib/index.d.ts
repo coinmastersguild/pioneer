@@ -1,0 +1,14 @@
+declare const TAG = " | midgard network | ";
+declare let SEED_TESTNET: string;
+declare const MIDGARD_API = "http://174.138.103.9:8080/v1";
+declare let MIDGARD_API_RAW: string;
+declare const Axios: any;
+declare const https: any;
+declare const axios: any;
+declare const log: any;
+declare const get_new_addresses: () => Promise<any>;
+declare const get_price: (asset: string) => Promise<any>;
+declare const get_pool_addresses: () => Promise<any>;
+declare const get_info: () => Promise<any>;
+declare const get_pools: () => Promise<any>;
+declare const get_pool: (poolId: string) => Promise<any>;

@@ -1,0 +1,43 @@
+{
+  "name": "@pioneer-platform/pioneer-app",
+  "version": "7.0.19",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "npm-rebuild": "npm rebuild",
+    "npm-update": "npm update",
+    "test": "npm run build && node __tests__/test-module.js",
+    "lint": "prettier --write '**/**/*.ts'",
+    "run-bridge": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts --auth",
+    "create": "npm run build && npm run test",
+    "build": "tsc -p .",
+    "prepublish": "npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "@bithighlander/hdwallet-native": "latest",
+    "@peculiar/webcrypto": "latest",
+    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/pioneer": "latest",
+    "@pioneer-platform/pioneer-config": "latest",
+    "@pioneer-platform/pioneer-hardware": "latest",
+    "@types/node": "^13.13.39",
+    "@types/uuid": "^8.3.0",
+    "axios": "^0.19.2",
+    "bcryptjs": "^2.4.3",
+    "chalk": "^4.1.0",
+    "cli-table": "^0.3.4",
+    "crypto-js": "^4.0.0",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^9.0.1",
+    "openapi-client-axios": "^3.7.8",
+    "prompt": "^1.1.0",
+    "request": "^2.88.2",
+    "scrypt-js": "^3.0.1",
+    "socket.io-client": "^2.4.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.9",
+    "when": "^3.7.8"
+  }
+}

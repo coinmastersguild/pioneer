@@ -1,0 +1,36 @@
+{
+  "name": "@pioneer-platform/pioneer-hardware",
+  "version": "6.3.0",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "npm-update": "npm update",
+    "test": "npm run build && node __tests__/test-module.js",
+    "dev": "tsc -w -p .",
+    "build": "tsc -p .",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@bithighlander/usb-detection": "^4.10.4",
+    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/pioneer": "^6.3.53",
+    "@pioneer-platform/pioneer-coins": "^6.2.7",
+    "@shapeshiftoss/hdwallet-core": "latest",
+    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "latest",
+    "@shapeshiftoss/hdwallet-keepkey-tcp": "latest",
+    "@types/bytebuffer": "^5.0.42",
+    "@types/google-protobuf": "^3.7.4",
+    "@types/node": "^13.13.41",
+    "bytebuffer": "^5.0.1",
+    "cli-table": "^0.3.4",
+    "dotenv": "^8.2.0",
+    "fiosdk-offline": "^1.2.21",
+    "fs-extra": "^9.1.0",
+    "prompt": "^1.1.0",
+    "request": "^2.88.2",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "wait-promise": "^0.4.1"
+  }
+}

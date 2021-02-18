@@ -1,0 +1,21 @@
+{
+  "name": "@pioneer-platform/cosmos-network",
+  "version": "6.2.4",
+  "dependencies": {
+    "@pioneer-platform/loggerdog": "latest",
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
+    "https": "^1.0.0",
+    "wait-promise": "^0.4.1"
+  },
+  "description": "Cosmos events to redis pub/sub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo lol"
+  },
+  "keywords": [
+    "cosmos"
+  ],
+  "author": "Bithighlander <pioneer@gmail.com>",
+  "license": "ISC"
+}
