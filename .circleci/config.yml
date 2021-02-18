@@ -7,7 +7,7 @@ orbs:
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi
+      - image: circleci/node:10
 
 jobs:
   build:
