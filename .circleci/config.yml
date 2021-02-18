@@ -154,21 +154,3 @@ workflows:
           <<: *only_master
           name: update prod
           env: prod
-      #      - deploy:
-      #          name: preview prod
-      #          env: prod
-      #          action: preview
-      #          requires:
-      #            - build containers
-      #      - approve prod:
-      #          <<: *only_master
-      #          <<: *foxContext
-      #          type: approval
-      #          requires:
-      #            - preview prod
-      - deploy:
-          <<: *only_master
-          name: update image
-          env: prod
-          requires:
-            - build containers
