@@ -24,7 +24,7 @@ jobs:
       - run:
           command: "curl -sL https://github.com/digitalocean/doctl/releases/download/v1.56.0/doctl-1.56.0-linux-amd64.tar.gz | tar -xzv"
       - run:
-          command: "mv doctl /usr/local/bin"
+          command: "sudo mv doctl /usr/local/bin"
       - run:
           command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
       - run:
