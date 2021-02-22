@@ -399,15 +399,6 @@ var init_network = function (runtime, servers) {
                 BLOCKBOOK = new blockbook_client_1.Blockbook({
                     nodes: ['btc1.trezor.io', 'btc2.trezor.io'],
                 });
-                if (runtime === "electrumX") {
-                }
-                else if (runtime === 'pioneer') {
-                    //TODO
-                    throw Error("unconfigured runtime");
-                }
-                else {
-                    throw Error("unkown runtime");
-                }
                 return [2 /*return*/, true];
             }
             catch (e) {

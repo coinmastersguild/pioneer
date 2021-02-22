@@ -347,17 +347,6 @@ let init_network = async function (runtime:string,servers:any) {
         })
 
 
-        if(runtime === "electrumX"){
-
-
-        } else if(runtime === 'pioneer'){
-            //TODO
-            throw Error("unconfigured runtime")
-        } else {
-            throw Error("unkown runtime")
-        }
-
-
         return true
     } catch (e) {
         console.error(tag, 'Error: ', e)

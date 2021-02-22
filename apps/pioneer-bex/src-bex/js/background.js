@@ -1,3 +1,23 @@
+/*
+    Pioneer Platform
+      Browser Extension
+
+
+
+ */
+
+/*
+    OnStart()
+ */
+
+
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url) {
+    bridge.send('browserTabUpdated', { tab, changeInfo })
+  }
+})
+
 // Background code goes here
 chrome.browserAction.onClicked.addListener((/* tab */) => {
   // Opens our extension in a new browser window.

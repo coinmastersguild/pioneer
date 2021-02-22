@@ -45,6 +45,14 @@
  */
 
 /*
+	//cosmos sdk
+	https://www.npmjs.com/package/@cosmostation/cosmosjs
+
+
+	Networks
+
+
+
     Tendermint API
 
 
@@ -72,11 +80,14 @@ let sleep = wait.sleep;
 
 
 const ASSET = "ATOM"
+
+let publicNode = "https://45.79.249.253"
+
 let ATOM_BASE = process.env["ATOM_BASE"] || '1000000'
-let URL_GAIAD = process.env['URL_GAIAD'] || 'https://lcd.nylira.net'
-let URL_GAIACLI= process.env['URL_GAIACLI'] || 'https://lcd.nylira.net'
-let URL_PIONEER = process.env['URL_PIONEER'] || 'https://lcd.nylira.net'
-let URL_REMOTE = process.env['URL_REMOTE'] || 'https://lcd.nylira.net'
+let URL_GAIAD = process.env['URL_GAIAD'] || publicNode
+let URL_GAIACLI= process.env['URL_GAIACLI'] || publicNode
+let URL_PIONEER = process.env['URL_PIONEER'] || publicNode
+let URL_REMOTE = process.env['URL_REMOTE'] || publicNode
 let RUNTIME
 
 module.exports = {

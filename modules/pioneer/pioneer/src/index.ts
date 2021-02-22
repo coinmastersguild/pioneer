@@ -720,7 +720,24 @@ module.exports = class wallet {
                 log.debug(tag,"addressFrom: ",addressFrom)
 
                 let rawTx
-                if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+
+                let UTXOcoins = [
+                    'BTC',
+                    'BCH',
+                    'LTC'
+                ]
+
+                if(UTXOcoins.indexOf(coin) >= 0){
+                    log.info(tag,"Build UTXO tx! ",coin)
+
+                    //list unspent
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent(addressFrom)
+                    unspentInputs = unspentInputs.data
+                    log.info(tag,"unspentInputs: ",unspentInputs)
+
+                    //buildTx
+
+                }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
                     log.debug(tag,"checkpoint")
                     let balanceEth = await this.getBalanceRemote('ETH')
                     log.debug(tag,"getBalanceRemote: ",balanceEth)

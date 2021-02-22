@@ -325,6 +325,29 @@ export class pioneerPublicController extends Controller {
     /**
      *  Retrieve account info
      */
+    @Get('/listUnspent/{coin}/{xpub}')
+    public async listUnspent(coin:string,xpub:string) {
+        let tag = TAG + " | listUnspent | "
+        try{
+            //TODO if UTXO else error
+
+            let inputs = await networks['ANY'].utxosByXpub(coin,xpub)
+
+            return inputs
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
+     *  Retrieve account info
+     */
     @Get('/getAccountInfo/{coin}/{address}')
     public async getAccountInfo(coin:string,address:string) {
         let tag = TAG + " | accountsFromPubkey | "

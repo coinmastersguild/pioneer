@@ -23,7 +23,6 @@ let ENV_VAR_LONG = []
 for(let i = 0; i < ENV_VARS.length;i++){
     ENV_VAR_LONG.push({name:ENV_VARS[i],value:process.env[ENV_VARS[i]]})
 }
-
 ENV_VAR_LONG.push({name:"DEFAULT_LOG_LEVEL",value:"DEBUG"})
 let ingress
 
@@ -97,5 +96,4 @@ const init_deploy = function () {
 }
 
 init_deploy()
-
 //create project
