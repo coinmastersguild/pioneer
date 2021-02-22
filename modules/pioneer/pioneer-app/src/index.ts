@@ -6,8 +6,7 @@
  */
 
 const TAG = " | app | ";
-require("module-alias/register")
-import axios from "axios";
+
 import {
     getConfig,
     getWallet,
@@ -776,6 +775,7 @@ let create_wallet = async function (type:string,wallet:any) {
                     // @ts-ignore
                     const success = await initWallet(walletNew);
                 } else {
+                    throw Error("already exists")
                     //TODO verify?
                     //createWallet
                 }

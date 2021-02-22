@@ -11,8 +11,6 @@
 let packageInfo = require("./package.json")
 const TAG = " |"+packageInfo.name+"|  "
 
-let ASSET = "ATOM"
-let ASSET_LONG = 'cosmos'
 let ENV_VARS = [
     'NODE_ENV',
     'DATADOG_API_KEY',
@@ -22,7 +20,6 @@ let ENV_VARS = [
 ]
 
 let ENV_VAR_LONG = []
-ENV_VAR_LONG.push({name:"ASSET",value:ASSET})
 for(let i = 0; i < ENV_VARS.length;i++){
     ENV_VAR_LONG.push({name:ENV_VARS[i],value:process.env[ENV_VARS[i]]})
 }

@@ -74,6 +74,26 @@ WALLET_COINS.push('FIO')
 //TODO BNB tokens
 
 //TODO type paths
+//TODO MOVEME coins module
+const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
+const ATOM_CHAIN="cosmoshub-4"
+const ATOM_BASE=1000000
+const ATOM_TX_FEE="100"
+const ATOM_MAX_GAS="100000"
+
+const HD_BNB_KEYPATH="44'/714'/0'/0/"
+const BNB_ASSET_SYMBOL="BNB"
+const BNB_CHAIN=""
+const BNB_MAX_GAS="100000"
+const BNB_TX_FEE="100"
+const BNB_BASE=100000000
+
+const HD_EOS_KEYPATH="44'/194'/0'/0/"
+const EOS_ASSET_SYMBOL="EOS"
+const EOS_CHAIN="aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
+const EOS_MAX_GAS="100000"
+const EOS_TX_FEE="100"
+const EOS_BASE=1000
 
 export interface config {
     spec:string,
@@ -670,11 +690,11 @@ module.exports = class wallet {
 
                 //build transfer
                 let signedTx = await this.buildTransfer(transaction)
-                log.debug(tag,"signedTx: ",signedTx)
+                log.info(tag,"signedTx: ",signedTx)
 
                 //broadcast
                 let broadcastResult = await this.broadcastTransaction(coin,signedTx)
-                log.debug(tag,"broadcastResult: ",broadcastResult)
+                log.info(tag,"broadcastResult: ",broadcastResult)
 
                 return broadcastResult
             }catch(e){
@@ -781,86 +801,106 @@ module.exports = class wallet {
 
                     rawTx.params = txParams
                 } else if(coin === 'ATOM'){
-                    throw Error ("666: ATOM not supported yet!")
                     //get amount native
-                    // let amountNative = ATOM_BASE * parseFloat(amount)
-                    // amountNative = parseInt(amountNative.toString())
-                    //
-                    // //get account number
-                    // let masterInfo = await network.getAccountInfo("ATOM",addressFrom)
-                    //
-                    // log.debug(tag,"masterInfo: ",masterInfo)
-                    //
-                    // let sequence = masterInfo.result.value.sequence
-                    // let account_number = masterInfo.result.value.account_number
-                    //
-                    // let txType = "cosmos-sdk/MsgSend"
-                    // let gas = "100000"
-                    // let fee = "1000"
-                    // let memo = transaction.memo || ""
-                    //
-                    // //sign tx
-                    // let unsigned = {
-                    //     "fee": {
-                    //         "amount": [
-                    //             {
-                    //                 "amount": fee,
-                    //                 "denom": "uatom"
-                    //             }
-                    //         ],
-                    //         "gas": gas
-                    //     },
-                    //     "memo": memo,
-                    //     "msg": [
-                    //         {
-                    //             "type": txType,
-                    //             "value": {
-                    //                 "amount": [
-                    //                     {
-                    //                         "amount": amountNative.toString(),
-                    //                         "denom": "uatom"
-                    //                     }
-                    //                 ],
-                    //                 "from_address": addressFrom,
-                    //                 "to_address": address
-                    //             }
-                    //         }
-                    //     ],
-                    //     "signatures": null
-                    // }
-                    //
-                    // let	chain_id = ATOM_CHAIN
-                    //
-                    // if(!sequence) throw Error("112: Failed to get sequence")
-                    // if(!account_number) throw Error("113: Failed to get account_number")
-                    //
-                    // let res = await WALLET.cosmosSignTx({
-                    //     addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                    //     chain_id: "cosmoshub-3",
-                    //     account_number: account_number,
-                    //     sequence:sequence,
-                    //     tx: unsigned,
-                    // });
-                    //
-                    // log.debug("res: ",res)
-                    // log.debug("res*****: ",res)
-                    //
-                    // let txFinal:any
-                    // txFinal = res
-                    // txFinal.signatures = res.signatures
-                    //
-                    // log.debug("FINAL: ****** ",txFinal)
-                    //
-                    // let broadcastString = {
-                    //     tx:txFinal,
-                    //     type:"cosmos-sdk/StdTx",
-                    //     mode:"sync"
-                    // }
-                    // rawTx = {
-                    //     txid:"",
-                    //     coin,
-                    //     serialized:JSON.stringify(broadcastString)
-                    // }
+                    let amountNative = ATOM_BASE * parseFloat(amount)
+                    amountNative = parseInt(amountNative.toString())
+
+                    //get account number
+                    log.info(tag,"addressFrom: ",addressFrom)
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'ATOM',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.info(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+
+                    let txType = "cosmos-sdk/MsgSend"
+                    let gas = "100000"
+                    let fee = "1000"
+                    let memo = transaction.memo || ""
+
+                    //sign tx
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "uatom"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            {
+                                "type": txType,
+                                "value": {
+                                    "amount": [
+                                        {
+                                            "amount": amountNative.toString(),
+                                            "denom": "uatom"
+                                        }
+                                    ],
+                                    "from_address": addressFrom,
+                                    "to_address": address
+                                }
+                            }
+                        ],
+                        "signatures": null
+                    }
+
+                    let	chain_id = ATOM_CHAIN
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) throw Error("113: Failed to get account_number")
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.cosmosGetAddress({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.info(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.info(tag,"fromAddress: ",addressFrom)
+
+                    log.info("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+
+                    let res = await this.WALLET.cosmosSignTx({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    });
+
+                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res*****: ",res)
+
+                    let txFinal:any
+                    txFinal = res
+                    txFinal.signatures = res.signatures
+
+                    log.debug("FINAL: ****** ",txFinal)
+
+                    let broadcastString = {
+                        tx:txFinal,
+                        type:"cosmos-sdk/StdTx",
+                        mode:"sync"
+                    }
+                    rawTx = {
+                        txid:"",
+                        coin,
+                        serialized:JSON.stringify(broadcastString)
+                    }
                 }else if(coin === "BNB"){
                     //TODO move to tx builder module
                     //get account info

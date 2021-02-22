@@ -35,10 +35,34 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config);
         let info = await Wallet.init()
         console.log("total Value: ",info.totalValueUsd)
-        console.log("info: ",prettyjson.render(info.public.BNB))
+        console.log("info: ",prettyjson.render(info.public.ATOM))
 
         let info2 = await Wallet.getInfo()
-        console.log("info2: ",info2)
+        //console.log("info2: ",info2)
+
+        //ATOM
+        let masterATOM = await Wallet.getMaster("ATOM")
+        console.log("masterATOM: ",masterATOM)
+
+        let balanceATOM = await Wallet.getBalance("ATOM")
+        console.log("balanceATOM: ",balanceATOM)
+
+        let address = "cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj"
+        let amount = "0.001"
+        let memo = "foobar"
+
+        let transfer = {
+            coin:"ATOM",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        // let txid = await Wallet.sendToAddress("ATOM",address,amount,memo)
+        // console.log("txid: ",txid)
 
         //getBalance ETH
         // let masterBNB = await Wallet.getMaster("BNB")

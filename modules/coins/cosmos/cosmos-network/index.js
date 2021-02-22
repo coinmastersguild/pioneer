@@ -249,21 +249,24 @@ let check_online_status = async function(){
 }
 
 let get_balance = async function(address){
-	let tag = TAG + " | get_pioneer_status | "
+	let tag = TAG + " | get_balance | "
 	let output = {}
 	try{
+		let output = 0
+		//
+		let accountInfo = await axios({method:'GET',url: URL_GAIACLI+'/bank/balances/'+address})
+		log.debug(tag,"accountInfo: ",accountInfo)
 
-		let accountInfo = await get_account(address)
-		log.info(tag,"accountInfo: ",accountInfo)
-		log.info(tag,"accountInfo.result.value: ",accountInfo.result.value.coins[0].amount)
-		if(accountInfo && accountInfo.result && accountInfo.result.value.coins[0]){
-			log.debug(tag,"accountInfo: ", accountInfo.result.value.coins[0].amount )
-			output.available = accountInfo.result.value.coins[0].amount / ATOM_BASE
-		} else {
-			output.available = 0
+		if(accountInfo && accountInfo.data && accountInfo.data.result){
+			for(let i = 0; i < accountInfo.data.result.length; i++){
+				let entry = accountInfo.data.result[i]
+				if(entry.denom === 'uatom'){
+					output = entry.amount / ATOM_BASE
+				}
+			}
 		}
 
-		return output.available
+		return accountInfo.data
 	}catch(e){
 		log.error(tag,"e: ",e)
 		output.success = false
@@ -628,16 +631,9 @@ let get_account = async function(address){
 	try{
 		let txInfo
 
-		if(RUNTIME === 'pioneer'){
-			//
-			txInfo = await axios({method:'GET',url: URL_PIONEER+'/api/v1/getAccount/'+address})
-			log.debug(tag,"txInfo: ",txInfo.data)
-
-		}else{
-			//
-			txInfo = await axios({method:'GET',url: URL_GAIACLI+'/auth/accounts/'+address})
-			log.debug(tag,"txInfo: ",txInfo.data)
-		}
+		//
+		txInfo = await axios({method:'GET',url: URL_GAIACLI+'/auth/accounts/'+address})
+		log.info(tag,"txInfo: ",txInfo.data)
 
 
 		return txInfo.data
@@ -765,13 +761,13 @@ let broadcast_transaction = async function(tx){
 				method: 'POST',
 				data: tx,
 			})
-			log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+			log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
 			if(result2.data.txhash) output.txid = result2.data.txhash
 
 			//verify success
 			if(result2.data.raw_log){
-				let logSend = JSON.parse(result2.data.raw_log)
-				log.debug(tag,"logSend: ",logSend)
+				let logSend = result2.data.raw_log
+				log.info(tag,"logSend: ",logSend)
 			}
 			output.height = result2.height
 			output.gas_wanted = result2.gas_wanted
@@ -779,7 +775,7 @@ let broadcast_transaction = async function(tx){
 			output.raw = result2.data
 		}catch(e){
 			//log.error(tag,"failed second broadcast e: ",e.response)
-			//log.error(tag,e)
+			log.error(tag,e)
 			log.error(tag,e.response)
 			log.error(tag,e.response.data)
 			log.error(tag,e.response.data.error)
@@ -982,7 +978,7 @@ let get_txs_by_address = async function (address) {
 			method: 'GET'
 		})
 		let sends = resultSends.data
-		log.debug('sends: ', sends)
+		log.info('sends: ', sends)
 
 		// TODO//pagnation
 		// let pagesSends = sends.page_number

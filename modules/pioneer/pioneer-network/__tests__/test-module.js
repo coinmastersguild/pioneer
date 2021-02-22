@@ -33,6 +33,8 @@ let run_test = async function(){
         //get wallet info
         let walletInfo = await network.getInfo()
         console.log("walletInfo: ",walletInfo)
+        // console.log("walletInfo: ",walletInfo.masters.ATOM)
+        // console.log("expect: ","cosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3")
 
         // console.log("masters: ",walletInfo.masters)
         // console.log("balances: ",walletInfo.balances)
@@ -58,7 +60,6 @@ let run_test = async function(){
         // let fioAccounts = await network.getFioAccountsByPubkey(fioPubkey)
         // console.log("fioAccounts: ",fioAccounts)
 
-        //
         // let validNewUsername = "xtesterbrosx"
         //
         // let validateUsername = await network.validateEosUsername(validNewUsername)

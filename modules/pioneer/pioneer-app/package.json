@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "7.0.19",
+  "version": "7.0.21",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -16,12 +16,14 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
+    "@babel/runtime": "^7.12.13",
     "@bithighlander/hdwallet-native": "latest",
     "@peculiar/webcrypto": "latest",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer": "latest",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-hardware": "latest",
+    "@shapeshiftoss/hdwallet-native": "latest",
     "@types/node": "^13.13.39",
     "@types/uuid": "^8.3.0",
     "axios": "^0.19.2",

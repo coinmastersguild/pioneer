@@ -76,7 +76,7 @@ var ethUtils = require('ethereumjs-util');
 var prettyjson = require('prettyjson');
 //All paths
 //TODO make paths adjustable!
-var getPaths = require("./paths").getPaths;
+var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
 var paths = getPaths();
 //support
 var support = __importStar(require("./support"));
@@ -110,6 +110,26 @@ WALLET_COINS.push('BNB');
 WALLET_COINS.push('ATOM');
 WALLET_COINS.push('EOS');
 WALLET_COINS.push('FIO');
+//TODO BNB tokens
+//TODO type paths
+//TODO MOVEME coins module
+var HD_ATOM_KEYPATH = "m/44'/118'/0'/0/0";
+var ATOM_CHAIN = "cosmoshub-4";
+var ATOM_BASE = 1000000;
+var ATOM_TX_FEE = "100";
+var ATOM_MAX_GAS = "100000";
+var HD_BNB_KEYPATH = "44'/714'/0'/0/";
+var BNB_ASSET_SYMBOL = "BNB";
+var BNB_CHAIN = "";
+var BNB_MAX_GAS = "100000";
+var BNB_TX_FEE = "100";
+var BNB_BASE = 100000000;
+var HD_EOS_KEYPATH = "44'/194'/0'/0/";
+var EOS_ASSET_SYMBOL = "EOS";
+var EOS_CHAIN = "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906";
+var EOS_MAX_GAS = "100000";
+var EOS_TX_FEE = "100";
+var EOS_BASE = 1000;
 var AuthProviders;
 (function (AuthProviders) {
     AuthProviders["shapeshift"] = "shapeshift";
@@ -322,7 +342,7 @@ module.exports = /** @class */ (function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            tag = TAG + " | get_wallet_info | ";
+                            tag = TAG + " | getInfo | ";
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 4, , 5]);
@@ -523,7 +543,7 @@ module.exports = /** @class */ (function () {
         this.getAddress = function (coin, account, index, isChange) {
             var tag = TAG + " | get_address | ";
             try {
-                var output
+                var output 
                 //if token use ETH pubkey
                 = void 0;
                 //if token use ETH pubkey
@@ -652,10 +672,10 @@ module.exports = /** @class */ (function () {
                             rawTx = res;
                             // code block
                             return [3 /*break*/, 8];
-                        case 4:
+                        case 4: 
                         // code block
                         return [3 /*break*/, 8];
-                        case 5:
+                        case 5: 
                         // code block
                         return [3 /*break*/, 8];
                         case 6:
@@ -722,11 +742,11 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.buildTransfer(transaction)];
                         case 3:
                             signedTx = _a.sent();
-                            log.debug(tag, "signedTx: ", signedTx);
+                            log.info(tag, "signedTx: ", signedTx);
                             return [4 /*yield*/, this.broadcastTransaction(coin, signedTx)];
                         case 4:
                             broadcastResult = _a.sent();
-                            log.debug(tag, "broadcastResult: ", broadcastResult);
+                            log.info(tag, "broadcastResult: ", broadcastResult);
                             return [2 /*return*/, broadcastResult];
                         case 5:
                             e_5 = _a.sent();
@@ -739,14 +759,14 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | build_transfer | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 19, , 20]);
+                            _a.trys.push([1, 22, , 23]);
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
                             amount = transaction.amount;
@@ -849,17 +869,109 @@ module.exports = /** @class */ (function () {
                         case 12:
                             rawTx = _a.sent();
                             rawTx.params = txParams;
-                            return [3 /*break*/, 18];
+                            return [3 /*break*/, 21];
                         case 13:
-                            if (!(coin === 'ATOM')) return [3 /*break*/, 14];
-                            throw Error("666: ATOM not supported yet!");
+                            if (!(coin === 'ATOM')) return [3 /*break*/, 17];
+                            amountNative = ATOM_BASE * parseFloat(amount);
+                            amountNative = parseInt(amountNative.toString());
+                            //get account number
+                            log.info(tag, "addressFrom: ", addressFrom);
+                            return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'ATOM', address: addressFrom })];
                         case 14:
-                            if (!(coin === "BNB")) return [3 /*break*/, 17];
+                            masterInfo = _a.sent();
+                            masterInfo = masterInfo.data;
+                            log.info(tag, "masterInfo: ", masterInfo.data);
+                            sequence = masterInfo.result.value.sequence;
+                            account_number = masterInfo.result.value.account_number;
+                            sequence = parseInt(sequence);
+                            sequence = sequence.toString();
+                            txType = "cosmos-sdk/MsgSend";
+                            gas = "100000";
+                            fee = "1000";
+                            memo_1 = transaction.memo || "";
+                            unsigned = {
+                                "fee": {
+                                    "amount": [
+                                        {
+                                            "amount": fee,
+                                            "denom": "uatom"
+                                        }
+                                    ],
+                                    "gas": gas
+                                },
+                                "memo": memo_1,
+                                "msg": [
+                                    {
+                                        "type": txType,
+                                        "value": {
+                                            "amount": [
+                                                {
+                                                    "amount": amountNative.toString(),
+                                                    "denom": "uatom"
+                                                }
+                                            ],
+                                            "from_address": addressFrom,
+                                            "to_address": address
+                                        }
+                                    }
+                                ],
+                                "signatures": null
+                            };
+                            chain_id = ATOM_CHAIN;
+                            if (!sequence)
+                                throw Error("112: Failed to get sequence");
+                            if (!account_number)
+                                throw Error("113: Failed to get account_number");
+                            return [4 /*yield*/, this.WALLET.cosmosGetAddress({
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
+                                    showDisplay: false,
+                                })];
+                        case 15:
+                            fromAddress = _a.sent();
+                            log.info(tag, "fromAddressHDwallet: ", fromAddress);
+                            log.info(tag, "fromAddress: ", addressFrom);
+                            log.info("res: ", prettyjson.render({
+                                addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
+                                chain_id: chain_id,
+                                account_number: account_number,
+                                sequence: sequence,
+                                tx: unsigned,
+                            }));
+                            if (fromAddress !== addressFrom)
+                                throw Error("Can not sign, address mismatch");
+                            return [4 /*yield*/, this.WALLET.cosmosSignTx({
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
+                                    chain_id: chain_id,
+                                    account_number: account_number,
+                                    sequence: sequence,
+                                    tx: unsigned,
+                                })];
+                        case 16:
+                            res = _a.sent();
+                            log.info("res: ", prettyjson.render(res));
+                            log.debug("res*****: ", res);
+                            txFinal = void 0;
+                            txFinal = res;
+                            txFinal.signatures = res.signatures;
+                            log.debug("FINAL: ****** ", txFinal);
+                            broadcastString = {
+                                tx: txFinal,
+                                type: "cosmos-sdk/StdTx",
+                                mode: "sync"
+                            };
+                            rawTx = {
+                                txid: "",
+                                coin: coin,
+                                serialized: JSON.stringify(broadcastString)
+                            };
+                            return [3 /*break*/, 21];
+                        case 17:
+                            if (!(coin === "BNB")) return [3 /*break*/, 20];
                             //TODO move to tx builder module
                             //get account info
                             log.debug("addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: coin, address: addressFrom })];
-                        case 15:
+                        case 18:
                             accountInfo = _a.sent();
                             accountInfo = accountInfo.data;
                             log.debug("accountInfo: ", prettyjson.render(accountInfo));
@@ -921,7 +1033,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: bnbTx,
                                 })];
-                        case 16:
+                        case 19:
                             signedTxResponse = _a.sent();
                             log.debug(tag, "**** signedTxResponse: ", signedTxResponse);
                             log.debug(tag, "**** signedTxResponse: ", JSON.stringify(signedTxResponse));
@@ -931,8 +1043,8 @@ module.exports = /** @class */ (function () {
                                 txid: signedTxResponse.txid,
                                 serialized: signedTxResponse.serialized
                             };
-                            return [3 /*break*/, 18];
-                        case 17:
+                            return [3 /*break*/, 21];
+                        case 20:
                             if (coin === "EOS") {
                                 throw Error("666: EOS not supported yet!");
                                 // amount = getEosAmount(amount)
@@ -1035,13 +1147,13 @@ module.exports = /** @class */ (function () {
                             else {
                                 throw Error("109: coin not yet implemented! coin: " + coin);
                             }
-                            _a.label = 18;
-                        case 18: return [2 /*return*/, rawTx];
-                        case 19:
+                            _a.label = 21;
+                        case 21: return [2 /*return*/, rawTx];
+                        case 22:
                             e_6 = _a.sent();
                             log.error(tag, "e: ", e_6);
                             throw e_6;
-                        case 20: return [2 /*return*/];
+                        case 23: return [2 /*return*/];
                     }
                 });
             });

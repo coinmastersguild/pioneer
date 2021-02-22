@@ -35,7 +35,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const TAG = " | app | ";
-require("module-alias/register");
 const pioneer_config_1 = require("@pioneer-platform/pioneer-config");
 const uuid_1 = require("uuid");
 const CryptoJS = require("crypto-js");
@@ -723,6 +722,7 @@ let create_wallet = function (type, wallet) {
                         const success = yield pioneer_config_1.initWallet(walletNew);
                     }
                     else {
+                        throw Error("already exists");
                         //TODO verify?
                         //createWallet
                     }
