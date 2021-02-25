@@ -22,6 +22,9 @@ module.exports = {
     getInfo:function () {
         return get_node_info();
     },
+    getTransaction:function (coin:string,txid:string) {
+        return get_transaction(coin,txid);
+    },
     // txsByXpub: function (coin:string,addresses:any) {
     //     return get_txs_by_xpub(coin,addresses);
     // },
@@ -31,12 +34,42 @@ module.exports = {
     getBalanceByXpub: function (coin:string,xpub:any) {
         return get_balance_by_xpub(coin,xpub);
     },
+    broadcast: function (coin:string,hex:string) {
+        return broadcast_transaction(coin,hex);
+    },
+}
+
+let broadcast_transaction = async function(coin:string,hex:string){
+    let tag = TAG + " | broadcast_transaction | "
+    try{
+
+        let output = await BLOCKBOOKS[coin].sendTx(hex)
+        log.debug(tag,"output: ",output)
+
+        return output
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
+let get_transaction = async function(coin:string,txid:string){
+    let tag = TAG + " | get_utxos_by_xpub | "
+    try{
+
+        let output = await BLOCKBOOKS[coin].getTx(txid)
+        log.debug(tag,"output: ",output)
+
+        return output
+    }catch(e){
+        console.error(tag,e)
+    }
 }
 
 let get_utxos_by_xpub = async function(coin:string,xpub:string){
     let tag = TAG + " | get_utxos_by_xpub | "
     try{
-        let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: true })
+
+        let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
         log.debug(tag,"output: ",output)
 
         return output
@@ -51,7 +84,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         log.debug(tag,"coin: ",coin)
         log.debug(tag,"xpub: ",xpub)
         log.debug(tag,"BLOCKBOOKS: ",BLOCKBOOKS)
-        let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: true })
+        let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
         log.debug(tag,"output: ",output)
 
         let balance = 0

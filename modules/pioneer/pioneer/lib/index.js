@@ -74,6 +74,7 @@ var bech32 = require("bech32");
 var bitcoin = require("bitcoinjs-lib");
 var ethUtils = require('ethereumjs-util');
 var prettyjson = require('prettyjson');
+var coinSelect = require('coinselect');
 //All paths
 //TODO make paths adjustable!
 var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
@@ -106,6 +107,7 @@ for (var i = 0; i < tokenData.tokens.length; i++) {
     WALLET_COINS.push(token);
 }
 // COINS
+WALLET_COINS.push('RUNE');
 WALLET_COINS.push('BNB');
 WALLET_COINS.push('ATOM');
 WALLET_COINS.push('EOS');
@@ -113,6 +115,11 @@ WALLET_COINS.push('FIO');
 //TODO BNB tokens
 //TODO type paths
 //TODO MOVEME coins module
+var HD_RUNE_KEYPATH = "m/44'/931'/0'/0/0";
+var RUNE_CHAIN = "thorchain";
+var RUNE_BASE = 1000000;
+var RUNE_TX_FEE = "100";
+var RUNE_MAX_GAS = "100000";
 var HD_ATOM_KEYPATH = "m/44'/118'/0'/0/0";
 var ATOM_CHAIN = "cosmoshub-4";
 var ATOM_BASE = 1000000;
@@ -530,8 +537,13 @@ module.exports = /** @class */ (function () {
                     try {
                         if (!coin)
                             throw Error("101: must pass coin!");
-                        output = this.PUBLIC_WALLET[coin].address;
-                        return [2 /*return*/, output];
+                        if (this.PUBLIC_WALLET[coin]) {
+                            output = this.PUBLIC_WALLET[coin].address;
+                            return [2 /*return*/, output];
+                        }
+                        else {
+                            return [2 /*return*/, "Not found!"];
+                        }
                     }
                     catch (e) {
                         log.error(tag, "e: ", e);
@@ -562,6 +574,10 @@ module.exports = /** @class */ (function () {
                     switch (coin) {
                         case 'ETH':
                             output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey, true));
+                            break;
+                        case 'RUNE':
+                            // code block
+                            output = createBech32Address(publicKey, 'tthor');
                             break;
                         case 'ATOM':
                             // code block
@@ -759,14 +775,14 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, unspentInputs, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, unspentInputs, utxos, i, input, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input, changeAddress, i, outputInfo, output, output, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | build_transfer | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 24, , 25]);
+                            _a.trys.push([1, 29, , 30]);
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
                             amount = transaction.amount;
@@ -789,37 +805,136 @@ module.exports = /** @class */ (function () {
                                 'BCH',
                                 'LTC'
                             ];
-                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 6];
+                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 7];
                             log.info(tag, "Build UTXO tx! ", coin);
-                            return [4 /*yield*/, this.pioneerClient.instance.ListUnspent(addressFrom)];
+                            //list unspent
+                            log.info(tag, "coin: ", coin);
+                            log.info(tag, "xpub: ", this.PUBLIC_WALLET[coin].xpub);
+                            return [4 /*yield*/, this.pioneerClient.instance.GetUtxos({ coin: coin })];
                         case 5:
                             unspentInputs = _a.sent();
                             unspentInputs = unspentInputs.data;
                             log.info(tag, "unspentInputs: ", unspentInputs);
-                            return [3 /*break*/, 23];
+                            utxos = [];
+                            for (i = 0; i < unspentInputs.length; i++) {
+                                input = unspentInputs[i];
+                                utxo = {
+                                    txId: input.txid,
+                                    vout: input.vout,
+                                    value: parseInt(input.value),
+                                    nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
+                                    hex: input.hex,
+                                    path: input.path
+                                    //TODO if segwit
+                                    // witnessUtxo: {
+                                    //     script: Buffer.from('... scriptPubkey hex...', 'hex'),
+                                    //     value: 10000 // 0.0001 BTC and is the exact same as the value above
+                                    // }
+                                };
+                                utxos.push(utxo);
+                            }
+                            feeRate = 150 // satoshis per byte
+                            ;
+                            amountSat = parseFloat(amount) * 100000000;
+                            amountSat = parseInt(amountSat.toString());
+                            log.info(tag, "amount satoshi: ", amountSat);
+                            targets = [
+                                {
+                                    address: address,
+                                    value: amountSat
+                                }
+                            ];
+                            //
+                            log.info(tag, "inputs coinselect algo: ", { utxos: utxos, targets: targets, feeRate: feeRate });
+                            selectedResults = coinSelect(utxos, targets, feeRate);
+                            log.info(tag, "result coinselect algo: ", selectedResults);
+                            inputs = [];
+                            outputs = [];
+                            for (i = 0; i < selectedResults.inputs.length; i++) {
+                                inputInfo = selectedResults.inputs[i];
+                                input = {
+                                    addressNList: support.bip32ToAddressNList("m/44'/145'/0'/0/0"),
+                                    scriptType: "p2pkh",
+                                    amount: String(inputInfo.value),
+                                    vout: inputInfo.vout,
+                                    txid: inputInfo.txId,
+                                    segwit: false,
+                                    hex: inputInfo.hex
+                                };
+                                inputs.push(input);
+                            }
+                            changeAddress = "bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3";
+                            for (i = 0; i < selectedResults.outputs.length; i++) {
+                                outputInfo = selectedResults.outputs[i];
+                                if (outputInfo.address) {
+                                    output = {
+                                        address: outputInfo.address,
+                                        addressType: "spend",
+                                        scriptType: "p2wpkh",
+                                        amount: String(outputInfo.value),
+                                        isChange: false,
+                                    };
+                                    outputs.push(output);
+                                }
+                                else {
+                                    output = {
+                                        address: changeAddress,
+                                        addressType: "spend",
+                                        scriptType: "p2pkh",
+                                        amount: String(outputInfo.value),
+                                        isChange: true,
+                                    };
+                                    outputs.push(output);
+                                }
+                            }
+                            //sign
+                            log.info(tag, "inputs HDwallet utxo: ", prettyjson.render({
+                                coin: "Bitcoin",
+                                inputs: inputs,
+                                outputs: outputs,
+                                version: 1,
+                                locktime: 0,
+                            }));
+                            return [4 /*yield*/, this.WALLET.btcSignTx({
+                                    coin: "Bitcoin",
+                                    inputs: inputs,
+                                    outputs: outputs,
+                                    version: 1,
+                                    locktime: 0,
+                                })];
                         case 6:
-                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 15];
+                            res = _a.sent();
+                            log.info(tag, "res: ", res);
+                            //
+                            rawTx = {
+                                txid: "",
+                                coin: coin,
+                                serialized: res.serializedTx
+                            };
+                            return [3 /*break*/, 28];
+                        case 7:
+                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 16];
                             log.debug(tag, "checkpoint");
                             return [4 /*yield*/, this.getBalanceRemote('ETH')];
-                        case 7:
+                        case 8:
                             balanceEth = _a.sent();
                             log.debug(tag, "getBalanceRemote: ", balanceEth);
                             return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
-                        case 8:
+                        case 9:
                             nonceRemote = _a.sent();
                             nonceRemote = nonceRemote.data;
                             nonce = transaction.nonce || nonceRemote;
                             gas_limit = 80000 //TODO dynamic gas limit?
                             ;
                             return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
-                        case 9:
+                        case 10:
                             gas_price = _a.sent();
                             gas_price = gas_price.data;
                             log.debug(tag, "gas_price: ", gas_price);
                             gas_price = parseInt(gas_price);
                             gas_price = gas_price + 1000000000;
                             txParams = void 0;
-                            if (!(coin === "ETH")) return [3 /*break*/, 10];
+                            if (!(coin === "ETH")) return [3 /*break*/, 11];
                             amountNative = parseFloat(amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
                             txParams = {
@@ -831,8 +946,8 @@ module.exports = /** @class */ (function () {
                                 data: memo
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            return [3 /*break*/, 13];
-                        case 10:
+                            return [3 /*break*/, 14];
+                        case 11:
                             knownCoins = tokenData.tokens;
                             log.debug(tag, "knownCoins: ", knownCoins);
                             if (knownCoins.indexOf(coin) === -1)
@@ -840,7 +955,7 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.getBalanceRemote(coin)
                                 //verify token balance
                             ];
-                        case 11:
+                        case 12:
                             balanceToken = _a.sent();
                             //verify token balance
                             if (amount > balanceToken)
@@ -851,7 +966,7 @@ module.exports = /** @class */ (function () {
                             amountNative = Number(parseInt(String(amountNative)));
                             log.debug({ coin: coin, address: address, amountNative: amountNative });
                             return [4 /*yield*/, this.pioneerClient.instance.GetTransferData({ coin: coin, address: address, amount: amountNative })];
-                        case 12:
+                        case 13:
                             transfer_data = _a.sent();
                             transfer_data = transfer_data.data;
                             log.debug(tag, "transfer_data: ", transfer_data);
@@ -863,8 +978,8 @@ module.exports = /** @class */ (function () {
                                 gasLimit: gas_limit
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            _a.label = 13;
-                        case 13:
+                            _a.label = 14;
+                        case 14:
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
                             log.debug(tag, "txParams: ", txParams);
@@ -880,18 +995,113 @@ module.exports = /** @class */ (function () {
                             };
                             log.debug("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
-                        case 14:
+                        case 15:
                             rawTx = _a.sent();
                             rawTx.params = txParams;
-                            return [3 /*break*/, 23];
-                        case 15:
-                            if (!(coin === 'ATOM')) return [3 /*break*/, 19];
+                            return [3 /*break*/, 28];
+                        case 16:
+                            if (!(coin === 'RUNE')) return [3 /*break*/, 20];
+                            amountNative = RUNE_BASE * parseFloat(amount);
+                            amountNative = parseInt(amountNative.toString());
+                            //get account number
+                            log.info(tag, "addressFrom: ", addressFrom);
+                            return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'RUNE', address: addressFrom })];
+                        case 17:
+                            masterInfo = _a.sent();
+                            masterInfo = masterInfo.data;
+                            log.info(tag, "masterInfo: ", masterInfo.data);
+                            sequence = masterInfo.result.value.sequence || 0;
+                            account_number = masterInfo.result.value.account_number;
+                            sequence = parseInt(sequence);
+                            sequence = sequence.toString();
+                            txType = "thorchain/MsgSend";
+                            gas = "200000";
+                            fee = "3000";
+                            memo_1 = transaction.memo || "";
+                            unsigned = {
+                                "fee": {
+                                    "amount": [
+                                        {
+                                            "amount": fee,
+                                            "denom": "rune"
+                                        }
+                                    ],
+                                    "gas": gas
+                                },
+                                "memo": memo_1,
+                                "msg": [
+                                    {
+                                        "type": txType,
+                                        "value": {
+                                            "amount": [
+                                                {
+                                                    "amount": amountNative.toString(),
+                                                    "denom": "rune"
+                                                }
+                                            ],
+                                            "from_address": addressFrom,
+                                            "to_address": address
+                                        }
+                                    }
+                                ],
+                                "signatures": null
+                            };
+                            chain_id = RUNE_CHAIN;
+                            if (!sequence)
+                                throw Error("112: Failed to get sequence");
+                            if (!account_number)
+                                throw Error("113: Failed to get account_number");
+                            return [4 /*yield*/, this.WALLET.thorchainGetAddress({
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
+                                    showDisplay: false,
+                                })];
+                        case 18:
+                            fromAddress = _a.sent();
+                            log.info(tag, "fromAddressHDwallet: ", fromAddress);
+                            log.info(tag, "fromAddress: ", addressFrom);
+                            log.info("res: ", prettyjson.render({
+                                addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
+                                chain_id: chain_id,
+                                account_number: account_number,
+                                sequence: sequence,
+                                tx: unsigned,
+                            }));
+                            if (fromAddress !== addressFrom)
+                                throw Error("Can not sign, address mismatch");
+                            return [4 /*yield*/, this.WALLET.thorchainSignTx({
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
+                                    chain_id: chain_id,
+                                    account_number: account_number,
+                                    sequence: sequence,
+                                    tx: unsigned,
+                                })];
+                        case 19:
+                            res = _a.sent();
+                            log.info("res: ", prettyjson.render(res));
+                            log.debug("res*****: ", res);
+                            txFinal = void 0;
+                            txFinal = res;
+                            txFinal.signatures = res.signatures;
+                            log.debug("FINAL: ****** ", txFinal);
+                            broadcastString = {
+                                tx: txFinal,
+                                type: "cosmos-sdk/StdTx",
+                                mode: "sync"
+                            };
+                            rawTx = {
+                                txid: "",
+                                coin: coin,
+                                serialized: JSON.stringify(broadcastString)
+                            };
+                            return [3 /*break*/, 28];
+                        case 20:
+                            if (!(coin === 'ATOM')) return [3 /*break*/, 24];
                             amountNative = ATOM_BASE * parseFloat(amount);
                             amountNative = parseInt(amountNative.toString());
                             //get account number
                             log.info(tag, "addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'ATOM', address: addressFrom })];
-                        case 16:
+                        case 21:
                             masterInfo = _a.sent();
                             masterInfo = masterInfo.data;
                             log.info(tag, "masterInfo: ", masterInfo.data);
@@ -902,7 +1112,7 @@ module.exports = /** @class */ (function () {
                             txType = "cosmos-sdk/MsgSend";
                             gas = "100000";
                             fee = "1000";
-                            memo_1 = transaction.memo || "";
+                            memo_2 = transaction.memo || "";
                             unsigned = {
                                 "fee": {
                                     "amount": [
@@ -913,7 +1123,7 @@ module.exports = /** @class */ (function () {
                                     ],
                                     "gas": gas
                                 },
-                                "memo": memo_1,
+                                "memo": memo_2,
                                 "msg": [
                                     {
                                         "type": txType,
@@ -940,7 +1150,7 @@ module.exports = /** @class */ (function () {
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
                                     showDisplay: false,
                                 })];
-                        case 17:
+                        case 22:
                             fromAddress = _a.sent();
                             log.info(tag, "fromAddressHDwallet: ", fromAddress);
                             log.info(tag, "fromAddress: ", addressFrom);
@@ -960,7 +1170,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: unsigned,
                                 })];
-                        case 18:
+                        case 23:
                             res = _a.sent();
                             log.info("res: ", prettyjson.render(res));
                             log.debug("res*****: ", res);
@@ -978,14 +1188,14 @@ module.exports = /** @class */ (function () {
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
-                            return [3 /*break*/, 23];
-                        case 19:
-                            if (!(coin === "BNB")) return [3 /*break*/, 22];
+                            return [3 /*break*/, 28];
+                        case 24:
+                            if (!(coin === "BNB")) return [3 /*break*/, 27];
                             //TODO move to tx builder module
                             //get account info
                             log.debug("addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: coin, address: addressFrom })];
-                        case 20:
+                        case 25:
                             accountInfo = _a.sent();
                             accountInfo = accountInfo.data;
                             log.debug("accountInfo: ", prettyjson.render(accountInfo));
@@ -1047,7 +1257,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: bnbTx,
                                 })];
-                        case 21:
+                        case 26:
                             signedTxResponse = _a.sent();
                             log.debug(tag, "**** signedTxResponse: ", signedTxResponse);
                             log.debug(tag, "**** signedTxResponse: ", JSON.stringify(signedTxResponse));
@@ -1057,8 +1267,8 @@ module.exports = /** @class */ (function () {
                                 txid: signedTxResponse.txid,
                                 serialized: signedTxResponse.serialized
                             };
-                            return [3 /*break*/, 23];
-                        case 22:
+                            return [3 /*break*/, 28];
+                        case 27:
                             if (coin === "EOS") {
                                 throw Error("666: EOS not supported yet!");
                                 // amount = getEosAmount(amount)
@@ -1161,13 +1371,13 @@ module.exports = /** @class */ (function () {
                             else {
                                 throw Error("109: coin not yet implemented! coin: " + coin);
                             }
-                            _a.label = 23;
-                        case 23: return [2 /*return*/, rawTx];
-                        case 24:
+                            _a.label = 28;
+                        case 28: return [2 /*return*/, rawTx];
+                        case 29:
                             e_6 = _a.sent();
                             log.error(tag, "e: ", e_6);
                             throw e_6;
-                        case 25: return [2 /*return*/];
+                        case 30: return [2 /*return*/];
                     }
                 });
             });

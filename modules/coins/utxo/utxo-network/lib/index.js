@@ -139,7 +139,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var TAG = " | utxo-api | ";
 var Axios = require('axios');
 var https = require('https');
@@ -152,7 +151,8 @@ var log = require('@pioneer-platform/loggerdog')();
 // const ElectrumClient = require('@pioneer-platform/electrum-client')
 var bitcoin = require("bitcoinjs-lib");
 var BitcoinRpc = require('bitcoin-rpc-promise');
-var blockbook_client_1 = require("blockbook-client");
+// import { Blockbook } from 'blockbook-client'
+var blockbook = require('@pioneer-platform/blockbook');
 var BLOCKBOOK;
 //if(!process.env['BTC_RPC_HOST'])
 var coins = [
@@ -240,6 +240,9 @@ module.exports = {
     // getBalance:function (address) {
     //     return get_balance(address);
     // },
+    getFee: function (coin) {
+        return get_fee(coin);
+    },
     getBlock: function (coin, height) {
         return get_block(coin, height);
     },
@@ -252,10 +255,68 @@ module.exports = {
     createRawTransaction: function (coin, hex) {
         return nodeMap[coin].decodeRawTransaction(hex);
     },
+    broadcast: function (coin, tx) {
+        return broadcast_transaction(coin, tx);
+    },
+};
+var get_fee = function (coin) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, output, query, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_fee | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 5, , 6]);
+                    output = {};
+                    if (!(coin === 'BTC')) return [3 /*break*/, 3];
+                    query = "https://bitcoinfees.earn.com/api/v1/fees/recommended";
+                    return [4 /*yield*/, axios({ method: 'GET', url: query })];
+                case 2:
+                    output = _a.sent();
+                    log.info(tag, "output: ", output.data);
+                    output = output.data.fastestFee;
+                    return [3 /*break*/, 4];
+                case 3: 
+                //eh just send whatever, probally be fine
+                throw Error("unknown coin! " + coin);
+                case 4: return [2 /*return*/, output];
+                case 5:
+                    e_1 = _a.sent();
+                    console.error(tag, e_1);
+                    return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
+};
+var broadcast_transaction = function (coin, tx) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, txid, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | broadcast_transaction | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, blockbook.broadcast(coin, tx)];
+                case 2:
+                    txid = _a.sent();
+                    return [2 /*return*/, txid];
+                case 3:
+                    e_2 = _a.sent();
+                    console.error(tag, e_2);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
 };
 var get_balance_by_addresses = function (coin, addresses) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, query, i, address, balanceInfo, e_1;
+        var tag, query, i, address, balanceInfo, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -277,8 +338,8 @@ var get_balance_by_addresses = function (coin, addresses) {
                     //https://blockchain.info/multiaddr?active=$address|$address
                     return [2 /*return*/, balanceInfo.data];
                 case 3:
-                    e_1 = _a.sent();
-                    console.error(tag, e_1);
+                    e_3 = _a.sent();
+                    console.error(tag, e_3);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -287,7 +348,7 @@ var get_balance_by_addresses = function (coin, addresses) {
 };
 var get_balance_by_address = function (coin, address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, balanceInfo, e_2;
+        var tag, balanceInfo, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -300,8 +361,8 @@ var get_balance_by_address = function (coin, address) {
                     balanceInfo = _a.sent();
                     return [2 /*return*/, balanceInfo.data.balance];
                 case 3:
-                    e_2 = _a.sent();
-                    console.error(tag, e_2);
+                    e_4 = _a.sent();
+                    console.error(tag, e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -310,7 +371,7 @@ var get_balance_by_address = function (coin, address) {
 };
 var get_utxos_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_3;
+        var tag, output, e_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -318,14 +379,14 @@ var get_utxos_by_xpub = function (coin, xpub) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOK.getUtxosForXpub(xpub, { confirmed: true })];
+                    return [4 /*yield*/, blockbook.utxosByXpub(coin, xpub)];
                 case 2:
                     output = _a.sent();
                     log.debug(tag, "output: ", output);
                     return [2 /*return*/, output];
                 case 3:
-                    e_3 = _a.sent();
-                    console.error(tag, e_3);
+                    e_5 = _a.sent();
+                    console.error(tag, e_5);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -334,7 +395,7 @@ var get_utxos_by_xpub = function (coin, xpub) {
 };
 var get_balance_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, balance, i, uxto, e_4;
+        var tag, output, balance, i, uxto, e_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -354,8 +415,8 @@ var get_balance_by_xpub = function (coin, xpub) {
                     }
                     return [2 /*return*/, balance / 100000000];
                 case 3:
-                    e_4 = _a.sent();
-                    console.error(tag, e_4);
+                    e_6 = _a.sent();
+                    console.error(tag, e_6);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -364,7 +425,7 @@ var get_balance_by_xpub = function (coin, xpub) {
 };
 var get_block_hash = function (coin, height) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, blockHash, e_5;
+        var tag, blockHash, e_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -378,8 +439,8 @@ var get_block_hash = function (coin, height) {
                     log.debug(tag, "blockHash: ", blockHash);
                     return [2 /*return*/, blockHash];
                 case 3:
-                    e_5 = _a.sent();
-                    console.error(tag, e_5);
+                    e_7 = _a.sent();
+                    console.error(tag, e_7);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -388,81 +449,52 @@ var get_block_hash = function (coin, height) {
 };
 var init_network = function (runtime, servers) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output;
+        var tag, output, e_8;
         return __generator(this, function (_a) {
-            tag = ' | get_txs_by_address | ';
-            try {
-                log.debug(tag, "checkpoint: ");
-                output = [];
-                RUNTIME = runtime;
-                //
-                BLOCKBOOK = new blockbook_client_1.Blockbook({
-                    nodes: ['btc1.trezor.io', 'btc2.trezor.io'],
-                });
-                return [2 /*return*/, true];
+            switch (_a.label) {
+                case 0:
+                    tag = ' | get_txs_by_address | ';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    log.debug(tag, "checkpoint: ");
+                    output = [];
+                    RUNTIME = runtime;
+                    return [4 /*yield*/, blockbook.init()];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/, true];
+                case 3:
+                    e_8 = _a.sent();
+                    console.error(tag, 'Error: ', e_8);
+                    throw e_8;
+                case 4: return [2 /*return*/];
             }
-            catch (e) {
-                console.error(tag, 'Error: ', e);
-                throw e;
-            }
-            return [2 /*return*/];
         });
     });
 };
 var get_transaction = function (coin, txid, format) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, txInfo, txHex, e_6;
+        var tag, txInfo, output, e_9;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = ' | get_transaction | ';
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 8, , 9]);
+                    _a.trys.push([1, 3, , 4]);
                     log.debug(tag, "checkpoint: ");
                     txInfo = {};
-                    if (!(format === 'hex')) return [3 /*break*/, 3];
-                    return [4 /*yield*/, nodeMap[coin].getRawTransaction(txid)];
+                    return [4 /*yield*/, blockbook.getTransaction(coin, txid)];
                 case 2:
-                    txInfo = _a.sent();
-                    log.debug(tag, "txInfo: ", txInfo);
-                    return [3 /*break*/, 7];
+                    output = _a.sent();
+                    log.debug(tag, "output: ", output);
+                    return [2 /*return*/, output];
                 case 3:
-                    if (!(format === 'bitcoind')) return [3 /*break*/, 6];
-                    return [4 /*yield*/, nodeMap[coin].getRawTransaction(txid)];
-                case 4:
-                    txHex = _a.sent();
-                    log.debug(tag, "txHex: ", txHex);
-                    return [4 /*yield*/, nodeMap[coin].decodeRawTransaction(txHex)];
-                case 5:
-                    txInfo = _a.sent();
-                    log.debug(tag, "txInfo: ", txInfo);
-                    return [3 /*break*/, 7];
-                case 6:
-                    if (format === 'insight') {
-                        //
-                        throw Error("unhandled");
-                    }
-                    else if (format === 'smart') {
-                        // let url = URL_BTC_SMART_1 + "tx/"+txid
-                        // log.debug(tag,"url: ",url)
-                        //
-                        // txInfo = await axios({method:'GET',url})
-                        // log.debug(tag,"txInfo: ",txInfo.data)
-                        //
-                        // txInfo.data = txInfo.data.transaction
-                        // txInfo = txInfo.data
-                    }
-                    else {
-                        throw Error("unknown format");
-                    }
-                    _a.label = 7;
-                case 7: return [2 /*return*/, txInfo];
-                case 8:
-                    e_6 = _a.sent();
-                    console.error(tag, 'Error: ', e_6);
-                    throw e_6;
-                case 9: return [2 /*return*/];
+                    e_9 = _a.sent();
+                    console.error(tag, 'Error: ', e_9);
+                    throw e_9;
+                case 4: return [2 /*return*/];
             }
         });
     });
@@ -595,7 +627,7 @@ var get_txs_by_xpubs = function (coin, xpub) {
 // }
 var get_block = function (coin, height) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, blockHash, blockInfo, e_7;
+        var tag, blockHash, blockInfo, e_10;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -614,8 +646,8 @@ var get_block = function (coin, height) {
                     log.debug(tag, "blockInfo: ", blockInfo);
                     return [2 /*return*/, blockInfo];
                 case 4:
-                    e_7 = _a.sent();
-                    console.error(tag, e_7);
+                    e_10 = _a.sent();
+                    console.error(tag, e_10);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -648,7 +680,7 @@ var get_block = function (coin, height) {
 // }
 var get_node_info = function (coin) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, results, e_8;
+        var tag, results, e_11;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -663,8 +695,8 @@ var get_node_info = function (coin) {
                     results.coin = coin;
                     return [2 /*return*/, results];
                 case 3:
-                    e_8 = _a.sent();
-                    console.error(tag, e_8);
+                    e_11 = _a.sent();
+                    console.error(tag, e_11);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }

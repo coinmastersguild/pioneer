@@ -19,6 +19,7 @@ const bech32 = require(`bech32`)
 const bitcoin = require("bitcoinjs-lib");
 const ethUtils = require('ethereumjs-util');
 const prettyjson = require('prettyjson');
+const coinSelect = require('coinselect')
 
 //All paths
 //TODO make paths adjustable!
@@ -66,6 +67,7 @@ for(let i = 0; i < tokenData.tokens.length; i++){
 }
 
 // COINS
+WALLET_COINS.push('RUNE')
 WALLET_COINS.push('BNB')
 WALLET_COINS.push('ATOM')
 WALLET_COINS.push('EOS')
@@ -75,6 +77,12 @@ WALLET_COINS.push('FIO')
 
 //TODO type paths
 //TODO MOVEME coins module
+const HD_RUNE_KEYPATH="m/44'/931'/0'/0/0"
+const RUNE_CHAIN="thorchain"
+const RUNE_BASE=1000000
+const RUNE_TX_FEE="100"
+const RUNE_MAX_GAS="100000"
+
 const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
 const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
@@ -494,8 +502,13 @@ module.exports = class wallet {
             let tag = TAG + " | get_address_master | "
             try {
                 if(!coin) throw Error("101: must pass coin!")
-                let output = this.PUBLIC_WALLET[coin].address
-                return output
+                if(this.PUBLIC_WALLET[coin]){
+                    let output = this.PUBLIC_WALLET[coin].address
+                    return output
+                }else{
+                    return "Not found!"
+                }
+
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -526,6 +539,10 @@ module.exports = class wallet {
                     switch(coin) {
                         case 'ETH':
                             output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
+                            break;
+                        case 'RUNE':
+                            // code block
+                            output = createBech32Address(publicKey,'tthor')
                             break;
                         case 'ATOM':
                             // code block
@@ -731,11 +748,125 @@ module.exports = class wallet {
                     log.info(tag,"Build UTXO tx! ",coin)
 
                     //list unspent
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent(addressFrom)
+                    log.info(tag,"coin: ",coin)
+                    log.info(tag,"xpub: ",this.PUBLIC_WALLET[coin].xpub)
+                    let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
                     unspentInputs = unspentInputs.data
                     log.info(tag,"unspentInputs: ",unspentInputs)
 
+                    let utxos = []
+                    for(let i = 0; i < unspentInputs.length; i++){
+                        let input = unspentInputs[i]
+                        let utxo = {
+                            txId:input.txid,
+                            vout:input.vout,
+                            value:parseInt(input.value),
+                            nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
+                            hex: input.hex,
+                            path:input.path
+                            //TODO if segwit
+                            // witnessUtxo: {
+                            //     script: Buffer.from('... scriptPubkey hex...', 'hex'),
+                            //     value: 10000 // 0.0001 BTC and is the exact same as the value above
+                            // }
+                        }
+                        utxos.push(utxo)
+                    }
+
+                    //get fee level in sat/byte
+                    let feeRate = await this.pioneerClient.instance.GetFee({coin})
+                    if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
+
+                    //TODO input selection
+
+                    //use coinselect to select inputs
+                    let amountSat = parseFloat(amount) * 100000000
+                    amountSat = parseInt(amountSat.toString())
+                    log.info(tag,"amount satoshi: ",amountSat)
+                    let targets = [
+                        {
+                            address,
+                            value: amountSat
+                        }
+                    ]
+
+                    //
+                    log.info(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
+                    let selectedResults = coinSelect(utxos, targets, feeRate)
+                    log.info(tag,"result coinselect algo: ",selectedResults)
+
+                    //TODO get long name for coin
+
+                    let inputs = []
+                    let outputs = []
+                    for(let i = 0; i < selectedResults.inputs.length; i++){
+                        //get input info
+                        let inputInfo = selectedResults.inputs[i]
+                        let input = {
+                            addressNList:support.bip32ToAddressNList("m/44'/145'/0'/0/0"),
+                            scriptType:"p2pkh",
+                            amount:String(inputInfo.value),
+                            vout:inputInfo.vout,
+                            txid:inputInfo.txId,
+                            segwit:false,
+                            hex:inputInfo.hex
+                        }
+                        inputs.push(input)
+                    }
+
+                    //TODO get new change address
+                    //hack send all change to master (address reuse bad, stop dis)
+                    let changeAddress = await this.getMaster(coin)
+
+                    for(let i = 0; i < selectedResults.outputs.length; i++){
+                        let outputInfo = selectedResults.outputs[i]
+                        if(outputInfo.address){
+                            //not change
+                            let output = {
+                                address:outputInfo.address,
+                                addressType:"spend",
+                                scriptType:"p2wpkh",//TODO more types
+                                amount:String(outputInfo.value),
+                                isChange: false,
+                            }
+                            outputs.push(output)
+                        } else {
+                            //change
+                            let output = {
+                                address:changeAddress,
+                                addressType:"spend",
+                                scriptType:"p2pkh",//TODO more types
+                                amount:String(outputInfo.value),
+                                isChange: true,
+                            }
+                            outputs.push(output)
+                        }
+                    }
+
+                    //sign
+                    log.info(tag,"inputs HDwallet utxo: ",prettyjson.render({
+                        coin: "Bitcoin",
+                        inputs,
+                        outputs,
+                        version: 1,
+                        locktime: 0,
+                    }))
+                    const res = await this.WALLET.btcSignTx({
+                        coin: "Bitcoin",
+                        inputs,
+                        outputs,
+                        version: 1,
+                        locktime: 0,
+                    });
+                    log.info(tag,"res: ",res)
+
+                    //
+                    rawTx = {
+                        txid:"",
+                        coin,
+                        serialized:res.serializedTx
+                    }
 
                 }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
                     log.debug(tag,"checkpoint")
@@ -817,7 +948,108 @@ module.exports = class wallet {
                     rawTx = await this.WALLET.ethSignTx(ethTx)
 
                     rawTx.params = txParams
-                } else if(coin === 'ATOM'){
+                } else if(coin === 'RUNE'){
+                    //get amount native
+                    let amountNative = RUNE_BASE * parseFloat(amount)
+                    amountNative = parseInt(amountNative.toString())
+
+                    //get account number
+                    log.info(tag,"addressFrom: ",addressFrom)
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.info(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence || 0
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+
+                    let txType = "thorchain/MsgSend"
+                    let gas = "200000"
+                    let fee = "3000"
+                    let memo = transaction.memo || ""
+
+                    //sign tx
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "rune"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            {
+                                "type": txType,
+                                "value": {
+                                    "amount": [
+                                        {
+                                            "amount": amountNative.toString(),
+                                            "denom": "rune"
+                                        }
+                                    ],
+                                    "from_address": addressFrom,
+                                    "to_address": address
+                                }
+                            }
+                        ],
+                        "signatures": null
+                    }
+
+                    let	chain_id = RUNE_CHAIN
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) throw Error("113: Failed to get account_number")
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.thorchainGetAddress({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.info(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.info(tag,"fromAddress: ",addressFrom)
+
+                    log.info("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+
+                    let res = await this.WALLET.thorchainSignTx({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    });
+
+                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res*****: ",res)
+
+                    let txFinal:any
+                    txFinal = res
+                    txFinal.signatures = res.signatures
+
+                    log.debug("FINAL: ****** ",txFinal)
+
+                    let broadcastString = {
+                        tx:txFinal,
+                        type:"cosmos-sdk/StdTx",
+                        mode:"sync"
+                    }
+                    rawTx = {
+                        txid:"",
+                        coin,
+                        serialized:JSON.stringify(broadcastString)
+                    }
+                }else if(coin === 'ATOM'){
                     //get amount native
                     let amountNative = ATOM_BASE * parseFloat(amount)
                     amountNative = parseInt(amountNative.toString())

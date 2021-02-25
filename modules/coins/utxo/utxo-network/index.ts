@@ -118,7 +118,9 @@ const log = require('@pioneer-platform/loggerdog')()
 const bitcoin = require("bitcoinjs-lib");
 
 const BitcoinRpc = require('bitcoin-rpc-promise');
-import { Blockbook } from 'blockbook-client'
+// import { Blockbook } from 'blockbook-client'
+
+const blockbook = require('@pioneer-platform/blockbook')
 
 let BLOCKBOOK:any
 //if(!process.env['BTC_RPC_HOST'])
@@ -218,12 +220,15 @@ module.exports = {
     getBlockHeight:async function (coin:string) {
         return nodeMap[coin].getBlockCount();
     },
-    getTransaction:function (coin:string,txid:string,format:string) {
+    getTransaction:function (coin:string,txid:string,format?:string) {
         return get_transaction(coin,txid,format);
     },
     // getBalance:function (address) {
     //     return get_balance(address);
     // },
+    getFee:function (coin:string) {
+        return get_fee(coin);
+    },
     getBlock:function (coin:string,height:number) {
         return get_block(coin,height);
     },
@@ -236,9 +241,9 @@ module.exports = {
     createRawTransaction:function (coin:string,hex:string) {
         return nodeMap[coin].decodeRawTransaction(hex);
     },
-    // broadcast:function (tx) {
-    //     return broadcast_transaction(tx);
-    // },
+    broadcast:function (coin:string,tx:string) {
+        return broadcast_transaction(coin,tx);
+    },
     // getAccount:function (address) {
     //     return get_account(address);
     // },
@@ -248,6 +253,40 @@ module.exports = {
     // getValidators:function () {
     //     return get_validators();
     // }
+}
+
+let get_fee = async function(coin:string){
+    let tag = TAG + " | get_fee | "
+    try{
+        let output:any = {}
+        if(coin === 'BTC'){
+            //
+            let query = "https://bitcoinfees.earn.com/api/v1/fees/recommended"
+
+            output = await axios({method:'GET',url:query})
+            log.info(tag,"output: ",output.data)
+            output = output.data.fastestFee
+        }else{
+            //eh just send whatever, probally be fine
+            throw Error("unknown coin! "+coin)
+        }
+
+
+        return output
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
+let broadcast_transaction = async function(coin:string,tx:string){
+    let tag = TAG + " | broadcast_transaction | "
+    try{
+
+        let txid = await blockbook.broadcast(coin,tx)
+        return txid
+    }catch(e){
+        console.error(tag,e)
+    }
 }
 
 let get_balance_by_addresses = async function(coin:string,addresses:any){
@@ -290,7 +329,7 @@ let get_balance_by_address = async function(coin:string,address:string){
 let get_utxos_by_xpub = async function(coin:string,xpub:string){
     let tag = TAG + " | get_utxos_by_xpub | "
     try{
-        let output = await BLOCKBOOK.getUtxosForXpub(xpub, { confirmed: true })
+        let output = await blockbook.utxosByXpub(coin,xpub)
         log.debug(tag,"output: ",output)
 
         return output
@@ -341,10 +380,7 @@ let init_network = async function (runtime:string,servers:any) {
 
         RUNTIME = runtime
 
-        //
-        BLOCKBOOK = new Blockbook({
-            nodes: ['btc1.trezor.io', 'btc2.trezor.io'],
-        })
+        await blockbook.init()
 
 
         return true
@@ -355,61 +391,17 @@ let init_network = async function (runtime:string,servers:any) {
 }
 
 
-let get_transaction = async function (coin:string,txid:string,format:string) {
+let get_transaction = async function (coin:string,txid:string,format?:string) {
     let tag = ' | get_transaction | '
     try {
         log.debug(tag,"checkpoint: ")
         let txInfo:any = {}
 
-        //if local node avaible
-        // let txInfo = await nodeMap[coin].getRawTransaction(txid)
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // //else use remote
-        // let txInfoDecode = await nodeMap[coin].decodeRawTransaction(txInfo)
-        // log.debug(tag,"txInfoDecode: ",txInfoDecode)
+        let output = await blockbook.getTransaction(coin,txid)
+        log.debug(tag,"output: ",output)
 
 
-        //get as hex
-        //let url = URL_BTC_TIER_1 +"/rawtx/"+txid+"?format=hex"
-        //get as insight
-
-        //if smart
-        if(format === 'hex'){
-
-            txInfo = await nodeMap[coin].getRawTransaction(txid)
-            log.debug(tag,"txInfo: ",txInfo)
-
-        } else if(format === 'bitcoind'){
-
-            let txHex = await nodeMap[coin].getRawTransaction(txid)
-            log.debug(tag,"txHex: ",txHex)
-
-            txInfo = await nodeMap[coin].decodeRawTransaction(txHex)
-            log.debug(tag,"txInfo: ",txInfo)
-
-        } else if(format === 'insight'){
-
-            //
-            throw Error("unhandled")
-
-        } else if(format === 'smart'){
-
-            // let url = URL_BTC_SMART_1 + "tx/"+txid
-            // log.debug(tag,"url: ",url)
-            //
-            // txInfo = await axios({method:'GET',url})
-            // log.debug(tag,"txInfo: ",txInfo.data)
-            //
-            // txInfo.data = txInfo.data.transaction
-            // txInfo = txInfo.data
-        } else {
-
-            throw Error("unknown format")
-        }
-
-
-        return txInfo
+        return output
     } catch (e) {
         console.error(tag, 'Error: ', e)
         throw e

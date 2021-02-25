@@ -30,6 +30,7 @@ const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
     'BNB' : require('@pioneer-platform/bnb-network'),
+    'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
@@ -396,6 +397,10 @@ const get_address = async function (coin:string,account:number,index:number,isCh
                     //TODO more types
                     output = await cloneCrypto.generateAddress('BTC',publicKey,'bech32')
                     break;
+                case 'BCH':
+                    //TODO more types
+                    output = await cloneCrypto.generateAddress('BCH',publicKey,'p2sh')
+                    break;
                 case 'DOGE':
                     //TODO more types
                     output = await cloneCrypto.generateAddress('DOGE',publicKey,'bech32')
@@ -410,6 +415,10 @@ const get_address = async function (coin:string,account:number,index:number,isCh
                     break;
                 case 'ETH':
                     output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
+                    break;
+                case 'RUNE':
+                    // code block
+                    output = createBech32Address(publicKey,'tthor')
                     break;
                 case 'ATOM':
                     // code block
@@ -510,22 +519,22 @@ const get_balance = async function (coin:string) {
         log.debug("coin detected: ",coin)
         let output
 
+        //TODO utxo's
+
         if(coin === "ETH"){
             log.debug("ETH detected ")
             let master = await get_address_master('ETH')
             output = await networks['ETH'].getBalanceAddress(master)
-
         }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
             log.debug("token detected ")
             let master = await get_address_master('ETH')
             output = await networks['ETH'].getBalanceToken(master,coin)
         } else if(coin === 'ATOM'){
-            // networks['ATOM'].init('full')
             let master = await get_address_master('ATOM')
             output = await networks[coin].getBalance(master)
-            // log.debug(tag,"output: ",output)
-            // output = output.available
-            // output = 0
+        } else if(coin === 'RUNE'){
+            let master = await get_address_master('RUNE')
+            output = await networks[coin].getBalance(master)
         }else if(coin === 'BNB'){
             let master = await get_address_master('BNB')
             output = await networks[coin].getBalance(master)
@@ -544,12 +553,6 @@ const get_balance = async function (coin:string) {
             if(output.success === false){
                 output = 0
             }
-        }else if(WT_COINS.indexOf(coin) >= 0){
-            //TODO query wt
-
-
-
-
         }else{
             log.error("Coin not yet implemented!")
             // @ts-ignore
@@ -605,6 +608,27 @@ const get_wallet_info = async function () {
             masters[coin] = await get_address_master(coin)
         }
 
+        /*
+               RUNE asset info
+
+         */
+        try{
+            if(PUBLIC_WALLET['RUNE']){
+                const balanceRUNE = await get_balance('RUNE')
+
+                if(balanceRUNE){
+                    balances['RUNE'] = balanceRUNE
+                } else {
+                    balances['RUNE'] = 0
+                }
+                masters['RUNE'] = PUBLIC_WALLET['RUNE'].master
+                valueUsds['RUNE'] = ""
+                coinInfo['RUNE'] = ""
+
+            }
+        }catch(e){
+            console.error("Failed to get ATOM balances! for account: ",PUBLIC_WALLET['ATOM'])
+        }
 
         /*
                ATOM asset info
@@ -623,19 +647,19 @@ const get_wallet_info = async function () {
                 valueUsds['ATOM'] = ""
                 coinInfo['ATOM'] = ""
 
-                //get staking positions
-                await networks['ATOM'].init('full')
-                let delegations = await networks['ATOM'].getDelegations()
-                log.debug(tag,"delegations: ",delegations)
-                if(delegations.length > 0){
-                    stakes['ATOM'] = {}
-                    stakes['ATOM'].delegations = []
-                    log.debug(tag,"delegations: ",delegations)
-                    for(let i = 0; i < delegations.length; i++){
-                        let delegation = delegations[i]
-                        stakes['ATOM'].delegations.push(delegation)
-                    }
-                }
+                // //get staking positions
+                // await networks['ATOM'].init('full')
+                // let delegations = await networks['ATOM'].getDelegations()
+                // log.debug(tag,"delegations: ",delegations)
+                // if(delegations.length > 0){
+                //     stakes['ATOM'] = {}
+                //     stakes['ATOM'].delegations = []
+                //     log.debug(tag,"delegations: ",delegations)
+                //     for(let i = 0; i < delegations.length; i++){
+                //         let delegation = delegations[i]
+                //         stakes['ATOM'].delegations.push(delegation)
+                //     }
+                // }
             }
         }catch(e){
             console.error("Failed to get ATOM balances! for account: ",PUBLIC_WALLET['ATOM'])

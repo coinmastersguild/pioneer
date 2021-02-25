@@ -16,7 +16,12 @@ let queue = require("@pioneer-platform/redis-queue")
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 let txsDB = connection.get('transactions')
-let txsRawDB = connection.get('transactions-raw')
+let utxosDB = connection.get('utxo')
+
+usersDB.createIndex({id: 1}, {unique: true})
+txsDB.createIndex({txid: 1}, {unique: true})
+utxosDB.createIndex({txid: 1}, {unique: true})
+
 const axios = require('axios')
 const network = require("@pioneer-platform/network")
 
@@ -203,6 +208,7 @@ export class pioneerPrivateController extends Controller {
             //get cache
             let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
 
+            //TODO dont nerf cache! clear when new asset
             if(walletInfo){
                 log.debug(tag,"user info cached!: ")
                 log.info(tag,"user info cached!: ",walletInfo)
@@ -332,9 +338,7 @@ export class pioneerPrivateController extends Controller {
 
 */
 
-    //get api keys
-
-    //create api key
+    //TODO get api keys
 
     /**
      * Create an api key
@@ -388,6 +392,41 @@ export class pioneerPrivateController extends Controller {
         }
     }
 
+    /**
+     * get utxos
+     * @param request This is a users unspent txs
+     */
+
+    @Post('/utxos')
+    public async getUtxos(@Body() body: any, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | getUtxos | "
+        try{
+            log.debug(tag,"account: ",body)
+            log.debug(tag,"Authorization: ",Authorization)
+
+            let accountInfo = await redis.hgetall(Authorization)
+            log.debug(tag,"accountInfo: ",accountInfo)
+
+           if(accountInfo){
+               //TODO filter by coin
+
+               let utxos = await utxosDB.find({accounts:{ $all: [accountInfo.username]}})
+               log.info(tag,"utxos: ",utxos)
+
+               return(utxos);
+           } else {
+               throw Error("user not found!")
+           }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     /**
      * Get transaction history

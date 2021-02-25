@@ -53,6 +53,9 @@ module.exports = {
     getInfo: function () {
         return get_node_info();
     },
+    getTransaction: function (coin, txid) {
+        return get_transaction(coin, txid);
+    },
     // txsByXpub: function (coin:string,addresses:any) {
     //     return get_txs_by_xpub(coin,addresses);
     // },
@@ -62,18 +65,21 @@ module.exports = {
     getBalanceByXpub: function (coin, xpub) {
         return get_balance_by_xpub(coin, xpub);
     },
+    broadcast: function (coin, hex) {
+        return broadcast_transaction(coin, hex);
+    },
 };
-var get_utxos_by_xpub = function (coin, xpub) {
+var broadcast_transaction = function (coin, hex) {
     return __awaiter(this, void 0, void 0, function () {
         var tag, output, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    tag = TAG + " | get_utxos_by_xpub | ";
+                    tag = TAG + " | broadcast_transaction | ";
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: true })];
+                    return [4 /*yield*/, BLOCKBOOKS[coin].sendTx(hex)];
                 case 2:
                     output = _a.sent();
                     log.debug(tag, "output: ", output);
@@ -87,9 +93,57 @@ var get_utxos_by_xpub = function (coin, xpub) {
         });
     });
 };
+var get_transaction = function (coin, txid) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, output, e_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_utxos_by_xpub | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, BLOCKBOOKS[coin].getTx(txid)];
+                case 2:
+                    output = _a.sent();
+                    log.debug(tag, "output: ", output);
+                    return [2 /*return*/, output];
+                case 3:
+                    e_2 = _a.sent();
+                    console.error(tag, e_2);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+};
+var get_utxos_by_xpub = function (coin, xpub) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, output, e_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_utxos_by_xpub | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })];
+                case 2:
+                    output = _a.sent();
+                    log.debug(tag, "output: ", output);
+                    return [2 /*return*/, output];
+                case 3:
+                    e_3 = _a.sent();
+                    console.error(tag, e_3);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+};
 var get_balance_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, balance, i, uxto, e_2;
+        var tag, output, balance, i, uxto, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -100,7 +154,7 @@ var get_balance_by_xpub = function (coin, xpub) {
                     log.debug(tag, "coin: ", coin);
                     log.debug(tag, "xpub: ", xpub);
                     log.debug(tag, "BLOCKBOOKS: ", BLOCKBOOKS);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: true })];
+                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })];
                 case 2:
                     output = _a.sent();
                     log.debug(tag, "output: ", output);
@@ -112,8 +166,8 @@ var get_balance_by_xpub = function (coin, xpub) {
                     }
                     return [2 /*return*/, balance / 100000000];
                 case 3:
-                    e_2 = _a.sent();
-                    console.error(tag, e_2);
+                    e_4 = _a.sent();
+                    console.error(tag, e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }

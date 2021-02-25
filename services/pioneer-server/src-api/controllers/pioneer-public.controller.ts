@@ -22,11 +22,12 @@ const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
     'BNB' : require('@pioneer-platform/bnb-network'),
+    'RUNE' : require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
 }
-
+networks.ANY.init('full')
 // usersDB.createIndex({id: 1}, {unique: true})
 // txsDB.createIndex({txid: 1}, {unique: true})
 // txsRawDB.createIndex({txhash: 1}, {unique: true})
@@ -92,6 +93,12 @@ interface UnsignedUtxoRequest {
     inputs:any
 }
 
+//TODO move this to coins module!
+let UTXO_COINS = [
+    'BTC',
+    'BCH',
+    'LTC'
+]
 
 //route
 @Tags('Public Endpoints')
@@ -298,6 +305,35 @@ export class pioneerPublicController extends Controller {
     }
 
     /**
+     *  Get Estimate Fee
+     */
+    @Get('/getFee/{coin}')
+    public async getFee(coin:string) {
+        let tag = TAG + " | getFee | "
+        try{
+            let output
+            if(UTXO_COINS.indexOf(coin) >= 0){
+                //TODO supported assets
+                output = await networks['ANY'].getFee(coin)
+                log.debug("output:",output)
+                //else error
+            }else{
+                output = await networks[coin].getFee(coin)
+            }
+
+            return(output)
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
      *  Cosmos getValidators
      */
     @Get('/getValidators/')
@@ -329,9 +365,26 @@ export class pioneerPublicController extends Controller {
     public async listUnspent(coin:string,xpub:string) {
         let tag = TAG + " | listUnspent | "
         try{
-            //TODO if UTXO else error
+            let output:any = []
+            //TODO if UTXO coin else error
+            //TODO does this scale on large xpubs?
+            log.info(tag,"coin: ",coin)
+            log.info(tag,"xpub: ",xpub)
+            //log.info("networks: ",networks)
+            //log.info("networks: ",networks.ANY)
+            let inputs = await networks.ANY.utxosByXpub(coin,xpub)
 
-            let inputs = await networks['ANY'].utxosByXpub(coin,xpub)
+            //for each get hex
+            for(let i = 0; i < inputs.length; i++){
+                let input = inputs[i]
+                log.info(tag,"input: ",input)
+                //get hex info
+                let rawInfo = await networks.ANY.getTransaction(coin,input.txid)
+                log.info(tag,"rawInfo: ",rawInfo)
+                input.hex = rawInfo.hex
+                input.coin = coin
+                output.push(input)
+            }
 
             return inputs
         }catch(e){
@@ -352,6 +405,9 @@ export class pioneerPublicController extends Controller {
     public async getAccountInfo(coin:string,address:string) {
         let tag = TAG + " | accountsFromPubkey | "
         try{
+            log.info(tag,"coin: ",coin)
+            log.info(tag,"address: ",address)
+            log.info(tag,"networks: ",networks)
             let accounts = await networks[coin].getAccount(address)
             return accounts
         }catch(e){
@@ -647,7 +703,7 @@ export class pioneerPublicController extends Controller {
             log.info("************************** CHECKPOINT *******************88 ")
             log.info(tag,"body: ",body)
             let coin = body.coin
-            if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
+            //if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
 
             //broadcast
             let result
@@ -688,6 +744,9 @@ export class pioneerPublicController extends Controller {
                     default:
                         throw Error("Type not supported! "+body.type)
                 }
+            } else if(UTXO_COINS.indexOf(coin) >= 0){
+                //normal broadcast
+                result = await networks['ANY'].broadcast(coin,body.serialized)
             } else {
                 //normal broadcast
                 result = await networks[coin].broadcast(body.serialized)

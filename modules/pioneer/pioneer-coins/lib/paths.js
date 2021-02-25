@@ -41,6 +41,18 @@ function getPaths() {
         //     scriptType: 'p2sh'
         // },
         {
+            note: "Standard bitcoin cash default path",
+            type: "xpub",
+            script_type: "p2pkh",
+            available_scripts_types: ['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'BitcoinCash',
+            symbol: 'BCH',
+            network: 'BCH',
+        },
+        {
             note: "Default litecoin path",
             coin: 'Litecoin',
             symbol: 'LTC',
@@ -147,6 +159,18 @@ function getPaths() {
             coin: 'Cosmos',
             symbol: 'ATOM',
             network: 'ATOM',
+        },
+        {
+            note: " Default RUNE path ",
+            type: "address",
+            script_type: "tthor",
+            available_scripts_types: ['tthor'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'Thorchain',
+            symbol: 'RUNE',
+            network: 'RUNE',
         },
     ];
 }

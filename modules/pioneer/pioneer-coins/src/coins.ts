@@ -111,6 +111,10 @@ export function get_address_from_xpub(xpub:string,scriptType:string,coin:string,
                 // code block
                 output = createBech32Address(publicKey,'cosmos')
                 break;
+            case 'RUNE':
+                // code block
+                output = createBech32Address(publicKey,'tthor')
+                break;
             case 'BNB':
                 // code block
                 output = createBech32Address(publicKey,'bnb')

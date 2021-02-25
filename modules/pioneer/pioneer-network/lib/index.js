@@ -60,6 +60,7 @@ var networks = {
     'ETH': require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
     'BNB': require('@pioneer-platform/bnb-network'),
+    'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
     'ANY': require('@pioneer-platform/utxo-network'),
@@ -440,7 +441,7 @@ var get_address = function (coin, account, index, isChange) {
                     tag = TAG + " | get_address | ";
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 17, , 18]);
+                    _b.trys.push([1, 20, , 21]);
                     log.info(tag, "get_address: ", { coin: coin, account: account, index: index, isChange: isChange });
                     output = void 0;
                     //if xpub get next unused
@@ -448,7 +449,7 @@ var get_address = function (coin, account, index, isChange) {
                         log.error(tag, "Error: ", coin);
                         throw Error("unknown coin!: " + coin);
                     }
-                    if (!(PUBLIC_WALLET[coin].type === 'xpub')) return [3 /*break*/, 15];
+                    if (!(PUBLIC_WALLET[coin].type === 'xpub')) return [3 /*break*/, 18];
                     publicKey = bitcoin.bip32.fromBase58(PUBLIC_WALLET[coin].pubkey).derive(account).derive(index).publicKey;
                     log.debug("publicKey: ********* ", publicKey);
                     //if token
@@ -458,51 +459,62 @@ var get_address = function (coin, account, index, isChange) {
                     _a = coin;
                     switch (_a) {
                         case 'BTC': return [3 /*break*/, 2];
-                        case 'DOGE': return [3 /*break*/, 4];
-                        case 'DASH': return [3 /*break*/, 6];
-                        case 'LTC': return [3 /*break*/, 8];
-                        case 'ETH': return [3 /*break*/, 10];
-                        case 'ATOM': return [3 /*break*/, 11];
-                        case 'BNB': return [3 /*break*/, 12];
+                        case 'BCH': return [3 /*break*/, 4];
+                        case 'DOGE': return [3 /*break*/, 6];
+                        case 'DASH': return [3 /*break*/, 8];
+                        case 'LTC': return [3 /*break*/, 10];
+                        case 'ETH': return [3 /*break*/, 12];
+                        case 'RUNE': return [3 /*break*/, 13];
+                        case 'ATOM': return [3 /*break*/, 14];
+                        case 'BNB': return [3 /*break*/, 15];
                     }
-                    return [3 /*break*/, 13];
+                    return [3 /*break*/, 16];
                 case 2: return [4 /*yield*/, cloneCrypto.generateAddress('BTC', publicKey, 'bech32')];
                 case 3:
                     //TODO more types
                     output = _b.sent();
-                    return [3 /*break*/, 14];
-                case 4: return [4 /*yield*/, cloneCrypto.generateAddress('DOGE', publicKey, 'bech32')];
+                    return [3 /*break*/, 17];
+                case 4: return [4 /*yield*/, cloneCrypto.generateAddress('BCH', publicKey, 'p2sh')];
                 case 5:
                     //TODO more types
                     output = _b.sent();
-                    return [3 /*break*/, 14];
-                case 6: return [4 /*yield*/, cloneCrypto.generateAddress('DASH', publicKey, 'bech32')];
+                    return [3 /*break*/, 17];
+                case 6: return [4 /*yield*/, cloneCrypto.generateAddress('DOGE', publicKey, 'bech32')];
                 case 7:
                     //TODO more types
                     output = _b.sent();
-                    return [3 /*break*/, 14];
-                case 8: return [4 /*yield*/, cloneCrypto.generateAddress('LTC', publicKey, 'bech32')];
+                    return [3 /*break*/, 17];
+                case 8: return [4 /*yield*/, cloneCrypto.generateAddress('DASH', publicKey, 'bech32')];
                 case 9:
                     //TODO more types
                     output = _b.sent();
-                    return [3 /*break*/, 14];
-                case 10:
-                    output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey, true));
-                    return [3 /*break*/, 14];
+                    return [3 /*break*/, 17];
+                case 10: return [4 /*yield*/, cloneCrypto.generateAddress('LTC', publicKey, 'bech32')];
                 case 11:
+                    //TODO more types
+                    output = _b.sent();
+                    return [3 /*break*/, 17];
+                case 12:
+                    output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey, true));
+                    return [3 /*break*/, 17];
+                case 13:
+                    // code block
+                    output = createBech32Address(publicKey, 'tthor');
+                    return [3 /*break*/, 17];
+                case 14:
                     // code block
                     output = createBech32Address(publicKey, 'cosmos');
-                    return [3 /*break*/, 14];
-                case 12:
+                    return [3 /*break*/, 17];
+                case 15:
                     // code block
                     log.debug("pubkey: ", publicKey);
                     output = createBech32Address(publicKey, 'bnb');
-                    return [3 /*break*/, 14];
-                case 13: throw Error("coin not yet implemented ! coin: " + coin);
-                case 14:
+                    return [3 /*break*/, 17];
+                case 16: throw Error("coin not yet implemented ! coin: " + coin);
+                case 17:
                     log.debug(tag, "output: ", output);
-                    return [3 /*break*/, 16];
-                case 15:
+                    return [3 /*break*/, 19];
+                case 18:
                     if (PUBLIC_WALLET[coin].master) {
                         output = PUBLIC_WALLET[coin].master;
                     }
@@ -512,13 +524,13 @@ var get_address = function (coin, account, index, isChange) {
                     else {
                         throw Error("invalid pubkey info");
                     }
-                    _b.label = 16;
-                case 16: return [2 /*return*/, output];
-                case 17:
+                    _b.label = 19;
+                case 19: return [2 /*return*/, output];
+                case 20:
                     e_5 = _b.sent();
                     log.error(tag, "e: ", e_5);
-                    return [3 /*break*/, 18];
-                case 18: return [2 /*return*/];
+                    return [3 /*break*/, 21];
+                case 21: return [2 /*return*/];
             }
         });
     });
@@ -568,14 +580,14 @@ var get_address_master = function (coin) {
 };
 var get_balance = function (coin) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, master, master, master, master, master, master, e_7;
+        var tag, output, master, master, master, master, master, master, master, e_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = TAG + " | get_balance | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 21, , 22]);
+                    _a.trys.push([1, 24, , 25]);
                     log.debug("coin detected: ", coin);
                     output = void 0;
                     if (!(coin === "ETH")) return [3 /*break*/, 4];
@@ -586,7 +598,7 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks['ETH'].getBalanceAddress(master)];
                 case 3:
                     output = _a.sent();
-                    return [3 /*break*/, 20];
+                    return [3 /*break*/, 23];
                 case 4:
                     if (!(tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 7];
                     log.debug("token detected ");
@@ -596,46 +608,38 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks['ETH'].getBalanceToken(master, coin)];
                 case 6:
                     output = _a.sent();
-                    return [3 /*break*/, 20];
+                    return [3 /*break*/, 23];
                 case 7:
                     if (!(coin === 'ATOM')) return [3 /*break*/, 10];
                     return [4 /*yield*/, get_address_master('ATOM')];
                 case 8:
                     master = _a.sent();
-                    return [4 /*yield*/, networks[coin].getBalance(master)
-                        // log.debug(tag,"output: ",output)
-                        // output = output.available
-                        // output = 0
-                    ];
+                    return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 9:
                     output = _a.sent();
-                    return [3 /*break*/, 20];
+                    return [3 /*break*/, 23];
                 case 10:
-                    if (!(coin === 'BNB')) return [3 /*break*/, 13];
-                    return [4 /*yield*/, get_address_master('BNB')];
+                    if (!(coin === 'RUNE')) return [3 /*break*/, 13];
+                    return [4 /*yield*/, get_address_master('RUNE')];
                 case 11:
                     master = _a.sent();
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 12:
                     output = _a.sent();
-                    output = output.free;
-                    return [3 /*break*/, 20];
+                    return [3 /*break*/, 23];
                 case 13:
-                    if (!(coin === 'EOS')) return [3 /*break*/, 16];
-                    return [4 /*yield*/, get_address_master('EOS')];
+                    if (!(coin === 'BNB')) return [3 /*break*/, 16];
+                    return [4 /*yield*/, get_address_master('BNB')];
                 case 14:
                     master = _a.sent();
-                    log.debug("master: ", master);
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 15:
                     output = _a.sent();
-                    if (output.success === false) {
-                        output = 0;
-                    }
-                    return [3 /*break*/, 20];
+                    output = output.free;
+                    return [3 /*break*/, 23];
                 case 16:
-                    if (!(coin === 'FIO')) return [3 /*break*/, 19];
-                    return [4 /*yield*/, get_address_master('FIO')];
+                    if (!(coin === 'EOS')) return [3 /*break*/, 19];
+                    return [4 /*yield*/, get_address_master('EOS')];
                 case 17:
                     master = _a.sent();
                     log.debug("master: ", master);
@@ -645,23 +649,29 @@ var get_balance = function (coin) {
                     if (output.success === false) {
                         output = 0;
                     }
-                    return [3 /*break*/, 20];
+                    return [3 /*break*/, 23];
                 case 19:
-                    if (WT_COINS.indexOf(coin) >= 0) {
-                        //TODO query wt
-                    }
-                    else {
-                        log.error("Coin not yet implemented!");
-                        // @ts-ignore
-                        //output = await networks[coin].getBalance(PUBLIC_WALLET[coin].pubkey)
-                    }
-                    _a.label = 20;
-                case 20: return [2 /*return*/, output];
+                    if (!(coin === 'FIO')) return [3 /*break*/, 22];
+                    return [4 /*yield*/, get_address_master('FIO')];
+                case 20:
+                    master = _a.sent();
+                    log.debug("master: ", master);
+                    return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 21:
+                    output = _a.sent();
+                    if (output.success === false) {
+                        output = 0;
+                    }
+                    return [3 /*break*/, 23];
+                case 22:
+                    log.error("Coin not yet implemented!");
+                    _a.label = 23;
+                case 23: return [2 /*return*/, output];
+                case 24:
                     e_7 = _a.sent();
                     log.error(tag, "e: ", e_7);
-                    return [3 /*break*/, 22];
-                case 22: return [2 /*return*/];
+                    return [3 /*break*/, 25];
+                case 25: return [2 /*return*/];
             }
         });
     });
@@ -671,14 +681,14 @@ function divideBy10ToTheNthAndRoundDown(n, num) {
 }
 var get_wallet_info = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, syncStatus, txCount, masters, balances, valueUsds, coinInfo, stakes, startTime, coins, i, coin, balance, i, coin, pubkeyInfo, _a, _b, balanceATOM, delegations, i, delegation, e_8, balanceBNB, e_9, totalUsd, endTime, duration, e_10;
+        var tag, output, syncStatus, txCount, masters, balances, valueUsds, coinInfo, stakes, startTime, coins, i, coin, balance, i, coin, pubkeyInfo, _a, _b, balanceRUNE, e_8, balanceATOM, e_9, balanceBNB, e_10, totalUsd, endTime, duration, e_11;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
                     tag = TAG + " | get_wallet_info | ";
                     _c.label = 1;
                 case 1:
-                    _c.trys.push([1, 22, , 23]);
+                    _c.trys.push([1, 24, , 25]);
                     output = {};
                     syncStatus = {};
                     txCount = {};
@@ -728,10 +738,31 @@ var get_wallet_info = function () {
                     i++;
                     return [3 /*break*/, 6];
                 case 9:
-                    _c.trys.push([9, 14, , 15]);
-                    if (!PUBLIC_WALLET['ATOM']) return [3 /*break*/, 13];
-                    return [4 /*yield*/, get_balance('ATOM')];
+                    _c.trys.push([9, 12, , 13]);
+                    if (!PUBLIC_WALLET['RUNE']) return [3 /*break*/, 11];
+                    return [4 /*yield*/, get_balance('RUNE')];
                 case 10:
+                    balanceRUNE = _c.sent();
+                    if (balanceRUNE) {
+                        balances['RUNE'] = balanceRUNE;
+                    }
+                    else {
+                        balances['RUNE'] = 0;
+                    }
+                    masters['RUNE'] = PUBLIC_WALLET['RUNE'].master;
+                    valueUsds['RUNE'] = "";
+                    coinInfo['RUNE'] = "";
+                    _c.label = 11;
+                case 11: return [3 /*break*/, 13];
+                case 12:
+                    e_8 = _c.sent();
+                    console.error("Failed to get ATOM balances! for account: ", PUBLIC_WALLET['ATOM']);
+                    return [3 /*break*/, 13];
+                case 13:
+                    _c.trys.push([13, 16, , 17]);
+                    if (!PUBLIC_WALLET['ATOM']) return [3 /*break*/, 15];
+                    return [4 /*yield*/, get_balance('ATOM')];
+                case 14:
                     balanceATOM = _c.sent();
                     if (balanceATOM) {
                         balances['ATOM'] = balanceATOM;
@@ -742,31 +773,13 @@ var get_wallet_info = function () {
                     masters['ATOM'] = PUBLIC_WALLET['ATOM'].master;
                     valueUsds['ATOM'] = "";
                     coinInfo['ATOM'] = "";
-                    //get staking positions
-                    return [4 /*yield*/, networks['ATOM'].init('full')];
-                case 11:
-                    //get staking positions
-                    _c.sent();
-                    return [4 /*yield*/, networks['ATOM'].getDelegations()];
-                case 12:
-                    delegations = _c.sent();
-                    log.debug(tag, "delegations: ", delegations);
-                    if (delegations.length > 0) {
-                        stakes['ATOM'] = {};
-                        stakes['ATOM'].delegations = [];
-                        log.debug(tag, "delegations: ", delegations);
-                        for (i = 0; i < delegations.length; i++) {
-                            delegation = delegations[i];
-                            stakes['ATOM'].delegations.push(delegation);
-                        }
-                    }
-                    _c.label = 13;
-                case 13: return [3 /*break*/, 15];
-                case 14:
-                    e_8 = _c.sent();
+                    _c.label = 15;
+                case 15: return [3 /*break*/, 17];
+                case 16:
+                    e_9 = _c.sent();
                     console.error("Failed to get ATOM balances! for account: ", PUBLIC_WALLET['ATOM']);
-                    return [3 /*break*/, 15];
-                case 15:
+                    return [3 /*break*/, 17];
+                case 17:
                     /*
                            EOS asset info
             
@@ -810,12 +823,12 @@ var get_wallet_info = function () {
                     catch (e) {
                         console.error("Failed to get EOS info! for account: ", PUBLIC_WALLET['EOS']);
                     }
-                    _c.label = 16;
-                case 16:
-                    _c.trys.push([16, 19, , 20]);
-                    if (!PUBLIC_WALLET['BNB']) return [3 /*break*/, 18];
+                    _c.label = 18;
+                case 18:
+                    _c.trys.push([18, 21, , 22]);
+                    if (!PUBLIC_WALLET['BNB']) return [3 /*break*/, 20];
                     return [4 /*yield*/, get_balance('BNB')];
-                case 17:
+                case 19:
                     balanceBNB = _c.sent();
                     if (balanceBNB) {
                         masters['BNB'] = PUBLIC_WALLET['BNB'].pubkey;
@@ -823,14 +836,14 @@ var get_wallet_info = function () {
                         valueUsds['BNB'] = "";
                         coinInfo['BNB'] = "";
                     }
-                    _c.label = 18;
-                case 18: return [3 /*break*/, 20];
-                case 19:
-                    e_9 = _c.sent();
-                    console.error("Failed to get BNB balances! for account: ", PUBLIC_WALLET['BNB']);
-                    return [3 /*break*/, 20];
-                case 20: return [4 /*yield*/, coincap.valuePortfolio(balances)];
+                    _c.label = 20;
+                case 20: return [3 /*break*/, 22];
                 case 21:
+                    e_10 = _c.sent();
+                    console.error("Failed to get BNB balances! for account: ", PUBLIC_WALLET['BNB']);
+                    return [3 /*break*/, 22];
+                case 22: return [4 /*yield*/, coincap.valuePortfolio(balances)];
+                case 23:
                     /*
                         ETH asset info
             
@@ -886,18 +899,18 @@ var get_wallet_info = function () {
                     output.syncStatus = syncStatus;
                     output.stakes = stakes;
                     return [2 /*return*/, output];
-                case 22:
-                    e_10 = _c.sent();
-                    log.error(tag, "e: ", e_10);
-                    return [3 /*break*/, 23];
-                case 23: return [2 /*return*/];
+                case 24:
+                    e_11 = _c.sent();
+                    log.error(tag, "e: ", e_11);
+                    return [3 /*break*/, 25];
+                case 25: return [2 /*return*/];
             }
         });
     });
 };
 var init_wallet = function (type, config, isTestnet) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, formatted, coins, i, coin, pubKeyInfo, e_11;
+        var tag, formatted, coins, i, coin, pubKeyInfo, e_12;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -934,9 +947,9 @@ var init_wallet = function (type, config, isTestnet) {
                     }
                     return [2 /*return*/, true];
                 case 3:
-                    e_11 = _a.sent();
-                    log.error(tag, "e: ", e_11);
-                    throw e_11;
+                    e_12 = _a.sent();
+                    log.error(tag, "e: ", e_12);
+                    throw e_12;
                 case 4: return [2 /*return*/];
             }
         });
