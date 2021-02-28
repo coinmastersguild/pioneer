@@ -43,7 +43,53 @@ jobs:
       - run:
           name: update
           command: "cd deploy && npm i && node leeroy-sdk.js"
+  build-native-mac:
+    macos:
+      xcode: 11.5.0
+    steps:
+      - checkout
+      - run:
+          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+      - run: npm install -g @quasar/cli
+      - run: node --version
+      - run: quasar --version
+      - run: cd platform && npm i
+      - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-mac
 
+#TODO
+#  build-native-linux:
+#    macos:
+#      xcode: 11.5.0
+#    steps:
+#      - checkout
+#      - run:
+#          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+#      - run: node --version
+#      - run: brew update && brew upgrade
+#      - run: brew install snapcraft
+#      - run: npm install -g @quasar/cli
+#      - run: cd apps/pioneer-platform/platform && npm i
+#      - run: cd apps/pioneer-platform/platform && npm run fix
+#      - run: cd apps/pioneer-platform/platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
+#
+#  build-native-windows:
+#    executor:
+#      name: win/default # executor type
+#      size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium"
+#    steps:
+#      - checkout
+#      - run:
+#          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+#          shell: bash.exe
+#          name: set env
+#      - run:
+#          command: cd apps/pioneer-platform/platform && npm i
+#          shell: bash.exe
+#          name: npm install
+#      - run:
+#          command: cd apps/pioneer-platform/platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-windows
+#          shell: bash.exe
+#          name: npm install
 
 not_master: &not_master
   filters:
@@ -71,6 +117,11 @@ only_release_canidate: &only_release_canidate
 
 workflows:
   version: 2
+  pioneer-native:
+    jobs:
+      - build-native-mac
+#      - build-native-windows
+#      - build-native-linux
   build-master:
     jobs:
       - build:

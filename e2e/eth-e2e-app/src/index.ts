@@ -22,6 +22,9 @@ require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
+const assert = require('assert');
+
+
 let urlSpec = 'https://pioneers.dev/spec/swagger.json'
 
 //test app
@@ -89,8 +92,8 @@ const test_service = async function () {
         //process
         //process.exit(0)
     } catch (e) {
-        log.error(e)
-        throw e
+        log.error("test can not continue: ",e)
+        process.exit(2)
     }
 }
 test_service()
