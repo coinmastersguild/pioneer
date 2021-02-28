@@ -42,7 +42,8 @@
 const TAG = " | Pioneer | "
 const queue = require('@pioneer-platform/redis-queue');
 const uuid = require('short-uuid');
-
+let blocknative = require("@pioneer-platform/blocknative-client")
+blocknative.init()
 
 //const bcrypt = require('bcryptjs');
 var numbro = require("numbro");
@@ -92,6 +93,9 @@ let register_xpubs = async function (account:string, pubkeys:any) {
 
             //if eth use master
             if(pubkeyInfo.coin === 'ETH'){
+                //register to blocknative
+                blocknative.submitAddress("ETH",pubkeyInfo.master)
+
                 let address = pubkeyInfo.master
                 let coin = pubkeyInfo.symbol
                 redis.sadd(address+":accounts", account)

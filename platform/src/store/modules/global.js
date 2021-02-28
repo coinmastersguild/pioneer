@@ -25,17 +25,6 @@ const getters = {
     txPanelVisible: (state) => state.txPanel
 }
 
-const actions = {
-    async fetchRate({ commit }, pair) {
-        commit('setRateLoading', true)
-        const response = await axios.get('https://shapeshift.io/marketinfo/' + pair)
-        if(response) {
-            commit('setRate', response.data)
-            commit('setRateLoading', false)
-        }
-    },
-}
-
 const mutations = {
     showModal(state, componentName) {
         state.modalVisible = componentName ? true : false

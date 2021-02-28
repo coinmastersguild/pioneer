@@ -59,7 +59,7 @@ var log = require("@pioneer-platform/loggerdog")();
 var networks = {
     'ETH': require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
-    'BNB': require('@pioneer-platform/bnb-network'),
+    // 'BNB' : require('@pioneer-platform/bnb-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
@@ -80,7 +80,7 @@ var prefurredScripts = {
 };
 var WT_COINS = ['BTC', 'LTC', 'DASH', 'DOGE', 'BCH', 'ETH', 'EOS', 'BNB', 'ATOM'];
 var WT_PUBKEYS_FORMATTED;
-var BLOCKBOOK_COINS = ['BTC'];
+var BLOCKBOOK_COINS = ['BTC', 'BCH', 'LTC', 'DOGE'];
 //prescisions
 var CURRENCY_DECIMALS = {
     'btc': 8,
@@ -580,14 +580,14 @@ var get_address_master = function (coin) {
 };
 var get_balance = function (coin) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, master, master, master, master, master, master, master, e_7;
+        var tag, output, master, master, master, master, master, master, e_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = TAG + " | get_balance | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 24, , 25]);
+                    _a.trys.push([1, 22, , 23]);
                     log.debug("coin detected: ", coin);
                     output = void 0;
                     if (!(coin === "ETH")) return [3 /*break*/, 4];
@@ -598,7 +598,7 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks['ETH'].getBalanceAddress(master)];
                 case 3:
                     output = _a.sent();
-                    return [3 /*break*/, 23];
+                    return [3 /*break*/, 21];
                 case 4:
                     if (!(tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 7];
                     log.debug("token detected ");
@@ -608,7 +608,7 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks['ETH'].getBalanceToken(master, coin)];
                 case 6:
                     output = _a.sent();
-                    return [3 /*break*/, 23];
+                    return [3 /*break*/, 21];
                 case 7:
                     if (!(coin === 'ATOM')) return [3 /*break*/, 10];
                     return [4 /*yield*/, get_address_master('ATOM')];
@@ -617,7 +617,7 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 9:
                     output = _a.sent();
-                    return [3 /*break*/, 23];
+                    return [3 /*break*/, 21];
                 case 10:
                     if (!(coin === 'RUNE')) return [3 /*break*/, 13];
                     return [4 /*yield*/, get_address_master('RUNE')];
@@ -626,52 +626,49 @@ var get_balance = function (coin) {
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 12:
                     output = _a.sent();
-                    return [3 /*break*/, 23];
+                    return [3 /*break*/, 21];
                 case 13:
-                    if (!(coin === 'BNB')) return [3 /*break*/, 16];
-                    return [4 /*yield*/, get_address_master('BNB')];
+                    if (!(coin === 'BNB')) return [3 /*break*/, 14];
+                    // let master = await get_address_master('BNB')
+                    // output = await networks[coin].getBalance(master)
+                    // output = output.free
+                    output = 0;
+                    return [3 /*break*/, 21];
                 case 14:
-                    master = _a.sent();
-                    return [4 /*yield*/, networks[coin].getBalance(master)];
-                case 15:
-                    output = _a.sent();
-                    output = output.free;
-                    return [3 /*break*/, 23];
-                case 16:
-                    if (!(coin === 'EOS')) return [3 /*break*/, 19];
+                    if (!(coin === 'EOS')) return [3 /*break*/, 17];
                     return [4 /*yield*/, get_address_master('EOS')];
+                case 15:
+                    master = _a.sent();
+                    log.debug("master: ", master);
+                    return [4 /*yield*/, networks[coin].getBalance(master)];
+                case 16:
+                    output = _a.sent();
+                    if (output.success === false) {
+                        output = 0;
+                    }
+                    return [3 /*break*/, 21];
                 case 17:
-                    master = _a.sent();
-                    log.debug("master: ", master);
-                    return [4 /*yield*/, networks[coin].getBalance(master)];
-                case 18:
-                    output = _a.sent();
-                    if (output.success === false) {
-                        output = 0;
-                    }
-                    return [3 /*break*/, 23];
-                case 19:
-                    if (!(coin === 'FIO')) return [3 /*break*/, 22];
+                    if (!(coin === 'FIO')) return [3 /*break*/, 20];
                     return [4 /*yield*/, get_address_master('FIO')];
-                case 20:
+                case 18:
                     master = _a.sent();
                     log.debug("master: ", master);
                     return [4 /*yield*/, networks[coin].getBalance(master)];
-                case 21:
+                case 19:
                     output = _a.sent();
                     if (output.success === false) {
                         output = 0;
                     }
-                    return [3 /*break*/, 23];
-                case 22:
+                    return [3 /*break*/, 21];
+                case 20:
                     log.error("Coin not yet implemented!");
-                    _a.label = 23;
-                case 23: return [2 /*return*/, output];
-                case 24:
+                    _a.label = 21;
+                case 21: return [2 /*return*/, output];
+                case 22:
                     e_7 = _a.sent();
                     log.error(tag, "e: ", e_7);
-                    return [3 /*break*/, 25];
-                case 25: return [2 /*return*/];
+                    return [3 /*break*/, 23];
+                case 23: return [2 /*return*/];
             }
         });
     });
@@ -681,14 +678,14 @@ function divideBy10ToTheNthAndRoundDown(n, num) {
 }
 var get_wallet_info = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, syncStatus, txCount, masters, balances, valueUsds, coinInfo, stakes, startTime, coins, i, coin, balance, i, coin, pubkeyInfo, _a, _b, balanceRUNE, e_8, balanceATOM, e_9, balanceBNB, e_10, totalUsd, endTime, duration, e_11;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var tag, output, syncStatus, txCount, masters, balances, valueUsds, coinInfo, stakes, startTime, coins, i, coin, balance, i, coin, pubkeyInfo, _a, _b, balanceRUNE, e_8, balanceATOM, e_9, balanceBNB, e_10, balanceETH, ethInfo, i, token, _c, _d, _e, _f, e_11, totalUsd, endTime, duration, e_12;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
                     tag = TAG + " | get_wallet_info | ";
-                    _c.label = 1;
+                    _g.label = 1;
                 case 1:
-                    _c.trys.push([1, 24, , 25]);
+                    _g.trys.push([1, 35, , 36]);
                     output = {};
                     syncStatus = {};
                     txCount = {};
@@ -704,24 +701,25 @@ var get_wallet_info = function () {
                     coins = Object.keys(PUBLIC_WALLET);
                     log.debug(tag, "coins: ", coins);
                     i = 0;
-                    _c.label = 2;
+                    _g.label = 2;
                 case 2:
                     if (!(i < BLOCKBOOK_COINS.length)) return [3 /*break*/, 5];
                     coin = BLOCKBOOK_COINS[i];
+                    if (!(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub)) return [3 /*break*/, 4];
                     return [4 /*yield*/, blockbook.getBalanceByXpub(coin, PUBLIC_WALLET[coin].xpub)
                         //get balance by xpub
                     ];
                 case 3:
-                    balance = _c.sent();
+                    balance = _g.sent();
                     //get balance by xpub
                     balances[coin] = balance;
-                    _c.label = 4;
+                    _g.label = 4;
                 case 4:
                     i++;
                     return [3 /*break*/, 2];
                 case 5:
                     i = 0;
-                    _c.label = 6;
+                    _g.label = 6;
                 case 6:
                     if (!(i < coins.length)) return [3 /*break*/, 9];
                     coin = coins[i];
@@ -732,17 +730,17 @@ var get_wallet_info = function () {
                     _b = coin;
                     return [4 /*yield*/, get_address_master(coin)];
                 case 7:
-                    _a[_b] = _c.sent();
-                    _c.label = 8;
+                    _a[_b] = _g.sent();
+                    _g.label = 8;
                 case 8:
                     i++;
                     return [3 /*break*/, 6];
                 case 9:
-                    _c.trys.push([9, 12, , 13]);
+                    _g.trys.push([9, 12, , 13]);
                     if (!PUBLIC_WALLET['RUNE']) return [3 /*break*/, 11];
                     return [4 /*yield*/, get_balance('RUNE')];
                 case 10:
-                    balanceRUNE = _c.sent();
+                    balanceRUNE = _g.sent();
                     if (balanceRUNE) {
                         balances['RUNE'] = balanceRUNE;
                     }
@@ -752,18 +750,18 @@ var get_wallet_info = function () {
                     masters['RUNE'] = PUBLIC_WALLET['RUNE'].master;
                     valueUsds['RUNE'] = "";
                     coinInfo['RUNE'] = "";
-                    _c.label = 11;
+                    _g.label = 11;
                 case 11: return [3 /*break*/, 13];
                 case 12:
-                    e_8 = _c.sent();
+                    e_8 = _g.sent();
                     console.error("Failed to get ATOM balances! for account: ", PUBLIC_WALLET['ATOM']);
                     return [3 /*break*/, 13];
                 case 13:
-                    _c.trys.push([13, 16, , 17]);
+                    _g.trys.push([13, 16, , 17]);
                     if (!PUBLIC_WALLET['ATOM']) return [3 /*break*/, 15];
                     return [4 /*yield*/, get_balance('ATOM')];
                 case 14:
-                    balanceATOM = _c.sent();
+                    balanceATOM = _g.sent();
                     if (balanceATOM) {
                         balances['ATOM'] = balanceATOM;
                     }
@@ -773,10 +771,10 @@ var get_wallet_info = function () {
                     masters['ATOM'] = PUBLIC_WALLET['ATOM'].master;
                     valueUsds['ATOM'] = "";
                     coinInfo['ATOM'] = "";
-                    _c.label = 15;
+                    _g.label = 15;
                 case 15: return [3 /*break*/, 17];
                 case 16:
-                    e_9 = _c.sent();
+                    e_9 = _g.sent();
                     console.error("Failed to get ATOM balances! for account: ", PUBLIC_WALLET['ATOM']);
                     return [3 /*break*/, 17];
                 case 17:
@@ -823,66 +821,79 @@ var get_wallet_info = function () {
                     catch (e) {
                         console.error("Failed to get EOS info! for account: ", PUBLIC_WALLET['EOS']);
                     }
-                    _c.label = 18;
+                    _g.label = 18;
                 case 18:
-                    _c.trys.push([18, 21, , 22]);
+                    _g.trys.push([18, 21, , 22]);
                     if (!PUBLIC_WALLET['BNB']) return [3 /*break*/, 20];
                     return [4 /*yield*/, get_balance('BNB')];
                 case 19:
-                    balanceBNB = _c.sent();
+                    balanceBNB = _g.sent();
                     if (balanceBNB) {
                         masters['BNB'] = PUBLIC_WALLET['BNB'].pubkey;
                         balances['BNB'] = balanceBNB;
                         valueUsds['BNB'] = "";
                         coinInfo['BNB'] = "";
                     }
-                    _c.label = 20;
+                    _g.label = 20;
                 case 20: return [3 /*break*/, 22];
                 case 21:
-                    e_10 = _c.sent();
+                    e_10 = _g.sent();
                     console.error("Failed to get BNB balances! for account: ", PUBLIC_WALLET['BNB']);
                     return [3 /*break*/, 22];
-                case 22: return [4 /*yield*/, coincap.valuePortfolio(balances)];
+                case 22:
+                    _g.trys.push([22, 32, , 33]);
+                    if (!PUBLIC_WALLET['ETH']) return [3 /*break*/, 31];
+                    return [4 /*yield*/, get_balance('ETH')];
                 case 23:
-                    /*
-                        ETH asset info
-            
-                      */
-                    // try{
-                    //     if(PUBLIC_WALLET['ETH']){
-                    //         const balanceETH = await get_balance('ETH')
-                    //
-                    //         if(balanceETH){
-                    //             masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
-                    //             balances['ETH'] = balanceETH
-                    //             valueUsds['ETH'] = ""
-                    //             coinInfo['ETH'] = ""
-                    //         }
-                    //
-                    //         //balances
-                    //         log.debug(tag,"PUBLIC_WALLET: ",PUBLIC_WALLET['ETH'])
-                    //         log.debug(tag,"eth master: ",PUBLIC_WALLET['ETH'].master)
-                    //         let ethInfo = await networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)
-                    //         log.debug(tag,"ethInfo: ",ethInfo)
-                    //
-                    //         //for each token use eth master
-                    //         for(let i = 0; i < tokenData.tokens.length; i++){
-                    //             let token:string = tokenData.tokens[i]
-                    //             //only there if a balance
-                    //             if(ethInfo.balances[token]){
-                    //                 balances[token] = await get_balance(token)
-                    //             } else {
-                    //                 balances[token] = 0
-                    //             }
-                    //             masters[token] = await get_address_master('ETH')
-                    //             valueUsds[token] = ethInfo.valueUsds[token]
-                    //             coinInfo[token] = ethInfo.coinInfo[token]
-                    //         }
-                    //     }
-                    // }catch(e){
-                    //     console.error("Failed to get ETH TOKEN balances! for account: ",PUBLIC_WALLET['ETH'], e)
-                    // }
-                    valueUsds = _c.sent();
+                    balanceETH = _g.sent();
+                    if (balanceETH) {
+                        masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey;
+                        balances['ETH'] = balanceETH;
+                        valueUsds['ETH'] = "";
+                        coinInfo['ETH'] = "";
+                    }
+                    //balances
+                    log.debug(tag, "PUBLIC_WALLET: ", PUBLIC_WALLET['ETH']);
+                    log.debug(tag, "eth master: ", PUBLIC_WALLET['ETH'].master);
+                    return [4 /*yield*/, networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)];
+                case 24:
+                    ethInfo = _g.sent();
+                    log.debug(tag, "ethInfo: ", ethInfo);
+                    i = 0;
+                    _g.label = 25;
+                case 25:
+                    if (!(i < tokenData.tokens.length)) return [3 /*break*/, 31];
+                    token = tokenData.tokens[i];
+                    if (!ethInfo.balances[token]) return [3 /*break*/, 27];
+                    _c = balances;
+                    _d = token;
+                    return [4 /*yield*/, get_balance(token)];
+                case 26:
+                    _c[_d] = _g.sent();
+                    return [3 /*break*/, 28];
+                case 27:
+                    balances[token] = 0;
+                    _g.label = 28;
+                case 28:
+                    _e = masters;
+                    _f = token;
+                    return [4 /*yield*/, get_address_master('ETH')];
+                case 29:
+                    _e[_f] = _g.sent();
+                    valueUsds[token] = ethInfo.valueUsds[token];
+                    coinInfo[token] = ethInfo.coinInfo[token];
+                    _g.label = 30;
+                case 30:
+                    i++;
+                    return [3 /*break*/, 25];
+                case 31: return [3 /*break*/, 33];
+                case 32:
+                    e_11 = _g.sent();
+                    console.error("Failed to get ETH TOKEN balances! for account: ", PUBLIC_WALLET['ETH'], e_11);
+                    return [3 /*break*/, 33];
+                case 33: return [4 /*yield*/, coincap.valuePortfolio(balances)];
+                case 34:
+                    valueUsds = _g.sent();
                     log.debug(tag, "valueUsds: ", valueUsds);
                     totalUsd = valueUsds.total;
                     valueUsds = valueUsds.values;
@@ -899,18 +910,18 @@ var get_wallet_info = function () {
                     output.syncStatus = syncStatus;
                     output.stakes = stakes;
                     return [2 /*return*/, output];
-                case 24:
-                    e_11 = _c.sent();
-                    log.error(tag, "e: ", e_11);
-                    return [3 /*break*/, 25];
-                case 25: return [2 /*return*/];
+                case 35:
+                    e_12 = _g.sent();
+                    log.error(tag, "e: ", e_12);
+                    return [3 /*break*/, 36];
+                case 36: return [2 /*return*/];
             }
         });
     });
 };
 var init_wallet = function (type, config, isTestnet) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, formatted, coins, i, coin, pubKeyInfo, e_12;
+        var tag, formatted, coins, i, coin, pubKeyInfo, e_13;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -947,9 +958,9 @@ var init_wallet = function (type, config, isTestnet) {
                     }
                     return [2 /*return*/, true];
                 case 3:
-                    e_12 = _a.sent();
-                    log.error(tag, "e: ", e_12);
-                    throw e_12;
+                    e_13 = _a.sent();
+                    log.error(tag, "e: ", e_13);
+                    throw e_13;
                 case 4: return [2 /*return*/];
             }
         });

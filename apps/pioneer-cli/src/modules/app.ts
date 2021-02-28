@@ -20,7 +20,6 @@ const vorpal = require("vorpal")();
 const bcrypt = require("bcryptjs");
 const prettyjson = require('prettyjson');
 
-
 import {
     prompt_fio_enable,
     prompt_password_enable,
@@ -223,8 +222,21 @@ export async function onStart() {
                 let resultCreate = await App.createWallet('software',wallet)
                 log.debug("result creating wallet: ",resultCreate)
             } else if (type === "pair hardware wallet") {
-                log.debug("pair hardware wallet!")
-                throw Error("TODO")
+                log.info("pair hardware wallet!")
+
+                if(info.features){
+                    //is locked?
+                    let pubkeysKeepkey = await Hardware.getPubkeys()
+
+                    //
+                    let resultPair = await App.pairKeepkey(info.features.deviceId,pubkeysKeepkey)
+                    log.info("resultPair: ",resultPair)
+                } else {
+                    //try to reconnect
+                    log.error(tag,"Device Connected to other host!")
+                }
+
+                //
             }
         }
 
@@ -361,9 +373,6 @@ export async function onRun() {
 
         let context = wallets[0]
 
-        let ethBalance = await context.getBalance("ETH")
-        log.debug("ethBalance: ",ethBalance)
-
         // let info = await context.getInfo()
         // log.debug("info: ",info)
 
@@ -391,8 +400,10 @@ export async function onRun() {
             info: "",
         };
 
+        //               view        controller
         await loadModule(contextView,context)
         await loadModule(Hardware,Hardware)
+        //await loadModule(App,App)
 
         vorpal
             .delimiter(prompt)

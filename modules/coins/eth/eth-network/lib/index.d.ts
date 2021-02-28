@@ -8,6 +8,13 @@ declare const log: any;
 declare let ETHPLORER_API_KEY: string;
 declare let web3: any;
 declare let BASE: number;
+declare let broadcast_transaction: (tx: any) => Promise<{
+    success: boolean;
+    blockIncluded: any;
+    block: any;
+    txid: any;
+    gas: any;
+}>;
 declare const get_balance_tokens: (address: string) => Promise<{
     balances: any;
     valueUsds: any;

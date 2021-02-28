@@ -33,18 +33,54 @@ let run_test = async function(){
         //     pioneerApi:false,
         // }
 
+        let watchWalletMetaMask = {
+            "WALLET_ID": "metamask-test",
+            "TYPE": "watch",
+            "CREATED": new Date().getTime(),
+            "VERSION": "0.1.3",
+            "WALLET_PUBLIC":{
+                "ETH":{
+                    "coin":"ETH",
+                    "network":"ETH",
+                    "script_type":"eth",
+                    "path":"m/44'/60'/0'/0/0",
+                    "long":"Ethereum",
+                    "address":"0x33b35c665496bA8E71B22373843376740401F106",
+                    "master":"0x33b35c665496bA8E71B22373843376740401F106",
+                    "type":"address",
+                    "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
+                }
+            }
+        }
+
+        let pubkeysMetamask = [
+            {
+                "coin":"ETH",
+                "network":"ETH",
+                "script_type":"eth",
+                "path":"m/44'/60'/0'/0/0",
+                "long":"Ethereum",
+                "address":"0x33b35c665496bA8E71B22373843376740401F106",
+                "master":"0x33b35c665496bA8E71B22373843376740401F106",
+                "type":"address",
+                "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
+            }
+        ]
+
+        //metamask
         let config = {
-            mnemonic: process.env['WALLET_MAINNET_DEV'],
-            username:walletName,
+            wallet: watchWalletMetaMask,
+            pubkeys:pubkeysMetamask,
+            username:"metamask"+walletName,
             pioneerApi:true,
             spec:urlSpec,
-            queryKey:walletName, //insecure
+            queryKey:"metamask"+walletName, //insecure
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
 
         //init wallet offline
-        let Wallet = new WalletClass('pioneer',config);
+        let Wallet = new WalletClass('metamask',config);
 
         let info = await Wallet.init()
         console.log("total Value: ",info.totalValueUsd)
@@ -52,6 +88,28 @@ let run_test = async function(){
         //await Wallet.forget()
 
         let info2 = await Wallet.getInfo()
+        console.log("info2: ",info2)
+
+        //pioneer
+        // let config = {
+        //     mnemonic: process.env['WALLET_MAINNET_DEV'],
+        //     username:walletName,
+        //     pioneerApi:true,
+        //     spec:urlSpec,
+        //     queryKey:walletName, //insecure
+        //     auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
+        //     authProvider:'shapeshift'
+        // }
+        //
+        // //init wallet offline
+        // let Wallet = new WalletClass('pioneer',config);
+        //
+        // let info = await Wallet.init()
+        // console.log("total Value: ",info.totalValueUsd)
+        //
+        // //await Wallet.forget()
+        //
+        // let info2 = await Wallet.getInfo()
         //console.log("info2: ",info2)
 
         /*
@@ -66,8 +124,8 @@ let run_test = async function(){
         // let balanceRUNE = await Wallet.getBalance("RUNE")
         // console.log("balanceRUNE: ",balanceRUNE)
         //
-        // let address = "tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh"
-        // let amount = "0.001"
+        // let address = "tthor1xz76k44xrm8cks8h0knnvx3njdzwrmrq48xhzn"
+        // let amount = "1"
         // let memo = "foobar"
         //
         // let transfer = {
@@ -87,18 +145,18 @@ let run_test = async function(){
         /*
                BTC
          */
-        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-
+        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
         //
-        let masterBTC = await Wallet.getMaster("BTC")
-        console.log("masterBTC: ",masterBTC)
-
-        let balanceBTC = await Wallet.getBalance("BTC")
-        console.log("balanceBTC: ",balanceBTC)
-
-        let amount = "0.0001"
-        let memo = null //Uses OP_RETURN outputs
-        let feeLevel = 5
+        // //
+        // let masterBTC = await Wallet.getMaster("BTC")
+        // console.log("masterBTC: ",masterBTC)
+        //
+        // let balanceBTC = await Wallet.getBalance("BTC")
+        // console.log("balanceBTC: ",balanceBTC)
+        //
+        // let amount = "0.0001"
+        // let memo = null //Uses OP_RETURN outputs
+        // let feeLevel = 5
 
         //TODO coin control
         //TODO offer input override
@@ -115,6 +173,7 @@ let run_test = async function(){
         //
         // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)
+
         /*
                BCH
          */
@@ -135,7 +194,7 @@ let run_test = async function(){
         // //TODO offer input override
         // let transfer = {
         //     coin:"BCH",
-        //     addressTo:"1F47NpJ2oqUCVJQF5zoN12G1hsoYGHCgXf",
+        //     addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
         //     amount,
         //     memo,
         //     feeLevel
@@ -143,6 +202,9 @@ let run_test = async function(){
         //
         // let transferSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                ATOM

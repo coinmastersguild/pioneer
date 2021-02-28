@@ -51,10 +51,10 @@ module.exports = function (ctx) {
 
       // transpile: false,
       env: {
-        URL_PIONEER_SPEC: ctx.dev
+        URL_PIONEER_SPEC: true
           ? JSON.stringify("http://127.0.0.1:9001/spec/swagger.json")
           : JSON.stringify("https://pioneers.dev/spec/swagger.json"),
-        URL_PIONEER_WS: ctx.dev
+        URL_PIONEER_WS: true
           ? JSON.stringify("ws://127.0.0.1:9001")
           : JSON.stringify("wss://pioneers.dev"),
         PIONEER_URL: JSON.stringify("pioneers.dev"),

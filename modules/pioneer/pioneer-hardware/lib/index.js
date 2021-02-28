@@ -58,7 +58,7 @@ var emitter = new EventEmitter();
 var wait = require('wait-promise');
 var sleep = wait.sleep;
 var usbDetect = require('@bithighlander/usb-detection');
-var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
+var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, normalize_pubkeys = _a.normalize_pubkeys;
 // import * as util from "./hardware"
 //keepkey
 var keyring = new hdwallet_core_1.Keyring;
@@ -69,6 +69,11 @@ var FIRMWARE_BASE_URL = "https://static.shapeshift.com/firmware/";
 var KEEPKEY_WALLET = {};
 var autoButton = true;
 var IS_CONNECTED = false;
+var KEEPKEY_SUPPORT = [
+    'BTC',
+    'BCH',
+    'DOGE'
+];
 module.exports = {
     start: function () {
         return start_hardware();
@@ -165,7 +170,7 @@ var get_lock_status = function () {
 };
 var display_pin = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, paths, result, e_2;
+        var tag, output, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -175,13 +180,20 @@ var display_pin = function () {
                     _a.trys.push([1, 4, , 5]);
                     output = {};
                     log.debug("KEEPKEY_WALLET: ", KEEPKEY_WALLET);
-                    paths = getPaths();
-                    paths = [paths[0]];
-                    return [4 /*yield*/, KEEPKEY_WALLET.getPublicKeys(paths)];
+                    //TODO HACK, better way to display then request pubkey?
+                    return [4 /*yield*/, get_pubkeys()
+                        // let paths = getPaths()
+                        // paths = [paths[0]]
+                        // const result = await KEEPKEY_WALLET.getPublicKeys(paths)
+                    ];
                 case 2:
-                    result = _a.sent();
+                    //TODO HACK, better way to display then request pubkey?
+                    _a.sent();
                     return [4 /*yield*/, KEEPKEY_WALLET.ping("hello")];
                 case 3:
+                    // let paths = getPaths()
+                    // paths = [paths[0]]
+                    // const result = await KEEPKEY_WALLET.getPublicKeys(paths)
                     output = _a.sent();
                     return [2 /*return*/, output];
                 case 4:
@@ -222,14 +234,14 @@ var enter_keepkey_pin = function (pin) {
 };
 var get_pubkeys = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, paths, pathsKeepkey, i, path, pathForKeepkey, result, e_3;
+        var tag, output, paths, pathsKeepkey, i, path, pathForKeepkey, result, pubkeys, keyedWallet, i, pubkey, features, walletId, watchWallet, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = " | get_pubkeys | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _a.trys.push([1, 5, , 6]);
                     output = {};
                     paths = getPaths();
                     pathsKeepkey = [];
@@ -242,41 +254,50 @@ var get_pubkeys = function () {
                         //why
                         pathForKeepkey.coin = 'Bitcoin';
                         pathForKeepkey.script_type = 'p2pkh';
-                        pathsKeepkey.push(pathForKeepkey);
+                        //showDisplay
+                        pathForKeepkey.showDisplay = false;
+                        if (KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0) {
+                            pathsKeepkey.push(pathForKeepkey);
+                        }
                     }
-                    return [4 /*yield*/, KEEPKEY_WALLET.getPublicKeys(paths)];
+                    log.debug("***** paths: ", pathsKeepkey);
+                    return [4 /*yield*/, KEEPKEY_WALLET.getPublicKeys(pathsKeepkey)];
                 case 2:
                     result = _a.sent();
                     log.debug("rawResult: ", result);
                     log.debug("rawResult: ", JSON.stringify(result));
-                    //rebuild
-                    // let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-                    // output.pubkeys = pubkeys
-                    // log.debug(tag,"pubkeys: ",pubkeys)
-                    //
-                    // //add feature info to pubkey
-                    // let keyedWallet:any = {}
-                    // for(let i = 0; i < pubkeys.length; i++){
-                    //     let pubkey = pubkeys[i]
-                    //     keyedWallet[pubkey.coin] = pubkey
-                    // }
-                    // let walletId = "keepkey-file-1"
-                    // let watchWallet = {
-                    //     "WALLET_ID": walletId,
-                    //     "TYPE": "watch",
-                    //     "CREATED": new Date().getTime(),
-                    //     "VERSION": "0.1.3",
-                    //     "WALLET_PUBLIC":keyedWallet,
-                    //     "PATHS":paths
-                    // }
-                    // log.debug(tag,"writePathPub: ",watchWallet)
-                    // output.wallet = watchWallet
-                    return [2 /*return*/, output];
+                    return [4 /*yield*/, normalize_pubkeys('keepkey', result, paths)];
                 case 3:
+                    pubkeys = _a.sent();
+                    output.pubkeys = pubkeys;
+                    log.debug(tag, "pubkeys: ", pubkeys);
+                    keyedWallet = {};
+                    for (i = 0; i < pubkeys.length; i++) {
+                        pubkey = pubkeys[i];
+                        keyedWallet[pubkey.coin] = pubkey;
+                    }
+                    return [4 /*yield*/, KEEPKEY_WALLET.features];
+                case 4:
+                    features = _a.sent();
+                    log.info(tag, "vender: ", features);
+                    log.info(tag, "vender: ", features.deviceId);
+                    walletId = "keepkey-pubkeys-" + features.deviceId;
+                    watchWallet = {
+                        "WALLET_ID": walletId,
+                        "TYPE": "watch",
+                        "CREATED": new Date().getTime(),
+                        "VERSION": "0.1.3",
+                        "WALLET_PUBLIC": keyedWallet,
+                        "PATHS": paths
+                    };
+                    log.debug(tag, "writePathPub: ", watchWallet);
+                    output.wallet = watchWallet;
+                    return [2 /*return*/, output];
+                case 5:
                     e_3 = _a.sent();
                     log.error(e_3);
                     throw e_3;
-                case 4: return [2 /*return*/];
+                case 6: return [2 /*return*/];
             }
         });
     });

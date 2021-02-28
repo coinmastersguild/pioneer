@@ -137,7 +137,8 @@ export enum HDWALLETS {
     'pioneer',
     'trezor',
     'keepkey',
-    'ledger'
+    'ledger',
+    'metamask'
 }
 
 export interface Transaction {
@@ -208,7 +209,7 @@ module.exports = class wallet {
     private getPaymentRequests: (pubkey: string) => Promise<void>;
     private fioEncryptRequestContent: (content: any) => Promise<void>;
     private fioDecryptRequestContent: (content: any) => Promise<void>;
-    private getFioAccountInfo: (pubkey: string) => Promise<void>;
+    private getFioAccountInfo: (username: string) => Promise<void>;
     // private validateFioUsername: (username: string) => Promise<void>;
     // private registerFioUsername: (pubkey: string, username: string) => Promise<void>;
     // private getStakes: (coin: string) => Promise<any>;
@@ -287,6 +288,14 @@ module.exports = class wallet {
                         break;
                     case HDWALLETS.keepkey:
                         log.debug(tag," Keepkey mode! ")
+                        if(!config.wallet) throw Error("Config is missing watch wallet!")
+                        if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
+                        this.PUBLIC_WALLET = config.wallet.WALLET_PUBLIC
+                        if(!config.pubkeys) throw Error("Config watch wallet missing pubkeys!")
+                        this.pubkeys = config.pubkeys
+                        break;
+                    case HDWALLETS.metamask:
+                        log.debug(tag," metamask mode! ")
                         if(!config.wallet) throw Error("Config is missing watch wallet!")
                         if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
                         this.PUBLIC_WALLET = config.wallet.WALLET_PUBLIC
@@ -461,8 +470,9 @@ module.exports = class wallet {
         this.getFioPubkey = function () {
             return this.PUBLIC_WALLET['FIO'].pubkey;
         }
-        this.getFioAccountInfo = function (username:string) {
-            return this.pioneerClient.instance.GetFioAccountInfo(username);
+        this.getFioAccountInfo = async function (username:string) {
+            let result = await this.pioneerClient.instance.GetFioAccountInfo(username);
+            return result.data
         }
         this.getFioAccountsByPubkey = async function (pubkey:string) {
             let accounts = await this.pioneerClient.instance.AccountsFromFioPubkey(pubkey)
@@ -750,7 +760,10 @@ module.exports = class wallet {
                     //list unspent
                     log.info(tag,"coin: ",coin)
                     log.info(tag,"xpub: ",this.PUBLIC_WALLET[coin].xpub)
-                    let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
+                    //From mongo
+                    // let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
+                    //From blockbook
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({coin,xpub:this.PUBLIC_WALLET[coin].xpub})
                     unspentInputs = unspentInputs.data
                     log.info(tag,"unspentInputs: ",unspentInputs)
 
@@ -774,8 +787,9 @@ module.exports = class wallet {
                     }
 
                     //get fee level in sat/byte
-                    let feeRate = await this.pioneerClient.instance.GetFee({coin})
-                    if(!feeRate) throw Error("Can not build TX without fee Rate!")
+                    let feeRate = 1
+                    // let feeRate = await this.pioneerClient.instance.GetFee({coin})
+                    // if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
 
                     //TODO input selection
@@ -804,7 +818,7 @@ module.exports = class wallet {
                         //get input info
                         let inputInfo = selectedResults.inputs[i]
                         let input = {
-                            addressNList:support.bip32ToAddressNList("m/44'/145'/0'/0/0"),
+                            addressNList:support.bip32ToAddressNList(inputInfo.path),
                             scriptType:"p2pkh",
                             amount:String(inputInfo.value),
                             vout:inputInfo.vout,
@@ -824,7 +838,7 @@ module.exports = class wallet {
                         if(outputInfo.address){
                             //not change
                             let output = {
-                                address:outputInfo.address,
+                                address:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
                                 addressType:"spend",
                                 scriptType:"p2wpkh",//TODO more types
                                 amount:String(outputInfo.value),
@@ -834,7 +848,7 @@ module.exports = class wallet {
                         } else {
                             //change
                             let output = {
-                                address:changeAddress,
+                                address:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
                                 addressType:"spend",
                                 scriptType:"p2pkh",//TODO more types
                                 amount:String(outputInfo.value),

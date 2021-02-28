@@ -683,6 +683,8 @@ export class pioneerPrivateController extends Controller {
                 let result = await pioneer.register(body.username, pubkeys)
                 log.debug(tag,"result: ",result)
 
+                //push
+
             } else {
                 //TODO
                 log.info("user found... not doing anything")

@@ -29,7 +29,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
-    'BNB' : require('@pioneer-platform/bnb-network'),
+    // 'BNB' : require('@pioneer-platform/bnb-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
@@ -61,7 +61,7 @@ let prefurredScripts:any = {
 let WT_COINS = ['BTC','LTC','DASH','DOGE','BCH','ETH','EOS','BNB','ATOM']
 let WT_PUBKEYS_FORMATTED:any
 
-let BLOCKBOOK_COINS = ['BTC']
+let BLOCKBOOK_COINS = ['BTC','BCH','LTC','DOGE']
 
 //prescisions
 const CURRENCY_DECIMALS:any = {
@@ -536,9 +536,10 @@ const get_balance = async function (coin:string) {
             let master = await get_address_master('RUNE')
             output = await networks[coin].getBalance(master)
         }else if(coin === 'BNB'){
-            let master = await get_address_master('BNB')
-            output = await networks[coin].getBalance(master)
-            output = output.free
+            // let master = await get_address_master('BNB')
+            // output = await networks[coin].getBalance(master)
+            // output = output.free
+            output = 0
         }else if(coin === 'EOS'){
             let master = await get_address_master('EOS')
             log.debug("master: ",master)
@@ -595,9 +596,11 @@ const get_wallet_info = async function () {
         //blockbook coins
         for(let i = 0; i < BLOCKBOOK_COINS.length; i++){
             let coin = BLOCKBOOK_COINS[i]
-            let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].xpub)
-            //get balance by xpub
-            balances[coin] = balance
+            if(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub){
+                let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].xpub)
+                //get balance by xpub
+                balances[coin] = balance
+            }
         }
 
         for(let i = 0; i < coins.length; i++){
@@ -759,40 +762,40 @@ const get_wallet_info = async function () {
             ETH asset info
 
           */
-        // try{
-        //     if(PUBLIC_WALLET['ETH']){
-        //         const balanceETH = await get_balance('ETH')
-        //
-        //         if(balanceETH){
-        //             masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
-        //             balances['ETH'] = balanceETH
-        //             valueUsds['ETH'] = ""
-        //             coinInfo['ETH'] = ""
-        //         }
-        //
-        //         //balances
-        //         log.debug(tag,"PUBLIC_WALLET: ",PUBLIC_WALLET['ETH'])
-        //         log.debug(tag,"eth master: ",PUBLIC_WALLET['ETH'].master)
-        //         let ethInfo = await networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)
-        //         log.debug(tag,"ethInfo: ",ethInfo)
-        //
-        //         //for each token use eth master
-        //         for(let i = 0; i < tokenData.tokens.length; i++){
-        //             let token:string = tokenData.tokens[i]
-        //             //only there if a balance
-        //             if(ethInfo.balances[token]){
-        //                 balances[token] = await get_balance(token)
-        //             } else {
-        //                 balances[token] = 0
-        //             }
-        //             masters[token] = await get_address_master('ETH')
-        //             valueUsds[token] = ethInfo.valueUsds[token]
-        //             coinInfo[token] = ethInfo.coinInfo[token]
-        //         }
-        //     }
-        // }catch(e){
-        //     console.error("Failed to get ETH TOKEN balances! for account: ",PUBLIC_WALLET['ETH'], e)
-        // }
+        try{
+            if(PUBLIC_WALLET['ETH']){
+                const balanceETH = await get_balance('ETH')
+
+                if(balanceETH){
+                    masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
+                    balances['ETH'] = balanceETH
+                    valueUsds['ETH'] = ""
+                    coinInfo['ETH'] = ""
+                }
+
+                //balances
+                log.debug(tag,"PUBLIC_WALLET: ",PUBLIC_WALLET['ETH'])
+                log.debug(tag,"eth master: ",PUBLIC_WALLET['ETH'].master)
+                let ethInfo = await networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)
+                log.debug(tag,"ethInfo: ",ethInfo)
+
+                //for each token use eth master
+                for(let i = 0; i < tokenData.tokens.length; i++){
+                    let token:string = tokenData.tokens[i]
+                    //only there if a balance
+                    if(ethInfo.balances[token]){
+                        balances[token] = await get_balance(token)
+                    } else {
+                        balances[token] = 0
+                    }
+                    masters[token] = await get_address_master('ETH')
+                    valueUsds[token] = ethInfo.valueUsds[token]
+                    coinInfo[token] = ethInfo.coinInfo[token]
+                }
+            }
+        }catch(e){
+            console.error("Failed to get ETH TOKEN balances! for account: ",PUBLIC_WALLET['ETH'], e)
+        }
 
         valueUsds = await coincap.valuePortfolio(balances)
         log.debug(tag,"valueUsds: ",valueUsds)

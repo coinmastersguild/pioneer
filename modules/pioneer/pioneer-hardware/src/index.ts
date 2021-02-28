@@ -22,7 +22,8 @@ let sleep = wait.sleep;
 const usbDetect = require('@bithighlander/usb-detection');
 
 let {
-    getPaths
+    getPaths,
+    normalize_pubkeys
 } = require('@pioneer-platform/pioneer-coins')
 
 
@@ -39,6 +40,12 @@ const FIRMWARE_BASE_URL = "https://static.shapeshift.com/firmware/"
 let KEEPKEY_WALLET:any = {}
 let autoButton = true;
 let IS_CONNECTED = false
+
+let KEEPKEY_SUPPORT = [
+    'BTC',
+    'BCH',
+    'DOGE'
+]
 
 module.exports = {
     start: function () {
@@ -127,9 +134,10 @@ let display_pin = async function () {
         log.debug("KEEPKEY_WALLET: ",KEEPKEY_WALLET)
 
         //TODO HACK, better way to display then request pubkey?
-        let paths = getPaths()
-        paths = [paths[0]]
-        const result = await KEEPKEY_WALLET.getPublicKeys(paths)
+        await get_pubkeys()
+        // let paths = getPaths()
+        // paths = [paths[0]]
+        // const result = await KEEPKEY_WALLET.getPublicKeys(paths)
 
         output = await KEEPKEY_WALLET.ping("hello");
 
@@ -182,36 +190,48 @@ let get_pubkeys = async function () {
             //why
             pathForKeepkey.coin = 'Bitcoin'
             pathForKeepkey.script_type = 'p2pkh'
-
-            pathsKeepkey.push(pathForKeepkey)
+            //showDisplay
+            pathForKeepkey.showDisplay = false
+            if(KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0){
+                pathsKeepkey.push(pathForKeepkey)
+            }
         }
 
-        const result = await KEEPKEY_WALLET.getPublicKeys(paths);
+        log.debug("***** paths: ",pathsKeepkey)
+        //NOTE: keepkey returns an ordered array.
+        //To build verbose pubkey info we must rebuild based on order
+        const result = await KEEPKEY_WALLET.getPublicKeys(pathsKeepkey);
         log.debug("rawResult: ",result)
         log.debug("rawResult: ",JSON.stringify(result))
 
+
         //rebuild
-        // let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-        // output.pubkeys = pubkeys
-        // log.debug(tag,"pubkeys: ",pubkeys)
-        //
-        // //add feature info to pubkey
-        // let keyedWallet:any = {}
-        // for(let i = 0; i < pubkeys.length; i++){
-        //     let pubkey = pubkeys[i]
-        //     keyedWallet[pubkey.coin] = pubkey
-        // }
-        // let walletId = "keepkey-file-1"
-        // let watchWallet = {
-        //     "WALLET_ID": walletId,
-        //     "TYPE": "watch",
-        //     "CREATED": new Date().getTime(),
-        //     "VERSION": "0.1.3",
-        //     "WALLET_PUBLIC":keyedWallet,
-        //     "PATHS":paths
-        // }
-        // log.debug(tag,"writePathPub: ",watchWallet)
-        // output.wallet = watchWallet
+        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+        output.pubkeys = pubkeys
+        log.debug(tag,"pubkeys: ",pubkeys)
+
+        //add feature info to pubkey
+        let keyedWallet:any = {}
+        for(let i = 0; i < pubkeys.length; i++){
+            let pubkey = pubkeys[i]
+            keyedWallet[pubkey.coin] = pubkey
+        }
+
+        let features = await KEEPKEY_WALLET.features;
+        log.info(tag,"vender: ",features)
+        log.info(tag,"vender: ",features.deviceId)
+
+        let walletId = "keepkey-pubkeys-"+features.deviceId
+        let watchWallet = {
+            "WALLET_ID": walletId,
+            "TYPE": "watch",
+            "CREATED": new Date().getTime(),
+            "VERSION": "0.1.3",
+            "WALLET_PUBLIC":keyedWallet,
+            "PATHS":paths
+        }
+        log.debug(tag,"writePathPub: ",watchWallet)
+        output.wallet = watchWallet
 
         return output
     } catch (e) {

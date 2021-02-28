@@ -84,6 +84,9 @@ module.exports = {
     getNonce: function (address) {
         return web3.eth.getTransactionCount(address, 'pending');
     },
+    getGasPrice: function () {
+        return web3.eth.getGasPrice();
+    },
     getTransaction: function (txid) {
         return get_transaction(txid);
     },
@@ -98,11 +101,46 @@ module.exports = {
     },
     getBalanceTokens: function (address) {
         return get_balance_tokens(address);
+    },
+    broadcast: function (tx) {
+        return broadcast_transaction(tx);
     }
+};
+var broadcast_transaction = function (tx) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, result, output, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | broadcast_transaction | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    if (!tx)
+                        throw Error("101: missing tx!");
+                    return [4 /*yield*/, web3.eth.sendSignedTransaction(tx)];
+                case 2:
+                    result = _a.sent();
+                    output = {
+                        success: true,
+                        blockIncluded: result.result,
+                        block: result.blockNumber,
+                        txid: result.transactionHash,
+                        gas: result.cumulativeGasUsed
+                    };
+                    return [2 /*return*/, output];
+                case 3:
+                    e_1 = _a.sent();
+                    log.error(tag, e_1);
+                    throw e_1;
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
 };
 var get_balance_tokens = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_1;
+        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -147,8 +185,8 @@ var get_balance_tokens = function (address) {
                     }
                     return [2 /*return*/, { balances: balances, valueUsds: valueUsds, coinInfo: coinInfo }];
                 case 3:
-                    e_1 = _a.sent();
-                    console.error(tag, e_1);
+                    e_2 = _a.sent();
+                    console.error(tag, e_2);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -157,7 +195,7 @@ var get_balance_tokens = function (address) {
 };
 var get_balance_token = function (address, token) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, abiInfo, ABI, metaData, contract, balance, e_2;
+        var tag, abiInfo, ABI, metaData, contract, balance, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -180,8 +218,8 @@ var get_balance_token = function (address, token) {
                     log.info(tag, "balance: ", balance);
                     return [2 /*return*/, balance / metaData.BASE];
                 case 3:
-                    e_2 = _a.sent();
-                    console.error(tag, e_2);
+                    e_3 = _a.sent();
+                    console.error(tag, e_3);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -190,7 +228,7 @@ var get_balance_token = function (address, token) {
 };
 var get_balance = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_3;
+        var tag, output, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -205,8 +243,8 @@ var get_balance = function (address) {
                     output = (_a.sent()) / BASE;
                     return [2 /*return*/, output];
                 case 3:
-                    e_3 = _a.sent();
-                    console.error(tag, e_3);
+                    e_4 = _a.sent();
+                    console.error(tag, e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -215,7 +253,7 @@ var get_balance = function (address) {
 };
 var get_transaction = function (txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, e_4;
+        var tag, output, _a, _b, e_5;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -240,8 +278,8 @@ var get_transaction = function (txid) {
                     _b.receipt = _c.sent();
                     return [2 /*return*/, output];
                 case 4:
-                    e_4 = _c.sent();
-                    console.error(tag, e_4);
+                    e_5 = _c.sent();
+                    console.error(tag, e_5);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -250,7 +288,7 @@ var get_transaction = function (txid) {
 };
 var check_online_status = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, networkName, _c, _d, e_5;
+        var tag, output, _a, _b, networkName, _c, _d, e_6;
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
@@ -306,8 +344,8 @@ var check_online_status = function () {
                     _d.syncing = _e.sent();
                     return [2 /*return*/, output];
                 case 6:
-                    e_5 = _e.sent();
-                    console.error(tag, e_5);
+                    e_6 = _e.sent();
+                    console.error(tag, e_6);
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }

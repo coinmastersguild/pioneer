@@ -43,15 +43,23 @@ const fs = require("fs-extra");
 const bcrypt = require("bcryptjs");
 const mkdirp = require("mkdirp");
 const log = require("@pioneer-platform/loggerdog")();
+const prettyjson = require('prettyjson');
+//@pioneer-platform/pioneer-events
+let Events = require("@pioneer-platform/pioneer-events");
+let { getPaths, get_address_from_xpub } = require('@pioneer-platform/pioneer-coins');
+let paths = getPaths();
 // @ts-ignore
 const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
 let Pioneer = require('@pioneer-platform/pioneer');
 let network = require("@pioneer-platform/pioneer-client");
+let Hardware = require("@pioneer-platform/pioneer-hardware");
+let wait = require('wait-promise');
+let sleep = wait.sleep;
 const ONLINE = [];
 let AUTH_TOKEN;
 let IS_LOGGED_IN = false;
-//TODO remove these
+let WALLET_CONTEXT = 0;
 let ACCOUNT = '';
 let WALLET_PUBLIC = {};
 let WALLET_PRIVATE = {};
@@ -70,7 +78,9 @@ let WALLET_VALUE_MAP = {};
 let CONTEXT_WALLET_SELECTED;
 //urlSpec
 let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'];
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'];
 let urlSpec = URL_PIONEER_SPEC;
+let KEEPKEY;
 //chingle
 // let opts:any = {}
 // var player = require('play-sound')(opts = {})
@@ -127,8 +137,8 @@ module.exports = {
         AUTH_TOKEN = auth;
         return true;
     },
-    pairKeepkey: function (deviceId, wallet) {
-        return pair_keepkey(deviceId, wallet);
+    pairKeepkey: function () {
+        return pair_keepkey();
     },
     getAccountInfo: function (asset, account) {
         return network.getAccountInfo(asset, account);
@@ -252,17 +262,18 @@ module.exports = {
     /*
         FIO commands
     */
-    //TODO get context on what wallet?
-    // getFioPubkey: function () {
-    //     console.log("pioneer: ",WALLETS_LOADED)
-    //     return WALLETS_LOADED[0].getFioPubkey();
-    // },
-    // getFioAccountsByPubkey: function (pubkey:string) {
-    //     return WALLETS_LOADED[0].getFioAccountsByPubkey(pubkey);
-    // },
-    // validateFioUsername: function (username:string) {
-    //     return WALLETS_LOADED[0].validateFioUsername(username);
-    // },
+    getFioAccountInfo: function (username) {
+        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
+    },
+    getFioPubkey: function () {
+        return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
+    },
+    getFioAccountsByPubkey: function (pubkey) {
+        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
+    },
+    validateFioUsername: function (username) {
+        return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
+    },
     registerFioUsername: function () {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -276,7 +287,10 @@ module.exports = {
             }
         });
     },
-    //open registeration
+    //TODO send payment request
+    // sendFioRequest: function (walletId:string,format:string) {
+    //     return send_fio_request(walletId, format);
+    // },
     //view all wallets
     //view current wallet
     //switch wallets
@@ -320,25 +334,11 @@ module.exports = {
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
     // },
-    // startBridge: function (password:string) {
-    //     return start_bridge(password);
-    // },
     getCoins: function () {
         return ONLINE;
     },
     viewSeed: function () {
         return WALLET_SEED;
-    },
-    // sendToAddress: function (coin:string,amount:string,address:string,memo:string) {
-    //   return send_to_address(coin,amount,address,memo);
-    // },
-    generateSeed: function () {
-        let randomBytesFunc = standardRandomBytesFunc;
-        const randomBytes = Buffer.from(randomBytesFunc(32), `hex`);
-        if (randomBytes.length !== 32)
-            throw Error(`Entropy has incorrect length`);
-        const mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`));
-        return mnemonic;
     },
 };
 let unlock_wallet = function (wallet, password) {
@@ -355,10 +355,28 @@ let unlock_wallet = function (wallet, password) {
         }
     });
 };
-let pair_keepkey = function (deviceId, wallet) {
+let pair_keepkey = function () {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | pair_keepkey | ";
         try {
+            KEEPKEY = yield Hardware.start();
+            let info = yield Hardware.info();
+            log.info("info: ", info);
+            let deviceId = info.features.deviceId;
+            //get lock status
+            let lockStatus = yield Hardware.isLocked();
+            log.info("lockStatus: ", lockStatus);
+            if (!lockStatus) {
+                //get pubkeys
+                let pubkeys = yield Hardware.getPubkeys();
+                console.log("pubkeys: ", prettyjson.render(pubkeys));
+            }
+            else {
+                //
+                log.info(tag, "Locked!");
+            }
+            let pubkeys = yield Hardware.getPubkeys();
+            console.log("pubkeys: ", prettyjson.render(pubkeys));
             //get config
             let config = pioneer_config_1.getConfig();
             log.debug(tag, "config: ", config);
@@ -374,16 +392,9 @@ let pair_keepkey = function (deviceId, wallet) {
                 paired.push(deviceId);
                 pioneer_config_1.updateConfig({ paired });
             }
-            //generate query key
-            const queryKey = "keepkey:" + deviceId + ":" + uuid_1.v4();
-            //
-            log.debug(tag, "queryKey: ", queryKey);
-            pioneer_config_1.updateConfig({ queryKey: queryKey });
-            // updateConfig({password: hash});
-            pioneer_config_1.updateConfig({ created: new Date().getTime() });
-            wallet.deviceId = deviceId;
+            pubkeys.deviceId = deviceId;
             //createWallet
-            yield create_wallet('hardware', wallet);
+            yield create_wallet('hardware', pubkeys);
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -773,6 +784,29 @@ let init_wallet = function (config) {
         let tag = TAG + " | init_wallet | ";
         try {
             let output = {};
+            //is keepkey connected?
+            //init wallet
+            if (config.keepkey) {
+                let KEEPKEY = yield Hardware.start();
+                KEEPKEY.events.on('event', function (event) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        log.info("EVENT: ", event);
+                        //attempt to start
+                        if (event.event === 'connect') {
+                            yield sleep(2000);
+                            //get info
+                            let info = yield Hardware.info();
+                            log.info(tag, "2info: ", info);
+                        }
+                        //TODO if no wallet found
+                        //TODO offer unlock
+                        //TODO collect pin
+                    });
+                });
+                //if hardware connected
+                let info = yield Hardware.info();
+                log.info("hardwre info: ", info);
+            }
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
             log.debug(tag, "wallets: ", wallets);
@@ -794,6 +828,23 @@ let init_wallet = function (config) {
             }
             if (!URL_PIONEER_SPEC)
                 URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json";
+            if (config.pioneerSocket) {
+                URL_PIONEER_SOCKET = config.pioneerSocket;
+            }
+            if (!URL_PIONEER_SOCKET)
+                URL_PIONEER_SOCKET = "wss://pioneers.dev";
+            if (!wallets) {
+                throw Error(" No wallets found! ");
+                //create wallet
+                // if(info.features){
+                //     let walletName = info.features.deviceId + ".wallet.json"
+                //     //if locked
+                //     //let isLocked = Hardware.is
+                //
+                // }
+                //hardware
+            }
+            //Load wallets if setup
             for (let i = 0; i < wallets.length; i++) {
                 let walletName = wallets[i];
                 log.debug(tag, "walletName: ", walletName);
@@ -828,6 +879,11 @@ let init_wallet = function (config) {
                     info.type = 'keepkey';
                     output.wallets.push(info);
                     log.debug(tag, "info: ", info.totalValueUsd);
+                    //write pubkeys
+                    let writePathPub = pioneer_config_1.pioneerPath + "/" + info.name + ".watch.wallet.json";
+                    log.info(tag, "writePathPub: ", writePathPub);
+                    let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
+                    log.info(tag, "writeSuccessPub: ", writeSuccessPub);
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                     WALLET_VALUE_MAP[configPioneer.username] = info.totalValueUsd;
@@ -859,44 +915,35 @@ let init_wallet = function (config) {
                         auth: process.env['SHAPESHIFT_AUTH'] || 'lol',
                         authProvider: 'shapeshift',
                         spec: URL_PIONEER_SPEC,
-                        queryKey: walletFile.username // TODO HACKY
+                        queryKey: config.queryKey
                     };
                     let wallet = new Pioneer('pioneer', configPioneer);
                     WALLETS_LOADED.push(wallet);
                     //init
                     let walletClient = yield wallet.init();
-                    //nerf socket
-                    // walletClient.on('blocks',function(block:any){
-                    //     log.debug("block: ",block)
-                    //     emitter.emit('blocks',block)
-                    // })
-                    //
-                    // walletClient.on('payments',function(payments:any){
-                    //     log.debug("payments: ",payments)
-                    //     emitter.emit('payments',payments)
-                    // })
-                    //
-                    // walletClient.on('balance',function(balance:any){
-                    //     log.debug("balance: ",balance)
-                    //     emitter.emit('balance',balance)
-                    // })
                     //info
                     let info = yield wallet.getInfo();
                     info.name = walletFile.username;
                     info.type = 'software';
                     output.wallets.push(info);
                     log.debug(tag, "info: ", info.totalValueUsd);
+                    let walletInfoPub = {
+                        WALLET_ID: walletFile.username,
+                        TYPE: 'watch',
+                        CREATED: new Date().getTime(),
+                        VERSION: "0.1.3",
+                        WALLET_PUBLIC: info.public,
+                        WALLET_PUBKEYS: info.pubkeys
+                    };
+                    let writePathPub = pioneer_config_1.pioneerPath + "/" + info.name + ".watch.wallet.json";
+                    log.info(tag, "writePathPub: ", writePathPub);
+                    let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
+                    log.info(tag, "writeSuccessPub: ", writeSuccessPub);
+                    //
+                    log.info(tag, "pubkeys: ", info);
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                     WALLET_VALUE_MAP[configPioneer.username] = info.totalValueUsd;
-                    //get masters
-                    //get masters
-                    // let coins = Object.keys(walletInfo.masters)
-                    // for(let j = 0; j < coins.length; j++){
-                    //     let coin = coins[j]
-                    //     let master = walletInfo.masters[coin]
-                    //     MASTER_MAP[master.toLowerCase()] = wallet.WALLET_ID
-                    // }
                 }
                 else {
                     throw Error("unhandled wallet type! " + walletFile.TYPE);
@@ -905,9 +952,15 @@ let init_wallet = function (config) {
             output.TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED;
             output.WALLET_VALUE_MAP = WALLET_VALUE_MAP;
             log.debug(tag, "TOTAL_VALUE_USD_LOADED: ", TOTAL_VALUE_USD_LOADED);
-            //aggrigate all events into 1 emmiter
-            //emmiter
-            // output.events = emitter
+            //sub all to events
+            let configEvents = {
+                username: config.username,
+                queryKey: config.queryKey,
+                pioneerWs: URL_PIONEER_SOCKET
+            };
+            //sub ALL events
+            let events = yield Events.init(configEvents);
+            output.events = events;
             return output;
         }
         catch (e) {

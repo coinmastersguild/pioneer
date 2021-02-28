@@ -148,6 +148,7 @@ var HDWALLETS;
     HDWALLETS[HDWALLETS["trezor"] = 1] = "trezor";
     HDWALLETS[HDWALLETS["keepkey"] = 2] = "keepkey";
     HDWALLETS[HDWALLETS["ledger"] = 3] = "ledger";
+    HDWALLETS[HDWALLETS["metamask"] = 4] = "metamask";
 })(HDWALLETS = exports.HDWALLETS || (exports.HDWALLETS = {}));
 function bech32ify(address, prefix) {
     var words = bech32.toWords(address);
@@ -186,15 +187,16 @@ module.exports = /** @class */ (function () {
                             tag = TAG + " | init_wallet | ";
                             _h.label = 1;
                         case 1:
-                            _h.trys.push([1, 18, , 19]);
+                            _h.trys.push([1, 19, , 20]);
                             log.debug(tag, "checkpoint");
                             pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring);
                             _a = +HDWALLETS[this.type];
                             switch (_a) {
                                 case HDWALLETS.pioneer: return [3 /*break*/, 2];
                                 case HDWALLETS.keepkey: return [3 /*break*/, 6];
+                                case HDWALLETS.metamask: return [3 /*break*/, 7];
                             }
-                            return [3 /*break*/, 7];
+                            return [3 /*break*/, 8];
                         case 2:
                             log.debug(tag, "checkpoint", " pioneer wallet detected! ");
                             if (!config.mnemonic && !config.wallet)
@@ -228,7 +230,7 @@ module.exports = /** @class */ (function () {
                                 }
                                 this.PUBLIC_WALLET[pubkey.coin] = pubkey;
                             }
-                            return [3 /*break*/, 8];
+                            return [3 /*break*/, 9];
                         case 6:
                             log.debug(tag, " Keepkey mode! ");
                             if (!config.wallet)
@@ -239,12 +241,23 @@ module.exports = /** @class */ (function () {
                             if (!config.pubkeys)
                                 throw Error("Config watch wallet missing pubkeys!");
                             this.pubkeys = config.pubkeys;
-                            return [3 /*break*/, 8];
-                        case 7: throw Error("108: WALLET not yet supported! " + type + " valid: " + HDWALLETS);
-                        case 8:
+                            return [3 /*break*/, 9];
+                        case 7:
+                            log.debug(tag, " metamask mode! ");
+                            if (!config.wallet)
+                                throw Error("Config is missing watch wallet!");
+                            if (!config.wallet.WALLET_PUBLIC)
+                                throw Error("Config watch wallet missing WALLET_PUBLIC!");
+                            this.PUBLIC_WALLET = config.wallet.WALLET_PUBLIC;
+                            if (!config.pubkeys)
+                                throw Error("Config watch wallet missing pubkeys!");
+                            this.pubkeys = config.pubkeys;
+                            return [3 /*break*/, 9];
+                        case 8: throw Error("108: WALLET not yet supported! " + type + " valid: " + HDWALLETS);
+                        case 9:
                             if (!this.pubkeys)
                                 throw Error("103: failed to init wallet! missing pubkeys!");
-                            if (!this.pioneerApi) return [3 /*break*/, 16];
+                            if (!this.pioneerApi) return [3 /*break*/, 17];
                             if (!this.spec)
                                 throw Error("102:  Api spec required! ");
                             if (!this.queryKey)
@@ -256,12 +269,12 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.pioneer.init(config.spec, {
                                     queryKey: config.queryKey
                                 })];
-                        case 9:
+                        case 10:
                             _d.pioneerClient = _h.sent();
                             _f = (_e = log).debug;
                             _g = ["baseUrl: "];
                             return [4 /*yield*/, this.pioneerClient.getBaseURL()];
-                        case 10:
+                        case 11:
                             _f.apply(_e, _g.concat([_h.sent()]));
                             register = {
                                 username: this.username,
@@ -275,35 +288,35 @@ module.exports = /** @class */ (function () {
                             log.debug("registerBody: ", register);
                             log.debug("this.pioneerClient: ", this.pioneerClient);
                             return [4 /*yield*/, this.pioneerClient.instance.Register(null, register)];
-                        case 11:
+                        case 12:
                             regsiterResponse = _h.sent();
                             log.debug("regsiterResponse: ", regsiterResponse);
                             return [4 /*yield*/, this.getInfo('')];
-                        case 12:
+                        case 13:
                             walletInfo = _h.sent();
                             log.debug("walletInfo: ", walletInfo);
                             this.WALLET_BALANCES = walletInfo.balances;
-                            if (!(walletInfo.masters['ETH'] === this.PUBLIC_WALLET['ETH'].master)) return [3 /*break*/, 13];
+                            if (!(walletInfo.masters['ETH'] === this.PUBLIC_WALLET['ETH'].master)) return [3 /*break*/, 14];
                             //
                             log.debug(tag, "Remote and local masters match!");
-                            return [3 /*break*/, 15];
-                        case 13:
+                            return [3 /*break*/, 16];
+                        case 14:
                             log.error(tag, "remote: ", walletInfo.masters['ETH']);
                             log.error(tag, "local: ", this.PUBLIC_WALLET['ETH'].master);
                             return [4 /*yield*/, this.pioneerClient.instance.Forget()];
-                        case 14:
+                        case 15:
                             _h.sent();
                             throw Error("Clearing pioneer! migration!");
-                        case 15: return [2 /*return*/, walletInfo];
-                        case 16:
+                        case 16: return [2 /*return*/, walletInfo];
+                        case 17:
                             log.debug(tag, "Offline mode!");
-                            _h.label = 17;
-                        case 17: return [3 /*break*/, 19];
-                        case 18:
+                            _h.label = 18;
+                        case 18: return [3 /*break*/, 20];
+                        case 19:
                             e_1 = _h.sent();
                             log.error(tag, e_1);
                             throw e_1;
-                        case 19: return [2 /*return*/];
+                        case 20: return [2 /*return*/];
                     }
                 });
             });
@@ -457,7 +470,17 @@ module.exports = /** @class */ (function () {
             return this.PUBLIC_WALLET['FIO'].pubkey;
         };
         this.getFioAccountInfo = function (username) {
-            return this.pioneerClient.instance.GetFioAccountInfo(username);
+            return __awaiter(this, void 0, void 0, function () {
+                var result;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.pioneerClient.instance.GetFioAccountInfo(username)];
+                        case 1:
+                            result = _a.sent();
+                            return [2 /*return*/, result.data];
+                    }
+                });
+            });
         };
         this.getFioAccountsByPubkey = function (pubkey) {
             return __awaiter(this, void 0, void 0, function () {
@@ -782,7 +805,7 @@ module.exports = /** @class */ (function () {
                             tag = TAG + " | build_transfer | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 29, , 30]);
+                            _a.trys.push([1, 30, , 31]);
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
                             amount = transaction.amount;
@@ -805,12 +828,12 @@ module.exports = /** @class */ (function () {
                                 'BCH',
                                 'LTC'
                             ];
-                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 7];
+                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 8];
                             log.info(tag, "Build UTXO tx! ", coin);
                             //list unspent
                             log.info(tag, "coin: ", coin);
                             log.info(tag, "xpub: ", this.PUBLIC_WALLET[coin].xpub);
-                            return [4 /*yield*/, this.pioneerClient.instance.GetUtxos({ coin: coin })];
+                            return [4 /*yield*/, this.pioneerClient.instance.ListUnspent({ coin: coin, xpub: this.PUBLIC_WALLET[coin].xpub })];
                         case 5:
                             unspentInputs = _a.sent();
                             unspentInputs = unspentInputs.data;
@@ -833,8 +856,7 @@ module.exports = /** @class */ (function () {
                                 };
                                 utxos.push(utxo);
                             }
-                            feeRate = 150 // satoshis per byte
-                            ;
+                            feeRate = 1;
                             amountSat = parseFloat(amount) * 100000000;
                             amountSat = parseInt(amountSat.toString());
                             log.info(tag, "amount satoshi: ", amountSat);
@@ -853,7 +875,7 @@ module.exports = /** @class */ (function () {
                             for (i = 0; i < selectedResults.inputs.length; i++) {
                                 inputInfo = selectedResults.inputs[i];
                                 input = {
-                                    addressNList: support.bip32ToAddressNList("m/44'/145'/0'/0/0"),
+                                    addressNList: support.bip32ToAddressNList(inputInfo.path),
                                     scriptType: "p2pkh",
                                     amount: String(inputInfo.value),
                                     vout: inputInfo.vout,
@@ -863,12 +885,14 @@ module.exports = /** @class */ (function () {
                                 };
                                 inputs.push(input);
                             }
-                            changeAddress = "bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3";
+                            return [4 /*yield*/, this.getMaster(coin)];
+                        case 6:
+                            changeAddress = _a.sent();
                             for (i = 0; i < selectedResults.outputs.length; i++) {
                                 outputInfo = selectedResults.outputs[i];
                                 if (outputInfo.address) {
                                     output = {
-                                        address: outputInfo.address,
+                                        address: "1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
                                         addressType: "spend",
                                         scriptType: "p2wpkh",
                                         amount: String(outputInfo.value),
@@ -878,7 +902,7 @@ module.exports = /** @class */ (function () {
                                 }
                                 else {
                                     output = {
-                                        address: changeAddress,
+                                        address: "1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
                                         addressType: "spend",
                                         scriptType: "p2pkh",
                                         amount: String(outputInfo.value),
@@ -902,7 +926,7 @@ module.exports = /** @class */ (function () {
                                     version: 1,
                                     locktime: 0,
                                 })];
-                        case 6:
+                        case 7:
                             res = _a.sent();
                             log.info(tag, "res: ", res);
                             //
@@ -911,30 +935,30 @@ module.exports = /** @class */ (function () {
                                 coin: coin,
                                 serialized: res.serializedTx
                             };
-                            return [3 /*break*/, 28];
-                        case 7:
-                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 16];
+                            return [3 /*break*/, 29];
+                        case 8:
+                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 17];
                             log.debug(tag, "checkpoint");
                             return [4 /*yield*/, this.getBalanceRemote('ETH')];
-                        case 8:
+                        case 9:
                             balanceEth = _a.sent();
                             log.debug(tag, "getBalanceRemote: ", balanceEth);
                             return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
-                        case 9:
+                        case 10:
                             nonceRemote = _a.sent();
                             nonceRemote = nonceRemote.data;
                             nonce = transaction.nonce || nonceRemote;
                             gas_limit = 80000 //TODO dynamic gas limit?
                             ;
                             return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
-                        case 10:
+                        case 11:
                             gas_price = _a.sent();
                             gas_price = gas_price.data;
                             log.debug(tag, "gas_price: ", gas_price);
                             gas_price = parseInt(gas_price);
                             gas_price = gas_price + 1000000000;
                             txParams = void 0;
-                            if (!(coin === "ETH")) return [3 /*break*/, 11];
+                            if (!(coin === "ETH")) return [3 /*break*/, 12];
                             amountNative = parseFloat(amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
                             txParams = {
@@ -946,8 +970,8 @@ module.exports = /** @class */ (function () {
                                 data: memo
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            return [3 /*break*/, 14];
-                        case 11:
+                            return [3 /*break*/, 15];
+                        case 12:
                             knownCoins = tokenData.tokens;
                             log.debug(tag, "knownCoins: ", knownCoins);
                             if (knownCoins.indexOf(coin) === -1)
@@ -955,7 +979,7 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.getBalanceRemote(coin)
                                 //verify token balance
                             ];
-                        case 12:
+                        case 13:
                             balanceToken = _a.sent();
                             //verify token balance
                             if (amount > balanceToken)
@@ -966,7 +990,7 @@ module.exports = /** @class */ (function () {
                             amountNative = Number(parseInt(String(amountNative)));
                             log.debug({ coin: coin, address: address, amountNative: amountNative });
                             return [4 /*yield*/, this.pioneerClient.instance.GetTransferData({ coin: coin, address: address, amount: amountNative })];
-                        case 13:
+                        case 14:
                             transfer_data = _a.sent();
                             transfer_data = transfer_data.data;
                             log.debug(tag, "transfer_data: ", transfer_data);
@@ -978,8 +1002,8 @@ module.exports = /** @class */ (function () {
                                 gasLimit: gas_limit
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            _a.label = 14;
-                        case 14:
+                            _a.label = 15;
+                        case 15:
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
                             log.debug(tag, "txParams: ", txParams);
@@ -995,18 +1019,18 @@ module.exports = /** @class */ (function () {
                             };
                             log.debug("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
-                        case 15:
+                        case 16:
                             rawTx = _a.sent();
                             rawTx.params = txParams;
-                            return [3 /*break*/, 28];
-                        case 16:
-                            if (!(coin === 'RUNE')) return [3 /*break*/, 20];
+                            return [3 /*break*/, 29];
+                        case 17:
+                            if (!(coin === 'RUNE')) return [3 /*break*/, 21];
                             amountNative = RUNE_BASE * parseFloat(amount);
                             amountNative = parseInt(amountNative.toString());
                             //get account number
                             log.info(tag, "addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'RUNE', address: addressFrom })];
-                        case 17:
+                        case 18:
                             masterInfo = _a.sent();
                             masterInfo = masterInfo.data;
                             log.info(tag, "masterInfo: ", masterInfo.data);
@@ -1055,7 +1079,7 @@ module.exports = /** @class */ (function () {
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
                                     showDisplay: false,
                                 })];
-                        case 18:
+                        case 19:
                             fromAddress = _a.sent();
                             log.info(tag, "fromAddressHDwallet: ", fromAddress);
                             log.info(tag, "fromAddress: ", addressFrom);
@@ -1075,7 +1099,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: unsigned,
                                 })];
-                        case 19:
+                        case 20:
                             res = _a.sent();
                             log.info("res: ", prettyjson.render(res));
                             log.debug("res*****: ", res);
@@ -1093,15 +1117,15 @@ module.exports = /** @class */ (function () {
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
-                            return [3 /*break*/, 28];
-                        case 20:
-                            if (!(coin === 'ATOM')) return [3 /*break*/, 24];
+                            return [3 /*break*/, 29];
+                        case 21:
+                            if (!(coin === 'ATOM')) return [3 /*break*/, 25];
                             amountNative = ATOM_BASE * parseFloat(amount);
                             amountNative = parseInt(amountNative.toString());
                             //get account number
                             log.info(tag, "addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'ATOM', address: addressFrom })];
-                        case 21:
+                        case 22:
                             masterInfo = _a.sent();
                             masterInfo = masterInfo.data;
                             log.info(tag, "masterInfo: ", masterInfo.data);
@@ -1150,7 +1174,7 @@ module.exports = /** @class */ (function () {
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
                                     showDisplay: false,
                                 })];
-                        case 22:
+                        case 23:
                             fromAddress = _a.sent();
                             log.info(tag, "fromAddressHDwallet: ", fromAddress);
                             log.info(tag, "fromAddress: ", addressFrom);
@@ -1170,7 +1194,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: unsigned,
                                 })];
-                        case 23:
+                        case 24:
                             res = _a.sent();
                             log.info("res: ", prettyjson.render(res));
                             log.debug("res*****: ", res);
@@ -1188,14 +1212,14 @@ module.exports = /** @class */ (function () {
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
-                            return [3 /*break*/, 28];
-                        case 24:
-                            if (!(coin === "BNB")) return [3 /*break*/, 27];
+                            return [3 /*break*/, 29];
+                        case 25:
+                            if (!(coin === "BNB")) return [3 /*break*/, 28];
                             //TODO move to tx builder module
                             //get account info
                             log.debug("addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: coin, address: addressFrom })];
-                        case 25:
+                        case 26:
                             accountInfo = _a.sent();
                             accountInfo = accountInfo.data;
                             log.debug("accountInfo: ", prettyjson.render(accountInfo));
@@ -1257,7 +1281,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: bnbTx,
                                 })];
-                        case 26:
+                        case 27:
                             signedTxResponse = _a.sent();
                             log.debug(tag, "**** signedTxResponse: ", signedTxResponse);
                             log.debug(tag, "**** signedTxResponse: ", JSON.stringify(signedTxResponse));
@@ -1267,8 +1291,8 @@ module.exports = /** @class */ (function () {
                                 txid: signedTxResponse.txid,
                                 serialized: signedTxResponse.serialized
                             };
-                            return [3 /*break*/, 28];
-                        case 27:
+                            return [3 /*break*/, 29];
+                        case 28:
                             if (coin === "EOS") {
                                 throw Error("666: EOS not supported yet!");
                                 // amount = getEosAmount(amount)
@@ -1371,13 +1395,13 @@ module.exports = /** @class */ (function () {
                             else {
                                 throw Error("109: coin not yet implemented! coin: " + coin);
                             }
-                            _a.label = 28;
-                        case 28: return [2 /*return*/, rawTx];
-                        case 29:
+                            _a.label = 29;
+                        case 29: return [2 /*return*/, rawTx];
+                        case 30:
                             e_6 = _a.sent();
                             log.error(tag, "e: ", e_6);
                             throw e_6;
-                        case 30: return [2 /*return*/];
+                        case 31: return [2 /*return*/];
                     }
                 });
             });

@@ -21,13 +21,14 @@ const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
-    'BNB' : require('@pioneer-platform/bnb-network'),
+    // 'BNB' : require('@pioneer-platform/bnb-network'),
     'RUNE' : require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
 }
 networks.ANY.init('full')
+networks.ETH.init()
 // usersDB.createIndex({id: 1}, {unique: true})
 // txsDB.createIndex({txid: 1}, {unique: true})
 // txsRawDB.createIndex({txhash: 1}, {unique: true})
@@ -187,8 +188,6 @@ export class pioneerPublicController extends Controller {
             throw new ApiError("error",503,"error: "+e.toString());
         }
     }
-
-
 
     /**
      *  get public user info
@@ -442,66 +441,6 @@ export class pioneerPublicController extends Controller {
     }
 
     /**
-     *  Retrieve accounts for FIO pubkey
-     */
-    @Get('/fio/accountsFromPubkey/{pubkey}')
-    public async accountsFromFioPubkey(pubkey:string) {
-        let tag = TAG + " | accountsFromFioPubkey | "
-        try{
-            let accounts = await networks['FIO'].getAccounts(pubkey)
-            return accounts
-        }catch(e){
-            let errorResp:Error = {
-                success:false,
-                tag,
-                e
-            }
-            log.error(tag,"e: ",{errorResp})
-            throw new ApiError("error",503,"error: "+e.toString());
-        }
-    }
-
-    /**
-     *  Retrieve public user info
-     */
-    @Get('/fio/getPubkey/{username}')
-    public async getFioPubkey(username:string) {
-        let tag = TAG + " | getFioPubkey | "
-        try{
-            let accounts = await networks['FIO'].getAccountAddress(username,"FIO")
-            return accounts.public_address
-        }catch(e){
-            let errorResp:Error = {
-                success:false,
-                tag,
-                e
-            }
-            log.error(tag,"e: ",{errorResp})
-            throw new ApiError("error",503,"error: "+e.toString());
-        }
-    }
-
-    /**
-     *  Retrieve public user info
-     */
-    @Get('/fio/accountInfo/{username}')
-    public async getFioAccountInfo(username:string) {
-        let tag = TAG + " | fioAccountInfo | "
-        try{
-            let accounts = await networks['FIO'].getAccountInfo(username)
-            return accounts
-        }catch(e){
-            let errorResp:Error = {
-                success:false,
-                tag,
-                e
-            }
-            log.error(tag,"e: ",{errorResp})
-            throw new ApiError("error",503,"error: "+e.toString());
-        }
-    }
-
-    /**
      *  Retrieve public user info
      */
     @Get('/eos/accountInfo/{username}')
@@ -550,6 +489,8 @@ export class pioneerPublicController extends Controller {
         try{
             //if cached
             //get last tx index
+            console.log("networks['ETH']: ",networks['ETH'])
+            console.log("address: ",address)
             let accounts = await networks['ETH'].getNonce(address)
             return accounts
         }catch(e){
@@ -652,6 +593,36 @@ export class pioneerPublicController extends Controller {
         try{
             let accounts = await networks['EOS'].getAccountsFromPubkey(pubkey)
             return accounts
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    //TODO
+    /**
+     * Mempool intake (blocknative)
+     *
+     */
+
+    @Post('/pushTx')
+    public async pushTx(@Body() body: any): Promise<any> {
+        let tag = TAG + " | pushTx | "
+        try{
+            log.info(tag,"mempool tx: ",body)
+
+            //push to redis
+            publisher.publish("mempool",JSON.stringify(body))
+
+            //save to mongo
+
+
+            return(true);
         }catch(e){
             let errorResp:Error = {
                 success:false,

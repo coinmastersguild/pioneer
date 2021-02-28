@@ -9,6 +9,10 @@ const sha256 = require("crypto-js/sha256")
 const bech32 = require(`bech32`)
 
 import { getNetwork } from "./networks";
+let {
+    getPaths,
+} = require('./paths')
+let paths = getPaths()
 
 enum HDWALLETS {
     'pioneer',
@@ -86,6 +90,62 @@ function createBech32Address(publicKey:any,prefix:string) {
     const address = Buffer.from(hash, `hex`)
     const cosmosAddress = bech32ify(address, prefix)
     return cosmosAddress
+}
+
+export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any) {
+    let tag = TAG + " | normalize_pubkeys | "
+    try {
+        log.info(tag,"input: ",{format,pubkeys,pathsIn})
+
+        //paths by symbol
+        let pathsBySymbol:any = {}
+        for(let i = 0; i < paths.length; i++){
+            let path = paths[i]
+            pathsBySymbol[path.symbol] = path
+        }
+        log.debug(tag,"pathsBySymbol: ",pathsBySymbol)
+
+        let output:any = []
+        if(format === 'keepkey'){
+            for(let i = 0; i < pubkeys.length; i++){
+                let pubkeyRaw = paths[i]
+                let pubkey:any = {}
+
+                //get "real" pubkey
+                pubkey = pathsBySymbol[pubkeyRaw.symbol]
+                log.debug(tag,"pubkey: ",pubkey)
+                pubkey.source = format
+                pubkey.pubkey = pubkeys[i].xpub
+                pubkey.xpub = pubkeys[i].xpub
+                let normalized:any = {}
+                //get "real" coin
+                normalized.note = pubkey.note
+                normalized.coin = pubkey.symbol
+                normalized.long = pubkey.symbol
+                normalized.network = pubkey.symbol
+                //normalized.path = addressNListToBIP32(pubkey.addressNList)
+                normalized.type = "xpub"
+                normalized.script_type = pubkey.script_type //TODO select script type?
+
+                //get address
+                let address = await get_address_from_xpub(pubkey.xpub,pubkey.script_type,pubkey.symbol,0,0,false)
+
+                normalized.pubkey = pubkey.xpub
+                normalized.xpub = pubkey.xpub
+                normalized.master = address //TODO
+                normalized.address = address //TODO
+
+                output.push(normalized)
+            }
+
+        } else {
+            throw Error(" unknown format! ")
+        }
+
+        return output
+    } catch (e) {
+        log.error(tag, "e: ", e)
+    }
 }
 
 export function get_address_from_xpub(xpub:string,scriptType:string,coin:string,account:number,index:number,isChange:boolean) {

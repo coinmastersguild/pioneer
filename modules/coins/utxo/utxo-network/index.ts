@@ -127,6 +127,7 @@ let BLOCKBOOK:any
 
 let coins = [
     'TBTC',
+    'BCH'
     //'BTC',
     //'DOGE','DASH','DGB','BCH','LTC'
 ]
@@ -134,7 +135,7 @@ let coins = [
 let nodeMap:any = {}
 for(let i = 0; i < coins.length; i++){
     let coin = coins[i]
-    let connString = 'https://user:pass@'+process.env[coin+'_RPC_HOST']
+    let connString = 'https://user:hunter2@'+process.env[coin+'_RPC_HOST']
     //console.log("connString: ",connString)
 
     nodeMap[coin] = new BitcoinRpc(connString);
@@ -281,6 +282,9 @@ let get_fee = async function(coin:string){
 let broadcast_transaction = async function(coin:string,tx:string){
     let tag = TAG + " | broadcast_transaction | "
     try{
+        //use nodes
+        // let txid = await nodeMap[coin].sendRawTransaction(tx)
+        // return txid
 
         let txid = await blockbook.broadcast(coin,tx)
         return txid

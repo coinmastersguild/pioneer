@@ -5,22 +5,38 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
+network.getInfo()
+    .then(function(resp){
+        console.log(resp)
+    })
+
 let address = process.env['TEST_ETH_MASTER']
 // network.sendToAddress(address,amount,asset,memo)
 //     .then(function(resp){
 //         console.log(resp)
 //     })
 
-network.getInfo()
+// network.getInfo()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+// //getBalance
+network.getBalance(address)
     .then(function(resp){
         console.log(resp)
     })
 
-// //getBalance
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getNonce(address)
+    .then(function(resp){
+        console.log(resp)
+    })
+
+network.getGasPrice(address)
+    .then(function(resp){
+        console.log(resp)
+    })
+
 //
 // //getBalanceAddress
 // network.getBalanceAddress(address)

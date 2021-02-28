@@ -157,11 +157,14 @@ var BLOCKBOOK;
 //if(!process.env['BTC_RPC_HOST'])
 var coins = [
     'TBTC',
+    'BCH'
+    //'BTC',
+    //'DOGE','DASH','DGB','BCH','LTC'
 ];
 var nodeMap = {};
 for (var i = 0; i < coins.length; i++) {
     var coin = coins[i];
-    var connString = 'https://user:pass@' + process.env[coin + '_RPC_HOST'];
+    var connString = 'https://user:hunter2@' + process.env[coin + '_RPC_HOST'];
     //console.log("connString: ",connString)
     nodeMap[coin] = new BitcoinRpc(connString);
 }

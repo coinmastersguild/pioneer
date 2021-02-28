@@ -28,7 +28,8 @@ export declare enum HDWALLETS {
     'pioneer' = 0,
     'trezor' = 1,
     'keepkey' = 2,
-    'ledger' = 3
+    'ledger' = 3,
+    'metamask' = 4
 }
 export interface Transaction {
     coin: string;

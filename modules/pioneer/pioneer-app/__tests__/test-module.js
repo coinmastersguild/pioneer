@@ -14,7 +14,7 @@ let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
 if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
-// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
 let password = process.env['WALLET_PASSWORD']
@@ -56,20 +56,32 @@ let run_test = async function(){
             App.updateConfig({temp:password});
             App.updateConfig({created: new Date().getTime()});
         } else {
+            //if force keepkey
 
-            // config.password = password
-            // console.log("config: ",config)
+            // let resultPair = await App.pairKeepkey()
+            // console.log("resultPair: ",resultPair)
+
+            config.password = password
+            console.log("config: ",config)
             config.username = username
 
             console.log("config: ",config)
             let resultInit = await App.init(config)
-            //console.log("resultInit: ",resultInit)
+            console.log("resultInit: ",resultInit)
 
             //get wallets
             let wallets = await App.getWallets()
             console.log("wallets: ",wallets)
 
             let context = wallets[0]
+
+            if(!context) throw Error("No Wallets on startup!")
+
+            /*
+                FIO
+             */
+            let fioPublicInfo = await context.getFioAccountInfo("highlander@scatter")
+            console.log("fioPublicInfo: ",fioPublicInfo)
 
             /*
                 BTC
@@ -87,7 +99,6 @@ let run_test = async function(){
                 //send
 
                 //TODO coin control
-
             }
 
 
@@ -115,13 +126,13 @@ let run_test = async function(){
                 console.log("atomMaster: ",atomMaster)
 
                 //send tx
-                let intent = {
-                    coin:"ATOM",
-                    address:"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj",
-                    amount:"0.001"
-                }
-                let txid = await context.sendToAddress(intent.coin, intent.address, intent.amount)
-                console.log("txid: ",txid)
+                // let intent = {
+                //     coin:"ATOM",
+                //     address:"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj",
+                //     amount:"0.001"
+                // }
+                // let txid = await context.sendToAddress(intent.coin, intent.address, intent.amount)
+                // console.log("txid: ",txid)
             }
 
 

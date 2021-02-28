@@ -51,6 +51,9 @@ module.exports = {
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
 	},
+	getGasPrice: function () {
+		return web3.eth.getGasPrice()
+	},
 	getTransaction: function (txid:string) {
 		return get_transaction(txid)
 	},
@@ -65,6 +68,30 @@ module.exports = {
 	},
 	getBalanceTokens: function (address:string) {
 		return get_balance_tokens(address)
+	},
+	broadcast:function (tx:any) {
+		return broadcast_transaction(tx);
+	}
+}
+
+let broadcast_transaction = async function(tx:any){
+	let tag = TAG + " | broadcast_transaction | "
+	try{
+		if(!tx) throw Error("101: missing tx!")
+		let result = await web3.eth.sendSignedTransaction(tx)
+
+		let output = {
+			success:true,
+			blockIncluded:result.result,
+			block:result.blockNumber,
+			txid:result.transactionHash,
+			gas:result.cumulativeGasUsed
+		}
+
+		return output
+	}catch(e){
+		log.error(tag,e)
+		throw e
 	}
 }
 
