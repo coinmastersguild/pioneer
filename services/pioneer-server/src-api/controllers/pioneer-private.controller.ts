@@ -25,21 +25,7 @@ utxosDB.createIndex({txid: 1}, {unique: true})
 const axios = require('axios')
 const network = require("@pioneer-platform/network")
 
-const networks:any = {
-    // 'ETH' : require('@pioneer-platform/eth-network'),
-    //TODO
-    // 'ATOM': require('@pioneer-platform/cosmos-network'),
-    // 'BNB' : require('@pioneer-platform/bnb-network'),
-    // 'EOS' : require('@pioneer-platform/eos-network'),
-    // 'ANY' : require('@pioneer-platform/anycoin-network'),
-    // 'FIO' : require('@pioneer-platform/fio-network'),
-}
 import { v4 as uuidv4 } from 'uuid';
-
-// usersDB.createIndex({username: 1}, {unique: true})
-// txsDB.createIndex({txid: 1}, {unique: true})
-// txsRawDB.createIndex({txhash: 1}, {unique: true})
-// pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 
 //globals
 

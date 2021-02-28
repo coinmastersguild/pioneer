@@ -44,7 +44,7 @@
     "@pioneer-platform/default-redis": "latest",
     "@pioneer-platform/fio-network": "latest",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/network": "latest",
+    "@pioneer-platform/network": "^6.3.63",
     "@pioneer-platform/redis-queue": "latest",
     "@pioneer-platform/thor-network": "^6.2.4",
     "@pioneer-platform/utxo-network": "^6.2.13",
