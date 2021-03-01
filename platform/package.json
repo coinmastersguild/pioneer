@@ -5,7 +5,7 @@
   "productName": "pioneer-platform",
   "author": "highlander <bithighlander@gmail.com>",
   "repository": {
-    "url": "https://github.com/bithighlander/pioneer-platform"
+    "url": "https://github.com/bithighlander/pioneer"
   },
   "scripts": {
     "npm": "npm i",
