@@ -1,7 +1,7 @@
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 require("dotenv").config({path:'../../../../../.env'})
-let network = require("../index")
+let network = require("../lib/index")
 
 
 //init local

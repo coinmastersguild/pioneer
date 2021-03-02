@@ -13,15 +13,15 @@
 
       <AppSwitcher />
 
-      <div v-if=keepkeyConnected>
-        <q-item clickable to="/keepkey" class="justify-center user-header" style="padding-top: 30px">
-          <q-img src="~assets/box-logo.png"></q-img>
-        </q-item>
-      </div>
+<!--      <div v-if=keepkeyConnected>-->
+<!--        <q-item clickable to="/keepkey" class="justify-center user-header" style="padding-top: 30px">-->
+<!--          <q-img src="~assets/box-logo.png"></q-img>-->
+<!--        </q-item>-->
+<!--      </div>-->
 
-      <q-item clickable to="/contacts" class="justify-center user-header" style="">
-        <q-icon size=md name="admin_panel_settings"></q-icon>
-      </q-item>
+<!--      <q-item clickable to="/contacts" class="justify-center user-header" style="">-->
+<!--        <q-icon size=md name="admin_panel_settings"></q-icon>-->
+<!--      </q-item>-->
 
       <q-item clickable class="user-header">
         <q-item-section avatar side>

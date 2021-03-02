@@ -6,48 +6,50 @@
     </div>
     <q-page class="q-pt-xs" >
 
-      <div id="content" style="width: 100%;">
-        <grid-layout v-if="show"
-                     :layout.sync="layout"
-                     :col-num="12"
-                     :row-height="30"
-                     :is-draggable="draggable"
-                     :is-resizable="resizable"
-                     :vertical-compact="true"
-                     :use-css-transforms="true"
-                     :responsive="responsive"
-        >
-          <grid-item v-for="item in layout"
-                     :key="item.i"
-                     :x="item.x"
-                     :y="item.y"
-                     :w="item.w"
-                     :h="item.h"
-                     :i="item.i"
-          >
-          <span class="text">
-            <q-card-section>
-              <q-card
-                class="my-card text-white"
-                style="background:#236303"
-              >
-<!--                <div v-if="item.icon">-->
-<!--                  <q-img height=50px width=50px src="../assets/GreenCompas.jpeg"></q-img>-->
+
+
+<!--      <div id="content" style="width: 100%;">-->
+<!--        <grid-layout v-if="show"-->
+<!--                     :layout.sync="layout"-->
+<!--                     :col-num="12"-->
+<!--                     :row-height="30"-->
+<!--                     :is-draggable="draggable"-->
+<!--                     :is-resizable="resizable"-->
+<!--                     :vertical-compact="true"-->
+<!--                     :use-css-transforms="true"-->
+<!--                     :responsive="responsive"-->
+<!--        >-->
+<!--          <grid-item v-for="item in layout"-->
+<!--                     :key="item.i"-->
+<!--                     :x="item.x"-->
+<!--                     :y="item.y"-->
+<!--                     :w="item.w"-->
+<!--                     :h="item.h"-->
+<!--                     :i="item.i"-->
+<!--          >-->
+<!--          <span class="text">-->
+<!--            <q-card-section>-->
+<!--              <q-card-->
+<!--                class="my-card text-white"-->
+<!--                style="background:#236303"-->
+<!--              >-->
+<!--&lt;!&ndash;                <div v-if="item.icon">&ndash;&gt;-->
+<!--&lt;!&ndash;                  <q-img height=50px width=50px src="../assets/GreenCompas.jpeg"></q-img>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--                <h4>{{item.name}}</h4>-->
+
+<!--                <div v-if="devMode">-->
+<!--                i:{{item.i}}-->
+<!--                x:{{item.x}}-->
+<!--                y:{{item.y}}-->
 <!--                </div>-->
-
-                <h4>{{item.name}}</h4>
-
-                <div v-if="devMode">
-                i:{{item.i}}
-                x:{{item.x}}
-                y:{{item.y}}
-                </div>
-              </q-card>
-            </q-card-section>
-          </span>
-          </grid-item>
-        </grid-layout>
-      </div>
+<!--              </q-card>-->
+<!--            </q-card-section>-->
+<!--          </span>-->
+<!--          </grid-item>-->
+<!--        </grid-layout>-->
+<!--      </div>-->
 
     </q-page>
 
@@ -98,8 +100,8 @@
       ...mapMutations(['addApp', 'removeApp']),
     },
     components: {
-      GridLayout: VueGridLayout.GridLayout,
-      GridItem: VueGridLayout.GridItem
+      // GridLayout: VueGridLayout.GridLayout,
+      // GridItem: VueGridLayout.GridItem
     }
   }
 </script>
