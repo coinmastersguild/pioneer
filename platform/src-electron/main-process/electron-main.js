@@ -13,9 +13,9 @@
 const TAG = ' | WALLET-MAIN | '
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification } from 'electron'
 //import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
-// const { menubar } = require('menubar');
-//const path = require('path');
-//const iconPath = path.join(__dirname, 'menu-icon-large.png');
+const { menubar } = require('menubar');
+const path = require('path');
+const iconPath = path.join(__dirname, 'menu-icon-large.png');
 
 //internal
 import {
@@ -65,26 +65,26 @@ if (process.env.PROD) {
 }
 
 let mainWindow
-// let previewWindow
+let previewWindow
 
 //TODO :pray: someday menubar again?
-// function createPreviewDashboard(){
-//   previewWindow = new BrowserWindow({
-//     width: 1000,
-//     height: 600,
-//     useContentSize: true,
-//     webPreferences: {
-//       // Change from /quasar.conf.js > electron > nodeIntegration;
-//       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-//       nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
-//       nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
-//
-//       // More info: /quasar-cli/developing-electron-apps/electron-preload-script
-//       // preload: path.resolve(__dirname, 'electron-preload.js')
-//     }
-//   })
-//   return previewWindow
-// }
+function createPreviewDashboard(){
+  previewWindow = new BrowserWindow({
+    width: 1000,
+    height: 600,
+    useContentSize: true,
+    webPreferences: {
+      // Change from /quasar.conf.js > electron > nodeIntegration;
+      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
+      nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
+      nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+
+      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+      // preload: path.resolve(__dirname, 'electron-preload.js')
+    }
+  })
+  return previewWindow
+}
 
 
 function createWindow () {
@@ -92,20 +92,20 @@ function createWindow () {
    * Menu Bar
    */
   //TODO crash (only on build) image could not be created from "blabla" menu-icon-large.png
-  // log.info("Creating window!")
-  // //TODO why this no work?
-  // // previewWindow = createPreviewDashboard()
-  // //
-  // const tray = new Tray(iconPath);
-  // const contextMenu = Menu.buildFromTemplate([
-  //   {
-  //     label: 'Open App', type: 'radio', click(){
-  //       console.log("Open App was clicked!")
-  //     }
-  //   }
-  // ])
-  // tray.setToolTip('This is my application.')
-  // tray.setContextMenu(contextMenu)
+  log.info("Creating window!")
+  //TODO why this no work?
+  previewWindow = createPreviewDashboard()
+
+  const tray = new Tray(iconPath);
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Open App', type: 'radio', click(){
+        console.log("Open App was clicked!")
+      }
+    }
+  ])
+  tray.setToolTip('This is my application.')
+  tray.setContextMenu(contextMenu)
 
   /**
    * Initial window options
