@@ -1016,7 +1016,7 @@ module.exports = class wallet {
                     let	chain_id = RUNE_CHAIN
 
                     if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
+                    if(!account_number) account_number = 0
 
                     //verify from address
                     let fromAddress = await this.WALLET.thorchainGetAddress({

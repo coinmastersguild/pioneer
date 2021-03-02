@@ -27,7 +27,7 @@ const axios = Axios.create({
 
 const log = require('@pioneer-platform/loggerdog')()
 
-let URL_MIDGARD = process.env['URL_MIDGARD'] || 'http://135.181.112.20:1317'
+let URL_MIDGARD = process.env['URL_THORNODE'] || 'http://135.181.112.20:1317'
 
 let BASE_THOR = 100000000
 
@@ -142,6 +142,7 @@ let get_account_info = async function(address:string){
     let tag = TAG + " | get_account_info | "
     try{
         //
+        console.log("URL ",URL_MIDGARD+'/auth/accounts/'+address)
         let txInfo = await axios({method:'GET',url: URL_MIDGARD+'/auth/accounts/'+address})
         log.info(tag,"txInfo: ",txInfo.data)
 
@@ -153,7 +154,7 @@ let get_account_info = async function(address:string){
 }
 
 let get_txs_by_address = async function(address:string){
-    let tag = TAG + " | get_balance | "
+    let tag = TAG + " | get_txs_by_address | "
     try{
         let output:any = []
 

@@ -33,54 +33,76 @@ let run_test = async function(){
         //     pioneerApi:false,
         // }
 
-        let watchWalletMetaMask = {
-            "WALLET_ID": "metamask-test",
-            "TYPE": "watch",
-            "CREATED": new Date().getTime(),
-            "VERSION": "0.1.3",
-            "WALLET_PUBLIC":{
-                "ETH":{
-                    "coin":"ETH",
-                    "network":"ETH",
-                    "script_type":"eth",
-                    "path":"m/44'/60'/0'/0/0",
-                    "long":"Ethereum",
-                    "address":"0x33b35c665496bA8E71B22373843376740401F106",
-                    "master":"0x33b35c665496bA8E71B22373843376740401F106",
-                    "type":"address",
-                    "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
-                }
-            }
-        }
+        // let watchWalletMetaMask = {
+        //     "WALLET_ID": "metamask-test",
+        //     "TYPE": "watch",
+        //     "CREATED": new Date().getTime(),
+        //     "VERSION": "0.1.3",
+        //     "WALLET_PUBLIC":{
+        //         "ETH":{
+        //             "coin":"ETH",
+        //             "network":"ETH",
+        //             "script_type":"eth",
+        //             "path":"m/44'/60'/0'/0/0",
+        //             "long":"Ethereum",
+        //             "address":"0x33b35c665496bA8E71B22373843376740401F106",
+        //             "master":"0x33b35c665496bA8E71B22373843376740401F106",
+        //             "type":"address",
+        //             "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
+        //         }
+        //     }
+        // }
+        //
+        // let pubkeysMetamask = [
+        //     {
+        //         "coin":"ETH",
+        //         "network":"ETH",
+        //         "script_type":"eth",
+        //         "path":"m/44'/60'/0'/0/0",
+        //         "long":"Ethereum",
+        //         "address":"0x33b35c665496bA8E71B22373843376740401F106",
+        //         "master":"0x33b35c665496bA8E71B22373843376740401F106",
+        //         "type":"address",
+        //         "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
+        //     }
+        // ]
+        //
+        // //metamask
+        // let config = {
+        //     wallet: watchWalletMetaMask,
+        //     pubkeys:pubkeysMetamask,
+        //     username:"metamask"+walletName,
+        //     pioneerApi:true,
+        //     spec:urlSpec,
+        //     queryKey:"metamask"+walletName, //insecure
+        //     auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
+        //     authProvider:'shapeshift'
+        // }
+        //
+        // //init wallet offline
+        // let Wallet = new WalletClass('metamask',config);
+        //
+        // let info = await Wallet.init()
+        // console.log("total Value: ",info.totalValueUsd)
+        //
+        // //await Wallet.forget()
+        //
+        // let info2 = await Wallet.getInfo()
+        // console.log("info2: ",info2)
 
-        let pubkeysMetamask = [
-            {
-                "coin":"ETH",
-                "network":"ETH",
-                "script_type":"eth",
-                "path":"m/44'/60'/0'/0/0",
-                "long":"Ethereum",
-                "address":"0x33b35c665496bA8E71B22373843376740401F106",
-                "master":"0x33b35c665496bA8E71B22373843376740401F106",
-                "type":"address",
-                "pubkey":"0x33b35c665496bA8E71B22373843376740401F106"
-            }
-        ]
-
-        //metamask
+        //pioneer
         let config = {
-            wallet: watchWalletMetaMask,
-            pubkeys:pubkeysMetamask,
-            username:"metamask"+walletName,
+            mnemonic: process.env['WALLET_TESTNET_DEV'],
+            username:walletName,
             pioneerApi:true,
             spec:urlSpec,
-            queryKey:"metamask"+walletName, //insecure
+            queryKey:walletName, //insecure
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
 
         //init wallet offline
-        let Wallet = new WalletClass('metamask',config);
+        let Wallet = new WalletClass('pioneer',config);
 
         let info = await Wallet.init()
         console.log("total Value: ",info.totalValueUsd)
@@ -90,56 +112,34 @@ let run_test = async function(){
         let info2 = await Wallet.getInfo()
         console.log("info2: ",info2)
 
-        //pioneer
-        // let config = {
-        //     mnemonic: process.env['WALLET_MAINNET_DEV'],
-        //     username:walletName,
-        //     pioneerApi:true,
-        //     spec:urlSpec,
-        //     queryKey:walletName, //insecure
-        //     auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
-        //     authProvider:'shapeshift'
-        // }
-        //
-        // //init wallet offline
-        // let Wallet = new WalletClass('pioneer',config);
-        //
-        // let info = await Wallet.init()
-        // console.log("total Value: ",info.totalValueUsd)
-        //
-        // //await Wallet.forget()
-        //
-        // let info2 = await Wallet.getInfo()
-        //console.log("info2: ",info2)
-
         /*
                THOR
          */
-        // console.log("info: ",prettyjson.render(info.public.RUNE))
-        //
-        // //ATOM
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "tthor1xz76k44xrm8cks8h0knnvx3njdzwrmrq48xhzn"
-        // let amount = "1"
-        // let memo = "foobar"
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
-        // console.log("txid: ",txid)
+        console.log("info: ",prettyjson.render(info.public.RUNE))
+
+        //ATOM
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        let address = "tthor1jvt443rvhq5h8yrna55yjysvhtju0el7ldnwwy"
+        let amount = "0.01"
+        let memo = "foobar"
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
+        console.log("txid: ",txid)
 
 
         /*

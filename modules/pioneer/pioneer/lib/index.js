@@ -1074,7 +1074,7 @@ module.exports = /** @class */ (function () {
                             if (!sequence)
                                 throw Error("112: Failed to get sequence");
                             if (!account_number)
-                                throw Error("113: Failed to get account_number");
+                                account_number = 0;
                             return [4 /*yield*/, this.WALLET.thorchainGetAddress({
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
                                     showDisplay: false,
