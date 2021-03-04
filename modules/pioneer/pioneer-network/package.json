@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/network",
-  "version": "6.3.65",
+  "version": "6.3.69",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,8 +20,8 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-core": "latest",
-    "@bithighlander/hdwallet-native": "latest",
+    "@bithighlander/hdwallet-core": "^1.9.1",
+    "@bithighlander/hdwallet-native": "^1.8.5",
     "@pioneer-platform/blockbook": "latest",
     "@pioneer-platform/cosmos-network": "latest",
     "@pioneer-platform/eth-network": "latest",
@@ -31,7 +31,7 @@
     "@pioneer-platform/thor-network": "latest",
     "@pioneer-platform/utxo-crypto": "latest",
     "@pioneer-platform/utxo-network": "latest",
-    "@shapeshiftoss/hdwallet-core": "latest",
+    "@shapeshiftoss/hdwallet-core": "^1.11.1",
     "@types/google-protobuf": "^3.7.4",
     "bech32": "^1.1.4",
     "bitcoinjs-lib": "^5.2.0",
@@ -39,7 +39,7 @@
     "ethereumjs-util": "^7.0.7",
     "fiosdk-offline": "^1.2.21",
     "fs-extra": "^9.0.1",
-    "google-protobuf": "^3.14.0",
+    "google-protobuf": "^3.15.4",
     "node-fetch": "^2.6.1",
     "open": "^7.3.1",
     "openapi-client-axios": "^3.7.8",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.39",
+    "@types/node": "^13.13.45",
     "@types/source-map-support": "^0.5.3",
     "jest": "^26.6.3",
     "onchange": "^7.1.0",

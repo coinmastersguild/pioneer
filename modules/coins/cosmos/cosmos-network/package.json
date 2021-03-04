@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cosmos-network",
-  "version": "6.2.7",
+  "version": "6.2.11",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
@@ -10,14 +10,15 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/nodes": "0.0.1",
+    "@pioneer-platform/nodes": "latest",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
     "wait-promise": "^0.4.1"
   },
   "description": "Cosmos events to redis pub/sub",
-  "main": "index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "keywords": [
     "cosmos"
   ],

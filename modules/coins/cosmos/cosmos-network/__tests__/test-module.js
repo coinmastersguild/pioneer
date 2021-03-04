@@ -42,11 +42,11 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.getAccount("cosmos1kyv3pn3mdk6q6yelhf4vyrza7a0lxgca077cze")
-    .then(function(resp){
-        console.log("resp: ",resp)
-        //console.log("resp: ",JSON.stringify(resp))
-    })
+// network.getAccount("cosmos1kyv3pn3mdk6q6yelhf4vyrza7a0lxgca077cze")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 network.getBalance("cosmos1kyv3pn3mdk6q6yelhf4vyrza7a0lxgca077cze")
     .then(function(resp){

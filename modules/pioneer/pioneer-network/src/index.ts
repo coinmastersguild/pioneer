@@ -785,12 +785,14 @@ const get_wallet_info = async function () {
                     //only there if a balance
                     if(ethInfo.balances[token]){
                         balances[token] = await get_balance(token)
+                        masters[token] = await get_address_master('ETH')
+                        valueUsds[token] = ethInfo.valueUsds[token]
+                        coinInfo[token] = ethInfo.coinInfo[token]
                     } else {
-                        balances[token] = 0
+                        //nerf dont show 0 balances
+                        //balances[token] = 0
                     }
-                    masters[token] = await get_address_master('ETH')
-                    valueUsds[token] = ethInfo.valueUsds[token]
-                    coinInfo[token] = ethInfo.coinInfo[token]
+
                 }
             }
         }catch(e){

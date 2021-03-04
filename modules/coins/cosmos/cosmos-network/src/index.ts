@@ -81,7 +81,7 @@ let sleep = wait.sleep;
 
 const ASSET = "ATOM"
 
-let nodes = require('../lib/index.js')
+let nodes = require('@pioneer-platform/nodes')
 let publicNode = nodes.getNode('cosmos','gaiad')
 
 let ATOM_BASE = 1000000
@@ -231,7 +231,7 @@ let get_balance = async function(address:string){
             }
         }
 
-        return accountInfo.data
+        return output
     }catch(e){
         throw e
     }
