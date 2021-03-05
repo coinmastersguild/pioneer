@@ -145,7 +145,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUsername'])
+    ...mapGetters(['getUsername','setTotal'])
   },
   mounted() {
     try {

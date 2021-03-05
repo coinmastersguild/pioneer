@@ -1,10 +1,11 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" style="min-width:333px">
     <q-header elevated>
       <q-toolbar>
 
         <q-toolbar-title>
-          Pioneer Browser Extension
+<!--          <q-img src="./assets/pioneer.jpeg"></q-img>-->
+          Pioneer BEX
         </q-toolbar-title>
 
         <div>v{{ $q.version }}</div>

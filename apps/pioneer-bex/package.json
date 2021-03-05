@@ -10,8 +10,12 @@
     "run-dev": "quasar dev -m bex"
   },
   "dependencies": {
+    "@peculiar/webcrypto": "^1.1.6",
+    "@pioneer-platform/loggerdog": "0.0.1",
+    "@pioneer-platform/pioneer": "^6.3.59",
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
+    "local-storage": "^2.0.0",
     "quasar": "^1.0.0",
     "vue-i18n": "^8.0.0"
   },
