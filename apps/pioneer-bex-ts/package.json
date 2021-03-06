@@ -16,6 +16,7 @@
     "@shapeshiftoss/hdwallet-core": "^1.11.1",
     "@shapeshiftoss/hdwallet-keepkey": "^1.11.1",
     "@shapeshiftoss/hdwallet-keepkey-webusb": "^1.11.1",
+    "@types/bytebuffer": "^5.0.42",
     "@types/w3c-web-usb": "^1.0.4",
     "core-js": "^3.6.5",
     "cryptr": "^6.0.2",

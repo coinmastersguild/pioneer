@@ -5,6 +5,11 @@
 </template>
 
 <script>
+
+import {
+  Keyring,
+} from "@shapeshiftoss/hdwallet-core";
+
 export default {
   name: 'PageIndex'
 }

@@ -56,13 +56,15 @@ import { isKeepKey } from "@shapeshiftoss/hdwallet-keepkey";
 
 const keyring = new Keyring();
 
-const keepkeyAdapter = WebUSBKeepKeyAdapter.useKeyring(keyring);
+
 
 import Vue from 'vue';
 import * as ls from "local-storage";
 const Pioneer = require('@pioneer-platform/pioneer')
-import { WebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-webusb";
+// import { WebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-webusb";
 // const Hardware = require("@pioneer-platform/pioneer-hardware")
+
+// const keepkeyAdapter = WebUSBKeepKeyAdapter.useKeyring(keyring);
 
 //TODO
 let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
@@ -97,12 +99,12 @@ export default Vue.extend({
   async mounted() {
     try {
 
-      try {
-        let resp = await keepkeyAdapter.initialize(undefined, /*tryDebugLink=*/ true, /*autoConnect=*/ false);
-        console.log("resp: ",resp)
-      } catch (e) {
-        console.error("Could not initialize KeepKeyAdapter", e);
-      }
+      // try {
+      //   let resp = await keepkeyAdapter.initialize(undefined, /*tryDebugLink=*/ true, /*autoConnect=*/ false);
+      //   console.log("resp: ",resp)
+      // } catch (e) {
+      //   console.error("Could not initialize KeepKeyAdapter", e);
+      // }
 
 
       let config = ls.get('config')
