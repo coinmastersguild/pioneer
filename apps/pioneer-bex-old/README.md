@@ -1,6 +1,6 @@
-# pioneer (pioneer-bex)
+# Pioneer Browser Extension (pioneer-bex)
 
-A simple client for the KeepKey device
+A simple multi-chain explorer
 
 ## Install the dependencies
 ```bash

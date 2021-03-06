@@ -5,11 +5,13 @@
 
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { configure } = require('quasar/wrappers');
 
-module.exports = function (/* ctx */) {
+module.exports = configure(function (/* ctx */) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
-    supportTS: false,
+    supportTS: true,
 
     // https://quasar.dev/quasar-cli/prefetch-feature
     // preFetch: true,
@@ -19,6 +21,7 @@ module.exports = function (/* ctx */) {
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
       
+      'i18n',
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -108,9 +111,9 @@ module.exports = function (/* ctx */) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: `pioneer`,
-        short_name: `pioneer`,
-        description: `A simple client for the KeepKey device`,
+        name: `Pioneer Browser Extension`,
+        short_name: `Pioneer Browser Extension`,
+        description: `A simple multi-chain explorer`,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
@@ -187,4 +190,4 @@ module.exports = function (/* ctx */) {
       }
     }
   }
-}
+});

@@ -1,8 +1,8 @@
 {
   "name": "pioneer-bex",
   "version": "0.0.1",
-  "description": "A simple client for the KeepKey device",
-  "productName": "pioneer",
+  "description": "A simple multi-chain explorer",
+  "productName": "Pioneer Browser Extension",
   "author": "highlander <bithighlander@gmail.com>",
   "private": true,
   "scripts": {
@@ -10,12 +10,23 @@
     "run-dev": "quasar dev -m bex"
   },
   "dependencies": {
+    "@pioneer-platform/loggerdog": "0.0.1",
+    "@pioneer-platform/pioneer": "^6.3.59",
     "@quasar/extras": "^1.0.0",
+    "@shapeshiftoss/hdwallet-core": "^1.11.1",
+    "@shapeshiftoss/hdwallet-keepkey": "^1.11.1",
+    "@shapeshiftoss/hdwallet-keepkey-webusb": "^1.11.1",
+    "@types/w3c-web-usb": "^1.0.4",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "cryptr": "^6.0.2",
+    "local-storage": "^2.0.0",
+    "quasar": "^1.0.0",
+    "vue-i18n": "^8.0.0",
+    "webcrypto-liner": "^1.2.3"
   },
   "devDependencies": {
-    "@quasar/app": "^2.0.0"
+    "@quasar/app": "^2.0.0",
+    "@types/node": "^10.17.15"
   },
   "browserslist": [
     "last 10 Chrome versions",

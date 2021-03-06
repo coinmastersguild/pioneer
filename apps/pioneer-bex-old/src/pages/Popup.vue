@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import ExampleComponent from 'components/OptionsComponent.vue';
   import SetupKeepkey from 'components/OptionsComponent.vue';
   import Vue from 'vue';

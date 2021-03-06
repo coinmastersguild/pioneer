@@ -4,6 +4,7 @@
       <q-toolbar>
 
         <q-toolbar-title>
+<!--          <q-img src="./assets/pioneer.jpeg"></q-img>-->
           Pioneer BEX
         </q-toolbar-title>
 
@@ -17,15 +18,15 @@
   </q-layout>
 </template>
 
-<script>
+<script lang="ts">
 
+import Vue from 'vue';
 
-export default {
+export default Vue.extend({
   name: 'MainLayout',
-  components: {  },
-  data () {
+  data() {
     return {
     }
   }
-}
+});
 </script>

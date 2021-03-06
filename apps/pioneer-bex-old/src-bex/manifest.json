@@ -1,6 +1,6 @@
 {
-  "name": "quasar-browser-extension",
-  "description": "pioneer web extension",
+  "name": "Pioneer",
+  "description": "A simple multi-chain explorer",
   "version": "1.0.0",
   "manifest_version": 2,
   "icons": {
