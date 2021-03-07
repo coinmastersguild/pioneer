@@ -10,14 +10,9 @@
 const TAG = " | Pioneer-sdk | "
 const log = require("@pioneer-platform/loggerdog")()
 
-//All paths
-//TODO make paths adjustable!
-let {
-    getPaths
-} = require('@pioneer-platform/pioneer-coins')
-let paths = getPaths()
+//Pioneer follows OpenAPI spec
+const Pioneer = require('openapi-client-axios').default;
 
-let App = require("@pioneer-platform/pioneer")
 
 export interface config {
     spec:string,
@@ -39,94 +34,60 @@ export interface config {
 
 module.exports = class wallet {
     private spec: string;
-    private pioneerApi: boolean | undefined;
+    private pioneerApi: any;
     private getInfo: (verbosity: string) => any;
-    private init: () => Promise<boolean>;
+    private init: () => Promise<any>;
     private config: config;
     private app: any;
-    constructor(type:any,config:config,isTestnet?:boolean) {
+    private createPairingCode: () => Promise<any>;
+    private queryKey: string;
+    private service: string;
+    constructor(spec:string,config:any) {
+        this.service = config.service || 'unknown'
         this.config = config
-        // todo remove init
-        // this.App = new App('metamask',config)
-        this.pioneerApi = config.pioneerApi
+        this.spec = spec
+        this.queryKey = config.queryKey
         this.spec = config.spec
         this.init = async function () {
-            let tag = TAG + " | init_sdk | "
-            try {
-                log.debug(tag, "checkpoint")
-
-                // @ts-ignore
-                let account = this.config?.addresses[0]
-
-                let watchWalletMetaMask = {
-                    "WALLET_ID": "metamask-test",
-                    "TYPE": "watch",
-                    "CREATED": new Date().getTime(),
-                    "VERSION": "0.1.3",
-                    "WALLET_PUBLIC":{
-                        "ETH":{
-                            "coin":"ETH",
-                            "network":"ETH",
-                            "script_type":"eth",
-                            "path":"m/44'/60'/0'/0/0",
-                            "long":"Ethereum",
-                            "address":account,
-                            "master":account,
-                            "type":"address",
-                            "pubkey":account
-                        }
+            let tag = TAG + " | init_wallet | "
+            try{
+                if(!this.queryKey) throw Error(" You must create an api key! ")
+                this.pioneerApi = new Pioneer({
+                    definition:spec,
+                    axiosConfigDefaults: {
+                        headers: {
+                            'Authorization': this.queryKey,
+                        },
                     }
-                }
-
-                let pubkeysMetamask = [
-                    {
-                        "coin":"ETH",
-                        "network":"ETH",
-                        "script_type":"eth",
-                        "path":"m/44'/60'/0'/0/0",
-                        "long":"Ethereum",
-                        "address":account,
-                        "master":account,
-                        "type":"address",
-                        "pubkey":account
-                    }
-                ]
-
-                let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-                let walletName = account
-
-                //metamask
-                let config = {
-                    wallet: watchWalletMetaMask,
-                    pubkeys:pubkeysMetamask,
-                    username:"metamask"+walletName,
-                    pioneerApi:true,
-                    spec:urlSpec,
-                    queryKey:"metamask"+walletName, //insecure
-                    auth:'lol',
-                    authProvider:'asdasd'
-                }
-
-                //get config from local storage
-
-                //if no config setup with metamask
-
-                this.app = new App('metamask',config);
-
-                let info = await this.app.init()
-
-                return info
-            } catch (e) {
-                log.error(tag, e)
+                });
+                await this.pioneerApi.init()
+                return this.pioneerApi
+            }catch(e){
+                log.error(tag,e)
                 throw e
             }
         }
         this.getInfo = async function () {
             let tag = TAG + " | getInfo | "
             try {
-                let walletInfo: any = {}
+                let result = await this.pioneerApi.instance.Info()
+                return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.createPairingCode = async function () {
+            let tag = TAG + " | createPairingCode | "
+            try {
+                //
+                let pairingBody:any = {
+                    service:this.service
+                }
+                // console.log(tag,"this.pioneerApi: ",this.pioneerApi)
+                // console.log(tag,"this.pioneerApi: ",this.pioneerApi.instance)
+                let result = this.pioneerApi.instance.CreatePairingCode(null, pairingBody)
 
-                return walletInfo
+                return result
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

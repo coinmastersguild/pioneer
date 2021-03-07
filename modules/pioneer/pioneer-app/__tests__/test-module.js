@@ -14,13 +14,13 @@ let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
 if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
 let password = process.env['WALLET_PASSWORD']
-let username = "test-user-554433"
+let username = process.env['TEST_USERNAME_1']
 
 //console.log("password: ",password)
 
@@ -70,6 +70,10 @@ let run_test = async function(){
             console.log("config: ",config)
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
+
+            //pair
+            let pairResult = await App.pair("IGJNVY")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()

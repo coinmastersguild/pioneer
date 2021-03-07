@@ -54,6 +54,7 @@ let init_client = async function (config:any) {
 
         //sub to websocket as user
         SOCKET = io.connect(URL_PIONEER_WS, {reconnect: true, rejectUnauthorized: false});
+
         //connect
         SOCKET.on('connect', function () {
             log.debug(tag,'Connected!');
@@ -62,7 +63,7 @@ let init_client = async function (config:any) {
 
         //sub to messages
         SOCKET.on('message', function (message:any) {
-            log.debug('message: ',message);
+            log.info('message: ',message);
             emitter.emit('message',message)
             //if payment request
             if(message.type === "payment_request"){
@@ -76,6 +77,8 @@ let init_client = async function (config:any) {
                 emitter.emit('message',message)
 
                 //else add to approve queue
+            } else {
+                //emit everything
             }
 
             //TODO blocks
@@ -85,6 +88,12 @@ let init_client = async function (config:any) {
             //balances
 
 
+        });
+
+
+        SOCKET.on('invocation', function (message:any) {
+            log.info('invocation: ',message);
+            emitter.emit('message',message)
         });
 
 

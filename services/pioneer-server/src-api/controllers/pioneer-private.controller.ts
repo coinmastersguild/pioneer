@@ -13,6 +13,9 @@ const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/de
 let connection  = require("@pioneer-platform/default-mongo")
 let queue = require("@pioneer-platform/redis-queue")
 
+var randomstring = require("randomstring");
+
+
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 let txsDB = connection.get('transactions')
@@ -71,6 +74,10 @@ interface GetNewAddressBody {
     coin:string
 }
 
+interface PairBody {
+    code:string
+}
+
 interface RegisterEosUsername {
     username:string
     pubkey:string
@@ -110,6 +117,11 @@ interface createApiKeyBody {
     data?:any
 }
 
+interface createPairingCodeBody {
+    service?:string
+    url?:string
+    data?:any
+}
 
 const short = require('short-uuid');
 
@@ -260,7 +272,7 @@ export class pioneerPrivateController extends Controller {
     }
 
     /**
-     Get the balances for a given username
+        Get the balances for a given username
      */
     @Get('/balance/{coin}')
     public async balance(coin:string,@Header('Authorization') authorization): Promise<any> {
@@ -318,13 +330,98 @@ export class pioneerPrivateController extends Controller {
         }
     }
 
-    /*
-    Account Info endpoint
+    /**
+     * Pair an sdk with app
+     * @param request This is an application pairing submission
+     */
 
+    @Post('/pair')
+    public async pair(@Body() body: PairBody, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | pair | "
+        try{
+            log.info(tag,"account: ",body)
+            log.info(tag,"Authorization: ",Authorization)
 
-*/
+            // get user info
+            let userInfo = await redis.hgetall(Authorization)
+            log.info(tag,"userInfo: ",userInfo)
+            //if no info throw
+            if(!userInfo) throw Error("User not known!")
+            if(!userInfo.username) throw Error("invalid user!")
 
-    //TODO get api keys
+            //get queryKey for code sdk user
+            let sdkQueryKey = await redis.hget(body.code,"pairing")
+            if(!sdkQueryKey) throw Error("unknown code!")
+            log.info(tag,"sdkQueryKey: ",sdkQueryKey)
+
+            let sdkUser = {
+                username:userInfo.username,
+                paired: new Date().getTime(),
+            }
+
+            //save queryKey code
+            let saveRedis = await redis.hmset(sdkQueryKey,sdkUser)
+
+            let output = {
+                user:sdkUser,
+                saveRedis
+            }
+
+            return(output);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
+     * Pair an sdk with app
+     * @param request This is an application pairing request
+     */
+
+    @Post('/createPairingCode')
+    public async createPairingCode(@Body() body: createPairingCodeBody, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | createPairingCode | "
+        try{
+            log.debug(tag,"account: ",body)
+            log.debug(tag,"Authorization: ",Authorization)
+
+            //is key known
+            let userInfo = await redis.hgetall(Authorization)
+                //if known return username (already paired)
+
+            //is service known
+                //if new service save to db
+
+            //create random code
+            let code = randomstring.generate(6)
+            code = code.toUpperCase()
+            log.info(tag,"code: ",code)
+
+            //save code to key
+            let saveRedis = await redis.hset(code,"pairing",Authorization)
+
+            let output = {
+                code,
+                saveRedis
+            }
+
+            return(output);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     /**
      * Create an api key

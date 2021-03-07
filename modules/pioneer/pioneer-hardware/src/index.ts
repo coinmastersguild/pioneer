@@ -9,7 +9,8 @@ import {
     Keyring,
     Events
 } from "@shapeshiftoss/hdwallet-core";
-const { NodeWebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-nodewebusb')
+// const { NodeWebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-nodewebusb')
+const { WebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-webusb')
 // import { TCPKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-tcp";
 // import { create as createHIDKeepKey } from "@bithighlander/hdwallet-keepkey";
 
@@ -368,7 +369,7 @@ const getLatestFirmwareData = async () => {
 let getDevice = async function(keyring: Keyring) {
     let tag = TAG + " | getDevice | "
     try {
-        const keepkeyAdapter = NodeWebUSBKeepKeyAdapter.useKeyring(keyring);
+        const keepkeyAdapter = WebUSBKeepKeyAdapter.useKeyring(keyring);
         let wallet = await keepkeyAdapter.pairDevice(undefined, true);
         if (wallet) {
             log.debug(tag,"Device found!")
@@ -380,6 +381,22 @@ let getDevice = async function(keyring: Keyring) {
         throw Error(e)
     }
 }
+
+// let getDevice = async function(keyring: Keyring) {
+//     let tag = TAG + " | getDevice | "
+//     try {
+//         const keepkeyAdapter = NodeWebUSBKeepKeyAdapter.useKeyring(keyring);
+//         let wallet = await keepkeyAdapter.pairDevice(undefined, true);
+//         if (wallet) {
+//             log.debug(tag,"Device found!")
+//             log.debug(tag,"wallet: ",wallet)
+//         }
+//         return wallet;
+//     } catch (e) {
+//         log.error(tag,"e: ",e)
+//         throw Error(e)
+//     }
+// }
 
 // async function createWallet(): Promise<HDWallet> {
 //     const keyring = new Keyring();

@@ -108,7 +108,7 @@ var init_client = function (config) {
                 });
                 //sub to messages
                 SOCKET.on('message', function (message) {
-                    log.debug('message: ', message);
+                    log.info('message: ', message);
                     emitter.emit('message', message);
                     //if payment request
                     if (message.type === "payment_request") {
@@ -120,9 +120,16 @@ var init_client = function (config) {
                         emitter.emit('message', message);
                         //else add to approve queue
                     }
+                    else {
+                        //emit everything
+                    }
                     //TODO blocks
                     //TODO payments
                     //balances
+                });
+                SOCKET.on('invocation', function (message) {
+                    log.info('invocation: ', message);
+                    emitter.emit('message', message);
                 });
                 return [2 /*return*/, emitter];
             }

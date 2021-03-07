@@ -127,6 +127,8 @@ let channel_history_max = 10;
 //redis-bridge
 subscriber.subscribe('blocks');
 
+
+
 //networks
 subscriber.subscribe('transactions:global:ETH');
 subscriber.subscribe('transactions:global:ATOM');
@@ -134,12 +136,14 @@ subscriber.subscribe('transactions:global:BNB');
 subscriber.subscribe('transactions:global:EOS');
 
 //TODO moveme (payments should go to user by userId)
+//private
 subscriber.subscribe('payments');
+subscriber.subscribe('invocations');
 
 subscriber.on('message', async function (channel, payloadS) {
     let tag = TAG + ' | publishToFront | ';
     try {
-        log.debug(tag,"event: ",payloadS)
+        log.info(tag,channel+ " event: ",payloadS)
         //Push event over socket
         if(channel === 'payments'){
             let payload = JSON.parse(payloadS)
@@ -147,9 +151,6 @@ subscriber.on('message', async function (channel, payloadS) {
             //for each username
             for(let i = 0; i < payload.accounts.length; i++){
                 let username = payload.accounts[i]
-                //expire account cache
-                let clearCache = await redis.del(username+":cache:walletInfo")
-
 
                 //if subscribed
                 if(usersByUsername[username]){
@@ -230,7 +231,25 @@ subscriber.on('message', async function (channel, payloadS) {
                     log.info(tag," Payment to offline user! ")
                 }
             }
-        } else {
+        } else if(channel === 'invocations'){
+            let invocation = JSON.parse(payloadS)
+            log.info(tag,"invocation: ",invocation)
+            //send to user
+            let username = invocation.username
+            if(!username) throw Error("username required!")
+
+            if(usersByUsername[username]){
+                let sockets = usersByUsername[username]
+                for(let i =0; i < sockets.length; i++){
+                    let socketid = sockets[i]
+                    if(globalSockets[socketid]){
+                        globalSockets[socketid].emit('message', invocation);
+                    }
+                }
+            } else {
+                throw Error("User is not connected!")
+            }
+        }else{
             //globals
             io.emit(channel, payloadS);
         }
@@ -265,11 +284,12 @@ io.on('connection', async function(socket){
     socket.on('disconnect', function(){
         let username = usersByUsername[socket.id]
         log.debug(tag,username+' disconnected');
+        redis.srem('online',username)
         //remove socket.id from username list
         if(usersByUsername[username])usersByUsername[username].splice(usersByUsername[username].indexOf(socket.id), 1);
         delete globalSockets[socket.id]
         delete usersBySocketId[socket.id]
-        redis.hincrby("globals","usersOnline",Object.keys(usersByUsername).length)
+        redis.hset("globals","usersOnline",Object.keys(usersByUsername).length)
     });
 
     socket.on('join', async function(msg){
@@ -279,15 +299,15 @@ io.on('connection', async function(socket){
 
         let queryKey = msg.queryKey
         if(queryKey){
-
             log.info(tag,"GIVEN: username: ",msg.username)
-
             //get pubkeyInfo
             let queryKeyInfo = await redis.hgetall(queryKey)
+            log.info(tag,"ACTUAL: username: ",queryKeyInfo.username)
             if(queryKeyInfo.username === msg.username){
                 usersBySocketId[socket.id] = msg.username
                 if(!usersByUsername[msg.username]) usersByUsername[msg.username] = []
                 usersByUsername[msg.username].push(socket.id)
+                redis.sadd('online',msg.username)
             } else {
                 log.error(tag,"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username)
             }

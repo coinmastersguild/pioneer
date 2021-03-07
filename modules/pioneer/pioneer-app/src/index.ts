@@ -30,6 +30,10 @@ const bcrypt = require("bcryptjs");
 const mkdirp = require("mkdirp");
 const log = require("@pioneer-platform/loggerdog")()
 const prettyjson = require('prettyjson');
+const queue = require('queue')
+
+const pendingQueue = queue({ pending: [] })
+const approvedQueue = queue({ approved: [] })
 
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events")
@@ -45,7 +49,7 @@ let paths = getPaths()
 import { Crypto } from "@peculiar/webcrypto";
 import * as native from "@bithighlander/hdwallet-native";
 let Pioneer = require('@pioneer-platform/pioneer')
-let network = require("@pioneer-platform/pioneer-client")
+let Network = require("@pioneer-platform/pioneer-client")
 let Hardware = require("@pioneer-platform/pioneer-hardware")
 
 let wait = require('wait-promise');
@@ -80,11 +84,13 @@ let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET']
 
 let urlSpec = URL_PIONEER_SPEC
 
-let KEEPKEY
-
+let KEEPKEY:any
+let network:any
 //chingle
 // let opts:any = {}
 // var player = require('play-sound')(opts = {})
+
+let AUTONOMOUS = false
 
 module.exports = {
     init: function (config: any) {
@@ -92,6 +98,23 @@ module.exports = {
     },
     initConfig: function (language: any) {
         return innitConfig(language);
+    },
+    getAutonomousStatus: function () {
+        return AUTONOMOUS;
+    },
+    autonomousOn: function () {
+        AUTONOMOUS = true
+        return AUTONOMOUS;
+    },
+    autonomousOff: function () {
+        AUTONOMOUS = false
+        return AUTONOMOUS;
+    },
+    getPending: function () {
+        return pendingQueue;
+    },
+    getAproved: function () {
+        return approvedQueue;
     },
     getConfig: function () {
         return getConfig();
@@ -142,12 +165,12 @@ module.exports = {
     pairKeepkey: function () {
         return pair_keepkey();
     },
-    getAccountInfo: function (asset:string,account:string) {
-        return network.getAccountInfo(asset,account);
-    },
-    getBlockCount: function (coin:string) {
-        return network.getAccountInfo(coin);
-    },
+    // getAccountInfo: function (asset:string,account:string) {
+    //     return network.getAccountInfo(asset,account);
+    // },
+    // getBlockCount: function (coin:string) {
+    //     return network.getAccountInfo(coin);
+    // },
     // login: function () {
     //     return login_shapeshift();
     // },
@@ -159,6 +182,9 @@ module.exports = {
     },
     getAccount: function () {
         return ACCOUNT;
+    },
+    pair: function (code:string) {
+        return pair_sdk_user(code);
     },
     forget: function () {
         return Pioneer.forget();
@@ -175,6 +201,7 @@ module.exports = {
         return [];
     },
     sendRequest: function (sender:string,receiver:string,amount:string,asset:string) {
+        //TODO use invoke
         let payment_request = {
             sender,
             receiver,
@@ -337,12 +364,12 @@ module.exports = {
     // listSinceLastblock: function (coin:string,block:string) {
     //     return pioneer.listSinceLastblock(coin,block);
     // },
-    // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
-    //     return send_to_address(coin,address,amount,memo);
-    // },
-    // broadcastTransaction: async function (coin:string,rawTx:string) {
-    //     return broadcast_transaction(coin,rawTx);
-    // },
+    sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
+        return send_to_address(coin,address,amount,memo);
+    },
+    broadcastTransaction: async function (coin:string,rawTx:string) {
+        return broadcast_transaction(coin,rawTx);
+    },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
@@ -379,6 +406,22 @@ module.exports = {
 
 };
 
+let pair_sdk_user = async function (code:string) {
+    let tag = " | unlock_wallet | ";
+    try {
+
+        //send code
+
+        log.info(tag,"network: ",network)
+        log.info(tag,"network: ",network.instance)
+        let result = await network.instance.Pair(null,{code})
+
+        return result.data
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
+};
 
 let unlock_wallet = async function (wallet:any,password:string) {
     let tag = " | unlock_wallet | ";
@@ -684,9 +727,9 @@ let send_to_address = async function (coin:string,address:string,amount:string,m
     try {
         coin = coin.toUpperCase()
 
-
+        log.info(tag,"Pioneer: ",Pioneer)
         log.debug("params: ",{coin,address,amount})
-        let rawTx = await Pioneer.sendToAddress(coin,address,amount, null)
+        let rawTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin,address,amount, null)
         log.debug(tag,"rawTx: ", rawTx)
 
         //open txid?
@@ -858,6 +901,8 @@ let create_wallet = async function (type:string,wallet:any) {
 let init_wallet = async function (config:any) {
     let tag = TAG+" | init_wallet | ";
     try {
+
+
         let output:any = {}
         //is keepkey connected?
 
@@ -905,6 +950,11 @@ let init_wallet = async function (config:any) {
             URL_PIONEER_SOCKET = config.pioneerSocket
         }
         if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
+
+        network = new Network(URL_PIONEER_SPEC,{
+            queryKey:config.queryKey
+        })
+        network = await network.init()
 
         if(!wallets){
             throw Error(" No wallets found! ")
@@ -1045,6 +1095,24 @@ let init_wallet = async function (config:any) {
 
         //sub ALL events
         let events = await Events.init(configEvents)
+
+        //on blocks update lastBlockHeight
+
+        //on payments update balances
+
+        //on on invocations add to queue
+        events.on('message', async function(request:any) {
+            console.log("message: ", request)
+
+            // @ts-ignore
+            let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
+            console.log("txid: ", txid)
+
+            //update status on server
+
+            //add to history
+        })
+
         output.events = events
         return output
     } catch (e) {

@@ -44,6 +44,9 @@ const bcrypt = require("bcryptjs");
 const mkdirp = require("mkdirp");
 const log = require("@pioneer-platform/loggerdog")();
 const prettyjson = require('prettyjson');
+const queue = require('queue');
+const pendingQueue = queue({ pending: [] });
+const approvedQueue = queue({ approved: [] });
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events");
 let { getPaths, get_address_from_xpub } = require('@pioneer-platform/pioneer-coins');
@@ -52,7 +55,7 @@ let paths = getPaths();
 const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
 let Pioneer = require('@pioneer-platform/pioneer');
-let network = require("@pioneer-platform/pioneer-client");
+let Network = require("@pioneer-platform/pioneer-client");
 let Hardware = require("@pioneer-platform/pioneer-hardware");
 let wait = require('wait-promise');
 let sleep = wait.sleep;
@@ -81,15 +84,34 @@ let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'];
 let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'];
 let urlSpec = URL_PIONEER_SPEC;
 let KEEPKEY;
+let network;
 //chingle
 // let opts:any = {}
 // var player = require('play-sound')(opts = {})
+let AUTONOMOUS = false;
 module.exports = {
     init: function (config) {
         return init_wallet(config);
     },
     initConfig: function (language) {
         return pioneer_config_1.innitConfig(language);
+    },
+    getAutonomousStatus: function () {
+        return AUTONOMOUS;
+    },
+    autonomousOn: function () {
+        AUTONOMOUS = true;
+        return AUTONOMOUS;
+    },
+    autonomousOff: function () {
+        AUTONOMOUS = false;
+        return AUTONOMOUS;
+    },
+    getPending: function () {
+        return pendingQueue;
+    },
+    getAproved: function () {
+        return approvedQueue;
     },
     getConfig: function () {
         return pioneer_config_1.getConfig();
@@ -140,12 +162,12 @@ module.exports = {
     pairKeepkey: function () {
         return pair_keepkey();
     },
-    getAccountInfo: function (asset, account) {
-        return network.getAccountInfo(asset, account);
-    },
-    getBlockCount: function (coin) {
-        return network.getAccountInfo(coin);
-    },
+    // getAccountInfo: function (asset:string,account:string) {
+    //     return network.getAccountInfo(asset,account);
+    // },
+    // getBlockCount: function (coin:string) {
+    //     return network.getAccountInfo(coin);
+    // },
     // login: function () {
     //     return login_shapeshift();
     // },
@@ -157,6 +179,9 @@ module.exports = {
     },
     getAccount: function () {
         return ACCOUNT;
+    },
+    pair: function (code) {
+        return pair_sdk_user(code);
     },
     forget: function () {
         return Pioneer.forget();
@@ -173,6 +198,7 @@ module.exports = {
         return [];
     },
     sendRequest: function (sender, receiver, amount, asset) {
+        //TODO use invoke
         let payment_request = {
             sender,
             receiver,
@@ -324,12 +350,16 @@ module.exports = {
     // listSinceLastblock: function (coin:string,block:string) {
     //     return pioneer.listSinceLastblock(coin,block);
     // },
-    // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
-    //     return send_to_address(coin,address,amount,memo);
-    // },
-    // broadcastTransaction: async function (coin:string,rawTx:string) {
-    //     return broadcast_transaction(coin,rawTx);
-    // },
+    sendToAddress: function (coin, address, amount, memo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return send_to_address(coin, address, amount, memo);
+        });
+    },
+    broadcastTransaction: function (coin, rawTx) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return broadcast_transaction(coin, rawTx);
+        });
+    },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
@@ -340,6 +370,22 @@ module.exports = {
     viewSeed: function () {
         return WALLET_SEED;
     },
+};
+let pair_sdk_user = function (code) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | unlock_wallet | ";
+        try {
+            //send code
+            log.info(tag, "network: ", network);
+            log.info(tag, "network: ", network.instance);
+            let result = yield network.instance.Pair(null, { code });
+            return result.data;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
 };
 let unlock_wallet = function (wallet, password) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -621,8 +667,9 @@ let send_to_address = function (coin, address, amount, memo) {
         let tag = " | send_to_address | ";
         try {
             coin = coin.toUpperCase();
+            log.info(tag, "Pioneer: ", Pioneer);
             log.debug("params: ", { coin, address, amount });
-            let rawTx = yield Pioneer.sendToAddress(coin, address, amount, null);
+            let rawTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin, address, amount, null);
             log.debug(tag, "rawTx: ", rawTx);
             //open txid?
             //broadcast
@@ -833,6 +880,10 @@ let init_wallet = function (config) {
             }
             if (!URL_PIONEER_SOCKET)
                 URL_PIONEER_SOCKET = "wss://pioneers.dev";
+            network = new Network(URL_PIONEER_SPEC, {
+                queryKey: config.queryKey
+            });
+            network = yield network.init();
             if (!wallets) {
                 throw Error(" No wallets found! ");
                 //create wallet
@@ -960,6 +1011,19 @@ let init_wallet = function (config) {
             };
             //sub ALL events
             let events = yield Events.init(configEvents);
+            //on blocks update lastBlockHeight
+            //on payments update balances
+            //on on invocations add to queue
+            events.on('message', function (request) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    console.log("message: ", request);
+                    // @ts-ignore
+                    let txid = yield send_to_address(request.coin, request.address, request.amount, request.memo);
+                    console.log("txid: ", txid);
+                    //update status on server
+                    //add to history
+                });
+            });
             output.events = events;
             return output;
         }
