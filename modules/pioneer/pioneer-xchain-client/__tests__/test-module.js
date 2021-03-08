@@ -17,7 +17,17 @@ let run_test = async function(){
     try{
         console.log("*** Running test module ***")
 
+        //enums blockchains supported
+        let blockchains = [
+            'bitcoin',
+            'ethereum',
+            'thorchain',
+            'binance'
+        ]
+
         let config = {
+            network:'testnet',
+            blockchain:blockchains[0],
             queryKey,
             username,
             spec:urlSpec
@@ -30,18 +40,19 @@ let run_test = async function(){
 
         console.log(app)
 
-        //is paired?
-        let info = await app.getInfo()
-        console.log("info: ",info)
+        let network = app.getNetwork()
+        console.log("network: ",network)
 
-        // if(!info){
-        //     console.log("Not paired! ")
-        //     //create pairing code
-        //     let code = await app.createPairingCode()
-        //     console.log("code: ",code)
-        // }
+        let explorerUrl = app.getExplorerUrl()
+        console.log("explorerUrl: ",explorerUrl)
 
+        let explorerAddressUrl = app.getExplorerAddressUrl()
+        console.log("explorerAddressUrl: ",explorerAddressUrl)
 
+        let explorerTxUrl = app.getExplorerTxUrl()
+        console.log("explorerTxUrl: ",explorerTxUrl)
+
+        //
 
     }catch(e){
         console.error(e)

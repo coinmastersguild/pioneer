@@ -44,6 +44,126 @@ enum HDWALLETS {
 // const segwitCoins = ["Bitcoin", "Testnet", "BitcoinGold", "Litecoin"];
 //
 
+export function getExplorerUrl(network:string,token:string, testnet:boolean){
+    if(testnet){
+        let href
+        switch (network) {
+            case 'bitcoin':
+                href = 'https://blockstream.info/testnet'
+                break
+            case 'ethereum':
+                href = 'https://ropsten.etherscan.io/'
+                break
+        }
+        return href
+    }else{
+        let href
+        switch (network) {
+            case 'bitcoin':
+                href = 'https://www.blockchain.com/'
+                break
+            case 'ethereum':
+                href = 'https://etherscan.io'
+                break
+            case 'bitcoinCash':
+                href = 'https://blockchair.com/bitcoin-cash'
+                break
+            case 'binance':
+                href = 'https://explorer.binance.org'
+                break
+            case 'cosmos':
+                href = 'https://www.mintscan.io'
+                break
+            case 'dash':
+                return `https://chainz.cryptoid.info/dash`
+            case 'doge':
+                return `https://dogechain.info`
+        }
+        return href
+    }
+}
+
+export function getExplorerAddressUrl(address:string,network:string,token:string, testnet:boolean){
+    if(testnet){
+        let href
+        switch (network) {
+            case 'bitcoin':
+                href = 'https://blockstream.info/testnet/address/'+address
+                break
+            case 'ethereum':
+                href = 'https://ropsten.etherscan.io/address/'+address
+                break
+        }
+        return href
+    }else{
+        let href
+        switch (network) {
+            //TODO
+            // case 'bitcoin':
+            //     href = 'https://www.blockchain.com/'
+            //     break
+            // case 'ethereum':
+            //     href = 'https://etherscan.io'
+            //     break
+            // case 'bitcoinCash':
+            //     href = 'https://blockchair.com/bitcoin-cash'
+            //     break
+            // case 'binance':
+            //     href = 'https://explorer.binance.org'
+            //     break
+            // case 'cosmos':
+            //     href = 'https://www.mintscan.io'
+            //     break
+            // case 'dash':
+            //     return `https://chainz.cryptoid.info/dash`
+            // case 'doge':
+            //     return `https://dogechain.info`
+        }
+        return href
+    }
+}
+
+export function getExplorerTxUrl(tx:string,network:string,token:string, testnet:boolean){
+    if(testnet){
+        let href
+        switch (network) {
+            case 'bitcoin':
+                href = 'https://blockstream.info/testnet/tx/'+tx
+                break
+            case 'ethereum':
+                href = 'https://ropsten.etherscan.io/tx/'+tx
+                break
+        }
+        return href
+    }else{
+        let href
+        switch (network) {
+            //TODO
+            // case 'bitcoin':
+            //     href = 'https://www.blockchain.com/'
+            //     break
+            // case 'ethereum':
+            //     href = 'https://etherscan.io'
+            //     break
+            // case 'bitcoinCash':
+            //     href = 'https://blockchair.com/bitcoin-cash'
+            //     break
+            // case 'binance':
+            //     href = 'https://explorer.binance.org'
+            //     break
+            // case 'cosmos':
+            //     href = 'https://www.mintscan.io'
+            //     break
+            // case 'dash':
+            //     return `https://chainz.cryptoid.info/dash`
+            // case 'doge':
+            //     return `https://dogechain.info`
+        }
+        return href
+    }
+}
+
+
 const COIN_MAP = {
     Bitcoin: "BTC",
     Cosmos: "ATOM",

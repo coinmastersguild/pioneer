@@ -1,13 +1,13 @@
 {
-  "name": "@pioneer-platform/pioneer-sdk",
-  "version": "0.0.6",
+  "name": "@pioneer-platform/pioneer-xchain-client",
+  "version": "0.0.3",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",
     "test": "npm run build && node __tests__/test-module.js",
-    "test-ts": "rm -R lib && npm run build && ts-node __tests__/test-module-ts.ts",
+    "test-cli-export": "npm run build && node __tests__/reference-test-cli-export.js",
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
     "build": "tsc -p .",
@@ -20,14 +20,13 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
+    "@binance-chain/javascript-sdk": "^4.1.1",
     "@bithighlander/xchain-util": "latest",
     "@pioneer-platform/pioneer": "latest",
     "@pioneer-platform/pioneer-coins": "latest",
-    "@pioneer-platform/pioneer-xchain-client": "0.0.3",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
-    "prettyjson": "^1.2.1",
-    "ts-node": "^9.1.1"
+    "prettyjson": "^1.2.1"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
