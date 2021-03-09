@@ -3,7 +3,10 @@
     <q-card class="text-center q-pb-lg" style="min-width:450px;">
       <q-form @submit="onSubmit">
         <q-card-section class="q-pb-sm">
-          <h4>{{ $t("msg.create.title") }}</h4>
+          <div v-if="showPasswordlessOption">
+            <h5>Would you like to enable encryption?</h5>
+          </div>
+
 
           <div v-if="usePassword">
             <p>{{ $t("msg.create.encrypt") }}</p>
@@ -15,7 +18,7 @@
               borderless
               v-model="password"
               size="lg"
-              :label='$t("msg.password")'
+              :label='$t("msg.password.title")'
               style="max-width: 400px;"
               type="password"
               lazy-rules
@@ -34,8 +37,10 @@
           </q-card-section>
         </div>
         <q-card-actions align="center" class="q-pb-lg">
-          enable encryption (recommended)
-          <q-toggle v-model="usePassword" color="green"/>
+          <div v-if="showPasswordlessOption">
+            enable encryption (recommended)
+            <q-toggle v-model="usePassword" color="green"/>
+          </div>
           <q-btn type="submit" color="primary" class="q-pl-md q-pr-md" style="font-size:1rem;" :label="$t('msg.createWallet')" :loading="loading" />
         </q-card-actions>
       </q-form>
@@ -46,13 +51,26 @@
 <script>
     import { mapMutations } from 'vuex';
 
+    let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
+
     export default {
         name: "PasswordCreate",
       data () {
         return {
+          showPasswordlessOption:featurePasswordless,
           password: '',
           password2: '',
           usePassword: false,
+        }
+      },
+      mounted() {
+        try{
+          if(!featurePasswordless){
+            this.usePassword = true
+          }
+
+        }catch(e){
+          console.error(e)
         }
       },
       methods: {
@@ -79,8 +97,8 @@
               }
             }
 
-            console.log('final pw: ', this.password)
-            this.$store.commit('setPassword',this.password)
+            //TODO this bad right??
+            //this.$store.commit('setPassword',this.password)
 
             let input = {}
             if(this.usePassword){

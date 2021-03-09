@@ -54,7 +54,7 @@ export class SDK {
             this.isTestnet = true
         }
         this.config = config
-        this.spec = spec
+        this.spec = spec || config.spec
         this.queryKey = config.queryKey
         this.spec = config.spec
         this.init = async function () {
@@ -85,7 +85,7 @@ export class SDK {
                 }
                 // console.log(tag,"this.pioneerApi: ",this.pioneerApi)
                 // console.log(tag,"this.pioneerApi: ",this.pioneerApi.instance)
-                let result = this.pioneerApi.instance.CreatePairingCode(null, pairingBody)
+                let result = await this.pioneerApi.instance.CreatePairingCode(null, pairingBody)
 
                 return result
             } catch (e) {
@@ -95,7 +95,6 @@ export class SDK {
         this.getInfo = async function () {
             let tag = TAG + " | getInfo | "
             try {
-                console.log(tag,"info: ",this.pioneerApi)
                 let result = await this.pioneerApi.Info()
 
                 return result.data
@@ -106,36 +105,56 @@ export class SDK {
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
-                console.log(tag,"info: ",this.pioneerApi)
                 let result = await this.pioneerApi.Info()
+                result = result.data
 
-                let thorAddress = "tthorfakeAddressBro"
+                if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
+                let thorAddress = result.masters.RUNE
+
+                log.info(tag,"this.spec: ",this.spec)
+                if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
+
+                let binance = new XchainClass(this.spec,{
+                    network:'testnet',
+                    blockchain:'binance',
+                    nativeAsset:'BNB',
+                    queryKey:this.queryKey
+                })
+                await binance.init()
+
+                let bitcoin = new XchainClass(this.spec,{
+                    network:'testnet',
+                    blockchain:'bitcoin',
+                    nativeAsset:'BTC',
+                    queryKey:this.queryKey
+                })
+                await bitcoin.init()
+
+                let thorchain = new XchainClass(this.spec,{
+                    network:'testnet',
+                    blockchain:'thorchain',
+                    nativeAsset:'RUNE',
+                    queryKey:this.queryKey
+                })
+                await thorchain.init()
+
+                let ethereum = new XchainClass(this.spec,{
+                    network:'testnet',
+                    blockchain:'thorchain',
+                    nativeAsset:'RUNE',
+                    queryKey:this.queryKey
+                })
+                await ethereum.init()
 
                 let output:any = {
                     type: 'pioneer',
                     wallet: thorAddress,
                     keystore:{},
                     clients: {
-                        binance: new XchainClass(this.spec,{
-                            network:'testnet',
-                            blockchain:'binance',
-                            queryKey:this.queryKey
-                        }),
-                        bitcoin: new XchainClass(this.spec,{
-                            network:'testnet',
-                            blockchain:'bitcoin',
-                            queryKey:this.queryKey
-                        }),
-                        thorchain: new XchainClass(this.spec,{
-                            network:'testnet',
-                            blockchain:'thorchain',
-                            queryKey:this.queryKey
-                        }),
-                        ethereum: new XchainClass(this.spec,{
-                            network:'testnet',
-                            blockchain:'ethereum',
-                            queryKey:this.queryKey
-                        })
+                        binance,
+                        bitcoin,
+                        thorchain,
+                        ethereum
                     }
                 }
 

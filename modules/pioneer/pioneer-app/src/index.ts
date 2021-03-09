@@ -66,7 +66,6 @@ let WALLET_PUBLIC:any = {}
 let WALLET_PRIVATE:any = {}
 let WALLET_PUBKEYS:any = []
 let WALLET_PASSWORD:any = ""
-let WALLET_SEED:string
 let APPROVE_QUEUE:any = []
 //
 let SOCKET_CLIENT:any
@@ -378,9 +377,10 @@ module.exports = {
     getCoins: function () {
         return ONLINE;
     },
-    viewSeed: function () {
-        return WALLET_SEED;
-    },
+    //TODO
+    // viewSeed: function () {
+    //     return WALLET_SEED;
+    // },
     // sendToAddress: function (coin:string,amount:string,address:string,memo:string) {
     //   return send_to_address(coin,amount,address,memo);
     // },

@@ -25,20 +25,31 @@ let run_test = async function(){
             'binance'
         ]
 
+        //bitcoin
+        // let config = {
+        //     network:'testnet',
+        //     blockchain:blockchains[0],
+        //     nativeAsset:'BTC',
+        //     queryKey,
+        //     username,
+        //     spec:urlSpec
+        // }
+
+        //Binance
         let config = {
             network:'testnet',
-            blockchain:blockchains[0],
+            blockchain:blockchains[3],
+            nativeAsset:'BNB',
             queryKey,
             username,
             spec:urlSpec
         }
 
-
         //init
         let app = new SDK(urlSpec,config)
         await app.init()
 
-        console.log(app)
+        //console.log(app)
 
         let network = app.getNetwork()
         console.log("network: ",network)
@@ -52,7 +63,15 @@ let run_test = async function(){
         let explorerTxUrl = app.getExplorerTxUrl()
         console.log("explorerTxUrl: ",explorerTxUrl)
 
-        //
+        //binance
+        const address = await app.getAddress();
+        //const bncBalances = await app.getBalance(address);
+
+        const bncClient = await app.getBncClient()
+        const bncBalances = await bncClient.getBalance(address)
+
+        console.log("address: ",address)
+        console.log("bncBalances: ",bncBalances)
 
     }catch(e){
         console.error(e)

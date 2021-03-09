@@ -11,7 +11,7 @@
           borderless
           v-model="password"
           size="lg"
-          :label='$t("msg.password")'
+          :label='password'
           style="max-width: 400px;"
           type="password"
           lazy-rules
@@ -39,10 +39,13 @@
   //crypto
   import { mapMutations } from 'vuex'
 
+  let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
+
   export default {
     name: 'Create',
     data () {
       return {
+        showPasswordlessOption:featurePasswordless,
         username:'',
         isPassword:false,
         password: '',
@@ -54,6 +57,11 @@
     },
     mounted() {
       try{
+        //
+        if(!featurePasswordless){
+
+        }
+
         //get username from state
         this.username = this.$store.getters['getUsername'];
 

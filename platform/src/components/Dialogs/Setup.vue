@@ -6,6 +6,7 @@
         </q-card-section>
         <q-card-actions vertical align="center" class="q-pb-lg q-pl-md q-pr-md">
             <q-btn
+              v-if="showSoftwareCreate"
               color="green"
               flat
               @click="openCreate()"
@@ -18,7 +19,7 @@
             <!-- <q-btn color="primary" label="Configure Hardware Wallet" class="q-mt-md">
             <q-tooltip content-class="bg-accent">Keepkey, Ledger and Trezor wallets supported</q-tooltip>
             </q-btn> -->
-        <q-btn
+          <q-btn
             color="white"
             @click="openRestore"
             label="I already have a wallet..."
@@ -42,7 +43,15 @@
 <script>
 
 import { mapMutations } from 'vuex'
+
+let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
+
 export default {
+    data() {
+      return {
+        showSoftwareCreate: featureSoftwareCreate,
+      };
+    },
     methods: {
       ...mapMutations(['showModal','hideModal']),
       openCreate: function () {

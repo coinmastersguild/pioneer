@@ -43,6 +43,7 @@ const WALLETS = []
 const APPS = []
 let KEEPKEY
 let PIONEER_SERVER_PROCESS
+let TEMP_SEED = "" //only used in setup
 
 /*
       MenuBar
@@ -322,25 +323,57 @@ ipcMain.on('onStart', async (event, data) => {
 //   }
 // })
 //
-// ipcMain.on('createWallet', async (event, data) => {
-//   const tag = TAG + ' | createWallet | '
-//   try {
-//       log.info(tag,"data: ",data)
-//
-//       let result = await createWallet(data)
-//
-//       //f it, send it
-//       if(result.success){
-//         event.sender.send('navigation',{ dialog: 'Connect', action: 'open'})
-//       } else {
-//         event.sender.send('errors', {dialog: 'Connect', action: 'create',error:result.error})
-//       }
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
+
+ipcMain.on('attemptPair', async (event, data) => {
+  const tag = TAG + ' | attemptPair | '
+  try {
+    log.info(tag,"data: ",data)
+    let result = await attemptPair(event,data)
+    log.info(tag,"createWallet result: ",result)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('setMnemonic', async (event, data) => {
+  const tag = TAG + ' | setMnemonic | '
+  try {
+    log.info(tag,"data: ",data)
+
+    TEMP_SEED = data.seed
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('createWallet', async (event, data) => {
+  const tag = TAG + ' | createWallet | '
+  try {
+      log.info(tag,"data: ",data)
+      if(!TEMP_SEED) throw Error("102: Failed to setup! missing TEMP_SEED")
+      data.mnemonic = TEMP_SEED
+
+      let result = await createWallet(event,data)
+      log.info(tag,"createWallet result: ",result)
+
+      //start wallet
+      let onStartResult = await onStart(event,data)
+      log.info(tag,"onStartResult: ",onStartResult)
+
+
+      //f it, send it
+      if(result.success){
+        event.sender.send('navigation',{ dialog: 'Connect', action: 'open'})
+      } else {
+        event.sender.send('errors', {dialog: 'Connect', action: 'create',error:result.error})
+      }
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
 // ipcMain.on('viewSeed', async (event, data) => {
 //   const tag = TAG + ' | viewSeed | '
 //   try {

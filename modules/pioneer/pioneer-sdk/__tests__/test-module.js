@@ -20,15 +20,19 @@ let run_test = async function(){
         let config = {
             queryKey,
             username,
-            spec:urlSpec
+            spec
         }
 
-
-        //init
-        let app = new SDK(urlSpec,config)
+        //console.log(SDK)
+        let app = new SDK.SDK(spec,config)
+        //console.log(app)
         await app.init()
 
-        console.log(app)
+        //init
+        // let app = new SDK(urlSpec,config)
+        // await app.init()
+        //
+        //console.log("app: ",app)
 
         //is paired?
         let info = await app.getInfo()
@@ -41,6 +45,19 @@ let run_test = async function(){
         //     console.log("code: ",code)
         // }
 
+        //get user
+        let user = await app.getUserParams()
+        //console.log("user: ",user)
+
+        //binance
+        // const address = await user.binance.client.getAddress();
+        // const bncBalances = await user.binance.bncClient.getBalance(address);
+        //
+        // console.log("user: ",address)
+        // console.log("bncBalances: ",bncBalances)
+        //BTC
+
+        //ETH
 
 
     }catch(e){

@@ -125,6 +125,7 @@ export interface config {
 module.exports = class wallet {
     private spec: string;
     private pioneerApi: any;
+    private info: any
     private init: () => Promise<any>;
     private queryKey: string;
     private service: string;
@@ -145,8 +146,10 @@ module.exports = class wallet {
     private getBncClient: (() => void) | undefined;
     private bncClient?: any;
     private getAddress: () => any;
+    private nativeAsset: string;
     constructor(spec:string,config:any) {
         this.network = config.blockchain
+        this.nativeAsset = config.nativeAsset
         this.service = config.service || 'unknown'
         if(config.network === 'mainnet'){
             this.isTestnet = false
@@ -168,6 +171,13 @@ module.exports = class wallet {
                     }
                 });
                 this.pioneerApi = await this.pioneerApi.init()
+
+                //get info
+                // @ts-ignore
+                let info = await this.pioneerApi.Info()
+                //TODO error handling
+                this.info = info.data
+
                 return this.pioneerApi
             }catch(e){
                 log.error(tag,e)
@@ -246,8 +256,7 @@ module.exports = class wallet {
         this.getAddress = function () {
             let tag = TAG + " | getAddress | "
             try {
-                //TODO
-                return "fakeAddressBro"
+                return this.info.masters[this.nativeAsset]
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -264,7 +273,6 @@ module.exports = class wallet {
         this.setPhrase = function (phrase:string) {
             let tag = TAG + " | setPhrase | "
             try {
-                //TODO
                 return "n/a"
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -273,8 +281,10 @@ module.exports = class wallet {
         this.getBalance = function (address?: Address, asset?: Asset) {
             let tag = TAG + " | getBalance | "
             try {
-                //TODO
-                return 1.234
+                //TODO if address
+                //request to api
+
+                return this.info.balances[this.nativeAsset]
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -283,7 +293,7 @@ module.exports = class wallet {
             let tag = TAG + " | getTransactions | "
             try {
                 //TODO
-                return "bla"
+                return [{"foo":"bar"}]
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

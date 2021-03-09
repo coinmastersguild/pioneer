@@ -244,6 +244,7 @@ module.exports = class wallet {
     private pioneer: any;
     private pioneerClient: any;
     private WALLET_BALANCES: any;
+    private setMnemonic: () => string | undefined;
     constructor(type:HDWALLETS,config:config,isTestnet:boolean) {
         this.isTestnet = isTestnet || false
         this.mode = config.mode
@@ -257,6 +258,9 @@ module.exports = class wallet {
         this.authProvider = config.authProvider
         this.bip32ToAddressNList = function (path:string) {
             return bip32ToAddressNList(path);
+        }
+        this.setMnemonic = function () {
+            return this.mnemonic;
         }
         this.init = async function () {
             let tag = TAG + " | init_wallet | "

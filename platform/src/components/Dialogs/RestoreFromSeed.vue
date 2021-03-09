@@ -109,7 +109,6 @@
             >12
           </li>
         </ul>
-        <h5>Restore a Software Wallet from seed</h5>
       </div>
     </div>
     <q-btn
@@ -119,7 +118,7 @@
       color="primary"
       class="q-mt-xl q-pl-lg q-pr-lg full-width"
     >
-      {{ $t("msg.restore.add") }}
+      Restore a Software Wallet from seed
     </q-btn>
   </q-card>
 </template>
@@ -262,7 +261,7 @@
             seed:this.mnemonic
           }
           if(password) input.password = password
-          this.$q.electron.ipcRenderer.send('createWallet', input);
+          this.$q.electron.ipcRenderer.send('setMnemonic', input);
 
           //TODO preview results
 

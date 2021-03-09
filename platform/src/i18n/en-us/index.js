@@ -22,7 +22,6 @@ export default {
     confirmed: 'Confirmed',
     unconfirmed: 'Unconfirmed',
     locked: 'Locked',
-    emptyPassword: 'Enter Password',
     amount: 'Amount',
     address: 'Address',
     receive: 'Receive',

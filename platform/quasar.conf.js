@@ -51,6 +51,15 @@ module.exports = function (ctx) {
 
       // transpile: false,
       env: {
+        KEEPKEY_FEATURE:false,
+        CREATE_SOFTWARE_FEATURE:false,
+        PASSWORDLESS_FEATURE:false,
+        FIO_FEATURE:false,
+        CONTACTS_FEATURE:false,
+        UI_THEME_FEATURE:false,
+        UI_LIGHT_MODE_FEATURE:false,
+        ADD_WALLET_FEATURE:false,
+        UI_APP_STORE_FEATURE:false,
         URL_PIONEER_SPEC: true
           ? JSON.stringify("http://127.0.0.1:9001/spec/swagger.json")
           : JSON.stringify("https://pioneers.dev/spec/swagger.json"),

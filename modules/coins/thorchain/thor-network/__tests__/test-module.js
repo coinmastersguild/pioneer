@@ -28,15 +28,27 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-
-
-let address = process.env['TEST_THOR_MASTER']
-if(!address) throw Error("must add TEST_THOR_MASTER to .env")
-console.log("address: ",address)
-network.getAccountInfo(address)
+let address = "tthor1lqk43hvysuzymrgg08q45234z6jzth322y532t"
+network.getBalance(address)
     .then(function(resp){
         console.log("resp: ",resp)
     })
+
+// let address = process.env['TEST_THOR_MASTER']
+// if(!address) throw Error("must add TEST_THOR_MASTER to .env")
+// console.log("address: ",address)
+// network.getAccount(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// let address = process.env['TEST_THOR_MASTER']
+// if(!address) throw Error("must add TEST_THOR_MASTER to .env")
+// console.log("address: ",address)
+// network.getAccountInfo(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // let address = process.env['TEST_THOR_MASTER']
 // // let address = "tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh" //test seed

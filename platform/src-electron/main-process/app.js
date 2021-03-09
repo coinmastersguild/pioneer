@@ -30,44 +30,66 @@ let WALLET_PASSWORD
 let WALLET_HASH
 let USERNAME
 let PRIMARY_VAULT
+let FIRST_START = true
 
 function standardRandomBytesFunc(size) {
   /* istanbul ignore if: not testable on node */
   return CryptoJS.lib.WordArray.random(size).toString()
 }
 
+//feature flags
+let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
+let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
+
+export async function attemptPair(event, data) {
+  let tag = TAG + " | createWallet | ";
+  try {
+    log.info(tag,"data: ",data)
+    let resultPair = await App.pair(data)
+    return resultPair
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
 export async function onStart(event,data) {
   let tag = TAG + " | onStart | ";
   try {
 
-    //open connect
-    event.sender.send('navigation',{ dialog: 'Connect', action: 'open'})
-
     log.info(tag," onStart() ")
-    //Print banner
-    log.info(  chalk.red(
-      figlet.textSync('Pioneer-Native', { horizontalLayout: 'full' })
-    ))
-    log.info(
-      "\n \n \n        ,    .  ,   .           .\n" +
-      "    *  / \\_ *  / \\_      " +
-      chalk.yellowBright(".-.") +
-      "  *       *   /\\'__        *\n" +
-      "      /    \\  /    \\,   " +
-      chalk.yellowBright("( ₿ )") +
-      "     .    _/  /  \\  *'.\n" +
-      " .   /\\/\\  /\\/ :' __ \\_  " +
-      chalk.yellowBright(" - ") +
-      "          _^/  ^/    `--.\n" +
-      "    /    \\/  \\  _/  \\-'\\      *    /.' ^_   \\_   .'\\  *\n" +
-      "  /\\  .-   `. \\/     \\ /==~=-=~=-=-;.  _/ \\ -. `_/   \\\n" +
-      " /  `-.__ ^   / .-'.--\\ =-=~_=-=~=^/  _ `--./ .-'  `-\n" +
-      "/        `.  / /       `.~-^=-=~=^=.-'      '-._ `._"
-    );
+    if(FIRST_START){
+      //Print banner
+      log.info(  chalk.red(
+        figlet.textSync('Pioneer-Native', { horizontalLayout: 'full' })
+      ))
+      log.info(
+        "\n \n \n        ,    .  ,   .           .\n" +
+        "    *  / \\_ *  / \\_      " +
+        chalk.yellowBright(".-.") +
+        "  *       *   /\\'__        *\n" +
+        "      /    \\  /    \\,   " +
+        chalk.yellowBright("( ₿ )") +
+        "     .    _/  /  \\  *'.\n" +
+        " .   /\\/\\  /\\/ :' __ \\_  " +
+        chalk.yellowBright(" - ") +
+        "          _^/  ^/    `--.\n" +
+        "    /    \\/  \\  _/  \\-'\\      *    /.' ^_   \\_   .'\\  *\n" +
+        "  /\\  .-   `. \\/     \\ /==~=-=~=-=-;.  _/ \\ -. `_/   \\\n" +
+        " /  `-.__ ^   / .-'.--\\ =-=~_=-=~=^/  _ `--./ .-'  `-\n" +
+        "/        `.  / /       `.~-^=-=~=^=.-'      '-._ `._"
+      );
+      FIRST_START = false
+    }
+
     let configStatus = checkConfigs()
     let config = await App.getConfig()
     log.info(tag,"config: ",config)
     log.debug(tag,"configStatus() | configStatus: ", configStatus)
+
+    if(data.password){
+      config.temp = data.password
+    }
 
     if(!config){
       //TODO prompt language?
@@ -75,12 +97,21 @@ export async function onStart(event,data) {
       await App.initConfig("english");
       await App.updateConfig({created: new Date().getTime()});
       config = await App.getConfig()
+
+      //TODO when pioneer local node working
+      //event.sender.send('navigation',{ dialog: 'Create', action: 'open'})
+
+      //navigate to setup
+      event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
+
+      return true
     }
 
     if(config && !config.promptedPasswordless){
       log.info(tag," offer encryption ")
       //TODO
       //event.sender.send('navigation',{ dialog: 'PasswordCreate', action: 'open'})
+      //return true
     }
 
 
@@ -101,18 +132,18 @@ export async function onStart(event,data) {
     //
     // }
 
-    if(!config.username){
-      //create username
-      let randomChars = generator.generateMultiple(1, {
-        length: 10,
-        uppercase: false
-      });
-      USERNAME = "temp:"+randomChars[0]
-      config.username = USERNAME
-      await App.updateConfig({username:USERNAME});
-    } else {
-      USERNAME = config.username
-    }
+    // if(!config.username){
+    //   //create username
+    //   let randomChars = generator.generateMultiple(1, {
+    //     length: 10,
+    //     uppercase: false
+    //   });
+    //   USERNAME = "temp:"+randomChars[0]
+    //   config.username = USERNAME
+    //   await App.updateConfig({username:USERNAME});
+    // } else {
+    //   USERNAME = config.username
+    // }
 
     if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
       WALLET_HASH = config.passwordHash
@@ -122,13 +153,16 @@ export async function onStart(event,data) {
       WALLET_PASSWORD = config.temp
     } else {
       //generate password
-      //create username
-      let randomChars = generator.generateMultiple(1, {
-        length: 10,
-        uppercase: false
-      });
-      WALLET_PASSWORD = randomChars[0]
-      await App.updateConfig({temp:WALLET_PASSWORD});
+      if(featurePasswordless){
+        log.info(tag,"featurePasswordless TRUE")
+        //create password
+        let randomChars = generator.generateMultiple(1, {
+          length: 10,
+          uppercase: false
+        });
+        WALLET_PASSWORD = randomChars[0]
+        await App.updateConfig({temp:WALLET_PASSWORD});
+      }
     }
     if(!WALLET_PASSWORD) throw Error("Error: Password required! ")
 
@@ -143,26 +177,9 @@ export async function onStart(event,data) {
 
     if(walletFiles.length === 0){
       //Always have atleast 1 wallet!
+      log.info(" No Wallets found! ")
 
-      //create a new
-      let randomBytesFunc = standardRandomBytesFunc
-      const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)
-      if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
-      let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
-
-      //create
-      let wallet = {
-        mnemonic,
-        username:config.username,
-        password:WALLET_PASSWORD
-      }
-      if(config.temp) wallet.temp = config.temp
-      //create wallet files
-      log.debug("1 creating wallet: ",wallet)
-      let resultCreate = await App.createWallet('software',wallet)
-      log.info(tag,"resultCreate: ",resultCreate)
-
-      //TODO CTA on backup
+      return true
     }
 
     //start App
@@ -190,6 +207,80 @@ export async function onStart(event,data) {
     //Start wallet interface
 
 
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function setMnemonic(event, data) {
+  let tag = TAG + " | createWallet | ";
+  try {
+    log.info(tag,"data: ",data)
+
+
+    let resultCreate = await App.setSeed('software',wallet)
+    return resultCreate
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function createWallet(event, data) {
+  let tag = TAG + " | createWallet | ";
+  try {
+    log.info(tag,"data: ",data)
+
+    //if no password
+    if(!data.password){
+      if(featurePasswordless){
+        log.info(tag,"featurePasswordless TRUE")
+        let randomChars = generator.generateMultiple(1, {
+          length: 10,
+          uppercase: false
+        });
+        data.password = "temp:"+randomChars[0]
+      }else{
+        throw Error("unhandled action featurePasswordless: "+featurePasswordless)
+      }
+    }
+
+    //if no username
+    if(!data.username){
+      let randomChars = generator.generateMultiple(1, {
+        length: 10,
+        uppercase: false
+      });
+      data.username = "user:"+randomChars[0]
+    }
+
+    //if no mnemonic
+    if(!data.mnemonic){
+      if(featureSoftwareCreate){
+        log.info(tag,"featureSoftwareCreate TRUE")
+        let randomBytesFunc = standardRandomBytesFunc
+        const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)
+        if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
+        let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
+        data.mnemonic = mnemonic
+      }else{
+        throw Error("unhandled action featureSoftwareCreate: "+featureSoftwareCreate)
+      }
+    }
+
+    //create
+    let wallet = {
+      mnemonic:data.mnemonic,
+      username:data.username,
+      password:data.password
+    }
+
+
+    //create wallet files
+    log.info("1 creating wallet: ",wallet)
+    let resultCreate = await App.createWallet('software',wallet)
+    return resultCreate
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};
