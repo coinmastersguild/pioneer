@@ -19,6 +19,13 @@ const bech32 = require(`bech32`)
 // const emitter = new EventEmitter();
 // const io = require('socket.io-client');
 
+let {
+    supportedBlockchains,
+    supportedAssets,
+    getPaths,
+    get_address_from_xpub
+} = require('@pioneer-platform/pioneer-coins')
+
 //crypto
 let cloneCrypto = require("@pioneer-platform/utxo-crypto")
 let coincap = require('@pioneer-platform/pioneer-coincap')
@@ -62,6 +69,8 @@ let WT_COINS = ['BTC','LTC','DASH','DOGE','BCH','ETH','EOS','BNB','ATOM']
 let WT_PUBKEYS_FORMATTED:any
 
 let BLOCKBOOK_COINS = ['BTC','BCH','LTC','DOGE']
+
+let BLOCKBOOK_COINS_TESTNET = [ 'BTC' , 'ETH'] //
 
 //prescisions
 const CURRENCY_DECIMALS:any = {
@@ -178,8 +187,8 @@ module.exports = {
     validateFioUsername: function (username:string) {
         return validate_FIO_username(username);
     },
-    getAddress: function (coin:string,account:number,index:number,isChange:boolean) {
-        return get_address(coin,account,index,isChange);
+    getAddress: function (coin:string,scriptType:string,account:number,index:number,isChange:boolean,isTestnet:boolean) {
+        return get_address(coin,scriptType,account,index,isChange,isTestnet);
     },
     getNewAddress: function (coin:string) {
         return get_new_address(coin);
@@ -369,8 +378,8 @@ function createBech32Address(publicKey:any,prefix:string) {
 /*
     Watch only wallet compatible!
  */
-
-const get_address = async function (coin:string,account:number,index:number,isChange:boolean) {
+//TODO do this in coin!
+const get_address = async function (coin:string,scriptType:string,account:number,index:number,isChange:boolean, isTestnet:boolean) {
     let tag = TAG + " | get_address | "
     try {
         log.info(tag,"get_address: ",{coin,account,index,isChange})
@@ -382,88 +391,12 @@ const get_address = async function (coin:string,account:number,index:number,isCh
         }
 
         if(PUBLIC_WALLET[coin].type === 'xpub'){
-            //get pubkey at path
-            let publicKey = bitcoin.bip32.fromBase58(PUBLIC_WALLET[coin].pubkey).derive(account).derive(index).publicKey
-            log.debug("publicKey: ********* ",publicKey)
-
-            //if token
-            if(tokenData.tokens.indexOf(coin) >= 0){
-                coin = 'ETH'
+            if(!PUBLIC_WALLET[coin].xpub) {
+                log.error(tag,"Invalid entry in public wallet: ",PUBLIC_WALLET[coin])
+                throw Error("Invalid coin! coin: "+coin)
             }
-            //do eth
-
-            switch(coin) {
-                case 'BTC':
-                    //TODO more types
-                    output = await cloneCrypto.generateAddress('BTC',publicKey,'bech32')
-                    break;
-                case 'BCH':
-                    //TODO more types
-                    output = await cloneCrypto.generateAddress('BCH',publicKey,'p2sh')
-                    break;
-                case 'DOGE':
-                    //TODO more types
-                    output = await cloneCrypto.generateAddress('DOGE',publicKey,'bech32')
-                    break;
-                case 'DASH':
-                    //TODO more types
-                    output = await cloneCrypto.generateAddress('DASH',publicKey,'bech32')
-                    break;
-                case 'LTC':
-                    //TODO more types
-                    output = await cloneCrypto.generateAddress('LTC',publicKey,'bech32')
-                    break;
-                case 'ETH':
-                    output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
-                    break;
-                case 'RUNE':
-                    // code block
-                    output = createBech32Address(publicKey,'tthor')
-                    break;
-                case 'ATOM':
-                    // code block
-                    output = createBech32Address(publicKey,'cosmos')
-                    break;
-                case 'BNB':
-                    // code block
-                    log.debug("pubkey: ",publicKey)
-                    output = createBech32Address(publicKey,'bnb')
-                    break;
-                // case 'FIO':
-                //     log.debug(tag,"pubkey: ",publicKey)
-                //
-                //     try{
-                //         //get accounts for pubkey
-                //         let account = networks['FIO'].getAccountsFromPubkey(publicKey)
-                //         log.debug(tag,"account: ",account)
-                //     }catch(e){
-                //         //no accounts
-                //         //return pubkey
-                //         output = {unregistered:true,pubkey:publicKey}
-                //     }
-                //
-                //     break;
-                // case 'EOS':
-                //     log.debug(tag,"pubkey: ",publicKey)
-                //
-                //     try{
-                //         //get accounts for pubkey
-                //         let account = networks['EOS'].getAccountsFromPubkey(publicKey)
-                //         log.debug(tag,"account: ",account)
-                //     }catch(e){
-                //         //no accounts
-                //         //return pubkey
-                //         output = {unregistered:true,pubkey:publicKey}
-                //     }
-                //
-                //     break;
-                default:
-                    throw Error("coin not yet implemented ! coin: "+coin)
-                // code block
-            }
-
-            log.debug(tag,"output: ",output)
-
+            //
+            output = await get_address_from_xpub(PUBLIC_WALLET[coin].xpub,scriptType,coin,account,index,isChange,isTestnet)
         } else {
             if(PUBLIC_WALLET[coin].master){
                 output = PUBLIC_WALLET[coin].master
@@ -491,21 +424,24 @@ const get_address_master = async function (coin:string) {
     let tag = TAG + " | get_address_master | "
     try {
         let output
-        if(coin === "EOS"){
-            // log.debug(tag,"pubkey: ",PUBLIC_WALLET[coin].pubkey)
-            //
-            // let account = await networks['EOS'].getAccountsFromPubkey(PUBLIC_WALLET[coin].pubkey)
-            // log.debug(tag,"account: ",account)
-            //
-            // if(!account.account_names[0]){
-            //     output = "No Accounts Found!"
-            // }else{
-            //     output = account.account_names[0]
-            // }
-            output = "TODO-EOS"
-        }else{
-            output = await get_address(coin,0,0,false)
-        }
+
+        output = PUBLIC_WALLET[coin].master
+
+        // if(coin === "EOS"){
+        //     // log.debug(tag,"pubkey: ",PUBLIC_WALLET[coin].pubkey)
+        //     //
+        //     // let account = await networks['EOS'].getAccountsFromPubkey(PUBLIC_WALLET[coin].pubkey)
+        //     // log.debug(tag,"account: ",account)
+        //     //
+        //     // if(!account.account_names[0]){
+        //     //     output = "No Accounts Found!"
+        //     // }else{
+        //     //     output = account.account_names[0]
+        //     // }
+        //     output = "TODO-EOS"
+        // }else{
+        //     output = await get_address_from_xpub(coin,0,0,false,IS_TESTNET)
+        // }
 
         return output
     } catch (e) {
@@ -513,7 +449,7 @@ const get_address_master = async function (coin:string) {
     }
 }
 
-const get_balance = async function (coin:string) {
+const get_balance = async function (coin:string, isTestnet?:boolean) {
     let tag = TAG + " | get_balance | "
     try {
         log.debug("coin detected: ",coin)
@@ -524,9 +460,11 @@ const get_balance = async function (coin:string) {
         if(coin === "ETH"){
             log.debug("ETH detected ")
             let master = await get_address_master('ETH')
+            if(isTestnet)networks['ETH'].init({testnet:true})
             output = await networks['ETH'].getBalanceAddress(master)
         }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
             log.debug("token detected ")
+            if(isTestnet)networks['ETH'].init({testnet:true})
             let master = await get_address_master('ETH')
             output = await networks['ETH'].getBalanceToken(master,coin)
         } else if(coin === 'ATOM'){
@@ -585,48 +523,87 @@ const get_wallet_info = async function () {
 
         let startTime = new Date().getTime()
 
-        //pubkeys
-        output.isTestnet = IS_TESTNET
-        output.public = PUBLIC_WALLET
 
         //masters
-        let coins = Object.keys(PUBLIC_WALLET)
+        let coinsGiven = Object.keys(PUBLIC_WALLET)
+        let coins:any = []
+        let publicWallet:any = []
+        for(let i = 0; i < coinsGiven.length; i++){
+            let coin = coinsGiven[i]
+            if(supportedAssets.indexOf(coin) >= 0){
+                coins.push(coin)
+                publicWallet.push(PUBLIC_WALLET[coin])
+            }
+        }
+        log.info(tag,"supportedAssets: ",supportedAssets)
         log.debug(tag,"coins: ",coins)
 
+        //pubkeys
+        output.isTestnet = IS_TESTNET
+        log.info(tag,"IS_TESTNET: ",IS_TESTNET)
+        //filter by support
+
+
+        output.public = publicWallet
+
+        //get masters
+        for(let i = 0; i < coins.length; i++){
+            let coin = coins[i]
+            log.info("coin: ",coin)
+            let pubkeyInfo = PUBLIC_WALLET[coin]
+            log.info(tag,"pubkeyInfo: ",pubkeyInfo)
+            masters[coin] = await get_address_master(coin)
+        }
+
+
         //blockbook coins
-        for(let i = 0; i < BLOCKBOOK_COINS.length; i++){
-            let coin = BLOCKBOOK_COINS[i]
-            if(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub){
-                let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].xpub)
-                //get balance by xpub
-                balances[coin] = balance
+        if(IS_TESTNET){
+            for(let i = 0; i < coins.length; i++){
+                let coin = coins[i]
+                if(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub ){
+                    if(coin === 'BTC') {
+                        let balance = await blockbook.getBalanceByXpub('TEST',PUBLIC_WALLET[coin].xpub)
+                        //get balance by xpub
+                        balances[coin] = balance
+                    }
+                }
+            }
+        }else{
+            for(let i = 0; i < BLOCKBOOK_COINS.length; i++){
+                let coin = BLOCKBOOK_COINS[i]
+                if(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub){
+                    let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].xpub)
+                    //get balance by xpub
+                    balances[coin] = balance
+                }
             }
         }
 
-        for(let i = 0; i < coins.length; i++){
-            let coin = coins[i]
-            log.debug("coin: ",coin)
-            let pubkeyInfo = PUBLIC_WALLET[coin]
-            log.debug(tag,"pubkeyInfo: ",pubkeyInfo)
-            masters[coin] = await get_address_master(coin)
-        }
+
 
         /*
                RUNE asset info
 
          */
         try{
-            if(PUBLIC_WALLET['RUNE']){
-                const balanceRUNE = await get_balance('RUNE')
+            if(PUBLIC_WALLET['RUNE'] && supportedAssets.indexOf('RUNE') >= 0){
+                if(IS_TESTNET){
+                    const balanceRUNE = await get_balance('RUNE')
 
-                if(balanceRUNE){
-                    balances['RUNE'] = balanceRUNE
+                    if(balanceRUNE){
+                        balances['RUNE'] = balanceRUNE
+                    } else {
+                        balances['RUNE'] = 0
+                    }
+                    masters['RUNE'] = PUBLIC_WALLET['RUNE'].master
+                    valueUsds['RUNE'] = ""
+                    coinInfo['RUNE'] = ""
                 } else {
-                    balances['RUNE'] = 0
+                    //not in mainnet yet
+                    //TODO mainnet
+
                 }
-                masters['RUNE'] = PUBLIC_WALLET['RUNE'].master
-                valueUsds['RUNE'] = ""
-                coinInfo['RUNE'] = ""
+
 
             }
         }catch(e){
@@ -638,31 +615,37 @@ const get_wallet_info = async function () {
 
          */
         try{
-            if(PUBLIC_WALLET['ATOM']){
-                const balanceATOM = await get_balance('ATOM')
+            if(PUBLIC_WALLET['ATOM'] && supportedAssets.indexOf('ATOM') >= 0){
+                if(IS_TESTNET){
+                    //TODO
 
-                if(balanceATOM){
-                    balances['ATOM'] = balanceATOM
-                } else {
-                    balances['ATOM'] = 0
+                }else{
+                    const balanceATOM = await get_balance('ATOM')
+
+                    if(balanceATOM){
+                        balances['ATOM'] = balanceATOM
+                    } else {
+                        balances['ATOM'] = 0
+                    }
+                    masters['ATOM'] = PUBLIC_WALLET['ATOM'].master
+                    valueUsds['ATOM'] = ""
+                    coinInfo['ATOM'] = ""
+
+                    // //get staking positions
+                    // await networks['ATOM'].init('full')
+                    // let delegations = await networks['ATOM'].getDelegations()
+                    // log.debug(tag,"delegations: ",delegations)
+                    // if(delegations.length > 0){
+                    //     stakes['ATOM'] = {}
+                    //     stakes['ATOM'].delegations = []
+                    //     log.debug(tag,"delegations: ",delegations)
+                    //     for(let i = 0; i < delegations.length; i++){
+                    //         let delegation = delegations[i]
+                    //         stakes['ATOM'].delegations.push(delegation)
+                    //     }
+                    // }
                 }
-                masters['ATOM'] = PUBLIC_WALLET['ATOM'].master
-                valueUsds['ATOM'] = ""
-                coinInfo['ATOM'] = ""
 
-                // //get staking positions
-                // await networks['ATOM'].init('full')
-                // let delegations = await networks['ATOM'].getDelegations()
-                // log.debug(tag,"delegations: ",delegations)
-                // if(delegations.length > 0){
-                //     stakes['ATOM'] = {}
-                //     stakes['ATOM'].delegations = []
-                //     log.debug(tag,"delegations: ",delegations)
-                //     for(let i = 0; i < delegations.length; i++){
-                //         let delegation = delegations[i]
-                //         stakes['ATOM'].delegations.push(delegation)
-                //     }
-                // }
             }
         }catch(e){
             console.error("Failed to get ATOM balances! for account: ",PUBLIC_WALLET['ATOM'])
@@ -677,10 +660,10 @@ const get_wallet_info = async function () {
             //get registered accounts
             // let master = await get_address_master('EOS')
             // masters['EOS'] = master
-            masters['EOS'] = "n/a"
-            valueUsds['EOS'] = ""
-            coinInfo['EOS'] = ""
-            balances['EOS'] = 0
+            // masters['EOS'] = "n/a"
+            // valueUsds['EOS'] = ""
+            // coinInfo['EOS'] = ""
+            // balances['EOS'] = 0
             //     const balanceEOS = await get_balance('EOS')
             //     log.debug(tag,"balanceEOS: ",balanceEOS)
             //
@@ -743,15 +726,20 @@ const get_wallet_info = async function () {
 
          */
         try{
-            if(PUBLIC_WALLET['BNB']){
-                const balanceBNB = await get_balance('BNB')
+            if(PUBLIC_WALLET['BNB'] && supportedAssets.indexOf('BNB') >= 0){
+                if(IS_TESTNET){
+                    //TODO
+                }else{
+                    const balanceBNB = await get_balance('BNB')
 
-                if(balanceBNB){
-                    masters['BNB'] = PUBLIC_WALLET['BNB'].pubkey
-                    balances['BNB'] = balanceBNB
-                    valueUsds['BNB'] = ""
-                    coinInfo['BNB'] = ""
+                    if(balanceBNB){
+                        masters['BNB'] = PUBLIC_WALLET['BNB'].pubkey
+                        balances['BNB'] = balanceBNB
+                        valueUsds['BNB'] = ""
+                        coinInfo['BNB'] = ""
+                    }
                 }
+
             }
         }catch(e){
             console.error("Failed to get BNB balances! for account: ",PUBLIC_WALLET['BNB'])
@@ -763,37 +751,50 @@ const get_wallet_info = async function () {
 
           */
         try{
-            if(PUBLIC_WALLET['ETH']){
-                const balanceETH = await get_balance('ETH')
+            if(PUBLIC_WALLET['ETH'] && supportedAssets.indexOf('ETH') >= 0){
+                if(IS_TESTNET){
+                    const balanceETH = await get_balance('ETH',true)
 
-                if(balanceETH){
-                    masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
-                    balances['ETH'] = balanceETH
-                    valueUsds['ETH'] = ""
-                    coinInfo['ETH'] = ""
-                }
-
-                //balances
-                log.debug(tag,"PUBLIC_WALLET: ",PUBLIC_WALLET['ETH'])
-                log.debug(tag,"eth master: ",PUBLIC_WALLET['ETH'].master)
-                let ethInfo = await networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)
-                log.debug(tag,"ethInfo: ",ethInfo)
-
-                //for each token use eth master
-                for(let i = 0; i < tokenData.tokens.length; i++){
-                    let token:string = tokenData.tokens[i]
-                    //only there if a balance
-                    if(ethInfo.balances[token]){
-                        balances[token] = await get_balance(token)
-                        masters[token] = await get_address_master('ETH')
-                        valueUsds[token] = ethInfo.valueUsds[token]
-                        coinInfo[token] = ethInfo.coinInfo[token]
-                    } else {
-                        //nerf dont show 0 balances
-                        //balances[token] = 0
+                    if(balanceETH){
+                        masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
+                        balances['ETH'] = balanceETH
+                        valueUsds['ETH'] = ""
+                        coinInfo['ETH'] = ""
                     }
 
+                }else{
+                    const balanceETH = await get_balance('ETH')
+
+                    if(balanceETH){
+                        masters['ETH'] = PUBLIC_WALLET['ETH'].pubkey
+                        balances['ETH'] = balanceETH
+                        valueUsds['ETH'] = ""
+                        coinInfo['ETH'] = ""
+                    }
+
+                    //balances
+                    log.debug(tag,"PUBLIC_WALLET: ",PUBLIC_WALLET['ETH'])
+                    log.debug(tag,"eth master: ",PUBLIC_WALLET['ETH'].master)
+                    let ethInfo = await networks['ETH'].getBalanceTokens(PUBLIC_WALLET['ETH'].master)
+                    log.debug(tag,"ethInfo: ",ethInfo)
+
+                    //for each token use eth master
+                    for(let i = 0; i < tokenData.tokens.length; i++){
+                        let token:string = tokenData.tokens[i]
+                        //only there if a balance
+                        if(ethInfo.balances[token]){
+                            balances[token] = await get_balance(token)
+                            masters[token] = await get_address_master('ETH')
+                            valueUsds[token] = ethInfo.valueUsds[token]
+                            coinInfo[token] = ethInfo.coinInfo[token]
+                        } else {
+                            //nerf dont show 0 balances
+                            //balances[token] = 0
+                        }
+
+                    }
                 }
+
             }
         }catch(e){
             console.error("Failed to get ETH TOKEN balances! for account: ",PUBLIC_WALLET['ETH'], e)
@@ -850,7 +851,6 @@ const init_wallet = async function (type:string,config:any,isTestnet:boolean) {
 
             if(coin === 'BNB' || coin === 'ATOM'){
                 pubKeyInfo.xpub = pubKeyInfo.master
-                console.log("pubKeyInfo: ",pubKeyInfo.xpub)
             }
             formatted.push(pubKeyInfo)
         }

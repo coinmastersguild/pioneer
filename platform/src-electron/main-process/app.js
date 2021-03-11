@@ -40,9 +40,10 @@ function standardRandomBytesFunc(size) {
 //feature flags
 let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
 let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
+let featureInsecurePassword = process.env['INSECURE_PASSWORD']
 
 export async function attemptPair(event, data) {
-  let tag = TAG + " | createWallet | ";
+  let tag = TAG + " | attemptPair | ";
   try {
     log.info(tag,"data: ",data)
     let resultPair = await App.pair(data)
@@ -89,6 +90,13 @@ export async function onStart(event,data) {
 
     if(data.password){
       config.temp = data.password
+      WALLET_PASSWORD = data.password
+      if(featureInsecurePassword){
+        //write password to file (auto-login)
+        //NOTE: it is bad form to store USER passwords on disk
+        //however: it is accepted to store generated passwords on disk
+        await App.updateConfig({temp: data.password});
+      }
     }
 
     if(!config){
@@ -108,7 +116,7 @@ export async function onStart(event,data) {
     }
 
     if(config && !config.promptedPasswordless){
-      log.info(tag," offer encryption ")
+      //log.info(tag," offer encryption ")
       //TODO
       //event.sender.send('navigation',{ dialog: 'PasswordCreate', action: 'open'})
       //return true
@@ -162,6 +170,10 @@ export async function onStart(event,data) {
         });
         WALLET_PASSWORD = randomChars[0]
         await App.updateConfig({temp:WALLET_PASSWORD});
+      } else {
+        //get password
+        event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+        return true
       }
     }
     if(!WALLET_PASSWORD) throw Error("Error: Password required! ")

@@ -34,9 +34,12 @@ let run_test = async function(){
         //
         //console.log("app: ",app)
 
+        let code = await app.createPairingCode()
+        console.log("code: ",code)
+
         //is paired?
-        let info = await app.getInfo()
-        console.log("info: ",info)
+        // let info = await app.getInfo()
+        // console.log("info: ",info)
 
         // if(!info){
         //     console.log("Not paired! ")
@@ -46,7 +49,7 @@ let run_test = async function(){
         // }
 
         //get user
-        let user = await app.getUserParams()
+        // let user = await app.getUserParams()
         //console.log("user: ",user)
 
         //binance

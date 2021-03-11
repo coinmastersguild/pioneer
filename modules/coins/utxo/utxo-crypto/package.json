@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/utxo-crypto",
-  "version": "6.2.0",
-  "main": "./lib/bin/index.js",
-  "types": "./lib/bin/main.d.ts",
+  "version": "6.2.2",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
   "scripts": {
-    "test": "ts-node __tests__/test-module.js",
+    "test": "npm run build && node __tests__/test-module.js",
     "start": "npm run build:live",
     "build": "tsc -p .",
     "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",

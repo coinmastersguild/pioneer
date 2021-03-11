@@ -13,13 +13,12 @@
           size="lg"
           label="pairing code"
           style="max-width: 400px;"
-          type="password"
           lazy-rules
           :rules="[ val => val && val.length > 0 || $t('msg.emptyPassword') ]">
         </q-input>
       </q-card-section>
       <q-card-actions align="center" class="column q-pb-lg">
-        <q-btn type="submit" color="primary" class="q-pl-md q-pr-md" style="font-size:1rem;" label="Pair App" :loading="loading" />
+        <q-btn @click="attemptPair" type="submit" color="primary" class="q-pl-md q-pr-md" style="font-size:1rem;" label="Pair App" :loading="loading" />
         <q-btn color="transparent" class="q-mt-md" flat @click="hideModal">Cancel</q-btn>
       </q-card-actions>
     </q-form>
@@ -44,7 +43,8 @@
     // },
     methods: {
       ...mapMutations(['hideModal']),
-      attemptPair: function (code) {
+      attemptPair: function () {
+        let code = this.pairingCode
         console.log('attemptPair: ',code)
         this.$q.electron.ipcRenderer.send('attemptPair', code);
       }

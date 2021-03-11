@@ -17,7 +17,8 @@ let network = require("../lib/index")
 //     })
 
 //tx
-// let tx = "80FA1B9C76B8A9FDA53FE1364ED0E46C8F77F5A2E31D5108C09AAC6BBCD7626E"
+// let tx = "73B3FA864CFD344E236FE89A1F25AE307A0F089354ACACD3922FDEA7108A23C3"
+// // let tx = "80FA1B9C76B8A9FDA53FE1364ED0E46C8F77F5A2E31D5108C09AAC6BBCD7626E"
 // network.transaction(tx)
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
@@ -27,8 +28,9 @@ let network = require("../lib/index")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
+//
 
-let address = "tthor1lqk43hvysuzymrgg08q45234z6jzth322y532t"
+let address = "tthor17t8al76t9g3hvak440kegn9xcdvxgal4gl7ejy"
 network.getBalance(address)
     .then(function(resp){
         console.log("resp: ",resp)

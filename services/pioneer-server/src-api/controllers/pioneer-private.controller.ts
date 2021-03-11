@@ -105,6 +105,7 @@ interface Pubkeys {
 }
 
 interface RegisterBody {
+    isTestnet?:boolean
     username:string
     data:RegisterBodyData,
     auth:string,
@@ -200,9 +201,11 @@ export class pioneerPrivateController extends Controller {
             log.debug(tag,"queryKey: ",authorization)
 
             let accountInfo = await redis.hgetall(authorization)
+            log.info(tag,"accountInfo: ",accountInfo)
+            let isTestnet = accountInfo.isTestnet || false
             let username = accountInfo.username
             if(!username) throw Error("unknown token! token:"+authorization)
-
+            log.info(tag,"isTestnet: ",isTestnet)
             //get cache
             let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
 
@@ -249,12 +252,16 @@ export class pioneerPrivateController extends Controller {
                 }
 
                 //import into wallet
+                log.info(tag,"isTestnet: ",isTestnet)
                 await network.init('full',{
                     pubkeys
-                })
+                },isTestnet)
                 //get wallet info
                 walletInfo = await network.getInfo()
                 walletInfo.username = username
+
+                log.info(tag,"walletInfo: ",walletInfo)
+
                 //write to cache
                 await redis.setex(accountInfo.username+":cache:walletInfo",600 * 5,JSON.stringify(walletInfo))
             }
@@ -671,7 +678,15 @@ export class pioneerPrivateController extends Controller {
 
             //if auth found in redis
             const authInfo = await redis.hgetall(authorization)
+            log.info(tag,"authInfo: ",authInfo)
+            let isTestnet = authInfo.isTestnet || false
+            if(body.isTestnet && Object.keys(authInfo).length != 0 && !isTestnet) throw Error(" Username already registerd on mainnet! please create a new")
             log.debug(tag,"authInfo: ",authInfo)
+
+            //isTestnet
+            if(body.isTestnet){
+                isTestnet = true
+            }
 
             let username
             if(Object.keys(authInfo).length > 0){
@@ -752,8 +767,9 @@ export class pioneerPrivateController extends Controller {
                     pubkeyIndex,
                     coinIndex
                 }
+                if(isTestnet) userInfo.isTestnet = true //NOTE: this saves as string if false
                 //save to mongo
-                log.debug(tag,"userInfo: ",userInfo)
+                log.info(tag,"userInfo: ",userInfo)
 
                 try{
                     let mongoSuccess =  await usersDB.insert(userInfo)

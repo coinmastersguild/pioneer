@@ -134,7 +134,40 @@ const NETWORKS:any = {
         pubKeyHash: 0x3d,
         scriptHash: 0x05,
         wif: 0xbd,
-    }
+    },
+    testnet: {
+        base: {
+            messagePrefix: "\x18Bitcoin Signed Message:\n",
+            bech32: "tb",
+            pubKeyHash: 0x6f,
+            scriptHash: 0xc4,
+            wif: 0xef,
+        },
+        p2sh: {
+            bip32: {
+                public: 0x043587cf,
+                private: 0x04358394,
+            },
+        },
+        p2pkh: {
+            bip32: {
+                public: 0x043587cf,
+                private: 0x04358394,
+            },
+        },
+        "p2sh-p2wpkh": {
+            bip32: {
+                public: 0x044a5262,
+                private: 0x044a4e28,
+            },
+        },
+        p2wpkh: {
+            bip32: {
+                public: 0x045f1cf6,
+                private: 0x045f18bc,
+            },
+        },
+    },
 }
 
 
@@ -205,26 +238,34 @@ module.exports = {
         log.debug("publicKey: ",publicKey)
         return publicKey.toString(`hex`)
     },
-    generateAddress: async function (coin:string,pubkey:any,type:any) {
+    generateAddress: async function (coin:string,pubkey:any,scriptType:string,isTestnet:boolean) {
         //
         let output:any
 
         switch(coin) {
             case 'BTC':
-                //if no type default to bech32
-                if(!type) type = 'bech32'
+                if(isTestnet){
+                    const { address } = bitcoin.payments.p2pkh({
+                        pubkey: Buffer.from(pubkey,'hex'),
+                        network: NETWORKS['testnet'].base
+                    })
+                    output = address
+                }else{
+                    //if no type default to bech32
+                    if(!scriptType) scriptType = 'bech32'
 
-                if(type === 'bech32'){
-                    const { address } = bitcoin.payments.p2wpkh({ pubkey: Buffer.from(pubkey,'hex') });
-                    output = address
-                } else if(type === 'legacy'){
-                    const { address } = bitcoin.payments.p2pkh({ pubkey: Buffer.from(pubkey,'hex') });
-                    output = address
+                    if(scriptType === 'bech32'){
+                        const { address } = bitcoin.payments.p2wpkh({ pubkey: Buffer.from(pubkey,'hex') });
+                        output = address
+                    } else if(scriptType === 'legacy'){
+                        const { address } = bitcoin.payments.p2pkh({ pubkey: Buffer.from(pubkey,'hex') });
+                        output = address
+                    }
                 }
+
 
                 break;
             default:
-
                 if(!NETWORKS[coin.toLowerCase()]) throw Error("103: unknown coin, no network found! coin: "+coin)
                 const { address } = bitcoin.payments.p2pkh({
                     pubkey: Buffer.from(pubkey,'hex'),

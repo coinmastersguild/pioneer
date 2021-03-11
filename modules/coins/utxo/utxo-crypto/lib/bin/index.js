@@ -182,22 +182,30 @@ module.exports = {
             return publicKey.toString(`hex`);
         });
     },
-    generateAddress: function (coin, pubkey, type) {
+    generateAddress: function (coin, pubkey, scriptType, isTestnet) {
         return __awaiter(this, void 0, void 0, function* () {
             //
             let output;
             switch (coin) {
                 case 'BTC':
-                    //if no type default to bech32
-                    if (!type)
-                        type = 'bech32';
-                    if (type === 'bech32') {
-                        const { address } = bitcoin.payments.p2wpkh({ pubkey: Buffer.from(pubkey, 'hex') });
-                        output = address;
+                    if (isTestnet) {
+                        const { address } = bitcoin.payments.p2pkh({
+                            pubkey: Buffer.from(pubkey, 'hex'),
+                            network: NETWORKS['testnet']
+                        });
                     }
-                    else if (type === 'legacy') {
-                        const { address } = bitcoin.payments.p2pkh({ pubkey: Buffer.from(pubkey, 'hex') });
-                        output = address;
+                    else {
+                        //if no type default to bech32
+                        if (!scriptType)
+                            scriptType = 'bech32';
+                        if (scriptType === 'bech32') {
+                            const { address } = bitcoin.payments.p2wpkh({ pubkey: Buffer.from(pubkey, 'hex') });
+                            output = address;
+                        }
+                        else if (scriptType === 'legacy') {
+                            const { address } = bitcoin.payments.p2pkh({ pubkey: Buffer.from(pubkey, 'hex') });
+                            output = address;
+                        }
                     }
                     break;
                 default:

@@ -78,7 +78,6 @@ var coinSelect = require('coinselect');
 //All paths
 //TODO make paths adjustable!
 var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
-var paths = getPaths();
 //support
 var support = __importStar(require("./support"));
 var web3_utils_1 = require("web3-utils");
@@ -178,9 +177,12 @@ module.exports = /** @class */ (function () {
         this.bip32ToAddressNList = function (path) {
             return hdwallet_core_1.bip32ToAddressNList(path);
         };
+        this.setMnemonic = function () {
+            return this.mnemonic;
+        };
         this.init = function () {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, pioneerAdapter, _a, _b, _c, i, pubkey, _d, _e, _f, _g, register, regsiterResponse, walletInfo, e_1;
+                var tag, pioneerAdapter, _a, _b, paths, isTestnet_1, _c, i, pubkey, _d, _e, _f, _g, register, regsiterResponse, walletInfo, e_1;
                 return __generator(this, function (_h) {
                     switch (_h.label) {
                         case 0:
@@ -204,24 +206,33 @@ module.exports = /** @class */ (function () {
                             if (config.mnemonic && config.wallet)
                                 throw Error("103: wallet collision! invalid config! ");
                             //TODO load wallet
+                            log.info(tag, "isTestnet: ", this.isTestnet);
                             //pair
                             _b = this;
                             return [4 /*yield*/, pioneerAdapter.pairDevice(config.username)];
                         case 3:
-                            //TODO load wallet
                             //pair
                             _b.WALLET = _h.sent();
-                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic })];
+                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet: this.isTestnet })];
                         case 4:
                             _h.sent();
+                            paths = getPaths(this.isTestnet);
+                            isTestnet_1 = this.WALLET.isTestnet();
+                            log.info(tag, "hdwallet isTestnet: ", isTestnet_1);
+                            log.debug(tag, "paths: ", paths);
                             _c = this;
-                            return [4 /*yield*/, this.WALLET.getPublicKeys(paths)];
+                            return [4 /*yield*/, this.WALLET.getPublicKeys(paths)
+                                //TODO verify hdwallet init successfull
+                            ];
                         case 5:
                             _c.pubkeys = _h.sent();
+                            //TODO verify hdwallet init successfull
+                            log.debug("pubkeys ", this.pubkeys);
                             log.debug("pubkeys.length ", this.pubkeys.length);
                             log.debug("paths.length ", paths.length);
                             for (i = 0; i < this.pubkeys.length; i++) {
                                 pubkey = this.pubkeys[i];
+                                log.debug(tag, "pubkey: ", pubkey);
                                 if (!pubkey)
                                     throw Error("empty pubkey!");
                                 if (!pubkey.coin) {
@@ -277,6 +288,7 @@ module.exports = /** @class */ (function () {
                         case 11:
                             _f.apply(_e, _g.concat([_h.sent()]));
                             register = {
+                                isTestnet: this.isTestnet,
                                 username: this.username,
                                 data: {
                                     pubkeys: this.pubkeys
@@ -326,6 +338,7 @@ module.exports = /** @class */ (function () {
             try {
                 var output = [];
                 if (format === 'keepkey') {
+                    var paths = getPaths(this.isTestnet);
                     for (var i = 0; i < paths.length; i++) {
                         var path = paths[i];
                         var pathForKeepkey = {};
@@ -339,6 +352,7 @@ module.exports = /** @class */ (function () {
                     }
                 }
                 else {
+                    var paths = getPaths(this.isTestnet);
                     output = paths;
                 }
                 return output;
@@ -600,7 +614,12 @@ module.exports = /** @class */ (function () {
                             break;
                         case 'RUNE':
                             // code block
-                            output = createBech32Address(publicKey, 'tthor');
+                            if (this.isTestnet) {
+                                output = createBech32Address(publicKey, 'tthor');
+                            }
+                            else {
+                                output = createBech32Address(publicKey, 'thor');
+                            }
                             break;
                         case 'ATOM':
                             // code block

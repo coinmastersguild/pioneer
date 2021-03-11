@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-network",
-  "version": "6.2.18",
+  "version": "6.2.19",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {

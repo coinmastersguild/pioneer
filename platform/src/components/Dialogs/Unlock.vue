@@ -3,7 +3,6 @@
     <q-form @submit.prevent.stop="tryLogin">
       <q-card-section class="q-pb-sm">
         <h4>Unlock Your Wallet</h4>
-        <p>ShapeShift protects your assets with a password.</p>
       </q-card-section>
       <q-card-section align="center" class="q-pt-sm">
         <q-input

@@ -51,6 +51,7 @@ module.exports = function (ctx) {
 
       // transpile: false,
       env: {
+        INSECURE_PASSWORD:true, //TODO dev mode only
         KEEPKEY_FEATURE:false,
         CREATE_SOFTWARE_FEATURE:false,
         PASSWORDLESS_FEATURE:false,

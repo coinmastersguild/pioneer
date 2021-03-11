@@ -25,6 +25,7 @@ const { menubar } = require('menubar');
 import {
   onStart,
   onLogin,
+  attemptPair,
   onCreate,
   onPairKeepkey,
   checkPioneerUrl,
@@ -275,16 +276,16 @@ ipcMain.on('onStart', async (event, data) => {
 //
 //  */
 //
-// ipcMain.on('onLogin', async (event, data) => {
-//   const tag = TAG + ' | onLogin | '
-//   try {
-//
-//     onLogin(event, data)
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
+ipcMain.on('onLogin', async (event, data) => {
+  const tag = TAG + ' | onLogin | '
+  try {
+
+    onLogin(event, data)
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
 //
 // //onTryPin
 // ipcMain.on('onTryPin', async (event, data) => {

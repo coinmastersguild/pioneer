@@ -71,7 +71,7 @@ module.exports = {
         }
         else if (settings.testnet) {
             //TODO if testnet
-            web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
+            web3 = new Web3(process.env['INFURA_TESTNET_ROPSTEN']);
         }
         else {
             //TODO if custom

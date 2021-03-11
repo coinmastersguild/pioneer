@@ -102,6 +102,7 @@ const models: TsoaRoute.Models = {
     "RegisterBody": {
         "dataType": "refObject",
         "properties": {
+            "isTestnet": {"dataType":"boolean"},
             "username": {"dataType":"string","required":true},
             "data": {"ref":"RegisterBodyData","required":true},
             "auth": {"dataType":"string","required":true},

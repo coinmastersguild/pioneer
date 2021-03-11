@@ -26,7 +26,6 @@ const coinSelect = require('coinselect')
 let {
     getPaths
 } = require('@pioneer-platform/pioneer-coins')
-let paths = getPaths()
 
 
 //support
@@ -274,14 +273,27 @@ module.exports = class wallet {
                         if(!config.mnemonic && !config.wallet) throw Error("102: mnemonic or wallet file required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
                         //TODO load wallet
+
+                        log.info(tag,"isTestnet: ",this.isTestnet)
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
-                        await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
+                        await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
+                        let paths = getPaths(this.isTestnet)
+
+                        //verify testnet
+                        const isTestnet = this.WALLET.isTestnet();
+                        log.info(tag,"hdwallet isTestnet: ",isTestnet)
+
+                        log.debug(tag,"paths: ",paths)
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
+                        //TODO verify hdwallet init successfull
+
+                        log.debug("pubkeys ",this.pubkeys)
                         log.debug("pubkeys.length ",this.pubkeys.length)
                         log.debug("paths.length ",paths.length)
                         for(let i = 0; i < this.pubkeys.length; i++){
                             let pubkey = this.pubkeys[i]
+                            log.debug(tag,"pubkey: ",pubkey)
                             if(!pubkey) throw Error("empty pubkey!")
                             if(!pubkey.coin){
                                 log.debug("pubkey: ",pubkey)
@@ -323,6 +335,7 @@ module.exports = class wallet {
                     log.debug("baseUrl: ",await this.pioneerClient.getBaseURL())
                     //API
                     let register = {
+                        isTestnet:this.isTestnet,
                         username:this.username,
                         data:{
                             pubkeys:this.pubkeys
@@ -369,6 +382,7 @@ module.exports = class wallet {
             try {
                 let output:any = []
                 if(format === 'keepkey'){
+                    let paths = getPaths(this.isTestnet)
                     for(let i = 0; i < paths.length; i++){
                         let path = paths[i]
                         let pathForKeepkey:any = {}
@@ -382,6 +396,7 @@ module.exports = class wallet {
                         output.push(pathForKeepkey)
                     }
                 } else {
+                    let paths = getPaths(this.isTestnet)
                     output = paths
                 }
                 return output
@@ -556,7 +571,12 @@ module.exports = class wallet {
                             break;
                         case 'RUNE':
                             // code block
-                            output = createBech32Address(publicKey,'tthor')
+                            if(this.isTestnet){
+                                output = createBech32Address(publicKey,'tthor')
+                            } else {
+                                output = createBech32Address(publicKey,'thor')
+                            }
+
                             break;
                         case 'ATOM':
                             // code block

@@ -68,7 +68,6 @@ let WALLET_PUBLIC = {};
 let WALLET_PRIVATE = {};
 let WALLET_PUBKEYS = [];
 let WALLET_PASSWORD = "";
-let WALLET_SEED;
 let APPROVE_QUEUE = [];
 //
 let SOCKET_CLIENT;
@@ -366,9 +365,6 @@ module.exports = {
     // },
     getCoins: function () {
         return ONLINE;
-    },
-    viewSeed: function () {
-        return WALLET_SEED;
     },
 };
 let pair_sdk_user = function (code) {

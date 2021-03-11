@@ -83,11 +83,8 @@ export class SDK {
                 let pairingBody:any = {
                     service:this.service
                 }
-                // console.log(tag,"this.pioneerApi: ",this.pioneerApi)
-                // console.log(tag,"this.pioneerApi: ",this.pioneerApi.instance)
-                let result = await this.pioneerApi.instance.CreatePairingCode(null, pairingBody)
-
-                return result
+                let result = await this.pioneerApi.CreatePairingCode(null, pairingBody)
+                return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
