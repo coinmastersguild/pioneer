@@ -25,7 +25,7 @@ let run_test = async function(){
         console.log("spec: ",spec)
         console.log("SDK: ",config)
 
-        let app = new SDK("http://127.0.0.1:9001/spec/swagger.json",config)
+        let app = new SDK("http://127.0.0.1:9001/spec/swagger.json",config,true)
         console.log("app: ",app)
 
 

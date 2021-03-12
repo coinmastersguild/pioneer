@@ -194,6 +194,16 @@ export async function onStart(event,data) {
       return true
     }
 
+    let isTestnet
+    //if feature flag mainnet
+    if(process.env['MAINNET_FEATURE']){
+      //TODO offer promt?
+    } else {
+      isTestnet = true
+      config.isTestnet = isTestnet
+    }
+
+
     //start App
     if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")
     config.password = WALLET_PASSWORD

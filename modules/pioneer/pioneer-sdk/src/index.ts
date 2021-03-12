@@ -5,8 +5,6 @@
 
  */
 
-import { Asset, BaseAmount } from '@bithighlander/xchain-util'
-
 const TAG = " | Pioneer-sdk | "
 const log = require("@pioneer-platform/loggerdog")()
 
@@ -42,16 +40,15 @@ export class SDK {
     private createPairingCode: () => Promise<any>;
     private queryKey: string;
     private service: string;
-    private network: any;
     private getInfo: () => Promise<any>;
     private isTestnet: boolean;
     private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
-    constructor(spec:string,config:any) {
+    constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
-        if(config.network === 'mainnet'){
-            this.isTestnet = false
-        } else {
+        if(isTestnet){
             this.isTestnet = true
+        } else {
+            this.isTestnet = false
         }
         this.config = config
         this.spec = spec || config.spec

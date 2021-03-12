@@ -11,7 +11,10 @@
       </q-item>
       <small><animated-number :value="totalValueUsd" :formatValue="formatToPriceUSD" :duration="duration"/></small>
 
-      <AppSwitcher />
+      <div v-if="featureApps">
+        <AppSwitcher />
+      </div>
+
 
       <div v-if="keepkeyConnected && featureKeepkey">
         <q-item clickable to="/keepkey" class="justify-center user-header" style="padding-top: 30px">
@@ -43,7 +46,6 @@
         <q-menu fit :offset="[-16, -3]">
           <q-list style="min-width: 100px">
             <q-list>
-              <q-item-label header>Settings</q-item-label>
               <q-item v-if="featureAddWallet" tag="label" v-ripple>
                 <q-item-section>
                   <q-item-label @click="onAddWallet">Add Wallet <q-icon name="add"></q-icon> </q-item-label>
@@ -82,8 +84,8 @@
               @click="showModal('Pair')"
               class="column justify-center align-center"
             >
-              <q-item-section avatar class="items-center">
-                Pair with App: <q-icon name="connect" />
+              <q-item-section>
+                Pair <q-icon name="connect" />
               </q-item-section>
             </q-item>
           </q-list>
@@ -108,6 +110,7 @@ import AppModal from '../components/Dialog';
 import { mapMutations, mapGetters } from 'vuex';
 
 //feature flags
+let featureApps = process.env['APPS_FEATURE']
 let featureKeepkey = process.env['KEEPKEY_FEATURE']
 let featureUiTheme = process.env['UI_THEME_FEATURE']
 let featureUiLightMode = process.env['UI_LIGHT_MODE_FEATURE']
@@ -125,6 +128,7 @@ export default {
   },
   data() {
     return {
+      featureApps,
       featureKeepkey,
       featureUiTheme,
       featureUiLightMode,

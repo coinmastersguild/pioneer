@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "7.0.31",
+  "version": "7.0.34",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -16,15 +16,15 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@babel/runtime": "^7.13.8",
+    "@babel/runtime": "^7.13.10",
     "@peculiar/webcrypto": "latest",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer": "latest",
-    "@pioneer-platform/pioneer-coins": "latest",
+    "@pioneer-platform/pioneer": "^6.3.61",
+    "@pioneer-platform/pioneer-coins": "^6.2.18",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
     "@pioneer-platform/pioneer-hardware": "latest",
-    "@types/node": "^13.13.45",
+    "@types/node": "^13.13.46",
     "@types/uuid": "^8.3.0",
     "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@bithighlander/xchain-util": "latest",
-    "@pioneer-platform/pioneer": "latest",
+    "@pioneer-platform/pioneer": "^6.3.60",
     "@pioneer-platform/pioneer-coins": "latest",
     "@pioneer-platform/pioneer-xchain-client": "latest",
     "bignumber.js": "^9.0.1",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.45",
+    "@types/node": "^13.13.46",
     "@types/source-map-support": "^0.5.3",
     "jest": "^26.6.3",
     "onchange": "^7.1.0",

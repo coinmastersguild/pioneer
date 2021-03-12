@@ -19,7 +19,7 @@
       </q-card-section>
       <q-card-actions align="center" class="column q-pb-lg">
         <q-btn @click="attemptPair" type="submit" color="primary" class="q-pl-md q-pr-md" style="font-size:1rem;" label="Pair App" :loading="loading" />
-        <q-btn color="transparent" class="q-mt-md" flat @click="hideModal">Cancel</q-btn>
+        <q-btn class="q-mt-md" flat @click="hideModal">Cancel</q-btn>
       </q-card-actions>
     </q-form>
   </q-card>

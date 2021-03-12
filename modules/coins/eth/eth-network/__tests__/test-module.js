@@ -21,21 +21,26 @@ let address = process.env['TEST_ETH_MASTER']
 //         console.log(resp)
 //     })
 
+// network.getInfo()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
 // //getBalance
-network.getBalance(address)
-    .then(function(resp){
-        console.log(resp)
-    })
-
-network.getNonce(address)
-    .then(function(resp){
-        console.log(resp)
-    })
-
-network.getGasPrice(address)
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+//
+// network.getNonce(address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+//
+// network.getGasPrice(address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //
 // //getBalanceAddress

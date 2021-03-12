@@ -288,25 +288,37 @@ var get_transaction = function (txid) {
 };
 var check_online_status = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, networkName, _c, _d, e_6;
-        return __generator(this, function (_e) {
-            switch (_e.label) {
+        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_6;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
                     tag = TAG + " | check_online_status | ";
-                    _e.label = 1;
+                    _g.label = 1;
                 case 1:
-                    _e.trys.push([1, 6, , 7]);
+                    _g.trys.push([1, 8, , 9]);
                     output = {};
                     //isTestnet
                     _a = output;
                     return [4 /*yield*/, web3.eth.getNodeInfo()];
                 case 2:
                     //isTestnet
-                    _a.version = _e.sent();
+                    _a.version = _g.sent();
                     _b = output;
                     return [4 /*yield*/, web3.eth.getChainId()];
                 case 3:
-                    _b.chainId = _e.sent();
+                    _b.chainId = _g.sent();
+                    _c = output;
+                    return [4 /*yield*/, web3.eth.getBlockNumber()
+                        //TODO get peer count
+                    ];
+                case 4:
+                    _c.height = _g.sent();
+                    //TODO get peer count
+                    _d = output;
+                    return [4 /*yield*/, web3.eth.net.getPeerCount()];
+                case 5:
+                    //TODO get peer count
+                    _d.peers = _g.sent();
                     networkName = void 0;
                     switch (output.chainId.toString()) {
                         case "1":
@@ -329,25 +341,25 @@ var check_online_status = function () {
                     }
                     output.networkName = networkName;
                     //
-                    _c = output;
+                    _e = output;
                     return [4 /*yield*/, web3.eth.getGasPrice()
                         //
                     ];
-                case 4:
-                    //
-                    _c.gasPrice = _e.sent();
-                    //
-                    _d = output;
-                    return [4 /*yield*/, web3.eth.isSyncing()];
-                case 5:
-                    //
-                    _d.syncing = _e.sent();
-                    return [2 /*return*/, output];
                 case 6:
-                    e_6 = _e.sent();
+                    //
+                    _e.gasPrice = _g.sent();
+                    //
+                    _f = output;
+                    return [4 /*yield*/, web3.eth.isSyncing()];
+                case 7:
+                    //
+                    _f.syncing = _g.sent();
+                    return [2 /*return*/, output];
+                case 8:
+                    e_6 = _g.sent();
                     console.error(tag, e_6);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    return [3 /*break*/, 9];
+                case 9: return [2 /*return*/];
             }
         });
     });

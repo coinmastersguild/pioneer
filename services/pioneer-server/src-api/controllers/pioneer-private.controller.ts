@@ -242,13 +242,9 @@ export class pioneerPrivateController extends Controller {
                         log.error("Invalid pubkey found for user!")
                         //delete
                         await usersDB.remove({username})
-
                         //generate
-
-
                         //save
                     }
-
                 }
 
                 //import into wallet

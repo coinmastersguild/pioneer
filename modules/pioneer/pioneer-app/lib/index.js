@@ -89,8 +89,8 @@ let network;
 // var player = require('play-sound')(opts = {})
 let AUTONOMOUS = false;
 module.exports = {
-    init: function (config) {
-        return init_wallet(config);
+    init: function (config, isTestnet) {
+        return init_wallet(config, isTestnet);
     },
     initConfig: function (language) {
         return pioneer_config_1.innitConfig(language);
@@ -728,10 +728,12 @@ let backup_wallet = function () {
         }
     });
 };
-let create_wallet = function (type, wallet) {
+let create_wallet = function (type, wallet, isTestnet) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | create_wallet | ";
         try {
+            if (!isTestnet)
+                isTestnet = false;
             //if software
             switch (type) {
                 case "software":
@@ -764,6 +766,7 @@ let create_wallet = function (type, wallet) {
                         log.debug(tag, "seed_encrypted: ", seed_encrypted);
                         log.debug(tag, "hash: ", hash);
                         let walletNew = {
+                            isTestnet,
                             TYPE: "citadel",
                             seed_encrypted,
                             hash,
@@ -789,6 +792,7 @@ let create_wallet = function (type, wallet) {
                         throw Error("103: WALLET_PUBLIC require for keepkey wallets!");
                     log.debug("hardware watch create!");
                     let walletFileNew = {
+                        isTestnet,
                         WALLET_ID: "keepkey:" + wallet.deviceId,
                         TYPE: 'keepkey',
                         CREATED: new Date().getTime(),
@@ -822,14 +826,18 @@ let create_wallet = function (type, wallet) {
         }
     });
 };
-let init_wallet = function (config) {
+let init_wallet = function (config, isTestnet) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = TAG + " | init_wallet | ";
         try {
+            if (config.isTestnet)
+                isTestnet = true;
+            log.info(tag, "isTestnet: ", isTestnet);
             let output = {};
             //is keepkey connected?
             //init wallet
             if (config.keepkey) {
+                //TODO testnet flag?
                 let KEEPKEY = yield Hardware.start();
                 KEEPKEY.events.on('event', function (event) {
                     return __awaiter(this, void 0, void 0, function* () {
@@ -853,6 +861,7 @@ let init_wallet = function (config) {
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
             log.debug(tag, "wallets: ", wallets);
+            //TODO if testnet flag only show testnet wallets!
             output.walletFiles = wallets;
             output.wallets = [];
             if (!config.username)
@@ -904,6 +913,7 @@ let init_wallet = function (config) {
                         throw Error("102: invalid keepkey wallet!");
                     //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
                     let configPioneer = {
+                        isTestnet,
                         hardware: true,
                         vendor: "keepkey",
                         pubkeys: walletFile.pubkeys,
@@ -956,6 +966,7 @@ let init_wallet = function (config) {
                     // log.debug(tag,"mnemonic: ",mnemonic)
                     //load wallet to global
                     let configPioneer = {
+                        isTestnet,
                         mnemonic,
                         username: walletFile.username,
                         pioneerApi: true,
@@ -964,7 +975,8 @@ let init_wallet = function (config) {
                         spec: URL_PIONEER_SPEC,
                         queryKey: config.queryKey
                     };
-                    let wallet = new Pioneer('pioneer', configPioneer);
+                    log.info(tag, "configPioneer: ", configPioneer);
+                    let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
                     WALLETS_LOADED.push(wallet);
                     //init
                     let walletClient = yield wallet.init();
@@ -1013,9 +1025,11 @@ let init_wallet = function (config) {
             events.on('message', function (request) {
                 return __awaiter(this, void 0, void 0, function* () {
                     console.log("message: ", request);
+                    //TODO filter invocations by subscribers
+                    //TODO autonomousOn/Off
                     // @ts-ignore
-                    let txid = yield send_to_address(request.coin, request.address, request.amount, request.memo);
-                    console.log("txid: ", txid);
+                    // let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
+                    // console.log("txid: ", txid)
                     //update status on server
                     //add to history
                 });

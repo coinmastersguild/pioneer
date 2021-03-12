@@ -1111,6 +1111,13 @@ module.exports = /** @class */ (function () {
                             }));
                             if (fromAddress !== addressFrom)
                                 throw Error("Can not sign, address mismatch");
+                            log.info(tag, "******* signTx: ", JSON.stringify({
+                                addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
+                                chain_id: chain_id,
+                                account_number: account_number,
+                                sequence: sequence,
+                                tx: unsigned,
+                            }));
                             return [4 /*yield*/, this.WALLET.thorchainSignTx({
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
                                     chain_id: chain_id,

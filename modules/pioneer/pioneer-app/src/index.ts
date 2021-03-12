@@ -92,8 +92,8 @@ let network:any
 let AUTONOMOUS = false
 
 module.exports = {
-    init: function (config: any) {
-        return init_wallet(config);
+    init: function (config: any,isTestnet?:boolean) {
+        return init_wallet(config,isTestnet);
     },
     initConfig: function (language: any) {
         return innitConfig(language);
@@ -801,10 +801,10 @@ let backup_wallet = async function () {
     }
 };
 
-let create_wallet = async function (type:string,wallet:any) {
+let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
     let tag = " | create_wallet | ";
     try {
-
+        if(!isTestnet) isTestnet = false
         //if software
         switch(type){
             case "software":
@@ -839,6 +839,7 @@ let create_wallet = async function (type:string,wallet:any) {
                     log.debug(tag, "hash: ", hash);
 
                     let walletNew:any = {
+                        isTestnet,
                         TYPE:"citadel",
                         seed_encrypted,
                         hash,
@@ -864,6 +865,7 @@ let create_wallet = async function (type:string,wallet:any) {
 
                 log.debug("hardware watch create!")
                 let walletFileNew:any = {
+                    isTestnet,
                     WALLET_ID:"keepkey:"+wallet.deviceId,
                     TYPE:'keepkey',
                     CREATED: new Date().getTime(),
@@ -898,16 +900,17 @@ let create_wallet = async function (type:string,wallet:any) {
     }
 };
 
-let init_wallet = async function (config:any) {
+let init_wallet = async function (config:any,isTestnet?:boolean) {
     let tag = TAG+" | init_wallet | ";
     try {
-
-
+        if(config.isTestnet) isTestnet = true
+        log.info(tag,"isTestnet: ",isTestnet)
         let output:any = {}
         //is keepkey connected?
 
         //init wallet
         if(config.keepkey){
+            //TODO testnet flag?
             let KEEPKEY = await Hardware.start()
             KEEPKEY.events.on('event', async function(event:any) {
                 log.info("EVENT: ",event)
@@ -932,6 +935,7 @@ let init_wallet = async function (config:any) {
         //get wallets
         let wallets = await getWallets()
         log.debug(tag,"wallets: ",wallets)
+        //TODO if testnet flag only show testnet wallets!
         output.walletFiles = wallets
         output.wallets = []
         if(!config.username) config.username = "temp:"
@@ -980,6 +984,7 @@ let init_wallet = async function (config:any) {
                 if(!walletFile.pubkeys) throw Error("102: invalid keepkey wallet!")
                 //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
                 let configPioneer = {
+                    isTestnet,
                     hardware:true,
                     vendor:"keepkey",
                     pubkeys:walletFile.pubkeys,
@@ -1035,6 +1040,7 @@ let init_wallet = async function (config:any) {
                 // log.debug(tag,"mnemonic: ",mnemonic)
                 //load wallet to global
                 let configPioneer = {
+                    isTestnet,
                     mnemonic,
                     username:walletFile.username,
                     pioneerApi:true,
@@ -1043,7 +1049,8 @@ let init_wallet = async function (config:any) {
                     spec:URL_PIONEER_SPEC,
                     queryKey:config.queryKey
                 }
-                let wallet = new Pioneer('pioneer',configPioneer);
+                log.info(tag,"configPioneer: ",configPioneer)
+                let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
                 WALLETS_LOADED.push(wallet)
 
                 //init
@@ -1103,10 +1110,13 @@ let init_wallet = async function (config:any) {
         //on on invocations add to queue
         events.on('message', async function(request:any) {
             console.log("message: ", request)
+            //TODO filter invocations by subscribers
+
+            //TODO autonomousOn/Off
 
             // @ts-ignore
-            let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
-            console.log("txid: ", txid)
+            // let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
+            // console.log("txid: ", txid)
 
             //update status on server
 

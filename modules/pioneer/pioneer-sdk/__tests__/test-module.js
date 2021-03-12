@@ -24,7 +24,7 @@ let run_test = async function(){
         }
 
         //console.log(SDK)
-        let app = new SDK.SDK(spec,config)
+        let app = new SDK.SDK(spec,config,true)
         //console.log(app)
         await app.init()
 
@@ -34,19 +34,19 @@ let run_test = async function(){
         //
         //console.log("app: ",app)
 
-        let code = await app.createPairingCode()
-        console.log("code: ",code)
+        // let code = await app.createPairingCode()
+        // console.log("code: ",code)
 
         //is paired?
-        // let info = await app.getInfo()
-        // console.log("info: ",info)
+        let info = await app.getInfo()
+        console.log("info: ",info)
 
-        // if(!info){
-        //     console.log("Not paired! ")
-        //     //create pairing code
-        //     let code = await app.createPairingCode()
-        //     console.log("code: ",code)
-        // }
+        if(!info){
+            console.log("Not paired! ")
+            //create pairing code
+            let code = await app.createPairingCode()
+            console.log("code: ",code)
+        }
 
         //get user
         // let user = await app.getUserParams()

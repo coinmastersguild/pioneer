@@ -103,6 +103,7 @@ const EOS_TX_FEE="100"
 const EOS_BASE=1000
 
 export interface config {
+    isTestnet?: boolean;
     spec:string,
     env:string,
     mode:string,
@@ -244,7 +245,8 @@ module.exports = class wallet {
     private pioneerClient: any;
     private WALLET_BALANCES: any;
     private setMnemonic: () => string | undefined;
-    constructor(type:HDWALLETS,config:config,isTestnet:boolean) {
+    constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
+        if(config.isTestnet) isTestnet = true
         this.isTestnet = isTestnet || false
         this.mode = config.mode
         this.queryKey = config.queryKey
@@ -1059,6 +1061,14 @@ module.exports = class wallet {
                     }))
 
                     if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+
+                    log.info(tag,"******* signTx: ",JSON.stringify({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
 
                     let res = await this.WALLET.thorchainSignTx({
                         addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),

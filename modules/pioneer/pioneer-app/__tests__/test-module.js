@@ -41,6 +41,7 @@ let run_test = async function(){
         //if no config
         if(!config){
             let wallet1 = {
+                isTestnet:true,
                 mnemonic:seed_1,
                 username:username,
                 password
@@ -49,11 +50,13 @@ let run_test = async function(){
             //create wallet files
             let successCreate = await App.createWallet('software',wallet1)
             console.log("successCreate: ",successCreate)
+
             //init config
             //throw Error("Must setup!")
             //create
             //init config
             await App.initConfig("english");
+            App.updateConfig({isTestnet:true});
             App.updateConfig({username});
             App.updateConfig({temp:password});
             App.updateConfig({created: new Date().getTime()});
@@ -72,8 +75,8 @@ let run_test = async function(){
             console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("IGJNVY")
-            console.log("pairResult: ",pairResult)
+            // let pairResult = await App.pair("IGJNVY")
+            // console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()

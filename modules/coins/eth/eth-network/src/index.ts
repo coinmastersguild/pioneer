@@ -219,6 +219,11 @@ let check_online_status = async function(){
 
 		output.chainId = await web3.eth.getChainId()
 
+		output.height = await web3.eth.getBlockNumber()
+
+		//TODO get peer count
+		output.peers = await web3.eth.net.getPeerCount()
+
 		let networkName
 		switch (output.chainId.toString()) {
 			case "1":

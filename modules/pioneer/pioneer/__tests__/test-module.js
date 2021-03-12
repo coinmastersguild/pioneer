@@ -6,7 +6,7 @@ require("dotenv").config({path:'../../../../../.env'})
 const prettyjson = require('prettyjson');
 let WalletClass = require('../lib/index.js')
 
-// let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+//let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
 let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let walletName = "local_new_2"
@@ -25,6 +25,8 @@ let FAUCET_ADDRESSES = {
 let run_test = async function(){
     try{
         console.log("*** Running test module ***")
+
+
 
         //CLI export
         // let config =  {
@@ -93,7 +95,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:true, //Woo! testnet!
-            mnemonic: process.env['WALLET_TESTNET_DEV'],
+            mnemonic: process.env['WALLET_MOBILE_DEV'],
             username:walletName,
             pioneerApi:true,
             spec:urlSpec,
@@ -118,16 +120,16 @@ let run_test = async function(){
          */
         // console.log("info: ",prettyjson.render(info.public.RUNE))
         //
-        // //ATOM
+        // //RUNE
         // let masterRUNE = await Wallet.getMaster("RUNE")
         // console.log("masterRUNE: ",masterRUNE)
         //
         // let balanceRUNE = await Wallet.getBalance("RUNE")
         // console.log("balanceRUNE: ",balanceRUNE)
         //
-        // let address = "tthor1lqk43hvysuzymrgg08q45234z6jzth322y532t"
+        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
         // let amount = "0.01"
-        // let memo = "foobar2"
+        // let memo = ""
         //
         // let transfer = {
         //     coin:"RUNE",

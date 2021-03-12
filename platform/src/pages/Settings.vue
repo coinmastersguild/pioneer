@@ -3,7 +3,7 @@
     <!-- content -->
     <q-card inline>
       <q-card-section>
-        <h3>Settings</h3>
+        Settings
         <div class="text-h6">PioneerUrl: {{pioneerUrl}}</div>
         <div class="text-h6">username: {{username}}</div>
         <div class="text-subtitle2">queryKey: {{queryKey}}</div>
