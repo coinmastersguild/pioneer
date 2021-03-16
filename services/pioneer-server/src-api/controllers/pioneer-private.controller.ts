@@ -201,68 +201,76 @@ export class pioneerPrivateController extends Controller {
             log.debug(tag,"queryKey: ",authorization)
 
             let accountInfo = await redis.hgetall(authorization)
-            log.info(tag,"accountInfo: ",accountInfo)
-            let isTestnet = accountInfo.isTestnet || false
-            let username = accountInfo.username
-            if(!username) throw Error("unknown token! token:"+authorization)
-            log.info(tag,"isTestnet: ",isTestnet)
-            //get cache
-            let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
-
-            //TODO dont nerf cache! clear when new asset
-            if(walletInfo){
-                log.debug(tag,"user info cached!: ")
-                log.info(tag,"user info cached!: ",walletInfo)
-
-                try{
-                    walletInfo = JSON.parse(walletInfo)
-                    walletInfo.username = username
-                    return walletInfo;
-                }catch(e){
-                    throw Error("103: invalid cache!")
-                }
-            }else{
-                log.debug(tag,"user info cached!: ")
-                log.debug(tag,"username: ",username)
-                //get pubkeys from mongo
-                let userInfo = await usersDB.findOne({username})
-                if(!userInfo) {
-                    throw Error("102: unknown user! username: "+username)
-                }
-                log.debug(tag,"userInfo: ",userInfo)
-
-                //reformat
-                let pubkeys = {}
-                for(let i = 0; i < userInfo.pubkeys.length; i++){
-                    let pubkeyInfo = userInfo.pubkeys[i]
-                    pubkeys[pubkeyInfo.coin] = pubkeyInfo
-
-                    //validate (migrate)
-                    if(!pubkeys[pubkeyInfo.coin].script_type || !pubkeys[pubkeyInfo.coin].network ||!pubkeys[pubkeyInfo.coin].coin){
-                        log.error("Invalid pubkey found for user!")
-                        //delete
-                        await usersDB.remove({username})
-                        //generate
-                        //save
-                    }
-                }
-
-                //import into wallet
+            if(accountInfo){
+                log.info(tag,"accountInfo: ",accountInfo)
+                let isTestnet = accountInfo.isTestnet || false
+                let username = accountInfo.username
+                if(!username) throw Error("unknown token! token:"+authorization)
                 log.info(tag,"isTestnet: ",isTestnet)
-                await network.init('full',{
-                    pubkeys
-                },isTestnet)
-                //get wallet info
-                walletInfo = await network.getInfo()
-                walletInfo.username = username
+                //get cache
+                let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
 
-                log.info(tag,"walletInfo: ",walletInfo)
+                //TODO dont nerf cache! clear when new asset
+                if(walletInfo){
+                    log.debug(tag,"user info cached!: ")
+                    log.info(tag,"user info cached!: ",walletInfo)
 
-                //write to cache
-                await redis.setex(accountInfo.username+":cache:walletInfo",600 * 5,JSON.stringify(walletInfo))
+                    try{
+                        walletInfo = JSON.parse(walletInfo)
+                        walletInfo.username = username
+                        return walletInfo;
+                    }catch(e){
+                        throw Error("103: invalid cache!")
+                    }
+                }else{
+                    log.debug(tag,"user info cached!: ")
+                    log.debug(tag,"username: ",username)
+                    //get pubkeys from mongo
+                    let userInfo = await usersDB.findOne({username})
+                    if(!userInfo) {
+                        throw Error("102: unknown user! username: "+username)
+                    }
+                    log.debug(tag,"userInfo: ",userInfo)
+
+                    //reformat
+                    let pubkeys = {}
+                    for(let i = 0; i < userInfo.pubkeys.length; i++){
+                        let pubkeyInfo = userInfo.pubkeys[i]
+                        pubkeys[pubkeyInfo.coin] = pubkeyInfo
+
+                        //validate (migrate)
+                        if(!pubkeys[pubkeyInfo.coin].script_type || !pubkeys[pubkeyInfo.coin].network ||!pubkeys[pubkeyInfo.coin].coin){
+                            log.error("Invalid pubkey found for user!")
+                            //delete
+                            await usersDB.remove({username})
+                            //generate
+                            //save
+                        }
+                    }
+
+                    //import into wallet
+                    log.info(tag,"isTestnet: ",isTestnet)
+                    await network.init('full',{
+                        pubkeys
+                    },isTestnet)
+                    //get wallet info
+                    walletInfo = await network.getInfo()
+                    walletInfo.username = username
+
+                    log.info(tag,"walletInfo: ",walletInfo)
+
+                    //write to cache
+                    await redis.setex(accountInfo.username+":cache:walletInfo",600 * 5,JSON.stringify(walletInfo))
+                }
+
+                return walletInfo
+            }else{
+                return {
+                    error:true,
+                    message:"101: Token not found! auth: "+authorization
+                }
             }
 
-            return walletInfo
         }catch(e){
             let errorResp:Error = {
                 success:false,

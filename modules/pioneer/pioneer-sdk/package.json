@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-sdk",
-  "version": "0.0.10",
+  "version": "0.0.25",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@bithighlander/xchain-util": "latest",
-    "@pioneer-platform/pioneer": "^6.3.60",
-    "@pioneer-platform/pioneer-coins": "latest",
+    "@pioneer-platform/pioneer": "latest",
+    "@pioneer-platform/pioneer-coins": "^6.2.20",
     "@pioneer-platform/pioneer-xchain-client": "latest",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",

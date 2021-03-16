@@ -1,4 +1,5 @@
 require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
 
 // const colorize = require('json-colorizer');
 let midgard = require("../lib")
@@ -29,8 +30,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        // let addresses = await midgard.getPoolAddress()
-        // console.log("addresses: ",addresses)
+        let addresses = await midgard.getPoolAddress()
+        console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)

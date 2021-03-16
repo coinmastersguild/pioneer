@@ -25,15 +25,21 @@ network.init()
         //         console.log(resp)
         //     })
 
-        // network.utxosByXpub("TEST",process.env["TEST_BCH_XPUB"])
+        // console.log(process.env["TEST_BTC_TPUB"])
+        // network.getBalanceByXpub("TEST",process.env["TEST_BTC_TPUB"])
         //     .then(function(resp){
         //         console.log(resp)
         //     })
 
-        network.getBalanceByXpub("TEST",process.env["TEST_BCH_XPUB"])
+        network.utxosByXpub("TEST",process.env["TEST_BTC_TPUB"])
             .then(function(resp){
                 console.log(resp)
             })
+
+        // network.getBalanceByXpub("TEST",process.env["TEST_BCH_XPUB"])
+        //     .then(function(resp){
+        //         console.log(resp)
+        //     })
     })
 
 

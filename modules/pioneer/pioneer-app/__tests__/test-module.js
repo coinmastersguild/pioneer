@@ -72,15 +72,15 @@ let run_test = async function(){
 
             console.log("config: ",config)
             let resultInit = await App.init(config)
-            console.log("resultInit: ",resultInit)
+            //console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("IGJNVY")
-            // console.log("pairResult: ",pairResult)
+            let pairResult = await App.pair("DDW995")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
-            console.log("wallets: ",wallets)
+            //console.log("wallets: ",wallets)
 
             let context = wallets[0]
 

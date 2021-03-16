@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-xchain-client",
-  "version": "0.0.5",
+  "version": "0.0.16",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,16 +21,18 @@
   },
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
+    "@bithighlander/xchain-client": "latest",
     "@bithighlander/xchain-util": "latest",
     "@pioneer-platform/pioneer": "latest",
     "@pioneer-platform/pioneer-coins": "latest",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
+    "ethers": "^5.0.32",
     "prettyjson": "^1.2.1"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.45",
+    "@types/node": "^13.13.46",
     "@types/source-map-support": "^0.5.3",
     "jest": "^26.6.3",
     "onchange": "^7.1.0",

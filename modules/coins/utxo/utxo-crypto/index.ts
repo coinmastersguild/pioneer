@@ -34,6 +34,7 @@ enum COIN_SUPPORT_ENUM {
 
 const COIN_SUPPORT = [
     'BTC',
+    'TEST',
     // 'BCH',
     // 'DASH',
     // 'DGB',
@@ -44,6 +45,7 @@ const COIN_SUPPORT = [
 
 const SLIP_44:any = {
     BTC: 0,
+    TEST: 1,
     BCH:145,
     LTC: 2,
     DOGE: 3,
@@ -299,7 +301,7 @@ module.exports = {
 
         return {privateKey,publicKey}
     },
-    generateWalletFromSeed: async function (mnemonic:string) {
+    generateWalletFromSeed: async function (mnemonic:string,isTestnet?:boolean) {
         let output:Wallet = {
             coins:{}
         }
@@ -307,16 +309,20 @@ module.exports = {
         for(let i = 0; i < COIN_SUPPORT.length; i++){
             let coin = COIN_SUPPORT[i]
 
-            let path = "m/44'/"+SLIP_44[coin]+"'/0'"
+            let pathXpub = "m/44'/"+SLIP_44[coin]+"'/0'"
+            log.info("path: ",pathXpub)
+            const {xpub} = await deriveMasterKey(mnemonic,pathXpub)
 
-            const {masterKey,xpub} = await deriveMasterKey(mnemonic,path)
-            //
-            const { privateKey, publicKey } = deriveKeypair(masterKey,path)
+            let pathMaster = "m/44'/"+SLIP_44[coin]+"'/0'/0/0"
+            log.info("pathMaster: ",pathMaster)
+            const {masterKey} = await deriveMasterKey(mnemonic,pathXpub)
+
+            const { privateKey, publicKey } = deriveKeypair(masterKey,pathMaster)
             //const bnbAddress = createBNBAddress(publicKey)
 
             // let master = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0)
             let addressMaster:string = ""
-            if(coin === "BTC"){
+            if(coin === "BTC" && false){
                  const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
                  addressMaster = address
             } else {
@@ -325,12 +331,19 @@ module.exports = {
             }
 
             log.info(addressMaster)
-            let coinInfo: CoinInfo = {
+
+            let coinInfo: any = {
                 coin,
                 master:addressMaster,
                 privateKey:privateKey.toString('hex'),
                 publicKey:publicKey.toString(`hex`),
                 xpub
+            }
+
+            if(coin === "TEST"){
+                //get tpub
+                let tpub = await this.xpubConvert(xpub,'tpub')
+                coinInfo.tpub = tpub
             }
 
             if(coin === "BTC"){
@@ -386,7 +399,7 @@ async function deriveMasterKey(mnemonic:string,path:string) {
     let xpub = mk.publicExtendedKey
     log.debug("xpub: ",xpub)
 
-    let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0).publicKey
+    let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).publicKey
     log.debug("publicKey: ",publicKey)
 
     const masterKey = bip32.fromSeed(seed)

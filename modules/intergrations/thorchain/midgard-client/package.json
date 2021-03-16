@@ -4,6 +4,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
+    "@pioneer-platform/loggerdog": "0.0.1",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.0",
     "bitcoinjs-lib": "^5.2.0",

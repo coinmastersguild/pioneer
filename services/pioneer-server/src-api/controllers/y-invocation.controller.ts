@@ -5,6 +5,7 @@
 
 
  */
+
 let TAG = ' | API | '
 
 const pjson = require('../../package.json');
@@ -12,6 +13,7 @@ const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 let connection  = require("@pioneer-platform/default-mongo")
 let queue = require("@pioneer-platform/redis-queue")
+const short = require('short-uuid');
 
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
@@ -23,6 +25,7 @@ txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
 
 //globals
+let BLOCKING_TIMEOUT_INVOCATION = process.env['BLOCKING_TIMEOUT_INVOCATION'] || 30
 
 //rest-ts
 import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Request, Response, Header } from 'tsoa';
@@ -89,16 +92,40 @@ export class pioneerInvocationController extends Controller {
             //is user online?
             let onlineUsers = await redis.smembers("online")
             log.info(tag,"onlineUsers: ",onlineUsers)
+            log.info(tag,"username: ",body.invocation.username)
+
+            //else
+            //does user exist?
+                //does user exist on fio?
+
+            //
+            let invocationId = "pioneer:invocation:v0.01:"+body.invocation.chain+":"+short.generate()
 
             if(onlineUsers.indexOf(body.invocation.username) >= 0){
+
+                body.invocation.invocationId = invocationId
                 //send
                 publisher.publish("invocations",JSON.stringify(body.invocation))
-            } else {
-                //TODO queue for re-connect
 
+                //timeOut return early
+
+                //block till confirmation
+                // let txConfirmed = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
+                // output.success = true
+                // output.txid = txConfirmed
+
+                //HACK TODO actually send moniez!
+                output.success = true
+                output.txid = invocationId
+                // output.ttr = TODO measure time till response
+
+                return output
+            } else {
+                output.invocationId = invocationId
+                output.msg = "User is offline! username:"+body.invocation.username
+                return output
             }
 
-            return output
         }catch(e){
             let errorResp:Error = {
                 success:false,

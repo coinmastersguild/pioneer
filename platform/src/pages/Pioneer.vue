@@ -6,9 +6,25 @@
     </div>
     <q-page class="q-pt-xs" >
 
+      <q-card class="qr-code q-mb-xl q-mt-md">
+<!--        <q-card-section class="items-center text-center q-pt-xl q-pb-xl">-->
+<!--&lt;!&ndash;          <qr-code :value="from.address" />&ndash;&gt;-->
+<!--        </q-card-section>-->
+<!--        <q-separator />-->
+        <q-input borderless readonly v-model="from.address" class="q-pb-none borderless--transparent">
+          <template v-slot:append>
+            <q-btn round dense flat icon="file_copy" @click="copyAddress(from.address)">
+              <q-tooltip content-class="bg-primary" content-style="font-size: 0.75rem" :offset="[10, 10]">
+                {{copyText}}
+              </q-tooltip>
 
+            </q-btn>
+          </template>
+        </q-input>
+      </q-card>
+      <accountSelector v-model="from" label="Account" />
 
-<!--      <div id="content" style="width: 100%;">-->
+      <!--      <div id="content" style="width: 100%;">-->
 <!--        <grid-layout v-if="show"-->
 <!--                     :layout.sync="layout"-->
 <!--                     :col-num="12"-->
@@ -65,8 +81,10 @@
 </template>
 
 <script>
+  import accountSelector from '../components/AccountSelector'
   import { mapMutations, mapGetters } from 'vuex'
   import VueGridLayout from 'vue-grid-layout';
+  import { copyToClipboard } from 'quasar'
 
   export default {
     name: 'Pioneer',
@@ -82,6 +100,8 @@
         responsive: true,
         index: 0,
         show: false,
+        from: {address:'testingaddy'} || null,
+        copyText: 'Copy Address'
       }
     },
     mounted() {
@@ -98,6 +118,18 @@
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp']),
+      copyAddress (value) {
+        copyToClipboard(value)
+          .then(() => {
+            this.copied = 'Copied!'
+            setTimeout(() => {
+              this.copyText = 'Copy Address'
+            }, 2000)
+          })
+          .catch(() => {
+            // fail
+          })
+      }
     },
     components: {
       // GridLayout: VueGridLayout.GridLayout,

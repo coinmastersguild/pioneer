@@ -1,4 +1,5 @@
 export interface config {
+    isTestnet?: boolean;
     spec: string;
     env: string;
     mode: string;

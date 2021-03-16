@@ -4,25 +4,49 @@
         A typescript sdk for integration for native wallets
 
  */
-
-import { Asset, BaseAmount } from '@bithighlander/xchain-util'
-
+import BigNumber from 'bignumber.js'
+import { ethers, BigNumberish } from 'ethers'
 const TAG = " | Pioneer-sdk | "
 const log = require("@pioneer-platform/loggerdog")()
 
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
+import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
+
 let {
+    getPrecision,
     getExplorerUrl,
     getExplorerAddressUrl,
     getExplorerTxUrl
 } = require('@pioneer-platform/pioneer-coins')
 
+import {
+    Balances
+} from '@bithighlander/xchain-client'
+
+import {
+    Asset,
+    AssetETH,
+    baseAmount,
+    baseToAsset,
+    BaseAmount,
+    assetFromString,
+    assetAmount,
+    assetToBase,
+    assetToString,
+    ETHChain,
+} from '@bithighlander/xchain-util'
 
 /*
     import from xchain
  */
+
+type Amount<T> = {
+    type: T
+    amount: () => BigNumber
+    decimal: number
+}
 
 export type Address = string
 
@@ -32,8 +56,6 @@ export type Balance = {
     asset: Asset
     amount: BaseAmount
 }
-
-export type Balances = Balance[]
 
 export type TxType = 'transfer' | 'unknown'
 
@@ -124,6 +146,7 @@ export interface config {
 
 module.exports = class wallet {
     private spec: string;
+    private username: string;
     private pioneerApi: any;
     private info: any
     private init: () => Promise<any>;
@@ -137,17 +160,22 @@ module.exports = class wallet {
     private validateAddress: (coin: string, address: string) => any;
     private setPhrase: (coin: string, phrase: string) => any;
     private getBalance: (address?: Address, asset?:any) => any;
-    private getTransactions: (address?: Address, asset?:any) => any;
-    private getTransactionData: (address?: Address, asset?:any) => any;
-    private purgeClient: (address?: Address, asset?:any) => any;
-    private getFees: (params?: FeesParams) => any;
-    private transfer: (tx: any) => any;
+    private getTransactions!: (address?: Address, asset?: any) => any;
+    private getTransactionData!: (address?: Address, asset?: any) => any;
+    private purgeClient!: (address?: Address, asset?: any) => any;
+    private getFees!: (params?: FeesParams) => any;
+    private transfer!: (tx: any) => any;
     private isTestnet: boolean;
     private getBncClient: (() => void) | undefined;
     private bncClient?: any;
     private getAddress: () => any;
     private nativeAsset: string;
+    //ETH specific
+    private estimateFeesWithGasPricesAndLimits?: (params: any) => Promise<any>;
+    private getWallet: (() => any) | undefined;
+    private getProvider: (() => any) | undefined;
     constructor(spec:string,config:any) {
+        this.username = ''
         this.network = config.blockchain
         this.nativeAsset = config.nativeAsset
         this.service = config.service || 'unknown'
@@ -177,6 +205,7 @@ module.exports = class wallet {
                 let info = await this.pioneerApi.Info()
                 //TODO error handling
                 this.info = info.data
+                this.username = this.info.username
 
                 return this.pioneerApi
             }catch(e){
@@ -186,6 +215,8 @@ module.exports = class wallet {
         }
         /*
             Network specific functions
+
+            Binance:
          */
         if(this.network === 'binance'){
             this.getBncClient = function () {
@@ -212,6 +243,68 @@ module.exports = class wallet {
             //TODO getSingleAndMultiFees
             //TODO multiSend
 
+        }
+
+        /*
+            Network specific functions
+
+            Ethereum:
+         */
+        if(this.network === 'ethereum'){
+
+            this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
+                let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
+                try {
+                    let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
+                    response = response.data
+                    let output = {
+                        gasPrices:response.gasPrices,
+                        fees:{
+                            type: 'byte',
+                            average:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.average)
+                                }
+                            },
+                            fast:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fast)
+                                }
+                            },
+                            fastest:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fastest)
+                                }
+                            }
+                        }
+                    }
+
+                    return output
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.getWallet = function () {
+                let tag = TAG + " | getWallet | "
+                try {
+                    //TODO With hardware we dont have seed.
+                    //Inject with test seed for now and see what anarchy happens
+                    //In theory we only use this for a few contract special things
+                    return ethers.Wallet.fromMnemonic("alcohol woman abuse must during monitor noble actual mixed trade anger aisle")
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.getProvider = function () {
+                let tag = TAG + " | getProvider | "
+                try {
+                    return getDefaultProvider(this.network)
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
         }
 
         /*
@@ -278,13 +371,36 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getBalance = function (address?: Address, asset?: Asset) {
+        // @ts-ignore
+        this.getBalance = async function (address?: Address, asset?: Asset): Promise<Balances> {
             let tag = TAG + " | getBalance | "
             try {
                 //TODO if address
                 //request to api
 
-                return this.info.balances[this.nativeAsset]
+                let returnAssetAmount = ():number =>{
+                    return this.info.balances[this.nativeAsset]
+                }
+
+                let assetDescription: Asset = {
+                    // @ts-ignore
+                    chain:this.nativeAsset,
+                    symbol:this.nativeAsset,
+                    ticker:this.nativeAsset
+                }
+
+                log.info(tag,"returnAssetAmount",returnAssetAmount())
+
+                // @ts-ignore
+                const balances: Balances = [
+                    {
+                        asset: assetDescription,
+                        // @ts-ignore
+                        amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(this.nativeAsset))),
+                    },
+                ]
+
+                return balances
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -307,20 +423,44 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getFees = function (params?: FeesParams) {
+        this.getFees = async function (params?: FeesParams) {
             let tag = TAG + " | getFees | "
             try {
-                //TODO
-                return "high"
+                let output = await this.pioneerApi.getFees(params)
+                return output
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
-        this.transfer = function (tx:any) {
+        this.transfer = async function (tx:any) {
             let tag = TAG + " | transfer | "
             try {
-                //TODO
-                return "bla"
+                let coin = tx.asset.symbol
+                let amount = tx.amount.amount()
+                let to = tx.recipient
+                let memo = tx.memo || ''
+
+                let invocation = {
+                    username:this.username,
+                    coin,
+                    amount,
+                    to,
+                    memo
+                }
+
+                let request:any = {
+                    type:"payment",
+                    //TODO source
+                    //TODO auth
+                    //TODO sig
+                    invocation
+                }
+                //invocation
+                let result = await this.pioneerApi.Invocation('',request)
+
+                //
+
+                return result.data.txid
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

@@ -12,6 +12,7 @@
 
 const TAG = " | eth-network | "
 let Web3 = require('web3');
+import { ethers, BigNumberish, BigNumber } from 'ethers'
 //
 const Axios = require('axios')
 const https = require('https')
@@ -21,13 +22,57 @@ const axios = Axios.create({
 	})
 });
 
+import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
+import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
+
+import {
+	GasOracleResponse,
+	Network as EthNetwork,
+	ExplorerUrl,
+	TxOverrides,
+	GasPrices,
+	FeesParams,
+	FeesWithGasPricesAndLimits,
+	InfuraCreds,
+} from './types'
+
+import {
+	ETH_DECIMAL,
+	ethNetworkToXchains,
+	xchainNetworkToEths,
+	getTokenAddress,
+	validateAddress,
+	SIMPLE_GAS_COST,
+	BASE_TOKEN_GAS_COST,
+	getFee,
+	MAX_APPROVAL,
+	ETHAddress,
+	getDefaultGasPrices,
+	erc20ABI
+} from './utils'
+
+import {
+	Fees,
+	FeeOptionKey,
+	FeesParams as XFeesParams,
+} from '@xchainjs/xchain-client'
+
+
+import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
+import * as etherscanAPI from './etherscan-api'
+
 //
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
 
+import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+
 //
 let web3:any
+let ETHERSCAN:any
+let ETHPLORER:any
+let PROVIDER:any
 
 //TODO precision module
 let BASE = 1000000000000000000;
@@ -37,9 +82,17 @@ module.exports = {
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
+			ETHERSCAN = new EtherscanProvider('mainnet', process.env['ETHERSCAN_API_KEY'])
+			PROVIDER = new ethers.providers.InfuraProvider('mainnet', process.env['INFURA_API_KEY'])
+
 		} else if(settings.testnet){
-			//TODO if testnet
+			if(!process.env['INFURA_TESTNET_ROPSTEN']) throw Error("Missing INFURA_TESTNET_ROPSTEN")
+			if(!process.env['ETHERSCAN_API_KEY']) throw Error("Missing ETHERSCAN_API_KEY")
+
+			//if testnet
 			web3 = new Web3(process.env['INFURA_TESTNET_ROPSTEN']);
+			ETHERSCAN = new EtherscanProvider('ropsten', process.env['ETHERSCAN_API_KEY'])
+			PROVIDER = new ethers.providers.InfuraProvider('ropsten', process.env['INFURA_API_KEY'])
 		}else {
 			//TODO if custom
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -51,6 +104,18 @@ module.exports = {
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
 	},
+	getFees: function (params:any): Promise<any> {
+		return get_fees(params)
+	},
+	// getFees: function (params: XFeesParams & FeesParams): Promise<Fees> {
+	// 	return get_fees()
+	// },
+	// estimateGasNormalTx: function (address:string): Promise<BaseAmount> {
+	// 	return get_balance_tokens(address)
+	// },
+	// estimateGasERC20Tx: function (address:string): Promise<BaseAmount> {
+	// 	return get_balance_tokens(address)
+	// },
 	getGasPrice: function () {
 		return web3.eth.getGasPrice()
 	},
@@ -71,6 +136,98 @@ module.exports = {
 	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
+	}
+}
+
+let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParams){
+	let tag = TAG + " | get_gas_limit | "
+	try{
+		log.info(tag,"input: ",{ asset, recipient, amount, memo })
+		const txAmount = BigNumber.from(amount?.amount().toFixed())
+
+		let assetAddress
+		if (asset && assetToString(asset) !== assetToString(AssetETH)) {
+			assetAddress = getTokenAddress(asset)
+		}
+
+		let estimate
+
+		//NOTE: I changed the from to recipient because this module has no context to address of the sender.
+		// I hope I dont skrew the pooch and the differnce +-1 byte between addresses actually matter
+		if (assetAddress && assetAddress !== ETHAddress) {
+			// ERC20 gas estimate
+			const contract = new ethers.Contract(assetAddress, erc20ABI, PROVIDER)
+
+			estimate = await contract.estimateGas.transfer(recipient, txAmount, {
+				from: recipient,
+			})
+		} else {
+			// ETH gas estimate
+			const transactionRequest = {
+				from: recipient,
+				to: recipient,
+				value: txAmount,
+				data: memo ? toUtf8Bytes(memo) : undefined,
+			}
+
+			estimate = await PROVIDER.estimateGas(transactionRequest)
+		}
+
+		return estimate
+
+	}catch(e){
+		log.error(tag,e)
+		throw e
+	}
+}
+
+let get_fees = async function(params: XFeesParams & FeesParams){
+	let tag = TAG + " | broadcast_transaction | "
+	try{
+		const response: any = await etherscanAPI.getGasOracle(ETHERSCAN.baseUrl, ETHERSCAN.apiKey)
+
+		// Convert result of gas prices: `Gwei` -> `Wei`
+		const averageWei = parseUnits(response.SafeGasPrice, 'gwei')
+		const fastWei = parseUnits(response.ProposeGasPrice, 'gwei')
+		const fastestWei = parseUnits(response.FastGasPrice, 'gwei')
+
+		let gasPrices:any =  {
+			average: baseAmount(averageWei.toString(), ETH_DECIMAL),
+			fast: baseAmount(fastWei.toString(), ETH_DECIMAL),
+			fastest: baseAmount(fastestWei.toString(), ETH_DECIMAL),
+		}
+		const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
+
+		if(!params.amount || !params?.amount?.amount){
+			// @ts-ignore
+			params.amount = {
+				// @ts-ignore
+				amount:function(){ return .98 }
+			}
+		}
+
+		const gasLimit = await get_gas_limit({
+			asset: params.asset,
+			amount: params.amount,
+			recipient: params.recipient,
+			memo: params.memo,
+		})
+
+		let output = {
+			gasPrices,
+			fees: {
+				type: 'byte',
+				average: getFee({ gasPrice: averageGP, gasLimit }).amount().toString(),
+				fast: getFee({ gasPrice: fastGP, gasLimit }).amount().toString(),
+				fastest: getFee({ gasPrice: fastestGP, gasLimit }).amount().toString(),
+			},
+			gasLimit,
+		}
+
+		return output
+	}catch(e){
+		log.error(tag,e)
+		throw e
 	}
 }
 

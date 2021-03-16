@@ -997,7 +997,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     authProvider:'shapeshift'
                 }
                 log.debug(tag,"KEEPKEY init config: ",configPioneer)
-                let wallet = new Pioneer('keepkey',configPioneer);
+                let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
                 WALLETS_LOADED.push(wallet)
 
                 //init
@@ -1050,6 +1050,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     queryKey:config.queryKey
                 }
                 log.info(tag,"configPioneer: ",configPioneer)
+                log.info(tag,"isTestnet: ",isTestnet)
                 let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
                 WALLETS_LOADED.push(wallet)
 
@@ -1079,7 +1080,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 log.info(tag,"writeSuccessPub: ",writeSuccessPub)
 
                 //
-                log.info(tag,"pubkeys: ",info)
+                log.info(tag,"info: ",info)
 
                 //global total valueUSD
                 TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
@@ -1115,8 +1116,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             //TODO autonomousOn/Off
 
             // @ts-ignore
-            // let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
-            // console.log("txid: ", txid)
+            let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
+            console.log("txid: ", txid)
+
+            //push txid to invocationId
 
             //update status on server
 

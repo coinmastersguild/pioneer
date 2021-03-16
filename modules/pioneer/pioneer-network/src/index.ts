@@ -3,8 +3,6 @@
 
  */
 
-
-
 const TAG = " | Pioneer network | "
 
 
@@ -558,13 +556,19 @@ const get_wallet_info = async function () {
 
         //blockbook coins
         if(IS_TESTNET){
+            log.info(tag,"blockbook IS_TESTNET")
             for(let i = 0; i < coins.length; i++){
                 let coin = coins[i]
+                log.info(tag,"blockbook IS_TESTNET coin: ",coin)
                 if(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub ){
                     if(coin === 'BTC') {
-                        let balance = await blockbook.getBalanceByXpub('TEST',PUBLIC_WALLET[coin].xpub)
+                        log.info(tag,"BTC testnet blockbook tpub: ",PUBLIC_WALLET[coin].tpub)
+                        let balance = await blockbook.getBalanceByXpub('TEST',PUBLIC_WALLET[coin].tpub)
+                        log.info(tag,"BTC testnet blockbook balance: ",balance)
                         //get balance by xpub
                         balances[coin] = balance
+                    } else {
+                        log.error(" Asset not supprted on testnet! ")
                     }
                 }
             }

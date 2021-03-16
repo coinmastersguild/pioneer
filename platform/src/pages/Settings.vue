@@ -10,7 +10,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn @click="openEditConfig">edit config <q-icon name="settings"></q-icon></q-btn>
+<!--        <q-btn @click="openEditConfig">edit config <q-icon name="settings"></q-icon></q-btn>-->
         <q-btn @click="deleteConfig" color="red">delete config <q-icon name="warning"></q-icon></q-btn>
       </q-card-actions>
     </q-card>

@@ -320,7 +320,7 @@ let get_balance_by_addresses = async function(coin:string,addresses:any){
 let get_balance_by_address = async function(coin:string,address:string){
     let tag = TAG + " | get_balance_by_address | "
     try{
-    //
+        //
         let balanceInfo = await axios({method:'GET',url:URL_BLOCKBOOK_BTC+'/address/'+address})
 
 

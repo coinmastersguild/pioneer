@@ -12,6 +12,7 @@ const TAG = " | Pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 //TODO remove this dep
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
+const crypto = require("@pioneer-platform/utxo-crypto")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
@@ -288,6 +289,8 @@ module.exports = class wallet {
 
                         log.debug(tag,"paths: ",paths)
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
+
+
                         //TODO verify hdwallet init successfull
 
                         log.debug("pubkeys ",this.pubkeys)
@@ -300,6 +303,9 @@ module.exports = class wallet {
                             if(!pubkey.coin){
                                 log.debug("pubkey: ",pubkey)
                                 throw Error("Invalid pubkey!")
+                            }
+                            if(isTestnet){
+                                pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
                             }
                             this.PUBLIC_WALLET[pubkey.coin] = pubkey
                         }
@@ -758,7 +764,6 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
-
                 let coin = transaction.coin.toUpperCase()
                 let address = transaction.addressTo
                 let amount = transaction.amount
@@ -789,7 +794,15 @@ module.exports = class wallet {
                     //From mongo
                     // let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
                     //From blockbook
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({coin,xpub:this.PUBLIC_WALLET[coin].xpub})
+                    let input
+                    log.info(tag,"isTestnet: ",isTestnet)
+                    if(this.isTestnet){
+                        input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].tpub}
+                    }else{
+                        input = {coin,xpub:this.PUBLIC_WALLET[coin].xpub}
+                    }
+                    log.info(tag,"input: ",input)
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
                     unspentInputs = unspentInputs.data
                     log.info(tag,"unspentInputs: ",unspentInputs)
 
@@ -812,10 +825,18 @@ module.exports = class wallet {
                         utxos.push(utxo)
                     }
 
-                    //get fee level in sat/byte
-                    let feeRate = 1
-                    // let feeRate = await this.pioneerClient.instance.GetFee({coin})
-                    // if(!feeRate) throw Error("Can not build TX without fee Rate!")
+                    //if no utxo's
+                    if (utxos.length === 0){
+                        throw Error("101 YOUR BROKE! no UTXO's found! ")
+                    }
+
+                    //TODO get fee level in sat/byte
+                    // let feeRate = 1
+                    // let feeRate = await this.pioneerClient.instance.GetFeeInfo({coin})
+                    // feeRate = feeRate.data
+                    let feeRate = 20000
+                    log.info(tag,"feeRate: ",feeRate)
+                    if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
 
                     //TODO input selection
@@ -835,6 +856,8 @@ module.exports = class wallet {
                     log.info(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
                     let selectedResults = coinSelect(utxos, targets, feeRate)
                     log.info(tag,"result coinselect algo: ",selectedResults)
+
+
 
                     //TODO get long name for coin
 
@@ -864,7 +887,7 @@ module.exports = class wallet {
                         if(outputInfo.address){
                             //not change
                             let output = {
-                                address:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
+                                address,
                                 addressType:"spend",
                                 scriptType:"p2wpkh",//TODO more types
                                 amount:String(outputInfo.value),
@@ -874,7 +897,7 @@ module.exports = class wallet {
                         } else {
                             //change
                             let output = {
-                                address:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
+                                address:changeAddress,
                                 addressType:"spend",
                                 scriptType:"p2pkh",//TODO more types
                                 amount:String(outputInfo.value),
@@ -1394,7 +1417,11 @@ module.exports = class wallet {
             }
         }
         this.broadcastTransaction = function (coin:string, signedTx:BroadcastBody) {
-            signedTx.coin = coin
+            if(this.isTestnet){
+                signedTx.coin = "TEST"
+            }else{
+                signedTx.coin = coin
+            }
             return this.pioneerClient.instance.Broadcast(null,signedTx).data;
         }
     }

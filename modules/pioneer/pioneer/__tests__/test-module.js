@@ -95,7 +95,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:true, //Woo! testnet!
-            mnemonic: process.env['WALLET_MOBILE_DEV'],
+            mnemonic: process.env['WALLET_TESTNET_DEV'],
             username:walletName,
             pioneerApi:true,
             spec:urlSpec,
@@ -119,8 +119,8 @@ let run_test = async function(){
                THOR
          */
         // console.log("info: ",prettyjson.render(info.public.RUNE))
-        //
-        // //RUNE
+
+        //RUNE
         // let masterRUNE = await Wallet.getMaster("RUNE")
         // console.log("masterRUNE: ",masterRUNE)
         //
@@ -128,7 +128,7 @@ let run_test = async function(){
         // console.log("balanceRUNE: ",balanceRUNE)
         //
         // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-        // let amount = "0.01"
+        // let amount = "2"
         // let memo = ""
         //
         // let transfer = {
@@ -148,18 +148,18 @@ let run_test = async function(){
         /*
                BTC
          */
-        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+
         //
-        // //
-        // let masterBTC = await Wallet.getMaster("BTC")
-        // console.log("masterBTC: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BTC")
-        // console.log("balanceBTC: ",balanceBTC)
-        //
-        // let amount = "0.0001"
-        // let memo = null //Uses OP_RETURN outputs
-        // let feeLevel = 5
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+
+        let amount = "0.0001"
+        let memo = null //Uses OP_RETURN outputs
+        let feeLevel = 5
 
         //TODO coin control
         //TODO offer input override
@@ -170,12 +170,19 @@ let run_test = async function(){
         //     memo,
         //     feeLevel
         // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let transfer = {
+            coin:"BTC",
+            addressTo:"mwFBhs7o4TzLRtZ8XZDB39JmiZSPCCmgMn",
+            amount,
+            memo,
+            feeLevel
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BCH

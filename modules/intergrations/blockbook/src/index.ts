@@ -85,7 +85,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         log.debug(tag,"xpub: ",xpub)
         log.debug(tag,"BLOCKBOOKS: ",BLOCKBOOKS)
         let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
-        log.debug(tag,"output: ",output)
+        log.info(tag,"output: ",output)
 
         let balance = 0
 

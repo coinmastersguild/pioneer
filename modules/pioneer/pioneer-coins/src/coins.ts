@@ -8,13 +8,13 @@ const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
 const bech32 = require(`bech32`)
-
+import BigNumber from 'bignumber.js'
 
 import { getNetwork } from "./networks";
 let {
     getPaths,
 } = require('./paths')
-let paths = getPaths()
+
 
 enum HDWALLETS {
     'pioneer',
@@ -75,6 +75,74 @@ if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
 export enum PoScoins {
     'EOS',
     'ATOM'
+}
+
+const CURRENCY_DECIMALS:any = {
+    'btc': 8,
+    'rune': 8,
+    'dash': 8,
+    'atom': 6,
+    'ltc': 8,
+    'doge': 8,
+    'eth': 18,
+    'gnt': 18,
+    'usdt': 6,
+    'trx': 6,
+    'bnb': 8,
+    'poly': 18,
+    'gno': 18,
+    'sngls': 0,
+    'icn': 18,
+    'dgd': 9,
+    'mln': 18,
+    'rep': 18,
+    'swt': 18,
+    'wings': 18,
+    'trst': 6,
+    'rlc': 9,
+    'gup': 3,
+    'ant': 18,
+    'bat': 18,
+    'bnt': 18,
+    'snt': 18,
+    'nmr': 18,
+    'edg': 0,
+    'eos': 18,
+    'cvc': 8,
+    'link': 18,
+    'knc': 18,
+    'mtl': 8,
+    'pay': 18,
+    'fun': 8,
+    'dnt': 18,
+    'zrx': 18,
+    '1st': 18,
+    'omg': 18,
+    'salt': 8,
+    'rcn': 18,
+    'storj': 8,
+    'zil': 12,
+    'mana': 18,
+    'tusd': 18,
+    'ae': 18,
+    'dai': 18,
+    'mkr': 18
+}
+
+export function getPrecision(asset:string){
+    if(CURRENCY_DECIMALS[asset.toLowerCase()]){
+        return CURRENCY_DECIMALS[asset.toLowerCase()]
+    } else {
+        throw Error(" Unknown asset! "+asset)
+    }
+}
+
+export function nativeToBaseAmount(asset:string,amount:string){
+    if(!CURRENCY_DECIMALS[asset.toLowerCase()]) throw Error("Unknown asset!")
+
+    let output:any = parseFloat(amount) / Math.pow(10, CURRENCY_DECIMALS[asset.toLowerCase()]);
+    output = parseInt(output)
+    return output
 }
 
 export const stakingCoins = ["EOS", "ATOM"];
@@ -254,6 +322,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
     try {
         log.info(tag,"input: ",{format,pubkeys,pathsIn})
         if(!isTestnet) isTestnet = false
+        let paths = getPaths(isTestnet)
 
         //paths by symbol
         let pathsBySymbol:any = {}

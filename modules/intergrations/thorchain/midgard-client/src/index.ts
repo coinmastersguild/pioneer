@@ -18,8 +18,12 @@ let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 //let MIDGARD_API = "https://testnet-midgard.bepswap.com/v1"
 //let MIDGARD_API = "https://54.0.0.27/v1"
 //let MIDGARD_API = "https://testnet.multichain.midgard.thorchain.info/v2"
-const MIDGARD_API = 'http://174.138.103.9:8080/v1'
-let MIDGARD_API_RAW = 'https://testnet.thornode.thorchain.info'
+
+// const MIDGARD_API = 'http://174.138.103.9:8080/v1'
+// let MIDGARD_API_RAW = 'https://testnet.thornode.thorchain.info'
+
+const MIDGARD_API = 'https://midgard.thorchain.info/v2'
+let URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.thorchain.info'
 
 //http://174.138.103.9:8080/v1/doc
 
@@ -68,7 +72,7 @@ const get_new_addresses = async function () {
 
         let body = {
             method: 'GET',
-            url: MIDGARD_API_RAW+"/thorchain/inbound_addresses",
+            url: URL_THORNODE+"/thorchain/inbound_addresses",
             headers: {'content-type': 'application/json'},
         };
 
@@ -118,13 +122,13 @@ const get_pool_addresses = async function () {
 
         let body = {
             method: 'GET',
-            url: MIDGARD_API_RAW+"/thorchain/inbound_addresses",
+            url: URL_THORNODE+"/thorchain/inbound_addresses",
             headers: {'content-type': 'application/json'},
             // body: {account_name: actor},
             // json: true
         };
 
-        log.debug(body)
+        log.info(body)
         let resp = await axios(body)
 
 

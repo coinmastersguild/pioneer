@@ -926,7 +926,7 @@ let init_wallet = function (config, isTestnet) {
                         authProvider: 'shapeshift'
                     };
                     log.debug(tag, "KEEPKEY init config: ", configPioneer);
-                    let wallet = new Pioneer('keepkey', configPioneer);
+                    let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
                     WALLETS_LOADED.push(wallet);
                     //init
                     let walletClient = yield wallet.init();
@@ -976,6 +976,7 @@ let init_wallet = function (config, isTestnet) {
                         queryKey: config.queryKey
                     };
                     log.info(tag, "configPioneer: ", configPioneer);
+                    log.info(tag, "isTestnet: ", isTestnet);
                     let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
                     WALLETS_LOADED.push(wallet);
                     //init
@@ -999,7 +1000,7 @@ let init_wallet = function (config, isTestnet) {
                     let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
                     log.info(tag, "writeSuccessPub: ", writeSuccessPub);
                     //
-                    log.info(tag, "pubkeys: ", info);
+                    log.info(tag, "info: ", info);
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                     WALLET_VALUE_MAP[configPioneer.username] = info.totalValueUsd;
@@ -1028,8 +1029,9 @@ let init_wallet = function (config, isTestnet) {
                     //TODO filter invocations by subscribers
                     //TODO autonomousOn/Off
                     // @ts-ignore
-                    // let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
-                    // console.log("txid: ", txid)
+                    let txid = yield send_to_address(request.coin, request.address, request.amount, request.memo);
+                    console.log("txid: ", txid);
+                    //push txid to invocationId
                     //update status on server
                     //add to history
                 });

@@ -98,7 +98,8 @@ interface UnsignedUtxoRequest {
 let UTXO_COINS = [
     'BTC',
     'BCH',
-    'LTC'
+    'LTC',
+    'TEST'
 ]
 
 //route
@@ -343,8 +344,8 @@ export class pioneerPublicController extends Controller {
     /**
      *  Get Estimate Fee
      */
-    @Get('/getFee/{coin}')
-    public async getFee(coin:string) {
+    @Get('/getFeeInfo/{coin}')
+    public async getFeeInfo(coin:string) {
         let tag = TAG + " | getFee | "
         try{
             let output
@@ -647,6 +648,64 @@ export class pioneerPublicController extends Controller {
      *
      */
 
+    //multi chain
+    @Post('/getFee')
+    public async getFee(@Body() body: any): Promise<any> {
+        let tag = TAG + " | getFee | "
+        try{
+            log.info(tag,"mempool tx: ",body)
+
+            //TODO filter by body.asset.chain
+            //if()
+
+            let feeResult = networks['ETH'].getFees(body)
+
+            //save to mongo
+
+
+            return(feeResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    //ETH only
+    @Post('/estimateFeesWithGasPricesAndLimits')
+    public async estimateFeesWithGasPricesAndLimits(@Body() body: any): Promise<any> {
+        let tag = TAG + " | getFee | "
+        try{
+            log.info(tag,"mempool tx: ",body)
+
+            //TODO filter by body.asset.chain
+            //if()
+
+            //TODO handle mainnet/testnet switch
+            networks.ETH.init({testnet:true})
+
+            console.log("networks['ETH']: ",networks['ETH'])
+            let feeResult = networks['ETH'].getFees(body)
+
+            //save to mongo
+
+
+            return(feeResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
     @Post('/pushTx')
     public async pushTx(@Body() body: any): Promise<any> {
         let tag = TAG + " | pushTx | "
@@ -712,6 +771,7 @@ export class pioneerPublicController extends Controller {
             log.info(tag,"body: ",body)
             let coin = body.coin
             //if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
+
 
             //broadcast
             let result

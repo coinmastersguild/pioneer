@@ -1,7 +1,7 @@
 declare const TAG = " | midgard network | ";
 declare let SEED_TESTNET: string;
-declare const MIDGARD_API = "http://174.138.103.9:8080/v1";
-declare let MIDGARD_API_RAW: string;
+declare const MIDGARD_API = "https://midgard.thorchain.info/v2";
+declare let URL_THORNODE: string;
 declare const Axios: any;
 declare const https: any;
 declare const axios: any;

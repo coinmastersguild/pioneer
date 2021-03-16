@@ -9,6 +9,25 @@
 
 
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -45,8 +64,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TAG = " | eth-network | ";
 var Web3 = require('web3');
+var ethers_1 = require("ethers");
 //
 var Axios = require('axios');
 var https = require('https');
@@ -55,12 +76,20 @@ var axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+var providers_1 = require("@ethersproject/providers");
+var utils_1 = require("./utils");
+var xchain_util_1 = require("@xchainjs/xchain-util");
+var etherscanAPI = __importStar(require("./etherscan-api"));
 //
 var tokenData = require("@pioneer-platform/pioneer-eth-token-data");
 var log = require('@pioneer-platform/loggerdog')();
 var ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey';
+var utils_2 = require("ethers/lib/utils");
 //
 var web3;
+var ETHERSCAN;
+var ETHPLORER;
+var PROVIDER;
 //TODO precision module
 var BASE = 1000000000000000000;
 module.exports = {
@@ -68,10 +97,18 @@ module.exports = {
         if (!settings) {
             //use default
             web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
+            ETHERSCAN = new providers_1.EtherscanProvider('mainnet', process.env['ETHERSCAN_API_KEY']);
+            PROVIDER = new ethers_1.ethers.providers.InfuraProvider('mainnet', process.env['INFURA_API_KEY']);
         }
         else if (settings.testnet) {
-            //TODO if testnet
+            if (!process.env['INFURA_TESTNET_ROPSTEN'])
+                throw Error("Missing INFURA_TESTNET_ROPSTEN");
+            if (!process.env['ETHERSCAN_API_KEY'])
+                throw Error("Missing ETHERSCAN_API_KEY");
+            //if testnet
             web3 = new Web3(process.env['INFURA_TESTNET_ROPSTEN']);
+            ETHERSCAN = new providers_1.EtherscanProvider('ropsten', process.env['ETHERSCAN_API_KEY']);
+            PROVIDER = new ethers_1.ethers.providers.InfuraProvider('ropsten', process.env['INFURA_API_KEY']);
         }
         else {
             //TODO if custom
@@ -84,6 +121,18 @@ module.exports = {
     getNonce: function (address) {
         return web3.eth.getTransactionCount(address, 'pending');
     },
+    getFees: function (params) {
+        return get_fees(params);
+    },
+    // getFees: function (params: XFeesParams & FeesParams): Promise<Fees> {
+    // 	return get_fees()
+    // },
+    // estimateGasNormalTx: function (address:string): Promise<BaseAmount> {
+    // 	return get_balance_tokens(address)
+    // },
+    // estimateGasERC20Tx: function (address:string): Promise<BaseAmount> {
+    // 	return get_balance_tokens(address)
+    // },
     getGasPrice: function () {
         return web3.eth.getGasPrice();
     },
@@ -106,9 +155,116 @@ module.exports = {
         return broadcast_transaction(tx);
     }
 };
+var get_gas_limit = function (_a) {
+    var asset = _a.asset, recipient = _a.recipient, amount = _a.amount, memo = _a.memo;
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, txAmount, assetAddress, estimate, contract, transactionRequest, e_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tag = TAG + " | get_gas_limit | ";
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 6, , 7]);
+                    log.info(tag, "input: ", { asset: asset, recipient: recipient, amount: amount, memo: memo });
+                    txAmount = ethers_1.BigNumber.from(amount === null || amount === void 0 ? void 0 : amount.amount().toFixed());
+                    assetAddress = void 0;
+                    if (asset && xchain_util_1.assetToString(asset) !== xchain_util_1.assetToString(xchain_util_1.AssetETH)) {
+                        assetAddress = utils_1.getTokenAddress(asset);
+                    }
+                    estimate = void 0;
+                    if (!(assetAddress && assetAddress !== utils_1.ETHAddress)) return [3 /*break*/, 3];
+                    contract = new ethers_1.ethers.Contract(assetAddress, utils_1.erc20ABI, PROVIDER);
+                    return [4 /*yield*/, contract.estimateGas.transfer(recipient, txAmount, {
+                            from: recipient,
+                        })];
+                case 2:
+                    estimate = _b.sent();
+                    return [3 /*break*/, 5];
+                case 3:
+                    transactionRequest = {
+                        from: recipient,
+                        to: recipient,
+                        value: txAmount,
+                        data: memo ? utils_2.toUtf8Bytes(memo) : undefined,
+                    };
+                    return [4 /*yield*/, PROVIDER.estimateGas(transactionRequest)];
+                case 4:
+                    estimate = _b.sent();
+                    _b.label = 5;
+                case 5: return [2 /*return*/, estimate];
+                case 6:
+                    e_1 = _b.sent();
+                    log.error(tag, e_1);
+                    throw e_1;
+                case 7: return [2 /*return*/];
+            }
+        });
+    });
+};
+var get_fees = function (params) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, response, averageWei, fastWei, fastestWei, gasPrices, fastGP, fastestGP, averageGP, gasLimit, output, e_2;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tag = TAG + " | broadcast_transaction | ";
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, etherscanAPI.getGasOracle(ETHERSCAN.baseUrl, ETHERSCAN.apiKey)
+                        // Convert result of gas prices: `Gwei` -> `Wei`
+                    ];
+                case 2:
+                    response = _b.sent();
+                    averageWei = utils_2.parseUnits(response.SafeGasPrice, 'gwei');
+                    fastWei = utils_2.parseUnits(response.ProposeGasPrice, 'gwei');
+                    fastestWei = utils_2.parseUnits(response.FastGasPrice, 'gwei');
+                    gasPrices = {
+                        average: xchain_util_1.baseAmount(averageWei.toString(), utils_1.ETH_DECIMAL),
+                        fast: xchain_util_1.baseAmount(fastWei.toString(), utils_1.ETH_DECIMAL),
+                        fastest: xchain_util_1.baseAmount(fastestWei.toString(), utils_1.ETH_DECIMAL),
+                    };
+                    fastGP = gasPrices.fast, fastestGP = gasPrices.fastest, averageGP = gasPrices.average;
+                    if (!params.amount || !((_a = params === null || params === void 0 ? void 0 : params.amount) === null || _a === void 0 ? void 0 : _a.amount)) {
+                        // @ts-ignore
+                        params.amount = {
+                            // @ts-ignore
+                            amount: function () { return .98; }
+                        };
+                    }
+                    return [4 /*yield*/, get_gas_limit({
+                            asset: params.asset,
+                            amount: params.amount,
+                            recipient: params.recipient,
+                            memo: params.memo,
+                        })];
+                case 3:
+                    gasLimit = _b.sent();
+                    output = {
+                        gasPrices: gasPrices,
+                        fees: {
+                            type: 'byte',
+                            average: utils_1.getFee({ gasPrice: averageGP, gasLimit: gasLimit }).amount().toString(),
+                            fast: utils_1.getFee({ gasPrice: fastGP, gasLimit: gasLimit }).amount().toString(),
+                            fastest: utils_1.getFee({ gasPrice: fastestGP, gasLimit: gasLimit }).amount().toString(),
+                        },
+                        gasLimit: gasLimit,
+                    };
+                    return [2 /*return*/, output];
+                case 4:
+                    e_2 = _b.sent();
+                    log.error(tag, e_2);
+                    throw e_2;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+};
 var broadcast_transaction = function (tx) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, result, output, e_1;
+        var tag, result, output, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -130,9 +286,9 @@ var broadcast_transaction = function (tx) {
                     };
                     return [2 /*return*/, output];
                 case 3:
-                    e_1 = _a.sent();
-                    log.error(tag, e_1);
-                    throw e_1;
+                    e_3 = _a.sent();
+                    log.error(tag, e_3);
+                    throw e_3;
                 case 4: return [2 /*return*/];
             }
         });
@@ -140,7 +296,7 @@ var broadcast_transaction = function (tx) {
 };
 var get_balance_tokens = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_2;
+        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -185,8 +341,8 @@ var get_balance_tokens = function (address) {
                     }
                     return [2 /*return*/, { balances: balances, valueUsds: valueUsds, coinInfo: coinInfo }];
                 case 3:
-                    e_2 = _a.sent();
-                    console.error(tag, e_2);
+                    e_4 = _a.sent();
+                    console.error(tag, e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -195,7 +351,7 @@ var get_balance_tokens = function (address) {
 };
 var get_balance_token = function (address, token) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, abiInfo, ABI, metaData, contract, balance, e_3;
+        var tag, abiInfo, ABI, metaData, contract, balance, e_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -218,8 +374,8 @@ var get_balance_token = function (address, token) {
                     log.info(tag, "balance: ", balance);
                     return [2 /*return*/, balance / metaData.BASE];
                 case 3:
-                    e_3 = _a.sent();
-                    console.error(tag, e_3);
+                    e_5 = _a.sent();
+                    console.error(tag, e_5);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -228,7 +384,7 @@ var get_balance_token = function (address, token) {
 };
 var get_balance = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_4;
+        var tag, output, e_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -243,8 +399,8 @@ var get_balance = function (address) {
                     output = (_a.sent()) / BASE;
                     return [2 /*return*/, output];
                 case 3:
-                    e_4 = _a.sent();
-                    console.error(tag, e_4);
+                    e_6 = _a.sent();
+                    console.error(tag, e_6);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -253,7 +409,7 @@ var get_balance = function (address) {
 };
 var get_transaction = function (txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, e_5;
+        var tag, output, _a, _b, e_7;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -278,8 +434,8 @@ var get_transaction = function (txid) {
                     _b.receipt = _c.sent();
                     return [2 /*return*/, output];
                 case 4:
-                    e_5 = _c.sent();
-                    console.error(tag, e_5);
+                    e_7 = _c.sent();
+                    console.error(tag, e_7);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -288,7 +444,7 @@ var get_transaction = function (txid) {
 };
 var check_online_status = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_6;
+        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_8;
         return __generator(this, function (_g) {
             switch (_g.label) {
                 case 0:
@@ -356,8 +512,8 @@ var check_online_status = function () {
                     _f.syncing = _g.sent();
                     return [2 /*return*/, output];
                 case 8:
-                    e_6 = _g.sent();
-                    console.error(tag, e_6);
+                    e_8 = _g.sent();
+                    console.error(tag, e_8);
                     return [3 /*break*/, 9];
                 case 9: return [2 /*return*/];
             }
