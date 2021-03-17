@@ -833,7 +833,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -894,7 +894,7 @@ module.exports = /** @class */ (function () {
                                     path: input_1.path
                                     //TODO if segwit
                                     // witnessUtxo: {
-                                    //     script: Buffer.from('... scriptPubkey hex...', 'hex'),
+                                    //     script: Buffer.from(input.hex, 'hex'),
                                     //     value: 10000 // 0.0001 BTC and is the exact same as the value above
                                     // }
                                 };
@@ -904,7 +904,7 @@ module.exports = /** @class */ (function () {
                             if (utxos.length === 0) {
                                 throw Error("101 YOUR BROKE! no UTXO's found! ");
                             }
-                            feeRate = 20000;
+                            feeRate = 20;
                             log.info(tag, "feeRate: ", feeRate);
                             if (!feeRate)
                                 throw Error("Can not build TX without fee Rate!");
@@ -921,6 +921,10 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "inputs coinselect algo: ", { utxos: utxos, targets: targets, feeRate: feeRate });
                             selectedResults = coinSelect(utxos, targets, feeRate);
                             log.info(tag, "result coinselect algo: ", selectedResults);
+                            //if
+                            if (!selectedResults.inputs) {
+                                throw Error("Fee exceeded totdal availble inputs!");
+                            }
                             inputs = [];
                             outputs = [];
                             for (i = 0; i < selectedResults.inputs.length; i++) {
@@ -970,8 +974,12 @@ module.exports = /** @class */ (function () {
                                 version: 1,
                                 locktime: 0,
                             }));
+                            longName = 'Bitcoin';
+                            if (isTestnet) {
+                                longName = 'Testnet';
+                            }
                             return [4 /*yield*/, this.WALLET.btcSignTx({
-                                    coin: "Bitcoin",
+                                    coin: longName,
                                     inputs: inputs,
                                     outputs: outputs,
                                     version: 1,

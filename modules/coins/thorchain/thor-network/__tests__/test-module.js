@@ -15,8 +15,8 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-//tx
-//let tx = "4CF2C0FCA2C04301C7085F78833CD1B5A6CA7B371D47BCEE08C5DAD53C2C9196"
+// tx
+// let tx = "4CF2C0FCA2C04301C7085F78833CD1B5A6CA7B371D47BCEE08C5DAD53C2C9196"
 // network.transaction(tx)
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
@@ -28,19 +28,19 @@ let network = require("../lib/index")
 //     })
 
 
-let address = "tthor1s8jgmfta3008lemq3x2673lhdv3qqrhw4kpvwj"
-network.getBalance(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
 // console.log("address: ",address)
-network.getAccount(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getAccount(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
@@ -63,8 +63,8 @@ network.getAccount(address)
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
-// console.log("address: ",address)
-// network.txs(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+console.log("address: ",address)
+network.txs(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })

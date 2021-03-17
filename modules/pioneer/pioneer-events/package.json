@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "7.0.5",
+  "version": "7.0.6",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

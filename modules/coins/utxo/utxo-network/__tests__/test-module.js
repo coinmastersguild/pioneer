@@ -4,6 +4,12 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 network.init('full')
 
+let memo = "thisisjustatestbro"
+network.getFeesWithRates("BTC",memo)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // let xpub = ""
 // network.utxosByXpub("TESTNET",xpub)

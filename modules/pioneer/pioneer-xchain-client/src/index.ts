@@ -174,6 +174,8 @@ module.exports = class wallet {
     private estimateFeesWithGasPricesAndLimits?: (params: any) => Promise<any>;
     private getWallet: (() => any) | undefined;
     private getProvider: (() => any) | undefined;
+    private getFeesWithMemo: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
+    private getFeeRates: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.network = config.blockchain
@@ -248,6 +250,90 @@ module.exports = class wallet {
         /*
             Network specific functions
 
+            Bitcoin:
+         */
+        if(this.network === 'bitcoin'){
+            //TODO
+            // this.derivePath = function () {
+            //     let tag = TAG + " | getBncClient | "
+            //     try {
+            //         //TODO
+            //     } catch (e) {
+            //         log.error(tag, "e: ", e)
+            //     }
+            // }
+
+            //TODO
+            // this.getFeesWithRates = function () {
+            //     let tag = TAG + " | getFeesWithRates | "
+            //     try {
+            //         //TODO
+            //     } catch (e) {
+            //         log.error(tag, "e: ", e)
+            //     }
+            // }
+
+            // @ts-ignore
+            this.getFeeRates = async function () {
+                let tag = TAG + " | getFeeRates | "
+                try {
+
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,{coin:'BTC',memo:''})
+                    response = response.data
+                    console.log("response: ",response)
+
+                    return response.rates
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            // @ts-ignore
+            this.getFeesWithMemo = async function (memo?:string) {
+                let tag = TAG + " | getFeesWithMemo | "
+                try {
+                    let params = {
+                        coin:'BTC',
+                        memo:"asdasdasdasdasda"
+                    }
+                    console.log("this.pioneerApi: ",this.pioneerApi)
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,params)
+                    response = response.data
+                    console.log("response: ",response)
+
+                    let output = {
+                        fees:{
+                            type: 'byte',
+                            average:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.average)
+                                }
+                            },
+                            fast:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fast)
+                                }
+                            },
+                            fastest:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fastest)
+                                }
+                            }
+                        }
+                    }
+
+                    return output.fees
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+        }
+
+
+        /*
+            Network specific functions
+
             Ethereum:
          */
         if(this.network === 'ethereum'){
@@ -255,7 +341,7 @@ module.exports = class wallet {
             this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
                 let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
                 try {
-                    let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
+                    let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(null,params)
                     response = response.data
                     let output = {
                         gasPrices:response.gasPrices,

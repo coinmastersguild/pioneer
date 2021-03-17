@@ -19,7 +19,9 @@ let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 let txsDB = connection.get('transactions')
 let utxosDB = connection.get('utxo')
+let invocationsDB = connection.get('invocations')
 
+invocationsDB.createIndex({invocationId: 1}, {unique: true})
 usersDB.createIndex({id: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
@@ -98,9 +100,23 @@ export class pioneerInvocationController extends Controller {
             //does user exist?
                 //does user exist on fio?
 
-            //
+            // invocationId
             let invocationId = "pioneer:invocation:v0.01:"+body.invocation.chain+":"+short.generate()
 
+            //origin
+            //TODO signed by?
+
+            let entry = {
+                invocationId,
+                invocation:body
+            }
+
+            //TODO sequence
+            //only accept 1 per username
+
+            //save to mongo
+            let mongoSave = await invocationsDB.insert(entry)
+            log.info(tag,"mongoSave: ",mongoSave)
             if(onlineUsers.indexOf(body.invocation.username) >= 0){
 
                 body.invocation.invocationId = invocationId
@@ -114,10 +130,9 @@ export class pioneerInvocationController extends Controller {
                 // output.success = true
                 // output.txid = txConfirmed
 
-                //HACK TODO actually send moniez!
                 output.success = true
                 output.txid = invocationId
-                // output.ttr = TODO measure time till response
+                //output.ttr = TODO measure time till response
 
                 return output
             } else {

@@ -117,10 +117,27 @@ const log = require('@pioneer-platform/loggerdog')()
 // const ElectrumClient = require('@pioneer-platform/electrum-client')
 const bitcoin = require("bitcoinjs-lib");
 
+import {
+    TxHistoryParams,
+    TxsPage,
+    Address,
+    XChainClient,
+    Tx,
+    TxParams,
+    TxHash,
+    Balance,
+    Network,
+    Fees,
+    XChainClientParams,
+} from '@xchainjs/xchain-client'
+
 const BitcoinRpc = require('bitcoin-rpc-promise');
 // import { Blockbook } from 'blockbook-client'
 
 const blockbook = require('@pioneer-platform/blockbook')
+import * as sochain from './sochain-api'
+import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import * as Utils from './utils'
 
 let BLOCKBOOK:any
 //if(!process.env['BTC_RPC_HOST'])
@@ -140,8 +157,9 @@ for(let i = 0; i < coins.length; i++){
 
     nodeMap[coin] = new BitcoinRpc(connString);
 }
-log.info("nodeMap: ",nodeMap)
+//log.info("nodeMap: ",nodeMap)
 
+const URL_SOCHAIN = "https://sochain.com/api/v2"
 
 const URL_BLOCKCHAIN_INFO = "http://blockchain.info"
 
@@ -230,6 +248,15 @@ module.exports = {
     getFee:function (coin:string) {
         return get_fee(coin);
     },
+    getFeeRates:function (coin:string,memo?:string) {
+        return get_fees_with_rates(coin,memo);
+    },
+    getFeesWithMemo:function (coin:string,memo?:string) {
+        return get_fees_with_memo(coin,memo);
+    },
+    getFeesWithRates:function (coin:string,memo?:string) {
+        return get_fees_with_rates(coin,memo);
+    },
     getBlock:function (coin:string,height:number) {
         return get_block(coin,height);
     },
@@ -254,6 +281,43 @@ module.exports = {
     // getValidators:function () {
     //     return get_validators();
     // }
+}
+
+let get_fees_with_memo = async function(coin:string,memo?:string){
+    let tag = TAG + " | get_fees_with_memo | "
+    try{
+        // @ts-ignore
+        const { fees } = await get_fees_with_rates(<string>memo)
+        return fees
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
+let get_fees_with_rates = async function(coin:string,memo?:string){
+    let tag = TAG + " | get_fees_with_rates | "
+    try{
+        let output:any = {}
+        const txFee = await sochain.getSuggestedTxFee()
+        console.log("txFee: ",txFee)
+
+        const rates: FeeRates = {
+            fastest: txFee * 5, //holy fuck
+            fast: txFee * 1,
+            average: txFee * 0.5,
+        }
+
+        const fees: Fees = {
+            type: 'byte',
+            fast: Utils.calcFee(rates.fast, memo),
+            average: Utils.calcFee(rates.average, memo),
+            fastest: Utils.calcFee(rates.fastest, memo),
+        }
+
+        return { fees, rates }
+    }catch(e){
+        console.error(tag,e)
+    }
 }
 
 let get_fee = async function(coin:string){

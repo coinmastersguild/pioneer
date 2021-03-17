@@ -22,6 +22,7 @@ let txsDB = connection.get('transactions')
 let utxosDB = connection.get('utxo')
 
 usersDB.createIndex({id: 1}, {unique: true})
+usersDB.createIndex({username: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
 
@@ -193,6 +194,16 @@ export class pioneerPrivateController extends Controller {
 
     /**
      Get the balances for a given username
+
+     protect mongo with redis cache
+
+     protect nodes with mongo data
+
+     All events push OUT in production
+
+        nodes ->  mongo -> redis -> (ws) user local db
+
+
      */
     @Get('/info')
     public async info(@Header('Authorization') authorization: string): Promise<any> {
@@ -201,12 +212,17 @@ export class pioneerPrivateController extends Controller {
             log.debug(tag,"queryKey: ",authorization)
 
             let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) throw Error("unknown token! token:"+authorization)
+
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
                 let isTestnet = accountInfo.isTestnet || false
-                let username = accountInfo.username
-                if(!username) throw Error("unknown token! token:"+authorization)
                 log.info(tag,"isTestnet: ",isTestnet)
+                let username = accountInfo.username
+                if(!username){
+                    log.error(tag,"invalid accountInfo: ",accountInfo)
+                    throw Error("invalid token info! token:"+authorization)
+                }
                 //get cache
                 let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
 
@@ -214,6 +230,8 @@ export class pioneerPrivateController extends Controller {
                 if(walletInfo){
                     log.debug(tag,"user info cached!: ")
                     log.info(tag,"user info cached!: ",walletInfo)
+
+                    //push to pubkeys sync?
 
                     try{
                         walletInfo = JSON.parse(walletInfo)
@@ -706,6 +724,8 @@ export class pioneerPrivateController extends Controller {
                     if(Object.keys(userInfo).length > 0){
                         throw Error("103: unable create new user, username taken!")
                     } else {
+                        log.error(tag,"authInfo.username: ",authInfo.username)
+                        log.error(tag,"username: ",body.username)
                         throw Error("104: username transfers on tokens not supported! owned username:"+username)
                     }
                 } else {

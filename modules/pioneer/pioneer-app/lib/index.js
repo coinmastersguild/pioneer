@@ -1016,7 +1016,7 @@ let init_wallet = function (config, isTestnet) {
             let configEvents = {
                 username: config.username,
                 queryKey: config.queryKey,
-                pioneerWs: URL_PIONEER_SOCKET
+                pioneerWs: "ws://127.0.0.1:9001"
             };
             //sub ALL events
             let events = yield Events.init(configEvents);
@@ -1029,7 +1029,7 @@ let init_wallet = function (config, isTestnet) {
                     //TODO filter invocations by subscribers
                     //TODO autonomousOn/Off
                     // @ts-ignore
-                    let txid = yield send_to_address(request.coin, request.address, request.amount, request.memo);
+                    let txid = yield send_to_address(request.coin, request.to, request.amount, request.memo);
                     console.log("txid: ", txid);
                     //push txid to invocationId
                     //update status on server

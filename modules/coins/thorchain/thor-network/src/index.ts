@@ -15,6 +15,7 @@
 
 */
 const TAG = " | thorchain-api | "
+const prettyjson = require('prettyjson');
 require("dotenv").config({path:'../../../.env'})
 
 const Axios = require('axios')
@@ -27,7 +28,7 @@ const axios = Axios.create({
 
 const log = require('@pioneer-platform/loggerdog')()
 
-let URL_MIDGARD = process.env['URL_THORNODE'] || 'http://135.181.112.20:1317'
+let URL_THORNODE = process.env['URL_THORNODE'] || 'http://135.181.112.20:1317'
 
 let BASE_THOR = 100000000
 
@@ -73,7 +74,7 @@ module.exports = {
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "
     try{
-        let txInfo = await axios({method:'GET',url:  URL_MIDGARD+'/txs/'+txid})
+        let txInfo = await axios({method:'GET',url:  URL_THORNODE+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){
@@ -92,7 +93,7 @@ let broadcast_transaction = async function(tx:string){
 
         try{
             //push to seed
-            let urlRemote = URL_MIDGARD+ '/txs'
+            let urlRemote = URL_THORNODE+ '/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
@@ -142,8 +143,8 @@ let get_account_info = async function(address:string){
     let tag = TAG + " | get_account_info | "
     try{
         //
-        console.log("URL ",URL_MIDGARD+'/auth/accounts/'+address)
-        let txInfo = await axios({method:'GET',url: URL_MIDGARD+'/auth/accounts/'+address})
+        console.log("URL ",URL_THORNODE+'/auth/accounts/'+address)
+        let txInfo = await axios({method:'GET',url: URL_THORNODE+'/auth/accounts/'+address})
         log.info(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
@@ -159,7 +160,7 @@ let get_txs_by_address = async function(address:string){
         let output:any = []
 
         //sends
-        let url = URL_MIDGARD+ '/txs?message.sender='+address
+        let url = URL_THORNODE+ '/txs?message.sender='+address
         log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
@@ -173,21 +174,24 @@ let get_txs_by_address = async function(address:string){
         // for(let i = 0; i < pagesSends; i++){
         //
         // }
-        // for(let i = 0; i < sends.txs.length; i++ ){
-        //     let tx = sends.txs[i]
-        //     //normalize
-        //     //tx = normalize_tx(tx,'send')
-        //     output.push(tx)
-        // }
+        for(let i = 0; i < sends.txs.length; i++ ){
+            let tx = sends.txs[i]
+
+            //pretty json
+            console.log("tx: ",prettyjson.render(tx))
+            //normalize
+            //tx = normalize_tx(tx,'send')
+            output.push(tx)
+        }
 
         //receives
-        url = URL_MIDGARD+ '/txs?transfer.recipient='+address
-        let resultRecieves = await axios({
-            url: url,
-            method: 'GET'
-        })
-        let receives = resultRecieves.data
-        log.info('receives: ', receives)
+        // url = URL_THORNODE+ '/txs?transfer.recipient='+address
+        // let resultRecieves = await axios({
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // let receives = resultRecieves.data
+        // log.info('receives: ', receives)
 
         // for(let i = 0; i < receives.txs.length; i++ ){
         //     let tx = receives.txs[i]
@@ -209,7 +213,7 @@ let get_balance = async function(address:string){
     try{
         let output = 0
 
-        let accountInfo = await axios({method:'GET',url: URL_MIDGARD+'/bank/balances/'+address})
+        let accountInfo = await axios({method:'GET',url: URL_THORNODE+'/bank/balances/'+address})
         log.info(tag,"accountInfo: ",accountInfo.data)
 
         //
@@ -235,18 +239,18 @@ let get_node_info_verbose = async function(){
         let output:any = {}
 
         //get syncing status
-        let syncInfo = await axios({method:'GET',url: URL_MIDGARD+'/syncing'})
+        let syncInfo = await axios({method:'GET',url: URL_THORNODE+'/syncing'})
         log.info(tag,"syncInfo: ",syncInfo.data)
 
         output.isSyncing = syncInfo.data
 
         //gaiad abci_info
-        let nodeInfo = await axios({method:'GET',url: URL_MIDGARD+'/node_info'})
+        let nodeInfo = await axios({method:'GET',url: URL_THORNODE+'/node_info'})
         log.debug(tag,"nodeInfo: ",nodeInfo.data)
         output = nodeInfo.data
 
 
-        let lastBlock = await axios({method:'GET',url: URL_MIDGARD+'/blocks/latest'})
+        let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
         log.info(tag,"lastBlock: ",lastBlock.data)
 
         //let height

@@ -22,6 +22,9 @@ let FAUCET_ADDRESSES = {
 
 }
 
+let username = process.env['TEST_USERNAME_2']
+let queryKey = process.env['TEST_QUERY_KEY_2']
+
 let run_test = async function(){
     try{
         console.log("*** Running test module ***")
@@ -96,10 +99,10 @@ let run_test = async function(){
         let config = {
             isTestnet:true, //Woo! testnet!
             mnemonic: process.env['WALLET_TESTNET_DEV'],
-            username:walletName,
+            username,
             pioneerApi:true,
             spec:urlSpec,
-            queryKey:walletName, //insecure
+            queryKey,
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
@@ -150,7 +153,7 @@ let run_test = async function(){
          */
         console.log("info: ",prettyjson.render(info.public.BTC),"\n")
 
-        //
+
         let masterBTC = await Wallet.getMaster("BTC")
         console.log("masterBTC: ",masterBTC)
 

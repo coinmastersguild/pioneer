@@ -818,7 +818,7 @@ module.exports = class wallet {
                             path:input.path
                             //TODO if segwit
                             // witnessUtxo: {
-                            //     script: Buffer.from('... scriptPubkey hex...', 'hex'),
+                            //     script: Buffer.from(input.hex, 'hex'),
                             //     value: 10000 // 0.0001 BTC and is the exact same as the value above
                             // }
                         }
@@ -834,7 +834,7 @@ module.exports = class wallet {
                     // let feeRate = 1
                     // let feeRate = await this.pioneerClient.instance.GetFeeInfo({coin})
                     // feeRate = feeRate.data
-                    let feeRate = 20000
+                    let feeRate = 20
                     log.info(tag,"feeRate: ",feeRate)
                     if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
@@ -857,7 +857,10 @@ module.exports = class wallet {
                     let selectedResults = coinSelect(utxos, targets, feeRate)
                     log.info(tag,"result coinselect algo: ",selectedResults)
 
-
+                    //if
+                    if(!selectedResults.inputs){
+                        throw Error("Fee exceeded totdal availble inputs!")
+                    }
 
                     //TODO get long name for coin
 
@@ -915,8 +918,12 @@ module.exports = class wallet {
                         version: 1,
                         locktime: 0,
                     }))
+                    let longName = 'Bitcoin'
+                    if(isTestnet){
+                        longName = 'Testnet'
+                    }
                     const res = await this.WALLET.btcSignTx({
-                        coin: "Bitcoin",
+                        coin: longName,
                         inputs,
                         outputs,
                         version: 1,

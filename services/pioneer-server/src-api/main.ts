@@ -247,7 +247,7 @@ subscriber.on('message', async function (channel, payloadS) {
                     }
                 }
             } else {
-                log.error("User is not connected!")
+                log.error("User is not connected! username: ",username," online: ",usersByUsername)
                 //throw Error("User is not connected!")
             }
         }else{

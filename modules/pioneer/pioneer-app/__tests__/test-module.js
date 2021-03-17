@@ -20,7 +20,10 @@ process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
 let password = process.env['WALLET_PASSWORD']
-let username = process.env['TEST_USERNAME_1']
+// let username = process.env['TEST_USERNAME_1']
+
+let username = process.env['TEST_USERNAME_2']
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
 //console.log("password: ",password)
 
@@ -42,7 +45,7 @@ let run_test = async function(){
         if(!config){
             let wallet1 = {
                 isTestnet:true,
-                mnemonic:seed_1,
+                mnemonic:process.env['WALLET_TESTNET_DEV'],
                 username:username,
                 password
             }
@@ -62,7 +65,7 @@ let run_test = async function(){
             App.updateConfig({created: new Date().getTime()});
         } else {
             //if force keepkey
-
+            let isTestnet = true
             // let resultPair = await App.pairKeepkey()
             // console.log("resultPair: ",resultPair)
 
@@ -71,11 +74,11 @@ let run_test = async function(){
             config.username = username
 
             console.log("config: ",config)
-            let resultInit = await App.init(config)
+            let resultInit = await App.init(config,isTestnet)
             //console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("DDW995")
+            let pairResult = await App.pair("IN5SNJ")
             console.log("pairResult: ",pairResult)
 
             //get wallets

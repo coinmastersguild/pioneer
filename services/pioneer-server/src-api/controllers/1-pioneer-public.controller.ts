@@ -78,6 +78,11 @@ interface Recipient{
     sendMax:boolean
 }
 
+interface GetFeesWithMemoBody{
+    coin:string
+    memo:string,
+}
+
 interface Input{
     network:string
     xpub:string,
@@ -341,9 +346,6 @@ export class pioneerPublicController extends Controller {
         }
     }
 
-    /**
-     *  Get Estimate Fee
-     */
     @Get('/getFeeInfo/{coin}')
     public async getFeeInfo(coin:string) {
         let tag = TAG + " | getFee | "
@@ -369,6 +371,8 @@ export class pioneerPublicController extends Controller {
             throw new ApiError("error",503,"error: "+e.toString());
         }
     }
+
+
 
     /**
      *  Cosmos getValidators
@@ -695,6 +699,36 @@ export class pioneerPublicController extends Controller {
 
 
             return(feeResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    @Post('/getFeesWithMemo')
+    public async getFeesWithMemo(@Body() body: GetFeesWithMemoBody): Promise<any> {
+        let tag = TAG + " | getFee | "
+        try{
+            let output:any = {}
+            log.info(tag,"body: ",body)
+
+            if(UTXO_COINS.indexOf(body.coin) >= 0){
+                //TODO supported assets
+                let resp = await networks['ANY'].getFeesWithRates(body.coin,body.memo)
+                log.info("resp:",resp)
+                //else error
+                output = resp
+            }else{
+                //not supported
+                throw Error("coin not supported! coin: "+body.coin)
+            }
+
+            return(output)
         }catch(e){
             let errorResp:Error = {
                 success:false,

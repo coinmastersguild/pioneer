@@ -18,7 +18,10 @@ if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
 let password = process.env['WALLET_PASSWORD']
-let username = "test-user-554433"
+// let username = "test-user-554433"
+
+let username = process.env['TEST_USERNAME_2']
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
 //console.log("password: ",password)
 
@@ -33,13 +36,18 @@ let run_test = async function(){
     try{
         //get config
         let config = await App.getConfig()
-
-
+        // let config = {
+        //     password
+        // }
+        // //override
+        // config.username = username
+        // config.queryKey = queryKey
+        // config.mnemonic = process.env['WALLET_TESTNET_DEV']
 
         //if no config
         if(!config){
             let wallet1 = {
-                mnemonic:seed_1,
+                mnemonic:process.env['WALLET_TESTNET_DEV'],
                 username:username,
                 password
             }
@@ -56,13 +64,14 @@ let run_test = async function(){
             App.updateConfig({temp:password});
             App.updateConfig({created: new Date().getTime()});
         } else {
+            let isTestnet = true
 
             // config.password = password
             // console.log("config: ",config)
             config.username = username
 
             console.log("config: ",config)
-            let resultInit = await App.init(config)
+            let resultInit = await App.init(config,isTestnet)
             console.log("resultInit: ",resultInit)
 
             //get wallets
@@ -71,7 +80,7 @@ let run_test = async function(){
 
             let context = wallets[0]
 
-            if(!context) throw Error("No Wallets on startup!")
+            //if(!context) throw Error("No Wallets on startup!")
 
             /*
                 BTC

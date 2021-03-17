@@ -43,8 +43,6 @@ interface createAppBody {
     description:string
 }
 
-
-
 export class ApiError extends Error {
     private statusCode: number;
     constructor(name: string, statusCode: number, message?: string) {

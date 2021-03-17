@@ -10,8 +10,8 @@ let SDK = require('../lib/index.js')
 let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let spec = process.env['URL_PIONEER_SPEC']
-let username = process.env['TEST_USERNAME_1']
-let queryKey = process.env['TEST_QUERY_KEY_1']
+let username = process.env['TEST_USERNAME_2']
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let run_test = async function(){
     try{
@@ -61,29 +61,35 @@ let run_test = async function(){
 
         //console.log(app)
 
-        let network = app.getNetwork()
-        console.log("network: ",network)
+        // let network = app.getNetwork()
+        // console.log("network: ",network)
+        //
+        // let explorerUrl = app.getExplorerUrl()
+        // console.log("explorerUrl: ",explorerUrl)
+        //
+        // let explorerAddressUrl = app.getExplorerAddressUrl()
+        // console.log("explorerAddressUrl: ",explorerAddressUrl)
+        //
+        // let explorerTxUrl = app.getExplorerTxUrl()
+        // console.log("explorerTxUrl: ",explorerTxUrl)
+        //
+        // //
+        // const address = await app.getAddress();
+        // //const bncBalances = await app.getBalance(address);
 
-        let explorerUrl = app.getExplorerUrl()
-        console.log("explorerUrl: ",explorerUrl)
+        const fees = await app.getFeeRates();
+        console.log("fees: ",fees)
 
-        let explorerAddressUrl = app.getExplorerAddressUrl()
-        console.log("explorerAddressUrl: ",explorerAddressUrl)
-
-        let explorerTxUrl = app.getExplorerTxUrl()
-        console.log("explorerTxUrl: ",explorerTxUrl)
-
-        //binance
-        const address = await app.getAddress();
-        //const bncBalances = await app.getBalance(address);
+        // const fees = await app.getFeesWithMemo("adsfasdfasdfdsf");
+        // console.log("fees: ",fees)
 
         // const bncClient = await app.getBncClient()
-        const balances = await app.getBalance(address)
-
-        console.log("address: ",address)
-        console.log("balances: ",balances)
-        console.log("balances: ",balances[0].amount.amount())
-        console.log("balances: ",balances[0].amount.amount().toString())
+        // const balances = await app.getBalance(address)
+        //
+        // console.log("address: ",address)
+        // console.log("balances: ",balances)
+        // console.log("balances: ",balances[0].amount.amount())
+        // console.log("balances: ",balances[0].amount.amount().toString())
 
         //ETH specific
         // let inputExample = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
@@ -115,6 +121,24 @@ let run_test = async function(){
 
         //BTC
         //build a tx
+        // let txInput = {
+        //     "asset":
+        //         {
+        //             "chain":"BTC",
+        //             "symbol":"BTC",
+        //             "ticker":"BTC"
+        //         },
+        //     "amount":
+        //         {
+        //             "type":"BASE",
+        //             "decimal":18,
+        //             amount: function(){
+        //                 return "0.0123"
+        //             }
+        //         },
+        //     "recipient":"0x33b35c665496bA8E71B22373843376740401F106"
+        // }
+
         let txInput = {
             "asset":
                 {
@@ -130,11 +154,12 @@ let run_test = async function(){
                         return "0.0123"
                     }
                 },
-            "recipient":"0x33b35c665496bA8E71B22373843376740401F106"
+            "recipient":"0x33b35c665496bA8E71B22373843376740401F106",
+            "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
         }
 
-        let txid = await app.transfer(txInput)
-        console.log("txid",txid)
+        // let txid = await app.transfer(txInput)
+        // console.log("txid",txid)
 
         //monitor tx till confirmed
 

@@ -1098,7 +1098,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         let configEvents = {
             username:config.username,
             queryKey:config.queryKey,
-            pioneerWs:URL_PIONEER_SOCKET
+            pioneerWs:"ws://127.0.0.1:9001"
         }
 
         //sub ALL events
@@ -1116,7 +1116,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             //TODO autonomousOn/Off
 
             // @ts-ignore
-            let txid = await send_to_address(request.coin, request.address, request.amount, request.memo)
+            let txid = await send_to_address(request.coin, request.to, request.amount, request.memo)
             console.log("txid: ", txid)
 
             //push txid to invocationId

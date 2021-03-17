@@ -16,9 +16,10 @@ let wallet_1_name = process.env['TEST_USERNAME_1']
 let wallet_2_name = process.env['TEST_USERNAME_2']
 
 let TEST_QUERY_KEY_1 = process.env['TEST_QUERY_KEY_1']
+let TEST_QUERY_KEY_2 = process.env['TEST_QUERY_KEY_2']
 
 let password = process.env['WALLET_PASSWORD']
-let username = wallet_1_name
+let username = wallet_2_name
 console.log("password: ",password)
 
 let run_test = async function(){
@@ -26,7 +27,7 @@ let run_test = async function(){
 
         let config = {
             username,
-            queryKey:TEST_QUERY_KEY_1,
+            queryKey:TEST_QUERY_KEY_2,
             pioneerWs:"ws://127.0.0.1:9001"
         }
 
