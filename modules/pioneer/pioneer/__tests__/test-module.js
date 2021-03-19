@@ -98,7 +98,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:true, //Woo! testnet!
-            mnemonic: process.env['WALLET_TESTNET_DEV'],
+            mnemonic: process.env['WALLET_TEST_SEED'],
             username,
             pioneerApi:true,
             spec:urlSpec,
@@ -111,25 +111,26 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,true);
 
         let info = await Wallet.init()
-        console.log("total Value: ",info.totalValueUsd)
+        console.log("total Value: ",info)
+        // console.log("total Value: ",info.totalValueUsd)
 
         //await Wallet.forget()
 
-        let info2 = await Wallet.getInfo()
-        console.log("info2: ",info2)
+        // let info2 = await Wallet.getInfo()
+        // console.log("info2: ",info2)
 
         /*
-               THOR
-         */
-        // console.log("info: ",prettyjson.render(info.public.RUNE))
+            ETH
+        */
+        // console.log("info: ",prettyjson.render(info.public.ETH))
+        //
+        // //RUNE
+        // let masterETH = await Wallet.getMaster("ETH")
+        // console.log("masterETH: ",masterETH)
+        //
+        // let balanceETH = await Wallet.getBalance("ETH")
+        // console.log("balanceETH: ",balanceETH)
 
-        //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
         // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
         // let amount = "2"
         // let memo = ""
@@ -147,45 +148,108 @@ let run_test = async function(){
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
 
+        /*
+               THOR
+         */
+        console.log("info: ",prettyjson.render(info.public.RUNE))
+
+        //RUNE
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
+        // let amount = "0.00002"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
+        // console.log("txid: ",txid)
+
+        /*
+            ETH thorchain swap
+         */
+        let masterETH = await Wallet.getMaster("ETH")
+        console.log("masterETH: ",masterETH)
+
+        let balanceETH = await Wallet.getBalance("ETH")
+        console.log("balanceETH: ",balanceETH)
+
+        //
+        let asset = {
+            chain:"ETH",
+            symbol:"ETH",
+            ticker:"ETH",
+        }
+
+        let swap = {
+            asset,
+            vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
+            toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+        }
+
+        let amount = 0.001
+        swap.amount = amount
+
+        let result = await Wallet.buildSwap(swap)
+        console.log("swapResult: ",result)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BTC
          */
-        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-
-
-        let masterBTC = await Wallet.getMaster("BTC")
-        console.log("masterBTC: ",masterBTC)
-
-        let balanceBTC = await Wallet.getBalance("BTC")
-        console.log("balanceBTC: ",balanceBTC)
-
-        let amount = "0.0001"
-        let memo = null //Uses OP_RETURN outputs
-        let feeLevel = 5
-
-        //TODO coin control
-        //TODO offer input override
+        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+        //
+        //
+        // let masterBTC = await Wallet.getMaster("BTC")
+        // console.log("masterBTC: ",masterBTC)
+        //
+        // let balanceBTC = await Wallet.getBalance("BTC")
+        // console.log("balanceBTC: ",balanceBTC)
+        //
+        // let amount = "0.00001"
+        // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
+        // let feeLevel = 5
+        //
+        // //TODO coin control
+        // //TODO offer input override
+        // // let transfer = {
+        // //     coin:"BTC",
+        // //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
+        // //     amount,
+        // //     memo,
+        // //     feeLevel
+        // // }
         // let transfer = {
         //     coin:"BTC",
-        //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
+        //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
         //     amount,
         //     memo,
         //     feeLevel
         // }
-        let transfer = {
-            coin:"BTC",
-            addressTo:"mwFBhs7o4TzLRtZ8XZDB39JmiZSPCCmgMn",
-            amount,
-            memo,
-            feeLevel
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        //
+        // // let transferSigned = await Wallet.buildTransfer(transfer)
+        // // console.log("transferSigned: ",transferSigned)
+        //
+        // let transferSigned = {
+        //
+        // }
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BCH

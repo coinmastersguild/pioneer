@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/thor-network",
-  "version": "6.2.4",
+  "version": "6.2.5",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {

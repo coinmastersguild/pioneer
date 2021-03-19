@@ -684,7 +684,7 @@ var get_wallet_info = function () {
                     if (!(i < coins.length)) return [3 /*break*/, 10];
                     coin = coins[i];
                     log.info(tag, "blockbook IS_TESTNET coin: ", coin);
-                    if (!(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub)) return [3 /*break*/, 9];
+                    if (!(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub || PUBLIC_WALLET[coin].tpub)) return [3 /*break*/, 9];
                     if (!(coin === 'BTC')) return [3 /*break*/, 8];
                     log.info(tag, "BTC testnet blockbook tpub: ", PUBLIC_WALLET[coin].tpub);
                     return [4 /*yield*/, blockbook.getBalanceByXpub('TEST', PUBLIC_WALLET[coin].tpub)];

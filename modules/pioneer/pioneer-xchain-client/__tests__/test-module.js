@@ -26,14 +26,14 @@ let run_test = async function(){
         ]
 
         //bitcoin
-        let config = {
-            network:'testnet',
-            blockchain:blockchains[0],
-            nativeAsset:'BTC',
-            queryKey,
-            username,
-            spec:urlSpec
-        }
+        // let config = {
+        //     network:'testnet',
+        //     blockchain:blockchains[0],
+        //     nativeAsset:'BTC',
+        //     queryKey,
+        //     username,
+        //     spec:urlSpec
+        // }
         let isTestnet = true
         // //Binance
         // let config = {
@@ -46,14 +46,14 @@ let run_test = async function(){
         // }
 
         //ethereum
-        // let config = {
-        //     network:'testnet',
-        //     blockchain:blockchains[1],
-        //     nativeAsset:'ETH',
-        //     queryKey,
-        //     username,
-        //     spec:urlSpec
-        // }
+        let config = {
+            network:'testnet',
+            blockchain:blockchains[1],
+            nativeAsset:'ETH',
+            queryKey,
+            username,
+            spec:urlSpec
+        }
         //
         //init
         let app = new SDK(urlSpec,config,isTestnet)
@@ -77,8 +77,8 @@ let run_test = async function(){
         // const address = await app.getAddress();
         // //const bncBalances = await app.getBalance(address);
 
-        const fees = await app.getFeeRates();
-        console.log("fees: ",fees)
+        // const fees = await app.getFeeRates();
+        // console.log("fees: ",fees)
 
         // const fees = await app.getFeesWithMemo("adsfasdfasdfdsf");
         // console.log("fees: ",fees)
@@ -98,6 +98,11 @@ let run_test = async function(){
         // console.log("fees: ",fees.fees.fastest)
         // console.log("fees: ",fees.fees.fastest.amount())
         // console.log("fees: ",fees.fees.fastest.amount().toNumber())
+
+        //get wallet
+        const wallet = await app.getWallet();
+        console.log("wallet: ",wallet)
+        //make sure provider set
 
         //ETH
         //build a tx
@@ -139,25 +144,25 @@ let run_test = async function(){
         //     "recipient":"0x33b35c665496bA8E71B22373843376740401F106"
         // }
 
-        let txInput = {
-            "asset":
-                {
-                    "chain":"BTC",
-                    "symbol":"BTC",
-                    "ticker":"BTC"
-                },
-            "amount":
-                {
-                    "type":"BASE",
-                    "decimal":18,
-                    amount: function(){
-                        return "0.0123"
-                    }
-                },
-            "recipient":"0x33b35c665496bA8E71B22373843376740401F106",
-            "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
-        }
-
+        // let txInput = {
+        //     "asset":
+        //         {
+        //             "chain":"BTC",
+        //             "symbol":"BTC",
+        //             "ticker":"BTC"
+        //         },
+        //     "amount":
+        //         {
+        //             "type":"BASE",
+        //             "decimal":18,
+        //             amount: function(){
+        //                 return "0.0123"
+        //             }
+        //         },
+        //     "recipient":"",
+        //     "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
+        // }
+        //
         // let txid = await app.transfer(txInput)
         // console.log("txid",txid)
 

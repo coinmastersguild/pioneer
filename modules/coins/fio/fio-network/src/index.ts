@@ -131,7 +131,7 @@ let get_pending_requests = async function(pubkey:string){
         let body = {method:'POST',url: fioNode+'/chain/get_pending_fio_requests',data}
         log.debug(body)
         let resp = await axios(body)
-        log.info(tag,"resp: ",resp)
+        log.debug(tag,"resp: ",resp)
         return resp.data
     }catch(e){
         return {
@@ -154,7 +154,7 @@ let get_account_info_from_account = async function(account:string){
 
         //is available?
         let isAvailable = await is_available(account)
-        log.info(tag,"isAvailable: ",isAvailable)
+        log.debug(tag,"isAvailable: ",isAvailable)
 
         if(isAvailable){
             output.isAvailable = true
@@ -169,12 +169,12 @@ let get_account_info_from_account = async function(account:string){
             }
 
             let body = {method:'POST',url: fioNode+'/chain/get_pub_address',data}
-            log.info(body)
+            log.debug(body)
             let resp = await axios(body)
-            log.info(tag,"resp: ",resp.data)
+            log.debug(tag,"resp: ",resp.data)
 
             output.pubkey = resp.data.public_address
-            log.info(tag,"output.pubkey: ",output.pubkey)
+            log.debug(tag,"output.pubkey: ",output.pubkey)
 
             //get balance
             // let balance = await get_balance(output.pubkey)
@@ -187,9 +187,9 @@ let get_account_info_from_account = async function(account:string){
             ]
             for(let i = 0; i < coins.length; i++){
                 let coin = coins[i]
-                log.info(tag,"coin: ",coin)
+                log.debug(tag,"coin: ",coin)
                 let address = await get_account_address(account,coin)
-                log.info(tag,"address: ",address)
+                log.debug(tag,"address: ",address)
                 output[coin] = address.public_address
             }
             // get aliases (other names with same pubkey)
@@ -261,7 +261,7 @@ let broadcast_new_funds_request_tx = async function(tx:any){
                 throw new Error(error);
             }
 
-            console.log(JSON.stringify(body));
+            //console.log(JSON.stringify(body));
             return body
         });
 
@@ -297,7 +297,7 @@ let broadcast_payment_request = async function(tx:any){
                 throw new Error(error);
             }
 
-            console.log(JSON.stringify(body));
+            //console.log(JSON.stringify(body));
             return body
         });
 
@@ -342,7 +342,7 @@ let broadcast_register_address = async function(tx:any){
                 throw new Error(error);
             }
 
-            console.log(JSON.stringify(body));
+            //console.log(JSON.stringify(body));
             return body
         });
 
@@ -521,7 +521,7 @@ let get_block = async function(height:string){
 
 
 let get_latest_block_height = async function(){
-    let tag = TAG + " | get_txs | "
+    let tag = TAG + " | get_latest_block_height | "
     let output:any = {}
     try{
         let body = {method:'POST',url: fioNode+'/chain/get_info'}
@@ -676,7 +676,7 @@ let get_actor = async function(pubkey:string){
         let body = {method:'POST',url: fioNode+'/chain/get_actor',data}
         log.debug(body)
         let resp = await axios(body)
-        log.info(tag,"resp: ",resp.data)
+        log.debug(tag,"resp: ",resp.data)
 
 
 
@@ -733,7 +733,7 @@ let get_account_from_actor = async function(actor:string){
 
         log.debug(body)
         let resp = await axios(body)
-        log.info(tag,"resp: ",resp.data)
+        log.debug(tag,"resp: ",resp.data)
 
         //TODO how tf do you do this in axios????
         // let request = require("request");
@@ -801,7 +801,7 @@ let get_accounts_from_pubkey = async function(pubkey:string){
         let body = {method:'POST',url: fioNode+'/chain/get_fio_names',data}
         log.debug(body)
         let resp = await axios(body)
-        log.info(tag,"resp: ",resp.data)
+        log.debug(tag,"resp: ",resp.data)
 
         output = resp.data
 

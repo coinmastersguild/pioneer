@@ -245,7 +245,7 @@ module.exports = /** @class */ (function () {
                                 log.debug("pubkey: ", pubkey);
                                 throw Error("Invalid pubkey!");
                             }
-                            if (!isTestnet_1) return [3 /*break*/, 8];
+                            if (!(isTestnet_1 && pubkey.xpub && !pubkey.tpub)) return [3 /*break*/, 8];
                             _d = pubkey;
                             return [4 /*yield*/, crypto.xpubConvert(pubkey.xpub, 'tpub')];
                         case 7:
@@ -693,8 +693,12 @@ module.exports = /** @class */ (function () {
         // /*
         //     Txs
         //
-        //     2 type:
+        //     3 type:
         //         Transfers
+        //              optional memo's
+        //         Swaps
+        //              Dex trades
+        //              Thorchain contract (ETH/TOKEN) trades
         //
         //         non-transfers
         //             Register address
@@ -702,96 +706,164 @@ module.exports = /** @class */ (function () {
         //             staking
         //
         //  */
-        this.buildTx = function (transaction) {
+        this.buildSwap = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, rawTx, tx, signTx, res, _a, e_4;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                var tag, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, rawTx, e_4;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
                         case 0:
-                            tag = TAG + " | buildTx | ";
-                            _b.label = 1;
+                            tag = TAG + " | buildSwap | ";
+                            _a.label = 1;
                         case 1:
-                            _b.trys.push([1, 11, , 12]);
-                            rawTx = {};
-                            if (!(transaction.coin === 'FIO')) return [3 /*break*/, 9];
-                            tx = void 0;
-                            signTx = void 0;
-                            res = void 0;
-                            _a = transaction.type;
-                            switch (_a) {
-                                case "fioSignAddPubAddressTx": return [3 /*break*/, 2];
-                                case "fioSignRegisterDomainTx": return [3 /*break*/, 4];
-                                case "fioSignRegisterFioAddressTx": return [3 /*break*/, 5];
-                                case "fioSignNewFundsRequestTx": return [3 /*break*/, 6];
-                            }
-                            return [3 /*break*/, 8];
-                        case 2:
-                            tx = transaction.tx;
-                            signTx = {
-                                addressNList: hdwallet_core_1.bip32ToAddressNList("m/44'/235'/0'/0/0"),
-                                actions: [
-                                    {
-                                        account: fiosdk_offline_1.FioActionParameters.FioAddPubAddressActionAccount,
-                                        name: fiosdk_offline_1.FioActionParameters.FioAddPubAddressActionName,
-                                        data: tx,
-                                    },
-                                ],
-                            };
-                            log.debug(tag, "signTx: ", JSON.stringify(signTx));
-                            return [4 /*yield*/, this.WALLET.fioSignTx(signTx)];
+                            _a.trys.push([1, 9, , 10]);
+                            addressFrom = void 0;
+                            if (!transaction.addressFrom) return [3 /*break*/, 2];
+                            addressFrom = transaction.addressFrom;
+                            return [3 /*break*/, 4];
+                        case 2: return [4 /*yield*/, this.getMaster('ETH')];
                         case 3:
-                            res = _b.sent();
-                            res.coin = "FIO";
-                            res.type = transaction.type;
-                            rawTx = res;
-                            // code block
-                            return [3 /*break*/, 8];
-                        case 4: 
-                        // code block
-                        return [3 /*break*/, 8];
-                        case 5: 
-                        // code block
-                        return [3 /*break*/, 8];
+                            addressFrom = _a.sent();
+                            _a.label = 4;
+                        case 4:
+                            if (!addressFrom)
+                                throw Error("102: unable to get master address! ");
+                            return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, transaction)];
+                        case 5:
+                            data = _a.sent();
+                            data = data.data;
+                            log.info(tag, "txData: ", data);
+                            return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
                         case 6:
-                            tx = transaction.tx;
-                            signTx = {
-                                addressNList: hdwallet_core_1.bip32ToAddressNList("m/44'/235'/0'/0/0"),
-                                actions: [
-                                    {
-                                        account: fiosdk_offline_1.FioActionParameters.FioNewFundsRequestActionAccount,
-                                        name: fiosdk_offline_1.FioActionParameters.FioNewFundsRequestActionName,
-                                        data: tx,
-                                    },
-                                ],
-                            };
-                            log.debug(tag, "signTx: ", JSON.stringify(signTx));
-                            return [4 /*yield*/, this.WALLET.fioSignTx(signTx)];
+                            nonceRemote = _a.sent();
+                            nonceRemote = nonceRemote.data;
+                            nonce = transaction.nonce || nonceRemote;
+                            gas_limit = 80000 //TODO dynamic gas limit?
+                            ;
+                            return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
                         case 7:
-                            res = _b.sent();
-                            res.coin = "FIO";
-                            res.type = transaction.type;
-                            rawTx = res;
-                            return [3 /*break*/, 8];
-                        case 8: return [3 /*break*/, 10];
+                            gas_price = _a.sent();
+                            gas_price = gas_price.data;
+                            log.debug(tag, "gas_price: ", gas_price);
+                            gas_price = parseInt(gas_price);
+                            gas_price = gas_price + 1000000000;
+                            masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
+                            ;
+                            amountNative = parseFloat(transaction.amount) * support.getBase('ETH');
+                            amountNative = Number(parseInt(String(amountNative)));
+                            ethTx = {
+                                addressNList: support.bip32ToAddressNList(masterPathEth),
+                                nonce: web3_utils_1.numberToHex(nonce),
+                                gasPrice: web3_utils_1.numberToHex(gas_price),
+                                gasLimit: web3_utils_1.numberToHex(gas_limit),
+                                value: amountNative,
+                                to: transaction.vaultAddress,
+                                data: data,
+                            };
+                            log.debug("unsignedTxETH: ", ethTx);
+                            return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
+                        case 8:
+                            rawTx = _a.sent();
+                            rawTx.params = ethTx;
+                            return [2 /*return*/, rawTx];
                         case 9:
-                            log.error(tag, "coin not supported! ", transaction.coin);
-                            _b.label = 10;
-                        case 10: return [2 /*return*/, rawTx];
-                        case 11:
-                            e_4 = _b.sent();
+                            e_4 = _a.sent();
                             log.error(e_4);
                             throw e_4;
-                        case 12: return [2 /*return*/];
+                        case 10: return [2 /*return*/];
                     }
                 });
             });
-        };
+        },
+            this.buildTx = function (transaction) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var tag, rawTx, tx, signTx, res, _a, e_5;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                tag = TAG + " | buildTx | ";
+                                _b.label = 1;
+                            case 1:
+                                _b.trys.push([1, 11, , 12]);
+                                rawTx = {};
+                                if (!(transaction.coin === 'FIO')) return [3 /*break*/, 9];
+                                tx = void 0;
+                                signTx = void 0;
+                                res = void 0;
+                                _a = transaction.type;
+                                switch (_a) {
+                                    case "fioSignAddPubAddressTx": return [3 /*break*/, 2];
+                                    case "fioSignRegisterDomainTx": return [3 /*break*/, 4];
+                                    case "fioSignRegisterFioAddressTx": return [3 /*break*/, 5];
+                                    case "fioSignNewFundsRequestTx": return [3 /*break*/, 6];
+                                }
+                                return [3 /*break*/, 8];
+                            case 2:
+                                tx = transaction.tx;
+                                signTx = {
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList("m/44'/235'/0'/0/0"),
+                                    actions: [
+                                        {
+                                            account: fiosdk_offline_1.FioActionParameters.FioAddPubAddressActionAccount,
+                                            name: fiosdk_offline_1.FioActionParameters.FioAddPubAddressActionName,
+                                            data: tx,
+                                        },
+                                    ],
+                                };
+                                log.debug(tag, "signTx: ", JSON.stringify(signTx));
+                                return [4 /*yield*/, this.WALLET.fioSignTx(signTx)];
+                            case 3:
+                                res = _b.sent();
+                                res.coin = "FIO";
+                                res.type = transaction.type;
+                                rawTx = res;
+                                // code block
+                                return [3 /*break*/, 8];
+                            case 4: 
+                            // code block
+                            return [3 /*break*/, 8];
+                            case 5: 
+                            // code block
+                            return [3 /*break*/, 8];
+                            case 6:
+                                tx = transaction.tx;
+                                signTx = {
+                                    addressNList: hdwallet_core_1.bip32ToAddressNList("m/44'/235'/0'/0/0"),
+                                    actions: [
+                                        {
+                                            account: fiosdk_offline_1.FioActionParameters.FioNewFundsRequestActionAccount,
+                                            name: fiosdk_offline_1.FioActionParameters.FioNewFundsRequestActionName,
+                                            data: tx,
+                                        },
+                                    ],
+                                };
+                                log.debug(tag, "signTx: ", JSON.stringify(signTx));
+                                return [4 /*yield*/, this.WALLET.fioSignTx(signTx)];
+                            case 7:
+                                res = _b.sent();
+                                res.coin = "FIO";
+                                res.type = transaction.type;
+                                rawTx = res;
+                                return [3 /*break*/, 8];
+                            case 8: return [3 /*break*/, 10];
+                            case 9:
+                                log.error(tag, "coin not supported! ", transaction.coin);
+                                _b.label = 10;
+                            case 10: return [2 /*return*/, rawTx];
+                            case 11:
+                                e_5 = _b.sent();
+                                log.error(e_5);
+                                throw e_5;
+                            case 12: return [2 /*return*/];
+                        }
+                    });
+                });
+            };
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
         this.sendToAddress = function (coin, address, amount, param1) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, output, addressFrom, transaction, signedTx, broadcastResult, e_5;
+                var tag, output, addressFrom, transaction, signedTx, broadcastResult, e_6;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -823,9 +895,9 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "broadcastResult: ", broadcastResult);
                             return [2 /*return*/, broadcastResult];
                         case 5:
-                            e_5 = _a.sent();
-                            log.error(tag, e_5);
-                            throw Error(e_5);
+                            e_6 = _a.sent();
+                            log.error(tag, e_6);
+                            throw Error(e_6);
                         case 6: return [2 /*return*/];
                     }
                 });
@@ -833,7 +905,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_6;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_7;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -917,6 +989,9 @@ module.exports = /** @class */ (function () {
                                     value: amountSat
                                 }
                             ];
+                            if (memo) {
+                                targets.push({ address: memo, value: 0 });
+                            }
                             //
                             log.info(tag, "inputs coinselect algo: ", { utxos: utxos, targets: targets, feeRate: feeRate });
                             selectedResults = coinSelect(utxos, targets, feeRate);
@@ -966,25 +1041,19 @@ module.exports = /** @class */ (function () {
                                     outputs.push(output);
                                 }
                             }
-                            //sign
-                            log.info(tag, "inputs HDwallet utxo: ", prettyjson.render({
-                                coin: "Bitcoin",
-                                inputs: inputs,
-                                outputs: outputs,
-                                version: 1,
-                                locktime: 0,
-                            }));
                             longName = 'Bitcoin';
                             if (isTestnet) {
                                 longName = 'Testnet';
                             }
-                            return [4 /*yield*/, this.WALLET.btcSignTx({
-                                    coin: longName,
-                                    inputs: inputs,
-                                    outputs: outputs,
-                                    version: 1,
-                                    locktime: 0,
-                                })];
+                            hdwalletTxDescription = {
+                                memo: memo,
+                                coin: longName,
+                                inputs: inputs,
+                                outputs: outputs,
+                                version: 1,
+                                locktime: 0,
+                            };
+                            return [4 /*yield*/, this.WALLET.btcSignTx(hdwalletTxDescription)];
                         case 7:
                             res = _a.sent();
                             log.info(tag, "res: ", res);
@@ -1464,16 +1533,16 @@ module.exports = /** @class */ (function () {
                             _a.label = 29;
                         case 29: return [2 /*return*/, rawTx];
                         case 30:
-                            e_6 = _a.sent();
-                            log.error(tag, "e: ", e_6);
-                            throw e_6;
+                            e_7 = _a.sent();
+                            log.error(tag, "e: ", e_7);
+                            throw e_7;
                         case 31: return [2 /*return*/];
                     }
                 });
             });
         };
         this.broadcastTransaction = function (coin, signedTx) {
-            if (this.isTestnet) {
+            if (this.isTestnet && coin === 'BTC') {
                 signedTx.coin = "TEST";
             }
             else {

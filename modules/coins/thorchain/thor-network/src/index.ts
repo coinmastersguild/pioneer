@@ -28,7 +28,8 @@ const axios = Axios.create({
 
 const log = require('@pioneer-platform/loggerdog')()
 
-let URL_THORNODE = process.env['URL_THORNODE'] || 'http://135.181.112.20:1317'
+let URL_THORNODE = process.env['URL_THORNODE'] || 'https://testnet.thornode.thorchain.info'
+let URL_MIDGARD = process.env['URL_THORNODE'] || 'https://testnet.midgard.thorchain.info/v2'
 
 let BASE_THOR = 100000000
 
@@ -154,6 +155,84 @@ let get_account_info = async function(address:string){
     }
 }
 
+let normalize_tx = function(tx:any,address?:string){
+    let tag = TAG + " | normalize_tx | "
+    try{
+        let output:any = {}
+
+        let sender
+        let receiver
+        let memo
+        let amount
+
+        let rawlog = JSON.parse(tx.raw_log)
+        rawlog = rawlog
+        //log.info("rawlog: ",rawlog)
+
+        //txTypes
+        let txTypes = [
+            'send',
+            'receive',
+            'governence',
+            'swap',
+            'other'
+        ]
+
+        for(let i = 0; i < rawlog.length; i++){
+            let txEvents = rawlog[i]
+
+            //log.info(tag,"txEvents: ",txEvents)
+            txEvents = txEvents.events
+
+            for(let j = 0; j < txEvents.length; j++){
+                let event = txEvents[j]
+
+                //
+                //log.info(tag,"event: ",event)
+                //log.info(tag,"attributes: ",prettyjson.render(event.attributes))
+
+                //detect event type
+                log.info(tag,"type: ",event.type)
+                switch(event.type) {
+                    case 'message':
+                        // ignore
+                        break;
+                    case 'transfer':
+                        log.info(tag,"attributes: ",event.attributes)
+                        for(let k = 0; k < event.attributes.length; k++){
+                            let attribute = event.attributes[k]
+                            if(attribute.key === 'recipient'){
+                                receiver = attribute.value
+                                output.receiver = receiver
+                                if(receiver === address) output.type = txTypes[1]
+                            }
+                            if(attribute.key === 'sender'){
+                                sender = attribute.value
+                                output.sender = sender
+                                if(sender === address) output.type = txTypes[0]
+                            }
+                            if(attribute.key === 'amount'){
+                                amount = attribute.value
+                                amount = amount.replace('rune','')
+                                output.amount = amount / 100000000
+                            }
+                        }
+                        break;
+                    default:
+                    // code block
+                }
+            }
+
+            // console.log("log: ",prettyjson.render(log))
+        }
+
+        return output
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
 let get_txs_by_address = async function(address:string){
     let tag = TAG + " | get_txs_by_address | "
     try{
@@ -167,7 +246,7 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let sends = resultSends.data
-        log.info('sends: ', sends)
+        //log.info('sends: ', sends)
 
         // TODO//pagnation
         // let pagesSends = sends.page_number
@@ -178,27 +257,28 @@ let get_txs_by_address = async function(address:string){
             let tx = sends.txs[i]
 
             //pretty json
-            console.log("tx: ",prettyjson.render(tx))
+
             //normalize
-            //tx = normalize_tx(tx,'send')
+            tx = normalize_tx(tx,address)
             output.push(tx)
         }
 
         //receives
-        // url = URL_THORNODE+ '/txs?transfer.recipient='+address
-        // let resultRecieves = await axios({
-        //     url: url,
-        //     method: 'GET'
-        // })
-        // let receives = resultRecieves.data
-        // log.info('receives: ', receives)
+        url = URL_THORNODE+ '/txs?transfer.recipient='+address
+        console.log("URL_THORNODE: ",url)
+        let resultRecieves = await axios({
+            url: url,
+            method: 'GET'
+        })
+        let receives = resultRecieves.data
+        log.info('receives: ', receives)
 
-        // for(let i = 0; i < receives.txs.length; i++ ){
-        //     let tx = receives.txs[i]
-        //     //normalize
-        //     //tx = normalize_tx(tx,'receive')
-        //     output.push(tx)
-        // }
+        for(let i = 0; i < receives.txs.length; i++ ){
+            let tx = receives.txs[i]
+            //normalize
+            tx = normalize_tx(tx,address)
+            output.push(tx)
+        }
 
 
         return output
@@ -213,20 +293,29 @@ let get_balance = async function(address:string){
     try{
         let output = 0
 
-        let accountInfo = await axios({method:'GET',url: URL_THORNODE+'/bank/balances/'+address})
-        log.info(tag,"accountInfo: ",accountInfo.data)
+        try{
+            let accountInfo = await axios({method:'GET',url: URL_THORNODE+'/bank/balances/'+address})
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
-        //
-        if(accountInfo.data?.result){
-            for(let i = 0; i < accountInfo.data.result.length; i++){
-                let entry = accountInfo.data.result[i]
-                if(entry.denom === 'rune'){
-                    output = entry.amount
+            //
+            if(accountInfo.data?.result){
+                for(let i = 0; i < accountInfo.data.result.length; i++){
+                    let entry = accountInfo.data.result[i]
+                    if(entry.denom === 'rune'){
+                        output = entry.amount
+                    }
                 }
             }
+
+            output = output / BASE_THOR
+        }catch(e){
+            //TODO stupid node 404's on new addresses!
+            //if !404
+                //really thow
         }
 
-        return output / BASE_THOR
+
+        return output
     }catch(e){
         log.error(tag,"e: ",e)
         throw e

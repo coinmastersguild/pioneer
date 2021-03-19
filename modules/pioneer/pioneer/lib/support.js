@@ -1,78 +1,36 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bech32ify = exports.bip32ToAddressNList = exports.bip32Like = exports.getBase = void 0;
+exports.bech32ify = exports.bip32ToAddressNList = exports.bip32Like = exports.getBase = exports.compileMemo = void 0;
 var bech32 = require("bech32");
-var supportedCoins = [
-    "Bitcoin",
-    "Testnet",
-    "BitcoinCash",
-    "BitcoinGold",
-    "Litecoin",
-    "EOS",
-    "FIO",
-    "Dash",
-    "DigiByte",
-    "Dogecoin",
-];
-var PoScoins;
-(function (PoScoins) {
-    PoScoins[PoScoins["EOS"] = 0] = "EOS";
-    PoScoins[PoScoins["ATOM"] = 1] = "ATOM";
-})(PoScoins || (PoScoins = {}));
-var stakingCoins = ["EOS", "ATOM"];
-var segwitCoins = ["Bitcoin", "Testnet", "BitcoinGold", "Litecoin"];
-var COIN_MAP = {
-    Bitcoin: "BTC",
-    Cosmos: "ATOM",
-    Testnet: "BTCT",
-    BitcoinCash: "BCH",
-    Litecoin: "LTC",
-    Dash: "DASH",
-    DigiByte: "DGB",
-    Dogecoin: "DOGE",
-    Ethereum: "ETH",
-    Cardano: "ADA",
-    Binance: "BNB",
-    Eos: "EOS",
-    EOS: "EOS",
-    Fio: "FIO",
-    FIO: "FIO",
-};
-var COIN_MAP_LONG = {
-    BTC: "Bitcoin",
-    ATOM: "Cosmos",
-    BTCT: "testnet",
-    BCH: "BitcoinCash",
-    LTC: "Litecoin",
-    DASH: "Dash",
-    DGB: "DigiByte",
-    DOGE: "Dogecoin",
-    ETH: "Ethereum",
-    ADA: "Cardano",
-    BNB: "Binance",
-    EOS: "Eos",
-    FIO: "Fio",
-};
-var HD_ATOM_KEYPATH = "m/44'/118'/0'/0/0";
-var ATOM_CHAIN = "cosmoshub-3";
-var ATOM_BASE = 1000000;
-var ATOM_TX_FEE = "100";
-var ATOM_MAX_GAS = "100000";
-var HD_BNB_KEYPATH = "44'/714'/0'/0/";
-var BNB_ASSET_SYMBOL = "BNB";
-var BNB_CHAIN = "";
-var BNB_MAX_GAS = "100000";
-var BNB_TX_FEE = "100";
-var BNB_BASE = 100000000;
-var HD_EOS_KEYPATH = "44'/194'/0'/0/";
-var EOS_ASSET_SYMBOL = "EOS";
-var EOS_CHAIN = "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906";
-var EOS_MAX_GAS = "100000";
-var EOS_TX_FEE = "100";
-var EOS_BASE = 1000;
+var Bitcoin = __importStar(require("bitcoinjs-lib")); // https://github.com/bitcoinjs/bitcoinjs-lib
+//TODO move to coins
 var ETH_BASE = 1000000000000000000;
 var HARDENED = 0x80000000;
-//TODO THIS IS DUMB AND SHIT FIXME default cant be null?
+//
+exports.compileMemo = function (memo) {
+    var data = Buffer.from(memo, 'utf8'); // converts MEMO to buffer
+    return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]); // Compile OP_RETURN script
+};
+//TODO THIS IS DUMB AS SHIT FIXME default cant be null?
 function getBase(coin) {
     switch (coin) {
         case "ETH":

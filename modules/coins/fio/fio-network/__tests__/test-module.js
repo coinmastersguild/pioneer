@@ -1,4 +1,9 @@
 require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'../../../../../.env'})
+
+console.log("FIO_NODE_HISTORY: ",process.env['FIO_NODE_HISTORY'])
+console.log("FIO_NODE: ",process.env['FIO_NODE'])
 
 const colorize = require('json-colorizer');
 let fio = require("../lib")
@@ -16,6 +21,21 @@ let run_test = async function(){
     try{
         //await fio.init(urlSpec)
 
+
+        let info = await fio.nodeInfo()
+        console.log("info: ",info)
+
+        //new
+        // let lastBlock = await fio.getBlockHeight()
+        // console.log("lastBlock: ",lastBlock)
+
+
+        // let blockInfo = await fio.getBlock(29990325)
+        // log("blockInfo: ",blockInfo)
+        // log("blockInfo: ",JSON.stringify(blockInfo.transactions[0]))
+
+
+        // OLD
         // let info = await fio.nodeInfo()
         // log("info: ",info)
 
@@ -35,8 +55,8 @@ let run_test = async function(){
         // let pendingReq = await fio.getPendingRequests('FIO6gEwHrLHaAPQK61mCRitvRX7dYKH7m4Jpyi65JBhcFb6pPSRhL')
         // console.log("pendingReq: ",pendingReq)
 
-        let fioAccountInfo = await fio.getAccountInfo('highlander@shapeshift')
-        log("fioAccountInfo: ",fioAccountInfo)
+        // let fioAccountInfo = await fio.getAccountInfo('highlander@shapeshift')
+        // log("fioAccountInfo: ",fioAccountInfo)
 
         // let fioAccountInfo = await fio.getAccount('disco@shapeshift')
         // log("fioAccountInfo: ",fioAccountInfo)

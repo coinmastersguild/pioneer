@@ -16,7 +16,7 @@ let network = require("../lib/index")
 //     })
 
 // tx
-// let tx = "4CF2C0FCA2C04301C7085F78833CD1B5A6CA7B371D47BCEE08C5DAD53C2C9196"
+// let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
 // network.transaction(tx)
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
@@ -63,7 +63,7 @@ let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
-console.log("address: ",address)
+// console.log("address: ",address)
 network.txs(address)
     .then(function(resp){
         console.log("resp: ",resp)

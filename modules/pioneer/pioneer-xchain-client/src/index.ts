@@ -13,7 +13,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const Pioneer = require('openapi-client-axios').default;
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
-
+import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 let {
     getPrecision,
     getExplorerUrl,
@@ -24,6 +24,7 @@ let {
 import {
     Balances
 } from '@bithighlander/xchain-client'
+
 
 import {
     Asset,
@@ -102,6 +103,17 @@ export type TxParams = {
     memo?: string // optional memo to pass
 }
 
+export type EstimateFeeParams = {
+    sourceAsset: Asset,
+    ethClient: any,
+    ethInbound: any,
+    inputAmount: number,
+    memo: string
+};
+
+const TCRopstenAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferAllowance","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"vault","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferOut","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"indexed":false,"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"VaultTransfer","type":"event"},{"inputs":[],"name":"RUNE","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"recipients","type":"address[]"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string[]","name":"memos","type":"string[]"}],"name":"batchTransferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address payable","name":"vault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address payable","name":"asgard","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string","name":"memo","type":"string"}],"name":"returnVaultAssets","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address","name":"newVault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferAllowance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"to","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"vaultAllowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+
 // In most cases, clients don't expect any paramter in `getFees`
 // but in some cases, they do (e.g. in xchain-ethereum).
 // To workaround this, we just define an "empty" (optional) param for now.
@@ -125,6 +137,13 @@ export type XChainClientParams = {
     phrase?: string
 }
 
+export type CallDepositParams = {
+    inboundAddress: any,
+    asset: Asset,
+    memo: string,
+    ethClient: any,
+    amount: number
+};
 
 export interface config {
     spec:string,
@@ -176,6 +195,8 @@ module.exports = class wallet {
     private getProvider: (() => any) | undefined;
     private getFeesWithMemo: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
     private getFeeRates: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
+    private estimateFee: (({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) => Promise<any>) | undefined;
+    private callDeposit: (({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.network = config.blockchain
@@ -371,13 +392,93 @@ module.exports = class wallet {
                 }
             }
 
-            this.getWallet = function () {
+            this.callDeposit = async function ({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) {
+                let tag = TAG + " | getWallet | "
+                try {
+                    let hash;
+                    const wallet = ethClient.getWallet();
+                    //TODO mainnet
+                    const abi = TCRopstenAbi;
+
+                    if (asset.ticker === 'ETH') {
+
+                        const ethAddress = await ethClient.getAddress();
+                        const contract = new ethers.Contract(inboundAddress.router, abi, wallet);
+
+                        console.log('Checkpoint eth-utils: ethAddress:', ethAddress);
+                        console.log('Checkpoint eth-utils: contract:', contract);
+
+                        const contractRes = await contract.deposit(
+                            inboundAddress.address, // not sure if this is correct...
+                            '0x0000000000000000000000000000000000000000',
+                            ethers.utils.parseEther(String(amount)),
+                            // memo,
+                            memo,
+                            {from: ethAddress, value: ethers.utils.parseEther(String(amount))}
+                        );
+
+                        // tslint:disable-next-line:no-string-literal
+                        hash = contractRes['hash'] ? contractRes['hash'] : '';
+
+                    } else {
+                        //TODO tokens
+                        // const assetAddress = asset.symbol.slice(asset.ticker.length + 1);
+                        // const strip0x = assetAddress.substr(2);
+                        // const checkSummedAddress = ethers.utils.getAddress(strip0x);
+                        // const tokenContract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
+                        // const decimal = await tokenContract.decimals();
+                        // const params = [
+                        //     inboundAddress.address, // vault
+                        //     checkSummedAddress, // asset
+                        //     assetToBase(assetAmount(amount, decimal.toNumber())).amount().toFixed(), // amount
+                        //     memo
+                        // ];
+                        //
+                        // const contractRes = await ethClient.call(inboundAddress.router, abi, 'deposit', params);
+                        //
+                        // // tslint:disable-next-line:no-string-literal
+                        // hash = contractRes['hash'] ? contractRes['hash'] : '';
+
+                    }
+
+                    return hash;
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.estimateFee = async function ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) {
+                let tag = TAG + " | getWallet | "
+                try {
+
+                    let params = {
+                        coin:"ETH",
+                        amount:assetToBase(assetAmount(inputAmount, 18)).amount().toFixed(),
+                        contract:"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
+                        recipient:ethInbound.address,
+                        memo
+                    }
+                    let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(null,params)
+                    response = response.data
+
+                    return new BigNumber(response,18)
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.getWallet = async function () {
                 let tag = TAG + " | getWallet | "
                 try {
                     //TODO With hardware we dont have seed.
                     //Inject with test seed for now and see what anarchy happens
                     //In theory we only use this for a few contract special things
-                    return ethers.Wallet.fromMnemonic("alcohol woman abuse must during monitor noble actual mixed trade anger aisle")
+
+                    let wallet:ethers.Wallet = ethers.Wallet.fromMnemonic("alcohol woman abuse must during monitor noble actual mixed trade anger aisle")
+                    let provider = getDefaultProvider('testnet')
+                    await wallet.connect(provider)
+
+                    return wallet
                 } catch (e) {
                     log.error(tag, "e: ", e)
                 }

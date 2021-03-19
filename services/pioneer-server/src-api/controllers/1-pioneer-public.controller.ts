@@ -28,7 +28,7 @@ const networks:any = {
     'ANY' : require('@pioneer-platform/utxo-network'),
 }
 networks.ANY.init('full')
-networks.ETH.init()
+// networks.ETH.init()
 // usersDB.createIndex({id: 1}, {unique: true})
 // txsDB.createIndex({txid: 1}, {unique: true})
 // txsRawDB.createIndex({txhash: 1}, {unique: true})
@@ -45,6 +45,18 @@ import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Reque
 // import * as express from 'express';
 
 //import { User, UserCreateRequest, UserUpdateRequest } from '../models/user';
+
+interface Asset {
+    chain:string,
+    symbol:string,
+    ticker:string,
+}
+
+interface ThorchainMemoEncodedBody {
+    asset:Asset,
+    vaultAddress:string,
+    toAddress:string
+}
 
 interface BroadcastBody {
     coin?:string
@@ -81,6 +93,14 @@ interface Recipient{
 interface GetFeesWithMemoBody{
     coin:string
     memo:string,
+}
+
+interface EstimateFeeBody{
+    coin:string
+    amount:string,
+    contract:string,
+    recipient:string,
+    memo:string
 }
 
 interface Input{
@@ -290,7 +310,7 @@ export class pioneerPublicController extends Controller {
         try{
 
             let output = await redis.get("cache:balance:"+address+":"+coin)
-
+            networks.ETH.init({testnet:true})
             if(!output || CACHE_OVERRIDE){
                 //if coin = token, network = ETH
                 if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
@@ -699,6 +719,76 @@ export class pioneerPublicController extends Controller {
 
 
             return(feeResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    @Post('/estimateFee')
+    public async estimateFee(@Body() body: EstimateFeeBody): Promise<any> {
+        let tag = TAG + " | estimateFee | "
+        try{
+            let output:any = {}
+            log.info(tag,"body: ",body)
+
+            let asset = {
+                chain:"ETH",
+                symbol:"ETH",
+                ticker:"ETH",
+            }
+            let params = [
+                body.contract,
+                "0x0000000000000000000000000000000000000000",
+                body.amount,
+                body.memo
+            ]
+
+
+            //TODO if not eth
+            networks.ETH.init({testnet:true})
+            let response = await networks['ETH'].estimateFee(asset,params)
+
+            return(response.data)
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    @Post('/getThorchainMemoEncoded')
+    public async getThorchainMemoEncoded(@Body() body: any): Promise<any> {
+        let tag = TAG + " | getFee | "
+        try{
+            let asset = {
+                chain:"ETH",
+                symbol:"ETH",
+                ticker:"ETH",
+            }
+
+            let swap = {
+                asset,
+                vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
+                toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+            }
+            networks.ETH.init({testnet:true})
+            console.log("networks['ETH']: ",networks['ETH'])
+
+            let resp = await networks['ETH'].getMemoEncoded(swap)
+            resp = resp
+            log.info("resp:",resp)
+
+            return(resp)
         }catch(e){
             let errorResp:Error = {
                 success:false,

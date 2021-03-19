@@ -77,6 +77,13 @@ let PROVIDER:any
 //TODO precision module
 let BASE = 1000000000000000000;
 
+//TODO move thorchain/eth stuff to its own module?
+
+const THORCHAIN_ROUTER_TESTNET = process.env['THORCHAIN_ROUTER_TESTNET'] || "0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a"
+//const THORCHAIN_ROUTER_MAINNET = process.env['THORCHAIN_ROUTER_MAINNET'] || ''
+
+const TCRopstenAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferAllowance","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"vault","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferOut","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"indexed":false,"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"VaultTransfer","type":"event"},{"inputs":[],"name":"RUNE","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"recipients","type":"address[]"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string[]","name":"memos","type":"string[]"}],"name":"batchTransferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address payable","name":"vault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address payable","name":"asgard","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string","name":"memo","type":"string"}],"name":"returnVaultAssets","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address","name":"newVault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferAllowance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"to","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"vaultAllowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
 module.exports = {
 	init:function (settings:any) {
 		if(!settings){
@@ -106,6 +113,12 @@ module.exports = {
 	},
 	getFees: function (params:any): Promise<any> {
 		return get_fees(params)
+	},
+	estimateFee: function (sourceAsset:any,params:any): Promise<any> {
+		return estimate_fee(sourceAsset,params)
+	},
+	getMemoEncoded: function (params:any): Promise<any> {
+		return get_memo_data(params)
 	},
 	// getFees: function (params: XFeesParams & FeesParams): Promise<Fees> {
 	// 	return get_fees()
@@ -138,6 +151,83 @@ module.exports = {
 		return broadcast_transaction(tx);
 	}
 }
+
+let get_memo_data = async function(swap:any){
+	let tag = TAG + " | get_memo_data | "
+	try{
+		const web3 = new Web3()
+		const routerContract = new web3.eth.Contract(TCRopstenAbi, THORCHAIN_ROUTER_TESTNET)
+
+		const memo = `SWAP:${swap.asset.chain}.${swap.asset.symbol}:${swap.toAddress}`
+		const data = routerContract.methods
+			.deposit(
+				swap.vaultAddress,
+				'0x0000000000000000000000000000000000000000', // 0 = ETH
+				0, // amount only matters for erc20
+				memo
+			)
+			.encodeABI()
+
+		return data
+	}catch(e){
+		log.error(tag,e)
+		throw e
+	}
+}
+
+/*
+	X-chain compatible call
+ */
+let estimate_fee = async function(sourceAsset:any, params:any){
+	let tag = TAG + " | estimate_fee | "
+	try{
+
+		let checkSummedAddress;
+		let decimal;
+
+		if (sourceAsset.symbol === 'ETH') {
+			checkSummedAddress = '0x0000000000000000000000000000000000000000';
+			decimal = ETH_DECIMAL;
+		} else {
+			throw Error("TODO")
+			// const assetAddress = sourceAsset.symbol.slice(sourceAsset.ticker.length + 1);
+			// const strip0x = assetAddress.substr(2);
+			// checkSummedAddress = ethers.utils.getAddress(strip0x);
+			//
+			// const tokenContract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
+			// const tokenDecimals = await tokenContract.decimals();
+			// decimal = tokenDecimals.toNumber();
+		}
+		// Connect to the network
+		let provider = PROVIDER;
+		//
+		const contract = new ethers.Contract(THORCHAIN_ROUTER_TESTNET, TCRopstenAbi, provider);
+
+		console.log('checkppint estimateFee: params', params);
+		const estimateGas = await contract.estimateGas.deposit(...params);
+		console.log('checkppint estimateFee: params', params);
+
+		let entry = {
+			asset: {
+				chain:"ETH",
+				symbol:"ETH",
+				ticker:"ETH",
+			},
+			amount: params[2],
+			recipient: params[0],
+			memo: params[3],
+		}
+
+		const {fees} = await get_fees(entry);
+		let minimumWeiCost = BigNumber.from(fees.average)
+		minimumWeiCost = minimumWeiCost.mul(estimateGas.toNumber())
+		return minimumWeiCost;
+	}catch(e){
+		log.error(tag,e)
+		throw e
+	}
+}
+
 
 let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParams){
 	let tag = TAG + " | get_gas_limit | "
@@ -181,7 +271,7 @@ let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParam
 	}
 }
 
-let get_fees = async function(params: XFeesParams & FeesParams){
+let get_fees = async function(params: any){
 	let tag = TAG + " | broadcast_transaction | "
 	try{
 		const response: any = await etherscanAPI.getGasOracle(ETHERSCAN.baseUrl, ETHERSCAN.apiKey)

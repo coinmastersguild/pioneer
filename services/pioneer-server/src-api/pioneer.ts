@@ -121,7 +121,7 @@ let register_xpubs = async function (account:string, pubkeys:any) {
 
             if(pubkeyInfo.type === "xpub"){
                 let xpub = pubkeyInfo.xpub
-
+                //TODO deal with tpub
                 //
                 if(!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
 

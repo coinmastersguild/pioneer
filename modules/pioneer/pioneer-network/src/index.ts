@@ -560,7 +560,7 @@ const get_wallet_info = async function () {
             for(let i = 0; i < coins.length; i++){
                 let coin = coins[i]
                 log.info(tag,"blockbook IS_TESTNET coin: ",coin)
-                if(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub ){
+                if(BLOCKBOOK_COINS_TESTNET.indexOf(coin) >= 0 && PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub || PUBLIC_WALLET[coin].tpub ){
                     if(coin === 'BTC') {
                         log.info(tag,"BTC testnet blockbook tpub: ",PUBLIC_WALLET[coin].tpub)
                         let balance = await blockbook.getBalanceByXpub('TEST',PUBLIC_WALLET[coin].tpub)

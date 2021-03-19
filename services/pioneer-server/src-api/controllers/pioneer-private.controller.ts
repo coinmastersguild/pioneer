@@ -57,6 +57,7 @@ export interface CoinInfo {
     network:string;
     pubkey: string;
     curve?: string,
+    tpub?: string;
     xpub?: string;
     zpub?: string;
     type?:string
@@ -278,7 +279,7 @@ export class pioneerPrivateController extends Controller {
                     log.info(tag,"walletInfo: ",walletInfo)
 
                     //write to cache
-                    await redis.setex(accountInfo.username+":cache:walletInfo",600 * 5,JSON.stringify(walletInfo))
+                    await redis.setex(accountInfo.username+":cache:walletInfo",5,JSON.stringify(walletInfo))
                 }
 
                 return walletInfo

@@ -44,9 +44,9 @@ let run_test = async function(){
         //get online
 
         //if username not online abort
-        let onlineUsers = await pioneer.instance.Online()
-        onlineUsers = onlineUsers.data
-        console.log("onlineUsers: ",onlineUsers)
+        // let onlineUsers = await pioneer.instance.Online()
+        // onlineUsers = onlineUsers.data
+        // console.log("onlineUsers: ",onlineUsers)
 
         // let isOnline = false
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
@@ -54,6 +54,10 @@ let run_test = async function(){
 
         // let info = await pioneer.instance.Info()
         // console.log("info: ",info.data)
+
+        let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
+        data = data.data
+        console.log("txData: ",data)
 
     }catch(e){
         console.error(e)

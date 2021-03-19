@@ -246,6 +246,7 @@ module.exports = class wallet {
     private pioneerClient: any;
     private WALLET_BALANCES: any;
     private setMnemonic: () => string | undefined;
+    private buildSwap: (transaction: any) => Promise<string>;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         if(config.isTestnet) isTestnet = true
         this.isTestnet = isTestnet || false
@@ -304,7 +305,7 @@ module.exports = class wallet {
                                 log.debug("pubkey: ",pubkey)
                                 throw Error("Invalid pubkey!")
                             }
-                            if(isTestnet){
+                            if(isTestnet && pubkey.xpub && !pubkey.tpub){
                                 pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
                             }
                             this.PUBLIC_WALLET[pubkey.coin] = pubkey
@@ -644,8 +645,12 @@ module.exports = class wallet {
         // /*
         //     Txs
         //
-        //     2 type:
+        //     3 type:
         //         Transfers
+        //              optional memo's
+        //         Swaps
+        //              Dex trades
+        //              Thorchain contract (ETH/TOKEN) trades
         //
         //         non-transfers
         //             Register address
@@ -653,6 +658,62 @@ module.exports = class wallet {
         //             staking
         //
         //  */
+        this.buildSwap = async function (transaction:any) {
+            let tag = TAG + " | buildSwap | "
+            try{
+                //get tx inputs
+                let addressFrom
+                if(transaction.addressFrom){
+                    addressFrom = transaction.addressFrom
+                } else {
+                    addressFrom = await this.getMaster('ETH')
+                }
+                if(!addressFrom) throw Error("102: unable to get master address! ")
+
+                let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,transaction)
+                data = data.data
+                log.info(tag,"txData: ",data)
+
+                let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
+                nonceRemote = nonceRemote.data
+                let nonce = transaction.nonce || nonceRemote
+                let gas_limit = 80000 //TODO dynamic gas limit?
+                let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                gas_price = gas_price.data
+                log.debug(tag,"gas_price: ",gas_price)
+                gas_price = parseInt(gas_price)
+                gas_price = gas_price + 1000000000
+
+                //sign
+                //send FROM master
+                let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
+
+                let amountNative = parseFloat(transaction.amount) * support.getBase('ETH')
+                amountNative = Number(parseInt(String(amountNative)))
+
+                let ethTx = {
+                    addressNList: support.bip32ToAddressNList(masterPathEth),
+                    nonce: numberToHex(nonce),
+                    gasPrice: numberToHex(gas_price),
+                    gasLimit: numberToHex(gas_limit),
+                    value: amountNative,
+                    to: transaction.vaultAddress,
+                    data,
+                    // chainId: 1,//TODO testnet
+                }
+
+                log.debug("unsignedTxETH: ",ethTx)
+                //send to hdwallet
+                let rawTx = await this.WALLET.ethSignTx(ethTx)
+                rawTx.params = ethTx
+
+
+                return rawTx
+            }catch(e){
+                log.error(e)
+                throw e
+            }
+        },
         this.buildTx = async function (transaction:any) {
             let tag = TAG + " | buildTx | "
             try{
@@ -830,6 +891,7 @@ module.exports = class wallet {
                         throw Error("101 YOUR BROKE! no UTXO's found! ")
                     }
 
+
                     //TODO get fee level in sat/byte
                     // let feeRate = 1
                     // let feeRate = await this.pioneerClient.instance.GetFeeInfo({coin})
@@ -851,7 +913,9 @@ module.exports = class wallet {
                             value: amountSat
                         }
                     ]
-
+                    if(memo){
+                        targets.push({ address: memo, value: 0 })
+                    }
                     //
                     log.info(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
                     let selectedResults = coinSelect(utxos, targets, feeRate)
@@ -909,26 +973,24 @@ module.exports = class wallet {
                             outputs.push(output)
                         }
                     }
-
-                    //sign
-                    log.info(tag,"inputs HDwallet utxo: ",prettyjson.render({
-                        coin: "Bitcoin",
-                        inputs,
-                        outputs,
-                        version: 1,
-                        locktime: 0,
-                    }))
                     let longName = 'Bitcoin'
                     if(isTestnet){
                         longName = 'Testnet'
                     }
-                    const res = await this.WALLET.btcSignTx({
+
+                    //hdwallet input
+                    //TODO type this
+                    let hdwalletTxDescription = {
+                        memo,
                         coin: longName,
                         inputs,
                         outputs,
                         version: 1,
                         locktime: 0,
-                    });
+                    }
+
+
+                    const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
                     log.info(tag,"res: ",res)
 
                     //
@@ -1424,7 +1486,7 @@ module.exports = class wallet {
             }
         }
         this.broadcastTransaction = function (coin:string, signedTx:BroadcastBody) {
-            if(this.isTestnet){
+            if(this.isTestnet && coin === 'BTC'){
                 signedTx.coin = "TEST"
             }else{
                 signedTx.coin = coin

@@ -157,7 +157,7 @@ var get_pending_requests = function (pubkey) {
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();
-                    log.info(tag, "resp: ", resp);
+                    log.debug(tag, "resp: ", resp);
                     return [2 /*return*/, resp.data];
                 case 3:
                     e_1 = _a.sent();
@@ -188,7 +188,7 @@ var get_account_info_from_account = function (account) {
                     return [4 /*yield*/, is_available(account)];
                 case 2:
                     isAvailable = _a.sent();
-                    log.info(tag, "isAvailable: ", isAvailable);
+                    log.debug(tag, "isAvailable: ", isAvailable);
                     if (!isAvailable) return [3 /*break*/, 3];
                     output_2.isAvailable = true;
                     return [3 /*break*/, 8];
@@ -201,13 +201,13 @@ var get_account_info_from_account = function (account) {
                         "token_code": tokenCode
                     };
                     body = { method: 'POST', url: fioNode + '/chain/get_pub_address', data: data };
-                    log.info(body);
+                    log.debug(body);
                     return [4 /*yield*/, axios(body)];
                 case 4:
                     resp = _a.sent();
-                    log.info(tag, "resp: ", resp.data);
+                    log.debug(tag, "resp: ", resp.data);
                     output_2.pubkey = resp.data.public_address;
-                    log.info(tag, "output.pubkey: ", output_2.pubkey);
+                    log.debug(tag, "output.pubkey: ", output_2.pubkey);
                     coins = [
                         'EOS',
                         'ETH'
@@ -217,11 +217,11 @@ var get_account_info_from_account = function (account) {
                 case 5:
                     if (!(i < coins.length)) return [3 /*break*/, 8];
                     coin = coins[i];
-                    log.info(tag, "coin: ", coin);
+                    log.debug(tag, "coin: ", coin);
                     return [4 /*yield*/, get_account_address(account, coin)];
                 case 6:
                     address = _a.sent();
-                    log.info(tag, "address: ", address);
+                    log.debug(tag, "address: ", address);
                     output_2[coin] = address.public_address;
                     _a.label = 7;
                 case 7:
@@ -298,7 +298,7 @@ var broadcast_new_funds_request_tx = function (tx) {
                         console.log(JSON.stringify(error));
                         throw new Error(error);
                     }
-                    console.log(JSON.stringify(body));
+                    //console.log(JSON.stringify(body));
                     return body;
                 });
             }
@@ -336,7 +336,7 @@ var broadcast_payment_request = function (tx) {
                         console.log(JSON.stringify(error));
                         throw new Error(error);
                     }
-                    console.log(JSON.stringify(body));
+                    //console.log(JSON.stringify(body));
                     return body;
                 });
                 // let body = {method:'POST',url: fioNode+'/chain/push_transaction',body:""}
@@ -381,7 +381,7 @@ var broadcast_register_address = function (tx) {
                         console.log(JSON.stringify(error));
                         throw new Error(error);
                     }
-                    console.log(JSON.stringify(body));
+                    //console.log(JSON.stringify(body));
                     return body;
                 });
                 // let body = {method:'POST',url: fioNode+'/chain/push_transaction',body:""}
@@ -572,7 +572,7 @@ var get_latest_block_height = function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    tag = TAG + " | get_txs | ";
+                    tag = TAG + " | get_latest_block_height | ";
                     output = {};
                     _a.label = 1;
                 case 1:
@@ -772,7 +772,7 @@ var get_actor = function (pubkey) {
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();
-                    log.info(tag, "resp: ", resp.data);
+                    log.debug(tag, "resp: ", resp.data);
                     return [2 /*return*/, resp.data];
                 case 3:
                     e_10 = _a.sent();
@@ -832,7 +832,7 @@ var get_account_from_actor = function (actor) {
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();
-                    log.info(tag, "resp: ", resp.data);
+                    log.debug(tag, "resp: ", resp.data);
                     return [3 /*break*/, 4];
                 case 3:
                     e_11 = _a.sent();
@@ -902,7 +902,7 @@ var get_accounts_from_pubkey = function (pubkey) {
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();
-                    log.info(tag, "resp: ", resp.data);
+                    log.debug(tag, "resp: ", resp.data);
                     output = resp.data;
                     return [2 /*return*/, output];
                 case 3:

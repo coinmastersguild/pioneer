@@ -45,7 +45,7 @@ let run_test = async function(){
         if(!config){
             let wallet1 = {
                 isTestnet:true,
-                mnemonic:process.env['WALLET_TESTNET_DEV'],
+                mnemonic:process.env['WALLET_TEST_SEED'],
                 username:username,
                 password
             }
@@ -78,7 +78,7 @@ let run_test = async function(){
             //console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("IN5SNJ")
+            let pairResult = await App.pair("BH4IK4")
             console.log("pairResult: ",pairResult)
 
             //get wallets
@@ -92,8 +92,8 @@ let run_test = async function(){
             /*
                 FIO
              */
-            let fioPublicInfo = await context.getFioAccountInfo("highlander@scatter")
-            console.log("fioPublicInfo: ",fioPublicInfo)
+            // let fioPublicInfo = await context.getFioAccountInfo("highlander@scatter")
+            // console.log("fioPublicInfo: ",fioPublicInfo)
 
             /*
                 BTC
