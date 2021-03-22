@@ -24,22 +24,22 @@ network.init({testnet:true})
 //         console.log(resp)
 //     })
 
-let asset = {
-        chain:"ETH",
-        symbol:"ETH",
-        ticker:"ETH",
-    }
-
-let swap = {
-    asset,
-    vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
-    toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
-}
-
-network.getMemoEncoded(swap)
-    .then(function(resp){
-        console.log("data: ",resp)
-    })
+// let asset = {
+//         chain:"ETH",
+//         symbol:"ETH",
+//         ticker:"ETH",
+//     }
+//
+// let swap = {
+//     asset,
+//     vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
+//     toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+// }
+//
+// network.getMemoEncoded(swap)
+//     .then(function(resp){
+//         console.log("data: ",resp)
+//     })
 
 //TODO getFees needs a tx template
 // let entry = {

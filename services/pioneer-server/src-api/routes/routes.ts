@@ -58,6 +58,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "coin": {"dataType":"string"},
+            "isTestnet": {"dataType":"boolean"},
             "serialized": {"dataType":"string","required":true},
             "signature": {"dataType":"string"},
             "type": {"dataType":"string"},

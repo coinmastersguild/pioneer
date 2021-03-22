@@ -55,9 +55,19 @@ let run_test = async function(){
         // let info = await pioneer.instance.Info()
         // console.log("info: ",info.data)
 
-        let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
+        // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
+        // data = data.data
+        // console.log("txData: ",data)
+
+        //broadcast
+        let broadcast = {
+            serialized: '0xf901511085028fa6ae008301388094a13beb789f721253077faefd9bf604e1929e0e7487038d7ea4c68000b8e41fece7b4000000000000000000000000a13beb789f721253077faefd9bf604e1929e0e74000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000003d535741503a756e646566696e65642e4554483a3078336534383565326337646637313265633137306330383765636635633135303136613033663933660000001ca021214c47d7977f78b2beed0f4c7dfcdf0fcd9bf4232dc2cb2e85372b78908d80a05c86dd58a3d5fc3105c61283b1fff866da9889f33a4a58e6d782b6c4e733d2fd',
+            coin: 'ETH',
+            isTestnet:true
+        }
+        let data = await pioneer.instance.Broadcast(null, broadcast)
         data = data.data
-        console.log("txData: ",data)
+        console.log("data: ",data)
 
     }catch(e){
         console.error(e)

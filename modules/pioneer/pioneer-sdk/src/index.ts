@@ -41,12 +41,14 @@ export class SDK {
     private pioneerApi: any;
     private init: (blockchains: []) => Promise<any>;
     private config: config;
+    private clients: any;
     private createPairingCode: () => Promise<any>;
     private queryKey: string;
     private service: string;
     private getInfo: () => Promise<any>;
     private isTestnet: boolean;
     private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
+    private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         if(isTestnet){
@@ -58,6 +60,7 @@ export class SDK {
         this.spec = spec || config.spec
         this.queryKey = config.queryKey
         this.spec = config.spec
+        this.clients = {}
         this.init = async function (blockchains?:[]) {
             let tag = TAG + " | init_wallet | "
             try{
@@ -109,6 +112,45 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
+        // @ts-ignore
+        this.sendToAddress = async function (blockchain:string,asset:string,amount:string,address:string,memo?:string) {
+            let tag = TAG + " | getInfo | "
+            try {
+
+                //build a tx
+                let txInput:any = {
+                    "asset":
+                        {
+                            "chain":blockchain,
+                            "symbol":asset,
+                            "ticker":asset
+                        },
+                    "amount":
+                        {
+                            "type":"BASE",
+                            "decimal":18,
+                            amount: function(){
+                                return amount
+                            }
+                        },
+                    "recipient":address,
+                }
+                if(memo) txInput.memo = memo
+
+                //ETH
+                if(this.isTestnet && blockchain === 'ETH'){
+                    txInput.chainId = 3 //ropsten
+                }
+
+                let txid = await this.clients[blockchain].transfer(txInput)
+                log.info("txid",txid)
+
+                return txid
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        //X-chain
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
@@ -122,7 +164,6 @@ export class SDK {
                 log.info(tag,"supportedBlockchains: ",supportedBlockchains)
                 if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
 
-                let clients:any = {}
 
                 if(supportedBlockchains.indexOf('Binance') >= 0){
                     let binance = new XchainClass(this.spec,{
@@ -132,7 +173,7 @@ export class SDK {
                         queryKey:this.queryKey
                     })
                     await binance.init()
-                    clients['binance'] = binance
+                    this.clients['binance'] = binance
                 }
 
                 if(supportedBlockchains.indexOf('Bitcoin') >= 0){
@@ -143,7 +184,7 @@ export class SDK {
                         queryKey:this.queryKey
                     })
                     await bitcoin.init()
-                    clients['bitcoin'] = bitcoin
+                    this.clients['bitcoin'] = bitcoin
                 }
 
                 if(supportedBlockchains.indexOf('Thorchain') >= 0){
@@ -154,7 +195,7 @@ export class SDK {
                         queryKey:this.queryKey
                     })
                     await thorchain.init()
-                    clients['thorchain'] = thorchain
+                    this.clients['thorchain'] = thorchain
                 }
 
                 if(supportedBlockchains.indexOf('Ethereum') >= 0){
@@ -165,7 +206,7 @@ export class SDK {
                         queryKey:this.queryKey
                     })
                     await ethereum.init()
-                    clients['ethereum'] = ethereum
+                    this.clients['ethereum'] = ethereum
                 }
 
                 //TODO
@@ -180,7 +221,7 @@ export class SDK {
                     type: 'pioneer',
                     wallet: thorAddress,
                     keystore:{},
-                    clients
+                    clients:this.clients
                 }
 
                 return output

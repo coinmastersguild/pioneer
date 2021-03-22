@@ -54,7 +54,7 @@ let run_test = async function(){
             username,
             spec:urlSpec
         }
-        //
+
         //init
         let app = new SDK(urlSpec,config,isTestnet)
         await app.init()

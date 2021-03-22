@@ -39,8 +39,6 @@ let run_test = async function(){
         //get config
         let config = await App.getConfig()
 
-
-
         //if no config
         if(!config){
             let wallet1 = {
@@ -63,17 +61,14 @@ let run_test = async function(){
             App.updateConfig({username});
             App.updateConfig({temp:password});
             App.updateConfig({created: new Date().getTime()});
+
         } else {
             //if force keepkey
             let isTestnet = true
-            // let resultPair = await App.pairKeepkey()
-            // console.log("resultPair: ",resultPair)
 
             config.password = password
-            console.log("config: ",config)
             config.username = username
 
-            console.log("config: ",config)
             let resultInit = await App.init(config,isTestnet)
             //console.log("resultInit: ",resultInit)
 

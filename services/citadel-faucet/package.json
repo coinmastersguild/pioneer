@@ -38,6 +38,7 @@
     "lint-fix": "tslint -c tslint.json 'src-api/**/*.ts'"
   },
   "dependencies": {
+    "@pioneer-platform/default-redis": "0.0.2",
     "@pioneer-platform/pioneer-config": "^6.3.23",
     "@pioneer-platform/pioneer-sdk": "0.0.13",
     "@quasar/extras": "^1.9.19",

@@ -1065,6 +1065,11 @@ module.exports = class wallet {
 
                     log.debug(tag,"txParams: ",txParams)
 
+                    let chainId = 1
+                    if(this.isTestnet){
+                        chainId = 3 //ropsten
+                    }
+
                     let ethTx = {
                         addressNList: support.bip32ToAddressNList(masterPathEth),
                         nonce: numberToHex(txParams.nonce),
@@ -1073,7 +1078,7 @@ module.exports = class wallet {
                         value: txParams.value,
                         to: txParams.to,
                         data:txParams.data,
-                        chainId: 1,
+                        chainId
                     }
 
                     log.debug("unsignedTxETH: ",ethTx)

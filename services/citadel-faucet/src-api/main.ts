@@ -26,7 +26,7 @@ const swaggerDocument = require('../api/dist/swagger.json')
 
 const app = express();
 const server = require('http').Server(app);
-let API_PORT = parseInt(process.env["API_PORT_PIONEER"]) || 80
+let API_PORT = parseInt(process.env["API_PORT_CITADEL"]) || 80
 let RATE_LIMIT_RPM = parseInt(process.env["RATE_LIMIT_TPS"]) || 500
 
 

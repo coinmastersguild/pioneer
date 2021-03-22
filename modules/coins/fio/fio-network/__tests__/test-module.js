@@ -26,8 +26,8 @@ let run_test = async function(){
         console.log("info: ",info)
 
         //new
-        // let lastBlock = await fio.getBlockHeight()
-        // console.log("lastBlock: ",lastBlock)
+        let lastBlock = await fio.getBlockHeight()
+        console.log("lastBlock: ",lastBlock)
 
 
         // let blockInfo = await fio.getBlock(29990325)
@@ -94,8 +94,8 @@ let run_test = async function(){
         // let getBalance = await fio.getBalance('FIO7Jpu6RnKt6URTaQfXfdzZBFtoXdbXuQMiVPVyrM913ES6wzFvo')
         // log("getBalance: ",getBalance)
         //
-        // let getBalance = await fio.getBalance('FIO7Jpu6RnKt6URTaQfXfdzZBFtoXdbXuQMiVPVyrM913ES6wzFvo')
-        // log("getBalance: ",getBalance)
+        let getBalance = await fio.getBalance('FIO7Jpu6RnKt6URTaQfXfdzZBFtoXdbXuQMiVPVyrM913ES6wzFvo')
+        log("getBalance: ",getBalance)
         //
         // // let accountFioAddress = await fio.getAccountAddress('highlander@scatter','FIO')
         // // log("accountFioAddress: ",accountFioAddress)

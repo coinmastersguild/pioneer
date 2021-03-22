@@ -27,7 +27,7 @@ const networks:any = {
     'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
 }
-networks.ANY.init('full')
+// networks.ANY.init('full')
 // networks.ETH.init()
 // usersDB.createIndex({id: 1}, {unique: true})
 // txsDB.createIndex({txid: 1}, {unique: true})
@@ -60,6 +60,7 @@ interface ThorchainMemoEncodedBody {
 
 interface BroadcastBody {
     coin?:string
+    isTestnet?:boolean,
     serialized:string
     signature?:string
     type?:string
@@ -894,6 +895,10 @@ export class pioneerPublicController extends Controller {
             log.info("************************** CHECKPOINT *******************88 ")
             log.info(tag,"body: ",body)
             let coin = body.coin
+            let isTestnet = false
+            if(body.isTestnet){
+                isTestnet = true
+            }
             //if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
 
 
@@ -938,9 +943,11 @@ export class pioneerPublicController extends Controller {
                 }
             } else if(UTXO_COINS.indexOf(coin) >= 0){
                 //normal broadcast
+                networks.ANY.init('full',{isTestnet},isTestnet)
                 result = await networks['ANY'].broadcast(coin,body.serialized)
             } else {
                 //normal broadcast
+                networks[coin].init({testnet:true},isTestnet)
                 result = await networks[coin].broadcast(body.serialized)
             }
 

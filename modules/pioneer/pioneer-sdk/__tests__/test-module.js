@@ -74,6 +74,10 @@ let run_test = async function(){
                 console.log(blockchain+ " balance: ",balance)
             }
 
+            //send eth
+
+            let txid = await app.sendToAddress('ethereum','ETH',0.001,'0x33b35c665496bA8E71B22373843376740401F106')
+            console.log("txid: ",txid)
         }
 
 

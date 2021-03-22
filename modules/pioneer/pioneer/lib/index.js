@@ -905,7 +905,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_7;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_7;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1135,6 +1135,10 @@ module.exports = /** @class */ (function () {
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
                             log.debug(tag, "txParams: ", txParams);
+                            chainId = 1;
+                            if (this.isTestnet) {
+                                chainId = 3; //ropsten
+                            }
                             ethTx = {
                                 addressNList: support.bip32ToAddressNList(masterPathEth),
                                 nonce: web3_utils_1.numberToHex(txParams.nonce),
@@ -1143,7 +1147,7 @@ module.exports = /** @class */ (function () {
                                 value: txParams.value,
                                 to: txParams.to,
                                 data: txParams.data,
-                                chainId: 1,
+                                chainId: chainId
                             };
                             log.debug("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
