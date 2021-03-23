@@ -22,10 +22,10 @@ let network = require("../lib/index")
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.info()
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.info()
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 
 let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"

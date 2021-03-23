@@ -187,27 +187,43 @@ let run_test = async function(){
         console.log("balanceETH: ",balanceETH)
 
         //
-        let asset = {
-            chain:"ETH",
-            symbol:"ETH",
-            ticker:"ETH",
+        // let asset = {
+        //     chain:"ETH",
+        //     symbol:"ETH",
+        //     ticker:"ETH",
+        // }
+        //
+        // let swap = {
+        //     asset,
+        //     vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
+        //     toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+        // }
+        //
+        // let amount = 0.0001
+        // swap.amount = amount
+        //
+        // let result = await Wallet.buildSwap(swap)
+        // console.log("swapResult: ",result)
+
+        let transfer = {
+            coin:"ETH",
+            addressTo:"0x33b35c665496bA8E71B22373843376740401F106"
         }
 
-        let swap = {
-            asset,
-            vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
-            toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
-        }
+        let amount = 0.0001
+        transfer.amount = amount
 
-        let amount = 0.001
-        swap.amount = amount
+        // let result = await Wallet.buildTransfer(transfer)
+        // console.log("transfer: ",result)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
-        let result = await Wallet.buildSwap(swap)
-        console.log("swapResult: ",result)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
-        console.log("resultBroadcast: ",resultBroadcast)
-
+        //normal send, to memo
+        let result = await Wallet.sendToAddress(transfer.coin,transfer.addressTo,transfer.amount)
+        //expect instant txid
+        console.log("result: ",result)
+        //TODO event emitter?
         /*
                BTC
          */

@@ -76,6 +76,7 @@ var bitcoin = require("bitcoinjs-lib");
 var ethUtils = require('ethereumjs-util');
 var prettyjson = require('prettyjson');
 var coinSelect = require('coinselect');
+var keccak256 = require('keccak256');
 //All paths
 //TODO make paths adjustable!
 var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
@@ -150,6 +151,16 @@ var HDWALLETS;
     HDWALLETS[HDWALLETS["ledger"] = 3] = "ledger";
     HDWALLETS[HDWALLETS["metamask"] = 4] = "metamask";
 })(HDWALLETS = exports.HDWALLETS || (exports.HDWALLETS = {}));
+//note: must match api!
+// interface BroadcastBody {
+//     coin?:string
+//     serialized:string
+//     type?:string
+//     broadcastBody?:any,
+//     txid?:string
+//     dscription?:any
+//     invocationId?:string
+// }
 function bech32ify(address, prefix) {
     var words = bech32.toWords(address);
     return bech32.encode(prefix, words);
@@ -861,18 +872,21 @@ module.exports = /** @class */ (function () {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
-        this.sendToAddress = function (coin, address, amount, param1) {
+        this.sendToAddress = function (coin, address, amount, param1, invocationId) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, output, addressFrom, transaction, signedTx, broadcastResult, e_6;
+                var tag, output, addressFrom, transaction, signedTx_1, broadcast_hook, e_6;
+                var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | sendToAddress | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 5, , 6]);
+                            _a.trys.push([1, 4, , 5]);
+                            if (!invocationId)
+                                throw Error("invocationId: required!");
                             output = {};
-                            log.debug(tag, "params: ", { coin: coin, address: address, amount: amount, param1: param1 });
+                            log.debug(tag, "params: ", { coin: coin, address: address, amount: amount, param1: param1, invocationId: invocationId });
                             return [4 /*yield*/, this.getMaster(coin)];
                         case 2:
                             addressFrom = _a.sent();
@@ -884,28 +898,50 @@ module.exports = /** @class */ (function () {
                                 amount: amount,
                                 memo: param1
                             };
-                            log.debug(tag, "transaction: ", transaction);
                             return [4 /*yield*/, this.buildTransfer(transaction)];
                         case 3:
-                            signedTx = _a.sent();
-                            log.info(tag, "signedTx: ", signedTx);
-                            return [4 /*yield*/, this.broadcastTransaction(coin, signedTx)];
+                            signedTx_1 = _a.sent();
+                            log.info(tag, "signedTx: ", signedTx_1);
+                            if (invocationId)
+                                signedTx_1.invocationId = invocationId;
+                            log.debug(tag, "transaction: ", transaction);
+                            broadcast_hook = function () { return __awaiter(_this, void 0, void 0, function () {
+                                var broadcastResult, e_7;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            _a.trys.push([0, 2, , 3]);
+                                            return [4 /*yield*/, this.broadcastTransaction(coin, signedTx_1)];
+                                        case 1:
+                                            broadcastResult = _a.sent();
+                                            log.info(tag, "broadcastResult: ", broadcastResult);
+                                            return [3 /*break*/, 3];
+                                        case 2:
+                                            e_7 = _a.sent();
+                                            log.error(tag, "Failed to broadcast transaction!");
+                                            return [3 /*break*/, 3];
+                                        case 3: return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            //Notice NO asyc!
+                            broadcast_hook();
+                            //
+                            if (!signedTx_1.txid)
+                                throw Error("103: Pre-broadcast txid hash not implemented!");
+                            return [2 /*return*/, signedTx_1];
                         case 4:
-                            broadcastResult = _a.sent();
-                            log.info(tag, "broadcastResult: ", broadcastResult);
-                            return [2 /*return*/, broadcastResult];
-                        case 5:
                             e_6 = _a.sent();
                             log.error(tag, e_6);
                             throw Error(e_6);
-                        case 6: return [2 /*return*/];
+                        case 5: return [2 /*return*/];
                     }
                 });
             });
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_7;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_8;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1150,9 +1186,19 @@ module.exports = /** @class */ (function () {
                                 chainId: chainId
                             };
                             log.debug("unsignedTxETH: ", ethTx);
-                            return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
+                            return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)
+                                //txid
+                                //const txHash = await web3.utils.sha3(signed.rawTransaction);
+                            ];
                         case 16:
                             rawTx = _a.sent();
+                            //txid
+                            //const txHash = await web3.utils.sha3(signed.rawTransaction);
+                            if (!rawTx.serialized)
+                                throw Error("Failed to sign!");
+                            txid = keccak256(rawTx.serialized).toString('hex');
+                            log.info(tag, "txid: ", txid);
+                            rawTx.txid = txid;
                             rawTx.params = txParams;
                             return [3 /*break*/, 29];
                         case 17:
@@ -1537,22 +1583,38 @@ module.exports = /** @class */ (function () {
                             _a.label = 29;
                         case 29: return [2 /*return*/, rawTx];
                         case 30:
-                            e_7 = _a.sent();
-                            log.error(tag, "e: ", e_7);
-                            throw e_7;
+                            e_8 = _a.sent();
+                            log.error(tag, "e: ", e_8);
+                            throw e_8;
                         case 31: return [2 /*return*/];
                     }
                 });
             });
         };
-        this.broadcastTransaction = function (coin, signedTx) {
-            if (this.isTestnet && coin === 'BTC') {
-                signedTx.coin = "TEST";
-            }
-            else {
-                signedTx.coin = coin;
-            }
-            return this.pioneerClient.instance.Broadcast(null, signedTx).data;
+        this.broadcastTransaction = function (coin, signedTx, invocationId) {
+            return __awaiter(this, void 0, void 0, function () {
+                var tag, resultBroadcast;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            tag = TAG + " | broadcastTransaction | ";
+                            if (this.isTestnet && coin === 'BTC') {
+                                signedTx.coin = "TEST";
+                            }
+                            else {
+                                signedTx.coin = coin;
+                            }
+                            if (invocationId)
+                                signedTx.invocationId = invocationId;
+                            log.info(tag, "signedTx: ", signedTx);
+                            return [4 /*yield*/, this.pioneerClient.instance.Broadcast(null, signedTx)];
+                        case 1:
+                            resultBroadcast = _a.sent();
+                            log.info(tag, "resultBroadcast: ", resultBroadcast);
+                            return [2 /*return*/, resultBroadcast];
+                    }
+                });
+            });
         };
     }
     return wallet;

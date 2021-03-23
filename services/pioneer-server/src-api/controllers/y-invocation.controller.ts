@@ -105,7 +105,7 @@ export class pioneerInvocationController extends Controller {
 
             //origin
             //TODO signed by?
-
+            body.invocationId = invocationId
             let entry = {
                 invocationId,
                 invocation:body
@@ -118,21 +118,28 @@ export class pioneerInvocationController extends Controller {
             let mongoSave = await invocationsDB.insert(entry)
             log.info(tag,"mongoSave: ",mongoSave)
             if(onlineUsers.indexOf(body.invocation.username) >= 0){
-
+                //rabble
                 body.invocation.invocationId = invocationId
+                body.invocationId = invocationId
                 //send
                 publisher.publish("invocations",JSON.stringify(body.invocation))
 
                 //timeOut return early
 
                 //block till confirmation
-                // let txConfirmed = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
-                // output.success = true
-                // output.txid = txConfirmed
+                log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
+                let timeStart = new Date().getTime()
+                //TODO timeout?
 
+                let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
+                let timeEnd = new Date().getTime()
+                log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+
+                //if
+                if(!txid[1]) throw Error("Failed to broadcast! timeout!")
                 output.success = true
-                output.txid = invocationId
-                //output.ttr = TODO measure time till response
+                output.txid = txid[1]
+                output.ttr = (timeEnd - timeStart)/1000
 
                 return output
             } else {

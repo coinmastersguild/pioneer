@@ -52,7 +52,7 @@ var SEED_TESTNET = "https://testnet-seed.thorchain.info/";
 //let MIDGARD_API = "https://testnet.multichain.midgard.thorchain.info/v2"
 // const MIDGARD_API = 'http://174.138.103.9:8080/v1'
 // let MIDGARD_API_RAW = 'https://testnet.thornode.thorchain.info'
-var MIDGARD_API = 'https://midgard.thorchain.info/v2';
+var MIDGARD_API = process.env['URL_MIDGARD'] || 'https://midgard.thorchain.info/v2';
 var URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.thorchain.info';
 //http://174.138.103.9:8080/v1/doc
 var Axios = require('axios');

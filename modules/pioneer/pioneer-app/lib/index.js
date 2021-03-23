@@ -658,18 +658,17 @@ let broadcast_transaction = function (coin, rawTx) {
         }
     });
 };
-let send_to_address = function (coin, address, amount, memo) {
+let send_to_address = function (coin, address, amount, memo, invocationId) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | send_to_address | ";
         try {
             coin = coin.toUpperCase();
             log.info(tag, "Pioneer: ", Pioneer);
             log.debug("params: ", { coin, address, amount });
-            let rawTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin, address, amount, null);
-            log.debug(tag, "rawTx: ", rawTx);
-            //open txid?
-            //broadcast
-            return rawTx;
+            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin, address, amount, memo, invocationId);
+            log.debug(tag, "txid: ", signedTx.txid);
+            //
+            return signedTx;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -1029,9 +1028,10 @@ let init_wallet = function (config, isTestnet) {
                     //TODO filter invocations by subscribers
                     //TODO autonomousOn/Off
                     // @ts-ignore
-                    let txid = yield send_to_address(request.coin, request.to, request.amount, request.memo);
-                    console.log("txid: ", txid);
+                    let signedTx = yield send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId);
+                    console.log("txid: ", signedTx.txid);
                     //push txid to invocationId
+                    events.emit('broadcast', signedTx);
                     //update status on server
                     //add to history
                 });

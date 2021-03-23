@@ -21,6 +21,7 @@ const bitcoin = require("bitcoinjs-lib");
 const ethUtils = require('ethereumjs-util');
 const prettyjson = require('prettyjson');
 const coinSelect = require('coinselect')
+const keccak256 = require('keccak256')
 
 //All paths
 //TODO make paths adjustable!
@@ -167,14 +168,29 @@ export interface CoinInfo {
     type?:string
 }
 
+//TODO move this to sdk types export
 interface BroadcastBody {
     coin?:string
+    isTestnet?:boolean,
     serialized:string
+    signature?:string
     type?:string
-    broadcastBody?:any,
     txid?:string
+    broadcastBody?:any
     dscription?:any
+    invocationId?:string
 }
+
+//note: must match api!
+// interface BroadcastBody {
+//     coin?:string
+//     serialized:string
+//     type?:string
+//     broadcastBody?:any,
+//     txid?:string
+//     dscription?:any
+//     invocationId?:string
+// }
 
 function bech32ify(address:any, prefix:string) {
     const words = bech32.toWords(address)
@@ -225,7 +241,7 @@ module.exports = class wallet {
     private buildTx: (transaction: any) => Promise<any>;
     private bip32ToAddressNList: (path: string) => number[];
     // private encrypt: (msg: FioActionParameters.FioRequestContent, payerPubkey: string) => Promise<any>;
-    private sendToAddress: (coin: string, address: string, amount: string, param1: string) => Promise<any>;
+    private sendToAddress: (coin: string, address: string, amount: string, param1: string, invocationId: string) => Promise<any>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
     private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
     private mode: string;
@@ -789,11 +805,12 @@ module.exports = class wallet {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
-        this.sendToAddress = async function (coin:string,address:string,amount:string,param1:string) {
+        this.sendToAddress = async function (coin:string,address:string,amount:string,param1:string,invocationId:string) {
             let tag = TAG+" | sendToAddress | "
             try{
+                if(!invocationId)throw Error("invocationId: required!")
                 let output = {}
-                log.debug(tag,"params: ",{coin,address,amount,param1})
+                log.debug(tag,"params: ",{coin,address,amount,param1,invocationId})
                 //TODO verify input params
 
                 let addressFrom = await this.getMaster(coin)
@@ -806,17 +823,32 @@ module.exports = class wallet {
                     amount:amount,
                     memo:param1
                 }
-                log.debug(tag,"transaction: ",transaction)
 
                 //build transfer
                 let signedTx = await this.buildTransfer(transaction)
                 log.info(tag,"signedTx: ",signedTx)
 
-                //broadcast
-                let broadcastResult = await this.broadcastTransaction(coin,signedTx)
-                log.info(tag,"broadcastResult: ",broadcastResult)
+                if(invocationId)signedTx.invocationId = invocationId
+                log.debug(tag,"transaction: ",transaction)
 
-                return broadcastResult
+                //broadcast hook
+                let broadcast_hook = async () =>{
+                    try{
+                        //TODO flag for async broadcast
+                        let broadcastResult = await this.broadcastTransaction(coin,signedTx)
+                        log.info(tag,"broadcastResult: ",broadcastResult)
+
+                        //push to invoke api
+                    }catch(e){
+                        log.error(tag,"Failed to broadcast transaction!")
+                    }
+                }
+                //Notice NO asyc!
+                broadcast_hook()
+
+                //
+                if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
+                return signedTx
             }catch(e){
                 log.error(tag,e)
                 throw Error(e)
@@ -1084,6 +1116,14 @@ module.exports = class wallet {
                     log.debug("unsignedTxETH: ",ethTx)
                     rawTx = await this.WALLET.ethSignTx(ethTx)
 
+                    //txid
+                    //const txHash = await web3.utils.sha3(signed.rawTransaction);
+                    if(!rawTx.serialized) throw Error("Failed to sign!")
+
+                    const txid = keccak256(rawTx.serialized).toString('hex')
+                    log.info(tag,"txid: ",txid)
+
+                    rawTx.txid = txid
                     rawTx.params = txParams
                 } else if(coin === 'RUNE'){
                     //get amount native
@@ -1490,13 +1530,18 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.broadcastTransaction = function (coin:string, signedTx:BroadcastBody) {
+        this.broadcastTransaction = async function (coin:string, signedTx:BroadcastBody, invocationId?:string) {
+            let tag = TAG + " | broadcastTransaction | "
             if(this.isTestnet && coin === 'BTC'){
                 signedTx.coin = "TEST"
             }else{
                 signedTx.coin = coin
             }
-            return this.pioneerClient.instance.Broadcast(null,signedTx).data;
+            if(invocationId) signedTx.invocationId = invocationId
+            log.info(tag,"signedTx: ",signedTx)
+            let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)
+            log.info(tag,"resultBroadcast: ",resultBroadcast)
+            return resultBroadcast;
         }
     }
 }

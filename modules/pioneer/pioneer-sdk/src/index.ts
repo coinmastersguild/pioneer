@@ -36,6 +36,16 @@ export interface config {
     pioneerApi?:boolean
 }
 
+export interface Invocation {
+    coin: string;
+    addressFrom?: string;
+    addressTo: string;
+    amount: string;
+    memo: string;
+    nonce?:number
+}
+
+
 export class SDK {
     private spec: any;
     private pioneerApi: any;
@@ -143,6 +153,7 @@ export class SDK {
                 }
 
                 let txid = await this.clients[blockchain].transfer(txInput)
+
                 log.info("txid",txid)
 
                 return txid

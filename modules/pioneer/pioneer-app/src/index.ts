@@ -722,21 +722,19 @@ let broadcast_transaction = async function (coin:string,rawTx:string) {
     }
 };
 
-let send_to_address = async function (coin:string,address:string,amount:string,memo?:string) {
+let send_to_address = async function (coin:string,address:string,amount:string,memo?:string,invocationId?:string) {
     let tag = " | send_to_address | ";
     try {
         coin = coin.toUpperCase()
 
+
         log.info(tag,"Pioneer: ",Pioneer)
         log.debug("params: ",{coin,address,amount})
-        let rawTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin,address,amount, null)
-        log.debug(tag,"rawTx: ", rawTx)
+        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin,address,amount,memo,invocationId)
+        log.debug(tag,"txid: ", signedTx.txid)
+        //
 
-        //open txid?
-
-        //broadcast
-        return rawTx
-
+        return signedTx
     } catch (e) {
         console.error(tag, "Error: ", e);
         throw e;
@@ -1116,11 +1114,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             //TODO autonomousOn/Off
 
             // @ts-ignore
-            let txid = await send_to_address(request.coin, request.to, request.amount, request.memo)
-            console.log("txid: ", txid)
+            let signedTx = await send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId)
+            console.log("txid: ", signedTx.txid)
 
             //push txid to invocationId
-
+            events.emit('broadcast',signedTx)
             //update status on server
 
             //add to history

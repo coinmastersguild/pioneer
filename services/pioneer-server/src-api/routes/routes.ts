@@ -65,6 +65,7 @@ const models: TsoaRoute.Models = {
             "txid": {"dataType":"string"},
             "broadcastBody": {"dataType":"any"},
             "dscription": {"dataType":"any"},
+            "invocationId": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

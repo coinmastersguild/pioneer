@@ -38,6 +38,7 @@
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 

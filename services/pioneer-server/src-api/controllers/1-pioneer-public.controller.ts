@@ -9,7 +9,7 @@ let TAG = ' | API | '
 
 const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
-const {subscriber, publisher, redis} = require('@pioneer-platform/default-redis')
+const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 // let connection  = require("@pioneer-platform/mongo-default-env")
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 // let usersDB = connection.get('users')
@@ -67,6 +67,7 @@ interface BroadcastBody {
     txid?:string
     broadcastBody?:any
     dscription?:any
+    invocationId?:string
 }
 
 //types
@@ -901,6 +902,13 @@ export class pioneerPublicController extends Controller {
             }
             //if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
 
+            //if
+            if(body.invocationId){
+                if(!body.txid) throw Error("102 txid required for interactive hook!")
+                log.info(tag,"Release InvocationId: ",body.invocationId)
+                log.info(tag,"Release body.txid: ",body.txid)
+                redis.lpush(body.invocationId,body.txid)
+            }
 
             //broadcast
             let result
@@ -943,11 +951,11 @@ export class pioneerPublicController extends Controller {
                 }
             } else if(UTXO_COINS.indexOf(coin) >= 0){
                 //normal broadcast
-                networks.ANY.init('full',{isTestnet},isTestnet)
+                await networks.ANY.init('full',{isTestnet},isTestnet)
                 result = await networks['ANY'].broadcast(coin,body.serialized)
             } else {
                 //normal broadcast
-                networks[coin].init({testnet:true},isTestnet)
+                await networks[coin].init({testnet:true},isTestnet)
                 result = await networks[coin].broadcast(body.serialized)
             }
 
