@@ -165,6 +165,25 @@ module.exports = {
         return broadcast_transaction(tx);
     }
 };
+/*
+let swap = {
+    inboundAddress: {
+        chain: 'ETH',
+        pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
+        address: '0x36286e570c412531aad366154eea9867b0e71755',
+        router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
+        halted: false
+    },
+    asset: {
+        chain: 'ETH',
+        symbol: 'ETH',
+        ticker: 'ETH',
+        iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+    },
+    memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
+    amount: "0.1"
+}
+ */
 var get_memo_data = function (swap) {
     return __awaiter(this, void 0, void 0, function () {
         var tag, web3_1, routerContract, memo, data;
@@ -172,12 +191,13 @@ var get_memo_data = function (swap) {
             tag = TAG + " | get_memo_data | ";
             try {
                 web3_1 = new Web3();
-                routerContract = new web3_1.eth.Contract(TCRopstenAbi, THORCHAIN_ROUTER_TESTNET);
-                memo = "SWAP:" + swap.asset.network + "." + swap.asset.symbol + ":" + swap.toAddress;
+                if (!swap.inboundAddress.router)
+                    throw Error("Router required!");
+                routerContract = new web3_1.eth.Contract(TCRopstenAbi, swap.inboundAddress.router);
+                memo = swap.memo;
                 data = routerContract.methods
-                    .deposit(swap.vaultAddress, '0x0000000000000000000000000000000000000000', // 0 = ETH
-                0, // amount only matters for erc20
-                memo)
+                    .deposit(swap.inboundAddress.address, '0x0000000000000000000000000000000000000000', // 0 = ETH
+                swap.amount, memo)
                     .encodeABI();
                 return [2 /*return*/, data];
             }

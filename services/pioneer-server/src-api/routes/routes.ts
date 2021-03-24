@@ -167,7 +167,7 @@ export function RegisterRoutes(app: express.Router) {
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
         app.get('/api/v1/health',
-            function (request: any, response: any, next: any) {
+            function IndexController_health(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -188,7 +188,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/globals',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_globals(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -209,7 +209,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/online',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_online(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -230,7 +230,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/coins',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_coins(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -251,7 +251,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/blockHeights',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_blockHeights(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -272,7 +272,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/blockHeight/:coin',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_blockHeight(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
             };
@@ -294,7 +294,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/blocks/:coin/:height',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getBlockHash(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     height: {"in":"path","name":"height","required":true,"dataType":"double"},
@@ -317,7 +317,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/user/:username',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_user(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -339,7 +339,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/getAddressBalance/:coin/:address',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getAddressBalance(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
@@ -362,7 +362,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/:coin/getTransaction/:txid',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getTransaction(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
@@ -385,7 +385,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/getFeeInfo/:coin',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getFeeInfo(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
             };
@@ -407,7 +407,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/getValidators',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getValidators(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -428,7 +428,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/listUnspent/:coin/:xpub',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_listUnspent(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     xpub: {"in":"path","name":"xpub","required":true,"dataType":"string"},
@@ -451,7 +451,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/getAccountInfo/:coin/:address',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getAccountInfo(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
@@ -474,7 +474,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eos/accountsFromPubkey/:pubkey',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_accountsFromEosPubkey(request: any, response: any, next: any) {
             const args = {
                     pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
@@ -496,7 +496,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eos/accountInfo/:username',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_eosAccountInfo(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -518,7 +518,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eth/getBalanceToken/:address/:token',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getBalanceToken(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
                     token: {"in":"path","name":"token","required":true,"dataType":"string"},
@@ -541,7 +541,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eth/getNonce/:address',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getNonce(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
             };
@@ -563,7 +563,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eth/getGasPrice',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getGasPrice(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -584,7 +584,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eth/getTransferData/:coin/:address/:amount',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getTransferData(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
@@ -608,7 +608,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eth/getTokens/:address',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getTokenInfo(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
             };
@@ -630,7 +630,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eos/validateEosUsername/:username',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_validateEosUsername(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -652,7 +652,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/eos/getEosAccountsByPubkey/:pubkey',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getEosAccountsByPubkey(request: any, response: any, next: any) {
             const args = {
                     pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
@@ -674,7 +674,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/getFee',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getFee(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
             };
@@ -696,7 +696,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/estimateFeesWithGasPricesAndLimits',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_estimateFeesWithGasPricesAndLimits(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
             };
@@ -718,7 +718,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/estimateFee',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_estimateFee(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"EstimateFeeBody"},
             };
@@ -740,7 +740,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/getThorchainMemoEncoded',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getThorchainMemoEncoded(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
             };
@@ -762,7 +762,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/getFeesWithMemo',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_getFeesWithMemo(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"GetFeesWithMemoBody"},
             };
@@ -784,7 +784,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pushTx',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_pushTx(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
             };
@@ -806,7 +806,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/broadcast',
-            function (request: any, response: any, next: any) {
+            function pioneerPublicController_broadcast(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"BroadcastBody"},
             };
@@ -828,7 +828,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/forget',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_forget(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
             };
@@ -850,7 +850,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/info',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_info(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
             };
@@ -872,7 +872,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/balance/:coin',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_balance(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
@@ -895,7 +895,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pair',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_pair(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"PairBody"},
                     Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
@@ -918,7 +918,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/createPairingCode',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_createPairingCode(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"createPairingCodeBody"},
                     Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
@@ -941,7 +941,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/createApiKey',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_createApiKey(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"createApiKeyBody"},
                     Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
@@ -964,7 +964,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/utxos',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_getUtxos(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
                     Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
@@ -987,7 +987,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/transactions',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_transactions(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"TransactionsBody"},
@@ -1010,7 +1010,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/register',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_register(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"RegisterBody"},
@@ -1033,7 +1033,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/import',
-            function (request: any, response: any, next: any) {
+            function pioneerPrivateController_import(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"importBody"},
@@ -1056,7 +1056,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/create',
-            function (request: any, response: any, next: any) {
+            function XAppsController_createApp(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"createAppBody"},
@@ -1079,7 +1079,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/apps',
-            function (request: any, response: any, next: any) {
+            function XAppsController_listApps(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -1100,7 +1100,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/invocation',
-            function (request: any, response: any, next: any) {
+            function pioneerInvocationController_invocation(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"dataType":"any"},
@@ -1123,7 +1123,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/fio/accountsFromPubkey/:pubkey',
-            function (request: any, response: any, next: any) {
+            function ZFioPublicController_accountsFromFioPubkey(request: any, response: any, next: any) {
             const args = {
                     pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
@@ -1145,7 +1145,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/fio/getPubkey/:username',
-            function (request: any, response: any, next: any) {
+            function ZFioPublicController_getFioPubkey(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -1167,7 +1167,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/fio/accountInfo/:username',
-            function (request: any, response: any, next: any) {
+            function ZFioPublicController_getFioAccountInfo(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -1205,7 +1205,7 @@ export function RegisterRoutes(app: express.Router) {
                 let headers;
                 if (isController(controllerObj)) {
                     headers = controllerObj.getHeaders();
-                    statusCode = controllerObj.getStatus();
+                    statusCode = controllerObj.getStatus() || statusCode;
                 }
 
                 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1218,6 +1218,9 @@ export function RegisterRoutes(app: express.Router) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
     function returnHandler(response: any, statusCode?: number, data?: any, headers: any = {}) {
+        if (response.headersSent) {
+            return;
+        }
         Object.keys(headers).forEach((name: string) => {
             response.set(name, headers[name]);
         });
@@ -1229,7 +1232,7 @@ export function RegisterRoutes(app: express.Router) {
             response.status(statusCode || 204).end();
         }
     }
-    
+
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
     function responder(response: any): TsoaResponse<HttpStatusCodeLiteral, unknown>  {
@@ -1257,6 +1260,14 @@ export function RegisterRoutes(app: express.Router) {
                     return validationService.ValidateParam(args[key], request.body, name, fieldErrors, undefined, {"noImplicitAdditionalProperties":"silently-remove-extras"});
                 case 'body-prop':
                     return validationService.ValidateParam(args[key], request.body[name], name, fieldErrors, 'body.', {"noImplicitAdditionalProperties":"silently-remove-extras"});
+                case 'formData':
+                    if (args[key].dataType === 'file') {
+                        return validationService.ValidateParam(args[key], request.file, name, fieldErrors, undefined, {"noImplicitAdditionalProperties":"silently-remove-extras"});
+                    } else if (args[key].dataType === 'array' && args[key].array.dataType === 'file') {
+                        return validationService.ValidateParam(args[key], request.files, name, fieldErrors, undefined, {"noImplicitAdditionalProperties":"silently-remove-extras"});
+                    } else {
+                        return validationService.ValidateParam(args[key], request.body[name], name, fieldErrors, undefined, {"noImplicitAdditionalProperties":"silently-remove-extras"});
+                    }
                 case 'res':
                     return responder(response);
             }

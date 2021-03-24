@@ -674,25 +674,45 @@ module.exports = class wallet {
         //             staking
         //
         //  */
-        this.buildSwap = async function (transaction:any) {
+
+        /*
+        let swap = {
+            inboundAddress: {
+                chain: 'ETH',
+                pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
+                address: '0x36286e570c412531aad366154eea9867b0e71755',
+                router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
+                halted: false
+            },
+            asset: {
+                chain: 'ETH',
+                symbol: 'ETH',
+                ticker: 'ETH',
+                iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+            },
+            memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
+            amount: "0.1"
+        }
+         */
+        this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
                 //get tx inputs
                 let addressFrom
-                if(transaction.addressFrom){
-                    addressFrom = transaction.addressFrom
+                if(swap.addressFrom){
+                    addressFrom = swap.addressFrom
                 } else {
                     addressFrom = await this.getMaster('ETH')
                 }
                 if(!addressFrom) throw Error("102: unable to get master address! ")
 
-                let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,transaction)
+                let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,swap)
                 data = data.data
                 log.info(tag,"txData: ",data)
 
                 let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                 nonceRemote = nonceRemote.data
-                let nonce = transaction.nonce || nonceRemote
+                let nonce = swap.nonce || nonceRemote
                 let gas_limit = 80000 //TODO dynamic gas limit?
                 let gas_price = await this.pioneerClient.instance.GetGasPrice()
                 gas_price = gas_price.data
@@ -704,7 +724,7 @@ module.exports = class wallet {
                 //send FROM master
                 let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
 
-                let amountNative = parseFloat(transaction.amount) * support.getBase('ETH')
+                let amountNative = parseFloat(swap.amount) * support.getBase('ETH')
                 amountNative = Number(parseInt(String(amountNative)))
 
                 let ethTx = {
@@ -713,7 +733,7 @@ module.exports = class wallet {
                     gasPrice: numberToHex(gas_price),
                     gasLimit: numberToHex(gas_limit),
                     value: amountNative,
-                    to: transaction.vaultAddress,
+                    to: swap.inboundAddress.router,
                     data,
                     // chainId: 1,//TODO testnet
                 }

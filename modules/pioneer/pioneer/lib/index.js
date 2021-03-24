@@ -717,7 +717,26 @@ module.exports = /** @class */ (function () {
         //             staking
         //
         //  */
-        this.buildSwap = function (transaction) {
+        /*
+        let swap = {
+            inboundAddress: {
+                chain: 'ETH',
+                pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
+                address: '0x36286e570c412531aad366154eea9867b0e71755',
+                router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
+                halted: false
+            },
+            asset: {
+                chain: 'ETH',
+                symbol: 'ETH',
+                ticker: 'ETH',
+                iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+            },
+            memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
+            amount: "0.1"
+        }
+         */
+        this.buildSwap = function (swap) {
             return __awaiter(this, void 0, void 0, function () {
                 var tag, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, rawTx, txid, e_4;
                 return __generator(this, function (_a) {
@@ -728,8 +747,8 @@ module.exports = /** @class */ (function () {
                         case 1:
                             _a.trys.push([1, 9, , 10]);
                             addressFrom = void 0;
-                            if (!transaction.addressFrom) return [3 /*break*/, 2];
-                            addressFrom = transaction.addressFrom;
+                            if (!swap.addressFrom) return [3 /*break*/, 2];
+                            addressFrom = swap.addressFrom;
                             return [3 /*break*/, 4];
                         case 2: return [4 /*yield*/, this.getMaster('ETH')];
                         case 3:
@@ -738,7 +757,7 @@ module.exports = /** @class */ (function () {
                         case 4:
                             if (!addressFrom)
                                 throw Error("102: unable to get master address! ");
-                            return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, transaction)];
+                            return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, swap)];
                         case 5:
                             data = _a.sent();
                             data = data.data;
@@ -747,7 +766,7 @@ module.exports = /** @class */ (function () {
                         case 6:
                             nonceRemote = _a.sent();
                             nonceRemote = nonceRemote.data;
-                            nonce = transaction.nonce || nonceRemote;
+                            nonce = swap.nonce || nonceRemote;
                             gas_limit = 80000 //TODO dynamic gas limit?
                             ;
                             return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
@@ -759,7 +778,7 @@ module.exports = /** @class */ (function () {
                             gas_price = gas_price + 1000000000;
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
-                            amountNative = parseFloat(transaction.amount) * support.getBase('ETH');
+                            amountNative = parseFloat(swap.amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
                             ethTx = {
                                 addressNList: support.bip32ToAddressNList(masterPathEth),
@@ -767,7 +786,7 @@ module.exports = /** @class */ (function () {
                                 gasPrice: web3_utils_1.numberToHex(gas_price),
                                 gasLimit: web3_utils_1.numberToHex(gas_limit),
                                 value: amountNative,
-                                to: transaction.vaultAddress,
+                                to: swap.inboundAddress.router,
                                 data: data,
                             };
                             log.debug("unsignedTxETH: ", ethTx);
