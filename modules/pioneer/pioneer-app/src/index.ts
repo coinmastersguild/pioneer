@@ -44,7 +44,6 @@ let {
 } = require('@pioneer-platform/pioneer-coins')
 let paths = getPaths()
 
-
 // @ts-ignore
 import { Crypto } from "@peculiar/webcrypto";
 import * as native from "@bithighlander/hdwallet-native";
@@ -78,8 +77,8 @@ let MASTER_MAP:any = {}
 let WALLET_VALUE_MAP:any = {}
 let CONTEXT_WALLET_SELECTED
 //urlSpec
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC']
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET']
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
 let urlSpec = URL_PIONEER_SPEC
 
@@ -726,13 +725,51 @@ let send_to_address = async function (coin:string,address:string,amount:string,m
     let tag = " | send_to_address | ";
     try {
         coin = coin.toUpperCase()
-
-
         log.info(tag,"Pioneer: ",Pioneer)
         log.debug("params: ",{coin,address,amount})
         let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin,address,amount,memo,invocationId)
         log.debug(tag,"txid: ", signedTx.txid)
+
         //
+
+        return signedTx
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
+};
+
+
+let build_swap = async function (swap:any,invocationId?:string) {
+    let tag = " | send_to_address | ";
+    try {
+
+        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].buildSwap(swap)
+        log.info(tag,"txid: ", signedTx.txid)
+
+        if(invocationId) signedTx.invocationId = invocationId
+
+        //broadcast hook
+        let broadcast_hook = async () =>{
+            try{
+                log.info(tag,"checkpoint: broadcast_hook: ",signedTx)
+                //TODO flag for async broadcast
+                if(!swap.asset.chain) {
+                    log.error("Invalid Swap! swap: ",swap)
+                    throw Error("104: fucking type swaps gdamnit")
+                }
+                let broadcastResult = await WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(swap.asset.chain,signedTx)
+                broadcastResult = broadcastResult.data
+                log.info(tag,"broadcastResult: ",broadcastResult)
+
+                //TODO push event to event emitter -> UI
+
+            }catch(e){
+                log.error(tag,"Failed to broadcast transaction!")
+            }
+        }
+        //Notice NO asyc!
+        broadcast_hook()
 
         return signedTx
     } catch (e) {
@@ -1096,7 +1133,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         let configEvents = {
             username:config.username,
             queryKey:config.queryKey,
-            pioneerWs:"ws://127.0.0.1:9001"
+            pioneerWs:URL_PIONEER_SOCKET
         }
 
         //sub ALL events
@@ -1107,18 +1144,51 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //on payments update balances
 
         //on on invocations add to queue
-        events.on('message', async function(request:any) {
-            console.log("message: ", request)
+        events.on('message', async (request: any) => {
+            console.log("**** Invoke: ", request)
             //TODO filter invocations by subscribers
 
             //TODO autonomousOn/Off
 
-            // @ts-ignore
-            let signedTx = await send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId)
-            console.log("txid: ", signedTx.txid)
+            //TODO verify auth to paired keys
+
+            //TODO filter by preferences
+                //if swaps allowed (no transfers)
+                //verify swap to wallet
+
+                //if transfer / whitelist rules
+
+            //if swap
+
+            //if transfer
+
+            //if liquidity event
+                //add/withdrawal
+
+            let signedTx
+            switch(request.type) {
+                case 'swap':
+                    //TODO validate inputs
+                    signedTx = await build_swap(request.invocation,request.invocationId)
+                    console.log("txid: ", signedTx.txid)
+                    events.emit('broadcast',signedTx)
+                    break;
+                case 'transfer':
+                    signedTx = await send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId)
+                    console.log("txid: ", signedTx.txid)
+                    events.emit('broadcast',signedTx)
+                    break;
+                default:
+                    log.error("Unknown invocation: "+request.type)
+                    //push error
+                    // code block
+            }
+
+            //push signed tx to socket
+            events.emit('broadcast',signedTx)
 
             //push txid to invocationId
-            events.emit('broadcast',signedTx)
+
             //update status on server
 
             //add to history

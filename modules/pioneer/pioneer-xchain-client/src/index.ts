@@ -145,6 +145,13 @@ export type CallDepositParams = {
     amount: number
 };
 
+export type Swap = {
+    asset: Asset,
+    amount: string,
+    vaultAddress?:string,
+    toAddress:string,
+};
+
 export interface config {
     spec:string,
     env:string,
@@ -197,6 +204,7 @@ module.exports = class wallet {
     private getFeeRates: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
     private estimateFee: (({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) => Promise<any>) | undefined;
     private callDeposit: (({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) => Promise<any>) | undefined;
+    private buildSwap: (swap: Swap) => Promise<any>;
     constructor(spec:string,config:any) {
         this.username = ''
         this.network = config.blockchain
@@ -392,60 +400,60 @@ module.exports = class wallet {
                 }
             }
 
-            this.callDeposit = async function ({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) {
-                let tag = TAG + " | getWallet | "
-                try {
-                    let hash;
-                    const wallet = ethClient.getWallet();
-                    //TODO mainnet
-                    const abi = TCRopstenAbi;
-
-                    if (asset.ticker === 'ETH') {
-
-                        const ethAddress = await ethClient.getAddress();
-                        const contract = new ethers.Contract(inboundAddress.router, abi, wallet);
-
-                        console.log('Checkpoint eth-utils: ethAddress:', ethAddress);
-                        console.log('Checkpoint eth-utils: contract:', contract);
-
-                        const contractRes = await contract.deposit(
-                            inboundAddress.address, // not sure if this is correct...
-                            '0x0000000000000000000000000000000000000000',
-                            ethers.utils.parseEther(String(amount)),
-                            // memo,
-                            memo,
-                            {from: ethAddress, value: ethers.utils.parseEther(String(amount))}
-                        );
-
-                        // tslint:disable-next-line:no-string-literal
-                        hash = contractRes['hash'] ? contractRes['hash'] : '';
-
-                    } else {
-                        //TODO tokens
-                        // const assetAddress = asset.symbol.slice(asset.ticker.length + 1);
-                        // const strip0x = assetAddress.substr(2);
-                        // const checkSummedAddress = ethers.utils.getAddress(strip0x);
-                        // const tokenContract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
-                        // const decimal = await tokenContract.decimals();
-                        // const params = [
-                        //     inboundAddress.address, // vault
-                        //     checkSummedAddress, // asset
-                        //     assetToBase(assetAmount(amount, decimal.toNumber())).amount().toFixed(), // amount
-                        //     memo
-                        // ];
-                        //
-                        // const contractRes = await ethClient.call(inboundAddress.router, abi, 'deposit', params);
-                        //
-                        // // tslint:disable-next-line:no-string-literal
-                        // hash = contractRes['hash'] ? contractRes['hash'] : '';
-
-                    }
-
-                    return hash;
-                } catch (e) {
-                    log.error(tag, "e: ", e)
-                }
-            }
+            // this.callDeposit = async function ({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) {
+            //     let tag = TAG + " | getWallet | "
+            //     try {
+            //         let hash;
+            //         const wallet = ethClient.getWallet();
+            //         //TODO mainnet
+            //         const abi = TCRopstenAbi;
+            //
+            //         if (asset.ticker === 'ETH') {
+            //
+            //             const ethAddress = await ethClient.getAddress();
+            //             const contract = new ethers.Contract(inboundAddress.router, abi, wallet);
+            //
+            //             console.log('Checkpoint eth-utils: ethAddress:', ethAddress);
+            //             console.log('Checkpoint eth-utils: contract:', contract);
+            //
+            //             const contractRes = await contract.deposit(
+            //                 inboundAddress.address, // not sure if this is correct...
+            //                 '0x0000000000000000000000000000000000000000',
+            //                 ethers.utils.parseEther(String(amount)),
+            //                 // memo,
+            //                 memo,
+            //                 {from: ethAddress, value: ethers.utils.parseEther(String(amount))}
+            //             );
+            //
+            //             // tslint:disable-next-line:no-string-literal
+            //             hash = contractRes['hash'] ? contractRes['hash'] : '';
+            //
+            //         } else {
+            //             //TODO tokens
+            //             // const assetAddress = asset.symbol.slice(asset.ticker.length + 1);
+            //             // const strip0x = assetAddress.substr(2);
+            //             // const checkSummedAddress = ethers.utils.getAddress(strip0x);
+            //             // const tokenContract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
+            //             // const decimal = await tokenContract.decimals();
+            //             // const params = [
+            //             //     inboundAddress.address, // vault
+            //             //     checkSummedAddress, // asset
+            //             //     assetToBase(assetAmount(amount, decimal.toNumber())).amount().toFixed(), // amount
+            //             //     memo
+            //             // ];
+            //             //
+            //             // const contractRes = await ethClient.call(inboundAddress.router, abi, 'deposit', params);
+            //             //
+            //             // // tslint:disable-next-line:no-string-literal
+            //             // hash = contractRes['hash'] ? contractRes['hash'] : '';
+            //
+            //         }
+            //
+            //         return hash;
+            //     } catch (e) {
+            //         log.error(tag, "e: ", e)
+            //     }
+            // }
 
             this.estimateFee = async function ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) {
                 let tag = TAG + " | getWallet | "
@@ -615,6 +623,40 @@ module.exports = class wallet {
             try {
                 let output = await this.pioneerApi.getFees(params)
                 return output
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.buildSwap = async function (swap:Swap) {
+            let tag = TAG + " | buildSwap | "
+            try {
+                // let coin = swap.asset.symbol
+                // let amount = swap.amount
+                // let to = swap.toAddress
+                //
+                // //TODO type
+                // let invocation:any = {
+                //     username:this.username,
+                //     coin,
+                //     amount,
+                //     to,
+                // }
+                // if(swap.vaultAddress) invocation.vaultAddress = swap.vaultAddress
+
+                let request:any = {
+                    type:"swap",
+                    username:this.username,
+                    //TODO source
+                    //TODO auth
+                    //TODO sig
+                    invocation:swap
+                }
+                //invocation
+                let result = await this.pioneerApi.Invocation('',request)
+
+                //
+
+                return result.data.txid
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

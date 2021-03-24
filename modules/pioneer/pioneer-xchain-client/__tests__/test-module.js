@@ -102,9 +102,28 @@ let run_test = async function(){
         //get wallet
         const wallet = await app.getWallet();
         console.log("wallet: ",wallet)
+
         //make sure provider set
 
         //ETH
+        let asset = {
+            chain:"ETH",
+            symbol:"ETH",
+            ticker:"ETH",
+        }
+
+        let swap = {
+            asset,
+            vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
+            toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+        }
+
+        let amount = 0.0001
+        swap.amount = amount
+
+        let txid = await app.buildSwap(swap)
+        console.log("txid",txid)
+
         //build a tx
         // let txInput = {
         //     "asset":

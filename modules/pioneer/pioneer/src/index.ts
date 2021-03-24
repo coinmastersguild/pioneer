@@ -723,6 +723,9 @@ module.exports = class wallet {
                 let rawTx = await this.WALLET.ethSignTx(ethTx)
                 rawTx.params = ethTx
 
+                const txid = keccak256(rawTx.serialized).toString('hex')
+                log.info(tag,"txid: ",txid)
+                rawTx.txid = txid
 
                 return rawTx
             }catch(e){

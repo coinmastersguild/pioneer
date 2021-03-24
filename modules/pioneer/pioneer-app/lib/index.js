@@ -79,8 +79,8 @@ let MASTER_MAP = {};
 let WALLET_VALUE_MAP = {};
 let CONTEXT_WALLET_SELECTED;
 //urlSpec
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'];
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'];
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json';
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev';
 let urlSpec = URL_PIONEER_SPEC;
 let KEEPKEY;
 let network;
@@ -676,6 +676,42 @@ let send_to_address = function (coin, address, amount, memo, invocationId) {
         }
     });
 };
+let build_swap = function (swap, invocationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | send_to_address | ";
+        try {
+            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].buildSwap(swap);
+            log.info(tag, "txid: ", signedTx.txid);
+            if (invocationId)
+                signedTx.invocationId = invocationId;
+            //broadcast hook
+            let broadcast_hook = () => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    log.info(tag, "checkpoint: broadcast_hook: ", signedTx);
+                    //TODO flag for async broadcast
+                    if (!swap.asset.chain) {
+                        log.error("Invalid Swap! swap: ", swap);
+                        throw Error("104: fucking type swaps gdamnit");
+                    }
+                    let broadcastResult = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(swap.asset.chain, signedTx);
+                    broadcastResult = broadcastResult.data;
+                    log.info(tag, "broadcastResult: ", broadcastResult);
+                    //TODO push event to event emitter -> UI
+                }
+                catch (e) {
+                    log.error(tag, "Failed to broadcast transaction!");
+                }
+            });
+            //Notice NO asyc!
+            broadcast_hook();
+            return signedTx;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
 let get_address = function (coin) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | get_address | ";
@@ -1015,27 +1051,50 @@ let init_wallet = function (config, isTestnet) {
             let configEvents = {
                 username: config.username,
                 queryKey: config.queryKey,
-                pioneerWs: "ws://127.0.0.1:9001"
+                pioneerWs: URL_PIONEER_SOCKET
             };
             //sub ALL events
             let events = yield Events.init(configEvents);
             //on blocks update lastBlockHeight
             //on payments update balances
             //on on invocations add to queue
-            events.on('message', function (request) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    console.log("message: ", request);
-                    //TODO filter invocations by subscribers
-                    //TODO autonomousOn/Off
-                    // @ts-ignore
-                    let signedTx = yield send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId);
-                    console.log("txid: ", signedTx.txid);
-                    //push txid to invocationId
-                    events.emit('broadcast', signedTx);
-                    //update status on server
-                    //add to history
-                });
-            });
+            events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
+                console.log("**** Invoke: ", request);
+                //TODO filter invocations by subscribers
+                //TODO autonomousOn/Off
+                //TODO verify auth to paired keys
+                //TODO filter by preferences
+                //if swaps allowed (no transfers)
+                //verify swap to wallet
+                //if transfer / whitelist rules
+                //if swap
+                //if transfer
+                //if liquidity event
+                //add/withdrawal
+                let signedTx;
+                switch (request.type) {
+                    case 'swap':
+                        //TODO validate inputs
+                        signedTx = yield build_swap(request.invocation, request.invocationId);
+                        console.log("txid: ", signedTx.txid);
+                        events.emit('broadcast', signedTx);
+                        break;
+                    case 'transfer':
+                        signedTx = yield send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId);
+                        console.log("txid: ", signedTx.txid);
+                        events.emit('broadcast', signedTx);
+                        break;
+                    default:
+                        log.error("Unknown invocation: " + request.type);
+                    //push error
+                    // code block
+                }
+                //push signed tx to socket
+                events.emit('broadcast', signedTx);
+                //push txid to invocationId
+                //update status on server
+                //add to history
+            }));
             output.events = events;
             return output;
         }

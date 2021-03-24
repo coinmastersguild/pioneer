@@ -115,11 +115,14 @@ function createWindow () {
 
   /**
    * Initial window options
+   *
+   * more options: https://www.electronjs.org/docs/api/browser-window
    */
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
     useContentSize: true,
+    alwaysOnTop: true,
     webPreferences: {
       // Change from /quasar.conf.js > electron > nodeIntegration;
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

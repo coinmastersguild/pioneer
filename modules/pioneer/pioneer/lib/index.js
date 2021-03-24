@@ -719,7 +719,7 @@ module.exports = /** @class */ (function () {
         //  */
         this.buildSwap = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, rawTx, e_4;
+                var tag, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, rawTx, txid, e_4;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -775,6 +775,9 @@ module.exports = /** @class */ (function () {
                         case 8:
                             rawTx = _a.sent();
                             rawTx.params = ethTx;
+                            txid = keccak256(rawTx.serialized).toString('hex');
+                            log.info(tag, "txid: ", txid);
+                            rawTx.txid = txid;
                             return [2 /*return*/, rawTx];
                         case 9:
                             e_4 = _a.sent();

@@ -94,7 +94,7 @@ export class pioneerInvocationController extends Controller {
             //is user online?
             let onlineUsers = await redis.smembers("online")
             log.info(tag,"onlineUsers: ",onlineUsers)
-            log.info(tag,"username: ",body.invocation.username)
+            log.info(tag,"username: ",body.username)
 
             //else
             //does user exist?
@@ -117,19 +117,16 @@ export class pioneerInvocationController extends Controller {
             //save to mongo
             let mongoSave = await invocationsDB.insert(entry)
             log.info(tag,"mongoSave: ",mongoSave)
-            if(onlineUsers.indexOf(body.invocation.username) >= 0){
-                //rabble
-                body.invocation.invocationId = invocationId
+            if(onlineUsers.indexOf(body.username) >= 0){
                 body.invocationId = invocationId
+                //auth (app needs to verify!)
+                body.auth = authorization
                 //send
-                publisher.publish("invocations",JSON.stringify(body.invocation))
-
-                //timeOut return early
+                publisher.publish("invocations",JSON.stringify(body))
 
                 //block till confirmation
                 log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
                 let timeStart = new Date().getTime()
-                //TODO timeout?
 
                 let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
                 let timeEnd = new Date().getTime()
@@ -137,6 +134,7 @@ export class pioneerInvocationController extends Controller {
 
                 //if
                 if(!txid[1]) throw Error("Failed to broadcast! timeout!")
+                //TODO if timeout return invocationId
                 output.success = true
                 output.txid = txid[1]
                 output.ttr = (timeEnd - timeStart)/1000

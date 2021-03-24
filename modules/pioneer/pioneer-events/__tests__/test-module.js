@@ -28,7 +28,7 @@ let run_test = async function(){
         let config = {
             username,
             queryKey:TEST_QUERY_KEY_2,
-            pioneerWs:"ws://127.0.0.1:9001"
+            pioneerWs:process.env['URL_PIONEER_SOCKET']
         }
 
         //sub ALL events

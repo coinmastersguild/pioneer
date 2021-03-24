@@ -215,6 +215,16 @@ export async function onStart(event,data) {
 
     let wallets = App.getWallets()
 
+    //
+    resultInit.events.on('message', async (request) => {
+      console.log("*** message: ", request)
+      event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+    })
+    //TODO blocks
+    //txs
+    //requests
+    //globals
+
 
     //TODO is context pref in config?
 
