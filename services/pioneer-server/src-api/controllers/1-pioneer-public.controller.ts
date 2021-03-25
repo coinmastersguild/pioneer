@@ -10,32 +10,22 @@ let TAG = ' | API | '
 const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
-// let connection  = require("@pioneer-platform/mongo-default-env")
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
-// let usersDB = connection.get('users')
-// let txsDB = connection.get('transactions')
-// let txsRawDB = connection.get('transactions-raw')
-// const axios = require('axios')
-// const network = require("@pioneer-platform/network")
 
-const networks:any = {
-    'ETH' : require('@pioneer-platform/eth-network'),
-    'ATOM': require('@pioneer-platform/cosmos-network'),
-    // 'BNB' : require('@pioneer-platform/bnb-network'),
-    'RUNE' : require('@pioneer-platform/thor-network'),
-    // 'EOS' : require('@pioneer-platform/eos-network'),
-    'FIO' : require('@pioneer-platform/fio-network'),
-    'ANY' : require('@pioneer-platform/utxo-network'),
+/*
+    Feature Flags per blockchain
+
+ */
+
+let blockchains = []
+const networks:any = {}
+
+if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
+    blockchains.push('bitcoin')
+    //all utxo's share
+    networks['ANY'] = require('@pioneer-platform/utxo-network')
 }
-// networks.ANY.init('full')
-// networks.ETH.init()
-// usersDB.createIndex({id: 1}, {unique: true})
-// txsDB.createIndex({txid: 1}, {unique: true})
-// txsRawDB.createIndex({txhash: 1}, {unique: true})
 
-
-//modules
-// let pioneer = require('../pioneer')
 
 //Cache time
 let CACHE_TIME = 1000 * 60 * 1
@@ -142,6 +132,7 @@ export class pioneerPublicController extends Controller {
         let tag = TAG + " | globals | "
         try{
             let globals = await redis.hgetall('globals')
+            globals.blockchains = blockchains
             return(globals)
         }catch(e){
             let errorResp:Error = {
@@ -175,7 +166,10 @@ export class pioneerPublicController extends Controller {
     public async coins() {
         let tag = TAG + " | coins | "
         try{
-            let coins = await redis.smembers("pioneer:ASSETS:live")
+            let coins = blockchains
+
+            //TODO assets/including tokens
+
             return(coins)
         }catch(e){
             let errorResp:Error = {
@@ -218,6 +212,7 @@ export class pioneerPublicController extends Controller {
         let tag = TAG + " | blockHeights | "
         try{
             if(!networks[coin]) throw Error("102: network not supported! ")
+            if(!networks[coin].getBlockHeight) throw Error("102: getBlockHeight not supported! coin: "+coin)
             let output:any = await networks[coin].getBlockHeight()
 
             return(output)

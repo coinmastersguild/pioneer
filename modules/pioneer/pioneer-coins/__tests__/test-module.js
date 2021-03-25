@@ -14,7 +14,7 @@ let {
 let paths = getPaths(true)
 console.log("",paths)
 
-//console.log("",supportedBlockchains)
+console.log("",supportedBlockchains)
 
 //console.log(getPaths())
 

@@ -69,6 +69,24 @@ export function getPaths(isTestnet?:boolean) {
         output.push(entry)
     }
 
+    if(process.env['FEATURE_SECRET_BLOCKCHAIN']){
+        let entry:any = {
+            note:" Default Secret path ",
+            type:"address",
+            addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            script_type:"thorchain",
+            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            coin: 'Thorchain',
+            symbol: 'RUNE',
+            network: 'RUNE',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
+
     return output
 }
 //TODO More paths

@@ -62,6 +62,8 @@ if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']) {
 if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']) {
     supportedBlockchains.push("Ethereum")
     supportedAssets.push("ETH")
+    //TODO get token list from npm
+    //add all supported
 }
 
 if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
@@ -69,12 +71,56 @@ if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
     supportedAssets.push("RUNE")
 }
 
+if(process.env['FEATURE_SECRET_BLOCKCHAIN']){
+    supportedBlockchains.push("Secret")
+    supportedAssets.push("SCRT")
+}
+
+if(process.env['FEATURE_KAVA_BLOCKCHAIN']){
+    supportedBlockchains.push("Kava")
+    supportedAssets.push("KAVA")
+}
+
+if(process.env['FEATURE_TERRA_BLOCKCHAIN']){
+    supportedBlockchains.push("Terra")
+    supportedAssets.push("LUNA")
+}
+
+if(process.env['FEATURE_BSC_BLOCKCHAIN']){
+    supportedBlockchains.push("BinanceSmartChain")
+    supportedAssets.push("BNB")
+}
+
+if(process.env['FEATURE_CARDANO_BLOCKCHAIN']){
+    supportedBlockchains.push("Cardano")
+    supportedAssets.push("ADA")
+}
+
+if(process.env['FEATURE_BNB_BLOCKCHAIN']){
+    supportedBlockchains.push("Thorchain")
+    supportedAssets.push("RUNE")
+}
+
+if(process.env['FEATURE_EOS_BLOCKCHAIN']){
+    supportedBlockchains.push("Eos")
+    supportedAssets.push("EOS")
+}
+
+if(process.env['FEATURE_FIO_BLOCKCHAIN']){
+    supportedBlockchains.push("Fio")
+    supportedAssets.push("FIO")
+}
+
 //TODO add more flags by networks
 
 
-export enum PoScoins {
-    'EOS',
-    'ATOM'
+export enum PoSchains {
+    'Eos',
+    'Cosmos',
+    'Fio',
+    'Terra',
+    'Kava',
+    'secret'
 }
 
 const CURRENCY_DECIMALS:any = {
