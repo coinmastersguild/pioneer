@@ -7,7 +7,17 @@
       <q-form
         class="q-gutter-md"
       >
-        Wallets detected!
+        Update
+        <q-btn
+          color="blue"
+          @click="updateDevices"
+          class="full-width"
+          icon="settings_ethernet"
+          align="left"
+          size="lg"
+          label="Check For Devices"
+          flat
+        />
 
       </q-form>
 
@@ -16,9 +26,27 @@
 </template>
 
 <script>
+  import { mapMutations } from 'vuex'
     export default {
-        name: "Hardware"
+      name: "Hardware",
+      data() {
+        return {
+        };
+      },
+      methods: {
+        ...mapMutations(['showModal','hideModal']),
+        updateDevices: function () {
+          this.$q.electron.ipcRenderer.send('checkDevices', {});
+        },
+        openRestore: function () {
+          this.hideModal()
+          this.showModal('Restore')
+        },
+        close: function () {
+          this.hideModal()
+        }
     }
+  }
 </script>
 
 <style scoped>

@@ -36,7 +36,7 @@ import {
 
 
 // const pioneer = require("@pioneer-platform/pioneer-client")
-// const Hardware = require("@pioneer-platform/pioneer-hardware")
+const Hardware = require("@pioneer-platform/pioneer-hardware")
 const client = require("@pioneer-platform/pioneer-events")
 
 let URL_PIONEER_SPEC
@@ -122,7 +122,9 @@ function createWindow () {
     width: 1000,
     height: 600,
     useContentSize: true,
-    alwaysOnTop: true,
+    //TODO make toggle
+    //remember last setting?
+    //alwaysOnTop: true,
     webPreferences: {
       // Change from /quasar.conf.js > electron > nodeIntegration;
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
@@ -291,18 +293,18 @@ ipcMain.on('onLogin', async (event, data) => {
 })
 //
 // //onTryPin
-// ipcMain.on('onTryPin', async (event, data) => {
-//   const tag = TAG + ' | onTryPin | '
-//   try {
-//     log.info(tag,"trying pin! ",data.pin)
-//     //try pin
-//     Hardware.enterPin(data.pin)
-//     //if wrong?
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
+ipcMain.on('onTryPin', async (event, data) => {
+  const tag = TAG + ' | onTryPin | '
+  try {
+    log.info(tag,"trying pin! ",data.pin)
+    //try pin
+    Hardware.enterPin(data.pin)
+    //if wrong?
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
 //
 // //onTryPin
 // ipcMain.on('onAttemptCreate', async (event, data) => {
@@ -429,22 +431,34 @@ ipcMain.on('createWallet', async (event, data) => {
 //   }
 // })
 //
-// ipcMain.on('onPairKeepkey', async (event, data) => {
-//   const tag = TAG + ' | onPairKeepkey | '
-//   try {
-//     //pair keepkey
-//     log.info(tag," pair device: ",data.deviceId)
-//
-//     let result = await onPairKeepkey(data)
-//     log.info(tag," result: ",result)
-//
-//     //if success
-//     event.sender.send('navigation', {dialog: 'SetupKeepkey', action: 'close'})
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
+
+ipcMain.on('checkDevices', async (event, data) => {
+  const tag = TAG + ' | checkDevices | '
+  try {
+    //
+    log.info(tag,"checkDevices: ")
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('onPairKeepkey', async (event, data) => {
+  const tag = TAG + ' | onPairKeepkey | '
+  try {
+    //pair keepkey
+    log.info(tag," pair device: ",data.deviceId)
+
+    let result = await onPairKeepkey(data)
+    log.info(tag," result: ",result)
+
+    //if success
+    //event.sender.send('navigation', {dialog: 'SetupKeepkey', action: 'close'})
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
 //
 // // ipcMain.on('onCreate', async (event, data) => {
 // //   const tag = TAG + ' | onCreate | '

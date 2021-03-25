@@ -18,6 +18,7 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 const log = require('electron-log');
 const generator = require('generate-password');
+const Hardware = require("@pioneer-platform/pioneer-hardware")
 
 //Globals
 let WALLETS_LOADED = []
@@ -38,6 +39,7 @@ function standardRandomBytesFunc(size) {
 }
 
 //feature flags
+let featureKeepkey = process.env['KEEPKEY_FEATURE']
 let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
 let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
 let featureInsecurePassword = process.env['INSECURE_PASSWORD']
@@ -54,9 +56,47 @@ export async function attemptPair(event, data) {
   }
 }
 
+/*
+  Maintain current state of devices
+
+  'conected',
+  'locked',
+  'unlocked'
+
+ */
+
+async function lifecycleKeepkey(event, data) {
+  let tag = TAG + " | lifecycleKeepkey | ";
+  try {
+
+    //start
+    let KEEPKEY = await Hardware.start()
+
+    //lockStatus
+    let lockStatus = await Hardware.isLocked()
+    console.log("lockStatus: ",lockStatus)
+
+    //if locked
+    if(lockStatus){
+      Hardware.displayPin()
+      //open pin
+      event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
+    }
+
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
 export async function onStart(event,data) {
   let tag = TAG + " | onStart | ";
   try {
+
+    if(featureKeepkey){
+      //start
+      lifecycleKeepkey(event,data)
+    }
 
     log.info(tag," onStart() ")
     if(FIRST_START){

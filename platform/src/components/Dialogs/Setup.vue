@@ -27,16 +27,17 @@
             class="full-width"
             flat
         />
-<!--        <q-btn-->
-<!--          color="blue"-->
-<!--          @click="openConnect"-->
-<!--          class="full-width"-->
-<!--          icon="settings_ethernet"-->
-<!--          align="left"-->
-<!--          size="lg"-->
-<!--          label="Connect Hardware Wallet"-->
-<!--          flat-->
-<!--        />-->
+        <q-btn
+          v-if="showKeepkey"
+          color="blue"
+          @click="openConnect"
+          class="full-width"
+          icon="settings_ethernet"
+          align="left"
+          size="lg"
+          label="Connect Hardware Wallet"
+          flat
+        />
         </q-card-actions>
     </q-card>
 </template>
@@ -45,11 +46,13 @@
 import { mapMutations } from 'vuex'
 
 let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
+let featureKeepkey = process.env['KEEPKEY_FEATURE']
 
 export default {
     data() {
       return {
         showSoftwareCreate: featureSoftwareCreate,
+        showKeepkey: featureKeepkey,
       };
     },
     methods: {

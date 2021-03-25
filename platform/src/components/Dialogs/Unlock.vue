@@ -20,6 +20,13 @@
       <q-card-actions align="center" class="q-pb-lg">
         <q-btn type="submit" color="primary" class="q-pl-md q-pr-md" style="font-size:1rem;"
                :label="$t('msg.password.body')" :loading="loading"/>
+        <q-btn
+          @click="close"
+          label="cancel"
+          size="small"
+          class="font-weight-medium q-pl-md q-pr-md"
+          style="font-size:1rem;"
+        ></q-btn>
       </q-card-actions>
     </q-form>
   </q-card>
@@ -50,6 +57,9 @@
         const password = this.password;
         //tryLogin
         this.$q.electron.ipcRenderer.send('onLogin', {password});
+      },
+      close: function () {
+        this.hideModal()
       },
       openStartup: function () {
         this.hideModal()

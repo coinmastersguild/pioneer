@@ -53,7 +53,7 @@ module.exports = function (ctx) {
       env: {
         MAINNET_FEATURE:false,
         INSECURE_PASSWORD:true, //TODO dev mode only
-        KEEPKEY_FEATURE:false,
+        KEEPKEY_FEATURE:true,
         CREATE_SOFTWARE_FEATURE:false,
         PASSWORDLESS_FEATURE:false,
         FIO_FEATURE:false,

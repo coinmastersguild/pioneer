@@ -15,7 +15,6 @@
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev --mode electron",
-    "test-server": "pioneer server start",
     "build": "quasar build",
     "build-electron-publish-mac": "quasar build -m electron --publish always --target mac --debug",
     "build-electron-publish-linux": "quasar build -m electron --publish always --target linux --debug",
