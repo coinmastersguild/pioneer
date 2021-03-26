@@ -1,9 +1,10 @@
 
 
 
-export function getPaths(isTestnet?:boolean) {
+export function getPaths(isTestnet?:boolean,blockchains?:any) {
     let output = []
-    if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
+    if(!blockchains) blockchains = []
+    if(process.env['FEATURE_BITCOIN_BLOCKCHAIN'] || blockchains.indexOf('bitcoin') >= 0){
         if(isTestnet){
             output.push({
                 note:"Bitcoin testnet account 0",
@@ -34,7 +35,7 @@ export function getPaths(isTestnet?:boolean) {
         }
     }
 
-    if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
+    if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN'] || blockchains.indexOf('ethereum') >= 0){
         let entry:any = {
             note:" ETH primary (default)",
             symbol: 'ETH',
@@ -51,7 +52,7 @@ export function getPaths(isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']){
+    if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN'] || blockchains.indexOf('thorchain') >= 0){
         let entry:any = {
             note:" Default RUNE path ",
             type:"address",
@@ -69,7 +70,7 @@ export function getPaths(isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_SECRET_BLOCKCHAIN']){
+    if(process.env['FEATURE_SECRET_BLOCKCHAIN'] || blockchains.indexOf('secret') >= 0){
         let entry:any = {
             note:" Default Secret path ",
             type:"address",

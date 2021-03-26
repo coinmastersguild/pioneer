@@ -289,7 +289,7 @@ let get_balance = async function(address:string){
             if(accountInfo.data?.result){
                 for(let i = 0; i < accountInfo.data.result.length; i++){
                     let entry = accountInfo.data.result[i]
-                    if(entry.denom === 'rune'){
+                    if(entry.denom === 'ukava'){
                         output = entry.amount
                     }
                 }

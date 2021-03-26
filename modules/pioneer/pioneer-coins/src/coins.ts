@@ -51,6 +51,46 @@ enum HDWALLETS {
 
 */
 
+
+/*
+    Name maps
+ */
+export const COIN_MAP = {
+    Bitcoin: "BTC",
+    Cosmos: "ATOM",
+    Testnet: "BTCT",
+    BitcoinCash: "BCH",
+    Litecoin: "LTC",
+    Dash: "DASH",
+    DigiByte: "DGB",
+    Dogecoin: "DOGE",
+    Ethereum: "ETH",
+    Cardano: "ADA",
+    Binance: "BNB",
+    Thorchain: "RUNE",
+    Eos: "EOS",
+    EOS: "EOS",
+    Fio: "FIO",
+    FIO: "FIO",
+};
+
+export const COIN_MAP_LONG:any = {
+    BTC: "Bitcoin",
+    ATOM: "Cosmos",
+    BTCT: "testnet",
+    BCH: "BitcoinCash",
+    LTC: "Litecoin",
+    DASH: "Dash",
+    DGB: "DigiByte",
+    DOGE: "Dogecoin",
+    RUNE: "Thorchain",
+    ETH: "Ethereum",
+    ADA: "Cardano",
+    BNB: "Binance",
+    EOS: "Eos",
+    FIO: "Fio",
+};
+
 export const supportedBlockchains:any = [];
 export const supportedAssets:any = [];
 
@@ -315,40 +355,6 @@ export function getExplorerTxUrl(tx:string,network:string,token:string, testnet:
 }
 
 
-export const COIN_MAP = {
-    Bitcoin: "BTC",
-    Cosmos: "ATOM",
-    Testnet: "BTCT",
-    BitcoinCash: "BCH",
-    Litecoin: "LTC",
-    Dash: "DASH",
-    DigiByte: "DGB",
-    Dogecoin: "DOGE",
-    Ethereum: "ETH",
-    Cardano: "ADA",
-    Binance: "BNB",
-    Eos: "EOS",
-    EOS: "EOS",
-    Fio: "FIO",
-    FIO: "FIO",
-};
-
-export const COIN_MAP_LONG:any = {
-    BTC: "Bitcoin",
-    ATOM: "Cosmos",
-    BTCT: "testnet",
-    BCH: "BitcoinCash",
-    LTC: "Litecoin",
-    DASH: "Dash",
-    DGB: "DigiByte",
-    DOGE: "Dogecoin",
-    ETH: "Ethereum",
-    ADA: "Cardano",
-    BNB: "Binance",
-    EOS: "Eos",
-    FIO: "Fio",
-};
-
 function bech32ify(address:any, prefix:string) {
     const words = bech32.toWords(address)
     return bech32.encode(prefix, words)
@@ -368,47 +374,59 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
     try {
         log.info(tag,"input: ",{format,pubkeys,pathsIn})
         if(!isTestnet) isTestnet = false
-        let paths = getPaths(isTestnet)
 
         //paths by symbol
         let pathsBySymbol:any = {}
-        for(let i = 0; i < paths.length; i++){
-            let path = paths[i]
+        for(let i = 0; i < pathsIn.length; i++){
+            let path = pathsIn[i]
             pathsBySymbol[path.symbol] = path
         }
-        log.debug(tag,"pathsBySymbol: ",pathsBySymbol)
+        log.info(tag,"pathsBySymbol: ",pathsBySymbol)
 
         let output:any = []
         if(format === 'keepkey'){
             for(let i = 0; i < pubkeys.length; i++){
-                let pubkeyRaw = paths[i]
-                let pubkey:any = {}
+                let pubkeyRaw = pathsIn[i]
+                if(pubkeyRaw){
+                    log.info(tag,"pubkeyRaw: ",pubkeyRaw)
+                    let pubkey:any = {}
 
-                //get "real" pubkey
-                pubkey = pathsBySymbol[pubkeyRaw.symbol]
-                log.debug(tag,"pubkey: ",pubkey)
-                pubkey.source = format
-                pubkey.pubkey = pubkeys[i].xpub
-                pubkey.xpub = pubkeys[i].xpub
-                let normalized:any = {}
-                //get "real" coin
-                normalized.note = pubkey.note
-                normalized.coin = pubkey.symbol
-                normalized.long = pubkey.symbol
-                normalized.network = pubkey.symbol
-                //normalized.path = addressNListToBIP32(pubkey.addressNList)
-                normalized.type = "xpub"
-                normalized.script_type = pubkey.script_type //TODO select script type?
+                    pubkey.path = pubkeys[i].path
+                    pubkey.pathMaster = pubkeys[i].path
 
-                //get address
-                let address = await get_address_from_xpub(pubkey.xpub,pubkey.script_type,pubkey.symbol,0,0,false, isTestnet)
+                    //get "real" pubkey
 
-                normalized.pubkey = pubkey.xpub
-                normalized.xpub = pubkey.xpub
-                normalized.master = address //TODO
-                normalized.address = address //TODO
+                    pubkey = pathsBySymbol[pubkeyRaw.symbol]
+                    log.debug(tag,"pubkey: ",pubkey)
+                    pubkey.source = format
+                    pubkey.pubkey = pubkeys[i].xpub
+                    pubkey.xpub = pubkeys[i].xpub
+                    let normalized:any = {}
+                    //get "real" coin
+                    normalized.note = pubkey.note
+                    normalized.coin = pubkey.symbol
+                    normalized.long = COIN_MAP_LONG[pubkey.symbol]
+                    normalized.network = pubkey.symbol
+                    //normalized.path = addressNListToBIP32(pubkey.addressNList)
 
-                output.push(normalized)
+                    //get master address
+                    let address = await get_address_from_xpub(pubkey.xpub,pubkey.script_type,pubkey.symbol,0,0,false, isTestnet)
+
+                    if(pubkey.symbol === 'ETH'){
+                        normalized.type = "address"
+                        normalized.pubkey = address
+                    } else {
+                        normalized.type = "xpub"
+                        normalized.pubkey = pubkey.xpub
+                    }
+                    normalized.script_type = pubkey.script_type //TODO select script type?
+
+                    normalized.xpub = pubkey.xpub
+                    normalized.master = address //TODO
+                    normalized.address = address //TODO
+
+                    output.push(normalized)
+                }
             }
 
         } else {
@@ -425,14 +443,14 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
     let tag = TAG + " | get_address_from_xpub | "
     try {
         let output
-
+        log.info(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
         //if xpub get next unused
         if(!xpub) throw Error("xpub required! coin:"+coin)
 
 
         //get pubkey at path
         let publicKey = bitcoin.bip32.fromBase58(xpub).derive(account).derive(index).publicKey
-
+        log.info("publicKey: ********* ",coin)
         log.info("publicKey: ********* ",publicKey)
         log.info("isTestnet: ",isTestnet)
 

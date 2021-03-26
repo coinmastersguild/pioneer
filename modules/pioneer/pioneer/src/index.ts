@@ -281,14 +281,15 @@ module.exports = class wallet {
         this.setMnemonic = function () {
             return this.mnemonic;
         }
-        this.init = async function () {
+        this.init = async function (wallet?:any) {
             let tag = TAG + " | init_wallet | "
             try{
                 log.debug(tag,"checkpoint")
-                const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
-                // @ts-ignore
+                let paths = getPaths(this.isTestnet)
+
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
+                        const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
                         log.debug(tag,"checkpoint"," pioneer wallet detected! ")
                         if(!config.mnemonic && !config.wallet) throw Error("102: mnemonic or wallet file required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
@@ -298,7 +299,6 @@ module.exports = class wallet {
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
-                        let paths = getPaths(this.isTestnet)
 
                         //verify testnet
                         const isTestnet = this.WALLET.isTestnet();
@@ -306,7 +306,7 @@ module.exports = class wallet {
 
                         log.debug(tag,"paths: ",paths)
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
-
+                        log.info("pubkeys ",JSON.stringify(this.pubkeys))
 
                         //TODO verify hdwallet init successfull
 
@@ -329,11 +329,38 @@ module.exports = class wallet {
                         break;
                     case HDWALLETS.keepkey:
                         log.debug(tag," Keepkey mode! ")
-                        if(!config.wallet) throw Error("Config is missing watch wallet!")
-                        if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
-                        this.PUBLIC_WALLET = config.wallet.WALLET_PUBLIC
-                        if(!config.pubkeys) throw Error("Config watch wallet missing pubkeys!")
-                        this.pubkeys = config.pubkeys
+                        //if(!config.wallet) throw Error("Config is missing watch wallet!")
+                        //if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
+                        //if(!config.wallet.pubkeys) throw Error("Config watch wallet missing pubkeys!")
+
+                        //load wallet from keepkey
+                        this.WALLET = wallet
+                        this.pubkeys = await this.WALLET.getPublicKeys(paths)
+                        //this.pubkeys = config.wallet.pubkeys
+
+
+                        log.info("pubkeys ",JSON.stringify(this.pubkeys))
+                        log.info("pubkeys.length ",this.pubkeys.length)
+                        log.info("paths.length ",paths.length)
+                        //if paths !== pubkeys throw? missing coin?
+
+                        for(let i = 0; i < this.pubkeys.length; i++){
+                            let pubkey = this.pubkeys[i]
+                            log.debug(tag,"pubkey: ",pubkey)
+                            if(!pubkey) throw Error("empty pubkey!")
+                            if(!pubkey.coin){
+                                log.debug("pubkey: ",pubkey)
+                                throw Error("Invalid pubkey!")
+                            }
+                            if(isTestnet && pubkey.xpub && !pubkey.tpub){
+                                pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
+                            }
+                            this.PUBLIC_WALLET[pubkey.coin] = pubkey
+                        }
+
+
+
+
                         break;
                     case HDWALLETS.metamask:
                         log.debug(tag," metamask mode! ")

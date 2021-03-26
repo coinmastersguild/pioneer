@@ -42,10 +42,14 @@ let KEEPKEY_WALLET:any = {}
 let autoButton = true;
 let IS_CONNECTED = false
 
+//TODO for the love of god dont do this
+//coins? from device? anything
 let KEEPKEY_SUPPORT = [
     'BTC',
     'BCH',
-    'DOGE'
+    'DOGE',
+    'RUNE',
+    'ETH'
 ]
 
 module.exports = {
@@ -175,12 +179,12 @@ let enter_keepkey_pin = async function (pin:string) {
 
 
 
-let get_pubkeys = async function () {
+let get_pubkeys = async function (isTestnet?:boolean,blockchains?:[string]) {
     let tag = " | get_pubkeys | ";
     try {
         let output:any = {}
 
-        let paths = getPaths()
+        let paths = getPaths(blockchains)
         let pathsKeepkey:any = []
         for(let i = 0; i < paths.length; i++){
             let path = paths[i]
@@ -196,14 +200,17 @@ let get_pubkeys = async function () {
             if(KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0){
                 pathsKeepkey.push(pathForKeepkey)
             }
+            // if(KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0){
+            //     pathsKeepkey.push(pathForKeepkey)
+            // }
         }
 
-        log.debug("***** paths: ",pathsKeepkey)
+        log.info("***** paths: ",pathsKeepkey)
         //NOTE: keepkey returns an ordered array.
         //To build verbose pubkey info we must rebuild based on order
         const result = await KEEPKEY_WALLET.getPublicKeys(pathsKeepkey);
-        log.debug("rawResult: ",result)
-        log.debug("rawResult: ",JSON.stringify(result))
+        log.info("rawResult: ",result)
+        log.info("rawResult: ",JSON.stringify(result))
 
 
         //rebuild

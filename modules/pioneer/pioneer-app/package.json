@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "7.0.38",
+  "version": "7.0.39",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -20,10 +20,10 @@
     "@peculiar/webcrypto": "latest",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer": "latest",
-    "@pioneer-platform/pioneer-coins": "latest",
+    "@pioneer-platform/pioneer-coins": "^6.2.24",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
-    "@pioneer-platform/pioneer-hardware": "latest",
+    "@pioneer-platform/pioneer-hardware": "^6.3.9",
     "@types/node": "^13.13.47",
     "@types/uuid": "^8.3.0",
     "axios": "^0.19.2",

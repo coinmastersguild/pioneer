@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPaths = void 0;
-function getPaths(isTestnet) {
+function getPaths(isTestnet, blockchains) {
     var output = [];
-    if (process.env['FEATURE_BITCOIN_BLOCKCHAIN']) {
+    if (!blockchains)
+        blockchains = [];
+    if (process.env['FEATURE_BITCOIN_BLOCKCHAIN'] || blockchains.indexOf('bitcoin') >= 0) {
         if (isTestnet) {
             output.push({
                 note: "Bitcoin testnet account 0",
@@ -34,7 +36,7 @@ function getPaths(isTestnet) {
             });
         }
     }
-    if (process.env['FEATURE_ETHEREUM_BLOCKCHAIN']) {
+    if (process.env['FEATURE_ETHEREUM_BLOCKCHAIN'] || blockchains.indexOf('ethereum') >= 0) {
         var entry = {
             note: " ETH primary (default)",
             symbol: 'ETH',
@@ -51,9 +53,26 @@ function getPaths(isTestnet) {
             entry.testnet = true;
         output.push(entry);
     }
-    if (process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
+    if (process.env['FEATURE_THORCHAIN_BLOCKCHAIN'] || blockchains.indexOf('thorchain') >= 0) {
         var entry = {
             note: " Default RUNE path ",
+            type: "address",
+            addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            script_type: "thorchain",
+            showDisplay: true,
+            coin: 'Thorchain',
+            symbol: 'RUNE',
+            network: 'RUNE',
+        };
+        if (isTestnet) {
+            entry.testnet = true;
+        }
+        output.push(entry);
+    }
+    if (process.env['FEATURE_SECRET_BLOCKCHAIN'] || blockchains.indexOf('secret') >= 0) {
+        var entry = {
+            note: " Default Secret path ",
             type: "address",
             addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',

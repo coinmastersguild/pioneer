@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-coins",
-  "version": "6.2.21",
+  "version": "6.2.24",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/utxo-crypto": "^6.2.2",
-    "bech32": "^2.0.0",
+    "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",
     "bitcoinjs-lib": "^5.2.0",
     "crypto-js": "^4.0.0",

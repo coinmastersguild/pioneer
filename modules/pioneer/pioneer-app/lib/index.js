@@ -56,7 +56,6 @@ const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
 let Pioneer = require('@pioneer-platform/pioneer');
 let Network = require("@pioneer-platform/pioneer-client");
-let Hardware = require("@pioneer-platform/pioneer-hardware");
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 const ONLINE = [];
@@ -158,8 +157,8 @@ module.exports = {
         AUTH_TOKEN = auth;
         return true;
     },
-    pairKeepkey: function () {
-        return pair_keepkey();
+    pairKeepkey: function (wallet) {
+        return pair_keepkey(wallet);
     },
     // getAccountInfo: function (asset:string,account:string) {
     //     return network.getAccountInfo(asset,account);
@@ -397,28 +396,12 @@ let unlock_wallet = function (wallet, password) {
         }
     });
 };
-let pair_keepkey = function () {
+let pair_keepkey = function (keepkeyWallet) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | pair_keepkey | ";
         try {
-            KEEPKEY = yield Hardware.start();
-            let info = yield Hardware.info();
-            log.info("info: ", info);
-            let deviceId = info.features.deviceId;
-            //get lock status
-            let lockStatus = yield Hardware.isLocked();
-            log.info("lockStatus: ", lockStatus);
-            if (!lockStatus) {
-                //get pubkeys
-                let pubkeys = yield Hardware.getPubkeys();
-                console.log("pubkeys: ", prettyjson.render(pubkeys));
-            }
-            else {
-                //
-                log.info(tag, "Locked!");
-            }
-            let pubkeys = yield Hardware.getPubkeys();
-            console.log("pubkeys: ", prettyjson.render(pubkeys));
+            log.debug(tag, "config: ", keepkeyWallet);
+            let deviceId = keepkeyWallet.features.deviceId;
             //get config
             let config = pioneer_config_1.getConfig();
             log.debug(tag, "config: ", config);
@@ -434,9 +417,10 @@ let pair_keepkey = function () {
                 paired.push(deviceId);
                 pioneer_config_1.updateConfig({ paired });
             }
-            pubkeys.deviceId = deviceId;
+            //use as ID
+            keepkeyWallet.deviceId = deviceId;
             //createWallet
-            yield create_wallet('hardware', pubkeys);
+            yield create_wallet('hardware', keepkeyWallet);
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -769,6 +753,7 @@ let create_wallet = function (type, wallet, isTestnet) {
         try {
             if (!isTestnet)
                 isTestnet = false;
+            let output = false;
             //if software
             switch (type) {
                 case "software":
@@ -820,14 +805,15 @@ let create_wallet = function (type, wallet, isTestnet) {
                     }
                     break;
                 case "hardware":
-                    log.debug(tag, "wallet hardware: ", wallet);
+                    log.info(tag, "wallet hardware: ", wallet);
                     if (!wallet.deviceId)
                         throw Error("102: deviceId require for keepkey wallets!");
                     if (!wallet.wallet.WALLET_PUBLIC)
                         throw Error("103: WALLET_PUBLIC require for keepkey wallets!");
-                    log.debug("hardware watch create!");
+                    log.info("hardware watch create!");
                     let walletFileNew = {
                         isTestnet,
+                        features: wallet.features,
                         WALLET_ID: "keepkey:" + wallet.deviceId,
                         TYPE: 'keepkey',
                         CREATED: new Date().getTime(),
@@ -842,13 +828,13 @@ let create_wallet = function (type, wallet, isTestnet) {
                     walletFileNew.deviceId = wallet.deviceId;
                     walletFileNew.filename = wallet.deviceId + ".watch.wallet.json";
                     // @ts-ignore
-                    const success = yield pioneer_config_1.initWallet(walletFileNew);
+                    output = yield pioneer_config_1.initWallet(walletFileNew);
                     break;
                 default:
                     throw Error("unhandled wallet type! " + type);
                     break;
             }
-            return true;
+            return output;
         }
         catch (e) {
             if (e.response && e.response.data) {
@@ -869,30 +855,6 @@ let init_wallet = function (config, isTestnet) {
                 isTestnet = true;
             log.info(tag, "isTestnet: ", isTestnet);
             let output = {};
-            //is keepkey connected?
-            //init wallet
-            if (config.keepkey) {
-                //TODO testnet flag?
-                let KEEPKEY = yield Hardware.start();
-                KEEPKEY.events.on('event', function (event) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        log.info("EVENT: ", event);
-                        //attempt to start
-                        if (event.event === 'connect') {
-                            yield sleep(2000);
-                            //get info
-                            let info = yield Hardware.info();
-                            log.info(tag, "2info: ", info);
-                        }
-                        //TODO if no wallet found
-                        //TODO offer unlock
-                        //TODO collect pin
-                    });
-                });
-                //if hardware connected
-                let info = yield Hardware.info();
-                log.info("hardwre info: ", info);
-            }
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
             log.debug(tag, "wallets: ", wallets);

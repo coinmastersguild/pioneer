@@ -18,7 +18,11 @@ Adding a cosmos sdk coins
     
     4. send mainnet to test seed address    
     
-    5. build reference transactions    
+    5. build reference transactions in HDwallet   
         
-
+    6. Bump/publish hdwallet
+    
+    7. update pioneer stack with new HDwallet version
+    
+    8. begin e2e test process
     

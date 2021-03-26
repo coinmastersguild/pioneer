@@ -80,7 +80,7 @@ const DEFAULT_MANTLE = "https://mantle.terra.dev";
 const BASE_DENOM = `uluna`;
 
 
-let BASE_TERRA = 100000000
+let BASE_TERRA = 1000000
 
 /**********************************
  // Module
@@ -132,7 +132,7 @@ let get_transaction = async function(txid:string){
     }
 }
 
-let broadcast_transaction = async function(tx:string){
+let broadcast_transaction = async function(tx:string,mode?:string){
     let tag = TAG + " | broadcast_transaction | "
     let output:any = {}
     try{
@@ -142,13 +142,18 @@ let broadcast_transaction = async function(tx:string){
 
 
         try{
+            let broadcastPayload = {
+                tx:JSON.parse(tx),
+                mode:mode || 'sync'
+            }
+            log.info(tag,"broadcastPayload: ",broadcastPayload)
             //push to seed
             let urlRemote = URL_TERRA_FCD+ '/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
                 method: 'POST',
-                data: tx,
+                data: broadcastPayload,
             })
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             if(result2.data.txhash) output.txid = result2.data.txhash
@@ -350,7 +355,7 @@ let get_balance = async function(address:string){
             if(accountInfo.data?.result){
                 for(let i = 0; i < accountInfo.data.result.length; i++){
                     let entry = accountInfo.data.result[i]
-                    if(entry.denom === 'rune'){
+                    if(entry.denom === 'uluna'){
                         output = entry.amount
                     }
                 }
