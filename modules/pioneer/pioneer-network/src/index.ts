@@ -764,6 +764,8 @@ const get_wallet_info = async function () {
                         balances['ETH'] = balanceETH
                         valueUsds['ETH'] = ""
                         coinInfo['ETH'] = ""
+                    } else {
+                        balances['ETH'] = 0
                     }
 
                 }else{

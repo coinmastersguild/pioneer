@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/network",
-  "version": "6.3.74",
+  "version": "6.3.75",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {

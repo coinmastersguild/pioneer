@@ -80,8 +80,16 @@ let run_test = async function(){
 
             let wallet = await App.getWallet()
             console.log("*** wallet: ",wallet)
+
+            //blockchains
+            let blockchains = [
+                'bitcoin',
+                'ethereum',
+                'thorchain'
+            ]
+
             if(!wallet){
-                wallet = await Hardware.getPubkeys()
+                wallet = await Hardware.getPubkeys(blockchains,true)
             }
 
             console.log("walletFile: ",JSON.stringify(wallet))

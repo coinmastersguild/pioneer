@@ -63,7 +63,7 @@ let run_test = async function(){
 
 
         //get pubkeys
-        let pubkeys = await Hardware.getPubkeys(blockchains)
+        let pubkeys = await Hardware.getPubkeys(blockchains,true)
         console.log("pubkeys: ",pubkeys)
         console.log("pubkeys: ",prettyjson.render(pubkeys))
 

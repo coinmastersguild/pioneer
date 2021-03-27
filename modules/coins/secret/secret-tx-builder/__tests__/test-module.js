@@ -1,47 +1,17 @@
-const {
-    EnigmaUtils, SigningCosmWasmClient, Secp256k1Pen, pubkeyToAddress, encodeSecp256k1Pubkey
-} = require("secretjs");
 
-require('dotenv').config();
+let txbuild = require('../lib/index')
+const prettyjson = require('prettyjson');
 
-const main = async () => {
 
-    const mnemonic = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle";
-    const httpUrl = 'https://lcd-secret.keplr.app';
-    const signingPen = await Secp256k1Pen.fromMnemonic(mnemonic);
-    const pubkey = encodeSecp256k1Pubkey(signingPen.pubkey);
-    const accAddress = pubkeyToAddress(pubkey, 'secret');
+let to = 'secret1vhtdhfmttwxlvu4ewueqt73tt8y9zv385fagty'
+let from = 'secret1vhtdhfmttwxlvu4ewueqt73tt8y9zv385fagty'
+let amount = '100000'
+let memo = 'testmemo'
+let seed = 'alcohol woman abuse must during monitor noble actual mixed trade anger aisle'
 
-    const txEncryptionSeed = EnigmaUtils.GenerateNewSeed();
-    const fees = {
-        send: {
-            amount: [{ amount: "80000", denom: "uscrt" }],
-            gas: "80000",
-        },
-    }
-    const client = new SigningCosmWasmClient(
-        httpUrl,
-        accAddress,
-        (signBytes) => signingPen.sign(signBytes),
-        txEncryptionSeed, fees
-    );
-    const rcpt = accAddress; // Set recipient to sender for testing
+txbuild.signTx(to,from,amount,memo,seed)
+    .then(function(resp){
+        console.log(JSON.stringify(resp))
+        console.log(prettyjson.render(resp))
 
-    //optional memo
-    const memo = 'sendTokens example';
-
-    const sent = await client.sendTokens(rcpt, [{amount: "1234", denom: "uscrt"}], memo)
-    console.log('sent', sent)
-    console.log('sent', JSON.stringify(sent))
-
-    // Query the tx result
-    const query = {id: sent.transactionHash}
-    const tx = await client.searchTx(query)
-    console.log('Transaction: ', tx);
-}
-
-main().then(resp => {
-    console.log(resp);
-}).catch(err => {
-    console.log(err);
-})
+    })

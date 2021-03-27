@@ -335,9 +335,10 @@ module.exports = class wallet {
 
                         //load wallet from keepkey
                         this.WALLET = wallet
-                        this.pubkeys = await this.WALLET.getPublicKeys(paths)
-                        //this.pubkeys = config.wallet.pubkeys
-
+                        log.info(tag,"IN paths: ",paths)
+                        //TODO why this no worky
+                        // this.pubkeys = await this.WALLET.getPublicKeys(paths)
+                        this.pubkeys = config.wallet.pubkeys
 
                         log.info("pubkeys ",JSON.stringify(this.pubkeys))
                         log.info("pubkeys.length ",this.pubkeys.length)
@@ -352,14 +353,12 @@ module.exports = class wallet {
                                 log.debug("pubkey: ",pubkey)
                                 throw Error("Invalid pubkey!")
                             }
-                            if(isTestnet && pubkey.xpub && !pubkey.tpub){
+                            if(this.isTestnet && pubkey.xpub && !pubkey.tpub){
                                 pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
                             }
                             this.PUBLIC_WALLET[pubkey.coin] = pubkey
                         }
-
-
-
+                        log.info("this.PUBLIC_WALLET",this.PUBLIC_WALLET)
 
                         break;
                     case HDWALLETS.metamask:

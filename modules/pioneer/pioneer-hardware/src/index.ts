@@ -59,8 +59,8 @@ module.exports = {
     info: function () {
         return hardware_info();
     },
-    getPubkeys: function () {
-        return get_pubkeys();
+    getPubkeys: function (blockchains?:[string],isTestnet?:boolean) {
+        return get_pubkeys(blockchains,isTestnet);
     },
     isLocked: function () {
         return get_lock_status();
@@ -179,12 +179,13 @@ let enter_keepkey_pin = async function (pin:string) {
 
 
 
-let get_pubkeys = async function (isTestnet?:boolean,blockchains?:[string]) {
+let get_pubkeys = async function (blockchains?:[string],isTestnet?:boolean) {
     let tag = " | get_pubkeys | ";
     try {
+        //TODO if blockchains === true? then just testnet?
         let output:any = {}
 
-        let paths = getPaths(blockchains)
+        let paths = getPaths(isTestnet, blockchains)
         let pathsKeepkey:any = []
         for(let i = 0; i < paths.length; i++){
             let path = paths[i]
@@ -214,7 +215,8 @@ let get_pubkeys = async function (isTestnet?:boolean,blockchains?:[string]) {
 
 
         //rebuild
-        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+        log.info(tag,"isTestnet: ",isTestnet)
+        let pubkeys = await normalize_pubkeys('keepkey',result,paths,isTestnet)
         output.pubkeys = pubkeys
         log.debug(tag,"pubkeys: ",pubkeys)
 

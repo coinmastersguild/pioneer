@@ -372,7 +372,7 @@ function createBech32Address(publicKey:any,prefix:string) {
 export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
     let tag = TAG + " | normalize_pubkeys | "
     try {
-        log.info(tag,"input: ",{format,pubkeys,pathsIn})
+        log.info(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
         if(!isTestnet) isTestnet = false
 
         //paths by symbol
@@ -420,6 +420,11 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                         normalized.pubkey = pubkey.xpub
                     }
                     normalized.script_type = pubkey.script_type //TODO select script type?
+
+                    if(isTestnet && pubkey.symbol === 'BTC'){
+                        //tpub
+                        normalized.tpub = await cloneCrypto.xpubConvert(pubkey.xpub,'tpub')
+                    }
 
                     normalized.xpub = pubkey.xpub
                     normalized.master = address //TODO

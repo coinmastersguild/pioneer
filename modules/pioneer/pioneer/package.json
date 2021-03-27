@@ -24,7 +24,7 @@
     "@bithighlander/hdwallet-native": "^1.10.2",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-client": "latest",
-    "@pioneer-platform/pioneer-coins": "^6.2.24",
+    "@pioneer-platform/pioneer-coins": "^6.2.26",
     "@pioneer-platform/pioneer-eth-token-data": "latest",
     "@pioneer-platform/pioneer-hardware": "^6.3.9",
     "@pioneer-platform/utxo-crypto": "latest",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.47",
+    "@types/node": "^13.13.48",
     "@types/source-map-support": "^0.5.3",
     "jest": "^26.6.3",
     "onchange": "^7.1.0",

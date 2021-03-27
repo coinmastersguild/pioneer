@@ -842,6 +842,9 @@ var get_wallet_info = function () {
                         valueUsds['ETH'] = "";
                         coinInfo['ETH'] = "";
                     }
+                    else {
+                        balances['ETH'] = 0;
+                    }
                     return [3 /*break*/, 39];
                 case 32: return [4 /*yield*/, get_balance('ETH')];
                 case 33:
