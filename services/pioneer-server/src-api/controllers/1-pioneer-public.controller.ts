@@ -11,19 +11,7 @@ const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
-import {
-    bip32ToAddressNList,
-    HDWallet,
-    BTCWallet,
-    supportsBTC,
-    BTCInputScriptType,
-    BTCOutputAddressType,
-    BTCOutputScriptType,
-    Coin,
-    BTCWalletInfo,
-    infoBTC,
-    HDWalletInfo,
-} from "@shapeshiftoss/hdwallet-core";
+
 /*
     Feature Flags per blockchain
 
