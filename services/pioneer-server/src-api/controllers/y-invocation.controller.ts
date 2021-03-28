@@ -27,7 +27,7 @@ txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
 
 //globals
-let BLOCKING_TIMEOUT_INVOCATION = process.env['BLOCKING_TIMEOUT_INVOCATION'] || 30
+let BLOCKING_TIMEOUT_INVOCATION = process.env['BLOCKING_TIMEOUT_INVOCATION'] || 60
 
 //rest-ts
 import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Request, Response, Header } from 'tsoa';

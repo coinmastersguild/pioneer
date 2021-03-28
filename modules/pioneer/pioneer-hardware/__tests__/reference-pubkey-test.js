@@ -12,6 +12,7 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 const prettyjson = require('prettyjson');
 //create wallet
+//pioneer
 
 
 prompt.start();
@@ -60,14 +61,21 @@ let run_test = async function(){
             'ethereum',
             'thorchain'
         ]
-
+        let masterDevice = await KEEPKEY.ethGetAddress({
+            "addressNList":[0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0,0,0],
+            showDisplay: false,
+        })
 
         //get pubkeys
         let pubkeys = await Hardware.getPubkeys(blockchains,true)
-        console.log("pubkeys: ",pubkeys)
-        console.log("pubkeys: ",prettyjson.render(pubkeys))
+        // console.log("pubkeys: ",pubkeys)
+        // console.log("pubkeys: ",prettyjson.render(pubkeys))
 
-        //
+        //expect master to be right
+        let masterEth = pubkeys.wallet.WALLET_PUBLIC.ETH.master
+        console.log("masterDevice: ",masterDevice)
+        console.log("masterEth: ",masterEth)
+        console.log("reference: ","0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8")
 
         // Hardware.displayPin()
         //

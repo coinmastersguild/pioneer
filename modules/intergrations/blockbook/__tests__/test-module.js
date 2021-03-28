@@ -19,11 +19,12 @@ network.init()
 
 
         //let txid
-        // let txid = ""
-        // network.getTransaction("BTC",txid)
-        //     .then(function(resp){
-        //         console.log(resp)
-        //     })
+        let txid = "537692a2ab9547e7c2652cf11e3a51023f6877a7817eb8a94269a1c8ffffcced"
+        network.getTransaction("TEST",txid)
+            .then(function(resp){
+                console.log(resp)
+                console.log(JSON.stringify(resp))
+            })
 
         // console.log(process.env["TEST_BTC_TPUB"])
         // network.getBalanceByXpub("TEST",process.env["TEST_BTC_TPUB"])
@@ -36,10 +37,10 @@ network.init()
         //         console.log(resp)
         //     })
 
-        network.getBalanceByXpub("TEST",process.env["TEST_BTC_TPUB"])
-            .then(function(resp){
-                console.log(resp)
-            })
+        // network.getBalanceByXpub("TEST",process.env["TEST_BTC_TPUB"])
+        //     .then(function(resp){
+        //         console.log(resp)
+        //     })
     })
 
 

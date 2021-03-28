@@ -43,7 +43,7 @@ let run_test = async function(){
         await invoke.init()
 
         //get online
-
+        console.log("invoker: ",invoker)
         //if username not online abort
         let onlineUsers = await invoke.online()
         console.log("onlineUsers: ",onlineUsers)
@@ -80,7 +80,7 @@ let run_test = async function(){
             memo:txInput.memo
         }
 
-        let result = await invoke.invoke('PaymentRequest',invocation)
+        let result = await invoke.invoke('swap',invocation)
         console.log("result: ",result.data)
 
     }catch(e){

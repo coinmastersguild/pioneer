@@ -39,6 +39,8 @@ let run_test = async function(){
         //get config
         let config = await App.getConfig()
 
+        console.log("config: ",config)
+
         //if no config
         if(!config){
             console.log("First time startup")

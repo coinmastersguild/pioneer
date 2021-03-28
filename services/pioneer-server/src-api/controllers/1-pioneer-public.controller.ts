@@ -11,7 +11,19 @@ const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
-
+import {
+    bip32ToAddressNList,
+    HDWallet,
+    BTCWallet,
+    supportsBTC,
+    BTCInputScriptType,
+    BTCOutputAddressType,
+    BTCOutputScriptType,
+    Coin,
+    BTCWalletInfo,
+    infoBTC,
+    HDWalletInfo,
+} from "@shapeshiftoss/hdwallet-core";
 /*
     Feature Flags per blockchain
 
@@ -26,6 +38,11 @@ if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
     networks['ANY'] = require('@pioneer-platform/utxo-network')
 }
 
+if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
+    blockchains.push('ethereum')
+    //all utxo's share
+    networks['ETH'] = require('@pioneer-platform/eth-network')
+}
 
 //Cache time
 let CACHE_TIME = 1000 * 60 * 1
@@ -428,6 +445,7 @@ export class pioneerPublicController extends Controller {
             //TODO does this scale on large xpubs?
             log.info(tag,"coin: ",coin)
             log.info(tag,"xpub: ",xpub)
+            await networks.ANY.init()
             //log.info("networks: ",networks)
             //log.info("networks: ",networks.ANY)
             let inputs = await networks.ANY.utxosByXpub(coin,xpub)
@@ -439,6 +457,50 @@ export class pioneerPublicController extends Controller {
                 //get hex info
                 let rawInfo = await networks.ANY.getTransaction(coin,input.txid)
                 log.info(tag,"rawInfo: ",rawInfo)
+                log.info(tag,"rawInfo: ",rawInfo.vin[0].addresses)
+                //TODO type from hdwallet-code txInput:
+                //TODO move this into module
+                //format inputs
+                let normalized_inputs = []
+                for(let i = 0; i < rawInfo.vin.length; i++){
+                    let vin = rawInfo.vin[i]
+                    let rawInfoInput = await networks.ANY.getTransaction(coin,vin.txid)
+                    log.info(tag,"rawInfoInput: ",JSON.stringify(rawInfoInput))
+                    let input = {
+                        txid:vin.txid,
+                        vout:vin.vout,
+                        addr:vin.addresses[0], //TODO if multi? multisig?
+                        scriptSig:{
+                            hex:"0014459a4d8600bfdaa52708eaae5be1dcf959069efc" //from input?
+                        },
+                        valueSat:parseInt(vin.value),
+                        value:parseInt(vin.value) / 100000000,
+                    }
+                    normalized_inputs.push(input)
+                }
+
+                //
+                let normalized_outputs = []
+                for(let i = 0; i < rawInfo.vout.length; i++){
+                    let vout = rawInfo.vout[i]
+                    let output = {
+                        value:vout.value,
+                        scriptPubKey:{
+                            hex:vout.hex
+                        },
+                    }
+                    normalized_outputs.push(output)
+                }
+
+                input.tx = {
+                    txid:rawInfo.txid,
+                    hash:rawInfo.txid,
+                    version:rawInfo.version,
+                    locktime:rawInfo.lockTime,
+                    vin:normalized_inputs,
+                    vout:normalized_outputs,
+                    hex:rawInfo.hex
+                }
                 input.hex = rawInfo.hex
                 input.coin = coin
                 output.push(input)

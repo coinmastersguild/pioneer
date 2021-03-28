@@ -43,7 +43,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             script_type:"ethereum",
             available_scripts_types:['ethereum'],
             type:"address",
-            addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0,0,0],
+            addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             coin: 'Ethereum'

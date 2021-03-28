@@ -185,7 +185,7 @@ let get_memo_data = async function(swap:any){
 			.deposit(
 				swap.inboundAddress.address,
 				'0x0000000000000000000000000000000000000000', // 0 = ETH
-				swap.amount,
+				web3.utils.toBN(swap.amount * BASE),
 				memo
 			)
 			.encodeABI()
@@ -294,7 +294,7 @@ let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParam
 }
 
 let get_fees = async function(params: any){
-	let tag = TAG + " | broadcast_transaction | "
+	let tag = TAG + " | get_fees | "
 	try{
 		const response: any = await etherscanAPI.getGasOracle(ETHERSCAN.baseUrl, ETHERSCAN.apiKey)
 

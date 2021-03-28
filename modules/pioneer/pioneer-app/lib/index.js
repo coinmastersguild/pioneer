@@ -56,6 +56,8 @@ const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
 let Pioneer = require('@pioneer-platform/pioneer');
 let Network = require("@pioneer-platform/pioneer-client");
+//hardware
+let Hardware = require("@pioneer-platform/pioneer-hardware");
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 const ONLINE = [];
@@ -888,14 +890,15 @@ let init_wallet = function (config, isTestnet) {
             network = yield network.init();
             if (!wallets) {
                 throw Error(" No wallets found! ");
-                //create wallet
-                // if(info.features){
-                //     let walletName = info.features.deviceId + ".wallet.json"
-                //     //if locked
-                //     //let isLocked = Hardware.is
-                //
-                // }
-                //hardware
+            }
+            if (config.hardware) {
+                log.info(tag, "Hardware enabled!");
+                //start
+                KEEPKEY = yield Hardware.start();
+                let lockStatus = yield Hardware.isLocked();
+                log.info("lockStatus: ", lockStatus);
+                //TODO if locked, prompt pin
+                //TODO keepkey.on events
             }
             //Load wallets if setup
             for (let i = 0; i < wallets.length; i++) {
@@ -915,7 +918,7 @@ let init_wallet = function (config, isTestnet) {
                         vendor: "keepkey",
                         pubkeys: walletFile.pubkeys,
                         wallet: walletFile,
-                        username: walletFile.username,
+                        username: config.username,
                         pioneerApi: true,
                         spec: URL_PIONEER_SPEC,
                         queryKey: config.queryKey,
@@ -924,9 +927,10 @@ let init_wallet = function (config, isTestnet) {
                     };
                     log.debug(tag, "KEEPKEY init config: ", configPioneer);
                     let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
-                    WALLETS_LOADED.push(wallet);
                     //init
-                    let walletClient = yield wallet.init();
+                    let walletInfo = yield wallet.init(KEEPKEY);
+                    log.info(tag, "walletInfo: ", walletInfo);
+                    WALLETS_LOADED.push(wallet);
                     //info
                     let info = yield wallet.getInfo();
                     info.name = walletFile.username;

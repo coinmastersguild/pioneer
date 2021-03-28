@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer",
-  "version": "6.3.72",
+  "version": "7.0.1",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -24,9 +24,9 @@
     "@bithighlander/hdwallet-native": "^1.10.2",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-client": "latest",
-    "@pioneer-platform/pioneer-coins": "^6.2.26",
+    "@pioneer-platform/pioneer-coins": "^6.2.29",
     "@pioneer-platform/pioneer-eth-token-data": "latest",
-    "@pioneer-platform/pioneer-hardware": "^6.3.9",
+    "@pioneer-platform/pioneer-hardware": "^6.3.13",
     "@pioneer-platform/utxo-crypto": "latest",
     "@types/google-protobuf": "^3.7.4",
     "bech32": "^1.1.4",

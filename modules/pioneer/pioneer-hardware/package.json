@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-hardware",
-  "version": "6.3.12",
+  "version": "6.3.13",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@bithighlander/usb-detection": "^4.10.4",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-coins": "^6.2.28",
+    "@pioneer-platform/pioneer-coins": "^6.2.29",
     "@shapeshiftoss/hdwallet-core": "latest",
     "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "latest",
     "@shapeshiftoss/hdwallet-keepkey-tcp": "latest",

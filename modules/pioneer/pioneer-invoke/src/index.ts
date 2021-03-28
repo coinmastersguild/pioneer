@@ -66,12 +66,13 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.invoke = async function (type,invocation:Invocation) {
+        this.invoke = async function (type,invocation:any) {
             let tag = TAG + " | invoke | "
             try{
                 //
                 let request:any = {
-                    type:"payment",
+                    type,
+                    username:invocation.username,
                     //TODO auth
                     //TODO sig
                     invocation

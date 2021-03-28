@@ -197,7 +197,7 @@ var get_memo_data = function (swap) {
                 memo = swap.memo;
                 data = routerContract.methods
                     .deposit(swap.inboundAddress.address, '0x0000000000000000000000000000000000000000', // 0 = ETH
-                swap.amount, memo)
+                web3_1.utils.toBN(swap.amount * BASE), memo)
                     .encodeABI();
                 return [2 /*return*/, data];
             }
@@ -325,7 +325,7 @@ var get_fees = function (params) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    tag = TAG + " | broadcast_transaction | ";
+                    tag = TAG + " | get_fees | ";
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 4, , 5]);

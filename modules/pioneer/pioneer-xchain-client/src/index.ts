@@ -661,6 +661,7 @@ module.exports = class wallet {
                     invocation:swap
                 }
                 //invocation
+                log.info(tag,"request: ",request)
                 let result = await this.pioneerApi.Invocation('',request)
 
                 //
@@ -688,6 +689,7 @@ module.exports = class wallet {
 
                 let request:any = {
                     type:"payment",
+                    username:this.username,
                     //TODO source
                     //TODO auth
                     //TODO sig

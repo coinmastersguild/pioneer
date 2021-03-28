@@ -407,7 +407,7 @@ module.exports = class wallet {
                     //emitter.info = walletInfo
 
                     //verify if remote is correct
-                    if(walletInfo.masters['ETH'] === this.PUBLIC_WALLET['ETH'].master){
+                    if(walletInfo.masters['ETH'].toLowerCase() === this.PUBLIC_WALLET['ETH'].master.toLowerCase()){
                         //
                         log.debug(tag,"Remote and local masters match!")
                     }else{
@@ -750,21 +750,45 @@ module.exports = class wallet {
                 //send FROM master
                 let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
 
-                let amountNative = parseFloat(swap.amount) * support.getBase('ETH')
+                let amountNative = parseFloat(swap.amount)
                 amountNative = Number(parseInt(String(amountNative)))
 
                 let ethTx = {
-                    addressNList: support.bip32ToAddressNList(masterPathEth),
+                    // addressNList: support.bip32ToAddressNList(masterPathEth),
+                    "addressNList":[
+                        2147483692,
+                        2147483708,
+                        2147483648,
+                        0,
+                        0
+                    ],
                     nonce: numberToHex(nonce),
                     gasPrice: numberToHex(gas_price),
                     gasLimit: numberToHex(gas_limit),
-                    value: amountNative,
+                    value: numberToHex(amountNative),
                     to: swap.inboundAddress.router,
                     data,
                     // chainId: 1,//TODO testnet
                 }
 
-                log.debug("unsignedTxETH: ",ethTx)
+                // let ethTx = {
+                //     "nonce":"0x0",
+                //     "gasPrice":"0x5FB9ACA00",
+                //     "gasLimit":"0x186A0",
+                //     "value":"0x00",
+                //     "to":"0x41e5560054824ea6b0732e656e3ad64e20e94e45",
+                //     "chainId":3,
+                //     "data":"0x1fece7b400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000031535741503a4254432e4254433a6d6b7152467a786d6b434758396a78677071714648637852556d4c4a634c444265723a31000000000000000000000000000000",
+                //     "addressNList":[
+                //         2147483692,
+                //         2147483708,
+                //         2147483648,
+                //         0,
+                //         0
+                //     ]
+                // }
+
+                log.info("unsignedTxETH: ",ethTx)
                 //send to hdwallet
                 let rawTx = await this.WALLET.ethSignTx(ethTx)
                 rawTx.params = ethTx
@@ -957,6 +981,7 @@ module.exports = class wallet {
                             value:parseInt(input.value),
                             nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
                             hex: input.hex,
+                            tx: input.tx,
                             path:input.path
                             //TODO if segwit
                             // witnessUtxo: {
@@ -1004,7 +1029,7 @@ module.exports = class wallet {
 
                     //if
                     if(!selectedResults.inputs){
-                        throw Error("Fee exceeded totdal availble inputs!")
+                        throw Error("Fee exceeded total available inputs!")
                     }
 
                     //TODO get long name for coin
@@ -1014,6 +1039,7 @@ module.exports = class wallet {
                     for(let i = 0; i < selectedResults.inputs.length; i++){
                         //get input info
                         let inputInfo = selectedResults.inputs[i]
+                        log.info(tag,"inputInfo: ",inputInfo)
                         let input = {
                             addressNList:support.bip32ToAddressNList(inputInfo.path),
                             scriptType:"p2pkh",
@@ -1021,7 +1047,8 @@ module.exports = class wallet {
                             vout:inputInfo.vout,
                             txid:inputInfo.txId,
                             segwit:false,
-                            hex:inputInfo.hex
+                            hex:inputInfo.hex,
+                            tx:inputInfo.tx
                         }
                         inputs.push(input)
                     }
@@ -1070,7 +1097,108 @@ module.exports = class wallet {
                         locktime: 0,
                     }
 
+                    const txid = "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea";
+                    const hex =
+                        "010000000181f605ead676d8182975c16e7191c21d833972dd0ed50583ce4628254d28b6a3010000008a47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43ffffffff0250ec0e00000000001976a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac10270000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac00000000";
 
+
+                    log.info(tag,"inputs[0].vout: ",inputs[0].tx.vout)
+
+                    let inputsMock = [
+                        {
+                            addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+                            scriptType: 'p2pkh',
+                            amount: String(10000),
+                            vout: 1,
+                            txid: txid,
+                            tx: {
+                                "txid": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+                                "hash": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+                                "version": 1,
+                                "size": 257,
+                                "vsize": 257,
+                                "weight": 1028,
+                                "locktime": 0,
+                                "vin": [
+                                    {
+                                        "txid": "a3b6284d252846ce8305d50edd7239831dc291716ec1752918d876d6ea05f681",
+                                        "vout": 1,
+                                        "n": 0,
+                                        "scriptSig": {
+                                            "asm": "304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce3[ALL] 045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43",
+                                            "hex": "47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43"
+                                        },
+                                        "sequence": 4294967295,
+                                        "addr": "1ParaEza5Ew5ioT5c8zR2wSSvArqiSQbpT",
+                                        "valueSat": 989000,
+                                        "value": 0.00989
+                                    }
+                                ],
+                                "vout": [
+                                    {
+                                        "value": "0.00978000",
+                                        "n": 0,
+                                        "scriptPubKey": {
+                                            "asm": "OP_DUP OP_HASH160 f7b9e0239571434f0ccfdba6f772a6d23f2cfb13 OP_EQUALVERIFY OP_CHECKSIG",
+                                            "hex": "76a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac",
+                                            "reqSigs": 1,
+                                            "addresses": ["1ParaEza5Ew5ioT5c8zR2wSSvArqiSQbpT"],
+                                            "type": "pubkeyhash"
+                                        },
+                                        "spentTxId": "171113f0745f570d18199efcb944b8f742fc590c700a41968081c5655338e4fc",
+                                        "spentIndex": 0,
+                                        "spentHeight": 355935
+                                    },
+                                    {
+                                        "value": "0.00010000",
+                                        "n": 1,
+                                        "scriptPubKey": {
+                                            "asm": "OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG",
+                                            "hex": "76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac",
+                                            "reqSigs": 1,
+                                            "addresses": ["1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"],
+                                            "type": "pubkeyhash"
+                                        },
+                                        "spentTxId": "84da2a3cc29a3e0fb8a3a28882c6fb59a426a95952d484ec2422c5a47b6f93d4",
+                                        "spentIndex": 2,
+                                        "spentHeight": 370585
+                                    }
+                                ],
+                                "blockhash": "000000000000000005c60c504e109684bb0886ab95520ad6a5af0d384f587a6a",
+                                "blockheight": 335414,
+                                "confirmations": 258975,
+                                "time": 1419279547,
+                                "blocktime": 1419279547,
+                                "valueOut": 0.00988,
+                                "valueIn": 0.00989,
+                                "fees": 0.00001
+                            },
+                            hex,
+                        },
+                    ];
+
+                    let outputsMock = [
+                        {
+                            address: "1MJ2tj2ThBE62zXbBYA5ZaN3fdve5CPAz1",
+                            addressType: 'spend',
+                            scriptType: 'p2pkh',
+                            amount: String(10000 - 1000),
+                            isChange: false,
+                        },
+                    ];
+
+                    let inputMock = {
+                        coin: "Bitcoin",
+                        inputs: inputsMock,
+                        outputs: outputsMock,
+                        version: 1,
+                        locktime: 0,
+                    }
+
+                    log.info(tag,"INPUT HDWALLET: ",hdwalletTxDescription)
+                    log.info(tag,"INPUT HDWALLET: ",JSON.stringify(hdwalletTxDescription))
+                    log.info(tag,"INPUT HDWALLET: ",prettyjson.render(hdwalletTxDescription))
+                    //const res = await this.WALLET.btcSignTx(inputMock);
                     const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
                     log.info(tag,"res: ",res)
 
@@ -1156,13 +1284,13 @@ module.exports = class wallet {
                         nonce: numberToHex(txParams.nonce),
                         gasPrice: numberToHex(txParams.gasPrice),
                         gasLimit: numberToHex(txParams.gasLimit),
-                        value: txParams.value,
+                        value: numberToHex(txParams.value || 0),
                         to: txParams.to,
                         data:txParams.data,
                         chainId
                     }
 
-                    log.debug("unsignedTxETH: ",ethTx)
+                    log.info("unsignedTxETH: ",ethTx)
                     rawTx = await this.WALLET.ethSignTx(ethTx)
 
                     //txid

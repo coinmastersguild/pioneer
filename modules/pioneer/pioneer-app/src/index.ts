@@ -50,6 +50,9 @@ import * as native from "@bithighlander/hdwallet-native";
 let Pioneer = require('@pioneer-platform/pioneer')
 let Network = require("@pioneer-platform/pioneer-client")
 
+//hardware
+let Hardware = require("@pioneer-platform/pioneer-hardware")
+
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 
@@ -957,16 +960,20 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         if(!wallets){
             throw Error(" No wallets found! ")
-            //create wallet
-            // if(info.features){
-            //     let walletName = info.features.deviceId + ".wallet.json"
-            //     //if locked
-            //     //let isLocked = Hardware.is
-            //
-            // }
-            //hardware
         }
 
+        if(config.hardware){
+            log.info(tag,"Hardware enabled!")
+
+            //start
+            KEEPKEY = await Hardware.start()
+            let lockStatus = await Hardware.isLocked()
+            log.info("lockStatus: ",lockStatus)
+
+            //TODO if locked, prompt pin
+
+            //TODO keepkey.on events
+        }
 
         //Load wallets if setup
         for(let i = 0; i < wallets.length; i++){
@@ -984,7 +991,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     vendor:"keepkey",
                     pubkeys:walletFile.pubkeys,
                     wallet:walletFile,
-                    username:walletFile.username,
+                    username:config.username,
                     pioneerApi:true,
                     spec:URL_PIONEER_SPEC,
                     queryKey:config.queryKey,
@@ -993,10 +1000,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 }
                 log.debug(tag,"KEEPKEY init config: ",configPioneer)
                 let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
+                //init
+                let walletInfo = await wallet.init(KEEPKEY)
+                log.info(tag,"walletInfo: ",walletInfo)
                 WALLETS_LOADED.push(wallet)
 
-                //init
-                let walletClient = await wallet.init()
+
 
                 //info
                 let info = await wallet.getInfo()

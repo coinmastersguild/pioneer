@@ -113,6 +113,9 @@ function createWindow () {
   // tray.setToolTip('This is my application.')
   // tray.setContextMenu(contextMenu)
 
+  //TODO focus on event https://stackoverflow.com/questions/53702044/how-do-i-bring-a-window-to-the-front-without-switching-apps-in-electron/62942825
+
+
   /**
    * Initial window options
    *

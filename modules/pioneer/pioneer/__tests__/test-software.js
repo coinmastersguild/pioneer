@@ -217,7 +217,7 @@ let run_test = async function(){
                 iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
             },
             memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-            amount: "10000000000000000"
+            amount: "0.0123"
         }
 
 
