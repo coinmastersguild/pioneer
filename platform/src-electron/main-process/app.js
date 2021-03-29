@@ -125,6 +125,8 @@ export async function onStart(event,data) {
 
     let configStatus = checkConfigs()
     let config = await App.getConfig()
+    //TODO always hardware?
+    config.hardware = true
     log.info(tag,"config: ",config)
     log.debug(tag,"configStatus() | configStatus: ", configStatus)
 

@@ -23,7 +23,7 @@ let {
 
 import {
     Balances
-} from '@bithighlander/xchain-client'
+} from '@xchainjs/xchain-client'
 
 
 import {
@@ -37,7 +37,7 @@ import {
     assetToBase,
     assetToString,
     ETHChain,
-} from '@bithighlander/xchain-util'
+} from '@xchainjs/xchain-util'
 
 /*
     import from xchain
@@ -650,7 +650,7 @@ module.exports = class wallet {
             let tag = TAG + " | buildSwap | "
             try {
                 //stringify amount
-                swap.amount = swap.amount.amount()
+                //swap.amount = swap.amount.amount()
 
                 let request:any = {
                     type:"swap",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-sdk",
-  "version": "0.0.37",
+  "version": "0.0.41",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,11 +20,11 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@bithighlander/xchain-util": "latest",
     "@pioneer-platform/pioneer-coins": "latest",
     "@pioneer-platform/pioneer-xchain-client": "latest",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
+    "openapi-client-axios": "^3.13.1",
     "prettyjson": "^1.2.1",
     "ts-node": "^9.1.1"
   },
