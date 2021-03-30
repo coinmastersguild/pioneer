@@ -2,6 +2,29 @@
 
 ## token
 
+## HDwallet notes:
+
+HDwallet https://github.com/shapeshift/hdwallet
+
+is a dependancie of the pioneer platform.
+
+To Add a new asset to pioneer you must add support for hdwallet
+
+Dev workflow:
+    Make a fork of hdwallet under your username
+    
+    Find and replace all @shapeshiftoss to your npm username
+    
+    you can now lerna -> publish hdwallet
+    
+    Modify @bithighlander hdwallet modules in pioneer to your username
+    
+    (optional)Configure circleCi to publish under your username
+
+NOTES:
+    Any PR for new asset support in pioneer must FIRST be accepted to HDwallet and published
+
+
 ## UTXO coin
     Example PR:
     

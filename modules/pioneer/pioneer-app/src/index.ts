@@ -35,6 +35,9 @@ const queue = require('queue')
 const pendingQueue = queue({ pending: [] })
 const approvedQueue = queue({ approved: [] })
 
+//dbs
+let nedb = require("@pioneer-platform/nedb")
+
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events")
 
@@ -60,6 +63,7 @@ const ONLINE: never[] = [];
 let AUTH_TOKEN: string;
 let IS_LOGGED_IN = false;
 
+let DATABASES:any = {}
 
 let WALLET_CONTEXT = 0
 let ACCOUNT = ''
@@ -109,6 +113,30 @@ module.exports = {
     autonomousOff: function () {
         AUTONOMOUS = false
         return AUTONOMOUS;
+    },
+    hardwareStart: function () {
+        return Hardware.start();
+    },
+    hardwareState: function () {
+        return Hardware.state();
+    },
+    hardwareLocked: function () {
+        return Hardware.isLocked();
+    },
+    hardwareInfo: function () {
+        return Hardware.info();
+    },
+    hardwareWipe: function () {
+        return Hardware.wipe();
+    },
+    hardwareLoad: function (mnemonic:string) {
+        return Hardware.load(mnemonic);
+    },
+    hardwareShowPin: function () {
+        return Hardware.displayPin();
+    },
+    hardwareEnterPin: function (pin:string) {
+        return Hardware.enterPin(pin);
     },
     getPending: function () {
         return pendingQueue;
@@ -186,9 +214,9 @@ module.exports = {
     pair: function (code:string) {
         return pair_sdk_user(code);
     },
-    forget: function () {
-        return Pioneer.forget();
-    },
+    // forget: function () {
+    //     return Pioneer.forget();
+    // },
     /**
      *    User Ecosystem
      *
@@ -262,9 +290,9 @@ module.exports = {
     // getWalletPubkeys: async function () {
     //     return WALLET_PUBKEYS;
     // },
-    getInfo: async function (verbosity:any) {
-        return get_wallet_summary(verbosity);
-    },
+    // getInfo: async function (verbosity:any) {
+    //     return get_wallet_summary(verbosity);
+    // },
     //TODO
     // getNewAddress: async function (coin:string) {
     //     return pioneer.getNewAddress(coin);
@@ -292,18 +320,18 @@ module.exports = {
     /*
         FIO commands
     */
-    getFioAccountInfo: function (username:string) {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
-    },
-    getFioPubkey: function () {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
-    },
-    getFioAccountsByPubkey: function (pubkey:string) {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
-    },
-    validateFioUsername: function (username:string) {
-        return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
-    },
+    // getFioAccountInfo: function (username:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
+    // },
+    // getFioPubkey: function () {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
+    // },
+    // getFioAccountsByPubkey: function (pubkey:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
+    // },
+    // validateFioUsername: function (username:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
+    // },
     registerFioUsername: async function () {
         try{
             const open = require("open");
@@ -364,12 +392,12 @@ module.exports = {
     // listSinceLastblock: function (coin:string,block:string) {
     //     return pioneer.listSinceLastblock(coin,block);
     // },
-    sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
-        return send_to_address(coin,address,amount,memo);
-    },
-    broadcastTransaction: async function (coin:string,rawTx:string) {
-        return broadcast_transaction(coin,rawTx);
-    },
+    // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
+    //     return send_to_address(coin,address,amount,memo);
+    // },
+    // broadcastTransaction: async function (coin:string,rawTx:string) {
+    //     return broadcast_transaction(coin,rawTx);
+    // },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
@@ -926,9 +954,21 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
 let init_wallet = async function (config:any,isTestnet?:boolean) {
     let tag = TAG+" | init_wallet | ";
     try {
+        DATABASES = await nedb.init()
         if(config.isTestnet) isTestnet = true
         log.info(tag,"isTestnet: ",isTestnet)
         let output:any = {}
+
+        //sub all to events
+        let configEvents = {
+            username:config.username,
+            queryKey:config.queryKey,
+            pioneerWs:URL_PIONEER_SOCKET
+        }
+
+
+        //sub ALL events
+        let events = await Events.init(configEvents)
 
         //get wallets
         let wallets = await getWallets()
@@ -967,12 +1007,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
             //start
             KEEPKEY = await Hardware.start()
-            let lockStatus = await Hardware.isLocked()
-            log.info("lockStatus: ",lockStatus)
 
-            //TODO if locked, prompt pin
+            KEEPKEY.events.on('event', async function(event:any) {
+                events.emit('keepkey',{event})
+            });
 
-            //TODO keepkey.on events
         }
 
         //Load wallets if setup
@@ -1098,15 +1137,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         output.WALLET_VALUE_MAP = WALLET_VALUE_MAP
         log.debug(tag,"TOTAL_VALUE_USD_LOADED: ",TOTAL_VALUE_USD_LOADED)
 
-        //sub all to events
-        let configEvents = {
-            username:config.username,
-            queryKey:config.queryKey,
-            pioneerWs:URL_PIONEER_SOCKET
-        }
-
-        //sub ALL events
-        let events = await Events.init(configEvents)
 
         //on blocks update lastBlockHeight
 

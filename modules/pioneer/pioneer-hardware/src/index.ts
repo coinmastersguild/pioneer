@@ -52,9 +52,27 @@ let KEEPKEY_SUPPORT = [
     'ETH'
 ]
 
+/*
+    Keepkey States
+    0 unknown
+
+    1 No devices connected
+    2 Already claimed
+    3 locked
+    4 unlocked
+ */
+
+let KEEPKEY_STATE = {
+    state:0,
+    msg:"unknown"
+}
+
 module.exports = {
     start: function () {
         return start_hardware();
+    },
+    state:function () {
+        return KEEPKEY_STATE;
     },
     info: function () {
         return hardware_info();
@@ -88,26 +106,31 @@ let hardware_info = async function () {
     try {
         let output:any = {}
 
-        let assetsSupported = []
+        if(KEEPKEY_STATE.state > 2){
+            output = KEEPKEY_STATE
+        } else {
+            let assetsSupported = []
 
-        log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
+            log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
 
-        //asset support
-        if(KEEPKEY_WALLET._supportsETH) assetsSupported.push('ETH')
-        if(KEEPKEY_WALLET._supportsBTC) assetsSupported.push('BTC')
-        if(KEEPKEY_WALLET._supportsCosmos) assetsSupported.push('ATOM')
-        if(KEEPKEY_WALLET._supportsRipple) assetsSupported.push('XRP')
-        if(KEEPKEY_WALLET._supportsBinance) assetsSupported.push('BNB')
-        if(KEEPKEY_WALLET._supportsEos) assetsSupported.push('EOS')
-        if(KEEPKEY_WALLET._supportsFio) assetsSupported.push('FIO')
-        output.assets = assetsSupported
+            //asset support
+            if(KEEPKEY_WALLET._supportsETH) assetsSupported.push('ETH')
+            if(KEEPKEY_WALLET._supportsBTC) assetsSupported.push('BTC')
+            if(KEEPKEY_WALLET._supportsCosmos) assetsSupported.push('ATOM')
+            if(KEEPKEY_WALLET._supportsRipple) assetsSupported.push('XRP')
+            if(KEEPKEY_WALLET._supportsBinance) assetsSupported.push('BNB')
+            if(KEEPKEY_WALLET._supportsEos) assetsSupported.push('EOS')
+            if(KEEPKEY_WALLET._supportsFio) assetsSupported.push('FIO')
+            output.assets = assetsSupported
 
-        //device
-        //TODO convert to json
-        //output.keepkey = KEEPKEY_WALLET.transport.usbDevice
+            //device
+            //TODO convert to json
+            //output.keepkey = KEEPKEY_WALLET.transport.usbDevice
 
-        //features
-        output.features = KEEPKEY_WALLET.features
+            //features
+            output.features = KEEPKEY_WALLET.features
+        }
+
 
         return output
     } catch (e) {
@@ -121,7 +144,12 @@ let get_lock_status = async function () {
     try {
         let output:any = {}
 
-        output = await KEEPKEY_WALLET.isLocked();
+        if(KEEPKEY_STATE.state > 2){
+            output = await KEEPKEY_WALLET.isLocked();
+        } else {
+            true
+        }
+
 
         return output
     } catch (e) {
@@ -274,22 +302,46 @@ let start_hardware = async function () {
         // usb dis/connect listeners
 
         let walletFound = false
-        //if wallet found
-        try{
-            await getDevice(keyring);
-            walletFound = true
-        }catch(e){
-            log.debug("CHECKPOINT ! *********")
-            log.error(tag,"e: ",e.toString())
-            if(e.toString().indexOf("claimInterface: ") >= 0){
-                log.error(tag," Unable to claim interface!")
-                return {
-                    error:"device already being used! failed to claim!"
+
+        let startReponse = await getDevice(keyring);
+
+        if(startReponse.error){
+            switch(startReponse.errorCode) {
+                case 1:
+                    KEEPKEY_STATE = {
+                        state:1,
+                        msg:"no devices detected!"
+                    }
+                    break;
+                case 2:
+                    KEEPKEY_STATE = {
+                        state:2,
+                        msg:"unable to claim!"
+                    }
+                    break;
+                default:
+                    console.error(tag,startReponse)
+                    throw Error("Unknown Error!")
+            }
+        } else if(startReponse){
+            KEEPKEY_WALLET =  await createWallet()
+            log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
+
+            //get lock status
+            let lockStatus = await KEEPKEY_WALLET.isLocked()
+            if(lockStatus){
+                KEEPKEY_STATE = {
+                    state:3,
+                    msg:"device locked!"
                 }
             } else {
-                log.debug("No devices connected!")
+                KEEPKEY_STATE = {
+                    state:4,
+                    msg:"unlocked"
+                }
             }
         }
+
         //else wait for connect
         if(walletFound){
             KEEPKEY_WALLET =  await createWallet()
@@ -311,7 +363,22 @@ let start_hardware = async function () {
             log.debug("Connecting to Keepkey!")
             emitter.emit('event',{event:"connect",msg:"Connecting to Keepkey!",code:'add:11044:2'})
             await sleep(2000)
-            KEEPKEY_WALLET = await createWallet()
+            KEEPKEY_WALLET =  await createWallet()
+            log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
+
+            //get lock status
+            let lockStatus = await KEEPKEY_WALLET.isLocked()
+            if(lockStatus){
+                KEEPKEY_STATE = {
+                    state:3,
+                    msg:"device locked!"
+                }
+            } else {
+                KEEPKEY_STATE = {
+                    state:4,
+                    msg:"unlocked"
+                }
+            }
         });
 
         usbDetect.on('remove:11044:2', async function(device:any) {
@@ -319,10 +386,10 @@ let start_hardware = async function () {
             emitter.emit('event',{event:"disconnect",msg:"Keepkey Disconnected!"})
 
             //disconnect
-            const wallet:any = Object.values(keyring.wallets)[0]
-            if (!!wallet) { // @ts-ignore
-                wallet.transport.disconnect()
-            }
+            // const wallet:any = Object.values(keyring.wallets)[0]
+            // if (!!wallet) { // @ts-ignore
+            //     wallet.transport.disconnect()
+            // }
             await keyring.removeAll()
             //webUsbAdapter.clearDevices()
         });
@@ -398,12 +465,31 @@ let getDevice = async function(keyring: Keyring) {
         let wallet = await keepkeyAdapter.pairDevice(undefined, true);
         if (wallet) {
             log.debug(tag,"Device found!")
-            log.debug(tag,"wallet: ",wallet)
+            log.info(tag,"wallet: ",wallet)
         }
         return wallet;
     } catch (e) {
-        log.error(tag,"e: ",e)
-        throw Error(e)
+        log.error(tag,"*** e: ",e.toString())
+        e = e.toString()
+        if(e.indexOf("no devices found")){
+            return {
+                error:true,
+                errorCode: 1,
+                errorMessage:"No devices"
+            }
+        } else if(e.indexOf("claim")){
+            return {
+                error:true,
+                errorCode: 1,
+                errorMessage:"Unable to claim!"
+            }
+        } else {
+            return {
+                error:true,
+                errorMessage:e
+            }
+        }
+
     }
 }
 

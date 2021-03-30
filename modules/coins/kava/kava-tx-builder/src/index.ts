@@ -27,18 +27,19 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
 
         const chainId = "kava-6";
         // Please install and use rest server separately. (https://hub.cosmos.network/master/resources/service-providers.html#setting-up-the-rest-server)
+        // const kava = cosmosjs.network("https://lcd-kava.keplr.app", chainId);
         const kava = cosmosjs.network("https://lcd-kava.keplr.app", chainId);
-        kava.setBech32MainPrefix("kava");
-        kava.setPath("m/44'/459'/0'/0/0"); 		// new: m/44'/459'/0'/0/0, legacy: m/44'/118'/0'/0/0
-        const address = kava.getAddress(seed);
+        // kava.setBech32MainPrefix("kava");
+        // kava.setPath("m/44'/459'/0'/0/0"); 		// new: m/44'/459'/0'/0/0, legacy: m/44'/118'/0'/0/0
+        // const address = kava.getAddress(seed);
 
-        log.info(tag,"address: ",address)
+        //log.info(tag,"address: ",address)
 
         const ecpairPriv = kava.getECPairPriv(seed);
 
         log.info(tag,"ecpairPriv: ",ecpairPriv)
 
-        let accountInfo = await kava.getAccounts(address)
+        let accountInfo = await kava.getAccounts(from)
 
         let stdSignMsg = kava.newStdMsg({
             msgs: [
@@ -51,7 +52,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
                                 denom: "ukava"
                             }
                         ],
-                        from_address: address,
+                        from_address: from,
                         to_address: to
                     }
                 }

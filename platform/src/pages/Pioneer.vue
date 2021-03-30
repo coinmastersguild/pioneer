@@ -3,26 +3,27 @@
   <q-page>
     <div class="page-header">
       <h4>Pioneer</h4>
+
     </div>
     <q-page class="q-pt-xs" >
+      <small>System Ready....</small>
+<!--      <q-card class="qr-code q-mb-xl q-mt-md">-->
+<!--&lt;!&ndash;        <q-card-section class="items-center text-center q-pt-xl q-pb-xl">&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <qr-code :value="from.address" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        </q-card-section>&ndash;&gt;-->
+<!--&lt;!&ndash;        <q-separator />&ndash;&gt;-->
+<!--        <q-input borderless readonly v-model="from.address" class="q-pb-none borderless&#45;&#45;transparent">-->
+<!--          <template v-slot:append>-->
+<!--            <q-btn round dense flat icon="file_copy" @click="copyAddress(from.address)">-->
+<!--              <q-tooltip content-class="bg-primary" content-style="font-size: 0.75rem" :offset="[10, 10]">-->
+<!--                {{copyText}}-->
+<!--              </q-tooltip>-->
 
-      <q-card class="qr-code q-mb-xl q-mt-md">
-<!--        <q-card-section class="items-center text-center q-pt-xl q-pb-xl">-->
-<!--&lt;!&ndash;          <qr-code :value="from.address" />&ndash;&gt;-->
-<!--        </q-card-section>-->
-<!--        <q-separator />-->
-        <q-input borderless readonly v-model="from.address" class="q-pb-none borderless--transparent">
-          <template v-slot:append>
-            <q-btn round dense flat icon="file_copy" @click="copyAddress(from.address)">
-              <q-tooltip content-class="bg-primary" content-style="font-size: 0.75rem" :offset="[10, 10]">
-                {{copyText}}
-              </q-tooltip>
-
-            </q-btn>
-          </template>
-        </q-input>
-      </q-card>
-      <accountSelector v-model="from" label="Account" />
+<!--            </q-btn>-->
+<!--          </template>-->
+<!--        </q-input>-->
+<!--      </q-card>-->
+<!--      <accountSelector v-model="from" label="Account" />-->
 
       <!--      <div id="content" style="width: 100%;">-->
 <!--        <grid-layout v-if="show"-->

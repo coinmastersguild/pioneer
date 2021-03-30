@@ -390,6 +390,18 @@ export async function onRun() {
         log.debug("context: ",context)
         const map = describe.map(contextView);
 
+        //
+        let appView:any = {}
+        let appFunctions = Object.keys(App)
+        for(let i = 0; i < appFunctions.length; i++){
+            let key = appFunctions[i]
+            if(typeof(App[key]) === 'function'){
+                appView[key] = App[key]
+            }
+        }
+        log.info("appView: ",appView)
+
+
         //TODO add switch wallet context
 
         //any more 1 off CLI needs?
@@ -403,7 +415,7 @@ export async function onRun() {
         //               view        controller
         await loadModule(contextView,context)
         await loadModule(Hardware,Hardware)
-        //await loadModule(App,App)
+        await loadModule(appView,App)
 
         vorpal
             .delimiter(prompt)

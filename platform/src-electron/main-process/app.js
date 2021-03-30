@@ -58,29 +58,43 @@ export async function attemptPair(event, data) {
 
 /*
   Maintain current state of devices
-
+  'unkown',
   'conected',
   'locked',
   'unlocked'
 
  */
-
+let KEEPKEY_STATUS = 'unkown'
 async function lifecycleKeepkey(event, data) {
   let tag = TAG + " | lifecycleKeepkey | ";
   try {
 
     //start
     let KEEPKEY = await Hardware.start()
+    KEEPKEY.events.on('event', async (eventKeepkey) => {
+      log.info(tag,"eventKeepkey: ",eventKeepkey)
+      event.sender.send('hardware',{event:eventKeepkey})
+    });
 
     //lockStatus
     let lockStatus = await Hardware.isLocked()
-    console.log("lockStatus: ",lockStatus)
+    log.info("lockStatus: ",lockStatus)
 
     //if locked
     if(lockStatus){
+      KEEPKEY_STATUS = 'locked'
       Hardware.displayPin()
       //open pin
       event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
+    } else {
+      KEEPKEY_STATUS = 'unlocked'
+      //is connected?
+      let info = await Hardware.info()
+      log.info("info: ",info)
+      if(info.features){
+        event.sender.send('navigation',{ dialog: 'Hardware', action: 'close'})
+      }
+      event.sender.send('deviceInfo',info)
     }
 
   } catch (e) {
@@ -92,11 +106,6 @@ async function lifecycleKeepkey(event, data) {
 export async function onStart(event,data) {
   let tag = TAG + " | onStart | ";
   try {
-
-    if(featureKeepkey){
-      //start
-      lifecycleKeepkey(event,data)
-    }
 
     log.info(tag," onStart() ")
     if(FIRST_START){
@@ -142,6 +151,14 @@ export async function onStart(event,data) {
     }
 
     if(!config){
+      if(featureKeepkey){
+        // if first time startup
+        // Launch keepkey connect
+        event.sender.send('navigation',{ dialog: 'Hardware', action: 'open'})
+        //start
+        lifecycleKeepkey(event,data)
+      }
+
       //TODO prompt language?
       //make config
       await App.initConfig("english");

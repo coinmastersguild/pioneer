@@ -2,9 +2,10 @@
   <q-card class="text-center q-pb-lg" style="min-width:450px;">
     <q-card-section>
       <div v-if="!isLoaded">
-        <h4>Attempting to Connect!</h4>
         <p>Waiting for response from a Pioneer server! </p>
       </div>
+      <small>Connecting to keepkey!</small>
+
       <q-spinner
         color="primary"
         size="5rem"

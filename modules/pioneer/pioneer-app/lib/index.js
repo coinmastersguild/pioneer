@@ -47,6 +47,8 @@ const prettyjson = require('prettyjson');
 const queue = require('queue');
 const pendingQueue = queue({ pending: [] });
 const approvedQueue = queue({ approved: [] });
+//dbs
+let nedb = require("@pioneer-platform/nedb");
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events");
 let { getPaths, get_address_from_xpub } = require('@pioneer-platform/pioneer-coins');
@@ -63,6 +65,7 @@ let sleep = wait.sleep;
 const ONLINE = [];
 let AUTH_TOKEN;
 let IS_LOGGED_IN = false;
+let DATABASES = {};
 let WALLET_CONTEXT = 0;
 let ACCOUNT = '';
 let WALLET_PUBLIC = {};
@@ -106,6 +109,30 @@ module.exports = {
     autonomousOff: function () {
         AUTONOMOUS = false;
         return AUTONOMOUS;
+    },
+    hardwareStart: function () {
+        return Hardware.start();
+    },
+    hardwareState: function () {
+        return Hardware.state();
+    },
+    hardwareLocked: function () {
+        return Hardware.isLocked();
+    },
+    hardwareInfo: function () {
+        return Hardware.info();
+    },
+    hardwareWipe: function () {
+        return Hardware.wipe();
+    },
+    hardwareLoad: function (mnemonic) {
+        return Hardware.load(mnemonic);
+    },
+    hardwareShowPin: function () {
+        return Hardware.displayPin();
+    },
+    hardwareEnterPin: function (pin) {
+        return Hardware.enterPin(pin);
     },
     getPending: function () {
         return pendingQueue;
@@ -853,10 +880,19 @@ let init_wallet = function (config, isTestnet) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = TAG + " | init_wallet | ";
         try {
+            DATABASES = yield nedb.init();
             if (config.isTestnet)
                 isTestnet = true;
             log.info(tag, "isTestnet: ", isTestnet);
             let output = {};
+            //sub all to events
+            let configEvents = {
+                username: config.username,
+                queryKey: config.queryKey,
+                pioneerWs: URL_PIONEER_SOCKET
+            };
+            //sub ALL events
+            let events = yield Events.init(configEvents);
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
             log.debug(tag, "wallets: ", wallets);
@@ -895,10 +931,11 @@ let init_wallet = function (config, isTestnet) {
                 log.info(tag, "Hardware enabled!");
                 //start
                 KEEPKEY = yield Hardware.start();
-                let lockStatus = yield Hardware.isLocked();
-                log.info("lockStatus: ", lockStatus);
-                //TODO if locked, prompt pin
-                //TODO keepkey.on events
+                KEEPKEY.events.on('event', function (event) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        events.emit('keepkey', { event });
+                    });
+                });
             }
             //Load wallets if setup
             for (let i = 0; i < wallets.length; i++) {
@@ -1013,14 +1050,6 @@ let init_wallet = function (config, isTestnet) {
             output.TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED;
             output.WALLET_VALUE_MAP = WALLET_VALUE_MAP;
             log.debug(tag, "TOTAL_VALUE_USD_LOADED: ", TOTAL_VALUE_USD_LOADED);
-            //sub all to events
-            let configEvents = {
-                username: config.username,
-                queryKey: config.queryKey,
-                pioneerWs: URL_PIONEER_SOCKET
-            };
-            //sub ALL events
-            let events = yield Events.init(configEvents);
             //on blocks update lastBlockHeight
             //on payments update balances
             //on on invocations add to queue

@@ -8,7 +8,7 @@ const TAG = " | terra-tx-builder | "
 
 const {
     EnigmaUtils, SigningCosmWasmClient, Secp256k1Pen, pubkeyToAddress, encodeSecp256k1Pubkey
-} = require("secretjs-nobroadcast");
+} = require("secretjs-offline");
 
 const log = require('@pioneer-platform/loggerdog')()
 
@@ -25,8 +25,7 @@ module.exports = {
 let sign_transaction = async function(to:string,from:string,amount:number,memo:string,seed:string){
     let tag = TAG + " | sign_transaction | "
     try{
-        //TODO make offline
-        const httpUrl = 'https://lcd-secret.keplr.app';
+        const httpUrl = '';
         const signingPen = await Secp256k1Pen.fromMnemonic(seed);
         const pubkey = encodeSecp256k1Pubkey(signingPen.pubkey);
         const accAddress = pubkeyToAddress(pubkey, 'secret');
@@ -46,7 +45,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         );
         const rcpt = to; // Set recipient to sender for testing
 
-        const sent = await client.sendTokensNoBroadcast(rcpt, [{amount: amount, denom: "uscrt"}], memo)
+        const sent = await client.sendTokensOffline(rcpt, [{amount: amount, denom: "uscrt"}],'secret-2', 16173, 5, memo)
         // console.log('sent', sent)
         // console.log('sent', JSON.stringify(sent))
 
