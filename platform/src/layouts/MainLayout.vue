@@ -5,7 +5,7 @@
       class="homerow dark-panel has-border has-border-right menu text-center column no-wrap justify-between q-electron-drag"
     >
       <q-item clickable to="/pioneer" class="justify-center user-header" style="padding-top: 30px">
-        <q-avatar color="primary">
+        <q-avatar @click="refreshPioneer" color="primary">
           <q-img src="~assets/GreenCompas.jpeg"></q-img>
         </q-avatar>
       </q-item>
@@ -160,7 +160,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUsername','setTotal'])
+    ...mapGetters([
+      'getUsername',
+      'isTestnet',
+      'getTotal',
+      'wallets',
+      'devices',
+      'getPioneerLive',
+      'getPioneerUrl',
+      'getMnemonic',
+      'getBalances',
+    ])
   },
   mounted() {
     try {
@@ -191,6 +201,27 @@ export default {
     ...mapMutations(['showModal', 'hideModal']),
     onAddWallet() {
       this.showModal('Setup')
+    },
+    //refreshPioneer
+    async refreshPioneer() {
+      console.log("refresh everything!")
+      //refresh
+      this.$q.electron.ipcRenderer.send('refreshPioneer', {});
+
+      //get all the things
+      let testnet = await this.$store.getters['isTestnet']
+      let username = await this.$store.getters['getUsername']
+      let total = await this.$store.getters['getTotal']
+      let walletsLoaded = await this.$store.getters['wallets']
+      let devicesLoaded = await this.$store.getters['devices']
+      let isPioneerLive = await this.$store.getters['getPioneerLive']
+      let pioneerUrl = await this.$store.getters['getPioneerUrl']
+      let seed = await this.$store.getters['getMnemonic']
+      let balances = await this.$store.getters['getBalances']
+
+      this.totalValueUsd = total
+      console.log("STATE: ",{testnet,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
+
     },
     openSettings() {
       console.log("Naving to settings!")
@@ -249,7 +280,7 @@ export default {
         //get value
         const totalUsd = this.$store.getters['getTotal'];
         this.totalValueUsd = totalUsd
-        this.isReady = true
+        console.log("totalUsd: ",totalUsd)
       },
       immediate: true // provides initial (not changed yet) state
     },

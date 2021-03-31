@@ -127,7 +127,7 @@ function createWindow () {
     useContentSize: true,
     //TODO make toggle
     //remember last setting?
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     webPreferences: {
       // Change from /quasar.conf.js > electron > nodeIntegration;
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

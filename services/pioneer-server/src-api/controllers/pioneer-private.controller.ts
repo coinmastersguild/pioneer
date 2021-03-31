@@ -122,7 +122,7 @@ interface createApiKeyBody {
 
 interface createPairingCodeBody {
     service?:string
-    url?:string
+    url:string
     data?:any
 }
 
@@ -379,11 +379,32 @@ export class pioneerPrivateController extends Controller {
             if(!userInfo) throw Error("User not known!")
             if(!userInfo.username) throw Error("invalid user!")
 
-            //get queryKey for code sdk user
+            // get queryKey for code sdk user
             let sdkQueryKey = await redis.hget(body.code,"pairing")
             if(!sdkQueryKey) throw Error("unknown code!")
             log.info(tag,"sdkQueryKey: ",sdkQueryKey)
 
+            // get url
+            let url = await redis.hget(body.code,"url")
+
+            // if in whitelist
+            let isWhitelisted = await redis.sismember('serviceUrls',url)
+
+            // let app = {
+            //     added:new Date().getTime(),
+            //     url
+            //     //More?
+            // }
+
+            //push to username cache
+            redis.sadd(userInfo.username+":apps",url)
+
+            //add to userInfo
+            let pushAppMongo = await usersDB.update({ username: userInfo.username },
+                { $addToSet: { apps: url } })
+            log.info(tag,"pushAppMongo: ",pushAppMongo)
+
+            // sdkUser
             let sdkUser = {
                 username:userInfo.username,
                 paired: new Date().getTime(),
@@ -394,7 +415,9 @@ export class pioneerPrivateController extends Controller {
 
             let output = {
                 user:sdkUser,
-                saveRedis
+                url,
+                saveRedis,
+                trusted:isWhitelisted
             }
 
             return(output);
@@ -423,9 +446,11 @@ export class pioneerPrivateController extends Controller {
 
             //is key known
             let userInfo = await redis.hgetall(Authorization)
-                //if known return username (already paired)
+            log.info(tag,"userInfo: ",userInfo)
 
-            //is service known
+            // if known return username (already paired)
+
+            // is service known
                 //if new service save to db
 
             //create random code
@@ -435,6 +460,7 @@ export class pioneerPrivateController extends Controller {
 
             //save code to key
             let saveRedis = await redis.hset(code,"pairing",Authorization)
+            redis.hset(code,"url",body.url)
 
             let output = {
                 code,

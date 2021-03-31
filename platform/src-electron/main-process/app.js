@@ -268,16 +268,21 @@ export async function onStart(event,data) {
     config.password = WALLET_PASSWORD
     log.info(tag,"config: ",config)
     let resultInit = await App.init(config)
-    log.info("resultInit: ",resultInit)
-    event.sender.send('init',resultInit)
+    log.info(tag,"resultInit: ",resultInit)
+
+    event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
     event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
 
     let wallets = App.getWallets()
+    let walletNames = App.getWalletNames()
+    log.info(tag,"walletNames: ",walletNames)
+    event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
 
-    //
+    //wallet events
     resultInit.events.on('message', async (request) => {
       console.log("*** message: ", request)
-      event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+      //TODO messages
+      //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
     })
     //TODO blocks
     //txs
@@ -292,8 +297,8 @@ export async function onStart(event,data) {
     WALLETS_LOADED = context
 
     //load masters
-    // let info = await context.getInfo()
-    // log.info("info: ",info)
+    let info = await context.getInfo()
+    log.info("info: ",info)
 
     //Start wallet interface
 

@@ -85,6 +85,17 @@ export default store => {
     //load wallet info
 
   })
+  ipcRenderer.on('updateTotalValue', (event, data) => {
+    console.log('updateTotalValue: ', data)
+    store.commit('setTotal',data)
+  })
+  ipcRenderer.on('updateWalletsLoaded', (event, data) => {
+    console.log('updateWalletsLoaded: ', data)
+    for(let i = 0; i < data.length; i++){
+      let wallet = data[i]
+      store.commit('registerWallet',wallet)
+    }
+  })
   ipcRenderer.on('loadApps', (event, data) => {
     console.log('init event! ')
     console.log('data: ', data)

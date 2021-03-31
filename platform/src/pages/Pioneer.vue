@@ -6,7 +6,13 @@
 
     </div>
     <q-page class="q-pt-xs" >
-      <small>System Ready....</small>
+
+      Wallets: {{wallets}}
+
+      <br />
+
+      apps: {{apps}}
+
 <!--      <q-card class="qr-code q-mb-xl q-mt-md">-->
 <!--&lt;!&ndash;        <q-card-section class="items-center text-center q-pt-xl q-pb-xl">&ndash;&gt;-->
 <!--&lt;!&ndash;&lt;!&ndash;          <qr-code :value="from.address" />&ndash;&gt;&ndash;&gt;-->
@@ -92,6 +98,7 @@
     data () {
       return {
         queryKey:"",
+        wallets:[],
         apps:[],
         devMode:false,
         installing: [],
@@ -114,8 +121,19 @@
         console.error(e)
       }
     },
+    watch: {
+      "$store.state.wallets": {
+        handler: function(value) {
+          console.log("value: ",value)
+          //get value
+          this.wallets = this.$store.getters['wallets'];
+          console.log("wallets: ",this.wallets)
+        },
+        immediate: true
+      }
+    },
     computed: {
-      ...mapGetters(['getApps','layout']),
+      ...mapGetters(['getApps','getWallets','layout']),
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp']),

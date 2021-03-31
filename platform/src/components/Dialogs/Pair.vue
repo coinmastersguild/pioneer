@@ -1,6 +1,6 @@
 <template>
   <q-card class="text-center q-pb-lg" style="min-width:450px;">
-    <q-form @submit="generateWallet">
+    <q-form @submit="attemptPair">
       <q-card-section class="q-pb-sm">
         <h4>Enter Pairing code from Pioneer SDK Application</h4>
 
@@ -35,12 +35,13 @@
         pairingCode:""
       }
     },
-    // mounted() {
-    //   try{
-    //   }catch(e){
-    //     console.error(e)
-    //   }
-    // },
+    mounted() {
+      try{
+        //
+      }catch(e){
+        console.error(e)
+      }
+    },
     methods: {
       ...mapMutations(['hideModal']),
       attemptPair: function () {
