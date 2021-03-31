@@ -20,7 +20,9 @@ let run_test = async function(){
         let config = {
             queryKey,
             username,
-            spec
+            spec,
+            service:'asgardx',
+            url:'swaps.pro'
         }
 
         //console.log(SDK)

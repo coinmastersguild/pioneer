@@ -257,6 +257,7 @@ export class pioneerPrivateController extends Controller {
                         let pubkeyInfo = userInfo.pubkeys[i]
                         pubkeys[pubkeyInfo.coin] = pubkeyInfo
 
+                        //TODO dont do this for multi-wallet
                         //validate (migrate)
                         if(!pubkeys[pubkeyInfo.coin].script_type || !pubkeys[pubkeyInfo.coin].network ||!pubkeys[pubkeyInfo.coin].coin){
                             log.error("Invalid pubkey found for user!")
@@ -275,6 +276,9 @@ export class pioneerPrivateController extends Controller {
                     //get wallet info
                     walletInfo = await network.getInfo()
                     walletInfo.username = username
+
+                    //apps
+                    walletInfo.apps = await redis.smembers(username+":apps")
 
                     log.info(tag,"walletInfo: ",walletInfo)
 

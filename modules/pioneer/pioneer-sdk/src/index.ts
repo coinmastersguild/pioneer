@@ -59,8 +59,10 @@ export class SDK {
     private isTestnet: boolean;
     private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
     private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
+    private url: string;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
+        this.url = config.url || 'unknown'
         if(isTestnet){
             this.isTestnet = true
         } else {
@@ -104,7 +106,8 @@ export class SDK {
             try {
                 //
                 let pairingBody:any = {
-                    service:this.service
+                    service:this.service,
+                    url:this.url
                 }
                 let result = await this.pioneerApi.CreatePairingCode(null, pairingBody)
                 return result.data
