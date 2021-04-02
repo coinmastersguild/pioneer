@@ -122,7 +122,7 @@ interface createApiKeyBody {
 
 interface createPairingCodeBody {
     service?:string
-    url:string
+    url?:string
     data?:any
 }
 
@@ -214,11 +214,13 @@ export class pioneerPrivateController extends Controller {
 
             let accountInfo = await redis.hgetall(authorization)
             if(!accountInfo) throw Error("unknown token! token:"+authorization)
+            log.info(tag,"accountInfo: ",accountInfo)
 
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
                 let isTestnet = accountInfo.isTestnet || false
-                log.info(tag,"isTestnet: ",isTestnet)
+                //let isTestnet = false
+                //log.info(tag,"isTestnet: ",isTestnet)
                 let username = accountInfo.username
                 if(!username){
                     log.error(tag,"invalid accountInfo: ",accountInfo)
@@ -270,9 +272,16 @@ export class pioneerPrivateController extends Controller {
 
                     //import into wallet
                     log.info(tag,"isTestnet: ",isTestnet)
-                    await network.init('full',{
-                        pubkeys
-                    },isTestnet)
+                    if(isTestnet){
+                        await network.init('full',{
+                            pubkeys
+                        },isTestnet)
+                    }else{
+                        await network.init('full',{
+                            pubkeys
+                        })
+                    }
+
                     //get wallet info
                     walletInfo = await network.getInfo()
                     walletInfo.username = username

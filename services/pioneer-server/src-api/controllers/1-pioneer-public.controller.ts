@@ -32,6 +32,12 @@ if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
     networks['ETH'] = require('@pioneer-platform/eth-network')
 }
 
+if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
+    blockchains.push('cosmos')
+    //all utxo's share
+    networks['ATOM'] = require('@pioneer-platform/cosmos-network')
+}
+
 //Cache time
 let CACHE_TIME = 1000 * 60 * 1
 let CACHE_OVERRIDE = true
