@@ -151,12 +151,23 @@ if(process.env['FEATURE_FIO_BLOCKCHAIN']){
     supportedAssets.push("FIO")
 }
 
+if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
+    supportedBlockchains.push("Cosmos")
+    supportedAssets.push("ATOM")
+}
+
+if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
+    supportedBlockchains.push("Binance")
+    supportedAssets.push("BNB")
+}
+
 //TODO add more flags by networks
 
 
 export enum PoSchains {
     'Eos',
     'Cosmos',
+    'Binance',
     'Fio',
     'Terra',
     'Kava',

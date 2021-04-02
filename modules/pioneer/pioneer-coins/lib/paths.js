@@ -87,9 +87,69 @@ function getPaths(isTestnet, blockchains) {
         }
         output.push(entry);
     }
+    if (process.env['FEATURE_COSMOS_BLOCKCHAIN'] || blockchains.indexOf('cosmos') >= 0) {
+        var entry = {
+            note: " Default ATOM path ",
+            type: "address",
+            script_type: "cosmos",
+            available_scripts_types: ['cosmos'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'Cosmos',
+            symbol: 'ATOM',
+            network: 'ATOM',
+        };
+        if (isTestnet) {
+            entry.testnet = true;
+        }
+        output.push(entry);
+    }
+    if (process.env['FEATURE_BINANCE_BLOCKCHAIN'] || blockchains.indexOf('binance') >= 0) {
+        var entry = {
+            note: "",
+            type: "address",
+            script_type: "binance",
+            available_scripts_types: ['binance'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'Binance',
+            symbol: 'BNB',
+            network: 'BNB',
+        };
+        if (isTestnet) {
+            entry.testnet = true;
+        }
+        output.push(entry);
+    }
     return output;
 }
 exports.getPaths = getPaths;
+// {
+//     note:"",
+//     type:"address",
+//     script_type:"binance",
+//     available_scripts_types:['binance'],
+//     addressNList: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0 , 0],
+//     curve: 'secp256k1',
+//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     coin: 'Binance',
+//     symbol: 'BNB',
+//     network: 'BNB',
+// },
+// {
+//     note:" Default ATOM path ",
+//     type:"address",
+//     script_type:"cosmos",
+//     available_scripts_types:['cosmos'],
+//     addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
+//     curve: 'secp256k1',
+//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     coin: 'Cosmos',
+//     symbol: 'ATOM',
+//     network: 'ATOM',
+// },
 //TODO More paths
 // [
 //

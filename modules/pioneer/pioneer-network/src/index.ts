@@ -622,10 +622,10 @@ const get_wallet_info = async function () {
             if(PUBLIC_WALLET['ATOM'] && supportedAssets.indexOf('ATOM') >= 0){
                 if(IS_TESTNET){
                     //TODO
-
+                    log.error("NO ATOM TESTNET YET!")
                 }else{
                     const balanceATOM = await get_balance('ATOM')
-
+                    log.info(tag,"balanceATOM: ",balanceATOM)
                     if(balanceATOM){
                         balances['ATOM'] = balanceATOM
                     } else {
@@ -650,6 +650,8 @@ const get_wallet_info = async function () {
                     // }
                 }
 
+            } else {
+                log.info(tag,"ATOM NOT SUPPORTED!")
             }
         }catch(e){
             console.error("Failed to get ATOM balances! for account: ",PUBLIC_WALLET['ATOM'])

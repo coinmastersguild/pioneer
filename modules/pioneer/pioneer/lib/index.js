@@ -960,7 +960,7 @@ module.exports = /** @class */ (function () {
                         case 1:
                             _a.trys.push([1, 4, , 5]);
                             if (!invocationId)
-                                throw Error("invocationId: required!");
+                                invocationId = "whatevs";
                             output = {};
                             log.debug(tag, "params: ", { coin: coin, address: address, amount: amount, param1: param1, invocationId: invocationId });
                             return [4 /*yield*/, this.getMaster(coin)];

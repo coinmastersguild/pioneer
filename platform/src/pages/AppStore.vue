@@ -46,12 +46,20 @@
   //   }
   // }
 
+  let swapsPro = {
+    name:"swaps.pro",
+    description:"Decentralized multi-chain swaps!",
+    launch:"https://swaps.pro",
+    logoUrl:"https://avatars.githubusercontent.com/u/40639099?s=280&v=4",
+    key:1,
+  }
+
   export default {
     name: 'AppStore',
     data () {
       return {
         queryKey:"",
-        apps:[],
+        apps:[swapsPro],
         installing: [],
         search: "",
       }
@@ -68,11 +76,13 @@
     computed: {
       ...mapGetters(['getApps']),
       filteredList() {
-        return this.apps.filter((app) => {
-          //send to ipc
-          this.$q.electron.ipcRenderer.send('onSearchApps', {query:this.search})
-          return app.name.toLowerCase().includes(this.search.toLowerCase());
-        });
+        return this.apps
+        //TODO add search back
+        // return this.apps.filter((app) => {
+        //   //send to ipc
+        //   this.$q.electron.ipcRenderer.send('onSearchApps', {query:this.search})
+        //   return app.name.toLowerCase().includes(this.search.toLowerCase());
+        // });
       }
     },
     methods: {
@@ -82,8 +92,8 @@
         window.open(app, '_blank', 'nodeIntegration=no')
       },
       loadApps () {
-        const apps = this.$store.getters['getApps'];
-        this.apps = apps
+        // const apps = this.$store.getters['getApps'];
+        // this.apps = apps
       },
       install (app) {
         this.installing.push(app._id)

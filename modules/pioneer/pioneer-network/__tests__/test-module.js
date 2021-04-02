@@ -13,13 +13,14 @@ let network = require('../lib/index.js')
 let run_test = async function(){
     try{
         //read file
-        let walletPublic = require("./data/keepkey.watch.wallet.json")
+        // let walletPublic = require("./data/keepkey.watch.wallet.json")
         // let walletPublic = require("./data/testnet.watch.wallet.json")
+        let walletPublic = require("./data/mainnet.watch.wallet.json")
         // let walletPublic = require("./data/metamask.watch.wallet.json")
 
         await network.init('full',{
             pubkeys:walletPublic.WALLET_PUBLIC
-        },true)
+        })
 
         // await network.init('full',{})
 

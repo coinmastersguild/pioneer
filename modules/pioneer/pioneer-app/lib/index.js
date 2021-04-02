@@ -210,9 +210,9 @@ module.exports = {
     pair: function (code) {
         return pair_sdk_user(code);
     },
-    forget: function () {
-        return Pioneer.forget();
-    },
+    // forget: function () {
+    //     return Pioneer.forget();
+    // },
     /**
      *    User Ecosystem
      *
@@ -286,11 +286,9 @@ module.exports = {
     // getWalletPubkeys: async function () {
     //     return WALLET_PUBKEYS;
     // },
-    getInfo: function (verbosity) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return get_wallet_summary(verbosity);
-        });
-    },
+    // getInfo: async function (verbosity:any) {
+    //     return get_wallet_summary(verbosity);
+    // },
     //TODO
     // getNewAddress: async function (coin:string) {
     //     return pioneer.getNewAddress(coin);
@@ -315,18 +313,18 @@ module.exports = {
     /*
         FIO commands
     */
-    getFioAccountInfo: function (username) {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
-    },
-    getFioPubkey: function () {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
-    },
-    getFioAccountsByPubkey: function (pubkey) {
-        return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
-    },
-    validateFioUsername: function (username) {
-        return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
-    },
+    // getFioAccountInfo: function (username:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
+    // },
+    // getFioPubkey: function () {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
+    // },
+    // getFioAccountsByPubkey: function (pubkey:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
+    // },
+    // validateFioUsername: function (username:string) {
+    //     return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
+    // },
     registerFioUsername: function () {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -377,16 +375,12 @@ module.exports = {
     // listSinceLastblock: function (coin:string,block:string) {
     //     return pioneer.listSinceLastblock(coin,block);
     // },
-    sendToAddress: function (coin, address, amount, memo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return send_to_address(coin, address, amount, memo);
-        });
-    },
-    broadcastTransaction: function (coin, rawTx) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return broadcast_transaction(coin, rawTx);
-        });
-    },
+    // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
+    //     return send_to_address(coin,address,amount,memo);
+    // },
+    // broadcastTransaction: async function (coin:string,rawTx:string) {
+    //     return broadcast_transaction(coin,rawTx);
+    // },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);

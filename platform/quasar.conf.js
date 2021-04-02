@@ -61,7 +61,7 @@ module.exports = function (ctx) {
         UI_THEME_FEATURE:false,
         UI_LIGHT_MODE_FEATURE:false,
         ADD_WALLET_FEATURE:false,
-        UI_APP_STORE_FEATURE:false,
+        UI_APP_STORE_FEATURE:true,
         URL_PIONEER_SPEC: true
           ? JSON.stringify("http://127.0.0.1:9001/spec/swagger.json")
           : JSON.stringify("https://pioneers.dev/spec/swagger.json"),

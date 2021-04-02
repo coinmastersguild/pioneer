@@ -86,6 +86,7 @@ let publicNode = nodes.getNode('cosmos','gaiad')
 
 let ATOM_BASE = 1000000
 let URL_GAIAD = process.env['URL_GAIAD'] || publicNode
+log.info("URL_GAIAD: ",URL_GAIAD)
 let RUNTIME:any
 
 module.exports = {

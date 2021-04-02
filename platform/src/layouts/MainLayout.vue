@@ -11,7 +11,7 @@
       </q-item>
       <small><animated-number :value="totalValueUsd" :formatValue="formatToPriceUSD" :duration="duration"/></small>
 
-      <div v-if="featureApps">
+      <div v-if="featureApps || true">
         <AppSwitcher />
       </div>
 

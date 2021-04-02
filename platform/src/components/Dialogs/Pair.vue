@@ -25,6 +25,7 @@
   </q-card>
 </template>
 <script>
+
   //crypto
   import { mapMutations } from 'vuex'
 

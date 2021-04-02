@@ -23,7 +23,7 @@
     "@bithighlander/hdwallet-native": "^1.10.2",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-client": "latest",
-    "@pioneer-platform/pioneer-coins": "^6.2.29",
+    "@pioneer-platform/pioneer-coins": "^6.2.30",
     "@pioneer-platform/pioneer-eth-token-data": "latest",
     "@pioneer-platform/utxo-crypto": "latest",
     "@types/google-protobuf": "^3.7.4",

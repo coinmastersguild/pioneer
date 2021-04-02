@@ -881,7 +881,8 @@ module.exports = class wallet {
         this.sendToAddress = async function (coin:string,address:string,amount:string,param1:string,invocationId:string) {
             let tag = TAG+" | sendToAddress | "
             try{
-                if(!invocationId)throw Error("invocationId: required!")
+                if(!invocationId) invocationId = "whatevs"
+                //if(!invocationId)throw Error("invocationId: required!")
                 let output = {}
                 log.debug(tag,"params: ",{coin,address,amount,param1,invocationId})
                 //TODO verify input params
