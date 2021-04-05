@@ -338,7 +338,14 @@ ipcMain.on('attemptPair', async (event, data) => {
   try {
     log.info(tag,"data: ",data)
     let result = await attemptPair(event,data)
-    log.info(tag,"createWallet result: ",result)
+
+    if(result.user){
+      //save pairing as app
+      event.sender.send('pairApp', {url: result.url, success: true, trusted:result.trusted})
+    } else {
+      event.sender.send('pairApp', {error:true,errorMsg:result})
+    }
+    log.info(tag,"attemptPair result: ",result)
   } catch (e) {
     console.error(tag, e)
   }

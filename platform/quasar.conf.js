@@ -280,7 +280,6 @@ module.exports = function (ctx) {
       // https://www.electron.build/configuration/configuration
       // https://discuss.circleci.com/t/mac-os-app-signing-without-fastlane/27292/8
       builder: {
-
         appId: 'dev.pioneer.platform',
         afterSign:"scripts/afterSignHook.js",
         "mac": {
