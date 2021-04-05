@@ -24,11 +24,11 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-// network.txsByHeight("5204363")
-//     .then(function(resp){
-//         console.log("resp: ",JSON.stringify(resp))
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.txsByHeight("5204363")
+    .then(function(resp){
+        console.log("resp: ",JSON.stringify(resp))
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.txsByHeight("5204363")
 //     .then(function(resp){
@@ -61,9 +61,9 @@ let network = require("../lib/index")
 //     })
 //
 // let tx = ''
-let tx = ''
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = ''
+// network.broadcast(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })

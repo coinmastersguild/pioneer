@@ -178,7 +178,7 @@ module.exports = /** @class */ (function () {
         this.PRIVATE_WALLET = {};
         if (config.isTestnet)
             isTestnet = true;
-        this.isTestnet = isTestnet || false;
+        this.isTestnet = isTestnet || null;
         this.mode = config.mode;
         this.queryKey = config.queryKey;
         this.username = config.username;
@@ -228,7 +228,7 @@ module.exports = /** @class */ (function () {
                         case 3:
                             //pair
                             _b.WALLET = _k.sent();
-                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet: this.isTestnet })
+                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic })
                                 //verify testnet
                             ];
                         case 4:

@@ -248,7 +248,7 @@ module.exports = class wallet {
     private queryKey: string | undefined;
     private username: string;
     private type: HDWALLETS;
-    private isTestnet: boolean;
+    private isTestnet: boolean | null;
     private init: (type: string, config: config) => Promise<any>;
     private mnemonic: string | undefined;
     private auth: string | undefined;
@@ -265,7 +265,7 @@ module.exports = class wallet {
     private buildSwap: (transaction: any) => Promise<string>;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         if(config.isTestnet) isTestnet = true
-        this.isTestnet = isTestnet || false
+        this.isTestnet = isTestnet || null
         this.mode = config.mode
         this.queryKey = config.queryKey
         this.username = config.username
