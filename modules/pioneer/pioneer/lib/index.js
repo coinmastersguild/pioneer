@@ -233,7 +233,7 @@ module.exports = /** @class */ (function () {
                             ];
                         case 4:
                             _k.sent();
-                            isTestnet_1 = this.WALLET.isTestnet();
+                            isTestnet_1 = this.WALLET.isTestnet;
                             log.info(tag, "hdwallet isTestnet: ", isTestnet_1);
                             log.debug(tag, "paths: ", paths);
                             _c = this;

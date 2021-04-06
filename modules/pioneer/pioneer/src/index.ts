@@ -301,7 +301,7 @@ module.exports = class wallet {
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
 
                         //verify testnet
-                        const isTestnet = this.WALLET.isTestnet();
+                        const isTestnet = this.WALLET.isTestnet;
                         log.info(tag,"hdwallet isTestnet: ",isTestnet)
 
                         log.debug(tag,"paths: ",paths)

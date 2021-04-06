@@ -11,46 +11,46 @@
 
       <q-separator />
 
-      <div class="q-pa-md" style="max-width: 550px">
-        <q-list bordered class="rounded-borders" style="width:550px;">
-          <div v-for="coin in coins" :key="coin.symbol">
-<!--            {{coin}}-->
-<!--            {{coin.symbol}}-->
-            <q-expansion-item style="width:550px;">
-              <template v-slot:header style="width:550px;">
-                <q-item-section avatar>
-                  <q-img :src="coin.icon"></q-img>
-                </q-item-section>
+<!--      <div class="q-pa-md" style="max-width: 550px">-->
+<!--        <q-list bordered class="rounded-borders" style="width:550px;">-->
+<!--          <div v-for="coin in coins" :key="coin.symbol">-->
+<!--&lt;!&ndash;            {{coin}}&ndash;&gt;-->
+<!--&lt;!&ndash;            {{coin.symbol}}&ndash;&gt;-->
+<!--            <q-expansion-item style="width:550px;">-->
+<!--              <template v-slot:header style="width:550px;">-->
+<!--                <q-item-section avatar>-->
+<!--                  <q-img :src="coin.icon"></q-img>-->
+<!--                </q-item-section>-->
 
-                <q-item-section>
-                  {{coin.symbol}}
-                </q-item-section>
+<!--                <q-item-section>-->
+<!--                  {{coin.symbol}}-->
+<!--                </q-item-section>-->
 
-                <q-item-section side>
-                  <animated-number :value="walletInfo?.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>
-                </q-item-section>
-              </template>
+<!--                <q-item-section side>-->
+<!--                  <animated-number :value="walletInfo?.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>-->
+<!--                </q-item-section>-->
+<!--              </template>-->
 
-              <q-card>
-                <q-card-section style="word-wrap: break-word;">
-                  {{coin.symbol}}
-                  <q-separator />
-                  Address: {{walletInfo?.masters[coin.symbol]}} <br/>
-                  {{copyText}}
-                  <q-icon @click=copyAddress(walletInfo?.masters[coin.symbol]) name="content_copy"></q-icon>
-                  <q-separator />
-                  info: {{walletInfo?.coinInfo[coin.symbol]}}
+<!--              <q-card>-->
+<!--                <q-card-section style="word-wrap: break-word;">-->
+<!--                  {{coin.symbol}}-->
+<!--                  <q-separator />-->
+<!--                  Address: {{walletInfo?.masters[coin.symbol]}} <br/>-->
+<!--                  {{copyText}}-->
+<!--                  <q-icon @click=copyAddress(walletInfo?.masters[coin.symbol]) name="content_copy"></q-icon>-->
+<!--                  <q-separator />-->
+<!--                  info: {{walletInfo?.coinInfo[coin.symbol]}}-->
 
-                </q-card-section>
-              </q-card>
-            </q-expansion-item>
+<!--                </q-card-section>-->
+<!--              </q-card>-->
+<!--            </q-expansion-item>-->
 
-            <q-separator />
+<!--            <q-separator />-->
 
-          </div>
+<!--          </div>-->
 
-        </q-list>
-      </div>
+<!--        </q-list>-->
+<!--      </div>-->
 
     </q-page>
 
@@ -70,19 +70,19 @@
    */
 
   let coins = [
-    {
-      symbol:"ETH",
-      icon:"https://static.coincap.io/assets/icons/svg/eth.svg"
-    },
-    {
-      symbol:"BTC",
-      icon:"https://static.coincap.io/assets/icons/svg/btc.svg"
-    }
+    // {
+    //   symbol:"ETH",
+    //   icon:"https://static.coincap.io/assets/icons/svg/eth.svg"
+    // },
+    // {
+    //   symbol:"BTC",
+    //   icon:"https://static.coincap.io/assets/icons/svg/btc.svg"
+    // }
   ]
   export default {
     name: 'Pioneer',
     components: {
-      AnimatedNumber
+      // AnimatedNumber
     },
     data () {
       return {
@@ -140,7 +140,7 @@
       }
     },
     computed: {
-      ...mapGetters(['walletInfo','getApps','getWallets','layout']),
+      ...mapGetters(['getApps','layout']),
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp']),
