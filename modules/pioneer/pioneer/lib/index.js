@@ -228,7 +228,7 @@ module.exports = /** @class */ (function () {
                         case 3:
                             //pair
                             _b.WALLET = _k.sent();
-                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic })
+                            return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet: this.isTestnet })
                                 //verify testnet
                             ];
                         case 4:
@@ -811,6 +811,7 @@ module.exports = /** @class */ (function () {
                             ;
                             amountNative = parseFloat(swap.amount);
                             amountNative = Number(parseInt(String(amountNative)));
+                            log.info("nonce: ", nonce);
                             ethTx = {
                                 // addressNList: support.bip32ToAddressNList(masterPathEth),
                                 "addressNList": [
@@ -827,22 +828,6 @@ module.exports = /** @class */ (function () {
                                 to: swap.inboundAddress.router,
                                 data: data,
                             };
-                            // let ethTx = {
-                            //     "nonce":"0x0",
-                            //     "gasPrice":"0x5FB9ACA00",
-                            //     "gasLimit":"0x186A0",
-                            //     "value":"0x00",
-                            //     "to":"0x41e5560054824ea6b0732e656e3ad64e20e94e45",
-                            //     "chainId":3,
-                            //     "data":"0x1fece7b400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000031535741503a4254432e4254433a6d6b7152467a786d6b434758396a78677071714648637852556d4c4a634c444265723a31000000000000000000000000000000",
-                            //     "addressNList":[
-                            //         2147483692,
-                            //         2147483708,
-                            //         2147483648,
-                            //         0,
-                            //         0
-                            //     ]
-                            // }
                             log.info("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
                         case 8:
@@ -1441,8 +1426,11 @@ module.exports = /** @class */ (function () {
                                 sequence: sequence,
                                 tx: unsigned,
                             }));
-                            if (fromAddress !== addressFrom)
+                            if (fromAddress !== addressFrom) {
+                                log.error(tag, "fromAddress: ", fromAddress);
+                                log.error(tag, "addressFrom: ", addressFrom);
                                 throw Error("Can not sign, address mismatch");
+                            }
                             log.info(tag, "******* signTx: ", JSON.stringify({
                                 addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
                                 chain_id: chain_id,
@@ -1516,7 +1504,7 @@ module.exports = /** @class */ (function () {
                                                     "denom": "uatom"
                                                 }
                                             ],
-                                            "from_address": addressFrom,
+                                            "from_address": "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj",
                                             "to_address": address
                                         }
                                     }
@@ -1543,8 +1531,6 @@ module.exports = /** @class */ (function () {
                                 sequence: sequence,
                                 tx: unsigned,
                             }));
-                            if (fromAddress !== addressFrom)
-                                throw Error("Can not sign, address mismatch");
                             return [4 /*yield*/, this.WALLET.cosmosSignTx({
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
                                     chain_id: chain_id,

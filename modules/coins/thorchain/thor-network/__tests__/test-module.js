@@ -15,20 +15,22 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-// tx
-// let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
+// let tx = "3F95DB42AF2FF4CC73D9272960B8FF7170DAD7704EFAB60856647D40F6B011F1"
+// // tx
+// // let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
 // network.transaction(tx)
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.info()
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.info()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
-
-let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
+let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
+// let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
+// let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
 // network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)

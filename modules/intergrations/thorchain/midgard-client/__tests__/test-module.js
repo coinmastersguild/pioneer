@@ -30,8 +30,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        // let addresses = await midgard.getPoolAddress()
-        // console.log("addresses: ",addresses)
+        let addresses = await midgard.getPoolAddress()
+        console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)

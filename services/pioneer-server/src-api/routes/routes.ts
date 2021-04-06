@@ -82,7 +82,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "service": {"dataType":"string"},
-            "url": {"dataType":"string","required":true},
+            "url": {"dataType":"string"},
             "data": {"dataType":"any"},
         },
         "additionalProperties": false,

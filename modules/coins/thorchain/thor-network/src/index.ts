@@ -240,20 +240,16 @@ let get_txs_by_address = async function(address:string){
 
         //sends
         let url = URL_THORNODE+ '/txs?message.sender='+address
-        log.debug(tag,"url: ",url)
+        log.info(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        //log.info('sends: ', sends)
-
+        log.info('sends: ', sends)
+        if(!sends.txs) sends.txs = []
         // TODO//pagnation
-        // let pagesSends = sends.page_number
-        // for(let i = 0; i < pagesSends; i++){
-        //
-        // }
-        for(let i = 0; i < sends.txs.length; i++ ){
+        for(let i = 0; i < sends?.txs.length; i++ ){
             let tx = sends.txs[i]
 
             //pretty json
@@ -271,9 +267,10 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let receives = resultRecieves.data
+        if(!receives.txs) receives.txs = []
         log.info('receives: ', receives)
 
-        for(let i = 0; i < receives.txs.length; i++ ){
+        for(let i = 0; i < receives?.txs.length; i++ ){
             let tx = receives.txs[i]
             //normalize
             tx = normalize_tx(tx,address)
@@ -343,9 +340,7 @@ let get_node_info_verbose = async function(){
         log.info(tag,"lastBlock: ",lastBlock.data)
 
         //let height
-
         output.height = lastBlock.data.block.header.height
-
 
         return output
     }catch(e){

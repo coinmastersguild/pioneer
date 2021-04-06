@@ -34,7 +34,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:false,
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_TEST_SEED'],
             username,
             pioneerApi:true,
             spec:urlSpec,
@@ -42,12 +42,12 @@ let run_test = async function(){
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
-
+        console.log(config)
         //init wallet offline
         let Wallet = new WalletClass('pioneer',config,isTestnet);
-
         let info = await Wallet.init()
         console.log("total Value: ",info)
+
         // console.log("total Value: ",info.totalValueUsd)
 
         //await Wallet.forget()
@@ -90,37 +90,40 @@ let run_test = async function(){
         console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
 
-        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-        // let amount = "0.00002"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        let address = "thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"
+        let amount = "1"
+        let memo = ""
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
+
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
 
         /*
             ETH thorchain swap
          */
-        let masterETH = await Wallet.getMaster("ETH")
-        console.log("masterETH: ",masterETH)
-
-        let balanceETH = await Wallet.getBalance("ETH")
-        console.log("balanceETH: ",balanceETH)
+        // let masterETH = await Wallet.getMaster("ETH")
+        // console.log("masterETH: ",masterETH)
+        //
+        // let balanceETH = await Wallet.getBalance("ETH")
+        // console.log("balanceETH: ",balanceETH)
 
 
         // let asset = {
@@ -138,6 +141,7 @@ let run_test = async function(){
         // let amount = 0.0001
         // swap.amount = amount
 
+        //testnet
         // let swap = {
         //     inboundAddress: {
         //         chain: 'ETH',
@@ -155,11 +159,29 @@ let run_test = async function(){
         //     memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
         //     amount: "0.0123"
         // }
-        //
+
+        //mainnet
+        // let swap = {
+        //     inboundAddress: {
+        //         chain: 'ETH',
+        //         pub_key: 'thorpub1addwnpepqfjmxedld0vgvg3ckx3u73uc4gsyzvzfp9rremx4wk4tsqh6g8lq62m53yr',
+        //         address: '0x12595a8c0d26659fa97d8ce7d368bd177ddb094d',
+        //         router: '0xc284C7dd4dc9A981F4C0cd2C10DA5E91217C3126',
+        //         halted: false
+        //     },
+        //     asset: {
+        //         chain: 'ETH',
+        //         symbol: 'ETH',
+        //         ticker: 'ETH',
+        //         iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+        //     },
+        //     memo: '=:THOR.RUNE:thor1lqk43hvysuzymrgg08q45234z6jzth32wn9pnw',
+        //     amount: "0.00512"
+        // }
         //
         // let result = await Wallet.buildSwap(swap)
         // console.log("swapResult: ",result)
-        //
+
         // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
         // console.log("resultBroadcast: ",resultBroadcast)
 

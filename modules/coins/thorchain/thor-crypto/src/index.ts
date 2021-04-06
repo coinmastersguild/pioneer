@@ -18,7 +18,8 @@ const sha256 = require("crypto-js/sha256")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const HDKey = require('hdkey')
-const hdPathAtom = `m/44'/931'/0'/0/0`
+const hdPathXpub = `m/44'/931'/0'`
+const hdPathMaster = `m/44'/931'/0'/0/0`
 let bitcoin = require("bitcoinjs-lib");
 
 const log = require('@pioneer-platform/loggerdog')()
@@ -43,44 +44,36 @@ function bech32ify(address:string, prefix:string) {
 }
 
 module.exports = {
-    generateWalletFromSeed: async function (mnemonic:string) {
+    generateWalletFromSeed: async function (mnemonic:string, isTestnet:boolean) {
         try{
             const seed = await bip39.mnemonicToSeed(mnemonic)
-            //console.log("seed: ",seed)
 
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
-            //log.debug(mk.publicExtendedKey)
+            mk = mk.derive(hdPathXpub)
 
-            //get correct address with xpub
             let xpub = mk.publicExtendedKey
             let xpriv = mk.privateExtendedKey
-            //log.debug("xpub: ",xpub)
 
-            let publicKey = bitcoin.bip32.fromBase58(xpub).publicKey
-            let privateKey = bitcoin.bip32.fromBase58(xpriv).privateKey
-            log.debug("publicKey: ",publicKey)
+            let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0).publicKey
+            let privateKey = bitcoin.bip32.fromBase58(xpriv).derive(0).derive(0).privateKey
+            log.info("publicKey: ",publicKey)
+            log.info("privateKey: ",privateKey)
 
-            //
-            let mkAccount = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
-            //get master key
-            //console.log("hdPathAtom: ",hdPathAtom)
-            mkAccount = mkAccount.derive(hdPathAtom)
-            log.debug(mkAccount.publicExtendedKey)
-
-            //get correct address with xpub
-            let xpubAccount = mkAccount.publicExtendedKey
-
-            //
-            let address = createAddress(publicKey,'tthor')
+            let prefix
+            if(isTestnet){
+                prefix = 'tthor'
+            } else {
+                prefix = 'thor'
+            }
+            let address = createAddress(publicKey,prefix)
             log.debug("address: ",address)
 
             return {
-                xpub:xpubAccount,
+                xpub,
                 privateKey: privateKey.toString('hex'),
                 publicKey: publicKey.toString('hex'),
                 masterAddress:address
             }
-
         }catch(e){
             throw e
         }

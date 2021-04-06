@@ -28,14 +28,22 @@ if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
 
 if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
     blockchains.push('ethereum')
-    //all utxo's share
     networks['ETH'] = require('@pioneer-platform/eth-network')
 }
 
 if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
     blockchains.push('cosmos')
-    //all utxo's share
     networks['ATOM'] = require('@pioneer-platform/cosmos-network')
+}
+
+if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
+    blockchains.push('binance')
+    networks['BNB'] = require('@pioneer-platform/binance-network')
+}
+
+if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']){
+    blockchains.push('thorchain')
+    networks['RUNE'] = require('@pioneer-platform/thor-network')
 }
 
 //Cache time
