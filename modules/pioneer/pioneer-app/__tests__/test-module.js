@@ -4,18 +4,18 @@
  */
 
 
-require("dotenv").config({path:'./../../.env'})
-require("dotenv").config({path:'../../../.env'})
-require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'./../../.env'})
+// require("dotenv").config({path:'../../../.env'})
+// require("dotenv").config({path:'../../../../.env'})
 
 let App = require("../lib")
 
-let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
-if(!WALLET_PASSWORD) throw Error(".env not found!")
+// let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
+// if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
@@ -45,16 +45,18 @@ let run_test = async function(){
 
         } else {
             //if force keepkey
-            let isTestnet = true
+            let isTestnet = null
 
-            config.password = password
-            config.username = username
+            config.password = config.temp || password
+            //config.username = username
+
+            config.blockchains = ['Bitcoin','Ethereum','Thorchain']
 
             let resultInit = await App.init(config,isTestnet)
             console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("BH4IK4")
+            // let pairResult = await App.pair("0W73YC")
             // console.log("pairResult: ",pairResult)
 
             //get wallets

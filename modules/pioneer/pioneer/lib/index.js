@@ -183,6 +183,7 @@ module.exports = /** @class */ (function () {
         this.queryKey = config.queryKey;
         this.username = config.username;
         this.pioneerApi = config.pioneerApi;
+        this.blockchains = config.blockchains || ['Bitcoin', 'Ethereum'];
         this.type = type;
         this.spec = config.spec;
         this.mnemonic = config.mnemonic;
@@ -205,7 +206,7 @@ module.exports = /** @class */ (function () {
                         case 1:
                             _k.trys.push([1, 29, , 30]);
                             log.debug(tag, "checkpoint");
-                            paths = getPaths(this.isTestnet);
+                            paths = getPaths(this.isTestnet, this.blockchains);
                             _a = +HDWALLETS[this.type];
                             switch (_a) {
                                 case HDWALLETS.pioneer: return [3 /*break*/, 2];
@@ -235,7 +236,7 @@ module.exports = /** @class */ (function () {
                             _k.sent();
                             isTestnet_1 = this.WALLET.isTestnet;
                             log.info(tag, "hdwallet isTestnet: ", isTestnet_1);
-                            log.debug(tag, "paths: ", paths);
+                            log.info(tag, "paths: ", paths);
                             _c = this;
                             return [4 /*yield*/, this.WALLET.getPublicKeys(paths)];
                         case 5:
@@ -396,7 +397,7 @@ module.exports = /** @class */ (function () {
             try {
                 var output = [];
                 if (format === 'keepkey') {
-                    var paths = getPaths(this.isTestnet);
+                    var paths = getPaths(this.isTestnet, this.blockchains);
                     for (var i = 0; i < paths.length; i++) {
                         var path = paths[i];
                         var pathForKeepkey = {};
@@ -410,7 +411,7 @@ module.exports = /** @class */ (function () {
                     }
                 }
                 else {
-                    var paths = getPaths(this.isTestnet);
+                    var paths = getPaths(this.isTestnet, this.blockchains);
                     output = paths;
                 }
                 return output;

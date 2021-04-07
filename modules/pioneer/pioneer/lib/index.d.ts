@@ -1,4 +1,5 @@
 export interface config {
+    blockchains: string[];
     isTestnet?: boolean;
     spec: string;
     env: string;

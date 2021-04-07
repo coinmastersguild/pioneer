@@ -9,6 +9,7 @@ let SDK = require('../lib/index.js')
 // let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
 let urlSpec = process.env['URL_PIONEER_SPEC']
 
+let wss = process.env['URL_PIONEER_SOCKET']
 let spec = process.env['URL_PIONEER_SPEC']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
@@ -21,6 +22,7 @@ let run_test = async function(){
             queryKey,
             username,
             spec,
+            wss,
             service:'asgardx',
             url:'swaps.pro'
         }
@@ -76,10 +78,17 @@ let run_test = async function(){
                 console.log(blockchain+ " balance: ",balance)
             }
 
+            //start socket
+            let events = await app.startSocket()
+            console.log("events: ",events)
+            events.on('message', async (request) => {
+                console.log("**** message: ", request)
+            })
+
             //send eth
 
-            let txid = await app.sendToAddress('ethereum','ETH',0.001,'0x33b35c665496bA8E71B22373843376740401F106')
-            console.log("txid: ",txid)
+            // let txid = await app.sendToAddress('ethereum','ETH',0.001,'0x33b35c665496bA8E71B22373843376740401F106')
+            // console.log("txid: ",txid)
         }
 
 

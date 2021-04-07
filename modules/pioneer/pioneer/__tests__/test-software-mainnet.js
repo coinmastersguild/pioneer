@@ -18,6 +18,8 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
+let blockchains = ['Bitcoin','Ethereum','Thorchain']
+
 let FAUCET_ADDRESSES = {
 
 }
@@ -34,6 +36,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:false,
+            blockchains,
             mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
             username,
             pioneerApi:true,

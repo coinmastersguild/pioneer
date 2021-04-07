@@ -904,8 +904,8 @@ let init_wallet = function (config, isTestnet) {
                 throw Error("102: username required!");
             if (!config.queryKey)
                 throw Error("103: queryKey required!");
-            if (config.urlSpec) {
-                URL_PIONEER_SPEC = config.urlSpec;
+            if (config.urlSpec || config.spec) {
+                URL_PIONEER_SPEC = config.urlSpec || config.spec;
             }
             if (!URL_PIONEER_SPEC)
                 URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json";
@@ -1000,6 +1000,7 @@ let init_wallet = function (config, isTestnet) {
                     let configPioneer = {
                         isTestnet,
                         mnemonic,
+                        blockchains: config.blockchains,
                         username: walletFile.username,
                         pioneerApi: true,
                         auth: process.env['SHAPESHIFT_AUTH'] || 'lol',

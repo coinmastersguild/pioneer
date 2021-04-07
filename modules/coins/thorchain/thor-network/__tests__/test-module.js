@@ -9,15 +9,15 @@ let network = require("../lib/index")
 
 //good
 //let tx = '{"tx":{"fee":{"amount":[{"amount":"3000","denom":"rune"}],"gas":"200000"},"memo":"foobar","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"1000000","denom":"rune"}],"from_address":"tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh","to_address":"tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh"}}],"signatures":[{"signature":"k8Pp9bo4J1IgaogVCKXhkJC/n5hp4wFcV+OlmUpO121lLVTa9lhSh8KCyMEWzK7qiVyWFGHXteSbocVfvolDiQ==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvZssaf4cD1EFUt34ppe5Ne9DlKj/2zVYSsPTtlrcFmj"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
-
+// let tx = '{"tx":{"fee":{"amount":[{"amount":"3000","denom":"rune"}],"gas":"200000"},"memo":"","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"100","denom":"rune"}],"from_address":"thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az","to_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"}}],"signatures":[{"signature":"EHwZQ8wDiiPkwB4V+1R3h0jO0+OisdjtMZR02pb5SpFnte2MIkoqz/T6tsltcXFvhsvNxH8ilm6XBk8EPo6Hsg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AxUZcTuLQr3DZxEtMxMs8Uzt+SisV3HURLpFm5SXEXuj"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
 // network.broadcast(tx)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
 
-// let tx = "3F95DB42AF2FF4CC73D9272960B8FF7170DAD7704EFAB60856647D40F6B011F1"
-// // tx
-// // let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
+let tx = "79CC4F8B68EE3FB2A486F48232CC3AED0E00093CF46F928805154322CDF77A36"
+// tx
+// let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
 // network.transaction(tx)
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
@@ -28,7 +28,8 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
+let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
+// let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
 // let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
 // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
 // network.getBalance(address)
@@ -57,16 +58,16 @@ let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
 // // let address = "tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh" //test seed
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
 // console.log("address: ",address)
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getBalance(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
 // console.log("address: ",address)
-network.txs(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.txs(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })

@@ -76,27 +76,31 @@ async function lifecycleKeepkey(event, data) {
       event.sender.send('hardware',{event:eventKeepkey})
     });
 
-    //lockStatus
-    let lockStatus = await Hardware.isLocked()
-    log.info("lockStatus: ",lockStatus)
+    let state = await Hardware.state()
+    log.info("state: ",state)
 
-    //if locked
-    if(lockStatus){
-      KEEPKEY_STATUS = 'locked'
-      Hardware.displayPin()
-      //open pin
-      event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
-    } else {
-      KEEPKEY_STATUS = 'unlocked'
-      //is connected?
-      let info = await Hardware.info()
-      log.info("info: ",info)
-      if(info.features){
-        event.sender.send('navigation',{ dialog: 'Hardware', action: 'close'})
+    if(state > 1){
+      //lockStatus
+      let lockStatus = await Hardware.isLocked()
+      log.info("lockStatus: ",lockStatus)
+
+      //if locked
+      if(lockStatus){
+        KEEPKEY_STATUS = 'locked'
+        Hardware.displayPin()
+        //open pin
+        event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
+      } else {
+        KEEPKEY_STATUS = 'unlocked'
+        //is connected?
+        let info = await Hardware.info()
+        log.info("info: ",info)
+        if(info.features){
+          event.sender.send('navigation',{ dialog: 'Hardware', action: 'close'})
+        }
+        event.sender.send('deviceInfo',info)
       }
-      event.sender.send('deviceInfo',info)
     }
-
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};
@@ -134,8 +138,7 @@ export async function onStart(event,data) {
 
     let configStatus = checkConfigs()
     let config = await App.getConfig()
-    //TODO always hardware?
-    config.hardware = true
+
     log.info(tag,"config: ",config)
     log.debug(tag,"configStatus() | configStatus: ", configStatus)
 
@@ -241,9 +244,10 @@ export async function onStart(event,data) {
     let walletFiles = await App.getWalletNames()
     log.info("walletFiles: ",walletFiles)
 
-    if(!config.spec){
-      //config.spec = process.env['URL_PIONEER_SPEC'] || "https://pioneers.dev/spec/swagger.json"
-      config.spec = "https://pioneers.dev/spec/swagger.json"
+    if(!config.spec || true){
+      config.spec = "http://127.0.0.1:9001/spec/swagger.json"
+      config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
+      //config.spec = "https://pioneers.dev/spec/swagger.json"
     }
 
     if(walletFiles.length === 0){
@@ -253,15 +257,18 @@ export async function onStart(event,data) {
       return true
     }
 
-    let isTestnet
+    let isTestnet = null
+    //TODO testnet feature
     //if feature flag mainnet
-    if(process.env['MAINNET_FEATURE']){
-      //TODO offer promt?
-    } else {
-      isTestnet = true
-      config.isTestnet = isTestnet
-    }
+    // if(process.env['MAINNET_FEATURE']){
+    //   //TODO offer promt?
+    // } else {
+    //   isTestnet = true
+    //   config.isTestnet = isTestnet
+    // }
+    config.isTestnet = null
 
+    config.blockchains = ['bitcoin','ethereum','thorchain']
 
     //start App
     if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")
@@ -310,7 +317,7 @@ export async function onStart(event,data) {
 }
 
 export async function setMnemonic(event, data) {
-  let tag = TAG + " | createWallet | ";
+  let tag = TAG + " | setMnemonic | ";
   try {
     log.info(tag,"data: ",data)
 
@@ -349,6 +356,8 @@ export async function createWallet(event, data) {
         uppercase: false
       });
       data.username = "user:"+randomChars[0]
+      //add to config
+      await updateConfig({username:data.username})
     }
 
     //if no mnemonic
@@ -360,6 +369,7 @@ export async function createWallet(event, data) {
         if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
         let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
         data.mnemonic = mnemonic
+
       }else{
         throw Error("unhandled action featureSoftwareCreate: "+featureSoftwareCreate)
       }

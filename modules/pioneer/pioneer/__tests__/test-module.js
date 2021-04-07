@@ -36,6 +36,7 @@ let run_test = async function(){
             isTestnet:false,
             mnemonic: process.env['WALLET_TEST_SEED'],
             username,
+            blockchains: ['bitcoin','ethereum','thorchain'],
             pioneerApi:true,
             spec:urlSpec,
             queryKey,
@@ -96,22 +97,22 @@ let run_test = async function(){
         let balanceRUNE = await Wallet.getBalance("RUNE")
         console.log("balanceRUNE: ",balanceRUNE)
 
-        // let address = "thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"
-        // let amount = "1"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
+        let amount = "100"
+        let memo = ""
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)

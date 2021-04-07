@@ -142,7 +142,10 @@ let hardware_info = async function () {
 let get_lock_status = async function () {
     let tag = " | get_lock_status | ";
     try {
-        let output:any = {}
+        let output:any = {
+            connected:false,
+            locked:false
+        }
 
         if(KEEPKEY_STATE.state > 2){
             output = await KEEPKEY_WALLET.isLocked();

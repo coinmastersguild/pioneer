@@ -78,8 +78,8 @@ module.exports = {
     },
     generateSeed: function () {
         let randomBytesFunc = standardRandomBytesFunc
-        const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)
-        if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
+        const randomBytes = Buffer.from(randomBytesFunc(16), `hex`)
+        if (randomBytes.length !== 16) throw Error(`Entropy has incorrect length`)
         const mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
         return mnemonic
     },

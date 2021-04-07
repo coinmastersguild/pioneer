@@ -105,6 +105,7 @@ const EOS_TX_FEE="100"
 const EOS_BASE=1000
 
 export interface config {
+    blockchains: string[];
     isTestnet?: boolean;
     spec:string,
     env:string,
@@ -263,6 +264,7 @@ module.exports = class wallet {
     private WALLET_BALANCES: any;
     private setMnemonic: () => string | undefined;
     private buildSwap: (transaction: any) => Promise<string>;
+    private blockchains: any;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         if(config.isTestnet) isTestnet = true
         this.isTestnet = isTestnet || null
@@ -270,6 +272,7 @@ module.exports = class wallet {
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
+        this.blockchains = config.blockchains || ['Bitcoin','Ethereum']
         this.type = type
         this.spec = config.spec
         this.mnemonic = config.mnemonic
@@ -285,7 +288,7 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 log.debug(tag,"checkpoint")
-                let paths = getPaths(this.isTestnet)
+                let paths = getPaths(this.isTestnet,this.blockchains)
 
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
@@ -304,7 +307,7 @@ module.exports = class wallet {
                         const isTestnet = this.WALLET.isTestnet;
                         log.info(tag,"hdwallet isTestnet: ",isTestnet)
 
-                        log.debug(tag,"paths: ",paths)
+                        log.info(tag,"paths: ",paths)
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
                         log.info("pubkeys ",JSON.stringify(this.pubkeys))
 
@@ -433,7 +436,7 @@ module.exports = class wallet {
             try {
                 let output:any = []
                 if(format === 'keepkey'){
-                    let paths = getPaths(this.isTestnet)
+                    let paths = getPaths(this.isTestnet,this.blockchains)
                     for(let i = 0; i < paths.length; i++){
                         let path = paths[i]
                         let pathForKeepkey:any = {}
@@ -447,7 +450,7 @@ module.exports = class wallet {
                         output.push(pathForKeepkey)
                     }
                 } else {
-                    let paths = getPaths(this.isTestnet)
+                    let paths = getPaths(this.isTestnet,this.blockchains)
                     output = paths
                 }
                 return output

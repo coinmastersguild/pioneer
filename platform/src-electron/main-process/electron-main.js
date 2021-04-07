@@ -15,6 +15,8 @@ const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification } from 'electron'
 //import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 const { menubar } = require('menubar');
+const CryptoJS = require("crypto-js")
+const bip39 = require(`bip39`)
 //TODO this path doesnt work on build
 //const path = require('path');
 //const iconPath = path.join(__dirname, 'menu-icon-large.png');
@@ -45,6 +47,12 @@ const APPS = []
 let KEEPKEY
 let PIONEER_SERVER_PROCESS
 let TEMP_SEED = "" //only used in setup
+
+//feature flags
+let featureKeepkey = process.env['KEEPKEY_FEATURE']
+let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
+let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
+let featureInsecurePassword = process.env['INSECURE_PASSWORD']
 
 /*
       MenuBar
@@ -363,11 +371,29 @@ ipcMain.on('setMnemonic', async (event, data) => {
   }
 })
 
+function standardRandomBytesFunc(size) {
+  /* istanbul ignore if: not testable on node */
+  return CryptoJS.lib.WordArray.random(size).toString()
+}
+
 ipcMain.on('createWallet', async (event, data) => {
   const tag = TAG + ' | createWallet | '
   try {
       log.info(tag,"data: ",data)
-      if(!TEMP_SEED) throw Error("102: Failed to setup! missing TEMP_SEED")
+      if(!TEMP_SEED) {
+        //create
+        if(featureSoftwareCreate){
+          log.info(tag,"featureSoftwareCreate TRUE")
+          let randomBytesFunc = standardRandomBytesFunc
+          const randomBytes = Buffer.from(randomBytesFunc(16), `hex`)
+          if (randomBytes.length !== 16) throw Error(`Entropy has incorrect length`)
+          let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
+          data.mnemonic = mnemonic
+          TEMP_SEED = mnemonic
+        }else{
+          throw Error("unhandled action featureSoftwareCreate: "+featureSoftwareCreate)
+        }
+      }
       data.mnemonic = TEMP_SEED
 
       let result = await createWallet(event,data)

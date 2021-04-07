@@ -54,20 +54,25 @@ module.exports = function (ctx) {
         MAINNET_FEATURE:false,
         INSECURE_PASSWORD:true, //TODO dev mode only
         KEEPKEY_FEATURE:true,
-        CREATE_SOFTWARE_FEATURE:false,
-        PASSWORDLESS_FEATURE:false,
+        CREATE_SOFTWARE_FEATURE:true,
+        PASSWORDLESS_FEATURE:true,
         FIO_FEATURE:false,
         CONTACTS_FEATURE:false,
         UI_THEME_FEATURE:false,
         UI_LIGHT_MODE_FEATURE:false,
         ADD_WALLET_FEATURE:false,
         UI_APP_STORE_FEATURE:true,
-        URL_PIONEER_SPEC: true
-          ? JSON.stringify("http://127.0.0.1:9001/spec/swagger.json")
-          : JSON.stringify("https://pioneers.dev/spec/swagger.json"),
-        URL_PIONEER_WS: true
-          ? JSON.stringify("ws://127.0.0.1:9001")
-          : JSON.stringify("wss://pioneers.dev"),
+        FEATURE_BITCOIN_BLOCKCHAIN:true,
+        FEATURE_ETHEREUM_BLOCKCHAIN:true,
+        FEATURE_THORCHAIN_BLOCKCHAIN:true,
+        FEATURE_COSMOS_BLOCKCHAIN:true,
+        FEATURE_SECRET_BLOCKCHAIN:true,
+        FEATURE_KAVA_BLOCKCHAIN:true,
+        FEATURE_TERRA_BLOCKCHAIN:true,
+        // URL_PIONEER_SPEC: JSON.stringify("https://pioneers.dev/spec/swagger.json"),
+        // URL_PIONEER_WS: JSON.stringify("wss://pioneers.dev"),
+        URL_PIONEER_SPEC: JSON.stringify("http://127.0.0.1:9001/spec/swagger.json"),
+        URL_PIONEER_WS: JSON.stringify("ws://127.0.0.1:9001"),
         PIONEER_URL: JSON.stringify("pioneers.dev"),
       },
 

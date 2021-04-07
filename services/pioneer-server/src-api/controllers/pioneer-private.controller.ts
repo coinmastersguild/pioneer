@@ -796,6 +796,8 @@ export class pioneerPrivateController extends Controller {
 
                 let registered = new Date().getTime()
                 if(!body.data.pubkeys) throw Error("105: missing pubkeys!")
+                if(body.data.pubkeys.length === 0) throw Error("105: empty pubkeys!")
+
                 log.debug(tag,"pubkeys: ",body.data.pubkeys)
 
                 let coins = Object.keys(body.data.pubkeys)

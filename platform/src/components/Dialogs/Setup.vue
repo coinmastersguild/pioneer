@@ -1,7 +1,7 @@
 <template>
     <q-card class="text-center q-pb-lg q-pl-lg q-pr-lg" style="min-width:450px;">
         <q-card-section>
-        <h4>Welcome</h4>
+        <h4>Setup</h4>
         <p>(no wallets found!) What would you like to do? </p>
         </q-card-section>
         <q-card-actions vertical align="center" class="q-pb-lg q-pl-md q-pr-md">
@@ -22,7 +22,7 @@
           <q-btn
             color="white"
             @click="openRestore"
-            label="I already have a wallet..."
+            label="Restore from seed..."
             icon="account_balance_wallet"
             class="full-width"
             flat
