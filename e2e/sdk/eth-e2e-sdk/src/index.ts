@@ -45,6 +45,8 @@ const log = require("@pioneer-platform/loggerdog")()
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
+let wait = require('wait-promise');
+let sleep = wait.sleep;
 
 const {
     startApp,
@@ -90,9 +92,9 @@ const test_service = async function () {
         }
 
 
-        let app = new SDK.SDK(spec,config,true)
+        let app = new SDK.SDK(spec,config)
 
-        let seedChains = ['Ethereum']
+        let seedChains = ['ethereum']
         await app.init(seedChains)
 
         //pair sdk
@@ -126,15 +128,31 @@ const test_service = async function () {
 
         //get address from faucet
         //TODO get this from api
-        let address = "0x33b35c665496bA8E71B22373843376740401F106"
+        let address = "0xc3affff54122658b89c31183cec4f15514f34624"
 
         //send to faucet
-        let txid = await app.sendToAddress(BLOCKCHAIN,ASSET,TEST_AMOUNT,address)
+        let sendPayload = {
+            // coin:BLOCKCHAIN, ???
+            coin:ASSET,
+            amount:TEST_AMOUNT,
+            address,
+            noBroadcast:true
+        }
+        let txid = await app.sendToAddress(sendPayload)
         console.log("txid: ",txid)
 
         //wait till confirmed
+        let confirmed = false
+        while(!confirmed){
 
-        //TODO request return
+            //get transaction
+
+            //wait
+            await sleep(1000)
+        }
+        //TODO request return from faucet
+
+        //expect event
 
         //process
         process.exit(0)

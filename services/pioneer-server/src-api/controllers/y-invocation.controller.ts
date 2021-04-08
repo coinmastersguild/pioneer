@@ -101,7 +101,7 @@ export class pioneerInvocationController extends Controller {
                 //does user exist on fio?
 
             // invocationId
-            let invocationId = "pioneer:invocation:v0.01:"+body.invocation.chain+":"+short.generate()
+            let invocationId = "pioneer:invocation:v0.01:"+body.invocation.coin+":"+short.generate()
 
             //origin
             //TODO signed by?

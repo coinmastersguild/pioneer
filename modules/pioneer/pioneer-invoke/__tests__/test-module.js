@@ -53,34 +53,65 @@ let run_test = async function(){
         if(!isOnline) throw Error("User not connected!")
 
 
+        // let txInput = {
+        //     "asset":
+        //         {
+        //             "chain":"BTC",
+        //             "symbol":"BTC",
+        //             "ticker":"BTC"
+        //         },
+        //     "amount":
+        //         {
+        //             "type":"BASE",
+        //             "decimal":18,
+        //             amount: function(){
+        //                 return "0.0123"
+        //             }
+        //         },
+        //     "recipient":"mwFBhs7o4TzLRtZ8XZDB39JmiZSPCCmgMn",
+        //     "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
+        // }
+        //
+        // let invocation = {
+        //     username:invoker,
+        //     coin:txInput.asset.symbol,
+        //     amount:txInput.amount.amount(),
+        //     to:txInput.recipient,
+        //     memo:txInput.memo
+        // }
+        //
+        // let result = await invoke.invoke('swap',invocation)
+        // console.log("result: ",result.data)
+
+
         let txInput = {
             "asset":
                 {
-                    "chain":"BTC",
-                    "symbol":"BTC",
-                    "ticker":"BTC"
+                    "chain":"ETH",
+                    "symbol":"ETH",
+                    "ticker":"ETH"
                 },
             "amount":
                 {
                     "type":"BASE",
                     "decimal":18,
                     amount: function(){
-                        return "0.0123"
+                        return "0.000123"
                     }
                 },
-            "recipient":"mwFBhs7o4TzLRtZ8XZDB39JmiZSPCCmgMn",
-            "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
+            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
+            "memo":""
         }
 
         let invocation = {
             username:invoker,
             coin:txInput.asset.symbol,
             amount:txInput.amount.amount(),
-            to:txInput.recipient,
+            address:txInput.recipient,
             memo:txInput.memo
         }
 
-        let result = await invoke.invoke('swap',invocation)
+        let result = await invoke.invoke('transfer',invocation)
         console.log("result: ",result.data)
 
     }catch(e){

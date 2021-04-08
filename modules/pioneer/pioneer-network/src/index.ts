@@ -458,11 +458,13 @@ const get_balance = async function (coin:string, isTestnet?:boolean) {
         if(coin === "ETH"){
             log.debug("ETH detected ")
             let master = await get_address_master('ETH')
-            if(isTestnet)networks['ETH'].init({testnet:true})
+            // if(isTestnet)networks['ETH'].init({testnet:true})
+            if(isTestnet)networks['ETH'].init()
             output = await networks['ETH'].getBalanceAddress(master)
         }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
             log.debug("token detected ")
-            if(isTestnet)networks['ETH'].init({testnet:true})
+            // if(isTestnet)networks['ETH'].init({testnet:true})
+            if(isTestnet)networks['ETH'].init()
             let master = await get_address_master('ETH')
             output = await networks['ETH'].getBalanceToken(master,coin)
         } else if(coin === 'ATOM'){
@@ -537,8 +539,8 @@ const get_wallet_info = async function () {
         log.debug(tag,"coins: ",coins)
 
         //pubkeys
-        output.isTestnet = IS_TESTNET
-        log.info(tag,"IS_TESTNET: ",IS_TESTNET)
+        // output.isTestnet = IS_TESTNET
+        // log.info(tag,"IS_TESTNET: ",IS_TESTNET)
         //filter by support
 
 
@@ -778,6 +780,8 @@ const get_wallet_info = async function () {
                         balances['ETH'] = balanceETH
                         valueUsds['ETH'] = ""
                         coinInfo['ETH'] = ""
+                    } else {
+                        balances['ETH'] = 0
                     }
 
                     //balances
@@ -839,8 +843,6 @@ const init_wallet = async function (type:string,config:any,isTestnet:boolean) {
     let tag = TAG + " | init_wallet | "
     try {
         log.debug("Checkpoint1  ",config)
-        if(isTestnet) IS_TESTNET = true
-
         await blockbook.init()
 
         //pubkeys

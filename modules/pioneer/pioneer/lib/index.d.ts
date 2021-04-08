@@ -1,3 +1,11 @@
+export interface SendToAddress {
+    coin: string;
+    amount: string;
+    address: string;
+    memo?: string;
+    invocationId?: string;
+    noBroadcast?: boolean;
+}
 export interface config {
     blockchains: string[];
     isTestnet?: boolean;
@@ -38,7 +46,7 @@ export interface Transaction {
     addressFrom: string;
     addressTo: string;
     amount: string;
-    memo: string;
+    memo?: string | undefined;
     nonce?: number;
 }
 export interface CoinInfo {

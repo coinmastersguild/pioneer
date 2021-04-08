@@ -409,9 +409,9 @@ module.exports = {
     // viewSeed: function () {
     //     return WALLET_SEED;
     // },
-    // sendToAddress: function (coin:string,amount:string,address:string,memo:string) {
-    //   return send_to_address(coin,amount,address,memo);
-    // },
+    sendToAddress: function (intent:any) {
+      return send_to_address(intent);
+    },
 
     //keepkey
     //download firmware
@@ -735,15 +735,16 @@ let broadcast_transaction = async function (coin:string,rawTx:string) {
     }
 };
 
-let send_to_address = async function (coin:string,address:string,amount:string,memo?:string,invocationId?:string) {
+let send_to_address = async function (intent:any) {
     let tag = " | send_to_address | ";
     try {
-        coin = coin.toUpperCase()
-        log.info(tag,"Pioneer: ",Pioneer)
-        log.debug("params: ",{coin,address,amount})
-        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin,address,amount,memo,invocationId)
-        log.debug(tag,"txid: ", signedTx.txid)
+        if(!intent.address) throw Error("102: invalid intent missing address!")
+        if(!intent.coin) throw Error("102: invalid intent missing coin!")
+        if(!intent.amount) throw Error("102: invalid intent missing amount!")
+        log.info(tag,"params: ",intent)
 
+        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
+        log.info(tag,"txid: ", signedTx.txid)
         //
 
         return signedTx
@@ -1146,7 +1147,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //on on invocations add to queue
         events.on('message', async (request: any) => {
-            console.log("**** Invoke: ", request)
+            log.info(tag,"**** Invoke: ", request)
             //TODO filter invocations by subscribers
 
             //TODO autonomousOn/Off
@@ -1171,12 +1172,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 case 'swap':
                     //TODO validate inputs
                     signedTx = await build_swap(request.invocation,request.invocationId)
-                    console.log("txid: ", signedTx.txid)
+                    log.info(tag,"txid: ", signedTx.txid)
                     events.emit('broadcast',signedTx)
                     break;
                 case 'transfer':
-                    signedTx = await send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId)
-                    console.log("txid: ", signedTx.txid)
+                    signedTx = await send_to_address(request.invocation)
+                    log.info(tag,"txid: ", signedTx.txid)
                     events.emit('broadcast',signedTx)
                     break;
                 default:

@@ -43,59 +43,10 @@ let run_test = async function(){
 
         //if no config
         if(!config){
-            console.log("First time startup")
-
-            //software
-            // let wallet1 = {
-            //     isTestnet:true,
-            //     mnemonic:process.env['WALLET_TEST_SEED'],
-            //     username:username,
-            //     password
-            // }
-            // console.log("wallet1: ",wallet1)
-            // //create wallet files
-            // let successCreate = await App.createWallet('software',wallet1)
-            // console.log("successCreate: ",successCreate)
-            //
-            // //init config
-            // //throw Error("Must setup!")
-            // //create
-            // //init config
-            // await App.initConfig("english");
-            // App.updateConfig({isTestnet:true});
-            // App.updateConfig({username});
-            // App.updateConfig({temp:password});
-            // App.updateConfig({created: new Date().getTime()});
-
-            //keepkey
-
-            //
-
-            // let wallet1 = {
-            //     isTestnet:true,
-            //     mnemonic:process.env['WALLET_TEST_SEED'],
-            //     username:username,
-            //     password
-            // }
-            // console.log("wallet1: ",wallet1)
-            //
-            // //create wallet files
-            // let successCreate = await App.createWallet('software',wallet1)
-            // console.log("successCreate: ",successCreate)
-            //
-            // //init config
-            // //throw Error("Must setup!")
-            // //create
-            // //init config
-            // await App.initConfig("english");
-            // App.updateConfig({isTestnet:true});
-            // App.updateConfig({username});
-            // App.updateConfig({temp:password});
-            // App.updateConfig({created: new Date().getTime()});
-
+            console.log("First time startup, run pair first")
         } else {
             //if force keepkey
-            let isTestnet = true
+            let isTestnet = null
 
             config.password = password
             config.username = username

@@ -34,7 +34,7 @@ let run_test = async function(){
         //     username,
         //     spec:urlSpec
         // }
-        let isTestnet = true
+        let isTestnet = null
         // //Binance
         // let config = {
         //     network:'testnet',
@@ -121,33 +121,33 @@ let run_test = async function(){
         // let amount = 0.0001
         // swap.amount = amount
 
-        let swap = {
-            "inboundAddress":{
-                "chain":"ETH",
-                    "pub_key":"tthorpub1addwnpepqwjl47d8qqyptghwpa6scayg5cxt88nssgt8kygcn823qjgv6gavuqga32f",
-                    "address":"0x2345bf0273a6ae4d02a4b4389baef5409139c36a",
-                    "router":"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
-                    "gas_rate":"1"
-            },
-            "asset":{
-                "chain":"ETH",
-                    "symbol":"ETH",
-                    "ticker":"ETH",
-                    "iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"
-            },
-            "memo":"=:THOR.RUNE:tthor1mu7gez4wpkddlsldfc8trn94zqwqumcgeyy78e",
-            "amount":{
-                "type":"BASE",
-                "decimal":18,
-                amount: function(){
-                    return "0.0101"
-                }
-            }
-        }
-
-
-        let txid = await app.buildSwap(swap)
-        console.log("txid",txid)
+        // let swap = {
+        //     "inboundAddress":{
+        //         "chain":"ETH",
+        //             "pub_key":"tthorpub1addwnpepqwjl47d8qqyptghwpa6scayg5cxt88nssgt8kygcn823qjgv6gavuqga32f",
+        //             "address":"0x2345bf0273a6ae4d02a4b4389baef5409139c36a",
+        //             "router":"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
+        //             "gas_rate":"1"
+        //     },
+        //     "asset":{
+        //         "chain":"ETH",
+        //             "symbol":"ETH",
+        //             "ticker":"ETH",
+        //             "iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"
+        //     },
+        //     "memo":"=:THOR.RUNE:tthor1mu7gez4wpkddlsldfc8trn94zqwqumcgeyy78e",
+        //     "amount":{
+        //         "type":"BASE",
+        //         "decimal":18,
+        //         amount: function(){
+        //             return "0.0101"
+        //         }
+        //     }
+        // }
+        //
+        //
+        // let txid = await app.buildSwap(swap)
+        // console.log("txid",txid)
 
         //build a tx
         // let txInput = {
@@ -170,45 +170,26 @@ let run_test = async function(){
 
         //BTC
         //build a tx
-        // let txInput = {
-        //     "asset":
-        //         {
-        //             "chain":"BTC",
-        //             "symbol":"BTC",
-        //             "ticker":"BTC"
-        //         },
-        //     "amount":
-        //         {
-        //             "type":"BASE",
-        //             "decimal":18,
-        //             amount: function(){
-        //                 return "0.0123"
-        //             }
-        //         },
-        //     "recipient":"0x33b35c665496bA8E71B22373843376740401F106"
-        // }
+        let txInput = {
+            "asset":
+                {
+                    "chain":"ETH",
+                    "symbol":"ETH",
+                    "ticker":"ETH"
+                },
+            "amount":
+                {
+                    "type":"BASE",
+                    "decimal":18,
+                    amount: function(){
+                        return "0.000123"
+                    }
+                },
+            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624"
+        }
 
-        // let txInput = {
-        //     "asset":
-        //         {
-        //             "chain":"BTC",
-        //             "symbol":"BTC",
-        //             "ticker":"BTC"
-        //         },
-        //     "amount":
-        //         {
-        //             "type":"BASE",
-        //             "decimal":18,
-        //             amount: function(){
-        //                 return "0.0123"
-        //             }
-        //         },
-        //     "recipient":"",
-        //     "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
-        // }
-        //
-        // let txid = await app.transfer(txInput)
-        // console.log("txid",txid)
+        let txid = await app.transfer(txInput)
+        console.log("txid",txid)
 
         //monitor tx till confirmed
 

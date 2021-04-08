@@ -34,7 +34,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:false,
-            mnemonic: process.env['WALLET_TEST_SEED'],
+            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
             username,
             blockchains: ['bitcoin','ethereum','thorchain'],
             pioneerApi:true,
@@ -88,31 +88,31 @@ let run_test = async function(){
         /*
                THOR
          */
-        console.log("info: ",prettyjson.render(info.public.RUNE))
+        // console.log("info: ",prettyjson.render(info.public.RUNE))
+        //
+        // //RUNE
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
+        //
+        // let address = "thor1x00pfwyx8xld45sdlmyn29vjf7ev0mv3rcn9al"
+        // let amount = "10"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
 
-        //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
-
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
-
-        let address = "thor1x00pfwyx8xld45sdlmyn29vjf7ev0mv3rcn9al"
-        let amount = "10"
-        let memo = ""
-
-        let transfer = {
-            coin:"RUNE",
-            addressTo:address,
-            amount,
-            memo
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
@@ -186,25 +186,34 @@ let run_test = async function(){
         // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
         // console.log("resultBroadcast: ",resultBroadcast)
 
+
+        //NOTICE addressTo****
         // let transfer = {
         //     coin:"ETH",
-        //     addressTo:"0x33b35c665496bA8E71B22373843376740401F106"
+        //     addressTo:"0xc3affff54122658b89c31183cec4f15514f34624",
+        //     amount: "0.0001",
+        //     // noBroadcast:true
         // }
+
+        // let result = await Wallet.buildTransfer(transfer)
+        // console.log("transfer: ",result)
         //
-        // let amount = 0.0001
-        // transfer.amount = amount
-        //
-        // // let result = await Wallet.buildTransfer(transfer)
-        // // console.log("transfer: ",result)
-        // //
-        // // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
-        // // console.log("resultBroadcast: ",resultBroadcast)
-        //
-        // //normal send, to memo
-        // let result = await Wallet.sendToAddress(transfer.coin,transfer.addressTo,transfer.amount)
-        // //expect instant txid
-        // console.log("result: ",result)
-        //TODO event emitter?
+        // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
+
+        let transfer = {
+            coin:"ETH",
+            address:"0xc3affff54122658b89c31183cec4f15514f34624",
+            amount: "0.0001",
+            noBroadcast:true,
+            invocationId:"blablaplzworky"
+        }
+        //normal send, to memo
+        let result = await Wallet.sendToAddress(transfer)
+        //expect instant txid
+        console.log("result: ",result)
+
         /*
                BTC
          */

@@ -127,12 +127,12 @@ export async function initWallet(wallet: any) {
         let filename = wallet.filename
 
         let result = fs.writeFileSync(seedDir+"/"+filename, JSON.stringify(walletWrite));
-        //console.log("result: ", result);
+        console.log("result: ", result);
 
         return result;
     } catch (e) {
         console.error(tag, "e: ", e);
-        return {};
+        throw e
     }
 }
 

@@ -11,12 +11,13 @@
     "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
     "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
     "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
-    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
+    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push",
+    "fix": "npm rebuild"
   },
   "dependencies": {
     "@babel/runtime": "^7.13.10",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "^7.0.35",
+    "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",

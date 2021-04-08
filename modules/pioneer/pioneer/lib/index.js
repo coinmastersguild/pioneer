@@ -949,9 +949,9 @@ module.exports = /** @class */ (function () {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
-        this.sendToAddress = function (coin, address, amount, param1, invocationId) {
+        this.sendToAddress = function (intent) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, output, addressFrom, transaction, signedTx_1, broadcast_hook, e_6;
+                var tag, invocationId, addressFrom, transaction, signedTx_1, broadcast_hook, e_6;
                 var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -960,21 +960,27 @@ module.exports = /** @class */ (function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 4, , 5]);
-                            if (!invocationId)
-                                invocationId = "whatevs";
-                            output = {};
-                            log.debug(tag, "params: ", { coin: coin, address: address, amount: amount, param1: param1, invocationId: invocationId });
-                            return [4 /*yield*/, this.getMaster(coin)];
+                            invocationId = void 0;
+                            if (!intent.invocationId) {
+                                invocationId = "notset";
+                            }
+                            else {
+                                invocationId = intent.invocationId;
+                            }
+                            intent.coin = intent.coin.toUpperCase();
+                            log.debug(tag, "params: ", intent);
+                            return [4 /*yield*/, this.getMaster(intent.coin)];
                         case 2:
                             addressFrom = _a.sent();
                             log.debug(tag, "addressFrom: ", addressFrom);
                             transaction = {
-                                coin: coin,
-                                addressTo: address,
+                                coin: intent.coin,
+                                addressTo: intent.address,
                                 addressFrom: addressFrom,
-                                amount: amount,
-                                memo: param1
+                                amount: intent.amount
                             };
+                            if (intent.memo)
+                                transaction.memo = intent.memo;
                             return [4 /*yield*/, this.buildTransfer(transaction)];
                         case 3:
                             signedTx_1 = _a.sent();
@@ -988,7 +994,7 @@ module.exports = /** @class */ (function () {
                                     switch (_a.label) {
                                         case 0:
                                             _a.trys.push([0, 2, , 3]);
-                                            return [4 /*yield*/, this.broadcastTransaction(coin, signedTx_1)];
+                                            return [4 /*yield*/, this.broadcastTransaction(intent.coin, signedTx_1)];
                                         case 1:
                                             broadcastResult = _a.sent();
                                             log.info(tag, "broadcastResult: ", broadcastResult);
@@ -1001,8 +1007,12 @@ module.exports = /** @class */ (function () {
                                     }
                                 });
                             }); };
-                            //Notice NO asyc!
-                            broadcast_hook();
+                            //broadcast hook
+                            if (!intent.noBroadcast) {
+                                //Notice NO asyc!
+                                broadcast_hook();
+                            }
+                            signedTx_1.invocationId = invocationId;
                             //
                             if (!signedTx_1.txid)
                                 throw Error("103: Pre-broadcast txid hash not implemented!");
@@ -1029,6 +1039,12 @@ module.exports = /** @class */ (function () {
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
                             amount = transaction.amount;
+                            if (!coin)
+                                throw Error("Invalid transaction missing coin!");
+                            if (!address)
+                                throw Error("Invalid transaction missing address!");
+                            if (!amount)
+                                throw Error("Invalid transaction missing amount!");
                             memo = transaction.memo;
                             addressFrom = void 0;
                             if (!transaction.addressFrom) return [3 /*break*/, 2];
@@ -1041,7 +1057,7 @@ module.exports = /** @class */ (function () {
                         case 4:
                             if (!addressFrom)
                                 throw Error("102: unable to get master address! ");
-                            log.debug(tag, "addressFrom: ", addressFrom);
+                            log.info(tag, "addressFrom: ", addressFrom);
                             rawTx = void 0;
                             UTXOcoins = [
                                 'BTC',
@@ -1361,11 +1377,13 @@ module.exports = /** @class */ (function () {
                             };
                             log.info("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)
+                                //debug https://flightwallet.github.io/decode-eth-tx/
                                 //txid
                                 //const txHash = await web3.utils.sha3(signed.rawTransaction);
                             ];
                         case 16:
                             rawTx = _a.sent();
+                            //debug https://flightwallet.github.io/decode-eth-tx/
                             //txid
                             //const txHash = await web3.utils.sha3(signed.rawTransaction);
                             if (!rawTx.serialized)

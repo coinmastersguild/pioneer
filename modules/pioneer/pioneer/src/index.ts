@@ -107,6 +107,15 @@ const EOS_MAX_GAS="100000"
 const EOS_TX_FEE="100"
 const EOS_BASE=1000
 
+export interface SendToAddress {
+    coin:string,
+    amount:string,
+    address:string,
+    memo?:string,
+    invocationId?:string,
+    noBroadcast?:boolean
+}
+
 export interface config {
     blockchains: string[];
     isTestnet?: boolean;
@@ -152,7 +161,7 @@ export interface Transaction {
     addressFrom: string;
     addressTo: string;
     amount: string;
-    memo: string;
+    memo?: string | undefined;
     nonce?:number
 }
 
@@ -246,7 +255,7 @@ module.exports = class wallet {
     private buildTx: (transaction: any) => Promise<any>;
     private bip32ToAddressNList: (path: string) => number[];
     // private encrypt: (msg: FioActionParameters.FioRequestContent, payerPubkey: string) => Promise<any>;
-    private sendToAddress: (coin: string, address: string, amount: string, param1: string, invocationId: string) => Promise<any>;
+    private sendToAddress: (intent: SendToAddress) => Promise<any>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
     private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
     private mode: string;
@@ -875,25 +884,29 @@ module.exports = class wallet {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
-        this.sendToAddress = async function (coin:string,address:string,amount:string,param1:string,invocationId:string) {
+        this.sendToAddress = async function (intent:SendToAddress) {
             let tag = TAG+" | sendToAddress | "
             try{
-                if(!invocationId) invocationId = "whatevs"
-                //if(!invocationId)throw Error("invocationId: required!")
-                let output = {}
-                log.debug(tag,"params: ",{coin,address,amount,param1,invocationId})
+                let invocationId
+                if(!intent.invocationId) {
+                    invocationId = "notset"
+                } else {
+                    invocationId = intent.invocationId
+                }
+                intent.coin = intent.coin.toUpperCase()
+                log.debug(tag,"params: ",intent)
                 //TODO verify input params
 
-                let addressFrom = await this.getMaster(coin)
+                let addressFrom = await this.getMaster(intent.coin)
                 log.debug(tag,"addressFrom: ",addressFrom)
 
                 let transaction:Transaction = {
-                    coin,
-                    addressTo:address,
+                    coin:intent.coin,
+                    addressTo:intent.address,
                     addressFrom,
-                    amount:amount,
-                    memo:param1
+                    amount:intent.amount
                 }
+                if(intent.memo) transaction.memo = intent.memo
 
                 //build transfer
                 let signedTx = await this.buildTransfer(transaction)
@@ -902,11 +915,12 @@ module.exports = class wallet {
                 if(invocationId)signedTx.invocationId = invocationId
                 log.debug(tag,"transaction: ",transaction)
 
-                //broadcast hook
+                signedTx.broadcasted = false
                 let broadcast_hook = async () =>{
                     try{
+
                         //TODO flag for async broadcast
-                        let broadcastResult = await this.broadcastTransaction(coin,signedTx)
+                        let broadcastResult = await this.broadcastTransaction(intent.coin,signedTx)
                         log.info(tag,"broadcastResult: ",broadcastResult)
 
                         //push to invoke api
@@ -914,9 +928,13 @@ module.exports = class wallet {
                         log.error(tag,"Failed to broadcast transaction!")
                     }
                 }
-                //Notice NO asyc!
-                broadcast_hook()
-
+                //broadcast hook
+                if(!intent.noBroadcast){
+                    signedTx.broadcasted = true
+                    //Notice NO asyc!
+                    broadcast_hook()
+                }
+                signedTx.invocationId = invocationId
                 //
                 if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
                 return signedTx
@@ -931,6 +949,10 @@ module.exports = class wallet {
                 let coin = transaction.coin.toUpperCase()
                 let address = transaction.addressTo
                 let amount = transaction.amount
+                if(!coin) throw Error("Invalid transaction missing coin!")
+                if(!address) throw Error("Invalid transaction missing address!")
+                if(!amount) throw Error("Invalid transaction missing amount!")
+
                 let memo = transaction.memo
                 let addressFrom
                 if(transaction.addressFrom){
@@ -939,7 +961,7 @@ module.exports = class wallet {
                     addressFrom = await this.getMaster(coin)
                 }
                 if(!addressFrom) throw Error("102: unable to get master address! ")
-                log.debug(tag,"addressFrom: ",addressFrom)
+                log.info(tag,"addressFrom: ",addressFrom)
 
                 let rawTx
 
@@ -1290,6 +1312,7 @@ module.exports = class wallet {
 
                     log.info("unsignedTxETH: ",ethTx)
                     rawTx = await this.WALLET.ethSignTx(ethTx)
+                    //debug https://flightwallet.github.io/decode-eth-tx/
 
                     //txid
                     //const txHash = await web3.utils.sha3(signed.rawTransaction);

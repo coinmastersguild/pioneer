@@ -22,11 +22,13 @@
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
     "@pioneer-platform/pioneer-coins": "latest",
+    "@pioneer-platform/pioneer-invoke": "^6.2.29",
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-util": "^0.2.6",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
     "ethers": "^5.0.32",
+    "openapi-client-axios": "^3.13.1",
     "prettyjson": "^1.2.1"
   },
   "devDependencies": {

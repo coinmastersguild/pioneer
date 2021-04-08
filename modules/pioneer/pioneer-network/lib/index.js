@@ -534,11 +534,14 @@ var get_balance = function (coin, isTestnet) {
                     output = void 0;
                     if (!(coin === "ETH")) return [3 /*break*/, 4];
                     log.debug("ETH detected ");
-                    return [4 /*yield*/, get_address_master('ETH')];
+                    return [4 /*yield*/, get_address_master('ETH')
+                        // if(isTestnet)networks['ETH'].init({testnet:true})
+                    ];
                 case 2:
                     master = _a.sent();
+                    // if(isTestnet)networks['ETH'].init({testnet:true})
                     if (isTestnet)
-                        networks['ETH'].init({ testnet: true });
+                        networks['ETH'].init();
                     return [4 /*yield*/, networks['ETH'].getBalanceAddress(master)];
                 case 3:
                     output = _a.sent();
@@ -546,8 +549,9 @@ var get_balance = function (coin, isTestnet) {
                 case 4:
                     if (!(tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 7];
                     log.debug("token detected ");
+                    // if(isTestnet)networks['ETH'].init({testnet:true})
                     if (isTestnet)
-                        networks['ETH'].init({ testnet: true });
+                        networks['ETH'].init();
                     return [4 /*yield*/, get_address_master('ETH')];
                 case 5:
                     master = _a.sent();
@@ -654,8 +658,8 @@ var get_wallet_info = function () {
                     log.info(tag, "supportedAssets: ", supportedAssets);
                     log.debug(tag, "coins: ", coins);
                     //pubkeys
-                    output.isTestnet = IS_TESTNET;
-                    log.info(tag, "IS_TESTNET: ", IS_TESTNET);
+                    // output.isTestnet = IS_TESTNET
+                    // log.info(tag,"IS_TESTNET: ",IS_TESTNET)
                     //filter by support
                     output.public = publicWallet;
                     i = 0;
@@ -862,6 +866,9 @@ var get_wallet_info = function () {
                         valueUsds['ETH'] = "";
                         coinInfo['ETH'] = "";
                     }
+                    else {
+                        balances['ETH'] = 0;
+                    }
                     //balances
                     log.debug(tag, "PUBLIC_WALLET: ", PUBLIC_WALLET['ETH']);
                     log.debug(tag, "eth master: ", PUBLIC_WALLET['ETH'].master);
@@ -935,8 +942,6 @@ var init_wallet = function (type, config, isTestnet) {
                 case 1:
                     _a.trys.push([1, 3, , 4]);
                     log.debug("Checkpoint1  ", config);
-                    if (isTestnet)
-                        IS_TESTNET = true;
                     return [4 /*yield*/, blockbook.init()
                         //pubkeys
                     ];

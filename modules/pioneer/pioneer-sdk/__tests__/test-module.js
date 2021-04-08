@@ -30,7 +30,7 @@ let run_test = async function(){
         //console.log(SDK)
         let app = new SDK.SDK(spec,config,true)
         //console.log(app)
-        let seedChains = ['Bitcoin','Ethereum','Thorchain']
+        let seedChains = ['bitcoin','ethereum','thorchain']
         await app.init(seedChains)
 
         //init
@@ -62,6 +62,7 @@ let run_test = async function(){
             //
             // console.log("user: ",address)
             // console.log("bncBalances: ",bncBalances)
+
             //BTC
 
             //ETH
@@ -87,8 +88,8 @@ let run_test = async function(){
 
             //send eth
 
-            // let txid = await app.sendToAddress('ethereum','ETH',0.001,'0x33b35c665496bA8E71B22373843376740401F106')
-            // console.log("txid: ",txid)
+            let txid = await app.sendToAddress('ethereum','ETH',0.001,'0xc3affff54122658b89c31183cec4f15514f34624')
+            console.log("txid: ",txid)
         }
 
 

@@ -390,6 +390,13 @@ module.exports = {
     getCoins: function () {
         return ONLINE;
     },
+    //TODO
+    // viewSeed: function () {
+    //     return WALLET_SEED;
+    // },
+    sendToAddress: function (intent) {
+        return send_to_address(intent);
+    },
 };
 let pair_sdk_user = function (code) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -667,15 +674,19 @@ let broadcast_transaction = function (coin, rawTx) {
         }
     });
 };
-let send_to_address = function (coin, address, amount, memo, invocationId) {
+let send_to_address = function (intent) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | send_to_address | ";
         try {
-            coin = coin.toUpperCase();
-            log.info(tag, "Pioneer: ", Pioneer);
-            log.debug("params: ", { coin, address, amount });
-            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(coin, address, amount, memo, invocationId);
-            log.debug(tag, "txid: ", signedTx.txid);
+            if (!intent.address)
+                throw Error("102: invalid intent missing address!");
+            if (!intent.coin)
+                throw Error("102: invalid intent missing coin!");
+            if (!intent.amount)
+                throw Error("102: invalid intent missing amount!");
+            log.info(tag, "params: ", intent);
+            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent);
+            log.info(tag, "txid: ", signedTx.txid);
             //
             return signedTx;
         }
@@ -1054,7 +1065,7 @@ let init_wallet = function (config, isTestnet) {
             //on payments update balances
             //on on invocations add to queue
             events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
-                console.log("**** Invoke: ", request);
+                log.info(tag, "**** Invoke: ", request);
                 //TODO filter invocations by subscribers
                 //TODO autonomousOn/Off
                 //TODO verify auth to paired keys
@@ -1071,12 +1082,12 @@ let init_wallet = function (config, isTestnet) {
                     case 'swap':
                         //TODO validate inputs
                         signedTx = yield build_swap(request.invocation, request.invocationId);
-                        console.log("txid: ", signedTx.txid);
+                        log.info(tag, "txid: ", signedTx.txid);
                         events.emit('broadcast', signedTx);
                         break;
                     case 'transfer':
-                        signedTx = yield send_to_address(request.coin, request.to, request.amount, request.memo, request.invocationId);
-                        console.log("txid: ", signedTx.txid);
+                        signedTx = yield send_to_address(request.invocation);
+                        log.info(tag, "txid: ", signedTx.txid);
                         events.emit('broadcast', signedTx);
                         break;
                     default:

@@ -20,7 +20,7 @@ let App = require("@pioneer-platform/pioneer-app")
 const log = require("@pioneer-platform/loggerdog")()
 
 //general dev envs
-let seed = process.env['WALLET_TESTNET_DEV']
+let seed = process.env['WALLET_MAINNET_DEV_OLD']
 let password = process.env['WALLET_PASSWORD']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
@@ -48,10 +48,10 @@ export async function startApp() {
 
         //create wallet files
         let successCreate = await App.createWallet('software',wallet1)
-        assert(successCreate)
+        //assert(successCreate)
 
         await App.initConfig("english");
-        App.updateConfig({isTestnet:true});
+        // App.updateConfig({isTestnet:true});
         App.updateConfig({username});
         App.updateConfig({temp:password});
         App.updateConfig({created: new Date().getTime()});
@@ -59,9 +59,11 @@ export async function startApp() {
         //get config
         config = await App.getConfig()
 
+        config.blockchains = ['ethereum']
+
         //verify startup
-        let isTestnet = true
-        let resultInit = await App.init(config,isTestnet)
+        //let isTestnet = null
+        let resultInit = await App.init(config)
         assert(resultInit)
 
         config.password = password

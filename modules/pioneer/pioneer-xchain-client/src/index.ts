@@ -21,6 +21,8 @@ let {
     getExplorerTxUrl
 } = require('@pioneer-platform/pioneer-coins')
 
+let Invoke = require("@pioneer-platform/pioneer-invoke")
+
 import {
     Balances
 } from '@xchainjs/xchain-client'
@@ -205,6 +207,7 @@ module.exports = class wallet {
     private estimateFee: (({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) => Promise<any>) | undefined;
     private callDeposit: (({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) => Promise<any>) | undefined;
     private buildSwap: (swap: Swap) => Promise<any>;
+    private invoke: any;
     constructor(spec:string,config:any) {
         this.username = ''
         this.network = config.blockchain
@@ -237,6 +240,17 @@ module.exports = class wallet {
                 //TODO error handling
                 this.info = info.data
                 this.username = this.info.username
+
+
+                //invoke
+                let config = {
+                    queryKey:this.queryKey,
+                    username:this.username,
+                    spec
+                }
+                //get config
+                this.invoke = new Invoke(spec,config)
+                await  this.invoke.init()
 
                 return this.pioneerApi
             }catch(e){
@@ -645,7 +659,7 @@ module.exports = class wallet {
             memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
                 amount: { type: 'BASE', decimal: 18 }
         }
-         */
+        */
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try {
@@ -683,20 +697,25 @@ module.exports = class wallet {
                     username:this.username,
                     coin,
                     amount,
-                    to,
+                    address:to,
                     memo
                 }
 
-                let request:any = {
-                    type:"payment",
-                    username:this.username,
-                    //TODO source
-                    //TODO auth
-                    //TODO sig
-                    invocation
-                }
-                //invocation
-                let result = await this.pioneerApi.Invocation('',request)
+
+                let result = await this.invoke.invoke('transfer',invocation)
+                console.log("result: ",result.data)
+
+                // let request:any = {
+                //     type:"transfer",
+                //     username:this.username,
+                //     service:this.service,
+                //     //TODO source
+                //     //TODO auth
+                //     //TODO sig
+                //     invocation
+                // }
+                // //invocation
+                // let result = await this.pioneerApi.Invocation('',request)
 
                 //
 
