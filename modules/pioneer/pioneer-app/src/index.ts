@@ -41,11 +41,10 @@ let nedb = require("@pioneer-platform/nedb")
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events")
 
-let {
-    getPaths,
-    get_address_from_xpub
-} = require('@pioneer-platform/pioneer-coins')
-let paths = getPaths()
+// let {
+//     getPaths,
+//     get_address_from_xpub
+// } = require('@pioneer-platform/pioneer-coins')
 
 // @ts-ignore
 import { Crypto } from "@peculiar/webcrypto";
@@ -818,7 +817,7 @@ function standardRandomBytesFunc(size: any) {
 }
 
 let backup_wallet = async function () {
-    let tag = " | create_wallet | ";
+    let tag = " | backup_wallet | ";
     try {
         //TODO validate seed
 
@@ -865,7 +864,8 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                 if(!wallet.username) wallet.username = "defaultUser:"+uuidv4()
 
                 //filename
-                let filename = wallet.username+".wallet.json"
+                let filename = wallet.masterAddress+".wallet.json"
+
                 //does wallet exist
                 let alreadyExists = getWallet(filename)
                 log.debug(tag,"alreadyExists: ",alreadyExists)
@@ -898,8 +898,8 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                         filename
                     }
                     if(wallet.temp) walletNew.temp = wallet.temp
-                    // @ts-ignore
-                    const success = await initWallet(walletNew);
+
+                    output = await initWallet(walletNew);
                 } else {
                     throw Error("already exists")
                     //TODO verify?
@@ -966,7 +966,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             pioneerWs:URL_PIONEER_SOCKET
         }
 
-
         //sub ALL events
         let events = await Events.init(configEvents)
 
@@ -1014,6 +1013,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         }
 
+        if(!config.blockchains){
+            config.blockchains = ['bitcoin','ethereum','thorchain']
+        }
+
         //Load wallets if setup
         for(let i = 0; i < wallets.length; i++){
             let walletName = wallets[i]
@@ -1028,6 +1031,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     isTestnet,
                     hardware:true,
                     vendor:"keepkey",
+                    blockchains:config.blockchains,
                     pubkeys:walletFile.pubkeys,
                     wallet:walletFile,
                     username:config.username,
@@ -1043,8 +1047,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 let walletInfo = await wallet.init(KEEPKEY)
                 log.info(tag,"walletInfo: ",walletInfo)
                 WALLETS_LOADED.push(wallet)
-
-
 
                 //info
                 let info = await wallet.getInfo()
@@ -1107,7 +1109,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 info.type = 'software'
                 output.wallets.push(info)
                 log.debug(tag,"info: ",info.totalValueUsd)
-
 
                 let walletInfoPub = {
                     WALLET_ID:walletFile.username,

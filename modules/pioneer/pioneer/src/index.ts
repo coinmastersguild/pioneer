@@ -23,6 +23,9 @@ const prettyjson = require('prettyjson');
 const coinSelect = require('coinselect')
 const keccak256 = require('keccak256')
 
+//coin crypto modules
+const ethCrypto = require("@pioneer-platform/eth-crypto")
+
 //All paths
 //TODO make paths adjustable!
 let {
@@ -233,6 +236,7 @@ module.exports = class wallet {
     // private getStakes: (coin: string) => Promise<any>;
     // private getBalances: (coin: string) => Promise<any>;
     private getMaster: (coin: string) => Promise<any>;
+    private getMasterOfSeed: (seed: string) => Promise<any>;
     private getAddress: (coin: string, account: number, index: number, isChange: boolean) => Promise<any>;
     // private getAddressByPath: (coin: string, path: string) => Promise<any>;
     // private getNewAddress: (coin: string) => Promise<any>;
@@ -272,7 +276,7 @@ module.exports = class wallet {
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
-        this.blockchains = config.blockchains || ['Bitcoin','Ethereum']
+        this.blockchains = config.blockchains || ['bitcoin','ethereum']
         this.type = type
         this.spec = config.spec
         this.mnemonic = config.mnemonic
@@ -485,6 +489,11 @@ module.exports = class wallet {
         }
         this.getBalance = function (coin:string) {
             return this.WALLET_BALANCES[coin] || 0;
+        }
+        this.getMasterOfSeed = async function (mnemonic:string,coin?:string) {
+            //master is ETH
+            let wallet = await ethCrypto.generateWalletFromSeed(mnemonic)
+            return wallet.masterAddress;
         }
         this.getBalanceRemote = async function (coin:string,address?:string) {
             let tag = TAG + " | getBalanceRemote | "

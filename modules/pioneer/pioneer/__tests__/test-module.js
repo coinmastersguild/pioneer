@@ -97,8 +97,8 @@ let run_test = async function(){
         let balanceRUNE = await Wallet.getBalance("RUNE")
         console.log("balanceRUNE: ",balanceRUNE)
 
-        let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
-        let amount = "100"
+        let address = "thor1x00pfwyx8xld45sdlmyn29vjf7ev0mv3rcn9al"
+        let amount = "10"
         let memo = ""
 
         let transfer = {

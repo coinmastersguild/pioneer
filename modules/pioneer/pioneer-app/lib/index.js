@@ -51,8 +51,10 @@ const approvedQueue = queue({ approved: [] });
 let nedb = require("@pioneer-platform/nedb");
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events");
-let { getPaths, get_address_from_xpub } = require('@pioneer-platform/pioneer-coins');
-let paths = getPaths();
+// let {
+//     getPaths,
+//     get_address_from_xpub
+// } = require('@pioneer-platform/pioneer-coins')
 // @ts-ignore
 const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
@@ -741,7 +743,7 @@ function standardRandomBytesFunc(size) {
 }
 let backup_wallet = function () {
     return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | create_wallet | ";
+        let tag = " | backup_wallet | ";
         try {
             //TODO validate seed
             //does wallet already exist?
@@ -788,7 +790,7 @@ let create_wallet = function (type, wallet, isTestnet) {
                     if (!wallet.username)
                         wallet.username = "defaultUser:" + uuid_1.v4();
                     //filename
-                    let filename = wallet.username + ".wallet.json";
+                    let filename = wallet.masterAddress + ".wallet.json";
                     //does wallet exist
                     let alreadyExists = pioneer_config_1.getWallet(filename);
                     log.debug(tag, "alreadyExists: ", alreadyExists);
@@ -818,8 +820,7 @@ let create_wallet = function (type, wallet, isTestnet) {
                         };
                         if (wallet.temp)
                             walletNew.temp = wallet.temp;
-                        // @ts-ignore
-                        const success = yield pioneer_config_1.initWallet(walletNew);
+                        output = yield pioneer_config_1.initWallet(walletNew);
                     }
                     else {
                         throw Error("already exists");
@@ -931,6 +932,9 @@ let init_wallet = function (config, isTestnet) {
                     });
                 });
             }
+            if (!config.blockchains) {
+                config.blockchains = ['bitcoin', 'ethereum', 'thorchain'];
+            }
             //Load wallets if setup
             for (let i = 0; i < wallets.length; i++) {
                 let walletName = wallets[i];
@@ -947,6 +951,7 @@ let init_wallet = function (config, isTestnet) {
                         isTestnet,
                         hardware: true,
                         vendor: "keepkey",
+                        blockchains: config.blockchains,
                         pubkeys: walletFile.pubkeys,
                         wallet: walletFile,
                         username: config.username,

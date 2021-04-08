@@ -65,6 +65,12 @@ export default store => {
       store.commit('registerApp',app)
     }
   })
+  ipcRenderer.on('setWalletInfoContext', (event, data) => {
+    console.log(' setWalletInfoContext event! ')
+    console.log('data: ', data)
+    store.commit('setWalletInfo',data)
+
+  })
   ipcRenderer.on('init', (event, data) => {
     console.log('init event! ')
     console.log('data: ', data)

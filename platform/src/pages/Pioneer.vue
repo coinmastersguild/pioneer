@@ -11,46 +11,49 @@
 
       <q-separator />
 
-<!--      <div class="q-pa-md" style="max-width: 550px">-->
-<!--        <q-list bordered class="rounded-borders" style="width:550px;">-->
-<!--          <div v-for="coin in coins" :key="coin.symbol">-->
-<!--&lt;!&ndash;            {{coin}}&ndash;&gt;-->
-<!--&lt;!&ndash;            {{coin.symbol}}&ndash;&gt;-->
-<!--            <q-expansion-item style="width:550px;">-->
-<!--              <template v-slot:header style="width:550px;">-->
-<!--                <q-item-section avatar>-->
-<!--                  <q-img :src="coin.icon"></q-img>-->
-<!--                </q-item-section>-->
+<!--      {{walletInfo}}-->
 
-<!--                <q-item-section>-->
-<!--                  {{coin.symbol}}-->
-<!--                </q-item-section>-->
+      <div class="q-pa-md" style="max-width: 550px">
+        <q-list bordered class="rounded-borders" style="width:550px;">
+          <div v-for="coin in coins" :key="coin.symbol">
+<!--            {{coin}}-->
+<!--            {{coin.symbol}}-->
+            <q-expansion-item style="width:550px;">
+              <template v-slot:header style="width:550px;">
+                <q-item-section avatar>
+                  <q-img :src="coin.icon"></q-img>
+                </q-item-section>
 
-<!--                <q-item-section side>-->
-<!--                  <animated-number :value="walletInfo?.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>-->
-<!--                </q-item-section>-->
-<!--              </template>-->
+                <q-item-section>
+                  {{coin.symbol}} ({{walletInfo.public[coin.symbol].long}})
+                </q-item-section>
 
-<!--              <q-card>-->
-<!--                <q-card-section style="word-wrap: break-word;">-->
-<!--                  {{coin.symbol}}-->
-<!--                  <q-separator />-->
-<!--                  Address: {{walletInfo?.masters[coin.symbol]}} <br/>-->
-<!--                  {{copyText}}-->
-<!--                  <q-icon @click=copyAddress(walletInfo?.masters[coin.symbol]) name="content_copy"></q-icon>-->
-<!--                  <q-separator />-->
-<!--                  info: {{walletInfo?.coinInfo[coin.symbol]}}-->
+                <q-item-section side>
+                  <animated-number :value="walletInfo.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>
+                </q-item-section>
+              </template>
 
-<!--                </q-card-section>-->
-<!--              </q-card>-->
-<!--            </q-expansion-item>-->
+              <q-card>
+                <q-card-section style="word-wrap: break-word;">
+                  <small>script type: {{walletInfo.public[coin.symbol].script_type}}</small>
+                  <q-separator />
+                  Address: {{walletInfo.masters[coin.symbol]}} <br/>
+                  {{copyText}}
+                  <q-icon @click=copyAddress(walletInfo.masters[coin.symbol]) name="content_copy"></q-icon>
+                  <q-separator />
+                  path: {{walletInfo.public[coin.symbol].path}}
+                  <q-separator />
+                  <small>xpub: {{walletInfo.public[coin.symbol].xpub}}</small>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
 
-<!--            <q-separator />-->
+            <q-separator />
 
-<!--          </div>-->
+          </div>
 
-<!--        </q-list>-->
-<!--      </div>-->
+        </q-list>
+      </div>
 
     </q-page>
 
@@ -69,27 +72,19 @@
    sample data
    */
 
-  let coins = [
-    // {
-    //   symbol:"ETH",
-    //   icon:"https://static.coincap.io/assets/icons/svg/eth.svg"
-    // },
-    // {
-    //   symbol:"BTC",
-    //   icon:"https://static.coincap.io/assets/icons/svg/btc.svg"
-    // }
-  ]
+  //let walletInfo = { "isTestnet": true, "public": { "BTC": { "coin": "BTC", "network": "BTC", "script_type": "p2pkh", "path": "m/44'/0'/1'", "long": "Bitcoin", "address": "19X8qFMB1f3MkFMb38y8ANGJN5Di18roMT", "master": "19X8qFMB1f3MkFMb38y8ANGJN5Di18roMT", "type": "xpub", "xpub": "xpub6D1weXBcFAo8HPiRxhc6tBvwu7o35mYfn2BemJhhB93syYFJ1FCE7Rn2dbLNh1EPqKG3BAuB66gLyqgW8ouxyo1hnU1p9xQpFSNQgXDuQL4", "pubkey": "xpub6D1weXBcFAo8HPiRxhc6tBvwu7o35mYfn2BemJhhB93syYFJ1FCE7Rn2dbLNh1EPqKG3BAuB66gLyqgW8ouxyo1hnU1p9xQpFSNQgXDuQL4" }, "ETH": { "coin": "ETH", "network": "ETH", "script_type": "ethereum", "path": "m/44'/60'/0'", "long": "Ethereum", "address": "0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8", "master": "0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8", "type": "address", "xpub": "xpub6D54vV8eUYHMVBZCnz4SLjuiQngXURVCGKKGoJrWUDRegdMByLTJKfRs64q3UKiQCsSHJPtCQehTvERczdghS7gb8oedWSyNDtBU1zYDJtb", "pubkey": "0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8" }, "RUNE": { "coin": "RUNE", "network": "RUNE", "script_type": "thorchain", "path": "m/44'/931'/0'/0/0", "long": "Thorchain", "address": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az", "master": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az", "type": "address", "xpub": "xpub6FkHm9bKQbvo1T28h8haU9iXBojqejUsS5JEvdmaDnbyfYN6jLd9M8VrhMS8ibEHcpTefHu9yxC7rfffLeWPS4jDqT1Vq5r2k3D9ySwm4uL", "pubkey": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az" } }, "totalValueUsd": 747.974853726241, "duration": 1435, "masters": { "BTC": "mkqRFzxmkCGX9jxgpqqFHcxRUmLJcLDBer", "ETH": "0x3f2329c9adfbccd9a84f52c906e936a42da18cb8", "RUNE": "tthor1mu7gez4wpkddlsldfc8trn94zqwqumcgeyy78e" }, "txCount": {}, "balances": { "BTC": 0.01, "RUNE": 0, "ETH": 0.07804892027035262 }, "valueUsds": { "BTC": 582.5339669860442, "RUNE": 0, "ETH": 165.4408867401968 }, "coinInfo": { "RUNE": "", "ETH": "" }, "syncStatus": {}, "stakes": {}, "username": "test-user-2", "apps": [ "https://swaps.pro/" ], "private": {} }
+
   export default {
     name: 'Pioneer',
     components: {
-      // AnimatedNumber
+      AnimatedNumber
     },
     data () {
       return {
         duration: 500,
         queryKey:"",
-        coins,
-        walletInfo:{},
+        coins:[],
+        walletInfo: {},
         wallets:[],
         apps:[],
         devMode:false,
@@ -126,21 +121,35 @@
       "$store.state.walletInfo": {
         handler: function(value) {
           console.log("value: ",value)
-          this.walletInfo = this.$store.getters['walletInfo'];
+          this.walletInfo = this.$store.getters['getWalletInfo'];
           console.log("walletInfo: ",this.walletInfo)
+
+          if(this.walletInfo && this.walletInfo.masters){
+            let coins = Object.keys(this.walletInfo.masters)
+            let coinList = []
+            for(let i = 0; i < coins.length; i++){
+              let coin = coins[i]
+              coinList.push({
+                symbol:coin,
+                icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
+              })
+            }
+            this.coins = coinList
+            console.log("coins: ",coinList)
+          }
         },
         immediate: true
       },
-      "$store.state.coins": {
-        handler: function(value) {
-          this.coins = this.$store.getters['coins'];
-          console.log("coins: ",this.coins)
-        },
-        immediate: true
-      }
+      // "$store.state.coins": {
+      //   handler: function(value) {
+      //     this.coins = this.$store.getters['coins'];
+      //     console.log("coins: ",this.coins)
+      //   },
+      //   immediate: true
+      // }
     },
     computed: {
-      ...mapGetters(['getApps','layout']),
+      ...mapGetters(['getApps','layout','getWalletInfo']),
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp']),

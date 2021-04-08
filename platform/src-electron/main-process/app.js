@@ -245,8 +245,10 @@ export async function onStart(event,data) {
     log.info("walletFiles: ",walletFiles)
 
     if(!config.spec || true){
-      config.spec = "http://127.0.0.1:9001/spec/swagger.json"
-      config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
+      config.spec = "https://pioneers.dev/spec/swagger.json"
+      config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
+      // config.spec = "http://127.0.0.1:9001/spec/swagger.json"
+      // config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
       //config.spec = "https://pioneers.dev/spec/swagger.json"
     }
 
@@ -306,7 +308,7 @@ export async function onStart(event,data) {
     //load masters
     let info = await context.getInfo()
     log.info("info: ",info)
-
+    event.sender.send('setWalletInfoContext',info)
     //Start wallet interface
 
 

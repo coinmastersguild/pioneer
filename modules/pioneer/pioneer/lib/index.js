@@ -77,6 +77,8 @@ var ethUtils = require('ethereumjs-util');
 var prettyjson = require('prettyjson');
 var coinSelect = require('coinselect');
 var keccak256 = require('keccak256');
+//coin crypto modules
+var ethCrypto = require("@pioneer-platform/eth-crypto");
 //All paths
 //TODO make paths adjustable!
 var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
@@ -183,7 +185,7 @@ module.exports = /** @class */ (function () {
         this.queryKey = config.queryKey;
         this.username = config.username;
         this.pioneerApi = config.pioneerApi;
-        this.blockchains = config.blockchains || ['Bitcoin', 'Ethereum'];
+        this.blockchains = config.blockchains || ['bitcoin', 'ethereum'];
         this.type = type;
         this.spec = config.spec;
         this.mnemonic = config.mnemonic;
@@ -462,6 +464,19 @@ module.exports = /** @class */ (function () {
         };
         this.getBalance = function (coin) {
             return this.WALLET_BALANCES[coin] || 0;
+        };
+        this.getMasterOfSeed = function (mnemonic, coin) {
+            return __awaiter(this, void 0, void 0, function () {
+                var wallet;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, ethCrypto.generateWalletFromSeed(mnemonic)];
+                        case 1:
+                            wallet = _a.sent();
+                            return [2 /*return*/, wallet.masterAddress];
+                    }
+                });
+            });
         };
         this.getBalanceRemote = function (coin, address) {
             return __awaiter(this, void 0, void 0, function () {

@@ -11,6 +11,7 @@ const state = {
     layout:[],
     wallets: [],
     devices: [],
+    walletInfo: {}, //Current wallet context
     mnemonic: null,
     walltedLoaded: false,
     walletSendInfo:{},
@@ -37,6 +38,7 @@ const getters = {
     getWalletSendInfo: state => state.walletSendInfo,
     getMasterAddresses: state => state.masterAddresses,
     getBalances: state => state.balances,
+    getWalletInfo: state => state.walletInfo,
     getWalletLoaded: state => state.walltedLoaded,
     getAssetLoading: state => state.assetLoading,
     getKeepkeyConnected: state => state.keepkeyConnected,
@@ -107,6 +109,9 @@ const mutations = {
     setAssets: (state, assets) => state.coins = assets,
     setTotal(state,value){
       state.totalUsd = value
+    },
+    setWalletInfo(state,value){
+      state.walletInfo = value
     },
     setViewSeed(state,value){
       state.mnemonic = value
