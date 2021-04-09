@@ -49,7 +49,6 @@ let do_work = async function(){
         log.debug(tag,"allWork: ",allWork)
 
         let work = await queue.getWork("pioneer:pubkey:queue:ingest", 1)
-        log.info("work: ",work)
         if(work){
             log.info("work: ",work)
 
@@ -81,6 +80,12 @@ let do_work = async function(){
                     let resultSaveDB = await utxosDB.bulkWrite(utxos)
                     console.log("resultSaveDB: ",resultSaveDB)
                 }
+            } else {
+                //
+                log.info(tag,"address ingestion")
+
+                //if eth get info
+
             }
 
             //is already in mongo?

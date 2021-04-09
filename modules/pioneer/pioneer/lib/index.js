@@ -988,12 +988,14 @@ module.exports = /** @class */ (function () {
                             if (invocationId)
                                 signedTx_1.invocationId = invocationId;
                             log.debug(tag, "transaction: ", transaction);
+                            signedTx_1.broadcasted = false;
                             broadcast_hook = function () { return __awaiter(_this, void 0, void 0, function () {
                                 var broadcastResult, e_7;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
                                             _a.trys.push([0, 2, , 3]);
+                                            log.info(tag, "signedTx: ", signedTx_1);
                                             return [4 /*yield*/, this.broadcastTransaction(intent.coin, signedTx_1)];
                                         case 1:
                                             broadcastResult = _a.sent();
@@ -1009,9 +1011,15 @@ module.exports = /** @class */ (function () {
                             }); };
                             //broadcast hook
                             if (!intent.noBroadcast) {
-                                //Notice NO asyc!
-                                broadcast_hook();
+                                signedTx_1.broadcasted = true;
                             }
+                            else {
+                                signedTx_1.noBroadcast = true;
+                            }
+                            //if noBroadcast we MUST still release the inovation
+                            //do we pass noBroadcast to the broadcast post request
+                            //Notice NO asyc!
+                            broadcast_hook();
                             signedTx_1.invocationId = invocationId;
                             //
                             if (!signedTx_1.txid)
@@ -1784,7 +1792,7 @@ module.exports = /** @class */ (function () {
                 });
             });
         };
-        this.broadcastTransaction = function (coin, signedTx, invocationId) {
+        this.broadcastTransaction = function (coin, signedTx) {
             return __awaiter(this, void 0, void 0, function () {
                 var tag, resultBroadcast;
                 return __generator(this, function (_a) {
@@ -1797,8 +1805,6 @@ module.exports = /** @class */ (function () {
                             else {
                                 signedTx.coin = coin;
                             }
-                            if (invocationId)
-                                signedTx.invocationId = invocationId;
                             log.info(tag, "signedTx: ", signedTx);
                             return [4 /*yield*/, this.pioneerClient.instance.Broadcast(null, signedTx)];
                         case 1:

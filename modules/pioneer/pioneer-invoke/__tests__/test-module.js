@@ -108,7 +108,8 @@ let run_test = async function(){
             coin:txInput.asset.symbol,
             amount:txInput.amount.amount(),
             address:txInput.recipient,
-            memo:txInput.memo
+            memo:txInput.memo,
+            noBroadcast:true
         }
 
         let result = await invoke.invoke('transfer',invocation)

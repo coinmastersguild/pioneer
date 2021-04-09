@@ -76,6 +76,8 @@ var axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+//blockbook
+var blockbook = require("@pioneer-platform/blockbook");
 var providers_1 = require("@ethersproject/providers");
 var utils_1 = require("./utils");
 var xchain_util_1 = require("@xchainjs/xchain-util");
@@ -98,6 +100,7 @@ var THORCHAIN_ROUTER_TESTNET = process.env['THORCHAIN_ROUTER_TESTNET'] || "0x9d4
 var TCRopstenAbi = [{ "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": true, "internalType": "address", "name": "asset", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }, { "indexed": false, "internalType": "string", "name": "memo", "type": "string" }], "name": "Deposit", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "oldVault", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newVault", "type": "address" }, { "indexed": false, "internalType": "address", "name": "asset", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }, { "indexed": false, "internalType": "string", "name": "memo", "type": "string" }], "name": "TransferAllowance", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "vault", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "address", "name": "asset", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }, { "indexed": false, "internalType": "string", "name": "memo", "type": "string" }], "name": "TransferOut", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "oldVault", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newVault", "type": "address" }, { "components": [{ "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "indexed": false, "internalType": "struct Router.Coin[]", "name": "coins", "type": "tuple[]" }, { "indexed": false, "internalType": "string", "name": "memo", "type": "string" }], "name": "VaultTransfer", "type": "event" }, { "inputs": [], "name": "RUNE", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address[]", "name": "recipients", "type": "address[]" }, { "components": [{ "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "internalType": "struct Router.Coin[]", "name": "coins", "type": "tuple[]" }, { "internalType": "string[]", "name": "memos", "type": "string[]" }], "name": "batchTransferOut", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "address payable", "name": "vault", "type": "address" }, { "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" }], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "router", "type": "address" }, { "internalType": "address payable", "name": "asgard", "type": "address" }, { "components": [{ "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "internalType": "struct Router.Coin[]", "name": "coins", "type": "tuple[]" }, { "internalType": "string", "name": "memo", "type": "string" }], "name": "returnVaultAssets", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "router", "type": "address" }, { "internalType": "address", "name": "newVault", "type": "address" }, { "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" }], "name": "transferAllowance", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address payable", "name": "to", "type": "address" }, { "internalType": "address", "name": "asset", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" }], "name": "transferOut", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }, { "internalType": "address", "name": "", "type": "address" }], "name": "vaultAllowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }];
 module.exports = {
     init: function (settings) {
+        blockbook.init();
         if (!settings) {
             //use default
             web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -121,6 +124,9 @@ module.exports = {
     },
     getInfo: function () {
         return check_online_status();
+    },
+    getPoolPositions: function (address) {
+        return get_pool_positions(address);
     },
     getNonce: function (address) {
         return web3.eth.getTransactionCount(address, 'pending');
@@ -164,6 +170,30 @@ module.exports = {
     broadcast: function (tx) {
         return broadcast_transaction(tx);
     }
+};
+var get_pool_positions = function (address) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, ethInto, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_pool_positions | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, blockbook.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")];
+                case 2:
+                    ethInto = _a.sent();
+                    log.info(tag, "ethInto: ", ethInto);
+                    return [2 /*return*/, true];
+                case 3:
+                    e_1 = _a.sent();
+                    console.error(tag, e_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
 };
 /*
 let swap = {
@@ -214,7 +244,7 @@ var get_memo_data = function (swap) {
  */
 var estimate_fee = function (sourceAsset, params) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, checkSummedAddress, decimal, provider, contract, estimateGas, entry, fees, minimumWeiCost, e_1;
+        var tag, checkSummedAddress, decimal, provider, contract, estimateGas, entry, fees, minimumWeiCost, e_2;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -263,9 +293,9 @@ var estimate_fee = function (sourceAsset, params) {
                     minimumWeiCost = minimumWeiCost.mul(estimateGas.toNumber());
                     return [2 /*return*/, minimumWeiCost];
                 case 4:
-                    e_1 = _b.sent();
-                    log.error(tag, e_1);
-                    throw e_1;
+                    e_2 = _b.sent();
+                    log.error(tag, e_2);
+                    throw e_2;
                 case 5: return [2 /*return*/];
             }
         });
@@ -274,7 +304,7 @@ var estimate_fee = function (sourceAsset, params) {
 var get_gas_limit = function (_a) {
     var asset = _a.asset, recipient = _a.recipient, amount = _a.amount, memo = _a.memo;
     return __awaiter(this, void 0, void 0, function () {
-        var tag, txAmount, assetAddress, estimate, contract, transactionRequest, e_2;
+        var tag, txAmount, assetAddress, estimate, contract, transactionRequest, e_3;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -310,9 +340,9 @@ var get_gas_limit = function (_a) {
                     _b.label = 5;
                 case 5: return [2 /*return*/, estimate];
                 case 6:
-                    e_2 = _b.sent();
-                    log.error(tag, e_2);
-                    throw e_2;
+                    e_3 = _b.sent();
+                    log.error(tag, e_3);
+                    throw e_3;
                 case 7: return [2 /*return*/];
             }
         });
@@ -321,7 +351,7 @@ var get_gas_limit = function (_a) {
 var get_fees = function (params) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var tag, response, averageWei, fastWei, fastestWei, gasPrices, fastGP, fastestGP, averageGP, gasLimit, output, e_3;
+        var tag, response, averageWei, fastWei, fastestWei, gasPrices, fastGP, fastestGP, averageGP, gasLimit, output, e_4;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -370,9 +400,9 @@ var get_fees = function (params) {
                     };
                     return [2 /*return*/, output];
                 case 4:
-                    e_3 = _b.sent();
-                    log.error(tag, e_3);
-                    throw e_3;
+                    e_4 = _b.sent();
+                    log.error(tag, e_4);
+                    throw e_4;
                 case 5: return [2 /*return*/];
             }
         });
@@ -380,7 +410,7 @@ var get_fees = function (params) {
 };
 var broadcast_transaction = function (tx) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, result, output, e_4;
+        var tag, result, output, e_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -402,9 +432,9 @@ var broadcast_transaction = function (tx) {
                     };
                     return [2 /*return*/, output];
                 case 3:
-                    e_4 = _a.sent();
-                    log.error(tag, e_4);
-                    throw e_4;
+                    e_5 = _a.sent();
+                    log.error(tag, e_5);
+                    throw e_5;
                 case 4: return [2 /*return*/];
             }
         });
@@ -412,7 +442,7 @@ var broadcast_transaction = function (tx) {
 };
 var get_balance_tokens = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_5;
+        var tag, balances, valueUsds, coinInfo, resp, tokenInfo, i, info, symbol, rate, balance, e_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -457,8 +487,8 @@ var get_balance_tokens = function (address) {
                     }
                     return [2 /*return*/, { balances: balances, valueUsds: valueUsds, coinInfo: coinInfo }];
                 case 3:
-                    e_5 = _a.sent();
-                    console.error(tag, e_5);
+                    e_6 = _a.sent();
+                    console.error(tag, e_6);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -467,7 +497,7 @@ var get_balance_tokens = function (address) {
 };
 var get_balance_token = function (address, token) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, abiInfo, ABI, metaData, contract, balance, e_6;
+        var tag, abiInfo, ABI, metaData, contract, balance, e_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -490,8 +520,8 @@ var get_balance_token = function (address, token) {
                     log.info(tag, "balance: ", balance);
                     return [2 /*return*/, balance / metaData.BASE];
                 case 3:
-                    e_6 = _a.sent();
-                    console.error(tag, e_6);
+                    e_7 = _a.sent();
+                    console.error(tag, e_7);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -500,7 +530,7 @@ var get_balance_token = function (address, token) {
 };
 var get_balance = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_7;
+        var tag, output, e_8;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -515,8 +545,8 @@ var get_balance = function (address) {
                     output = (_a.sent()) / BASE;
                     return [2 /*return*/, output];
                 case 3:
-                    e_7 = _a.sent();
-                    console.error(tag, e_7);
+                    e_8 = _a.sent();
+                    console.error(tag, e_8);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -525,7 +555,7 @@ var get_balance = function (address) {
 };
 var get_transaction = function (txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, e_8;
+        var tag, output, _a, _b, e_9;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -550,8 +580,8 @@ var get_transaction = function (txid) {
                     _b.receipt = _c.sent();
                     return [2 /*return*/, output];
                 case 4:
-                    e_8 = _c.sent();
-                    console.error(tag, e_8);
+                    e_9 = _c.sent();
+                    console.error(tag, e_9);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -560,7 +590,7 @@ var get_transaction = function (txid) {
 };
 var check_online_status = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_9;
+        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_10;
         return __generator(this, function (_g) {
             switch (_g.label) {
                 case 0:
@@ -628,8 +658,8 @@ var check_online_status = function () {
                     _f.syncing = _g.sent();
                     return [2 /*return*/, output];
                 case 8:
-                    e_9 = _g.sent();
-                    console.error(tag, e_9);
+                    e_10 = _g.sent();
+                    console.error(tag, e_10);
                     return [3 /*break*/, 9];
                 case 9: return [2 /*return*/];
             }

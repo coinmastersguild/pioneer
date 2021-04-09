@@ -22,6 +22,9 @@ const axios = Axios.create({
 	})
 });
 
+//blockbook
+let blockbook = require("@pioneer-platform/blockbook")
+
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
 
@@ -88,6 +91,7 @@ const TCRopstenAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constr
 
 module.exports = {
 	init:function (settings:any) {
+		blockbook.init()
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -109,6 +113,9 @@ module.exports = {
 	},
 	getInfo:function () {
 		return check_online_status();
+	},
+	getPoolPositions:function (address:string) {
+		return get_pool_positions(address);
 	},
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
@@ -153,6 +160,22 @@ module.exports = {
 		return broadcast_transaction(tx);
 	}
 }
+
+const get_pool_positions = async function(address:string){
+	let tag = TAG + " | get_pool_positions | "
+	try{
+		//
+		let ethInto = await blockbook.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")
+
+		log.info(tag,"ethInto: ",ethInto)
+
+		return true
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+
 /*
 let swap = {
     inboundAddress: {

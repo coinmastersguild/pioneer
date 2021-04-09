@@ -171,12 +171,13 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo): Tx => {
   }
 }
 
+
 /**
  * Calculate fees by multiplying .
  *
  * @returns {Fees} The default gas price.
  */
-export const getFee = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
+export const getFee: ({gasPrice, gasLimit}: { gasPrice: BaseAmount; gasLimit: BigNumber }) => BaseAmount = ({ gasPrice, gasLimit }: { gasPrice: BaseAmount; gasLimit: BigNumber }) =>
   baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), ETH_DECIMAL)
 
 export const estimateDefaultFeesWithGasPricesAndLimits = (asset?: Asset): FeesWithGasPricesAndLimits => {

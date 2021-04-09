@@ -912,13 +912,13 @@ module.exports = class wallet {
                 let signedTx = await this.buildTransfer(transaction)
                 log.info(tag,"signedTx: ",signedTx)
 
-                if(invocationId)signedTx.invocationId = invocationId
+                if(invocationId) signedTx.invocationId = invocationId
                 log.debug(tag,"transaction: ",transaction)
 
                 signedTx.broadcasted = false
                 let broadcast_hook = async () =>{
                     try{
-
+                        log.info(tag,"signedTx: ",signedTx)
                         //TODO flag for async broadcast
                         let broadcastResult = await this.broadcastTransaction(intent.coin,signedTx)
                         log.info(tag,"broadcastResult: ",broadcastResult)
@@ -931,9 +931,14 @@ module.exports = class wallet {
                 //broadcast hook
                 if(!intent.noBroadcast){
                     signedTx.broadcasted = true
-                    //Notice NO asyc!
-                    broadcast_hook()
+                } else {
+                    signedTx.noBroadcast = true
                 }
+                //if noBroadcast we MUST still release the inovation
+                //do we pass noBroadcast to the broadcast post request
+                //Notice NO asyc!
+                broadcast_hook()
+
                 signedTx.invocationId = invocationId
                 //
                 if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
@@ -1732,14 +1737,13 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.broadcastTransaction = async function (coin:string, signedTx:BroadcastBody, invocationId?:string) {
+        this.broadcastTransaction = async function (coin:string, signedTx:BroadcastBody) {
             let tag = TAG + " | broadcastTransaction | "
             if(this.isTestnet && coin === 'BTC'){
                 signedTx.coin = "TEST"
             }else{
                 signedTx.coin = coin
             }
-            if(invocationId) signedTx.invocationId = invocationId
             log.info(tag,"signedTx: ",signedTx)
             let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)
             log.info(tag,"resultBroadcast: ",resultBroadcast)

@@ -43,9 +43,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TAG = " | blockbook-client | ";
 var blockbook_client_1 = require("blockbook-client");
 var log = require('@pioneer-platform/loggerdog')();
+var Axios = require('axios');
+var https = require('https');
+var axios = Axios.create({
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false
+    })
+});
 var blockbooks_1 = require("./blockbooks");
 var BLOCKBOOKS = {};
 var RUNTIME;
+var ETH_BLOCKBOOK_URL = "";
 module.exports = {
     init: function (runtime, servers) {
         return init_network(runtime, servers);
@@ -55,6 +63,9 @@ module.exports = {
     },
     getTransaction: function (coin, txid) {
         return get_transaction(coin, txid);
+    },
+    getEthInfo: function (address, filter) {
+        return get_eth_info_by_address(address, filter);
     },
     // txsByXpub: function (coin:string,addresses:any) {
     //     return get_txs_by_xpub(coin,addresses);
@@ -69,9 +80,43 @@ module.exports = {
         return broadcast_transaction(coin, hex);
     },
 };
+var get_eth_info_by_address = function (address, filter) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, url, body, resp, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_eth_info_by_address | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    if (!filter)
+                        filter = "all";
+                    url = ETH_BLOCKBOOK_URL + "/api/v2/address/" + address + "?=" + filter;
+                    body = {
+                        method: 'GET',
+                        url: url,
+                        headers: { 'content-type': 'application/json' },
+                    };
+                    return [4 /*yield*/, axios(body)
+                        //TODO paginate?
+                    ];
+                case 2:
+                    resp = _a.sent();
+                    //TODO paginate?
+                    return [2 /*return*/, resp.data];
+                case 3:
+                    e_1 = _a.sent();
+                    console.error(tag, e_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+};
 var broadcast_transaction = function (coin, hex) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_1;
+        var tag, output, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -85,8 +130,8 @@ var broadcast_transaction = function (coin, hex) {
                     log.debug(tag, "output: ", output);
                     return [2 /*return*/, output];
                 case 3:
-                    e_1 = _a.sent();
-                    console.error(tag, e_1);
+                    e_2 = _a.sent();
+                    console.error(tag, e_2);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -95,7 +140,7 @@ var broadcast_transaction = function (coin, hex) {
 };
 var get_transaction = function (coin, txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_2;
+        var tag, output, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -109,8 +154,8 @@ var get_transaction = function (coin, txid) {
                     log.debug(tag, "output: ", output);
                     return [2 /*return*/, output];
                 case 3:
-                    e_2 = _a.sent();
-                    console.error(tag, e_2);
+                    e_3 = _a.sent();
+                    console.error(tag, e_3);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -119,7 +164,7 @@ var get_transaction = function (coin, txid) {
 };
 var get_utxos_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_3;
+        var tag, output, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -133,8 +178,8 @@ var get_utxos_by_xpub = function (coin, xpub) {
                     log.debug(tag, "output: ", output);
                     return [2 /*return*/, output];
                 case 3:
-                    e_3 = _a.sent();
-                    console.error(tag, e_3);
+                    e_4 = _a.sent();
+                    console.error(tag, e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -143,7 +188,7 @@ var get_utxos_by_xpub = function (coin, xpub) {
 };
 var get_balance_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, balance, i, uxto, e_4;
+        var tag, output, balance, i, uxto, e_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -157,7 +202,7 @@ var get_balance_by_xpub = function (coin, xpub) {
                     return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })];
                 case 2:
                     output = _a.sent();
-                    log.debug(tag, "output: ", output);
+                    log.info(tag, "output: ", output);
                     balance = 0;
                     //tally
                     for (i = 0; i < output.length; i++) {
@@ -166,8 +211,8 @@ var get_balance_by_xpub = function (coin, xpub) {
                     }
                     return [2 /*return*/, balance / 100000000];
                 case 3:
-                    e_4 = _a.sent();
-                    console.error(tag, e_4);
+                    e_5 = _a.sent();
+                    console.error(tag, e_5);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -175,34 +220,30 @@ var get_balance_by_xpub = function (coin, xpub) {
     });
 };
 var init_network = function (runtime, servers) {
-    return __awaiter(this, void 0, void 0, function () {
-        var tag, output, blockbooks, i, coinInfo, blockbookurl;
-        return __generator(this, function (_a) {
-            tag = ' | get_txs_by_address | ';
-            try {
-                log.debug(tag, "checkpoint: ");
-                output = [];
-                RUNTIME = runtime;
-                blockbooks = blockbooks_1.getBlockBooks();
-                for (i = 0; i < blockbooks.length; i++) {
-                    coinInfo = blockbooks[i];
-                    log.debug("coinInfo: ", coinInfo);
-                    blockbookurl = coinInfo.explorer.tx;
-                    blockbookurl = blockbookurl.replace("/tx/", "");
-                    log.debug("blockbookurl: ", blockbookurl);
-                    BLOCKBOOKS[coinInfo.symbol.toUpperCase()] = new blockbook_client_1.Blockbook({
-                        nodes: [blockbookurl],
-                    });
-                }
-                return [2 /*return*/, true];
-            }
-            catch (e) {
-                console.error(tag, 'Error: ', e);
-                throw e;
-            }
-            return [2 /*return*/];
-        });
-    });
+    var tag = ' | get_txs_by_address | ';
+    try {
+        log.debug(tag, "checkpoint: ");
+        var output = [];
+        RUNTIME = runtime;
+        var blockbooks = blockbooks_1.getBlockBooks();
+        for (var i = 0; i < blockbooks.length; i++) {
+            var coinInfo = blockbooks[i];
+            log.debug("coinInfo: ", coinInfo);
+            var blockbookurl = coinInfo.explorer.tx;
+            blockbookurl = blockbookurl.replace("/tx/", "");
+            if (coinInfo.symbol.toUpperCase() === 'ETH')
+                ETH_BLOCKBOOK_URL = blockbookurl;
+            log.debug("blockbookurl: ", blockbookurl);
+            BLOCKBOOKS[coinInfo.symbol.toUpperCase()] = new blockbook_client_1.Blockbook({
+                nodes: [blockbookurl],
+            });
+        }
+        return true;
+    }
+    catch (e) {
+        console.error(tag, 'Error: ', e);
+        throw e;
+    }
 };
 var get_node_info = function () {
     return __awaiter(this, void 0, void 0, function () {

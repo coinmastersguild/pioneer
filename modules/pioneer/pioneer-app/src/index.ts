@@ -1176,6 +1176,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     events.emit('broadcast',signedTx)
                     break;
                 case 'transfer':
+                    if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                    request.invocation.invocationId = request.invocationId
                     signedTx = await send_to_address(request.invocation)
                     log.info(tag,"txid: ", signedTx.txid)
                     events.emit('broadcast',signedTx)

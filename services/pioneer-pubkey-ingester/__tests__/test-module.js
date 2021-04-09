@@ -7,21 +7,21 @@ let queue = require("@pioneer-platform/redis-queue")
 let ASSET = "ETH"
 
 
-// let work = {
-//     coin: 'ETH',
-//     queueId: 'j9ZbcfjFy6kqShnupHXLWi',
-//     account: 'tesasdasdtaddress',
-//     address: process.env['TEST_ETH_MASTER'],
-//     inserted: 1594510142838
-// }
-
 let work = {
-    coin: 'BTC',
-    queueId: 'j9ZbcfjasdFy6kqShnupHXLWi',
+    coin: 'ETH',
+    queueId: 'j9ZbcfjFy6kqShnupHXLWi',
     account: 'tesasdasdtaddress',
-    xpub: process.env['TEST_BCH_XPUB'],
+    address: "0x33b35c665496ba8e71b22373843376740401f106",
     inserted: 1594510142838
 }
+
+// let work = {
+//     coin: 'BTC',
+//     queueId: 'j9ZbcfjasdFy6kqShnupHXLWi',
+//     account: 'tesasdasdtaddress',
+//     xpub: process.env['TEST_BCH_XPUB'],
+//     inserted: 1594510142838
+// }
 
 console.log("inserted:",work)
 

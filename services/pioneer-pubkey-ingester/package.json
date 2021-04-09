@@ -4,6 +4,7 @@
   "scripts": {
     "npm": "npm i",
     "start": "node lib/index",
+    "test": "npm run build && node lib/index",
     "build": "tsc -p .",
     "dev": "npm run build && npm run start",
     "prepublish": "npm run build"

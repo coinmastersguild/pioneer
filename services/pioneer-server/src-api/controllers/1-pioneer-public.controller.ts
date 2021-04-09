@@ -75,6 +75,7 @@ interface BroadcastBody {
     type?:string
     txid?:string
     broadcastBody?:any
+    noBroadcast?:boolean
     dscription?:any
     invocationId?:string
 }
@@ -960,6 +961,7 @@ export class pioneerPublicController extends Controller {
         try{
             log.info("************************** CHECKPOINT *******************88 ")
             log.info(tag,"body: ",body)
+            let result
             let coin = body.coin
             let isTestnet = false
             if(body.isTestnet){
@@ -976,52 +978,57 @@ export class pioneerPublicController extends Controller {
             }
 
             //broadcast
-            let result
-            if(coin === 'EOS'){
-                result = await networks[coin].broadcast(body.broadcastBody)
-            } else if(coin === 'FIO'){
-                let broadcast = {
-                    signatures:
-                        [ body.signature ],
-                    compression: "none",
-                    packed_context_free_data: '',
-                    packed_trx:
-                    body.serialized
-                }
-                if(!body.type) {
-                    log.error(tag,"invalid payload!: ",broadcast)
-                    throw Error("Fio txs require type!")
+            if(!body.noBroadcast){
+                let result
+                if(coin === 'EOS'){
+                    result = await networks[coin].broadcast(body.broadcastBody)
+                } else if(coin === 'FIO'){
+                    let broadcast = {
+                        signatures:
+                            [ body.signature ],
+                        compression: "none",
+                        packed_context_free_data: '',
+                        packed_trx:
+                        body.serialized
+                    }
+                    if(!body.type) {
+                        log.error(tag,"invalid payload!: ",broadcast)
+                        throw Error("Fio txs require type!")
+                    }
+
+                    //broadcast based on tx
+                    switch(body.type) {
+                        case "fioSignAddPubAddressTx":
+                            log.info(tag,"checkpoint: fioSignAddPubAddressTx ")
+                            log.info(tag,"broadcast: ",broadcast)
+                            result = await networks[coin].broadcastAddPubAddressTx(broadcast)
+                            break;
+                        case "fioSignRegisterDomainTx":
+                            //TODO
+                            break;
+                        case "fioSignRegisterFioAddressTx":
+                            //TODO
+                            break;
+                        case "fioSignNewFundsRequestTx":
+                            log.info(tag,"checkpoint: broadcastNewFundsRequestTx ")
+                            log.info(tag,"broadcast: ",broadcast)
+                            result = await networks[coin].broadcastNewFundsRequestTx(broadcast)
+                            break;
+                        default:
+                            throw Error("Type not supported! "+body.type)
+                    }
+                } else if(UTXO_COINS.indexOf(coin) >= 0){
+                    //normal broadcast
+                    await networks.ANY.init('full',{isTestnet},isTestnet)
+                    result = await networks['ANY'].broadcast(coin,body.serialized)
+                } else {
+                    //normal broadcast
+                    await networks[coin].init({testnet:true},isTestnet)
+                    result = await networks[coin].broadcast(body.serialized)
                 }
 
-                //broadcast based on tx
-                switch(body.type) {
-                    case "fioSignAddPubAddressTx":
-                        log.info(tag,"checkpoint: fioSignAddPubAddressTx ")
-                        log.info(tag,"broadcast: ",broadcast)
-                        result = await networks[coin].broadcastAddPubAddressTx(broadcast)
-                        break;
-                    case "fioSignRegisterDomainTx":
-                        //TODO
-                        break;
-                    case "fioSignRegisterFioAddressTx":
-                        //TODO
-                        break;
-                    case "fioSignNewFundsRequestTx":
-                        log.info(tag,"checkpoint: broadcastNewFundsRequestTx ")
-                        log.info(tag,"broadcast: ",broadcast)
-                        result = await networks[coin].broadcastNewFundsRequestTx(broadcast)
-                        break;
-                    default:
-                        throw Error("Type not supported! "+body.type)
-                }
-            } else if(UTXO_COINS.indexOf(coin) >= 0){
-                //normal broadcast
-                await networks.ANY.init('full',{isTestnet},isTestnet)
-                result = await networks['ANY'].broadcast(coin,body.serialized)
             } else {
-                //normal broadcast
-                await networks[coin].init({testnet:true},isTestnet)
-                result = await networks[coin].broadcast(body.serialized)
+                result = body.invocationId
             }
 
             return(result);

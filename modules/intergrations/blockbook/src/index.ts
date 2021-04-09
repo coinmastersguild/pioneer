@@ -10,10 +10,20 @@ const TAG = " | blockbook-client | "
 import { Blockbook } from 'blockbook-client'
 const log = require('@pioneer-platform/loggerdog')()
 
+const Axios = require('axios')
+const https = require('https')
+const axios = Axios.create({
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false
+    })
+});
+
 import { getBlockBooks } from "./blockbooks";
 
 let BLOCKBOOKS:any = {}
 let RUNTIME:string
+
+let ETH_BLOCKBOOK_URL = ""
 
 module.exports = {
     init:function (runtime:string,servers:any) {
@@ -24,6 +34,9 @@ module.exports = {
     },
     getTransaction:function (coin:string,txid:string) {
         return get_transaction(coin,txid);
+    },
+    getEthInfo:function (address:string,filter?:string) {
+        return get_eth_info_by_address(address,filter);
     },
     // txsByXpub: function (coin:string,addresses:any) {
     //     return get_txs_by_xpub(coin,addresses);
@@ -38,6 +51,28 @@ module.exports = {
         return broadcast_transaction(coin,hex);
     },
 }
+
+let get_eth_info_by_address = async function(address:string,filter?:string){
+    let tag = TAG + " | get_eth_info_by_address | "
+    try{
+        if(!filter) filter = "all"
+        let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
+
+        let body = {
+            method: 'GET',
+            url,
+            headers: {'content-type': 'application/json'},
+        };
+        let resp = await axios(body)
+
+        //TODO paginate?
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
 
 let broadcast_transaction = async function(coin:string,hex:string){
     let tag = TAG + " | broadcast_transaction | "
@@ -103,7 +138,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
 }
 
 
-let init_network = async function (runtime:string,servers:any) {
+let init_network = function (runtime:string,servers:any) {
     let tag = ' | get_txs_by_address | '
     try {
         log.debug(tag,"checkpoint: ")
@@ -118,6 +153,7 @@ let init_network = async function (runtime:string,servers:any) {
 
             let blockbookurl = coinInfo.explorer.tx
             blockbookurl = blockbookurl.replace("/tx/","")
+            if(coinInfo.symbol.toUpperCase() === 'ETH') ETH_BLOCKBOOK_URL = blockbookurl
             log.debug("blockbookurl: ",blockbookurl)
             BLOCKBOOKS[coinInfo.symbol.toUpperCase()] = new Blockbook({
                 nodes: [blockbookurl],
