@@ -20,6 +20,15 @@ let {
 //xchain adapter
 const XchainClass = require("@pioneer-platform/pioneer-xchain-client")
 
+export interface SendToAddress {
+    blockchain:string
+    asset:string
+    amount:number
+    address:string
+    memo?:string
+    noBroadcast?:boolean
+}
+
 export interface config {
     spec:string,
     env:string,
@@ -151,7 +160,7 @@ export class SDK {
             }
         }
         // @ts-ignore
-        this.sendToAddress = async function (blockchain:string,asset:string,amount:string,address:string,memo?:string) {
+        this.sendToAddress = async function (intent:SendToAddress) {
             let tag = TAG + " | getInfo | "
             try {
 
@@ -159,28 +168,32 @@ export class SDK {
                 let txInput:any = {
                     "asset":
                         {
-                            "chain":blockchain,
-                            "symbol":asset,
-                            "ticker":asset
+                            "chain":intent.blockchain,
+                            "symbol":intent.asset,
+                            "ticker":intent.asset
                         },
                     "amount":
                         {
                             "type":"BASE",
                             "decimal":18,
                             amount: function(){
-                                return amount
+                                return intent.amount
                             }
                         },
-                    "recipient":address,
+                    "recipient":intent.address,
                 }
-                if(memo) txInput.memo = memo
+                if(intent.memo) txInput.memo = intent.memo
 
                 //ETH
-                if(this.isTestnet && blockchain === 'ETH'){
+                if(this.isTestnet && intent.blockchain === 'ETH'){
                     txInput.chainId = 3 //ropsten
                 }
 
-                let txid = await this.clients[blockchain].transfer(txInput)
+                if(intent.noBroadcast){
+                    txInput.noBroadcast = true
+                }
+
+                let txid = await this.clients[intent.blockchain].transfer(txInput)
 
                 log.info("txid",txid)
 

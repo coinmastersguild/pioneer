@@ -87,8 +87,14 @@ let run_test = async function(){
             })
 
             //send eth
-
-            let txid = await app.sendToAddress('ethereum','ETH',0.001,'0xc3affff54122658b89c31183cec4f15514f34624')
+            let payload = {
+                blockchain:'ethereum',
+                asset:'ETH',
+                amount:0.00011,
+                address:'0xc3affff54122658b89c31183cec4f15514f34624',
+                noBroadcast:true,
+            }
+            let txid = await app.sendToAddress(payload)
             console.log("txid: ",txid)
         }
 

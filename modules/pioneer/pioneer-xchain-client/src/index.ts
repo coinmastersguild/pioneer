@@ -693,14 +693,14 @@ module.exports = class wallet {
                 let to = tx.recipient
                 let memo = tx.memo || ''
 
-                let invocation = {
+                let invocation:any = {
                     username:this.username,
                     coin,
                     amount,
                     address:to,
                     memo
                 }
-
+                if(tx.noBroadcast) invocation.noBroadcast = true
 
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)

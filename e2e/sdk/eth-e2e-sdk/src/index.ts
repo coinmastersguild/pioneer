@@ -58,6 +58,7 @@ let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || 0.0002
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.0001
 let spec = process.env['URL_PIONEER_SPEC']
+let NO_BROADCAST = process.env['E2E_NO_BROADCAST'] || null
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -117,39 +118,44 @@ const test_service = async function () {
         let blockchains = Object.keys(user.clients)
         log.info("blockchains: ",blockchains)
 
-        for(let i = 0; i < blockchains.length; i++){
-            let blockchain = blockchains[i]
-            let client = user.clients[blockchain]
+        // for(let i = 0; i < blockchains.length; i++){
+        //     let blockchain = blockchains[i]
+        //     let client = user.clients[blockchain]
+        //
+        //     let balance = await client.getBalance()
+        //     log.info(blockchain+ " balance: ",balance.amount.amount())
+        // }
 
-            let balance = await client.getBalance()
-            log.info(blockchain+ " balance: ",balance)
-        }
-
+        let client = user.clients['ethereum']
+        let balanceSdk = await client.getBalance()
+        log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
         //get address from faucet
         //TODO get this from api
         let address = "0xc3affff54122658b89c31183cec4f15514f34624"
 
         //send to faucet
-        let sendPayload = {
-            // coin:BLOCKCHAIN, ???
-            coin:ASSET,
+        let sendPayload:any = {
+            blockchain:BLOCKCHAIN,
+            coin:'ETH',
             amount:TEST_AMOUNT,
             address,
-            noBroadcast:true
         }
+        sendPayload.noBroadcast = true
+
+        log.info(tag,"sendPayload: ",sendPayload)
         let txid = await app.sendToAddress(sendPayload)
         console.log("txid: ",txid)
 
         //wait till confirmed
-        let confirmed = false
-        while(!confirmed){
-
-            //get transaction
-
-            //wait
-            await sleep(1000)
-        }
+        // let confirmed = false
+        // while(!confirmed){
+        //
+        //     //get transaction
+        //
+        //     //wait
+        //     await sleep(1000)
+        // }
         //TODO request return from faucet
 
         //expect event

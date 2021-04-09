@@ -961,7 +961,9 @@ export class pioneerPublicController extends Controller {
         try{
             log.info("************************** CHECKPOINT *******************88 ")
             log.info(tag,"body: ",body)
-            let result
+            let result:any = {
+                success:false
+            }
             let coin = body.coin
             let isTestnet = false
             if(body.isTestnet){
@@ -1028,6 +1030,8 @@ export class pioneerPublicController extends Controller {
                 }
 
             } else {
+                result.success = true
+                result.broadcast = false
                 result = body.invocationId
             }
 

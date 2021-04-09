@@ -138,7 +138,7 @@ export class pioneerInvocationController extends Controller {
                 output.success = true
                 output.txid = txid[1]
                 output.ttr = (timeEnd - timeStart)/1000
-
+                if(body.invocation.noBroadcast) output.broadcast = false
                 return output
             } else {
                 output.invocationId = invocationId

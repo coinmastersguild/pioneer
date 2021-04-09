@@ -185,7 +185,8 @@ let run_test = async function(){
                         return "0.000123"
                     }
                 },
-            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624"
+            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
+            "noBroadcast":true
         }
 
         let txid = await app.transfer(txInput)
