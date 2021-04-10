@@ -9,13 +9,16 @@ network.init({testnet:true})
 //DEX
 
 //get LP position by address
-network.getPoolPositions("0x33b35c665496ba8e71b22373843376740401f106")
+// network.getPoolPositions("0x33b35c665496ba8e71b22373843376740401f106")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//get all tokens by address
+network.getAllTokensEth("0x33b35c665496ba8e71b22373843376740401f106")
     .then(function(resp){
         console.log(resp)
     })
-
-//get all tokens by address
-
 
 //Asgard exchange calls
 

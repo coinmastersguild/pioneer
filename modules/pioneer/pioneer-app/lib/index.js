@@ -891,14 +891,6 @@ let init_wallet = function (config, isTestnet) {
                 isTestnet = true;
             log.info(tag, "isTestnet: ", isTestnet);
             let output = {};
-            //sub all to events
-            let configEvents = {
-                username: config.username,
-                queryKey: config.queryKey,
-                pioneerWs: URL_PIONEER_SOCKET
-            };
-            //sub ALL events
-            let events = yield Events.init(configEvents);
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
             log.debug(tag, "wallets: ", wallets);
@@ -939,7 +931,7 @@ let init_wallet = function (config, isTestnet) {
                 KEEPKEY = yield Hardware.start();
                 KEEPKEY.events.on('event', function (event) {
                     return __awaiter(this, void 0, void 0, function* () {
-                        events.emit('keepkey', { event });
+                        //events.emit('keepkey',{event})
                     });
                 });
             }
@@ -1061,6 +1053,15 @@ let init_wallet = function (config, isTestnet) {
             output.TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED;
             output.WALLET_VALUE_MAP = WALLET_VALUE_MAP;
             log.debug(tag, "TOTAL_VALUE_USD_LOADED: ", TOTAL_VALUE_USD_LOADED);
+            //after registered start socket
+            //sub all to events
+            let configEvents = {
+                username: config.username,
+                queryKey: config.queryKey,
+                pioneerWs: URL_PIONEER_SOCKET
+            };
+            //sub ALL events
+            let events = yield Events.init(configEvents);
             //on blocks update lastBlockHeight
             //on payments update balances
             //on on invocations add to queue

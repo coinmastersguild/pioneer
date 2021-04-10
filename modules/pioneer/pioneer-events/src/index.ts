@@ -16,6 +16,9 @@ const EventEmitter = require('events');
 const emitter = new EventEmitter();
 const io = require('socket.io-client');
 
+let wait = require('wait-promise');
+let sleep = wait.sleep;
+
 //globals
 let URL_PIONEER_WS = process.env['URL_PIONEER_WS']
 let SOCKET:any
@@ -51,6 +54,9 @@ let init_client = async function (config:any) {
         if(!URL_PIONEER_WS) throw Error(" Failed to find ws server! ")
         if(!config.username) throw Error(" invalid config! missing username ")
         if(!config.queryKey) throw Error(" invalid config! missing queryKey ")
+
+        //let successConnect
+        let successConnect = false
 
         //sub to websocket as user
         SOCKET = io.connect(URL_PIONEER_WS, {reconnect: true, rejectUnauthorized: false});
@@ -90,11 +96,28 @@ let init_client = async function (config:any) {
 
         });
 
+        SOCKET.on('connect', function (message:any) {
+            log.info(tag,"connect:",message)
+            successConnect = true
+        });
+
+        SOCKET.on('errorMessage', function (message:any) {
+            log.error(tag,"error: ",message)
+            if(message.code && message.code === 6) throw Error(" Failed to connect!")
+        });
+
 
         SOCKET.on('invocation', function (message:any) {
             log.info('invocation: ',message);
             emitter.emit('message',message)
         });
+
+        //wait 30 seconds for a valid connection
+        //let timeout = setTimeout(process.exit(2),30 * 1000)
+
+        while(!successConnect){
+            await sleep(300)
+        }
 
 
         return emitter

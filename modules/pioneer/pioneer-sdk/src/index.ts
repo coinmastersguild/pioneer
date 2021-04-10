@@ -10,7 +10,7 @@ const log = require("@pioneer-platform/loggerdog")()
 
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
-const Events = require("@pioneer-platform/pioneer-events")
+// const Events = require("@pioneer-platform/pioneer-events")
 
 let {
     supportedBlockchains,
@@ -73,7 +73,7 @@ export class SDK {
     private events: {};
     private wss: string | undefined;
     private username: string | undefined;
-    private startSocket: () => Promise<any>;
+    // private startSocket: () => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -119,22 +119,22 @@ export class SDK {
                 throw e
             }
         }
-        this.startSocket = async function () {
-            let tag = TAG + " | startSocket | "
-            try {
-                if(!this.username)throw Error("102: can not start socket without username!")
-                let configEvents = {
-                    username:this.username,
-                    queryKey:this.queryKey,
-                    pioneerWs:this.wss
-                }
-                //sub to events
-                this.events = await Events.init(configEvents)
-                return this.events
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
+        // this.startSocket = async function () {
+        //     let tag = TAG + " | startSocket | "
+        //     try {
+        //         if(!this.username)throw Error("102: can not start socket without username!")
+        //         let configEvents = {
+        //             username:this.username,
+        //             queryKey:this.queryKey,
+        //             pioneerWs:this.wss
+        //         }
+        //         //sub to events
+        //         this.events = await Events.init(configEvents)
+        //         return this.events
+        //     } catch (e) {
+        //         log.error(tag, "e: ", e)
+        //     }
+        // }
         this.createPairingCode = async function () {
             let tag = TAG + " | createPairingCode | "
             try {

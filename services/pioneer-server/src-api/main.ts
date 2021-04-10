@@ -284,7 +284,7 @@ io.on('connection', async function(socket){
 
     socket.on('disconnect', function(){
         let username = usersByUsername[socket.id]
-        log.debug(tag,username+' disconnected');
+        log.info(tag,username+' disconnected');
         redis.srem('online',username)
         //remove socket.id from username list
         if(usersByUsername[username])usersByUsername[username].splice(usersByUsername[username].indexOf(socket.id), 1);
@@ -309,8 +309,18 @@ io.on('connection', async function(socket){
                 if(!usersByUsername[msg.username]) usersByUsername[msg.username] = []
                 usersByUsername[msg.username].push(socket.id)
                 redis.sadd('online',msg.username)
+                let connectPayload = {
+                    success:true,
+                    username:msg.username
+                }
+                globalSockets[socket.id].emit('connect', connectPayload);
             } else {
                 log.error(tag,"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username)
+                let error = {
+                    code:6,
+                    msg:"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username
+                }
+                globalSockets[socket.id].emit('errorMessage', error);
             }
 
         } else {

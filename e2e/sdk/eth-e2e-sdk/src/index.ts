@@ -137,7 +137,7 @@ const test_service = async function () {
         //send to faucet
         let sendPayload:any = {
             blockchain:BLOCKCHAIN,
-            coin:'ETH',
+            asset:'ETH',
             amount:TEST_AMOUNT,
             address,
         }
@@ -161,7 +161,7 @@ const test_service = async function () {
         //expect event
 
         //process
-        process.exit(0)
+        //process.exit(0)
     } catch (e) {
         log.error(e)
         //process

@@ -960,15 +960,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         log.info(tag,"isTestnet: ",isTestnet)
         let output:any = {}
 
-        //sub all to events
-        let configEvents = {
-            username:config.username,
-            queryKey:config.queryKey,
-            pioneerWs:URL_PIONEER_SOCKET
-        }
 
-        //sub ALL events
-        let events = await Events.init(configEvents)
 
         //get wallets
         let wallets = await getWallets()
@@ -1009,7 +1001,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             KEEPKEY = await Hardware.start()
 
             KEEPKEY.events.on('event', async function(event:any) {
-                events.emit('keepkey',{event})
+                //events.emit('keepkey',{event})
             });
 
         }
@@ -1140,6 +1132,17 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         output.WALLET_VALUE_MAP = WALLET_VALUE_MAP
         log.debug(tag,"TOTAL_VALUE_USD_LOADED: ",TOTAL_VALUE_USD_LOADED)
 
+
+        //after registered start socket
+        //sub all to events
+        let configEvents = {
+            username:config.username,
+            queryKey:config.queryKey,
+            pioneerWs:URL_PIONEER_SOCKET
+        }
+
+        //sub ALL events
+        let events = await Events.init(configEvents)
 
         //on blocks update lastBlockHeight
 

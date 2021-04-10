@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "7.0.6",
+  "version": "7.0.7",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -24,6 +24,7 @@
     "socket.io-client": "^2.4.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
+    "wait-promise": "^0.4.1",
     "when": "^3.7.8"
   }
 }

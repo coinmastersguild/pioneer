@@ -114,9 +114,6 @@ module.exports = {
 	getInfo:function () {
 		return check_online_status();
 	},
-	getPoolPositions:function (address:string) {
-		return get_pool_positions(address);
-	},
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
 	},
@@ -128,6 +125,12 @@ module.exports = {
 	},
 	getMemoEncoded: function (params:any): Promise<any> {
 		return get_memo_data(params)
+	},
+	getPoolPositions:function (address:string) {
+		return get_pool_positions(address);
+	},
+	getAllTokensEth:function (address:string) {
+		return get_all_tokens_blockbook(address);
 	},
 	// getFees: function (params: XFeesParams & FeesParams): Promise<Fees> {
 	// 	return get_fees()
@@ -161,12 +164,27 @@ module.exports = {
 	}
 }
 
+const get_all_tokens_blockbook = async function(address:string){
+	let tag = TAG + " | get_all_tokens_blockbook | "
+	try{
+		//
+		let ethInto = await blockbook.getEthInfo(address)
+
+		log.info(tag,"ethInto: ",ethInto)
+
+		return true
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
 const get_pool_positions = async function(address:string){
 	let tag = TAG + " | get_pool_positions | "
 	try{
 		//
-		let ethInto = await blockbook.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")
+		let ethInto = await blockbook.getEthInfo(address)
 
+		//TODO filter by LP contracts
 		log.info(tag,"ethInto: ",ethInto)
 
 		return true
