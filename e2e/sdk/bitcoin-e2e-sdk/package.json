@@ -13,9 +13,10 @@
     "docker:push": ""
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.1",
+    "@babel/runtime": "^7.13.10",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "latest",
+    "@pioneer-platform/pioneer-app": "^7.1.15",
+    "@pioneer-platform/pioneer-sdk": "0.0.46",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",

@@ -82,8 +82,16 @@ let run_test = async function(){
 
                 //TODO request from faucet
 
-                //send
 
+                let intent = {
+                    coin:"BTC",
+                    address:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
+                    amount:"0.00001",
+                    noBroadcast:true,
+                    invocationId:"workyplzbro"
+                }
+                let txid = await context.sendToAddress(intent)
+                console.log("txid: ",txid)
                 //TODO coin control
             }
 
