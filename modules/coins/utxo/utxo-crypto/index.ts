@@ -14,6 +14,7 @@ let bitcoin = require("bitcoinjs-lib");
 const log = require('@pioneer-platform/loggerdog')()
 var b58 = require('bs58check');
 const BIP84 = require('bip84')
+var wif = require('wif')
 
 /**********************************
  // Module
@@ -313,16 +314,19 @@ module.exports = {
             log.info("path: ",pathXpub)
             const {xpub} = await deriveMasterKey(mnemonic,pathXpub)
 
+
             let pathMaster = "m/44'/"+SLIP_44[coin]+"'/0'/0/0"
+            //let pathMaster = "m/44'/"+SLIP_44[coin]+"'/1'"
             log.info("pathMaster: ",pathMaster)
             const {masterKey} = await deriveMasterKey(mnemonic,pathXpub)
 
             const { privateKey, publicKey } = deriveKeypair(masterKey,pathMaster)
             //const bnbAddress = createBNBAddress(publicKey)
 
+
             // let master = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0)
             let addressMaster:string = ""
-            if(coin === "BTC" && false){
+            if(coin === "BTC"){
                  const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
                  addressMaster = address
             } else {
@@ -335,7 +339,9 @@ module.exports = {
             let coinInfo: any = {
                 coin,
                 master:addressMaster,
-                privateKey:privateKey.toString('hex'),
+                //privateKey:privateKey.toString('hex'),
+                privateKey:privateKey.toString(`hex`),
+                privateKeyWif:wif.encode(128, privateKey, true),
                 publicKey:publicKey.toString(`hex`),
                 xpub
             }
@@ -351,6 +357,9 @@ module.exports = {
                 let child0 = root.deriveAccount(0)
                 let account0 = new BIP84.fromZPrv(child0)
                 let zpub = account0.getAccountPublicKey()
+                let master = account0.getAddress(0)
+                log.info("master: ",master)
+                coinInfo.master = account0.getAddress(0)
                 coinInfo.zpub = zpub
             }
 

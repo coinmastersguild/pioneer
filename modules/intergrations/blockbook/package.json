@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/blockbook",
-  "version": "6.2.13",
+  "version": "6.2.16",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,8 @@
     "@pioneer-platform/loggerdog": "latest",
     "@types/request-promise-native": "^1.0.17",
     "axios": "^0.21.1",
-    "blockbook-client": "latest"
+    "blockbook-client": "latest",
+    "fake-useragent": "^1.0.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.6",

@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@pioneer-platform/loggerdog": "latest",
+    "base-58": "0.0.1",
     "bech32": "^1.1.4",
     "bip32": "^2.0.4",
     "bip39": "^3.0.2",
@@ -27,7 +28,8 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.1",
     "hdkey": "^1.1.2",
-    "secp256k1": "^3.8.0"
+    "secp256k1": "^3.8.0",
+    "wif": "^2.0.6"
   },
   "devDependencies": {
     "@types/node": "^13.13.12",

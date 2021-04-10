@@ -577,10 +577,13 @@ const get_wallet_info = async function () {
         }else{
             for(let i = 0; i < BLOCKBOOK_COINS.length; i++){
                 let coin = BLOCKBOOK_COINS[i]
-                if(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].xpub){
-                    let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].xpub)
+                log.info(tag,"Scanning blockbook coin for balance: ",coin)
+                if(PUBLIC_WALLET[coin] && PUBLIC_WALLET[coin].pubkey){
+                    let balance = await blockbook.getBalanceByXpub(coin,PUBLIC_WALLET[coin].pubkey)
                     //get balance by xpub
                     balances[coin] = balance
+                } else {
+                    log.error(tag,"invalid pubkey! ",coin)
                 }
             }
         }

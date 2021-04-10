@@ -43,6 +43,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TAG = " | blockbook-client | ";
 var blockbook_client_1 = require("blockbook-client");
 var log = require('@pioneer-platform/loggerdog')();
+var fakeUa = require('fake-useragent');
 var Axios = require('axios');
 var https = require('https');
 var axios = Axios.create({
@@ -52,6 +53,7 @@ var axios = Axios.create({
 });
 var blockbooks_1 = require("./blockbooks");
 var BLOCKBOOKS = {};
+var BLOCKBOOK_URLS = {};
 var RUNTIME;
 var ETH_BLOCKBOOK_URL = "";
 module.exports = {
@@ -96,7 +98,10 @@ var get_eth_info_by_address = function (address, filter) {
                     body = {
                         method: 'GET',
                         url: url,
-                        headers: { 'content-type': 'application/json' },
+                        headers: {
+                            'content-type': 'application/json',
+                            'User-Agent': fakeUa()
+                        },
                     };
                     return [4 /*yield*/, axios(body)
                         //TODO paginate?
@@ -116,7 +121,7 @@ var get_eth_info_by_address = function (address, filter) {
 };
 var broadcast_transaction = function (coin, hex) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_2;
+        var tag, url, data, body, resp, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -124,11 +129,27 @@ var broadcast_transaction = function (coin, hex) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].sendTx(hex)];
+                    url = BLOCKBOOK_URLS[coin.toUpperCase()] + "/api/v2/sendtx/";
+                    data = hex;
+                    body = {
+                        url: url,
+                        headers: {
+                            'content-type': 'application/json',
+                            'User-Agent': fakeUa()
+                        },
+                        method: 'POST',
+                        json: false,
+                        data: data,
+                    };
+                    return [4 /*yield*/, axios(body)
+                        // let output = await BLOCKBOOKS[coin].sendTx(hex)
+                        // log.debug(tag,"output: ",output)
+                    ];
                 case 2:
-                    output = _a.sent();
-                    log.debug(tag, "output: ", output);
-                    return [2 /*return*/, output];
+                    resp = _a.sent();
+                    // let output = await BLOCKBOOKS[coin].sendTx(hex)
+                    // log.debug(tag,"output: ",output)
+                    return [2 /*return*/, resp.data];
                 case 3:
                     e_2 = _a.sent();
                     console.error(tag, e_2);
@@ -140,19 +161,32 @@ var broadcast_transaction = function (coin, hex) {
 };
 var get_transaction = function (coin, txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_3;
+        var tag, url, body, resp, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    tag = TAG + " | get_utxos_by_xpub | ";
+                    tag = TAG + " | get_transaction | ";
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].getTx(txid)];
+                    url = BLOCKBOOK_URLS[coin.toUpperCase()] + "/api/v2/tx/" + txid;
+                    body = {
+                        method: 'GET',
+                        url: url,
+                        headers: {
+                            'content-type': 'application/json',
+                            'User-Agent': fakeUa()
+                        },
+                    };
+                    return [4 /*yield*/, axios(body)
+                        // let output = await BLOCKBOOKS[coin].getTx(txid)
+                        // log.debug(tag,"output: ",output)
+                    ];
                 case 2:
-                    output = _a.sent();
-                    log.debug(tag, "output: ", output);
-                    return [2 /*return*/, output];
+                    resp = _a.sent();
+                    // let output = await BLOCKBOOKS[coin].getTx(txid)
+                    // log.debug(tag,"output: ",output)
+                    return [2 /*return*/, resp.data];
                 case 3:
                     e_3 = _a.sent();
                     console.error(tag, e_3);
@@ -164,19 +198,32 @@ var get_transaction = function (coin, txid) {
 };
 var get_utxos_by_xpub = function (coin, xpub) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_4;
+        var tag, url, body, resp, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    tag = TAG + " | get_utxos_by_xpub | ";
+                    tag = TAG + " | FA get_utxos_by_xpub | ";
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })];
+                    url = BLOCKBOOK_URLS[coin.toUpperCase()] + "/api/v2/utxo/" + xpub + "?confirmed=false";
+                    body = {
+                        method: 'GET',
+                        url: url,
+                        headers: {
+                            'content-type': 'application/json',
+                            'User-Agent': fakeUa()
+                        },
+                    };
+                    return [4 /*yield*/, axios(body)
+                        // let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
+                        // log.debug(tag,"output: ",output)
+                    ];
                 case 2:
-                    output = _a.sent();
-                    log.debug(tag, "output: ", output);
-                    return [2 /*return*/, output];
+                    resp = _a.sent();
+                    // let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
+                    // log.debug(tag,"output: ",output)
+                    return [2 /*return*/, resp.data];
                 case 3:
                     e_4 = _a.sent();
                     console.error(tag, e_4);
@@ -199,7 +246,7 @@ var get_balance_by_xpub = function (coin, xpub) {
                     log.debug(tag, "coin: ", coin);
                     log.debug(tag, "xpub: ", xpub);
                     log.debug(tag, "BLOCKBOOKS: ", BLOCKBOOKS);
-                    return [4 /*yield*/, BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })];
+                    return [4 /*yield*/, get_utxos_by_xpub(coin, xpub)];
                 case 2:
                     output = _a.sent();
                     log.info(tag, "output: ", output);
@@ -229,10 +276,12 @@ var init_network = function (runtime, servers) {
         for (var i = 0; i < blockbooks.length; i++) {
             var coinInfo = blockbooks[i];
             log.debug("coinInfo: ", coinInfo);
+            //
             var blockbookurl = coinInfo.explorer.tx;
             blockbookurl = blockbookurl.replace("/tx/", "");
             if (coinInfo.symbol.toUpperCase() === 'ETH')
                 ETH_BLOCKBOOK_URL = blockbookurl;
+            BLOCKBOOK_URLS[coinInfo.symbol.toUpperCase()] = blockbookurl;
             log.debug("blockbookurl: ", blockbookurl);
             BLOCKBOOKS[coinInfo.symbol.toUpperCase()] = new blockbook_client_1.Blockbook({
                 nodes: [blockbookurl],

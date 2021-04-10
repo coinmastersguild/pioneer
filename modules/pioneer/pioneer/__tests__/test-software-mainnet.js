@@ -18,7 +18,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['Bitcoin','Ethereum','Thorchain']
+let blockchains = ['bitcoin','ethereum','thorchain']
 
 let FAUCET_ADDRESSES = {
 
@@ -119,11 +119,11 @@ let run_test = async function(){
         /*
             ETH thorchain swap
          */
-        let masterETH = await Wallet.getMaster("ETH")
-        console.log("masterETH: ",masterETH)
-
-        let balanceETH = await Wallet.getBalance("ETH")
-        console.log("balanceETH: ",balanceETH)
+        // let masterETH = await Wallet.getMaster("ETH")
+        // console.log("masterETH: ",masterETH)
+        //
+        // let balanceETH = await Wallet.getBalance("ETH")
+        // console.log("balanceETH: ",balanceETH)
 
 
         // let asset = {
@@ -188,28 +188,26 @@ let run_test = async function(){
         /*
                BTC
          */
-        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
         //
-        //
-        // let masterBTC = await Wallet.getMaster("BTC")
-        // console.log("masterBTC: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BTC")
-        // console.log("balanceBTC: ",balanceBTC)
-        //
-        // let amount = "0.00001"
+        let amount = "0.00001"
         // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
-        // let feeLevel = 5
-        //
-        // //TODO coin control
-        // //TODO offer input override
-        // // let transfer = {
-        // //     coin:"BTC",
-        // //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
-        // //     amount,
-        // //     memo,
-        // //     feeLevel
-        // // }
+        let feeLevel = 5
+
+        let transfer = {
+            coin:"BTC",
+            addressTo:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
+            amount,
+            feeLevel
+        }
+
         // let transfer = {
         //     coin:"BTC",
         //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
@@ -218,8 +216,9 @@ let run_test = async function(){
         //     feeLevel
         // }
         //
-        // // let transferSigned = await Wallet.buildTransfer(transfer)
-        // // console.log("transferSigned: ",transferSigned)
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
         //
         // let transferSigned = {
         //
