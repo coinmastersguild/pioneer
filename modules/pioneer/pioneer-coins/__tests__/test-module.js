@@ -1,7 +1,7 @@
 
-// require("dotenv").config({path:'./../../.env'})
-// require("dotenv").config({path:'../../../.env'})
-// require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'./../../.env'})
+require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
 
 // import * as config ""
 let {
@@ -12,10 +12,11 @@ let {
     normalize_pubkeys
 } = require('../lib/index.js')
 
-let paths = getPaths(true,['bitcoin','ethereum','thorchain'])
-console.log("",paths)
+let paths = getPaths(true,['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
+console.log("paths: ",paths)
 
-console.log("",supportedBlockchains)
+console.log("supportedAssets: ",supportedAssets)
+//console.log("supportedBlockchains: ",supportedBlockchains)
 
 //console.log(getPaths())
 

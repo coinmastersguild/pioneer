@@ -22,7 +22,7 @@ const ethUtils = require('ethereumjs-util');
 const prettyjson = require('prettyjson');
 const coinSelect = require('coinselect')
 const keccak256 = require('keccak256')
-
+const bchaddr = require('bchaddrjs');
 //coin crypto modules
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
@@ -279,8 +279,8 @@ module.exports = class wallet {
     private buildSwap: (transaction: any) => Promise<string>;
     private blockchains: any;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
-        if(config.isTestnet) isTestnet = true
-        this.isTestnet = isTestnet || null
+        //if(config.isTestnet) isTestnet = true
+        this.isTestnet = false
         this.mode = config.mode
         this.queryKey = config.queryKey
         this.username = config.username
@@ -302,7 +302,6 @@ module.exports = class wallet {
             try{
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.isTestnet,this.blockchains)
-
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
@@ -317,7 +316,7 @@ module.exports = class wallet {
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
 
                         //verify testnet
-                        const isTestnet = this.WALLET.isTestnet;
+                        const isTestnet = false
                         log.info(tag,"hdwallet isTestnet: ",isTestnet)
 
                         log.info(tag,"paths: ",paths)
@@ -402,8 +401,9 @@ module.exports = class wallet {
                     log.debug("baseUrl: ",await this.pioneerClient.getBaseURL())
                     //API
                     let register = {
-                        isTestnet:this.isTestnet,
+                        isTestnet:false,
                         username:this.username,
+                        blockchains:this.blockchains,
                         data:{
                             pubkeys:this.pubkeys
                         },
@@ -1082,6 +1082,16 @@ module.exports = class wallet {
                     //hack send all change to master (address reuse bad, stop dis)
                     let changeAddress = await this.getMaster(coin)
 
+                    //if bch convert format
+                    if(coin === 'BCH'){
+                        //if cashaddr convert to legacy
+                        let type = bchaddr.detectAddressFormat(changeAddress)
+                        log.info(tag,"type: ",type)
+                        if(type === 'cashaddr'){
+                            changeAddress = bchaddr.toLegacyAddress(changeAddress)
+                        }
+                    }
+
                     for(let i = 0; i < selectedResults.outputs.length; i++){
                         let outputInfo = selectedResults.outputs[i]
                         if(outputInfo.address){
@@ -1106,10 +1116,16 @@ module.exports = class wallet {
                             outputs.push(output)
                         }
                     }
-                    let longName = 'Bitcoin'
-                    if(isTestnet){
-                        longName = 'Testnet'
+                    let longName
+                    if(coin === 'BCH'){
+                        longName = 'BitcoinCash'
+                    }else {
+                        longName = 'Bitcoin'
+                        if(isTestnet){
+                            longName = 'Testnet'
+                        }
                     }
+
 
                     //hdwallet input
                     //TODO type this

@@ -28,8 +28,8 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 //console.log("password: ",password)
 
 let TEST_COINS = [
-    'BTC',
-    // 'BCH',
+    // 'BTC',
+    'BCH',
     // 'ETH',
     // 'ATOM'
 ]
@@ -100,7 +100,26 @@ let run_test = async function(){
             /*
                BCH
             */
+            if(TEST_COINS.indexOf('BCH') >= 0){
+                let bchBalance = await context.getBalance("BCH")
+                console.log("bchBalance: ",bchBalance)
 
+                //get address
+                let bchMaster = await context.getMaster("BCH")
+                console.log("bchMaster: ",bchMaster)
+
+                //TODO request from faucet
+                let intent = {
+                    coin:"BCH",
+                    address:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
+                    amount:"0.00001",
+                    noBroadcast:true,
+                    invocationId:"workyplzbro"
+                }
+                let txid = await context.sendToAddress(intent)
+                console.log("txid: ",txid)
+                //TODO coin control
+            }
 
 
 

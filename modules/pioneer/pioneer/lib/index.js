@@ -77,6 +77,7 @@ var ethUtils = require('ethereumjs-util');
 var prettyjson = require('prettyjson');
 var coinSelect = require('coinselect');
 var keccak256 = require('keccak256');
+var bchaddr = require('bchaddrjs');
 //coin crypto modules
 var ethCrypto = require("@pioneer-platform/eth-crypto");
 //All paths
@@ -178,9 +179,8 @@ module.exports = /** @class */ (function () {
     function wallet(type, config, isTestnet) {
         this.PUBLIC_WALLET = {};
         this.PRIVATE_WALLET = {};
-        if (config.isTestnet)
-            isTestnet = true;
-        this.isTestnet = isTestnet || null;
+        //if(config.isTestnet) isTestnet = true
+        this.isTestnet = false;
         this.mode = config.mode;
         this.queryKey = config.queryKey;
         this.username = config.username;
@@ -236,7 +236,7 @@ module.exports = /** @class */ (function () {
                             ];
                         case 4:
                             _k.sent();
-                            isTestnet_1 = this.WALLET.isTestnet;
+                            isTestnet_1 = false;
                             log.info(tag, "hdwallet isTestnet: ", isTestnet_1);
                             log.info(tag, "paths: ", paths);
                             _c = this;
@@ -349,8 +349,9 @@ module.exports = /** @class */ (function () {
                         case 21:
                             _h.apply(_g, _j.concat([_k.sent()]));
                             register = {
-                                isTestnet: this.isTestnet,
+                                isTestnet: false,
                                 username: this.username,
+                                blockchains: this.blockchains,
                                 data: {
                                     pubkeys: this.pubkeys
                                 },
@@ -1036,7 +1037,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_8;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_8;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1155,9 +1156,19 @@ module.exports = /** @class */ (function () {
                                 };
                                 inputs.push(input_2);
                             }
-                            return [4 /*yield*/, this.getMaster(coin)];
+                            return [4 /*yield*/, this.getMaster(coin)
+                                //if bch convert format
+                            ];
                         case 6:
                             changeAddress = _a.sent();
+                            //if bch convert format
+                            if (coin === 'BCH') {
+                                type_1 = bchaddr.detectAddressFormat(changeAddress);
+                                log.info(tag, "type: ", type_1);
+                                if (type_1 === 'cashaddr') {
+                                    changeAddress = bchaddr.toLegacyAddress(changeAddress);
+                                }
+                            }
                             for (i = 0; i < selectedResults.outputs.length; i++) {
                                 outputInfo = selectedResults.outputs[i];
                                 if (outputInfo.address) {
@@ -1181,9 +1192,15 @@ module.exports = /** @class */ (function () {
                                     outputs.push(output);
                                 }
                             }
-                            longName = 'Bitcoin';
-                            if (isTestnet) {
-                                longName = 'Testnet';
+                            longName = void 0;
+                            if (coin === 'BCH') {
+                                longName = 'BitcoinCash';
+                            }
+                            else {
+                                longName = 'Bitcoin';
+                                if (isTestnet) {
+                                    longName = 'Testnet';
+                                }
                             }
                             hdwalletTxDescription = {
                                 memo: memo,

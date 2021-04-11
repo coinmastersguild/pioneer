@@ -26,6 +26,15 @@ if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
     networks['ANY'] = require('@pioneer-platform/utxo-network')
 }
 
+if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
+    blockchains.push('bitcoincash')
+}
+
+if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
+    blockchains.push('litecoin')
+}
+
+
 if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
     blockchains.push('ethereum')
     networks['ETH'] = require('@pioneer-platform/eth-network')
@@ -45,6 +54,7 @@ if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']){
     blockchains.push('thorchain')
     networks['RUNE'] = require('@pioneer-platform/thor-network')
 }
+
 
 //Cache time
 let CACHE_TIME = 1000 * 60 * 1

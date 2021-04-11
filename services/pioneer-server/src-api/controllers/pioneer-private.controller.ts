@@ -108,6 +108,7 @@ interface Pubkeys {
 
 interface RegisterBody {
     isTestnet?:boolean
+    blockchains:[string]
     username:string
     data:RegisterBodyData,
     auth:string,
@@ -824,9 +825,10 @@ export class pioneerPrivateController extends Controller {
                 //register username
                 let userInfo:any = {
                     registered,
-                    id:uuidv4(),
+                    id:uuidv4(), //TODO does this mean we change id every register!?!?
                     username:body.username,
                     verified:true,
+                    blockchains:body.blockchains,
                     pubkeys,
                     coins,
                     ssInfo:{},
@@ -838,7 +840,7 @@ export class pioneerPrivateController extends Controller {
                 log.info(tag,"userInfo: ",userInfo)
 
                 try{
-                    let mongoSuccess =  await usersDB.insert(userInfo)
+                    let mongoSuccess =  await usersDB.insert(userInfo) //TODO upsert?
                     log.info(tag,"mongoSuccess: ",mongoSuccess)
                 }catch(e){
                     log.error(tag,"mongo: ",e)

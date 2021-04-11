@@ -161,6 +161,16 @@ if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
     supportedAssets.push("BNB")
 }
 
+if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
+    supportedBlockchains.push("BitcoinCash")
+    supportedAssets.push("BCH")
+}
+
+if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
+    supportedBlockchains.push("litecoin")
+    supportedAssets.push("LTC")
+}
+
 //TODO add more flags by networks
 
 

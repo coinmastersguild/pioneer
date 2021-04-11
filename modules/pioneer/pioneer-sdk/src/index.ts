@@ -219,7 +219,7 @@ export class SDK {
 
                 if(supportedBlockchains.indexOf('Binance') >= 0){
                     let binance = new XchainClass(this.spec,{
-                        network:'testnet',
+                        network:'mainnet',
                         blockchain:'binance',
                         nativeAsset:'BNB',
                         queryKey:this.queryKey
@@ -230,7 +230,7 @@ export class SDK {
 
                 if(supportedBlockchains.indexOf('Bitcoin') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
-                        network:'testnet',
+                        network:'mainnet',
                         blockchain:'bitcoin',
                         nativeAsset:'BTC',
                         queryKey:this.queryKey
@@ -241,7 +241,7 @@ export class SDK {
 
                 if(supportedBlockchains.indexOf('Thorchain') >= 0){
                     let thorchain = new XchainClass(this.spec,{
-                        network:'testnet',
+                        network:'mainnet',
                         blockchain:'thorchain',
                         nativeAsset:'RUNE',
                         queryKey:this.queryKey
@@ -252,7 +252,7 @@ export class SDK {
 
                 if(supportedBlockchains.indexOf('Ethereum') >= 0){
                     let ethereum = new XchainClass(this.spec,{
-                        network:'testnet',
+                        network:'mainnet',
                         blockchain:'ethereum',
                         nativeAsset:'ETH',
                         queryKey:this.queryKey
@@ -261,13 +261,27 @@ export class SDK {
                     this.clients['ethereum'] = ethereum
                 }
 
-                //TODO
-                // if(supportedBlockchains.indexOf('bitcoinCash') >= 0){
-                // }
+                if(supportedBlockchains.indexOf('BitcoinCash') >= 0){
+                    let bitcoin = new XchainClass(this.spec,{
+                        network:'mainnet',
+                        blockchain:'bitcoincash',
+                        nativeAsset:'BCH',
+                        queryKey:this.queryKey
+                    })
+                    await bitcoin.init()
+                    this.clients['bitcoincash'] = bitcoin
+                }
 
-
-
-
+                if(supportedBlockchains.indexOf('Litecoin') >= 0){
+                    let bitcoin = new XchainClass(this.spec,{
+                        network:'mainnet',
+                        blockchain:'bitcoincash',
+                        nativeAsset:'BCH',
+                        queryKey:this.queryKey
+                    })
+                    await bitcoin.init()
+                    this.clients['litecoin'] = bitcoin
+                }
 
                 let output:any = {
                     type: 'pioneer',

@@ -115,7 +115,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
 
     if(process.env['FEATURE_BINANCE_BLOCKCHAIN'] || blockchains.indexOf('binance') >= 0){
         let entry:any = {
-            note:"",
+            note:"Binance default path",
             type:"address",
             script_type:"binance",
             available_scripts_types:['binance'],
@@ -126,6 +126,46 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             coin: 'Binance',
             symbol: 'BNB',
             network: 'BNB',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
+
+    if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN'] || blockchains.indexOf('bitcoincash') >= 0){
+        let entry:any = {
+            note:"Bitcoin Cash Default path",
+            type:"xpub",
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            coin: 'BitcoinCash',
+            symbol: 'BCH',
+            network: 'BCH',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
+
+    if(process.env['FEATURE_LITECOIN_BLOCKCHAIN'] || blockchains.indexOf('litecoin') >= 0){
+        let entry:any = {
+            note:"Litecoin Default path",
+            type:"xpub",
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            coin: 'Litecoin',
+            symbol: 'LTC',
+            network: 'LTC',
         }
         if(isTestnet) {
             entry.testnet = true

@@ -533,6 +533,8 @@ const get_wallet_info = async function () {
             if(supportedAssets.indexOf(coin) >= 0){
                 coins.push(coin)
                 publicWallet.push(PUBLIC_WALLET[coin])
+            } else {
+                log.error("coin not supported! ",coin)
             }
         }
         log.info(tag,"supportedAssets: ",supportedAssets)
@@ -856,6 +858,7 @@ const init_wallet = async function (type:string,config:any,isTestnet:boolean) {
         //
         for(let i = 0; i < coins.length; i++){
             let coin = coins[i]
+            log.info(tag,"coin: ",coin)
             let pubKeyInfo = PUBLIC_WALLET[coin]
             pubKeyInfo.symbol = pubKeyInfo.coin
             if(!pubKeyInfo.script_type) throw Error("102: missing script_type")

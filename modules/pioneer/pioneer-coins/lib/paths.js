@@ -113,7 +113,7 @@ function getPaths(isTestnet, blockchains) {
     }
     if (process.env['FEATURE_BINANCE_BLOCKCHAIN'] || blockchains.indexOf('binance') >= 0) {
         var entry = {
-            note: "",
+            note: "Binance default path",
             type: "address",
             script_type: "binance",
             available_scripts_types: ['binance'],
@@ -124,6 +124,44 @@ function getPaths(isTestnet, blockchains) {
             coin: 'Binance',
             symbol: 'BNB',
             network: 'BNB',
+        };
+        if (isTestnet) {
+            entry.testnet = true;
+        }
+        output.push(entry);
+    }
+    if (process.env['FEATURE_BITCOINCASH_BLOCKCHAIN'] || blockchains.indexOf('bitcoincash') >= 0) {
+        var entry = {
+            note: "Bitcoin Cash Default path",
+            type: "xpub",
+            script_type: "p2pkh",
+            available_scripts_types: ['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'BitcoinCash',
+            symbol: 'BCH',
+            network: 'BCH',
+        };
+        if (isTestnet) {
+            entry.testnet = true;
+        }
+        output.push(entry);
+    }
+    if (process.env['FEATURE_LITECOIN_BLOCKCHAIN'] || blockchains.indexOf('litecoin') >= 0) {
+        var entry = {
+            note: "Litecoin Default path",
+            type: "xpub",
+            script_type: "p2pkh",
+            available_scripts_types: ['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true,
+            coin: 'Litecoin',
+            symbol: 'LTC',
+            network: 'LTC',
         };
         if (isTestnet) {
             entry.testnet = true;

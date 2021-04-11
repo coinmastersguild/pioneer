@@ -654,6 +654,9 @@ var get_wallet_info = function () {
                             coins.push(coin);
                             publicWallet.push(PUBLIC_WALLET[coin]);
                         }
+                        else {
+                            log.error("coin not supported! ", coin);
+                        }
                     }
                     log.info(tag, "supportedAssets: ", supportedAssets);
                     log.debug(tag, "coins: ", coins);
@@ -958,6 +961,7 @@ var init_wallet = function (type, config, isTestnet) {
                     //
                     for (i = 0; i < coins.length; i++) {
                         coin = coins[i];
+                        log.info(tag, "coin: ", coin);
                         pubKeyInfo = PUBLIC_WALLET[coin];
                         pubKeyInfo.symbol = pubKeyInfo.coin;
                         if (!pubKeyInfo.script_type)

@@ -1,21 +1,26 @@
 {
-  "name": "@pioneer-platform/bnb-network",
-  "version": "6.2.2",
+  "name": "@pioneer-platform/binance-network",
+  "version": "6.2.12",
+  "scripts": {
+    "create": "npm run build && npm run test",
+    "build": "tsc -p .",
+    "test": "npm run build && node __tests__/test-module.js",
+    "prepublish": "rm -Rf lib && npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
   "dependencies": {
-    "@binance-chain/javascript-sdk": "^2.16.4",
     "@crypto-hex-decoder/bnb": "^2.1.0",
+    "@foxcookieco/pioneer-loggerdog-client": "latest",
     "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/nodes": "latest",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
-    "lodash": "^4.17.15",
-    "moment": "^2.27.0"
+    "wait-promise": "^0.4.1"
   },
   "description": "Cosmos events to redis pub/sub",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo lol"
-  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "keywords": [
     "cosmos"
   ],

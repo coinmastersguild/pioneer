@@ -36,7 +36,7 @@ let run_test = async function(){
             isTestnet:false,
             mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
             username,
-            blockchains: ['bitcoin','ethereum','thorchain'],
+            blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
             pioneerApi:true,
             spec:urlSpec,
             queryKey,
@@ -217,26 +217,26 @@ let run_test = async function(){
         /*
                BTC
          */
-        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-
-        let masterBTC = await Wallet.getMaster("BTC")
-        console.log("masterBTC: ",masterBTC)
-
-        let balanceBTC = await Wallet.getBalance("BTC")
-        console.log("balanceBTC: ",balanceBTC)
-
-        let amount = "0.00001"
-        let feeLevel = 5
-
-        let transfer = {
-            coin:"BTC",
-            addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
-            amount,
-            feeLevel
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
+        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+        //
+        // let masterBTC = await Wallet.getMaster("BTC")
+        // console.log("masterBTC: ",masterBTC)
+        //
+        // let balanceBTC = await Wallet.getBalance("BTC")
+        // console.log("balanceBTC: ",balanceBTC)
+        //
+        // let amount = "0.00001"
+        // let feeLevel = 5
+        //
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
+        //     amount,
+        //     feeLevel
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
 
         // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)
@@ -245,33 +245,33 @@ let run_test = async function(){
                BCH
          */
 
-        // console.log("info: ",prettyjson.render(info.public.BCH),"\n")
+        console.log("info: ",prettyjson.render(info.public.BCH),"\n")
+
         //
-        // //
-        // let masterBTC = await Wallet.getMaster("BCH")
-        // console.log("masterBCH: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BCH")
-        // console.log("balanceBCH: ",balanceBTC)
-        //
-        // let amount = "0.0001"
-        // let memo = null //Uses OP_RETURN outputs
-        // let feeLevel = 5
-        //
-        // //TODO offer input override
-        // let transfer = {
-        //     coin:"BCH",
-        //     addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
-        //     amount,
-        //     memo,
-        //     feeLevel
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let masterBCH = await Wallet.getMaster("BCH")
+        console.log("masterBCH: ",masterBCH)
+
+        let balanceBCH = await Wallet.getBalance("BCH")
+        console.log("balanceBCH: ",balanceBCH)
+
+        let amount = "0.0001"
+        let memo = null //Uses OP_RETURN outputs
+        let feeLevel = 5
+
+        //TODO offer input override
+        let transfer = {
+            coin:"BCH",
+            addressTo:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
+            amount,
+            // memo,
+            feeLevel
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                ATOM
