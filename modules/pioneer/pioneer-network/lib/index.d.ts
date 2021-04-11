@@ -20,11 +20,8 @@ interface Tx {
     serialized?: string;
 }
 declare let prefurredScripts: any;
-declare let WT_COINS: string[];
-declare let WT_PUBKEYS_FORMATTED: any;
 declare let BLOCKBOOK_COINS: string[];
 declare let BLOCKBOOK_COINS_TESTNET: string[];
-declare const CURRENCY_DECIMALS: any;
 interface Recipient {
     address: string;
     amount: string;
@@ -36,14 +33,6 @@ interface Input {
     account_address_n: [number];
     script_type: string;
 }
-interface UnsignedUtxoRequest {
-    network: string;
-    recipients: [Recipient];
-    include_txs: boolean;
-    include_hex: boolean;
-    effort: number;
-    inputs: [Input];
-}
 declare const get_fio_actor_from_pubkey: (publicKey: string) => Promise<any>;
 declare const get_fio_accounts_by_pubkey: (publicKey: string) => Promise<any>;
 declare const get_fio_pubkey: () => Promise<any>;
@@ -51,7 +40,6 @@ declare const get_eos_pubkey: () => Promise<any>;
 declare const validate_FIO_username: (username: string) => Promise<any>;
 declare const validate_EOS_username: (username: string) => Promise<any>;
 declare const balance_history: (coin: string) => Promise<"TODO" | undefined>;
-declare const create_unsigned_transaction: (unsignedUtxoRequest: UnsignedUtxoRequest) => Promise<"TODO" | undefined>;
 declare const get_new_address: (coin: string) => Promise<"TODO" | undefined>;
 declare const get_block_height: (coin: string) => Promise<any>;
 declare const broadcast_transaction: (coin: string, tx: Tx) => Promise<any>;

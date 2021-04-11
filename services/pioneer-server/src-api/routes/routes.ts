@@ -127,6 +127,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "isTestnet": {"dataType":"boolean"},
+            "blockchains": {"dataType":"any","required":true},
             "username": {"dataType":"string","required":true},
             "data": {"ref":"RegisterBodyData","required":true},
             "auth": {"dataType":"string","required":true},

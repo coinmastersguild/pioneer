@@ -34,6 +34,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             isTestnet:false,
+            // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
             mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
             username,
             blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
@@ -57,35 +58,6 @@ let run_test = async function(){
         // console.log("info2: ",info2)
 
         /*
-            ETH
-        */
-        // console.log("info: ",prettyjson.render(info.public.ETH))
-        //
-        // //RUNE
-        // let masterETH = await Wallet.getMaster("ETH")
-        // console.log("masterETH: ",masterETH)
-        //
-        // let balanceETH = await Wallet.getBalance("ETH")
-        // console.log("balanceETH: ",balanceETH)
-
-        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-        // let amount = "2"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
-        // console.log("txid: ",txid)
-
-        /*
                THOR
          */
         // console.log("info: ",prettyjson.render(info.public.RUNE))
@@ -107,7 +79,7 @@ let run_test = async function(){
         //     amount,
         //     memo
         // }
-
+        //
         // let transferSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferSigned: ",transferSigned)
         //
@@ -242,36 +214,78 @@ let run_test = async function(){
         // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
+               LTC
+         */
+
+        console.log("info: ",prettyjson.render(info.public.LTC),"\n")
+
+        //
+        let masterLTC = await Wallet.getMaster("LTC")
+        console.log("masterLTC: ",masterLTC)
+
+        let balanceLTC = await Wallet.getBalance("LTC")
+        console.log("balanceLTC: ",balanceLTC)
+
+        // let amount = "0.001"
+        // let memo = null //Uses OP_RETURN outputs
+        // let feeLevel = 5
+
+        //TODO offer input override
+        // let transfer = {
+        //     coin:"LTC",
+        //     addressTo:"LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB",
+        //     amount,
+        //     // memo,
+        //     feeLevel
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('LTC',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
+        let intent = {
+            coin:"LTC",
+            address:"LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB",
+            amount:"0.0001",
+            //noBroadcast:true,
+            invocationId:"workyplzbro"
+        }
+        let txid = await Wallet.sendToAddress(intent)
+        console.log("txid: ",txid)
+
+        /*
                BCH
          */
 
-        console.log("info: ",prettyjson.render(info.public.BCH),"\n")
-
+        // console.log("info: ",prettyjson.render(info.public.BCH),"\n")
         //
-        let masterBCH = await Wallet.getMaster("BCH")
-        console.log("masterBCH: ",masterBCH)
-
-        let balanceBCH = await Wallet.getBalance("BCH")
-        console.log("balanceBCH: ",balanceBCH)
-
-        let amount = "0.0001"
-        let memo = null //Uses OP_RETURN outputs
-        let feeLevel = 5
-
-        //TODO offer input override
-        let transfer = {
-            coin:"BCH",
-            addressTo:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
-            amount,
-            // memo,
-            feeLevel
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // //
+        // let masterBCH = await Wallet.getMaster("BCH")
+        // console.log("masterBCH: ",masterBCH)
+        //
+        // let balanceBCH = await Wallet.getBalance("BCH")
+        // console.log("balanceBCH: ",balanceBCH)
+        //
+        // let amount = "0.0001"
+        // let memo = null //Uses OP_RETURN outputs
+        // let feeLevel = 5
+        //
+        // //TODO offer input override
+        // let transfer = {
+        //     coin:"BCH",
+        //     addressTo:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
+        //     amount,
+        //     // memo,
+        //     feeLevel
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                ATOM
@@ -306,7 +320,7 @@ let run_test = async function(){
                BNB
          */
 
-        //
+
         // let masterBNB = await Wallet.getMaster("BNB")
         // console.log("masterBNB: ",masterBNB)
         //
@@ -317,13 +331,16 @@ let run_test = async function(){
         //
         // let transfer = {
         //     coin:"BNB",
-        //     addressTo:address,
+        //     addressTo:"bnb1yq372zpenw0sla8l0pxpf08xgflxnfngndv433",
         //     amount,
         //     memo
         // }
-
+        //
         // let rawTx = await Wallet.buildTransfer(transfer)
         // console.log("rawTx: ",rawTx)
+
+        // let resultBroadcast = await Wallet.broadcastTransaction('BNB',rawTx)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("BNB",address,amount,memo)
         // console.log("txid: ",txid)

@@ -66,6 +66,7 @@ exports.HDWALLETS = exports.AuthProviders = void 0;
 var TAG = " | Pioneer | ";
 var log = require("@pioneer-platform/loggerdog")();
 //TODO remove this dep
+var cryptoTools = require('crypto');
 var tokenData = require("@pioneer-platform/pioneer-eth-token-data");
 var crypto = require("@pioneer-platform/utxo-crypto");
 var ripemd160 = require("crypto-js/ripemd160");
@@ -1037,7 +1038,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, e_8;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, buffer, hash, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, buffer, hash, e_8;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1045,6 +1046,7 @@ module.exports = /** @class */ (function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 30, , 31]);
+                            isTestnet = false;
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
                             amount = transaction.amount;
@@ -1080,7 +1082,7 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "xpub: ", this.PUBLIC_WALLET[coin].xpub);
                             input = void 0;
                             log.info(tag, "isTestnet: ", isTestnet);
-                            if (this.isTestnet) {
+                            if (this.isTestnet && false) { //Seriously fuck testnet flagging!
                                 input = { coin: "TEST", xpub: this.PUBLIC_WALLET[coin].pubkey };
                             }
                             else {
@@ -1196,11 +1198,20 @@ module.exports = /** @class */ (function () {
                             if (coin === 'BCH') {
                                 longName = 'BitcoinCash';
                             }
-                            else {
+                            else if (coin === 'LTC') {
+                                longName = 'Litecoin';
+                                if (isTestnet) {
+                                    longName = 'Testnet';
+                                }
+                            }
+                            else if (coin === 'BTC') {
                                 longName = 'Bitcoin';
                                 if (isTestnet) {
                                     longName = 'Testnet';
                                 }
+                            }
+                            else {
+                                throw Error("UTXO coin: " + coin + " Not supported yet! ");
                             }
                             hdwalletTxDescription = {
                                 memo: memo,
@@ -1418,13 +1429,15 @@ module.exports = /** @class */ (function () {
                             txFinal = res;
                             txFinal.signatures = res.signatures;
                             log.debug("FINAL: ****** ", txFinal);
+                            buffer = Buffer.from(broadcastString, 'base64');
+                            hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase();
                             broadcastString = {
                                 tx: txFinal,
                                 type: "cosmos-sdk/StdTx",
                                 mode: "sync"
                             };
                             rawTx = {
-                                txid: "",
+                                txid: hash,
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
@@ -1596,8 +1609,10 @@ module.exports = /** @class */ (function () {
                             log.debug(tag, "**** signedTxResponse: ", JSON.stringify(signedTxResponse));
                             pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex');
                             log.debug(tag, "pubkeySigHex: ", pubkeySigHex);
+                            buffer = Buffer.from(signedTxResponse.serialized, 'base64');
+                            hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase();
                             rawTx = {
-                                txid: signedTxResponse.txid,
+                                txid: hash,
                                 serialized: signedTxResponse.serialized
                             };
                             return [3 /*break*/, 29];

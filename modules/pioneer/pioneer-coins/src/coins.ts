@@ -167,7 +167,7 @@ if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
 }
 
 if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
-    supportedBlockchains.push("litecoin")
+    supportedBlockchains.push("Litecoin")
     supportedAssets.push("LTC")
 }
 
@@ -190,6 +190,7 @@ const CURRENCY_DECIMALS:any = {
     'dash': 8,
     'atom': 6,
     'ltc': 8,
+    'bch': 8,
     'doge': 8,
     'eth': 18,
     'gnt': 18,

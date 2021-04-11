@@ -11,6 +11,7 @@
 const TAG = " | Pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 //TODO remove this dep
+const cryptoTools = require('crypto');
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const crypto = require("@pioneer-platform/utxo-crypto")
 const ripemd160 = require("crypto-js/ripemd160")
@@ -951,6 +952,7 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
+                isTestnet = false
                 let coin = transaction.coin.toUpperCase()
                 let address = transaction.addressTo
                 let amount = transaction.amount
@@ -987,7 +989,7 @@ module.exports = class wallet {
                     //From blockbook
                     let input
                     log.info(tag,"isTestnet: ",isTestnet)
-                    if(this.isTestnet){
+                    if(this.isTestnet && false){ //Seriously fuck testnet flagging!
                         input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }else{
                         input = {coin,xpub:this.PUBLIC_WALLET[coin].pubkey}
@@ -1119,11 +1121,18 @@ module.exports = class wallet {
                     let longName
                     if(coin === 'BCH'){
                         longName = 'BitcoinCash'
-                    }else {
+                    }else if(coin === 'LTC'){
+                        longName = 'Litecoin'
+                        if(isTestnet){
+                            longName = 'Testnet'
+                        }
+                    }else if(coin === 'BTC'){
                         longName = 'Bitcoin'
                         if(isTestnet){
                             longName = 'Testnet'
                         }
+                    }else {
+                        throw Error("UTXO coin: "+coin+" Not supported yet! ")
                     }
 
 
@@ -1345,13 +1354,18 @@ module.exports = class wallet {
 
                     log.debug("FINAL: ****** ",txFinal)
 
+                    // @ts-ignore
+                    const buffer = Buffer.from(broadcastString, 'base64');
+                    let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
+
                     let broadcastString = {
                         tx:txFinal,
                         type:"cosmos-sdk/StdTx",
                         mode:"sync"
                     }
                     rawTx = {
-                        txid:"",
+                        txid:hash,
                         coin,
                         serialized:JSON.stringify(broadcastString)
                     }
@@ -1538,8 +1552,11 @@ module.exports = class wallet {
                     let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
                     log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
 
+                    const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
+                    let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
                     rawTx = {
-                        txid:signedTxResponse.txid,
+                        txid:hash,
                         serialized:signedTxResponse.serialized
                     }
                 }else if(coin === "EOS"){

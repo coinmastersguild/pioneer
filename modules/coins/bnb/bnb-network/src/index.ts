@@ -68,9 +68,12 @@ let ROUND_ROBIN_STATE:any = []
 let REMOTE_OVERRIDE_BNB = process.env['REMOTE_OVERRIDE_BNB']
 
 module.exports = {
-    // init:function (bnbchaind,bnbcli) {
-    // 	return init_network(bnbchaind,bnbcli);
-    // },
+    init:function (mode:string,config:any) {
+        if(mode){
+            //TODO override nodes
+        } else {
+        }
+    },
     nodeInfo:function () {
         return get_node_info();
     },
@@ -151,21 +154,27 @@ let get_balance = async function(address:string,token:string){
         log.debug(tag,"get_account: ",address)
         //
 
-        //TODO do without SDK!
-        // let txInfo = await network.getBalance(address,token)
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // if(!txInfo || txInfo.length === 0){
-        //     output = 0
-        // }
-        //
-        // for(let i = 0; i < txInfo.length; i++){
-        //     let assetInfo = txInfo[i]
-        //     log.debug(tag,"assetInfo: ",assetInfo)
-        //     if(assetInfo.symbol === token){
-        //         output = assetInfo.free
-        //     }
-        // }
+        let url = URL_DEX + '/api/v1/account/'+address
+
+        log.debug(tag,"url: ",url)
+        let result = await axios({
+            url: url,
+            method: 'GET'
+        })
+        let balanceInfo = result.data
+        log.info('balanceInfo: ', balanceInfo)
+
+        if(!balanceInfo || !balanceInfo.balances || balanceInfo.balances.length === 0){
+            output = 0
+        }
+
+        for(let i = 0; i < balanceInfo.balances.length; i++){
+            let assetInfo = balanceInfo.balances[i]
+            log.debug(tag,"assetInfo: ",assetInfo)
+            if(assetInfo.symbol === token){
+                output = parseFloat(assetInfo.free)
+            }
+        }
 
         return output
     }catch(e){

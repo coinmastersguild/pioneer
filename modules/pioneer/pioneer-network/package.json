@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/network",
-  "version": "6.3.87",
+  "version": "6.3.88",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,8 +20,7 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-core": "latest",
-    "@bithighlander/hdwallet-native": "latest",
+    "@pioneer-platform/binance-network": "latest",
     "@pioneer-platform/blockbook": "latest",
     "@pioneer-platform/cosmos-network": "latest",
     "@pioneer-platform/eth-network": "latest",
@@ -32,7 +31,6 @@
     "@pioneer-platform/thor-network": "latest",
     "@pioneer-platform/utxo-crypto": "latest",
     "@pioneer-platform/utxo-network": "latest",
-    "@shapeshiftoss/hdwallet-core": "latest",
     "@types/google-protobuf": "^3.7.4",
     "bech32": "^1.1.4",
     "bitcoinjs-lib": "^5.2.0",

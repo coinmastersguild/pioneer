@@ -29,9 +29,12 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let TEST_COINS = [
     // 'BTC',
-    'BCH',
+    // 'BCH',
+    'LTC',
     // 'ETH',
     // 'ATOM'
+    // 'RUNE'
+    // 'BNB'
 ]
 
 let run_test = async function(){
@@ -121,7 +124,29 @@ let run_test = async function(){
                 //TODO coin control
             }
 
+            /*
+               LTC
+            */
+            if(TEST_COINS.indexOf('LTC') >= 0){
+                let ltcBalance = await context.getBalance("LTC")
+                console.log("ltcBalance: ",ltcBalance)
 
+                //get address
+                let ltcMaster = await context.getMaster("LTC")
+                console.log("ltcMaster: ",ltcMaster)
+
+                //TODO request from faucet
+                let intent = {
+                    coin:"LTC",
+                    address:"LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB",
+                    amount:"0.0001",
+                    noBroadcast:true,
+                    invocationId:"workyplzbro"
+                }
+                let txid = await context.sendToAddress(intent)
+                console.log("txid: ",txid)
+                //TODO coin control
+            }
 
             /*
                 ETH
@@ -162,12 +187,54 @@ let run_test = async function(){
                 //     address:"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj",
                 //     amount:"0.001"
                 // }
-                // let txid = await context.sendToAddress(intent.coin, intent.address, intent.amount)
+                // let txid = await context.sendToAddress(intent)
                 // console.log("txid: ",txid)
             }
 
+            /*
+                RUNE
+             */
+            if(TEST_COINS.indexOf('RUNE') >= 0){
+                let runeBalance = await context.getBalance("RUNE")
+                console.log("runeBalance: ",runeBalance)
+
+                let runeMaster = await context.getMaster("RUNE")
+                console.log("runeMaster: ",runeMaster)
+
+                //send tx
+                let intent = {
+                    coin:"RUNE",
+                    address:"",
+                    amount:"0.001",
+                    noBroadcast:true,
+                    invocationId:"workyplzbro"
+                }
+                let txid = await context.sendToAddress(intent)
+                console.log("txid: ",txid)
+            }
 
 
+            /*
+                BNB
+             */
+            if(TEST_COINS.indexOf('BNB') >= 0){
+                let runeBalance = await context.getBalance("BNB")
+                console.log("runeBalance: ",runeBalance)
+
+                let runeMaster = await context.getMaster("BNB")
+                console.log("runeMaster: ",runeMaster)
+
+                //send tx
+                let intent = {
+                    coin:"BNB",
+                    address:"bnb1yq372zpenw0sla8l0pxpf08xgflxnfngndv433",
+                    amount:"0.0001",
+                    // noBroadcast:true,
+                    invocationId:"workyplzbro"
+                }
+                let txid = await context.sendToAddress(intent)
+                console.log("txid: ",txid)
+            }
 
         }
 

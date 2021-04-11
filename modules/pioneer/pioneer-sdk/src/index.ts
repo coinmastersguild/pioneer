@@ -275,8 +275,8 @@ export class SDK {
                 if(supportedBlockchains.indexOf('Litecoin') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
-                        blockchain:'bitcoincash',
-                        nativeAsset:'BCH',
+                        blockchain:'litecoin',
+                        nativeAsset:'LTC',
                         queryKey:this.queryKey
                     })
                     await bitcoin.init()

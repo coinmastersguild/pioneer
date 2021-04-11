@@ -1031,14 +1031,13 @@ export class pioneerPublicController extends Controller {
                     }
                 } else if(UTXO_COINS.indexOf(coin) >= 0){
                     //normal broadcast
-                    await networks.ANY.init('full',{isTestnet},isTestnet)
+                    await networks.ANY.init('full')
                     result = await networks['ANY'].broadcast(coin,body.serialized)
                 } else {
                     //normal broadcast
-                    await networks[coin].init({testnet:true},isTestnet)
+                    await networks[coin].init()
                     result = await networks[coin].broadcast(body.serialized)
                 }
-
             } else {
                 result.success = true
                 result.broadcast = false

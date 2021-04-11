@@ -30,7 +30,7 @@ let run_test = async function(){
         //console.log(SDK)
         let app = new SDK.SDK(spec,config,true)
         //console.log(app)
-        let seedChains = ['bitcoin','ethereum','thorchain']
+        let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
         await app.init(seedChains)
 
         //init
@@ -76,26 +76,38 @@ let run_test = async function(){
                 let client = user.clients[blockchain]
 
                 let balance = await client.getBalance()
-                console.log(blockchain+ " balance: ",balance)
+                //console.log(blockchain+ " balance: ",balance)
+                console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
             }
+            //
+            // //start socket
+            // let events = await app.startSocket()
+            // console.log("events: ",events)
+            // events.on('message', async (request) => {
+            //     console.log("**** message: ", request)
+            // })
+            //
+            // //send eth
+            // let payload = {
+            //     blockchain:'ethereum',
+            //     asset:'ETH',
+            //     amount:0.00011,
+            //     address:'0xc3affff54122658b89c31183cec4f15514f34624',
+            //     noBroadcast:true,
+            // }
+            // let txid = await app.sendToAddress(payload)
+            // console.log("txid: ",txid)
 
-            //start socket
-            let events = await app.startSocket()
-            console.log("events: ",events)
-            events.on('message', async (request) => {
-                console.log("**** message: ", request)
-            })
-
-            //send eth
             let payload = {
-                blockchain:'ethereum',
-                asset:'ETH',
+                blockchain:'litecoin',
+                asset:'LTC',
                 amount:0.00011,
-                address:'0xc3affff54122658b89c31183cec4f15514f34624',
+                address:'LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB',
                 noBroadcast:true,
             }
             let txid = await app.sendToAddress(payload)
             console.log("txid: ",txid)
+
         }
 
 

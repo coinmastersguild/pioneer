@@ -34,7 +34,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
-    // 'BNB' : require('@pioneer-platform/bnb-network'),
+    'BNB' : require('@pioneer-platform/binance-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
@@ -63,64 +63,9 @@ let prefurredScripts:any = {
     ATOM:"cosmos"
 }
 
-let WT_COINS = ['BTC','LTC','DASH','DOGE','BCH','ETH','EOS','BNB','ATOM']
-let WT_PUBKEYS_FORMATTED:any
-
 let BLOCKBOOK_COINS = ['BTC','BCH','LTC','DOGE']
 
 let BLOCKBOOK_COINS_TESTNET = [ 'BTC' , 'ETH'] //
-
-//prescisions
-const CURRENCY_DECIMALS:any = {
-    'btc': 8,
-    'dash': 8,
-    'atom': 6,
-    'ltc': 8,
-    'doge': 8,
-    'eth': 18,
-    'gnt': 18,
-    'usdt': 6,
-    'trx': 6,
-    'bnb': 8,
-    'poly': 18,
-    'gno': 18,
-    'sngls': 0,
-    'icn': 18,
-    'dgd': 9,
-    'mln': 18,
-    'rep': 18,
-    'swt': 18,
-    'wings': 18,
-    'trst': 6,
-    'rlc': 9,
-    'gup': 3,
-    'ant': 18,
-    'bat': 18,
-    'bnt': 18,
-    'snt': 18,
-    'nmr': 18,
-    'edg': 0,
-    'eos': 18,
-    'cvc': 8,
-    'link': 18,
-    'knc': 18,
-    'mtl': 8,
-    'pay': 18,
-    'fun': 8,
-    'dnt': 18,
-    'zrx': 18,
-    '1st': 18,
-    'omg': 18,
-    'salt': 8,
-    'rcn': 18,
-    'storj': 8,
-    'zil': 12,
-    'mana': 18,
-    'tusd': 18,
-    'ae': 18,
-    'dai': 18,
-    'mkr': 18
-}
 
 //TODO
 //script type array
@@ -137,15 +82,6 @@ interface Input{
     xpub:string,
     account_address_n:[number]
     script_type:string
-}
-
-interface UnsignedUtxoRequest {
-    network:string
-    recipients:[Recipient]
-    include_txs:boolean
-    include_hex:boolean
-    effort:number
-    inputs:[Input]
 }
 
 module.exports = {
@@ -193,9 +129,6 @@ module.exports = {
     },
     multiBalanceHistory: function (coin:string) {
         return balance_history(coin);
-    },
-    createUnsignedTransaction: function (unsignedUtxoRequest:UnsignedUtxoRequest) {
-        return create_unsigned_transaction(unsignedUtxoRequest);
     },
     broadcast: function (coin:string, tx:Tx) {
         return broadcast_transaction(coin,tx);
@@ -305,17 +238,6 @@ const validate_EOS_username = async function (username:string) {
 const balance_history = async function (coin:string) {
     let tag = TAG + " | balance_history | "
     try {
-
-        return "TODO"
-    } catch (e) {
-        log.error(tag, "e: ", e)
-    }
-}
-
-const create_unsigned_transaction = async function (unsignedUtxoRequest:UnsignedUtxoRequest) {
-    let tag = TAG + " | create_unsigned_transaction | "
-    try {
-
 
         return "TODO"
     } catch (e) {
@@ -474,10 +396,8 @@ const get_balance = async function (coin:string, isTestnet?:boolean) {
             let master = await get_address_master('RUNE')
             output = await networks[coin].getBalance(master)
         }else if(coin === 'BNB'){
-            // let master = await get_address_master('BNB')
-            // output = await networks[coin].getBalance(master)
-            // output = output.free
-            output = 0
+            let master = await get_address_master('BNB')
+            output = await networks[coin].getBalance(master)
         }else if(coin === 'EOS'){
             let master = await get_address_master('EOS')
             log.debug("master: ",master)

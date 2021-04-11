@@ -60,7 +60,7 @@ var log = require("@pioneer-platform/loggerdog")();
 var networks = {
     'ETH': require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
-    // 'BNB' : require('@pioneer-platform/bnb-network'),
+    'BNB': require('@pioneer-platform/binance-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
     // 'FIO' : require('@pioneer-platform/fio-network'),
@@ -79,61 +79,8 @@ var prefurredScripts = {
     BNB: "binance",
     ATOM: "cosmos"
 };
-var WT_COINS = ['BTC', 'LTC', 'DASH', 'DOGE', 'BCH', 'ETH', 'EOS', 'BNB', 'ATOM'];
-var WT_PUBKEYS_FORMATTED;
 var BLOCKBOOK_COINS = ['BTC', 'BCH', 'LTC', 'DOGE'];
 var BLOCKBOOK_COINS_TESTNET = ['BTC', 'ETH']; //
-//prescisions
-var CURRENCY_DECIMALS = {
-    'btc': 8,
-    'dash': 8,
-    'atom': 6,
-    'ltc': 8,
-    'doge': 8,
-    'eth': 18,
-    'gnt': 18,
-    'usdt': 6,
-    'trx': 6,
-    'bnb': 8,
-    'poly': 18,
-    'gno': 18,
-    'sngls': 0,
-    'icn': 18,
-    'dgd': 9,
-    'mln': 18,
-    'rep': 18,
-    'swt': 18,
-    'wings': 18,
-    'trst': 6,
-    'rlc': 9,
-    'gup': 3,
-    'ant': 18,
-    'bat': 18,
-    'bnt': 18,
-    'snt': 18,
-    'nmr': 18,
-    'edg': 0,
-    'eos': 18,
-    'cvc': 8,
-    'link': 18,
-    'knc': 18,
-    'mtl': 8,
-    'pay': 18,
-    'fun': 8,
-    'dnt': 18,
-    'zrx': 18,
-    '1st': 18,
-    'omg': 18,
-    'salt': 8,
-    'rcn': 18,
-    'storj': 8,
-    'zil': 12,
-    'mana': 18,
-    'tusd': 18,
-    'ae': 18,
-    'dai': 18,
-    'mkr': 18
-};
 module.exports = {
     init: function (type, config, isTestnet) {
         return init_wallet(type, config, isTestnet);
@@ -179,9 +126,6 @@ module.exports = {
     },
     multiBalanceHistory: function (coin) {
         return balance_history(coin);
-    },
-    createUnsignedTransaction: function (unsignedUtxoRequest) {
-        return create_unsigned_transaction(unsignedUtxoRequest);
     },
     broadcast: function (coin, tx) {
         return broadcast_transaction(coin, tx);
@@ -333,21 +277,6 @@ var balance_history = function (coin) {
         var tag;
         return __generator(this, function (_a) {
             tag = TAG + " | balance_history | ";
-            try {
-                return [2 /*return*/, "TODO"];
-            }
-            catch (e) {
-                log.error(tag, "e: ", e);
-            }
-            return [2 /*return*/];
-        });
-    });
-};
-var create_unsigned_transaction = function (unsignedUtxoRequest) {
-    return __awaiter(this, void 0, void 0, function () {
-        var tag;
-        return __generator(this, function (_a) {
-            tag = TAG + " | create_unsigned_transaction | ";
             try {
                 return [2 /*return*/, "TODO"];
             }
@@ -522,14 +451,14 @@ var get_address_master = function (coin) {
 };
 var get_balance = function (coin, isTestnet) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, master, master, master, master, master, master, e_6;
+        var tag, output, master, master, master, master, master, master, master, e_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = TAG + " | get_balance | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 22, , 23]);
+                    _a.trys.push([1, 24, , 25]);
                     log.debug("coin detected: ", coin);
                     output = void 0;
                     if (!(coin === "ETH")) return [3 /*break*/, 4];
@@ -545,7 +474,7 @@ var get_balance = function (coin, isTestnet) {
                     return [4 /*yield*/, networks['ETH'].getBalanceAddress(master)];
                 case 3:
                     output = _a.sent();
-                    return [3 /*break*/, 21];
+                    return [3 /*break*/, 23];
                 case 4:
                     if (!(tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 7];
                     log.debug("token detected ");
@@ -558,7 +487,7 @@ var get_balance = function (coin, isTestnet) {
                     return [4 /*yield*/, networks['ETH'].getBalanceToken(master, coin)];
                 case 6:
                     output = _a.sent();
-                    return [3 /*break*/, 21];
+                    return [3 /*break*/, 23];
                 case 7:
                     if (!(coin === 'ATOM')) return [3 /*break*/, 10];
                     return [4 /*yield*/, get_address_master('ATOM')];
@@ -567,7 +496,7 @@ var get_balance = function (coin, isTestnet) {
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 9:
                     output = _a.sent();
-                    return [3 /*break*/, 21];
+                    return [3 /*break*/, 23];
                 case 10:
                     if (!(coin === 'RUNE')) return [3 /*break*/, 13];
                     return [4 /*yield*/, get_address_master('RUNE')];
@@ -576,49 +505,51 @@ var get_balance = function (coin, isTestnet) {
                     return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 12:
                     output = _a.sent();
-                    return [3 /*break*/, 21];
+                    return [3 /*break*/, 23];
                 case 13:
-                    if (!(coin === 'BNB')) return [3 /*break*/, 14];
-                    // let master = await get_address_master('BNB')
-                    // output = await networks[coin].getBalance(master)
-                    // output = output.free
-                    output = 0;
-                    return [3 /*break*/, 21];
+                    if (!(coin === 'BNB')) return [3 /*break*/, 16];
+                    return [4 /*yield*/, get_address_master('BNB')];
                 case 14:
-                    if (!(coin === 'EOS')) return [3 /*break*/, 17];
-                    return [4 /*yield*/, get_address_master('EOS')];
+                    master = _a.sent();
+                    return [4 /*yield*/, networks[coin].getBalance(master)];
                 case 15:
-                    master = _a.sent();
-                    log.debug("master: ", master);
-                    return [4 /*yield*/, networks[coin].getBalance(master)];
+                    output = _a.sent();
+                    return [3 /*break*/, 23];
                 case 16:
-                    output = _a.sent();
-                    if (output.success === false) {
-                        output = 0;
-                    }
-                    return [3 /*break*/, 21];
+                    if (!(coin === 'EOS')) return [3 /*break*/, 19];
+                    return [4 /*yield*/, get_address_master('EOS')];
                 case 17:
-                    if (!(coin === 'FIO')) return [3 /*break*/, 20];
-                    return [4 /*yield*/, get_address_master('FIO')];
-                case 18:
                     master = _a.sent();
                     log.debug("master: ", master);
                     return [4 /*yield*/, networks[coin].getBalance(master)];
-                case 19:
+                case 18:
                     output = _a.sent();
                     if (output.success === false) {
                         output = 0;
                     }
-                    return [3 /*break*/, 21];
+                    return [3 /*break*/, 23];
+                case 19:
+                    if (!(coin === 'FIO')) return [3 /*break*/, 22];
+                    return [4 /*yield*/, get_address_master('FIO')];
                 case 20:
-                    log.error("Coin not yet implemented!");
-                    _a.label = 21;
-                case 21: return [2 /*return*/, output];
+                    master = _a.sent();
+                    log.debug("master: ", master);
+                    return [4 /*yield*/, networks[coin].getBalance(master)];
+                case 21:
+                    output = _a.sent();
+                    if (output.success === false) {
+                        output = 0;
+                    }
+                    return [3 /*break*/, 23];
                 case 22:
+                    log.error("Coin not yet implemented!");
+                    _a.label = 23;
+                case 23: return [2 /*return*/, output];
+                case 24:
                     e_6 = _a.sent();
                     log.error(tag, "e: ", e_6);
-                    return [3 /*break*/, 23];
-                case 23: return [2 /*return*/];
+                    return [3 /*break*/, 25];
+                case 25: return [2 /*return*/];
             }
         });
     });

@@ -108,7 +108,7 @@ interface Pubkeys {
 
 interface RegisterBody {
     isTestnet?:boolean
-    blockchains:[string]
+    blockchains:any
     username:string
     data:RegisterBodyData,
     auth:string,

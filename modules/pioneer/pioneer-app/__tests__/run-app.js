@@ -46,12 +46,11 @@ let run_test = async function(){
             console.log("First time startup, run pair first")
         } else {
             //if force keepkey
-            let isTestnet = null
 
             config.password = password
             config.username = username
 
-            let resultInit = await App.init(config,isTestnet)
+            let resultInit = await App.init(config)
             //console.log("resultInit: ",resultInit)
 
             //pair
