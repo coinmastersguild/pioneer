@@ -32,18 +32,18 @@
     </q-card-section>
     <q-card-actions vertical align="center" class="q-pb-lg q-pl-md q-pr-md">
 
-      <div v-if="showKeepkey">
-        <q-btn
-          color="green"
-          flat
-          @click="openConnect()"
-          label="Connect Hardware Wallet"
-          align="left"
-          icon="add"
-          size="lg"
-          class="full-width"
-        />
-      </div>
+<!--      <div v-if="showKeepkey">-->
+<!--        <q-btn-->
+<!--          color="green"-->
+<!--          flat-->
+<!--          @click="openConnect()"-->
+<!--          label="Connect Hardware Wallet"-->
+<!--          align="left"-->
+<!--          icon="add"-->
+<!--          size="lg"-->
+<!--          class="full-width"-->
+<!--        />-->
+<!--      </div>-->
 
       <!-- <q-btn color="primary" label="Configure Hardware Wallet" class="q-mt-md">
       <q-tooltip content-class="bg-accent">Keepkey, Ledger and Trezor wallets supported</q-tooltip>

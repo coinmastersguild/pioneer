@@ -31,9 +31,11 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let TEST_COINS = [
     'BTC',
-    // 'BCH',
-    // 'ETH',
-    // 'ATOM'
+    'BCH',
+    'ETH',
+    // 'ATOM',
+    'BNB',
+    'LTC'
 ]
 
 let run_test = async function(){
@@ -48,7 +50,7 @@ let run_test = async function(){
             //software
             let wallet1 = {
                 isTestnet:true,
-                mnemonic:process.env['WALLET_TEST_SEED'],
+                mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
                 username:username,
                 password
             }
@@ -83,8 +85,8 @@ let run_test = async function(){
             //console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("BH4IK4")
-            // console.log("pairResult: ",pairResult)
+            let pairResult = await App.pair("C5K4ES")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
@@ -110,26 +112,43 @@ let run_test = async function(){
                 let btcMaster = await context.getMaster("BTC")
                 console.log("btcMaster: ",btcMaster)
 
-                //TODO request from faucet
-
-                //send
-
-                //TODO coin control
             }
 
+            /*
+               LTC
+            */
+            if(TEST_COINS.indexOf('LTC') >= 0){
+                let ltcBalance = await context.getBalance("LTC")
+                console.log("ltcBalance: ",ltcBalance)
 
+                let ltcMaster = await context.getMaster("LTC")
+                console.log("ltcMaster: ",ltcMaster)
+
+            }
 
             /*
                BCH
             */
+            if(TEST_COINS.indexOf('BCH') >= 0){
+                let bchBalance = await context.getBalance("BCH")
+                console.log("bchBalance: ",bchBalance)
 
+                let bchMaster = await context.getMaster("BCH")
+                console.log("bchMaster: ",bchMaster)
 
-
+            }
 
             /*
                 ETH
              */
+            if(TEST_COINS.indexOf('ETH') >= 0){
+                let ethBalance = await context.getBalance("ETH")
+                console.log("ethBalance: ",ethBalance)
 
+                let ethMaster = await context.getMaster("ETH")
+                console.log("ethMaster: ",ethMaster)
+
+            }
 
             /*
                 ATOM
@@ -141,14 +160,6 @@ let run_test = async function(){
                 let atomMaster = await context.getMaster("ATOM")
                 console.log("atomMaster: ",atomMaster)
 
-                //send tx
-                // let intent = {
-                //     coin:"ATOM",
-                //     address:"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj",
-                //     amount:"0.001"
-                // }
-                // let txid = await context.sendToAddress(intent.coin, intent.address, intent.amount)
-                // console.log("txid: ",txid)
             }
 
         }

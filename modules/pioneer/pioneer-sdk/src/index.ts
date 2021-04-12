@@ -264,7 +264,7 @@ export class SDK {
                 if(supportedBlockchains.indexOf('BitcoinCash') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
-                        blockchain:'bitcoincash',
+                        blockchain:'bitcoinCash',
                         nativeAsset:'BCH',
                         queryKey:this.queryKey
                     })

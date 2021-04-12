@@ -40,6 +40,8 @@ let pioneer = require('../pioneer')
 import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Request, Response, Header } from 'tsoa';
 import * as express from 'express';
 
+let PIONEER_INFO_CACHE_TIME = process.env['PIONEER_INFO_CACHE_TIME'] || 60 * 5
+
 enum AuthProviders {
     shapeshift = 'shapeshift',
     bitcoin = 'bitcoin'
@@ -293,7 +295,7 @@ export class pioneerPrivateController extends Controller {
                     log.info(tag,"walletInfo: ",walletInfo)
 
                     //write to cache
-                    await redis.setex(accountInfo.username+":cache:walletInfo",5,JSON.stringify(walletInfo))
+                    await redis.setex(accountInfo.username+":cache:walletInfo",PIONEER_INFO_CACHE_TIME,JSON.stringify(walletInfo))
                 }
 
                 return walletInfo
