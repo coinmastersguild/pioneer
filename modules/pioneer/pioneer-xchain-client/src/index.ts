@@ -370,10 +370,121 @@ module.exports = class wallet {
                     log.error(tag, "e: ", e)
                 }
             }
-
         }
 
+        if(this.network === 'bitcoincash'){
+            // @ts-ignore
+            this.getFeeRates = async function () {
+                let tag = TAG + " | getFeeRates | "
+                try {
 
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,{coin:'BCH',memo:''})
+                    response = response.data
+                    console.log("response: ",response)
+
+                    return response.rates
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            // @ts-ignore
+            this.getFeesWithMemo = async function (memo?:string) {
+                let tag = TAG + " | getFeesWithMemo | "
+                try {
+                    let params = {
+                        coin:'BCH',
+                        memo:"asdasdasdasdasda"
+                    }
+                    console.log("this.pioneerApi: ",this.pioneerApi)
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,params)
+                    response = response.data
+                    console.log("response: ",response)
+
+                    let output = {
+                        fees:{
+                            type: 'byte',
+                            average:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.average)
+                                }
+                            },
+                            fast:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fast)
+                                }
+                            },
+                            fastest:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fastest)
+                                }
+                            }
+                        }
+                    }
+
+                    return output.fees
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+        }
+
+        if(this.network === 'litecoin'){
+            // @ts-ignore
+            this.getFeeRates = async function () {
+                let tag = TAG + " | getFeeRates | "
+                try {
+
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,{coin:'LTC',memo:''})
+                    response = response.data
+                    console.log("response: ",response)
+
+                    return response.rates
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            // @ts-ignore
+            this.getFeesWithMemo = async function (memo?:string) {
+                let tag = TAG + " | getFeesWithMemo | "
+                try {
+                    let params = {
+                        coin:'LTC',
+                        memo:"asdasdasdasdasda"
+                    }
+                    console.log("this.pioneerApi: ",this.pioneerApi)
+                    let response = await this.pioneerApi.GetFeesWithMemo(null,params)
+                    response = response.data
+                    console.log("response: ",response)
+
+                    let output = {
+                        fees:{
+                            type: 'byte',
+                            average:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.average)
+                                }
+                            },
+                            fast:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fast)
+                                }
+                            },
+                            fastest:{
+                                amount:function(){
+                                    return new BigNumber(response.fees.fastest)
+                                }
+                            }
+                        }
+                    }
+
+                    return output.fees
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+        }
         /*
             Network specific functions
 

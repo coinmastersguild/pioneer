@@ -1,7 +1,7 @@
-require("dotenv").config({path:'./../../.env'})
-require("dotenv").config({path:'../../../.env'})
-require("dotenv").config({path:'../../../../.env'})
-require("dotenv").config({path:'../../../../../.env'})
+// require("dotenv").config({path:'./../../.env'})
+// require("dotenv").config({path:'../../../.env'})
+// require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'../../../../../.env'})
 
 const prettyjson = require('prettyjson');
 let SDK = require('../lib/index.js')
@@ -9,10 +9,10 @@ let SDK = require('../lib/index.js')
 // let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
 let urlSpec = process.env['URL_PIONEER_SPEC']
 
-let wss = process.env['URL_PIONEER_SOCKET']
-let spec = process.env['URL_PIONEER_SPEC']
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbro'
 
 let run_test = async function(){
     try{
@@ -20,7 +20,7 @@ let run_test = async function(){
 
         let config = {
             queryKey,
-            username,
+            // username,
             spec,
             wss,
             service:'asgardx',
@@ -98,15 +98,15 @@ let run_test = async function(){
             // let txid = await app.sendToAddress(payload)
             // console.log("txid: ",txid)
 
-            let payload = {
-                blockchain:'litecoin',
-                asset:'LTC',
-                amount:0.00011,
-                address:'LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB',
-                noBroadcast:true,
-            }
-            let txid = await app.sendToAddress(payload)
-            console.log("txid: ",txid)
+            // let payload = {
+            //     blockchain:'litecoin',
+            //     asset:'LTC',
+            //     amount:0.00011,
+            //     address:'LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB',
+            //     noBroadcast:true,
+            // }
+            // let txid = await app.sendToAddress(payload)
+            // console.log("txid: ",txid)
 
         }
 

@@ -73,6 +73,7 @@ export class SDK {
     private events: {};
     private wss: string | undefined;
     private username: string | undefined;
+    private blockchains: any
     // private startSocket: () => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
@@ -90,9 +91,11 @@ export class SDK {
         this.spec = config.spec
         this.clients = {}
         this.events = {}
-        this.init = async function (blockchains?:[]) {
+        this.blockchains = []
+        this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
             try{
+
                 log.info(tag,"blockchains: ",blockchains)
                 if(!blockchains) blockchains = []
                 if(!this.queryKey) throw Error(" You must create an api key! ")
@@ -104,14 +107,13 @@ export class SDK {
                         },
                     }
                 });
+
                 //init blockchains
                 for(let i = 0; i < blockchains.length; i++){
                     let blockchain = blockchains[i]
-                    if(supportedBlockchains.indexOf(blockchain) < 0){
-                        supportedBlockchains.push(blockchain)
-                    }
+                    this.blockchains.push(blockchain.toLowerCase())
                 }
-
+                if(this.blockchains.length === 0) throw Error("Failed to init! must have blockchains!")
                 this.pioneerApi = await this.pioneerApi.init()
                 return this.pioneerApi
             }catch(e){
@@ -217,7 +219,7 @@ export class SDK {
                 if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
 
 
-                if(supportedBlockchains.indexOf('Binance') >= 0){
+                if(this.blockchains.indexOf('binance') >= 0){
                     let binance = new XchainClass(this.spec,{
                         network:'mainnet',
                         blockchain:'binance',
@@ -228,7 +230,7 @@ export class SDK {
                     this.clients['binance'] = binance
                 }
 
-                if(supportedBlockchains.indexOf('Bitcoin') >= 0){
+                if(this.blockchains.indexOf('bitcoin') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
                         blockchain:'bitcoin',
@@ -239,7 +241,7 @@ export class SDK {
                     this.clients['bitcoin'] = bitcoin
                 }
 
-                if(supportedBlockchains.indexOf('Thorchain') >= 0){
+                if(this.blockchains.indexOf('thorchain') >= 0){
                     let thorchain = new XchainClass(this.spec,{
                         network:'mainnet',
                         blockchain:'thorchain',
@@ -250,7 +252,7 @@ export class SDK {
                     this.clients['thorchain'] = thorchain
                 }
 
-                if(supportedBlockchains.indexOf('Ethereum') >= 0){
+                if(this.blockchains.indexOf('ethereum') >= 0){
                     let ethereum = new XchainClass(this.spec,{
                         network:'mainnet',
                         blockchain:'ethereum',
@@ -261,18 +263,18 @@ export class SDK {
                     this.clients['ethereum'] = ethereum
                 }
 
-                if(supportedBlockchains.indexOf('BitcoinCash') >= 0){
+                if(this.blockchains.indexOf('bitcoincash') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
-                        blockchain:'bitcoinCash',
+                        blockchain:'bitcoincash',
                         nativeAsset:'BCH',
                         queryKey:this.queryKey
                     })
                     await bitcoin.init()
-                    this.clients['bitcoincash'] = bitcoin
+                    this.clients['bitcoinCash'] = bitcoin
                 }
 
-                if(supportedBlockchains.indexOf('Litecoin') >= 0){
+                if(this.blockchains.indexOf('litecoin') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
                         blockchain:'litecoin',
