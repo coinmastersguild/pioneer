@@ -1,7 +1,7 @@
 /*
 
      Pioneer SDK
-        A typescript sdk for integration for native wallets
+        A typescript sdk for integration for apps
 
  */
 
@@ -10,7 +10,7 @@ const log = require("@pioneer-platform/loggerdog")()
 
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
-// const Events = require("@pioneer-platform/pioneer-events")
+const Events = require("@pioneer-platform/pioneer-events")
 
 let {
     supportedBlockchains,
@@ -70,11 +70,12 @@ export class SDK {
     private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
     private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
     private url: string;
-    private events: {};
+    private events: any;
     private wss: string | undefined;
     private username: string | undefined;
     private blockchains: any
-    // private startSocket: () => Promise<any>;
+    private startSocket: () => Promise<any>;
+    private isPaired: boolean
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -83,6 +84,7 @@ export class SDK {
         } else {
             this.isTestnet = false
         }
+        this.isPaired = false
         this.config = config
         this.username = config.username
         this.spec = spec || config.spec
@@ -121,22 +123,22 @@ export class SDK {
                 throw e
             }
         }
-        // this.startSocket = async function () {
-        //     let tag = TAG + " | startSocket | "
-        //     try {
-        //         if(!this.username)throw Error("102: can not start socket without username!")
-        //         let configEvents = {
-        //             username:this.username,
-        //             queryKey:this.queryKey,
-        //             pioneerWs:this.wss
-        //         }
-        //         //sub to events
-        //         this.events = await Events.init(configEvents)
-        //         return this.events
-        //     } catch (e) {
-        //         log.error(tag, "e: ", e)
-        //     }
-        // }
+        this.startSocket = async function () {
+            let tag = TAG + " | startSocket | "
+            try {
+                let configEvents:any = {
+                    queryKey:this.queryKey,
+                    pioneerWs:this.wss
+                }
+                if(this.username) configEvents.username = this.username
+                //sub to events
+                this.events = new Events.Events(configEvents.pioneerWs,config)
+                this.events.init()
+                return this.events.events
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
         this.createPairingCode = async function () {
             let tag = TAG + " | createPairingCode | "
             try {
@@ -145,6 +147,9 @@ export class SDK {
                     service:this.service,
                     url:this.url
                 }
+                //sub to pairings
+                this.events.subscribeToKey()
+
                 let result = await this.pioneerApi.CreatePairingCode(null, pairingBody)
                 return result.data
             } catch (e) {

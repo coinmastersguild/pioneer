@@ -48,6 +48,7 @@ export interface Transaction {
     amount: string;
     memo?: string | undefined;
     nonce?: number;
+    feeLevel?: string;
 }
 export interface CoinInfo {
     coin: string;

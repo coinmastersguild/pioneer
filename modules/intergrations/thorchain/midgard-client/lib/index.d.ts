@@ -1,11 +1,11 @@
 declare const TAG = " | midgard network | ";
+declare const log: any;
 declare let SEED_TESTNET: string;
 declare const MIDGARD_API: string;
 declare const URL_THORNODE: string;
 declare const Axios: any;
 declare const https: any;
 declare const axios: any;
-declare const log: any;
 declare const get_new_addresses: () => Promise<any>;
 declare const get_price: (asset: string) => Promise<any>;
 declare const get_pool_addresses: () => Promise<any>;

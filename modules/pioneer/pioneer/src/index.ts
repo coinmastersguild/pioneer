@@ -164,6 +164,7 @@ export interface Transaction {
     amount: string;
     memo?: string | undefined;
     nonce?:number
+    feeLevel?:string
 }
 
 export interface CoinInfo {
@@ -279,6 +280,7 @@ module.exports = class wallet {
     private setMnemonic: () => string | undefined;
     private buildSwap: (transaction: any) => Promise<string>;
     private blockchains: any;
+    private addLiquidity: (addLiquidity: any) => Promise<any>;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
         this.isTestnet = false
@@ -742,67 +744,209 @@ module.exports = class wallet {
             amount: "0.1"
         }
          */
+        this.addLiquidity = async function (addLiquidity:any) {
+            let tag = TAG + " | addLiquidity | "
+            try{
+                let rawTx
+
+                let UTXOcoins = [
+                    'BTC',
+                    'BCH',
+                    'LTC'
+                ]
+
+                //supported tokens
+                //USDT SUSHI
+
+                if(addLiquidity.inboundAddress.chain === 'ETH'){
+                    //get tx inputs
+                    let addressFrom
+                    if(addLiquidity.addressFrom){
+                        addressFrom = addLiquidity.addressFrom
+                    } else {
+                        addressFrom = await this.getMaster('ETH')
+                    }
+                    if(!addressFrom) throw Error("102: unable to get master address! ")
+
+                    let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,addLiquidity)
+                    data = data.data
+                    log.info(tag,"txData: ",data)
+
+                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
+                    nonceRemote = nonceRemote.data
+                    let nonce = addLiquidity.nonce || nonceRemote
+                    let gas_limit = 80000 //TODO dynamic gas limit?
+                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                    gas_price = gas_price.data
+                    log.debug(tag,"gas_price: ",gas_price)
+                    gas_price = parseInt(gas_price)
+                    gas_price = gas_price + 1000000000
+
+                    //sign
+                    //send FROM master
+                    let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
+
+                    //if eth
+                    let amountNative = parseFloat(addLiquidity.amount) * support.getBase('ETH')
+                    amountNative = Number(parseInt(String(amountNative)))
+                    log.info("amountNative: ",amountNative)
+                    log.info("nonce: ",nonce)
+
+                    //TODO if token
+
+                    let ethTx = {
+                        // addressNList: support.bip32ToAddressNList(masterPathEth),
+                        "addressNList":[
+                            2147483692,
+                            2147483708,
+                            2147483648,
+                            0,
+                            0
+                        ],
+                        nonce: numberToHex(nonce),
+                        gasPrice: numberToHex(gas_price),
+                        gasLimit: numberToHex(gas_limit),
+                        value: numberToHex(amountNative),
+                        to: addLiquidity.inboundAddress.router,
+                        data,
+                        // chainId: 1,//TODO testnet
+                    }
+
+                    log.info("unsignedTxETH: ",ethTx)
+                    //send to hdwallet
+                    rawTx = await this.WALLET.ethSignTx(ethTx)
+                    rawTx.params = ethTx
+
+                    const txid = keccak256(rawTx.serialized).toString('hex')
+                    log.info(tag,"txid: ",txid)
+                    rawTx.txid = txid
+
+                } else if(UTXOcoins.indexOf(addLiquidity.inboundAddress.chain) >= 0){
+                    if(!addLiquidity.memo) throw Error("Memo required for swaps!")
+                    //UTXO coins
+                    let coin = addLiquidity.inboundAddress.chain
+                    let addressFrom = await this.getMaster(coin) //TODO this silly in utxo
+                    //build transfer with memo
+                    let transfer:Transaction = {
+                        coin:"BTC",
+                        addressTo:addLiquidity.inboundAddress.address,
+                        addressFrom,
+                        amount:addLiquidity.amount,
+                        feeLevel:addLiquidity.feeLevel,
+                        memo:addLiquidity.memo
+                    }
+
+                    rawTx = await this.buildTransfer(transfer)
+                    console.log("rawTx: ",rawTx)
+
+                } else {
+                    throw Error("Chain not supported! "+addLiquidity.inboundAddress.chain)
+                }
+
+                return rawTx
+            }catch(e){
+                log.error(e)
+                throw e
+            }
+        },
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
-                //get tx inputs
-                let addressFrom
-                if(swap.addressFrom){
-                    addressFrom = swap.addressFrom
+                let rawTx
+
+                let UTXOcoins = [
+                    'BTC',
+                    'BCH',
+                    'LTC'
+                ]
+
+                //supported tokens
+                //USDT SUSHI
+
+                if(swap.inboundAddress.chain === 'ETH'){
+                    //get tx inputs
+                    let addressFrom
+                    if(swap.addressFrom){
+                        addressFrom = swap.addressFrom
+                    } else {
+                        addressFrom = await this.getMaster('ETH')
+                    }
+                    if(!addressFrom) throw Error("102: unable to get master address! ")
+
+                    let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,swap)
+                    data = data.data
+                    log.info(tag,"txData: ",data)
+
+                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
+                    nonceRemote = nonceRemote.data
+                    let nonce = swap.nonce || nonceRemote
+                    let gas_limit = 80000 //TODO dynamic gas limit?
+                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                    gas_price = gas_price.data
+                    log.debug(tag,"gas_price: ",gas_price)
+                    gas_price = parseInt(gas_price)
+                    gas_price = gas_price + 1000000000
+
+                    //sign
+                    //send FROM master
+                    let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
+
+                    //if eth
+                    let amountNative = parseFloat(swap.amount) * support.getBase('ETH')
+                    amountNative = Number(parseInt(String(amountNative)))
+                    log.info("amountNative: ",amountNative)
+                    log.info("nonce: ",nonce)
+
+                    //TODO if token
+
+                    let ethTx = {
+                        // addressNList: support.bip32ToAddressNList(masterPathEth),
+                        "addressNList":[
+                            2147483692,
+                            2147483708,
+                            2147483648,
+                            0,
+                            0
+                        ],
+                        nonce: numberToHex(nonce),
+                        gasPrice: numberToHex(gas_price),
+                        gasLimit: numberToHex(gas_limit),
+                        value: numberToHex(amountNative),
+                        to: swap.inboundAddress.router,
+                        data,
+                        // chainId: 1,//TODO testnet
+                    }
+
+                    log.info("unsignedTxETH: ",ethTx)
+                    //send to hdwallet
+                    rawTx = await this.WALLET.ethSignTx(ethTx)
+                    rawTx.params = ethTx
+
+                    const txid = keccak256(rawTx.serialized).toString('hex')
+                    log.info(tag,"txid: ",txid)
+                    rawTx.txid = txid
+
+                } else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
+                    if(!swap.memo) throw Error("Memo required for swaps!")
+                    //UTXO coins
+                    let coin = swap.inboundAddress.chain
+                    let addressFrom = await this.getMaster(coin) //TODO this silly in utxo
+                    //build transfer with memo
+                    let transfer:Transaction = {
+                        coin:"BTC",
+                        addressTo:swap.inboundAddress.address,
+                        addressFrom,
+                        amount:swap.amount,
+                        feeLevel:swap.feeLevel,
+                        memo:swap.memo
+                    }
+
+                    rawTx = await this.buildTransfer(transfer)
+                    console.log("rawTx: ",rawTx)
+
                 } else {
-                    addressFrom = await this.getMaster('ETH')
+                    throw Error("Chain not supported! "+swap.inboundAddress.chain)
                 }
-                if(!addressFrom) throw Error("102: unable to get master address! ")
-
-                let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,swap)
-                data = data.data
-                log.info(tag,"txData: ",data)
-
-                let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                nonceRemote = nonceRemote.data
-                let nonce = swap.nonce || nonceRemote
-                let gas_limit = 80000 //TODO dynamic gas limit?
-                let gas_price = await this.pioneerClient.instance.GetGasPrice()
-                gas_price = gas_price.data
-                log.debug(tag,"gas_price: ",gas_price)
-                gas_price = parseInt(gas_price)
-                gas_price = gas_price + 1000000000
-
-                //sign
-                //send FROM master
-                let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
-
-                let amountNative = parseFloat(swap.amount)
-                amountNative = Number(parseInt(String(amountNative)))
-
-                log.info("nonce: ",nonce)
-
-                let ethTx = {
-                    // addressNList: support.bip32ToAddressNList(masterPathEth),
-                    "addressNList":[
-                        2147483692,
-                        2147483708,
-                        2147483648,
-                        0,
-                        0
-                    ],
-                    nonce: numberToHex(nonce),
-                    gasPrice: numberToHex(gas_price),
-                    gasLimit: numberToHex(gas_limit),
-                    value: numberToHex(amountNative),
-                    to: swap.inboundAddress.router,
-                    data,
-                    // chainId: 1,//TODO testnet
-                }
-
-                log.info("unsignedTxETH: ",ethTx)
-                //send to hdwallet
-                let rawTx = await this.WALLET.ethSignTx(ethTx)
-                rawTx.params = ethTx
-
-                const txid = keccak256(rawTx.serialized).toString('hex')
-                log.info(tag,"txid: ",txid)
-                rawTx.txid = txid
 
                 return rawTx
             }catch(e){

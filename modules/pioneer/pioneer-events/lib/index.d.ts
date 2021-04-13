@@ -1,11 +1,17 @@
-declare const TAG = " | ws-client | ";
-declare const log: any;
-declare const EventEmitter: any;
-declare const emitter: any;
-declare const io: any;
-declare let wait: any;
-declare let sleep: any;
-declare let URL_PIONEER_WS: string | undefined;
-declare let SOCKET: any;
-declare let disconnect: () => Promise<void>;
-declare let init_client: (config: any) => Promise<any>;
+export declare class Events {
+    private wss;
+    private username;
+    private queryKey;
+    private socket;
+    private events;
+    private isConnected;
+    private isTestnet;
+    private isPaired;
+    private init;
+    private emitter;
+    private setUsername;
+    private pair;
+    private disconnect;
+    private subscribeToKey;
+    constructor(wss: string, config: any, isTestnet?: boolean);
+}

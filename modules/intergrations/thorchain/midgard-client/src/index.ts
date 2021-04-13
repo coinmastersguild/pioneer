@@ -12,6 +12,7 @@ http://174.138.103.9:8080/v1/doc
 
 const TAG = " | midgard network | "
 
+const log = require("@pioneer-platform/loggerdog")()
 let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 
 //let MIDGARD_API = "https://chaosnet-midgard.bepswap.com/v1"
@@ -24,6 +25,8 @@ let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 
 const MIDGARD_API = process.env['URL_MIDGARD'] ||'https://midgard.thorchain.info/v2'
 const URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.thorchain.info'
+log.debug("URL_THORNODE: ",URL_THORNODE)
+log.debug("MIDGARD_API: ",MIDGARD_API)
 
 //http://174.138.103.9:8080/v1/doc
 
@@ -35,7 +38,6 @@ const axios = Axios.create({
     })
 });
 
-const log = require("@pioneer-platform/loggerdog")()
 
 module.exports = {
     // init: function (type:string,config:any,isTestnet:boolean) {
@@ -151,7 +153,7 @@ const get_info = async function () {
             // json: true
         };
 
-        //log.debug(body)
+        log.info(body.url)
         let resp = await axios(body)
 
 
@@ -188,7 +190,7 @@ const get_pools = async function () {
             // json: true
         };
 
-        log.debug(body)
+        log.debug(body.url)
         let resp = await axios(body)
 
 

@@ -1,5 +1,6 @@
 require("dotenv").config({path:'../../../.env'})
-require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'../../../../../.env'})
 
 // const colorize = require('json-colorizer');
 let midgard = require("../lib")
@@ -19,8 +20,8 @@ let run_test = async function(){
         let info = await midgard.getInfo()
         console.log("info: ",info)
 
-        let pools = await midgard.getPools()
-        console.log("pools: ",pools)
+        // let pools = await midgard.getPools()
+        // console.log("pools: ",pools)
 
         //get price
         // let price = await midgard.getPrice("BNB.ETH-D5B")
@@ -30,8 +31,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        let addresses = await midgard.getPoolAddress()
-        console.log("addresses: ",addresses)
+        // let addresses = await midgard.getPoolAddress()
+        // console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)

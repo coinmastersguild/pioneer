@@ -668,7 +668,7 @@ module.exports = /** @class */ (function () {
         this.getAddress = function (coin, account, index, isChange) {
             var tag = TAG + " | get_address | ";
             try {
-                var output 
+                var output
                 //if token use ETH pubkey
                 = void 0;
                 //if token use ETH pubkey
@@ -787,14 +787,21 @@ module.exports = /** @class */ (function () {
          */
         this.buildSwap = function (swap) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, rawTx, txid, e_4;
+                var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, txid, coin, addressFrom, transfer, e_4;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | buildSwap | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 9, , 10]);
+                            _a.trys.push([1, 14, , 15]);
+                            rawTx = void 0;
+                            UTXOcoins = [
+                                'BTC',
+                                'BCH',
+                                'LTC'
+                            ];
+                            if (!(swap.inboundAddress.chain === 'ETH')) return [3 /*break*/, 9];
                             addressFrom = void 0;
                             if (!swap.addressFrom) return [3 /*break*/, 2];
                             addressFrom = swap.addressFrom;
@@ -827,8 +834,9 @@ module.exports = /** @class */ (function () {
                             gas_price = gas_price + 1000000000;
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
-                            amountNative = parseFloat(swap.amount);
+                            amountNative = parseFloat(swap.amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
+                            log.info("amountNative: ", amountNative);
                             log.info("nonce: ", nonce);
                             ethTx = {
                                 // addressNList: support.bip32ToAddressNList(masterPathEth),
@@ -849,17 +857,44 @@ module.exports = /** @class */ (function () {
                             log.info("unsignedTxETH: ", ethTx);
                             return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
                         case 8:
+                            //send to hdwallet
                             rawTx = _a.sent();
                             rawTx.params = ethTx;
                             txid = keccak256(rawTx.serialized).toString('hex');
                             log.info(tag, "txid: ", txid);
                             rawTx.txid = txid;
-                            return [2 /*return*/, rawTx];
+                            return [3 /*break*/, 13];
                         case 9:
+                            if (!(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0)) return [3 /*break*/, 12];
+                            if (!swap.memo)
+                                throw Error("Memo required for swaps!");
+                            coin = swap.inboundAddress.chain;
+                            return [4 /*yield*/, this.getMaster(coin)
+                                //build transfer with memo
+                            ]; //TODO this silly in utxo
+                        case 10:
+                            addressFrom = _a.sent() //TODO this silly in utxo
+                            ;
+                            transfer = {
+                                coin: "BTC",
+                                addressTo: swap.inboundAddress.address,
+                                addressFrom: addressFrom,
+                                amount: swap.amount,
+                                feeLevel: swap.feeLevel,
+                                memo: swap.memo
+                            };
+                            return [4 /*yield*/, this.buildTransfer(transfer)];
+                        case 11:
+                            rawTx = _a.sent();
+                            console.log("rawTx: ", rawTx);
+                            return [3 /*break*/, 13];
+                        case 12: throw Error("Chain not supported! " + swap.inboundAddress.chain);
+                        case 13: return [2 /*return*/, rawTx];
+                        case 14:
                             e_4 = _a.sent();
                             log.error(e_4);
                             throw e_4;
-                        case 10: return [2 /*return*/];
+                        case 15: return [2 /*return*/];
                     }
                 });
             });
@@ -908,10 +943,10 @@ module.exports = /** @class */ (function () {
                                 rawTx = res;
                                 // code block
                                 return [3 /*break*/, 8];
-                            case 4: 
+                            case 4:
                             // code block
                             return [3 /*break*/, 8];
-                            case 5: 
+                            case 5:
                             // code block
                             return [3 /*break*/, 8];
                             case 6:
@@ -1429,8 +1464,9 @@ module.exports = /** @class */ (function () {
                             txFinal = res;
                             txFinal.signatures = res.signatures;
                             log.debug("FINAL: ****** ", txFinal);
-                            buffer = Buffer.from(broadcastString, 'base64');
-                            hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase();
+                            //buffer = Buffer.from(broadcastString, 'base64');
+                            //hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase();
+                            let hash = "lol"
                             broadcastString = {
                                 tx: txFinal,
                                 type: "cosmos-sdk/StdTx",

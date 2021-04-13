@@ -9,10 +9,15 @@ let SDK = require('../lib/index.js')
 // let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
 let urlSpec = process.env['URL_PIONEER_SPEC']
 
-let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
-let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+
+let wss = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001'
+let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
+
+//let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+// let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+
 let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
-let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbro'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
 
 let run_test = async function(){
     try{
@@ -23,11 +28,11 @@ let run_test = async function(){
             // username,
             spec,
             wss,
-            service:'asgardx',
+            service:'asgardxasdas',
             url:'swaps.pro'
         }
 
-        //console.log(SDK)
+        console.log(config)
         let app = new SDK.SDK(spec,config,true)
         //console.log(app)
         let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
@@ -48,7 +53,16 @@ let run_test = async function(){
 
         if(!info || info.error){
             console.log("Not paired! ")
+
             //create pairing code
+
+            //start socket
+            let events = await app.startSocket()
+            console.log("events: ",events)
+            events.on('message', async (request) => {
+                console.log("**** message: ", request)
+            })
+
             let code = await app.createPairingCode()
             console.log("code: ",code)
         } else {
@@ -79,13 +93,7 @@ let run_test = async function(){
                 //console.log(blockchain+ " balance: ",balance)
                 console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
             }
-            //
-            // //start socket
-            // let events = await app.startSocket()
-            // console.log("events: ",events)
-            // events.on('message', async (request) => {
-            //     console.log("**** message: ", request)
-            // })
+
             //
             // //send eth
             // let payload = {

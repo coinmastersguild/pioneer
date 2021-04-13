@@ -1,7 +1,7 @@
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let client = require("../lib")
+let Events = require("../lib")
 
 let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
 if(!WALLET_PASSWORD) throw Error(".env not found!")
@@ -26,16 +26,18 @@ let run_test = async function(){
     try{
 
         let config = {
-            username,
-            queryKey:TEST_QUERY_KEY_2,
-            pioneerWs:process.env['URL_PIONEER_SOCKET']
+            queryKey:"adsfgdfgds3sdfsd",
+            wss:"ws://127.0.0.1:9001"
         }
 
         //sub ALL events
-        let events = await client.init(config)
+        let clientEvents = new Events.Events(config.pioneerWs,config)
+        clientEvents.init()
+
+        clientEvents.subscribeToKey()
 
         //info
-        events.on('message',function(request){
+        clientEvents.events.on('message',function(request){
             console.log("message: ",request)
         })
 

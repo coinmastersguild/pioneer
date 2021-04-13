@@ -122,12 +122,11 @@ RegisterRoutes(app);  // and here
 let globalSockets = {}
 let usersBySocketId = {}
 let usersByUsername = {}
+let usersByKey = {}
 let channel_history_max = 10;
 
 //redis-bridge
 subscriber.subscribe('blocks');
-
-
 
 //networks
 subscriber.subscribe('transactions:global:ETH');
@@ -139,6 +138,7 @@ subscriber.subscribe('transactions:global:EOS');
 //private
 subscriber.subscribe('payments');
 subscriber.subscribe('invocations');
+subscriber.subscribe('pairings');
 
 subscriber.on('message', async function (channel, payloadS) {
     let tag = TAG + ' | publishToFront | ';
@@ -250,7 +250,29 @@ subscriber.on('message', async function (channel, payloadS) {
                 log.error("User is not connected! username: ",username," online: ",usersByUsername)
                 //throw Error("User is not connected!")
             }
+        }else if(channel === 'pairings'){
+            let pairing = JSON.parse(payloadS)
+            log.info(tag,"pairing: ",pairing)
+            //send to user
+            let queryKey = pairing.queryKey
+            log.info(tag,"usersByKey: ",usersByKey)
+            if(usersByKey[queryKey]){
+                log.info(tag,"key found! ")
+                let sockets = usersByKey[queryKey]
+                log.info(tag,"sockets: ",sockets)
+                for(let i =0; i < sockets.length; i++){
+                    let socketid = sockets[i]
+                    if(globalSockets[socketid]){
+                        log.info(tag,"sending message to user!")
+                        globalSockets[socketid].emit('message', pairing);
+                    }
+                }
+            } else {
+                log.error("apiKey is not connected! queryKey: ",queryKey," online: ",usersByKey)
+                //throw Error("User is not connected!")
+            }
         }else{
+            //TODO dont catchall globals?
             //globals
             io.emit(channel, payloadS);
         }
@@ -299,7 +321,7 @@ io.on('connection', async function(socket){
         log.info(tag,"message: ",msg)
 
         let queryKey = msg.queryKey
-        if(queryKey){
+        if(queryKey && msg.username){
             log.info(tag,"GIVEN: username: ",msg.username)
             //get pubkeyInfo
             let queryKeyInfo = await redis.hgetall(queryKey)
@@ -309,11 +331,11 @@ io.on('connection', async function(socket){
                 if(!usersByUsername[msg.username]) usersByUsername[msg.username] = []
                 usersByUsername[msg.username].push(socket.id)
                 redis.sadd('online',msg.username)
-                let connectPayload = {
+                let subscribePayload = {
                     success:true,
                     username:msg.username
                 }
-                globalSockets[socket.id].emit('connect', connectPayload);
+                globalSockets[socket.id].emit('subscribedToUsername', subscribePayload);
             } else {
                 log.error(tag,"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username)
                 let error = {
@@ -323,7 +345,20 @@ io.on('connection', async function(socket){
                 globalSockets[socket.id].emit('errorMessage', error);
             }
 
-        } else {
+        } else if(msg.queryKey){
+            log.info(tag,"No username given! subbing to queryKey!")
+            if(!usersByKey[msg.queryKey]) {
+                usersByKey[msg.queryKey] = [socket.id]
+            } else {
+                usersByKey[msg.queryKey].push(socket.id)
+            } //edge case multiple sockets on same key, push to all
+            let connectPayload = {
+                success:true,
+            }
+            globalSockets[socket.id].emit('connect', connectPayload);
+            log.info(tag,"sdk subscribed to apiKey: ",msg.queryKey)
+            log.info(tag,"usersByKey: ",usersByKey)
+        }else {
             log.error(tag,"invalid join request! ")
         }
     });

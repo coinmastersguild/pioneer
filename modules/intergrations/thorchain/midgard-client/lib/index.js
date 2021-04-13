@@ -45,6 +45,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var TAG = " | midgard network | ";
+var log = require("@pioneer-platform/loggerdog")();
 var SEED_TESTNET = "https://testnet-seed.thorchain.info/";
 //let MIDGARD_API = "https://chaosnet-midgard.bepswap.com/v1"
 //let MIDGARD_API = "https://testnet-midgard.bepswap.com/v1"
@@ -54,6 +55,8 @@ var SEED_TESTNET = "https://testnet-seed.thorchain.info/";
 // let MIDGARD_API_RAW = 'https://testnet.thornode.thorchain.info'
 var MIDGARD_API = process.env['URL_MIDGARD'] || 'https://midgard.thorchain.info/v2';
 var URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.thorchain.info';
+log.debug("URL_THORNODE: ", URL_THORNODE);
+log.debug("MIDGARD_API: ", MIDGARD_API);
 //http://174.138.103.9:8080/v1/doc
 var Axios = require('axios');
 var https = require('https');
@@ -62,7 +65,6 @@ var axios = Axios.create({
         rejectUnauthorized: false
     })
 });
-var log = require("@pioneer-platform/loggerdog")();
 module.exports = {
     // init: function (type:string,config:any,isTestnet:boolean) {
     //     return init_wallet(type,config,isTestnet);
@@ -198,6 +200,7 @@ var get_info = function () {
                         url: MIDGARD_API + "/health",
                         headers: { 'content-type': 'application/json' },
                     };
+                    log.info(body.url);
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();
@@ -238,7 +241,7 @@ var get_pools = function () {
                         url: MIDGARD_API + "/pools",
                         headers: { 'content-type': 'application/json' },
                     };
-                    log.debug(body);
+                    log.debug(body.url);
                     return [4 /*yield*/, axios(body)];
                 case 2:
                     resp = _a.sent();

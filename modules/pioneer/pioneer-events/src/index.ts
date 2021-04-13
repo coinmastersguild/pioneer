@@ -1,132 +1,135 @@
-/*
-    Pioneer Events
-
-    Sub to username
-
-    sub to rooms
-
-    Go online
-
-    Sub to Wallet
-
- */
 const TAG = " | ws-client | ";
 const log = require("@pioneer-platform/loggerdog")()
 const EventEmitter = require('events');
-const emitter = new EventEmitter();
 const io = require('socket.io-client');
+const wait = require('wait-promise');
+const sleep = wait.sleep;
 
-let wait = require('wait-promise');
-let sleep = wait.sleep;
+export class Events {
+    private wss: string;
+    private username: string
+    private queryKey: string
+    private socket: any
+    private events: any
+    private isConnected: boolean
+    private isTestnet: boolean
+    private isPaired: boolean
+    private init: () => Promise<boolean>;
+    private emitter: any;
+    private setUsername: (username:string) => Promise<void>;
+    private pair: (username?: string) => Promise<boolean>;
+    private disconnect: () => Promise<void>;
+    private subscribeToKey: () => Promise<boolean>;
+    constructor(wss:string,config:any,isTestnet?:boolean) {
+        this.wss = config.wss || 'wss://pioneers.dev'
+        this.isConnected = false
+        this.isTestnet = false
+        this.username = config.username
+        this.queryKey = config.queryKey
+        this.isPaired = false
+        this.events = new EventEmitter();
+        this.init = async function () {
+            let tag = TAG + " | init_events | "
+            try {
+                this.socket = io.connect(this.wss, {
+                    reconnect: true,
+                    rejectUnauthorized: false
+                });
 
-//globals
-let URL_PIONEER_WS = process.env['URL_PIONEER_WS']
-let SOCKET:any
-module.exports = {
-    init: function (config: any) {
-        return init_client(config);
-    },
-    disconnect: function () {
-        return disconnect();
-    },
-}
+                //sub
+                this.socket.on('connect', () => {
+                    log.info(tag,'Connected to '+this.wss);
+                    this.isConnected = true
+                });
 
-let disconnect = async function () {
-    let tag = TAG+" | init_wallet | ";
-    try {
-        SOCKET.disconnect()
-    } catch (e) {
-        if(e.response && e.response.data){
-            log.error(tag, "Error: ", e.response.data);
-        }else{
-            log.error(tag, "Error: ", e);
-        }
-        throw e;
-    }
-};
+                this.socket.on('subscribedToUsername', () => {
+                    log.info(tag,'subscribed to '+this.username);
+                    this.isPaired = true
+                });
 
-let init_client = async function (config:any) {
-    let tag = TAG+" | init_wallet | ";
-    try {
-        if(config.pioneerWs){
-            URL_PIONEER_WS = config.pioneerWs
-        }
-        if(!URL_PIONEER_WS) throw Error(" Failed to find ws server! ")
-        if(!config.username) throw Error(" invalid config! missing username ")
-        if(!config.queryKey) throw Error(" invalid config! missing queryKey ")
+                this.socket.on('message', (message: any) => {
+                    //TODO only emit expected messages?
+                    //if(message.type === "payment_request"){}
+                    this.events.emit('message',message)
+                })
 
-        //let successConnect
-        let successConnect = false
+                //sub to errors
+                this.socket.on('errorMessage', function (message:any) {
+                    log.error(tag,"error: ",message)
+                    if(message.code && message.code === 6) throw Error(" Failed to connect!")
+                });
 
-        //sub to websocket as user
-        SOCKET = io.connect(URL_PIONEER_WS, {reconnect: true, rejectUnauthorized: false});
+                this.socket.on('invocation', (message: any) => {
+                    log.info('invocation: ',message);
+                    this.events.emit('message',message)
+                });
 
-        //connect
-        SOCKET.on('connect', function () {
-            log.debug(tag,'Connected!');
-            SOCKET.emit('join',{username:config.username,queryKey:config.queryKey})
-        });
+                //dont release to connect
+                while(!this.isConnected){
+                    await sleep(300)
+                }
 
-        //sub to messages
-        SOCKET.on('message', function (message:any) {
-            log.info('message: ',message);
-            emitter.emit('message',message)
-            //if payment request
-            if(message.type === "payment_request"){
-                //if receiver is known
-
-                //if receiver is unknown
-                    //if global accept on
-
-                //if autonomous
-                //perform
-                emitter.emit('message',message)
-
-                //else add to approve queue
-            } else {
-                //emit everything
+                return true
+            } catch (e) {
+                log.error(tag, e)
+                throw e
             }
-
-            //TODO blocks
-
-            //TODO payments
-
-            //balances
-
-
-        });
-
-        SOCKET.on('connect', function (message:any) {
-            log.info(tag,"connect:",message)
-            successConnect = true
-        });
-
-        SOCKET.on('errorMessage', function (message:any) {
-            log.error(tag,"error: ",message)
-            if(message.code && message.code === 6) throw Error(" Failed to connect!")
-        });
-
-
-        SOCKET.on('invocation', function (message:any) {
-            log.info('invocation: ',message);
-            emitter.emit('message',message)
-        });
-
-        //wait 30 seconds for a valid connection
-        //let timeout = setTimeout(process.exit(2),30 * 1000)
-
-        while(!successConnect){
-            await sleep(300)
         }
-
-
-        return emitter
-    } catch (e) {
-        if(e.response && e.response.data){
-            log.error(tag, "Error: ", e.response.data);
-        }else{
-            log.error(tag, "Error: ", e);
+        this.setUsername = async function (username) {
+            let tag = TAG + " | startSocket | "
+            try {
+                this.username = username
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
         }
-        throw e;
+        this.subscribeToKey = async function () {
+            let tag = TAG + " | subscribeToKey | "
+            try {
+
+                //attempt join
+                this.socket.emit('join',{
+                    queryKey:config.queryKey
+                })
+
+                return true
+            } catch (e) {
+                log.error(tag, "e: ", e)
+                throw e
+            }
+        }
+        this.pair = async function (username?:string) {
+            let tag = TAG + " | startSocket | "
+            try {
+                if(username) this.username = username
+                if(!this.username) throw Error("103: can not pair without username!")
+
+                //attempt join
+                this.socket.emit('join',{
+                    username:this.username,
+                    queryKey:config.queryKey
+                })
+
+                //paired message?
+
+                //release on successful pair
+                // while(!this.isPaired){
+                //     await sleep(300)
+                // }
+
+                return true
+            } catch (e) {
+                log.error(tag, "e: ", e)
+                throw e
+            }
+        }
+        this.disconnect = async function () {
+            let tag = TAG + " | disconnect | "
+            try {
+
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
     }
-};
+}

@@ -35,7 +35,7 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,
             blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
             pioneerApi:true,
@@ -60,34 +60,38 @@ let run_test = async function(){
         /*
                THOR
          */
-        // console.log("info: ",prettyjson.render(info.public.RUNE))
-        //
-        // //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "thor1x00pfwyx8xld45sdlmyn29vjf7ev0mv3rcn9al"
-        // let amount = "10"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        console.log("info: ",prettyjson.render(info.public.RUNE))
+
+        //RUNE
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        let address = "thor1x00pfwyx8xld45sdlmyn29vjf7ev0mv3rcn9al"
+        let amount = "10"
+        let memo = ""
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
+
+        /*
+            ETH thorchain AddLiquidity
+         */
 
         /*
             ETH thorchain swap
@@ -98,48 +102,13 @@ let run_test = async function(){
         // let balanceETH = await Wallet.getBalance("ETH")
         // console.log("balanceETH: ",balanceETH)
 
-
-        // let asset = {
-        //     chain:"ETH",
-        //     symbol:"ETH",
-        //     ticker:"ETH",
-        // }
-        //
-        // let swap = {
-        //     asset,
-        //     vaultAddress:"0xa13beb789f721253077faefd9bf604e1929e0e74",
-        //     toAddress:"0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
-        // }
-        //
-        // let amount = 0.0001
-        // swap.amount = amount
-
-        //testnet
-        // let swap = {
-        //     inboundAddress: {
-        //         chain: 'ETH',
-        //         pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
-        //         address: '0x36286e570c412531aad366154eea9867b0e71755',
-        //         router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
-        //         halted: false
-        //     },
-        //     asset: {
-        //         chain: 'ETH',
-        //         symbol: 'ETH',
-        //         ticker: 'ETH',
-        //         iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
-        //     },
-        //     memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-        //     amount: "0.0123"
-        // }
-
         //mainnet
         // let swap = {
         //     inboundAddress: {
         //         chain: 'ETH',
-        //         pub_key: 'thorpub1addwnpepqfjmxedld0vgvg3ckx3u73uc4gsyzvzfp9rremx4wk4tsqh6g8lq62m53yr',
-        //         address: '0x12595a8c0d26659fa97d8ce7d368bd177ddb094d',
-        //         router: '0xc284C7dd4dc9A981F4C0cd2C10DA5E91217C3126',
+        //         pub_key: 'thorpub1addwnpepqvwmxdvt87perl6mvncjre4vhthmuxkdm7zaww0jf40ey780pr5xwjs03c0',
+        //         address: '0x60ecab48eae7be3a148fe3a73a10a1cef9d3445f',
+        //         router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
         //         halted: false
         //     },
         //     asset: {
@@ -148,43 +117,42 @@ let run_test = async function(){
         //         ticker: 'ETH',
         //         iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
         //     },
-        //     memo: '=:THOR.RUNE:thor1lqk43hvysuzymrgg08q45234z6jzth32wn9pnw',
-        //     amount: "0.00512"
+        //     memo: '=:THOR.RUNE:thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp',
+        //     amount: "0.00912"
         // }
         //
         // let result = await Wallet.buildSwap(swap)
         // console.log("swapResult: ",result)
-
-        // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
-        // console.log("resultBroadcast: ",resultBroadcast)
-
-
-        //NOTICE addressTo****
-        // let transfer = {
-        //     coin:"ETH",
-        //     addressTo:"0xc3affff54122658b89c31183cec4f15514f34624",
-        //     amount: "0.0001",
-        //     // noBroadcast:true
-        // }
-
-        // let result = await Wallet.buildTransfer(transfer)
-        // console.log("transfer: ",result)
         //
         // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
         // console.log("resultBroadcast: ",resultBroadcast)
 
+        /*
+            BTC thorchain swap
 
-        // let transfer = {
-        //     coin:"ETH",
-        //     address:"0xc3affff54122658b89c31183cec4f15514f34624",
-        //     amount: "0.0001",
-        //     noBroadcast:true,
-        //     invocationId:"blablaplzworky"
+        */
+        // let swap = {
+        //     inboundAddress: {
+        //         chain: 'BTC',
+        //         pub_key: 'thorpub1addwnpepqvwmxdvt87perl6mvncjre4vhthmuxkdm7zaww0jf40ey780pr5xwjs03c0',
+        //         address: 'bc1qyjxzpvjmmzylcq573vlpt068n8mf7xdjngpmpu'
+        //     },
+        //     asset: {
+        //         chain: 'BTC',
+        //         symbol: 'BTC',
+        //         ticker: 'BTC',
+        //         iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+        //     },
+        //     memo: '=:THOR.RUNE:thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp',
+        //     amount: "0.00033",
+        //     feeLevel:5
         // }
-        // //normal send, to memo
-        // let result = await Wallet.sendToAddress(transfer)
-        // //expect instant txid
-        // console.log("result: ",result)
+        //
+        // let result = await Wallet.buildSwap(swap)
+        // console.log("swapResult: ",result)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',result)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BTC
@@ -217,14 +185,14 @@ let run_test = async function(){
                LTC
          */
 
-        console.log("info: ",prettyjson.render(info.public.LTC),"\n")
-
+        // console.log("info: ",prettyjson.render(info.public.LTC),"\n")
         //
-        let masterLTC = await Wallet.getMaster("LTC")
-        console.log("masterLTC: ",masterLTC)
-
-        let balanceLTC = await Wallet.getBalance("LTC")
-        console.log("balanceLTC: ",balanceLTC)
+        // //
+        // let masterLTC = await Wallet.getMaster("LTC")
+        // console.log("masterLTC: ",masterLTC)
+        //
+        // let balanceLTC = await Wallet.getBalance("LTC")
+        // console.log("balanceLTC: ",balanceLTC)
 
         // let amount = "0.001"
         // let memo = null //Uses OP_RETURN outputs
@@ -245,15 +213,15 @@ let run_test = async function(){
         // let resultBroadcast = await Wallet.broadcastTransaction('LTC',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)
 
-        let intent = {
-            coin:"LTC",
-            address:"LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB",
-            amount:"0.0001",
-            //noBroadcast:true,
-            invocationId:"workyplzbro"
-        }
-        let txid = await Wallet.sendToAddress(intent)
-        console.log("txid: ",txid)
+        // let intent = {
+        //     coin:"LTC",
+        //     address:"LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB",
+        //     amount:"0.0001",
+        //     //noBroadcast:true,
+        //     invocationId:"workyplzbro"
+        // }
+        // let txid = await Wallet.sendToAddress(intent)
+        // console.log("txid: ",txid)
 
         /*
                BCH

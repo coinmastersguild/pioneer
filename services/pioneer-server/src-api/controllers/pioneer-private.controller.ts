@@ -424,7 +424,11 @@ export class pioneerPrivateController extends Controller {
             let sdkUser = {
                 username:userInfo.username,
                 paired: new Date().getTime(),
+                queryKey: sdkQueryKey,
+                url
             }
+            publisher.publish('pairings',JSON.stringify(sdkUser))
+
 
             //save queryKey code
             let saveRedis = await redis.hmset(sdkQueryKey,sdkUser)

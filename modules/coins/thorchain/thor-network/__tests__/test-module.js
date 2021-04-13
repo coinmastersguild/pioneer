@@ -28,14 +28,14 @@ let tx = "79CC4F8B68EE3FB2A486F48232CC3AED0E00093CF46F928805154322CDF77A36"
 //         console.log("resp: ",resp)
 //     })
 
-let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
+let address = "thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp"
 // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
 // let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
 // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getBalance(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
