@@ -298,7 +298,7 @@ let get_fees_with_rates = async function(coin:string,memo?:string){
     let tag = TAG + " | get_fees_with_rates | "
     try{
         let output:any = {}
-        const txFee = await sochain.getSuggestedTxFee()
+        const txFee = await sochain.getSuggestedTxFee(coin.toLowerCase())
         console.log("txFee: ",txFee)
 
         const rates: FeeRates = {

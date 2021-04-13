@@ -123,7 +123,7 @@ export class SDK {
                 throw e
             }
         }
-        this.startSocket = async function () {
+        this.startSocket = function () {
             let tag = TAG + " | startSocket | "
             try {
                 let configEvents:any = {
@@ -271,7 +271,7 @@ export class SDK {
                 if(this.blockchains.indexOf('bitcoincash') >= 0){
                     let bitcoin = new XchainClass(this.spec,{
                         network:'mainnet',
-                        blockchain:'bitcoincash',
+                        blockchain:'bitcoinCash',
                         nativeAsset:'BCH',
                         queryKey:this.queryKey
                     })

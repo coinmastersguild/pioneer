@@ -372,7 +372,7 @@ module.exports = class wallet {
             }
         }
 
-        if(this.network === 'bitcoincash'){
+        if(this.network === 'bitcoinCash'){
             // @ts-ignore
             this.getFeeRates = async function () {
                 let tag = TAG + " | getFeeRates | "

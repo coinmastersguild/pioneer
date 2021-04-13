@@ -110,12 +110,12 @@ export const getUnspentTxs = async ({ sochainUrl, network, address }: AddressPar
  *
  * @returns {number} The Bitcoin suggested transaction fee per bytes in sat.
  */
-export const getSuggestedTxFee = async (): Promise<number> => {
+export const getSuggestedTxFee = async (coin:string): Promise<number> => {
   //Note: sochain does not provide fee rate related data
   //So use Bitgo API for fee estimation
   //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
   try {
-    const response = await axios.get('https://app.bitgo.com/api/v2/btc/tx/fee')
+    const response = await axios.get('https://app.bitgo.com/api/v2/'+coin+'/tx/fee')
     return response.data.feePerKb / 1000 // feePerKb to feePerByte
   } catch (error) {
     return DEFAULT_SUGGESTED_TRANSACTION_FEE

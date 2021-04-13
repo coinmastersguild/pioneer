@@ -980,8 +980,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         }
         if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json"
 
-        if(config.pioneerSocket){
-            URL_PIONEER_SOCKET = config.pioneerSocket
+        if(config.pioneerSocket || config.wss){
+            URL_PIONEER_SOCKET = config.pioneerSocket || config.wss
         }
         if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
 
@@ -1138,18 +1138,19 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         let configEvents = {
             username:config.username,
             queryKey:config.queryKey,
-            pioneerWs:URL_PIONEER_SOCKET
+            wss:URL_PIONEER_SOCKET
         }
 
         //sub ALL events
-        let events = await Events.init(configEvents)
-
+        let clientEvents = new Events.Events(configEvents.wss,configEvents)
+        clientEvents.init()
+        clientEvents.pair()
         //on blocks update lastBlockHeight
 
         //on payments update balances
 
         //on on invocations add to queue
-        events.on('message', async (request: any) => {
+        clientEvents.events.on('message', async (request: any) => {
             log.info(tag,"**** Invoke: ", request)
             //TODO filter invocations by subscribers
 
@@ -1176,14 +1177,14 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //TODO validate inputs
                     signedTx = await build_swap(request.invocation,request.invocationId)
                     log.info(tag,"txid: ", signedTx.txid)
-                    events.emit('broadcast',signedTx)
+                    clientEvents.events.emit('broadcast',signedTx)
                     break;
                 case 'transfer':
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
                     signedTx = await send_to_address(request.invocation)
                     log.info(tag,"txid: ", signedTx.txid)
-                    events.emit('broadcast',signedTx)
+                    clientEvents.events.emit('broadcast',signedTx)
                     break;
                 default:
                     log.error("Unknown invocation: "+request.type)
@@ -1192,7 +1193,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             }
 
             //push signed tx to socket
-            events.emit('broadcast',signedTx)
+            clientEvents.events.emit('broadcast',signedTx)
 
             //push txid to invocationId
 
@@ -1201,7 +1202,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             //add to history
         })
 
-        output.events = events
+        output.events = clientEvents.events
         return output
     } catch (e) {
         if(e.response && e.response.data){

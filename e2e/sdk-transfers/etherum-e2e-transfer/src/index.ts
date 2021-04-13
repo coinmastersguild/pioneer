@@ -39,6 +39,7 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'../../../../../.env'})
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
@@ -59,6 +60,7 @@ let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || 0.0002
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.0001
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_NO_BROADCAST'] || null
+let wss = process.env['URL_PIONEER_SOCKET']
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -89,11 +91,22 @@ const test_service = async function () {
         let config = {
             queryKey,
             username,
-            spec
+            spec,
+            wss
         }
 
 
         let app = new SDK.SDK(spec,config)
+
+        let events = await app.startSocket()
+
+        let eventPairReceived = false
+        events.on('message', async (request:any) => {
+            assert(request.queryKey)
+            assert(request.username)
+            assert(request.url)
+            eventPairReceived = true
+        })
 
         let seedChains = ['ethereum']
         await app.init(seedChains)
@@ -108,6 +121,11 @@ const test_service = async function () {
         let pairSuccess = await sendPairingCode(code)
         log.info("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
+
+        //dont release till pair event
+        while(!eventPairReceived){
+            await sleep(300)
+        }
 
         //assert sdk user
         //get user

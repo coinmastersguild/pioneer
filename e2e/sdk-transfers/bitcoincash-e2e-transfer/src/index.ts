@@ -51,12 +51,13 @@ const {
     sendPairingCode
 } = require('./app')
 
-let BLOCKCHAIN = 'bitcoincash'
+let BLOCKCHAIN = 'bitcoinCash'
 let ASSET = 'BCH'
 let MIN_BALANCE = process.env['MIN_BALANCE_BTC'] || 0.00002
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.00001
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
+let wss = process.env['URL_PIONEER_SOCKET']
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -86,11 +87,22 @@ const test_service = async function () {
         let config = {
             queryKey,
             username,
-            spec
+            spec,
+            wss
         }
 
 
         let app = new SDK.SDK(spec,config)
+
+        let events = await app.startSocket()
+
+        let eventPairReceived = false
+        events.on('message', async (request:any) => {
+            assert(request.queryKey)
+            assert(request.username)
+            assert(request.url)
+            eventPairReceived = true
+        })
 
         let seedChains = ['bitcoincash']
         await app.init(seedChains)
@@ -106,6 +118,11 @@ const test_service = async function () {
         log.info("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
+        //dont release till pair event
+        while(!eventPairReceived){
+            await sleep(300)
+        }
+
         //assert sdk user
         //get user
         let user = await app.getUserParams()
@@ -114,6 +131,20 @@ const test_service = async function () {
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
         log.info("blockchains: ",blockchains)
+
+        //expect special bitcoin functions
+
+        //getFeeWithMemo
+        let feeEstimate = await user.clients.bitcoinCash.getFeesWithMemo()
+        log.info(tag,"feeEstimate: ",feeEstimate)
+        log.info(tag,"feeEstimate: fast:",feeEstimate.fast.amount())
+        log.info(tag,"feeEstimate: average: ",feeEstimate.average.amount())
+        log.info(tag,"feeEstimate: fastest: ",feeEstimate.fastest.amount())
+        assert(feeEstimate)
+        assert(feeEstimate.type)
+        assert(feeEstimate.fast)
+        assert(feeEstimate.average)
+        assert(feeEstimate.fastest)
 
         //get address from faucet
         //TODO get this from api

@@ -24,7 +24,8 @@ let seed = process.env['WALLET_MAINNET_DEV_OLD']
 let password = process.env['WALLET_PASSWORD']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
-
+let spec = process.env['URL_PIONEER_SPEC']
+let wss = process.env['URL_PIONEER_SOCKET']
 
 export async function startApp() {
     let tag = " | app_assert_env_start | "
@@ -59,6 +60,8 @@ export async function startApp() {
 
         //get config
         config = await App.getConfig()
+        config.spec = spec
+        config.pioneerSocket = wss
 
         //verify startup
         let isTestnet = true

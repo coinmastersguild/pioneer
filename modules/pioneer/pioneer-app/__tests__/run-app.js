@@ -56,7 +56,7 @@ let run_test = async function(){
             //console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("YDR2DM")
+            let pairResult = await App.pair("CK8NSW")
             console.log("pairResult: ",pairResult)
 
             //get wallets

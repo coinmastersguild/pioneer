@@ -16,7 +16,7 @@
     "@babel/runtime": "^7.13.10",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-app": "latest",
-    "@pioneer-platform/pioneer-sdk": "0.0.51",
+    "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",

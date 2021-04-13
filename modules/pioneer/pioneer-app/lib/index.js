@@ -913,8 +913,8 @@ let init_wallet = function (config, isTestnet) {
             }
             if (!URL_PIONEER_SPEC)
                 URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json";
-            if (config.pioneerSocket) {
-                URL_PIONEER_SOCKET = config.pioneerSocket;
+            if (config.pioneerSocket || config.wss) {
+                URL_PIONEER_SOCKET = config.pioneerSocket || config.wss;
             }
             if (!URL_PIONEER_SOCKET)
                 URL_PIONEER_SOCKET = "wss://pioneers.dev";
@@ -1058,14 +1058,16 @@ let init_wallet = function (config, isTestnet) {
             let configEvents = {
                 username: config.username,
                 queryKey: config.queryKey,
-                pioneerWs: URL_PIONEER_SOCKET
+                wss: URL_PIONEER_SOCKET
             };
             //sub ALL events
-            let events = yield Events.init(configEvents);
+            let clientEvents = new Events.Events(configEvents.wss, configEvents);
+            clientEvents.init();
+            clientEvents.pair();
             //on blocks update lastBlockHeight
             //on payments update balances
             //on on invocations add to queue
-            events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
+            clientEvents.events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
                 log.info(tag, "**** Invoke: ", request);
                 //TODO filter invocations by subscribers
                 //TODO autonomousOn/Off
@@ -1084,7 +1086,7 @@ let init_wallet = function (config, isTestnet) {
                         //TODO validate inputs
                         signedTx = yield build_swap(request.invocation, request.invocationId);
                         log.info(tag, "txid: ", signedTx.txid);
-                        events.emit('broadcast', signedTx);
+                        clientEvents.events.emit('broadcast', signedTx);
                         break;
                     case 'transfer':
                         if (!request.invocationId)
@@ -1092,7 +1094,7 @@ let init_wallet = function (config, isTestnet) {
                         request.invocation.invocationId = request.invocationId;
                         signedTx = yield send_to_address(request.invocation);
                         log.info(tag, "txid: ", signedTx.txid);
-                        events.emit('broadcast', signedTx);
+                        clientEvents.events.emit('broadcast', signedTx);
                         break;
                     default:
                         log.error("Unknown invocation: " + request.type);
@@ -1100,12 +1102,12 @@ let init_wallet = function (config, isTestnet) {
                     // code block
                 }
                 //push signed tx to socket
-                events.emit('broadcast', signedTx);
+                clientEvents.events.emit('broadcast', signedTx);
                 //push txid to invocationId
                 //update status on server
                 //add to history
             }));
-            output.events = events;
+            output.events = clientEvents.events;
             return output;
         }
         catch (e) {

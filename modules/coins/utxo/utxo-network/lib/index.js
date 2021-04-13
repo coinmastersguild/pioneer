@@ -328,7 +328,7 @@ var get_fees_with_rates = function (coin, memo) {
                 case 1:
                     _a.trys.push([1, 3, , 4]);
                     output = {};
-                    return [4 /*yield*/, sochain.getSuggestedTxFee()];
+                    return [4 /*yield*/, sochain.getSuggestedTxFee(coin.toLowerCase())];
                 case 2:
                     txFee = _a.sent();
                     console.log("txFee: ", txFee);
