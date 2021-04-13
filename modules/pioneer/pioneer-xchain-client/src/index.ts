@@ -768,15 +768,14 @@ module.exports = class wallet {
                 iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
             },
             memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-                amount: { type: 'BASE', decimal: 18 }
+            amount: { type: 'BASE', decimal: 18 }
         }
         */
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try {
-                //stringify amount
-                //swap.amount = swap.amount.amount()
-
+                //NOTE THIS IS ONLY ETH!
+                //ETH always a weird one
                 let request:any = {
                     type:"swap",
                     username:this.username,
@@ -799,8 +798,9 @@ module.exports = class wallet {
         this.transfer = async function (tx:any) {
             let tag = TAG + " | transfer | "
             try {
-                let coin = tx.asset.symbol
+                let coin = this.nativeAsset
                 let amount = tx.amount.amount()
+                if(!amount) throw Error("Failed to get amount!")
                 let to = tx.recipient
                 let memo = tx.memo || ''
 
@@ -815,20 +815,6 @@ module.exports = class wallet {
 
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)
-
-                // let request:any = {
-                //     type:"transfer",
-                //     username:this.username,
-                //     service:this.service,
-                //     //TODO source
-                //     //TODO auth
-                //     //TODO sig
-                //     invocation
-                // }
-                // //invocation
-                // let result = await this.pioneerApi.Invocation('',request)
-
-                //
 
                 return result.data.txid
             } catch (e) {

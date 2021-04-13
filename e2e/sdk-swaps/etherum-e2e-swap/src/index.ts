@@ -134,18 +134,47 @@ const test_service = async function () {
         //TODO get this from api
         let address = "0xc3affff54122658b89c31183cec4f15514f34624"
 
-        //send to faucet
-        let sendPayload:any = {
-            blockchain:BLOCKCHAIN,
-            asset:'ETH',
-            amount:TEST_AMOUNT,
-            address,
+        //Raw from asgardx
+        let swap = {
+            type: 'swap',
+            username: 'test-user-2',
+            invocation: {
+                inboundAddress: {
+                    chain: 'ETH',
+                    pub_key: 'thorpub1addwnpepqf477x09wsp8rakssrh84dm00j77glhw0v5rmd76dy4tn7n430jf5f2u0lw',
+                    address: '0x40c47fb75dcd6d978f03f4d738d289056a226b47',
+                    router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
+                    gas_rate: '90'
+                },
+                asset: {
+                    chain: 'ETH',
+                    symbol: 'ETH',
+                    ticker: 'ETH',
+                    iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+                },
+                memo: '=:BTC.BTC:bc1qx2grtsuukf6wh8x65e3202cw42hp2cftccmapu',
+                amount: 0.01
+            },
+            invocationId: 'pioneer:invocation:v0.01:undefined:2HeGmqrkohCDRKUPqaDW8o',
+            auth: '',
+            noBroadcast:true
         }
-        sendPayload.noBroadcast = true
 
-        log.info(tag,"sendPayload: ",sendPayload)
-        let txid = await app.swap(sendPayload)
-        console.log("txid: ",txid)
+
+
+
+        //send to faucet
+        // let sendPayload:any = {
+        //     blockchain:BLOCKCHAIN,
+        //     asset:'ETH',
+        //     amount:TEST_AMOUNT,
+        //     address,
+        // }
+        // sendPayload.noBroadcast = true
+        //
+        // log.info(tag,"sendPayload: ",sendPayload)
+        // let txid = await app.swap(sendPayload)
+        // console.log("txid: ",txid)
 
         //wait till confirmed
         // let confirmed = false
