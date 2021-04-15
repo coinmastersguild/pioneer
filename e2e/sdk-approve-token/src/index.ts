@@ -38,10 +38,14 @@
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'../../../../../.env'})
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
+
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
+let BigNumber = require('@ethersproject/bignumber')
 let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
@@ -51,12 +55,12 @@ const {
     sendPairingCode
 } = require('./app')
 
-let BLOCKCHAIN = 'bitcoinCash'
-let ASSET = 'BCH'
-let MIN_BALANCE = process.env['MIN_BALANCE_BTC'] || 0.00002
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.00001
+let BLOCKCHAIN = 'ethereum'
+let ASSET = 'ETH'
+let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || 0.0002
+let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.0001
 let spec = process.env['URL_PIONEER_SPEC']
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
+let NO_BROADCAST = process.env['E2E_NO_BROADCAST'] || null
 let wss = process.env['URL_PIONEER_SOCKET']
 
 const test_service = async function () {
@@ -66,15 +70,16 @@ const test_service = async function () {
         //start app and get wallet
         let wallet = await startApp()
         let username = wallet.username
+        assert(username)
 
-        //assert balance local
-        //log.info(tag,"wallet: ",wallet)
-        log.info(tag,"wallet: ",wallet.WALLET_BALANCES)
         let balance = wallet.WALLET_BALANCES[ASSET]
         assert(balance)
 
-        if(wallet.WALLET_BALANCES[ASSET] < MIN_BALANCE){
-            log.info(tag," Test wallet low! amount: "+wallet.WALLET_BALANCES[ASSET]+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+        //assert balance local
+        //log.info(tag,"wallet: ",wallet)
+        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
+        if(balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
             throw Error("101: Low funds!")
         } else {
             log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -104,7 +109,7 @@ const test_service = async function () {
             eventPairReceived = true
         })
 
-        let seedChains = ['bitcoinCash']
+        let seedChains = ['ethereum']
         await app.init(seedChains)
 
         //pair sdk
@@ -132,66 +137,47 @@ const test_service = async function () {
         let blockchains = Object.keys(user.clients)
         log.info("blockchains: ",blockchains)
 
-        //expect special bitcoin functions
-
-        //getFeeWithMemo
-        let feeEstimate = await user.clients.bitcoinCash.getFeesWithMemo()
-        log.info(tag,"feeEstimate: ",feeEstimate)
-        log.info(tag,"feeEstimate: fast:",feeEstimate.fast.amount())
-        log.info(tag,"feeEstimate: average: ",feeEstimate.average.amount())
-        log.info(tag,"feeEstimate: fastest: ",feeEstimate.fastest.amount())
-        assert(feeEstimate)
-        assert(feeEstimate.type)
-        assert(feeEstimate.fast)
-        assert(feeEstimate.average)
-        assert(feeEstimate.fastest)
-
-        //monitor
-        let txid = "9d0e92caea91504263dba97c72699c179b0c1305e9fdff63a7e74242c50fbee2"
-
-        //raw swap
-        // let transfer = {
-        //     "amount": {
-        //         "type": "BASE",
-        //         "decimal": 8,
-        //         amount: function(){
-        //             return "0.0101"
-        //         }
-        //     },
-        //     "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
-        //     "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
-        //     "feeRate": 1
+        // for(let i = 0; i < blockchains.length; i++){
+        //     let blockchain = blockchains[i]
+        //     let client = user.clients[blockchain]
+        //
+        //     let balance = await client.getBalance()
+        //     log.info(blockchain+ " balance: ",balance.amount.amount())
         // }
-        // let txid = await user.clients.bitcoinCash.transfer(transfer)
-        // log.info(tag,"txid: ",txid)
 
-        let isConfirmed = false
-        //wait for confirmation
+        let client = user.clients['ethereum']
+        let balanceSdk = await client.getBalance()
+        log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
-        // log.info("CLIENT: ",user.clients.bitcoinCash)
+        //let tokenAddress
+        //tether
+        //Router RUNE
+        let contract = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+        //USDT
+        let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
 
-        //wait for swap
-        while(!isConfirmed){
-            let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-            log.info(tag,"txInfo: ",txInfo)
+        //TODO approve max int?
+        let amountApprove = 1000000000
 
-            if(txInfo.confirmations > 0){
-                isConfirmed = true
+        //Xchain amount object
+        let amount = {
+            amount:function(){
+                return BigNumber.BigNumber.from(amountApprove)
             }
-
-            await sleep(3000)
         }
 
-        //let midgardInfo
-        // let fullfilled = false
-        // while(!fullfilled){
-        //
-        //
-        //     await sleep(3000)
-        // }
+        let isApproved = await app.isApproved(contract,tokenAddress,amount)
+        log.info("isApproved: ",isApproved)
 
+        //verify not already approved
 
-        //verify swap amount
+        //build approvalTx
+        let txid = client.approve(contract,tokenAddress,amount)
+        log.info("txid: ",txid)
+
+        //TODO let confirm
+
+        //TODO verify approval on contract
 
         //process
         process.exit(0)

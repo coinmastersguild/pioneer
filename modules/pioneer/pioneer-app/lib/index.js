@@ -674,6 +674,22 @@ let broadcast_transaction = function (coin, rawTx) {
         }
     });
 };
+let send_approval = function (intent) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | send_to_address | ";
+        try {
+            log.info(tag, "params: ", intent);
+            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendApproval(intent);
+            log.info(tag, "txid: ", signedTx.txid);
+            //
+            return signedTx;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
 let send_to_address = function (intent) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | send_to_address | ";
@@ -1083,8 +1099,18 @@ let init_wallet = function (config, isTestnet) {
                 let signedTx;
                 switch (request.type) {
                     case 'swap':
+                        //Note this is ETH only
                         //TODO validate inputs
                         signedTx = yield build_swap(request.invocation, request.invocationId);
+                        log.info(tag, "txid: ", signedTx.txid);
+                        clientEvents.events.emit('broadcast', signedTx);
+                        break;
+                    case 'approval':
+                        //Note this is ETH only
+                        if (!request.invocationId)
+                            throw Error("102: invalid invocation! missing id!");
+                        request.invocation.invocationId = request.invocationId;
+                        signedTx = yield send_approval(request.invocation);
                         log.info(tag, "txid: ", signedTx.txid);
                         clientEvents.events.emit('broadcast', signedTx);
                         break;

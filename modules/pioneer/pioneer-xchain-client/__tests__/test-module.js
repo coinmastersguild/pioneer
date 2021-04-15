@@ -5,9 +5,10 @@ require("dotenv").config({path:'../../../../../.env'})
 
 const prettyjson = require('prettyjson');
 let SDK = require('../lib/index.js')
+let BigNumber = require('@ethersproject/bignumber')
 
-// let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-let urlSpec = process.env['URL_PIONEER_SPEC']
+let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+//let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let spec = process.env['URL_PIONEER_SPEC']
 let username = process.env['TEST_USERNAME_2']
@@ -27,14 +28,14 @@ let run_test = async function(){
 
         //bitcoin
         // let config = {
-        //     network:'testnet',
-        //     blockchain:blockchains[0],
+        //     network:'mainnet',
+        //     blockchain:'bitcoin',
         //     nativeAsset:'BTC',
         //     queryKey,
         //     username,
         //     spec:urlSpec
         // }
-        let isTestnet = null
+
         // //Binance
         // let config = {
         //     network:'testnet',
@@ -47,7 +48,7 @@ let run_test = async function(){
 
         //ethereum
         let config = {
-            network:'testnet',
+            network:'mainnet',
             blockchain:blockchains[1],
             nativeAsset:'ETH',
             queryKey,
@@ -55,11 +56,39 @@ let run_test = async function(){
             spec:urlSpec
         }
 
+        // let config = {
+        //     network:'bitcoinCash',
+        //     blockchain:'bitcoinCash',
+        //     nativeAsset:'BCH',
+        //     queryKey,
+        //     username,
+        //     spec:urlSpec
+        // }
+
         //init
-        let app = new SDK(urlSpec,config,isTestnet)
+        let app = new SDK(urlSpec,config)
         await app.init()
 
+        //0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B
+        let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+        let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+
+        let amount = {
+            amount:function(){
+                return BigNumber.BigNumber.from(10000000)
+            }
+        }
+
+        let isApproved = await app.isApproved(routerAddy,tokenAddress,amount)
+        console.log("isApproved: ",isApproved)
+
         //console.log(app)
+
+        //BTC
+        // let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
+        // let txInfo = await app.getTransactionData(txid)
+        // console.log("txInfo: ",txInfo)
+
 
         // let network = app.getNetwork()
         // console.log("network: ",network)
@@ -100,8 +129,8 @@ let run_test = async function(){
         // console.log("fees: ",fees.fees.fastest.amount().toNumber())
 
         //get wallet
-        const wallet = await app.getWallet();
-        console.log("wallet: ",wallet)
+        // const wallet = await app.getWallet();
+        // console.log("wallet: ",wallet)
 
         //make sure provider set
 
@@ -195,30 +224,30 @@ let run_test = async function(){
         //monitor tx till confirmed
 
         //ETH swap object
-        let swap = {
-            type: 'swap',
-            username: 'test-user-2',
-            invocation: {
-                inboundAddress: {
-                    chain: 'ETH',
-                    pub_key: 'thorpub1addwnpepqf477x09wsp8rakssrh84dm00j77glhw0v5rmd76dy4tn7n430jf5f2u0lw',
-                    address: '0x40c47fb75dcd6d978f03f4d738d289056a226b47',
-                    router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
-                    gas_rate: '90'
-                },
-                asset: {
-                    chain: 'ETH',
-                    symbol: 'ETH',
-                    ticker: 'ETH',
-                    iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
-                },
-                memo: '=:BTC.BTC:bc1qx2grtsuukf6wh8x65e3202cw42hp2cftccmapu',
-                amount: 0.01
-            },
-            invocationId: 'pioneer:invocation:v0.01:undefined:2HeGmqrkohCDRKUPqaDW8o',
-            auth: '',
-            noBroadcast:true
-        }
+        // let swap = {
+        //     type: 'swap',
+        //     username: 'test-user-2',
+        //     invocation: {
+        //         inboundAddress: {
+        //             chain: 'ETH',
+        //             pub_key: 'thorpub1addwnpepqf477x09wsp8rakssrh84dm00j77glhw0v5rmd76dy4tn7n430jf5f2u0lw',
+        //             address: '0x40c47fb75dcd6d978f03f4d738d289056a226b47',
+        //             router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
+        //             gas_rate: '90'
+        //         },
+        //         asset: {
+        //             chain: 'ETH',
+        //             symbol: 'ETH',
+        //             ticker: 'ETH',
+        //             iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+        //         },
+        //         memo: '=:BTC.BTC:bc1qx2grtsuukf6wh8x65e3202cw42hp2cftccmapu',
+        //         amount: 0.01
+        //     },
+        //     invocationId: 'pioneer:invocation:v0.01:undefined:2HeGmqrkohCDRKUPqaDW8o',
+        //     auth: '',
+        //     noBroadcast:true
+        // }
 
         // //BCH transfer* object to BTC
         // let transfer = {
@@ -232,18 +261,21 @@ let run_test = async function(){
         // }
 
         //BCH transfer* object to RUNE
-        let transfer = {
-            "amount": {
-                "type": "BASE",
-                "decimal": 8
-            },
-            "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
-            "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
-            "feeRate": 1
-        }
-
-        let txid = await app.transfer(transfer)
-        console.log('TXID: ',txid)
+        // let transfer = {
+        //     "amount": {
+        //         "type": "BASE",
+        //         "decimal": 8,
+        //         amount: function(){
+        //             return "0.0101"
+        //         }
+        //     },
+        //     "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
+        //     "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
+        //     "feeRate": 1
+        // }
+        //
+        // let txid = await app.transfer(transfer)
+        // console.log('TXID: ',txid)
 
     }catch(e){
         console.error(e)

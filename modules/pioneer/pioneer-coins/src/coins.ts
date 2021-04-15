@@ -245,10 +245,15 @@ export function getPrecision(asset:string){
     }
 }
 
-export function nativeToBaseAmount(asset:string,amount:string){
+export function nativeToBaseAmount(asset:string,amount:number){
     if(!CURRENCY_DECIMALS[asset.toLowerCase()]) throw Error("Unknown asset!")
+    let output:any = amount / Math.pow(10, CURRENCY_DECIMALS[asset.toLowerCase()]);
+    return output
+}
 
-    let output:any = parseFloat(amount) / Math.pow(10, CURRENCY_DECIMALS[asset.toLowerCase()]);
+export function baseAmountToNative(asset:string,amount:number){
+    if(!CURRENCY_DECIMALS[asset.toLowerCase()]) throw Error("Unknown asset!")
+    let output:any = amount * Math.pow(10, CURRENCY_DECIMALS[asset.toLowerCase()]);
     output = parseInt(output)
     return output
 }

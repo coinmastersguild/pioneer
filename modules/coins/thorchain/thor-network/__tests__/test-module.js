@@ -15,7 +15,7 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let tx = "79CC4F8B68EE3FB2A486F48232CC3AED0E00093CF46F928805154322CDF77A36"
+let tx = "2CA41812D3C82348179125D71436B6A977D26606FDB8E63512EFF7FEED5C12C2"
 // tx
 // let tx = "149269B687FFFA0BECD6A30A8B906135702809DE24D3AF77A41BCC05562883D5"
 // network.transaction(tx)
@@ -28,7 +28,7 @@ let tx = "79CC4F8B68EE3FB2A486F48232CC3AED0E00093CF46F928805154322CDF77A36"
 //         console.log("resp: ",resp)
 //     })
 
-let address = "thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp"
+let address = "thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"
 // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
 // let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
 // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
@@ -58,10 +58,10 @@ network.getBalance(address)
 // // let address = "tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh" //test seed
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
 // console.log("address: ",address)
-network.getBalance(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 
 // let address = process.env['TEST_THOR_MASTER']
@@ -71,3 +71,4 @@ network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
+

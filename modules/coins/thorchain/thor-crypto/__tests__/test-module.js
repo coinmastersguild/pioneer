@@ -9,7 +9,7 @@ require("dotenv").config({path:'../../../../../.env'})
 let crypto = require("../lib/index")
 
 
-// let seed = crypto.generateSeed()
+let seed = crypto.generateSeed()
 // console.log("seed: ",seed)
 
 let test_seed = process.env['WALLET_MAINNET_DEV_NEW']

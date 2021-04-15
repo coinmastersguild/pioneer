@@ -735,6 +735,22 @@ let broadcast_transaction = async function (coin:string,rawTx:string) {
     }
 };
 
+let send_approval = async function (intent:any) {
+    let tag = " | send_to_address | ";
+    try {
+        log.info(tag,"params: ",intent)
+
+        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendApproval(intent)
+        log.info(tag,"txid: ", signedTx.txid)
+        //
+
+        return signedTx
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
+};
+
 let send_to_address = async function (intent:any) {
     let tag = " | send_to_address | ";
     try {
@@ -1174,8 +1190,17 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             let signedTx
             switch(request.type) {
                 case 'swap':
+                    //Note this is ETH only
                     //TODO validate inputs
                     signedTx = await build_swap(request.invocation,request.invocationId)
+                    log.info(tag,"txid: ", signedTx.txid)
+                    clientEvents.events.emit('broadcast',signedTx)
+                    break;
+                case 'approval':
+                    //Note this is ETH only
+                    if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                    request.invocation.invocationId = request.invocationId
+                    signedTx = await send_approval(request.invocation)
                     log.info(tag,"txid: ", signedTx.txid)
                     clientEvents.events.emit('broadcast',signedTx)
                     break;

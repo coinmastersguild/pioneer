@@ -65,3 +65,23 @@ export interface CoinInfo {
     zpub?: string;
     type?: string;
 }
+export interface BroadcastBody {
+    coin?: string;
+    isTestnet?: boolean;
+    serialized: string;
+    signature?: string;
+    type?: string;
+    txid?: string;
+    broadcastBody?: any;
+    dscription?: any;
+    invocationId?: string;
+}
+export interface Approval {
+    contract: string;
+    tokenAddress: string;
+    amount: number;
+    invocationId?: string;
+    nonce?: string;
+    coin?: string;
+    noBroadcast?: boolean;
+}

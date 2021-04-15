@@ -26,11 +26,13 @@ const keccak256 = require('keccak256')
 const bchaddr = require('bchaddrjs');
 //coin crypto modules
 const ethCrypto = require("@pioneer-platform/eth-crypto")
-
+const coincap = require("@pioneer-platform/coincap")
 //All paths
 //TODO make paths adjustable!
 let {
-    getPaths
+    getPaths,
+    nativeToBaseAmount,
+    baseAmountToNative
 } = require('@pioneer-platform/pioneer-coins')
 
 
@@ -184,7 +186,7 @@ export interface CoinInfo {
 }
 
 //TODO move this to sdk types export
-interface BroadcastBody {
+export interface BroadcastBody {
     coin?:string
     isTestnet?:boolean,
     serialized:string
@@ -194,6 +196,16 @@ interface BroadcastBody {
     broadcastBody?:any
     dscription?:any
     invocationId?:string
+}
+
+export interface Approval {
+    contract:string,
+    tokenAddress:string,
+    amount:number,
+    invocationId?:string,
+    nonce?:string,
+    coin?:string,
+    noBroadcast?:boolean
 }
 
 //note: must match api!
@@ -281,6 +293,8 @@ module.exports = class wallet {
     private buildSwap: (transaction: any) => Promise<string>;
     private blockchains: any;
     private addLiquidity: (addLiquidity: any) => Promise<any>;
+    private buildApproval: (swap: any) => Promise<any>;
+    private sendApproval: (intent: Approval) => Promise<any>;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
         this.isTestnet = false
@@ -849,6 +863,63 @@ module.exports = class wallet {
                 throw e
             }
         },
+        this.buildApproval = async function (approval:any) {
+                let tag = TAG + " | buildApproval | "
+                try{
+                    let rawTx
+
+                    let addressFrom = await this.getMaster('ETH')
+
+                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
+                    nonceRemote = nonceRemote.data
+                    let nonce = approval.nonce || nonceRemote
+                    let gas_limit = 80000 //TODO dynamic gas limit?
+                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                    gas_price = gas_price.data
+                    log.debug(tag,"gas_price: ",gas_price)
+                    gas_price = parseInt(gas_price)
+                    gas_price = gas_price + 1000000000
+
+                    let data =
+                        "0x" +
+                        "095ea7b3" + // ERC-20 contract approve function identifier
+                        (approval.contract).replace("0x", "").padStart(64, "0") +
+                        (approval.amount).toString(16).padStart(64, "0");
+
+                    log.info(tag,"data: ",data)
+
+                    let ethTx = {
+                        // addressNList: support.bip32ToAddressNList(masterPathEth),
+                        "addressNList":[
+                            2147483692,
+                            2147483708,
+                            2147483648,
+                            0,
+                            0
+                        ],
+                        nonce: numberToHex(nonce),
+                        gasPrice: numberToHex(gas_price),
+                        gasLimit: numberToHex(gas_limit),
+                        value: numberToHex(0),
+                        to: approval.contract,
+                        data,
+                        // chainId: 1,//TODO testnet
+                    }
+
+                    log.info("unsignedTxETH: ",ethTx)
+                    //send to hdwallet
+                    rawTx = await this.WALLET.ethSignTx(ethTx)
+                    rawTx.params = ethTx
+
+                    const txid = keccak256(rawTx.serialized).toString('hex')
+                    log.info(tag,"txid: ",txid)
+                    rawTx.txid = txid
+                    return rawTx
+                }catch(e){
+                    log.error(e)
+                    throw e
+                }
+            },
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
@@ -1029,6 +1100,63 @@ module.exports = class wallet {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
+        this.sendApproval = async function (intent:Approval) {
+            let tag = TAG+" | sendToAddress | "
+            try{
+                let invocationId
+                if(!intent.invocationId) {
+                    invocationId = "notset"
+                } else {
+                    invocationId = intent.invocationId
+                }
+                if(intent.coin && intent.coin !== 'ETH') throw Error("approvals are ETH only!")
+                intent.coin = "ETH"
+
+                let approval = {
+                    contract:intent.contract,
+                    tokenAddress:intent.tokenAddress,
+                    amount:intent.amount
+                }
+
+                let signedTx = await this.buildApproval(approval)
+                log.info(tag,"signedTx: ",signedTx)
+
+                if(invocationId) signedTx.invocationId = invocationId
+                log.debug(tag,"invocationId: ",invocationId)
+
+                signedTx.broadcasted = false
+                let broadcast_hook = async () =>{
+                    try{
+                        log.info(tag,"signedTx: ",signedTx)
+                        //TODO flag for async broadcast
+                        let broadcastResult = await this.broadcastTransaction('ETH',signedTx)
+                        log.info(tag,"broadcastResult: ",broadcastResult)
+
+                        //push to invoke api
+                    }catch(e){
+                        log.error(tag,"Failed to broadcast transaction!")
+                    }
+                }
+                //broadcast hook
+                if(!intent.noBroadcast){
+                    signedTx.broadcasted = true
+                } else {
+                    signedTx.noBroadcast = true
+                }
+                //if noBroadcast we MUST still release the inovation
+                //do we pass noBroadcast to the broadcast post request
+                //Notice NO asyc!
+                broadcast_hook()
+
+                signedTx.invocationId = invocationId
+                //
+                if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
+                return signedTx
+            }catch(e){
+                log.error(tag,e)
+                throw Error(e)
+            }
+        }
         this.sendToAddress = async function (intent:SendToAddress) {
             let tag = TAG+" | sendToAddress | "
             try{
@@ -1128,9 +1256,9 @@ module.exports = class wallet {
                     //list unspent
                     log.info(tag,"coin: ",coin)
                     log.info(tag,"xpub: ",this.PUBLIC_WALLET[coin].xpub)
-                    //From mongo
+
                     // let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
-                    //From blockbook
+
                     let input
                     log.info(tag,"isTestnet: ",isTestnet)
                     if(this.isTestnet && false){ //Seriously fuck testnet flagging!
@@ -1171,9 +1299,20 @@ module.exports = class wallet {
 
                     //TODO get fee level in sat/byte
                     // let feeRate = 1
-                    // let feeRate = await this.pioneerClient.instance.GetFeeInfo({coin})
-                    // feeRate = feeRate.data
-                    let feeRate = 20
+                    let feeRateInfo = await this.pioneerClient.instance.GetFeeInfo({coin})
+                    feeRateInfo = feeRateInfo.data
+                    log.info(tag,"feeRateInfo: ",feeRateInfo)
+                    let feeRate
+                    if(coin === 'BTC'){
+                        feeRate = feeRateInfo
+                    }else if(coin === 'BCH'){
+                        feeRate = 2
+                    } else if(coin === 'LTC'){
+                        feeRate = 4
+                    } else {
+                        throw Error("Fee's not configured for coin:"+coin)
+                    }
+
                     log.info(tag,"feeRate: ",feeRate)
                     if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
@@ -1190,13 +1329,42 @@ module.exports = class wallet {
                             value: amountSat
                         }
                     ]
-                    if(memo){
-                        targets.push({ address: memo, value: 0 })
+                    // if(memo){
+                    //     targets.push({ address: memo, value: 0 })
+                    // }
+
+                    //Value of all inputs
+                    let totalInSatoshi = 0
+                    for(let i = 0; i < utxos.length; i++){
+                        let amountInSat = utxos[i].value
+                        totalInSatoshi = totalInSatoshi + amountInSat
                     }
-                    //
+                    log.info(tag,"totalInSatoshi: ",totalInSatoshi)
+                    log.info(tag,"totalInBase: ",nativeToBaseAmount(coin,totalInSatoshi))
+                    let valueIn = await coincap.getValue(coin,nativeToBaseAmount(coin,totalInSatoshi))
+                    log.info(tag,"totalInValue: ",valueIn)
+
+                    //amount out
+                    log.info(tag,"amountOutSat: ",amountSat)
+                    log.info(tag,"amountOutBase: ",amount)
+                    let valueOut = await coincap.getValue(coin,nativeToBaseAmount(coin,amountSat))
+                    log.info(tag,"valueOut: ",valueOut)
+
+                    if(valueOut < 1){
+                        throw Error(" Dollar to play bro, DUST tx refused")
+                    }
+
+                    if(nativeToBaseAmount(coin,totalInSatoshi) < amount){
+                        throw Error("Sum of input less than output! YOUR BROKE! ")
+                    }
+
                     log.info(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
                     let selectedResults = coinSelect(utxos, targets, feeRate)
                     log.info(tag,"result coinselect algo: ",selectedResults)
+
+                    //value of all outputs
+
+                    //amount fee in USD
 
                     //if
                     if(!selectedResults.inputs){
@@ -1283,7 +1451,7 @@ module.exports = class wallet {
                     //hdwallet input
                     //TODO type this
                     let hdwalletTxDescription = {
-                        memo,
+                        opReturnData:memo,
                         coin: longName,
                         inputs,
                         outputs,
@@ -1296,7 +1464,7 @@ module.exports = class wallet {
 
                     //
                     rawTx = {
-                        txid:sha256(sha256(res.serializedTx)).toString(),
+                        txid:res.txid,
                         coin,
                         serialized:res.serializedTx
                     }
@@ -1412,7 +1580,7 @@ module.exports = class wallet {
                     sequence = sequence.toString()
 
                     let txType = "thorchain/MsgSend"
-                    let gas = "200000"
+                    let gas = "100000"
                     let fee = "3000"
                     let memo = transaction.memo || ""
 
@@ -1499,8 +1667,8 @@ module.exports = class wallet {
                     log.debug("FINAL: ****** ",txFinal)
 
                     // @ts-ignore
-                    const buffer = Buffer.from(broadcastString, 'base64');
-                    let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+                    // const buffer = Buffer.from(broadcastString, 'base64');
+                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
 
 
                     let broadcastString = {
@@ -1509,7 +1677,7 @@ module.exports = class wallet {
                         mode:"sync"
                     }
                     rawTx = {
-                        txid:hash,
+                        txid:"",
                         coin,
                         serialized:JSON.stringify(broadcastString)
                     }

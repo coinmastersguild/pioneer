@@ -81,9 +81,10 @@ var keccak256 = require('keccak256');
 var bchaddr = require('bchaddrjs');
 //coin crypto modules
 var ethCrypto = require("@pioneer-platform/eth-crypto");
+var coincap = require("@pioneer-platform/coincap");
 //All paths
 //TODO make paths adjustable!
-var getPaths = require('@pioneer-platform/pioneer-coins').getPaths;
+var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, nativeToBaseAmount = _a.nativeToBaseAmount, baseAmountToNative = _a.baseAmountToNative;
 //support
 var support = __importStar(require("./support"));
 var web3_utils_1 = require("web3-utils");
@@ -668,7 +669,7 @@ module.exports = /** @class */ (function () {
         this.getAddress = function (coin, account, index, isChange) {
             var tag = TAG + " | get_address | ";
             try {
-                var output
+                var output 
                 //if token use ETH pubkey
                 = void 0;
                 //if token use ETH pubkey
@@ -785,13 +786,13 @@ module.exports = /** @class */ (function () {
             amount: "0.1"
         }
          */
-        this.buildSwap = function (swap) {
+        this.addLiquidity = function (addLiquidity) {
             return __awaiter(this, void 0, void 0, function () {
                 var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, txid, coin, addressFrom, transfer, e_4;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            tag = TAG + " | buildSwap | ";
+                            tag = TAG + " | addLiquidity | ";
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 14, , 15]);
@@ -801,10 +802,10 @@ module.exports = /** @class */ (function () {
                                 'BCH',
                                 'LTC'
                             ];
-                            if (!(swap.inboundAddress.chain === 'ETH')) return [3 /*break*/, 9];
+                            if (!(addLiquidity.inboundAddress.chain === 'ETH')) return [3 /*break*/, 9];
                             addressFrom = void 0;
-                            if (!swap.addressFrom) return [3 /*break*/, 2];
-                            addressFrom = swap.addressFrom;
+                            if (!addLiquidity.addressFrom) return [3 /*break*/, 2];
+                            addressFrom = addLiquidity.addressFrom;
                             return [3 /*break*/, 4];
                         case 2: return [4 /*yield*/, this.getMaster('ETH')];
                         case 3:
@@ -813,7 +814,7 @@ module.exports = /** @class */ (function () {
                         case 4:
                             if (!addressFrom)
                                 throw Error("102: unable to get master address! ");
-                            return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, swap)];
+                            return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, addLiquidity)];
                         case 5:
                             data = _a.sent();
                             data = data.data;
@@ -822,7 +823,7 @@ module.exports = /** @class */ (function () {
                         case 6:
                             nonceRemote = _a.sent();
                             nonceRemote = nonceRemote.data;
-                            nonce = swap.nonce || nonceRemote;
+                            nonce = addLiquidity.nonce || nonceRemote;
                             gas_limit = 80000 //TODO dynamic gas limit?
                             ;
                             return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
@@ -834,7 +835,7 @@ module.exports = /** @class */ (function () {
                             gas_price = gas_price + 1000000000;
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
-                            amountNative = parseFloat(swap.amount) * support.getBase('ETH');
+                            amountNative = parseFloat(addLiquidity.amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
                             log.info("amountNative: ", amountNative);
                             log.info("nonce: ", nonce);
@@ -851,7 +852,7 @@ module.exports = /** @class */ (function () {
                                 gasPrice: web3_utils_1.numberToHex(gas_price),
                                 gasLimit: web3_utils_1.numberToHex(gas_limit),
                                 value: web3_utils_1.numberToHex(amountNative),
-                                to: swap.inboundAddress.router,
+                                to: addLiquidity.inboundAddress.router,
                                 data: data,
                             };
                             log.info("unsignedTxETH: ", ethTx);
@@ -865,10 +866,10 @@ module.exports = /** @class */ (function () {
                             rawTx.txid = txid;
                             return [3 /*break*/, 13];
                         case 9:
-                            if (!(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0)) return [3 /*break*/, 12];
-                            if (!swap.memo)
+                            if (!(UTXOcoins.indexOf(addLiquidity.inboundAddress.chain) >= 0)) return [3 /*break*/, 12];
+                            if (!addLiquidity.memo)
                                 throw Error("Memo required for swaps!");
-                            coin = swap.inboundAddress.chain;
+                            coin = addLiquidity.inboundAddress.chain;
                             return [4 /*yield*/, this.getMaster(coin)
                                 //build transfer with memo
                             ]; //TODO this silly in utxo
@@ -877,18 +878,18 @@ module.exports = /** @class */ (function () {
                             ;
                             transfer = {
                                 coin: "BTC",
-                                addressTo: swap.inboundAddress.address,
+                                addressTo: addLiquidity.inboundAddress.address,
                                 addressFrom: addressFrom,
-                                amount: swap.amount,
-                                feeLevel: swap.feeLevel,
-                                memo: swap.memo
+                                amount: addLiquidity.amount,
+                                feeLevel: addLiquidity.feeLevel,
+                                memo: addLiquidity.memo
                             };
                             return [4 /*yield*/, this.buildTransfer(transfer)];
                         case 11:
                             rawTx = _a.sent();
                             console.log("rawTx: ", rawTx);
                             return [3 /*break*/, 13];
-                        case 12: throw Error("Chain not supported! " + swap.inboundAddress.chain);
+                        case 12: throw Error("Chain not supported! " + addLiquidity.inboundAddress.chain);
                         case 13: return [2 /*return*/, rawTx];
                         case 14:
                             e_4 = _a.sent();
@@ -899,9 +900,191 @@ module.exports = /** @class */ (function () {
                 });
             });
         },
+            this.buildApproval = function (approval) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var tag, rawTx, addressFrom, nonceRemote, nonce, gas_limit, gas_price, data, ethTx, txid, e_5;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                tag = TAG + " | buildApproval | ";
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 6, , 7]);
+                                rawTx = void 0;
+                                return [4 /*yield*/, this.getMaster('ETH')];
+                            case 2:
+                                addressFrom = _a.sent();
+                                return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
+                            case 3:
+                                nonceRemote = _a.sent();
+                                nonceRemote = nonceRemote.data;
+                                nonce = approval.nonce || nonceRemote;
+                                gas_limit = 80000 //TODO dynamic gas limit?
+                                ;
+                                return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
+                            case 4:
+                                gas_price = _a.sent();
+                                gas_price = gas_price.data;
+                                log.debug(tag, "gas_price: ", gas_price);
+                                gas_price = parseInt(gas_price);
+                                gas_price = gas_price + 1000000000;
+                                data = "0x" +
+                                    "095ea7b3" + // ERC-20 contract approve function identifier
+                                    (approval.contract).replace("0x", "").padStart(64, "0") +
+                                    (approval.amount).toString(16).padStart(64, "0");
+                                log.info(tag, "data: ", data);
+                                ethTx = {
+                                    // addressNList: support.bip32ToAddressNList(masterPathEth),
+                                    "addressNList": [
+                                        2147483692,
+                                        2147483708,
+                                        2147483648,
+                                        0,
+                                        0
+                                    ],
+                                    nonce: web3_utils_1.numberToHex(nonce),
+                                    gasPrice: web3_utils_1.numberToHex(gas_price),
+                                    gasLimit: web3_utils_1.numberToHex(gas_limit),
+                                    value: web3_utils_1.numberToHex(0),
+                                    to: approval.contract,
+                                    data: data,
+                                };
+                                log.info("unsignedTxETH: ", ethTx);
+                                return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
+                            case 5:
+                                //send to hdwallet
+                                rawTx = _a.sent();
+                                rawTx.params = ethTx;
+                                txid = keccak256(rawTx.serialized).toString('hex');
+                                log.info(tag, "txid: ", txid);
+                                rawTx.txid = txid;
+                                return [2 /*return*/, rawTx];
+                            case 6:
+                                e_5 = _a.sent();
+                                log.error(e_5);
+                                throw e_5;
+                            case 7: return [2 /*return*/];
+                        }
+                    });
+                });
+            },
+            this.buildSwap = function (swap) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, txid, coin, addressFrom, transfer, e_6;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                tag = TAG + " | buildSwap | ";
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 14, , 15]);
+                                rawTx = void 0;
+                                UTXOcoins = [
+                                    'BTC',
+                                    'BCH',
+                                    'LTC'
+                                ];
+                                if (!(swap.inboundAddress.chain === 'ETH')) return [3 /*break*/, 9];
+                                addressFrom = void 0;
+                                if (!swap.addressFrom) return [3 /*break*/, 2];
+                                addressFrom = swap.addressFrom;
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, this.getMaster('ETH')];
+                            case 3:
+                                addressFrom = _a.sent();
+                                _a.label = 4;
+                            case 4:
+                                if (!addressFrom)
+                                    throw Error("102: unable to get master address! ");
+                                return [4 /*yield*/, this.pioneerClient.instance.GetThorchainMemoEncoded(null, swap)];
+                            case 5:
+                                data = _a.sent();
+                                data = data.data;
+                                log.info(tag, "txData: ", data);
+                                return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
+                            case 6:
+                                nonceRemote = _a.sent();
+                                nonceRemote = nonceRemote.data;
+                                nonce = swap.nonce || nonceRemote;
+                                gas_limit = 80000 //TODO dynamic gas limit?
+                                ;
+                                return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
+                            case 7:
+                                gas_price = _a.sent();
+                                gas_price = gas_price.data;
+                                log.debug(tag, "gas_price: ", gas_price);
+                                gas_price = parseInt(gas_price);
+                                gas_price = gas_price + 1000000000;
+                                masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
+                                ;
+                                amountNative = parseFloat(swap.amount) * support.getBase('ETH');
+                                amountNative = Number(parseInt(String(amountNative)));
+                                log.info("amountNative: ", amountNative);
+                                log.info("nonce: ", nonce);
+                                ethTx = {
+                                    // addressNList: support.bip32ToAddressNList(masterPathEth),
+                                    "addressNList": [
+                                        2147483692,
+                                        2147483708,
+                                        2147483648,
+                                        0,
+                                        0
+                                    ],
+                                    nonce: web3_utils_1.numberToHex(nonce),
+                                    gasPrice: web3_utils_1.numberToHex(gas_price),
+                                    gasLimit: web3_utils_1.numberToHex(gas_limit),
+                                    value: web3_utils_1.numberToHex(amountNative),
+                                    to: swap.inboundAddress.router,
+                                    data: data,
+                                };
+                                log.info("unsignedTxETH: ", ethTx);
+                                return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
+                            case 8:
+                                //send to hdwallet
+                                rawTx = _a.sent();
+                                rawTx.params = ethTx;
+                                txid = keccak256(rawTx.serialized).toString('hex');
+                                log.info(tag, "txid: ", txid);
+                                rawTx.txid = txid;
+                                return [3 /*break*/, 13];
+                            case 9:
+                                if (!(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0)) return [3 /*break*/, 12];
+                                if (!swap.memo)
+                                    throw Error("Memo required for swaps!");
+                                coin = swap.inboundAddress.chain;
+                                return [4 /*yield*/, this.getMaster(coin)
+                                    //build transfer with memo
+                                ]; //TODO this silly in utxo
+                            case 10:
+                                addressFrom = _a.sent() //TODO this silly in utxo
+                                ;
+                                transfer = {
+                                    coin: "BTC",
+                                    addressTo: swap.inboundAddress.address,
+                                    addressFrom: addressFrom,
+                                    amount: swap.amount,
+                                    feeLevel: swap.feeLevel,
+                                    memo: swap.memo
+                                };
+                                return [4 /*yield*/, this.buildTransfer(transfer)];
+                            case 11:
+                                rawTx = _a.sent();
+                                console.log("rawTx: ", rawTx);
+                                return [3 /*break*/, 13];
+                            case 12: throw Error("Chain not supported! " + swap.inboundAddress.chain);
+                            case 13: return [2 /*return*/, rawTx];
+                            case 14:
+                                e_6 = _a.sent();
+                                log.error(e_6);
+                                throw e_6;
+                            case 15: return [2 /*return*/];
+                        }
+                    });
+                });
+            },
             this.buildTx = function (transaction) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var tag, rawTx, tx, signTx, res, _a, e_5;
+                    var tag, rawTx, tx, signTx, res, _a, e_7;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
@@ -943,10 +1126,10 @@ module.exports = /** @class */ (function () {
                                 rawTx = res;
                                 // code block
                                 return [3 /*break*/, 8];
-                            case 4:
+                            case 4: 
                             // code block
                             return [3 /*break*/, 8];
-                            case 5:
+                            case 5: 
                             // code block
                             return [3 /*break*/, 8];
                             case 6:
@@ -975,9 +1158,9 @@ module.exports = /** @class */ (function () {
                                 _b.label = 10;
                             case 10: return [2 /*return*/, rawTx];
                             case 11:
-                                e_5 = _b.sent();
-                                log.error(e_5);
-                                throw e_5;
+                                e_7 = _b.sent();
+                                log.error(e_7);
+                                throw e_7;
                             case 12: return [2 /*return*/];
                         }
                     });
@@ -986,9 +1169,88 @@ module.exports = /** @class */ (function () {
         // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
         //     return encrypt_message(msg,payerPubkey);
         // }
+        this.sendApproval = function (intent) {
+            return __awaiter(this, void 0, void 0, function () {
+                var tag, invocationId, approval, signedTx_1, broadcast_hook, e_8;
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            tag = TAG + " | sendToAddress | ";
+                            _a.label = 1;
+                        case 1:
+                            _a.trys.push([1, 3, , 4]);
+                            invocationId = void 0;
+                            if (!intent.invocationId) {
+                                invocationId = "notset";
+                            }
+                            else {
+                                invocationId = intent.invocationId;
+                            }
+                            if (intent.coin && intent.coin !== 'ETH')
+                                throw Error("approvals are ETH only!");
+                            intent.coin = "ETH";
+                            approval = {
+                                contract: intent.contract,
+                                tokenAddress: intent.tokenAddress,
+                                amount: intent.amount
+                            };
+                            return [4 /*yield*/, this.buildApproval(approval)];
+                        case 2:
+                            signedTx_1 = _a.sent();
+                            log.info(tag, "signedTx: ", signedTx_1);
+                            if (invocationId)
+                                signedTx_1.invocationId = invocationId;
+                            log.debug(tag, "invocationId: ", invocationId);
+                            signedTx_1.broadcasted = false;
+                            broadcast_hook = function () { return __awaiter(_this, void 0, void 0, function () {
+                                var broadcastResult, e_9;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            _a.trys.push([0, 2, , 3]);
+                                            log.info(tag, "signedTx: ", signedTx_1);
+                                            return [4 /*yield*/, this.broadcastTransaction('ETH', signedTx_1)];
+                                        case 1:
+                                            broadcastResult = _a.sent();
+                                            log.info(tag, "broadcastResult: ", broadcastResult);
+                                            return [3 /*break*/, 3];
+                                        case 2:
+                                            e_9 = _a.sent();
+                                            log.error(tag, "Failed to broadcast transaction!");
+                                            return [3 /*break*/, 3];
+                                        case 3: return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            //broadcast hook
+                            if (!intent.noBroadcast) {
+                                signedTx_1.broadcasted = true;
+                            }
+                            else {
+                                signedTx_1.noBroadcast = true;
+                            }
+                            //if noBroadcast we MUST still release the inovation
+                            //do we pass noBroadcast to the broadcast post request
+                            //Notice NO asyc!
+                            broadcast_hook();
+                            signedTx_1.invocationId = invocationId;
+                            //
+                            if (!signedTx_1.txid)
+                                throw Error("103: Pre-broadcast txid hash not implemented!");
+                            return [2 /*return*/, signedTx_1];
+                        case 3:
+                            e_8 = _a.sent();
+                            log.error(tag, e_8);
+                            throw Error(e_8);
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        };
         this.sendToAddress = function (intent) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, invocationId, addressFrom, transaction, signedTx_1, broadcast_hook, e_6;
+                var tag, invocationId, addressFrom, transaction, signedTx_2, broadcast_hook, e_10;
                 var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -1020,26 +1282,26 @@ module.exports = /** @class */ (function () {
                                 transaction.memo = intent.memo;
                             return [4 /*yield*/, this.buildTransfer(transaction)];
                         case 3:
-                            signedTx_1 = _a.sent();
-                            log.info(tag, "signedTx: ", signedTx_1);
+                            signedTx_2 = _a.sent();
+                            log.info(tag, "signedTx: ", signedTx_2);
                             if (invocationId)
-                                signedTx_1.invocationId = invocationId;
+                                signedTx_2.invocationId = invocationId;
                             log.debug(tag, "transaction: ", transaction);
-                            signedTx_1.broadcasted = false;
+                            signedTx_2.broadcasted = false;
                             broadcast_hook = function () { return __awaiter(_this, void 0, void 0, function () {
-                                var broadcastResult, e_7;
+                                var broadcastResult, e_11;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
                                             _a.trys.push([0, 2, , 3]);
-                                            log.info(tag, "signedTx: ", signedTx_1);
-                                            return [4 /*yield*/, this.broadcastTransaction(intent.coin, signedTx_1)];
+                                            log.info(tag, "signedTx: ", signedTx_2);
+                                            return [4 /*yield*/, this.broadcastTransaction(intent.coin, signedTx_2)];
                                         case 1:
                                             broadcastResult = _a.sent();
                                             log.info(tag, "broadcastResult: ", broadcastResult);
                                             return [3 /*break*/, 3];
                                         case 2:
-                                            e_7 = _a.sent();
+                                            e_11 = _a.sent();
                                             log.error(tag, "Failed to broadcast transaction!");
                                             return [3 /*break*/, 3];
                                         case 3: return [2 /*return*/];
@@ -1048,24 +1310,24 @@ module.exports = /** @class */ (function () {
                             }); };
                             //broadcast hook
                             if (!intent.noBroadcast) {
-                                signedTx_1.broadcasted = true;
+                                signedTx_2.broadcasted = true;
                             }
                             else {
-                                signedTx_1.noBroadcast = true;
+                                signedTx_2.noBroadcast = true;
                             }
                             //if noBroadcast we MUST still release the inovation
                             //do we pass noBroadcast to the broadcast post request
                             //Notice NO asyc!
                             broadcast_hook();
-                            signedTx_1.invocationId = invocationId;
+                            signedTx_2.invocationId = invocationId;
                             //
-                            if (!signedTx_1.txid)
+                            if (!signedTx_2.txid)
                                 throw Error("103: Pre-broadcast txid hash not implemented!");
-                            return [2 /*return*/, signedTx_1];
+                            return [2 /*return*/, signedTx_2];
                         case 4:
-                            e_6 = _a.sent();
-                            log.error(tag, e_6);
-                            throw Error(e_6);
+                            e_10 = _a.sent();
+                            log.error(tag, e_10);
+                            throw Error(e_10);
                         case 5: return [2 /*return*/];
                     }
                 });
@@ -1073,14 +1335,14 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRate, amountSat, targets, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, buffer, hash, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, buffer, hash, e_8;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRateInfo, feeRate, amountSat, targets, totalInSatoshi, i, amountInSat, valueIn, valueOut, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, res, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, txid, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, res, txFinal, broadcastString, accountInfo, sequence, account_number, pubkey, bnbTx, signedTxResponse, pubkeySigHex, buffer, hash, e_12;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | build_transfer | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 30, , 31]);
+                            _a.trys.push([1, 33, , 34]);
                             isTestnet = false;
                             coin = transaction.coin.toUpperCase();
                             address = transaction.addressTo;
@@ -1110,7 +1372,7 @@ module.exports = /** @class */ (function () {
                                 'BCH',
                                 'LTC'
                             ];
-                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 8];
+                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 11];
                             log.info(tag, "Build UTXO tx! ", coin);
                             //list unspent
                             log.info(tag, "coin: ", coin);
@@ -1152,7 +1414,24 @@ module.exports = /** @class */ (function () {
                             if (utxos.length === 0) {
                                 throw Error("101 YOUR BROKE! no UTXO's found! ");
                             }
-                            feeRate = 20;
+                            return [4 /*yield*/, this.pioneerClient.instance.GetFeeInfo({ coin: coin })];
+                        case 6:
+                            feeRateInfo = _a.sent();
+                            feeRateInfo = feeRateInfo.data;
+                            log.info(tag, "feeRateInfo: ", feeRateInfo);
+                            feeRate = void 0;
+                            if (coin === 'BTC') {
+                                feeRate = feeRateInfo;
+                            }
+                            else if (coin === 'BCH') {
+                                feeRate = 2;
+                            }
+                            else if (coin === 'LTC') {
+                                feeRate = 4;
+                            }
+                            else {
+                                throw Error("Fee's not configured for coin:" + coin);
+                            }
                             log.info(tag, "feeRate: ", feeRate);
                             if (!feeRate)
                                 throw Error("Can not build TX without fee Rate!");
@@ -1165,13 +1444,35 @@ module.exports = /** @class */ (function () {
                                     value: amountSat
                                 }
                             ];
-                            if (memo) {
-                                targets.push({ address: memo, value: 0 });
+                            totalInSatoshi = 0;
+                            for (i = 0; i < utxos.length; i++) {
+                                amountInSat = utxos[i].value;
+                                totalInSatoshi = totalInSatoshi + amountInSat;
                             }
-                            //
+                            log.info(tag, "totalInSatoshi: ", totalInSatoshi);
+                            log.info(tag, "totalInBase: ", nativeToBaseAmount(coin, totalInSatoshi));
+                            return [4 /*yield*/, coincap.getValue(coin, nativeToBaseAmount(coin, totalInSatoshi))];
+                        case 7:
+                            valueIn = _a.sent();
+                            log.info(tag, "totalInValue: ", valueIn);
+                            //amount out
+                            log.info(tag, "amountOutSat: ", amountSat);
+                            log.info(tag, "amountOutBase: ", amount);
+                            return [4 /*yield*/, coincap.getValue(coin, nativeToBaseAmount(coin, amountSat))];
+                        case 8:
+                            valueOut = _a.sent();
+                            log.info(tag, "valueOut: ", valueOut);
+                            if (valueOut < 1) {
+                                throw Error(" Dollar to play bro, DUST tx refused");
+                            }
+                            if (nativeToBaseAmount(coin, totalInSatoshi) < amount) {
+                                throw Error("Sum of input less than output! YOUR BROKE! ");
+                            }
                             log.info(tag, "inputs coinselect algo: ", { utxos: utxos, targets: targets, feeRate: feeRate });
                             selectedResults = coinSelect(utxos, targets, feeRate);
                             log.info(tag, "result coinselect algo: ", selectedResults);
+                            //value of all outputs
+                            //amount fee in USD
                             //if
                             if (!selectedResults.inputs) {
                                 throw Error("Fee exceeded total available inputs!");
@@ -1196,7 +1497,7 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.getMaster(coin)
                                 //if bch convert format
                             ];
-                        case 6:
+                        case 9:
                             changeAddress = _a.sent();
                             //if bch convert format
                             if (coin === 'BCH') {
@@ -1249,7 +1550,7 @@ module.exports = /** @class */ (function () {
                                 throw Error("UTXO coin: " + coin + " Not supported yet! ");
                             }
                             hdwalletTxDescription = {
-                                memo: memo,
+                                opReturnData: memo,
                                 coin: longName,
                                 inputs: inputs,
                                 outputs: outputs,
@@ -1257,39 +1558,39 @@ module.exports = /** @class */ (function () {
                                 locktime: 0,
                             };
                             return [4 /*yield*/, this.WALLET.btcSignTx(hdwalletTxDescription)];
-                        case 7:
+                        case 10:
                             res = _a.sent();
                             log.info(tag, "res: ", res);
                             //
                             rawTx = {
-                                txid: sha256(sha256(res.serializedTx)).toString(),
+                                txid: res.txid,
                                 coin: coin,
                                 serialized: res.serializedTx
                             };
-                            return [3 /*break*/, 29];
-                        case 8:
-                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 17];
+                            return [3 /*break*/, 32];
+                        case 11:
+                            if (!(coin === 'ETH' || tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 20];
                             log.debug(tag, "checkpoint");
                             return [4 /*yield*/, this.getBalanceRemote('ETH')];
-                        case 9:
+                        case 12:
                             balanceEth = _a.sent();
                             log.debug(tag, "getBalanceRemote: ", balanceEth);
                             return [4 /*yield*/, this.pioneerClient.instance.GetNonce(addressFrom)];
-                        case 10:
+                        case 13:
                             nonceRemote = _a.sent();
                             nonceRemote = nonceRemote.data;
                             nonce = transaction.nonce || nonceRemote;
                             gas_limit = 80000 //TODO dynamic gas limit?
                             ;
                             return [4 /*yield*/, this.pioneerClient.instance.GetGasPrice()];
-                        case 11:
+                        case 14:
                             gas_price = _a.sent();
                             gas_price = gas_price.data;
                             log.debug(tag, "gas_price: ", gas_price);
                             gas_price = parseInt(gas_price);
                             gas_price = gas_price + 1000000000;
                             txParams = void 0;
-                            if (!(coin === "ETH")) return [3 /*break*/, 12];
+                            if (!(coin === "ETH")) return [3 /*break*/, 15];
                             amountNative = parseFloat(amount) * support.getBase('ETH');
                             amountNative = Number(parseInt(String(amountNative)));
                             txParams = {
@@ -1301,8 +1602,8 @@ module.exports = /** @class */ (function () {
                                 data: memo
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            return [3 /*break*/, 15];
-                        case 12:
+                            return [3 /*break*/, 18];
+                        case 15:
                             knownCoins = tokenData.tokens;
                             log.debug(tag, "knownCoins: ", knownCoins);
                             if (knownCoins.indexOf(coin) === -1)
@@ -1310,7 +1611,7 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.getBalanceRemote(coin)
                                 //verify token balance
                             ];
-                        case 13:
+                        case 16:
                             balanceToken = _a.sent();
                             //verify token balance
                             if (amount > balanceToken)
@@ -1321,7 +1622,7 @@ module.exports = /** @class */ (function () {
                             amountNative = Number(parseInt(String(amountNative)));
                             log.debug({ coin: coin, address: address, amountNative: amountNative });
                             return [4 /*yield*/, this.pioneerClient.instance.GetTransferData({ coin: coin, address: address, amount: amountNative })];
-                        case 14:
+                        case 17:
                             transfer_data = _a.sent();
                             transfer_data = transfer_data.data;
                             log.debug(tag, "transfer_data: ", transfer_data);
@@ -1333,8 +1634,8 @@ module.exports = /** @class */ (function () {
                                 gasLimit: gas_limit
                             };
                             log.debug(tag, "txParams: ", txParams);
-                            _a.label = 15;
-                        case 15:
+                            _a.label = 18;
+                        case 18:
                             masterPathEth = "m/44'/60'/0'/0/0" //TODO moveme to support
                             ;
                             log.debug(tag, "txParams: ", txParams);
@@ -1358,7 +1659,7 @@ module.exports = /** @class */ (function () {
                                 //txid
                                 //const txHash = await web3.utils.sha3(signed.rawTransaction);
                             ];
-                        case 16:
+                        case 19:
                             rawTx = _a.sent();
                             //debug https://flightwallet.github.io/decode-eth-tx/
                             //txid
@@ -1369,15 +1670,15 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "txid: ", txid);
                             rawTx.txid = txid;
                             rawTx.params = txParams;
-                            return [3 /*break*/, 29];
-                        case 17:
-                            if (!(coin === 'RUNE')) return [3 /*break*/, 21];
+                            return [3 /*break*/, 32];
+                        case 20:
+                            if (!(coin === 'RUNE')) return [3 /*break*/, 24];
                             amountNative = RUNE_BASE * parseFloat(amount);
                             amountNative = parseInt(amountNative.toString());
                             //get account number
                             log.info(tag, "addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'RUNE', address: addressFrom })];
-                        case 18:
+                        case 21:
                             masterInfo = _a.sent();
                             masterInfo = masterInfo.data;
                             log.info(tag, "masterInfo: ", masterInfo.data);
@@ -1386,7 +1687,7 @@ module.exports = /** @class */ (function () {
                             sequence = parseInt(sequence);
                             sequence = sequence.toString();
                             txType = "thorchain/MsgSend";
-                            gas = "200000";
+                            gas = "100000";
                             fee = "3000";
                             memo_1 = transaction.memo || "";
                             unsigned = {
@@ -1426,7 +1727,7 @@ module.exports = /** @class */ (function () {
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_RUNE_KEYPATH),
                                     showDisplay: false,
                                 })];
-                        case 19:
+                        case 22:
                             fromAddress = _a.sent();
                             log.info(tag, "fromAddressHDwallet: ", fromAddress);
                             log.info(tag, "fromAddress: ", addressFrom);
@@ -1456,7 +1757,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: unsigned,
                                 })];
-                        case 20:
+                        case 23:
                             res = _a.sent();
                             log.info("res: ", prettyjson.render(res));
                             log.debug("res*****: ", res);
@@ -1464,28 +1765,25 @@ module.exports = /** @class */ (function () {
                             txFinal = res;
                             txFinal.signatures = res.signatures;
                             log.debug("FINAL: ****** ", txFinal);
-                            //buffer = Buffer.from(broadcastString, 'base64');
-                            //hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase();
-                            let hash = "lol"
                             broadcastString = {
                                 tx: txFinal,
                                 type: "cosmos-sdk/StdTx",
                                 mode: "sync"
                             };
                             rawTx = {
-                                txid: hash,
+                                txid: "",
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
-                            return [3 /*break*/, 29];
-                        case 21:
-                            if (!(coin === 'ATOM')) return [3 /*break*/, 25];
+                            return [3 /*break*/, 32];
+                        case 24:
+                            if (!(coin === 'ATOM')) return [3 /*break*/, 28];
                             amountNative = ATOM_BASE * parseFloat(amount);
                             amountNative = parseInt(amountNative.toString());
                             //get account number
                             log.info(tag, "addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: 'ATOM', address: addressFrom })];
-                        case 22:
+                        case 25:
                             masterInfo = _a.sent();
                             masterInfo = masterInfo.data;
                             log.info(tag, "masterInfo: ", masterInfo.data);
@@ -1534,7 +1832,7 @@ module.exports = /** @class */ (function () {
                                     addressNList: hdwallet_core_1.bip32ToAddressNList(HD_ATOM_KEYPATH),
                                     showDisplay: false,
                                 })];
-                        case 23:
+                        case 26:
                             fromAddress = _a.sent();
                             log.info(tag, "fromAddressHDwallet: ", fromAddress);
                             log.info(tag, "fromAddress: ", addressFrom);
@@ -1552,7 +1850,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: unsigned,
                                 })];
-                        case 24:
+                        case 27:
                             res = _a.sent();
                             log.info("res: ", prettyjson.render(res));
                             log.debug("res*****: ", res);
@@ -1570,14 +1868,14 @@ module.exports = /** @class */ (function () {
                                 coin: coin,
                                 serialized: JSON.stringify(broadcastString)
                             };
-                            return [3 /*break*/, 29];
-                        case 25:
-                            if (!(coin === "BNB")) return [3 /*break*/, 28];
+                            return [3 /*break*/, 32];
+                        case 28:
+                            if (!(coin === "BNB")) return [3 /*break*/, 31];
                             //TODO move to tx builder module
                             //get account info
                             log.debug("addressFrom: ", addressFrom);
                             return [4 /*yield*/, this.pioneerClient.instance.GetAccountInfo({ coin: coin, address: addressFrom })];
-                        case 26:
+                        case 29:
                             accountInfo = _a.sent();
                             accountInfo = accountInfo.data;
                             log.debug("accountInfo: ", prettyjson.render(accountInfo));
@@ -1639,7 +1937,7 @@ module.exports = /** @class */ (function () {
                                     sequence: sequence,
                                     tx: bnbTx,
                                 })];
-                        case 27:
+                        case 30:
                             signedTxResponse = _a.sent();
                             log.debug(tag, "**** signedTxResponse: ", signedTxResponse);
                             log.debug(tag, "**** signedTxResponse: ", JSON.stringify(signedTxResponse));
@@ -1651,8 +1949,8 @@ module.exports = /** @class */ (function () {
                                 txid: hash,
                                 serialized: signedTxResponse.serialized
                             };
-                            return [3 /*break*/, 29];
-                        case 28:
+                            return [3 /*break*/, 32];
+                        case 31:
                             if (coin === "EOS") {
                                 throw Error("666: EOS not supported yet!");
                                 // amount = getEosAmount(amount)
@@ -1755,13 +2053,13 @@ module.exports = /** @class */ (function () {
                             else {
                                 throw Error("109: coin not yet implemented! coin: " + coin);
                             }
-                            _a.label = 29;
-                        case 29: return [2 /*return*/, rawTx];
-                        case 30:
-                            e_8 = _a.sent();
-                            log.error(tag, "e: ", e_8);
-                            throw e_8;
-                        case 31: return [2 /*return*/];
+                            _a.label = 32;
+                        case 32: return [2 /*return*/, rawTx];
+                        case 33:
+                            e_12 = _a.sent();
+                            log.error(tag, "e: ", e_12);
+                            throw e_12;
+                        case 34: return [2 /*return*/];
                     }
                 });
             });

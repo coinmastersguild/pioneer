@@ -4,8 +4,15 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 network.init('full')
 
-let memo = "thisisjustatestbro"
-network.getFeesWithRates("BCH",memo)
+// let memo = "thisisjustatestbro"
+// network.getFeesWithRates("BCH",memo)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
+
+let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
+network.getTransaction("BTC",txid)
     .then(function(resp){
         console.log("resp: ",resp)
         //console.log("resp: ",JSON.stringify(resp))

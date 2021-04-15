@@ -24,6 +24,7 @@ if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']){
     blockchains.push('bitcoin')
     //all utxo's share
     networks['ANY'] = require('@pioneer-platform/utxo-network')
+    networks['ANY'].init('full')
 }
 
 if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
@@ -38,6 +39,7 @@ if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
 if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']){
     blockchains.push('ethereum')
     networks['ETH'] = require('@pioneer-platform/eth-network')
+    networks['ETH'].init()
 }
 
 if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
@@ -139,6 +141,12 @@ interface UnsignedUtxoRequest {
     include_hex:boolean
     effort:number
     inputs:any
+}
+
+interface BodyAllowance {
+    token:string
+    spender:string
+    sender:string
 }
 
 //TODO move this to coins module!
@@ -367,7 +375,7 @@ export class pioneerPublicController extends Controller {
     }
 
     /**
-     *  Cosmos getTransaction
+     *  getTransaction
      */
     @Get('{coin}/getTransaction/{txid}')
     public async getTransaction(coin:string,txid:string) {
@@ -377,9 +385,14 @@ export class pioneerPublicController extends Controller {
 
             log.info(tag,"coin: ",coin)
             log.info(tag,"txid: ",txid)
-
-            let output = await networks[coin].getTransaction(txid)
-            log.debug("getTxid: output:",output)
+            let output
+            //if UXTO coin = any
+            if(UTXO_COINS.indexOf(coin) >= 0){
+                output = await networks['ANY'].getTransaction(coin,txid)
+            } else {
+                if(!networks[coin]) throw Error("102: coin not supported! coin: "+coin)
+                output = await networks[coin].getTransaction(txid)
+            }
 
             return(output)
         }catch(e){
@@ -614,6 +627,8 @@ export class pioneerPublicController extends Controller {
         }
     }
 
+
+
     /**
      *  ETH nonce check
      */
@@ -743,6 +758,27 @@ export class pioneerPublicController extends Controller {
      * Mempool intake (blocknative)
      *
      */
+
+    @Post('/eth/getAllowance')
+    public async getAllowance(@Body() body: BodyAllowance): Promise<any> {
+        let tag = TAG + " | getAllowance | "
+        try{
+
+            log.info(tag,"body: ",body)
+            let result = await networks['ETH'].getAllowance(body.token,body.spender,body.sender)
+
+
+            return(result);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     //multi chain
     @Post('/getFee')

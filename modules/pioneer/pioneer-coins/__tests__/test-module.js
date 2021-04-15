@@ -7,15 +7,21 @@ require("dotenv").config({path:'../../../../.env'})
 let {
     supportedBlockchains,
     supportedAssets,
+    baseAmountToNative,
+    nativeToBaseAmount,
     getPaths,
     get_address_from_xpub,
     normalize_pubkeys
 } = require('../lib/index.js')
 
-let paths = getPaths(true,['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
-console.log("paths: ",paths)
+let amountNative = 12000
+// console.log("base: ",baseAmountToNative("BTC",amountNative))
+console.log("base: ",nativeToBaseAmount("BTC",amountNative))
 
-console.log("supportedAssets: ",supportedAssets)
+// let paths = getPaths(true,['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
+// console.log("paths: ",paths)
+//
+// console.log("supportedAssets: ",supportedAssets)
 //console.log("supportedBlockchains: ",supportedBlockchains)
 
 //console.log(getPaths())

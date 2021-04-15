@@ -114,6 +114,9 @@ module.exports = {
 	getInfo:function () {
 		return check_online_status();
 	},
+	getAllowance:function (token:string,spender:string,sender:string) {
+		return get_allowance(token,spender,sender);
+	},
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
 	},
@@ -161,6 +164,22 @@ module.exports = {
 	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
+	}
+}
+
+let ERC20ABI = [{"inputs": [], "stateMutability": "nonpayable", "type": "constructor"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "owner", "type": "address"}, {"indexed": true, "internalType": "address", "name": "spender", "type": "address"}, {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"} ], "name": "Approval", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "from", "type": "address"}, {"indexed": true, "internalType": "address", "name": "to", "type": "address"}, {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"} ], "name": "Transfer", "type": "event"}, {"inputs": [{"internalType": "address", "name": "", "type": "address"}, {"internalType": "address", "name": "", "type": "address"} ], "name": "allowance", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"} ], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "value", "type": "uint256"} ], "name": "approve", "outputs": [{"internalType": "bool", "name": "success", "type": "bool"} ], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "", "type": "address"} ], "name": "balanceOf", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"} ], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "decimals", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"} ], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "name", "outputs": [{"internalType": "string", "name": "", "type": "string"} ], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "symbol", "outputs": [{"internalType": "string", "name": "", "type": "string"} ], "stateMutability": "view", "type": "function"}, {"inputs": [], "name": "totalSupply", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"} ], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "address", "name": "to", "type": "address"}, {"internalType": "uint256", "name": "value", "type": "uint256"} ], "name": "transfer", "outputs": [{"internalType": "bool", "name": "success", "type": "bool"} ], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "from", "type": "address"}, {"internalType": "address", "name": "to", "type": "address"}, {"internalType": "uint256", "name": "value", "type": "uint256"} ], "name": "transferFrom", "outputs": [{"internalType": "bool", "name": "success", "type": "bool"} ], "stateMutability": "nonpayable", "type": "function"} ]
+
+//get_approval_status
+const get_allowance = async function(tokenAddress:string,spender:string,sender:string){
+	let tag = TAG + " | get_allowance | "
+	try{
+
+		let contract = new web3.eth.Contract(ERC20ABI,tokenAddress);
+		let allowance = await contract.methods.allowance(spender,sender).call()
+
+		return allowance
+	}catch(e){
+		console.error(tag,e)
 	}
 }
 

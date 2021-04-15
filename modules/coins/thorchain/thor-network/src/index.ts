@@ -335,6 +335,10 @@ let get_node_info_verbose = async function(){
         log.debug(tag,"nodeInfo: ",nodeInfo.data)
         output = nodeInfo.data
 
+        // let network = await axios({method:'GET',url: URL_THORNODE+'/network'})
+        // log.debug(tag,"nodeInfo: ",network.data)
+        // output.network = network.data
+
 
         let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
         log.info(tag,"lastBlock: ",lastBlock.data)

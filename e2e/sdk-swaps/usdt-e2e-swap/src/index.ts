@@ -92,6 +92,7 @@ const test_service = async function () {
             spec
         }
 
+
         let app = new SDK.SDK(spec,config)
 
         let seedChains = ['ethereum']
@@ -133,6 +134,15 @@ const test_service = async function () {
         //TODO get this from api
         let address = "0xc3affff54122658b89c31183cec4f15514f34624"
 
+        //get master address
+        let masterAddress = client.getAddress()
+        //stripOx
+        address = address.substr(2);
+
+        //isApproved?
+        let routerAddress = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+        let isApproved = await client.isApproved(routerAddress,address,10000000000000000)
+
         //Raw from asgardx
         // let swap = {
         //     type: 'swap',
@@ -158,9 +168,6 @@ const test_service = async function () {
         //     auth: '',
         //     noBroadcast:true
         // }
-
-
-
 
         //send to faucet
         // let sendPayload:any = {

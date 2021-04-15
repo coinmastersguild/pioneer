@@ -6,7 +6,21 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 network.init({testnet:true})
 
+//thorchain is approved
+let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+let masterAddy = "0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+let tokenAddress = "DAC17F958D2EE523A2206206994597C13D831EC7"
+
+console.log({routerAddy,masterAddy})
+
+network.getAllowance(tokenAddress,routerAddy,masterAddy)
+    .then(function(resp){
+        console.log(resp)
+    })
+
+
 //DEX
+
 
 //get LP position by address
 // network.getPoolPositions("0x33b35c665496ba8e71b22373843376740401f106")
@@ -15,10 +29,10 @@ network.init({testnet:true})
 //     })
 
 //get all tokens by address
-network.getAllTokensEth("0x33b35c665496ba8e71b22373843376740401f106")
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getAllTokensEth("0x33b35c665496ba8e71b22373843376740401f106")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //Asgard exchange calls
 

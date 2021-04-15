@@ -6,7 +6,7 @@
  */
 import BigNumber from 'bignumber.js'
 import { ethers, BigNumberish } from 'ethers'
-const TAG = " | Pioneer-sdk | "
+const TAG = " | Pioneer-xchain-client | "
 const log = require("@pioneer-platform/loggerdog")()
 
 //Pioneer follows OpenAPI spec
@@ -18,7 +18,9 @@ let {
     getPrecision,
     getExplorerUrl,
     getExplorerAddressUrl,
-    getExplorerTxUrl
+    getExplorerTxUrl,
+    baseAmountToNative,
+    nativeToBaseAmount,
 } = require('@pioneer-platform/pioneer-coins')
 
 let Invoke = require("@pioneer-platform/pioneer-invoke")
@@ -113,9 +115,6 @@ export type EstimateFeeParams = {
     memo: string
 };
 
-const TCRopstenAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferAllowance","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"vault","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"address","name":"asset","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"TransferOut","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldVault","type":"address"},{"indexed":true,"internalType":"address","name":"newVault","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"indexed":false,"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"VaultTransfer","type":"event"},{"inputs":[],"name":"RUNE","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"recipients","type":"address[]"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string[]","name":"memos","type":"string[]"}],"name":"batchTransferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address payable","name":"vault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address payable","name":"asgard","type":"address"},{"components":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"internalType":"struct Router.Coin[]","name":"coins","type":"tuple[]"},{"internalType":"string","name":"memo","type":"string"}],"name":"returnVaultAssets","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"router","type":"address"},{"internalType":"address","name":"newVault","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferAllowance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"to","type":"address"},{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"transferOut","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"vaultAllowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
-
-
 // In most cases, clients don't expect any paramter in `getFees`
 // but in some cases, they do (e.g. in xchain-ethereum).
 // To workaround this, we just define an "empty" (optional) param for now.
@@ -189,7 +188,7 @@ module.exports = class wallet {
     private setPhrase: (coin: string, phrase: string) => any;
     private getBalance: (address?: Address, asset?:any) => any;
     private getTransactions!: (address?: Address, asset?: any) => any;
-    private getTransactionData!: (address?: Address, asset?: any) => any;
+    private getTransactionData!: (txid: string) => Promise<any>;
     private purgeClient!: (address?: Address, asset?: any) => any;
     private getFees!: (params?: FeesParams) => any;
     private transfer!: (tx: any) => any;
@@ -208,6 +207,10 @@ module.exports = class wallet {
     private callDeposit: (({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) => Promise<any>) | undefined;
     private buildSwap: (swap: Swap) => Promise<any>;
     private invoke: any;
+    private isApproved: ((routerAddress: string, address: string, amount: number) => Promise<any>) | undefined;
+    private call: (<T>(address: Address, abi: any, func: string, params: Array<any>) => Promise<T>) | undefined;
+    private estimateApproveFee: ((contractAddress: string, asset: any) => Promise<BigNumber>) | undefined;
+    private approve: ((spender: string, sender: string, amount: BaseAmount) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.network = config.blockchain
@@ -525,60 +528,51 @@ module.exports = class wallet {
                 }
             }
 
-            // this.callDeposit = async function ({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) {
-            //     let tag = TAG + " | getWallet | "
-            //     try {
-            //         let hash;
-            //         const wallet = ethClient.getWallet();
-            //         //TODO mainnet
-            //         const abi = TCRopstenAbi;
-            //
-            //         if (asset.ticker === 'ETH') {
-            //
-            //             const ethAddress = await ethClient.getAddress();
-            //             const contract = new ethers.Contract(inboundAddress.router, abi, wallet);
-            //
-            //             console.log('Checkpoint eth-utils: ethAddress:', ethAddress);
-            //             console.log('Checkpoint eth-utils: contract:', contract);
-            //
-            //             const contractRes = await contract.deposit(
-            //                 inboundAddress.address, // not sure if this is correct...
-            //                 '0x0000000000000000000000000000000000000000',
-            //                 ethers.utils.parseEther(String(amount)),
-            //                 // memo,
-            //                 memo,
-            //                 {from: ethAddress, value: ethers.utils.parseEther(String(amount))}
-            //             );
-            //
-            //             // tslint:disable-next-line:no-string-literal
-            //             hash = contractRes['hash'] ? contractRes['hash'] : '';
-            //
-            //         } else {
-            //             //TODO tokens
-            //             // const assetAddress = asset.symbol.slice(asset.ticker.length + 1);
-            //             // const strip0x = assetAddress.substr(2);
-            //             // const checkSummedAddress = ethers.utils.getAddress(strip0x);
-            //             // const tokenContract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
-            //             // const decimal = await tokenContract.decimals();
-            //             // const params = [
-            //             //     inboundAddress.address, // vault
-            //             //     checkSummedAddress, // asset
-            //             //     assetToBase(assetAmount(amount, decimal.toNumber())).amount().toFixed(), // amount
-            //             //     memo
-            //             // ];
-            //             //
-            //             // const contractRes = await ethClient.call(inboundAddress.router, abi, 'deposit', params);
-            //             //
-            //             // // tslint:disable-next-line:no-string-literal
-            //             // hash = contractRes['hash'] ? contractRes['hash'] : '';
-            //
-            //         }
-            //
-            //         return hash;
-            //     } catch (e) {
-            //         log.error(tag, "e: ", e)
-            //     }
-            // }
+            this.approve = async function (spender: string, sender: string, amount: BaseAmount) {
+                let tag = TAG + " | getWallet | "
+                try {
+                    //
+                    let invocation:any = {
+                        username:this.username,
+                        coin:this.nativeAsset,
+                        spender,
+                        sender,
+                        amount:amount.amount().toNumber()
+                    }
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke('approve',invocation)
+                    console.log("result: ",result.data)
+
+
+                    return result.data.txid
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //estimateApproveFee
+            // @ts-ignore
+            this.estimateApproveFee = async function (contractAddress:string, asset: any) {
+                let tag = TAG + " | getWallet | "
+                try {
+                    //TODO figuremeout
+                    // const wallet = ethClient.getWallet();
+                    // const assetAddress = asset.symbol.slice(asset.ticker.length + 1);
+                    // const strip0x = (assetAddress.toUpperCase().indexOf('0X') === 0) ? assetAddress.substr(2) : assetAddress;
+                    // const checkSummedAddress = ethers.utils.getAddress(strip0x);
+                    // const contract = new ethers.Contract(checkSummedAddress, erc20ABI, wallet);
+                    // const estimateGas = await contract.estimateGas.approve(contractAddress, checkSummedAddress);
+                    // const prices = await ethClient.estimateGasPrices();
+                    // const minimumWeiCost = prices.average.amount().multipliedBy(estimateGas.toNumber());
+
+                    //TODO actually estimate fee
+                    let response = 100000000
+                    return new BigNumber(response,18)
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
 
             this.estimateFee = async function ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) {
                 let tag = TAG + " | getWallet | "
@@ -612,6 +606,33 @@ module.exports = class wallet {
                     await wallet.connect(provider)
 
                     return wallet
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+            this.isApproved = async function (routerAddress:string,tokenAddress:string,amount:any) {
+                let tag = TAG + " | isApproved | "
+                try {
+                    amount = amount.amount().toNumber()
+                    if(amount === 0) throw Error("Failed to get a valid amount!")
+                    //
+                    let address = this.getAddress()
+                    let body = {
+                        token:tokenAddress,
+                        spender:routerAddress,
+                        sender:address
+                    }
+
+                    let allowance = await this.pioneerApi.GetAllowance(null,body)
+                    allowance = allowance.data
+
+                    log.info(tag,"allowance: ",allowance)
+                    log.info(tag,"amount: ",amount)
+                    if(allowance > amount){
+                        return true
+                    } else {
+                        return false
+                    }
                 } catch (e) {
                     log.error(tag, "e: ", e)
                 }
@@ -734,11 +755,13 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactionData = function (address?: Address, asset?: Asset) {
+        this.getTransactionData = async function (txid:string) {
             let tag = TAG + " | getTransactionData | "
             try {
-                //TODO
-                return "bla"
+                if(!txid) throw Error("Txid is required!")
+                log.info("asset: ",this.nativeAsset)
+                let output = await this.pioneerApi.GetTransaction({coin:this.nativeAsset,txid})
+                return output.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -799,8 +822,19 @@ module.exports = class wallet {
             let tag = TAG + " | transfer | "
             try {
                 let coin = this.nativeAsset
-                let amount = tx.amount.amount()
+                log.info(tag,"tx: ",tx)
+                log.info(tag,"tx.amount: ",tx.amount)
+                log.info(tag,"tx.amount.amount(): ",tx.amount.amount())
+                log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toFixed())
+                let amount = tx.amount.amount().toFixed()
+                amount = nativeToBaseAmount(this.nativeAsset,amount)
+                log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
+
+                //TODO min transfer size 10$
+                //TODO validate addresses
+                //TODO validate midgard addresses not expired
+
                 let to = tx.recipient
                 let memo = tx.memo || ''
 
@@ -813,6 +847,7 @@ module.exports = class wallet {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
+                log.info(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)
 
