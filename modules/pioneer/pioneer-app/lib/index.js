@@ -1105,7 +1105,7 @@ let init_wallet = function (config, isTestnet) {
                         log.info(tag, "txid: ", signedTx.txid);
                         clientEvents.events.emit('broadcast', signedTx);
                         break;
-                    case 'approval':
+                    case 'approve':
                         //Note this is ETH only
                         if (!request.invocationId)
                             throw Error("102: invalid invocation! missing id!");

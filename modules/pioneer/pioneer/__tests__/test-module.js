@@ -55,44 +55,48 @@ let run_test = async function(){
             ETH approve Token
         */
 
-        let contract = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
-        let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
-        let amount = 1000000000
+        // let contract = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+        // let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        // let amount = 1000000000
+        //
+        // // let approvalSigned = await Wallet.buildApproval({contract,tokenAddress,amount})
+        // // console.log("approvalSigned: ",approvalSigned)
+        //
+        // // let resultBroadcast = await Wallet.broadcastTransaction('ETH',approvalSigned)
+        // // console.log("resultBroadcast: ",resultBroadcast)
+        //
+        // let txid = await Wallet.sendApproval({contract,tokenAddress,amount,noBroadcast:true,invocationId:"foobarapprove"})
+        // console.log("txid: ",txid)
 
-        let approvalSigned = await Wallet.buildApproval({contract,tokenAddress,amount})
-        console.log("approvalSigned: ",approvalSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('ETH',approvalSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                THOR
          */
-        // console.log("info: ",prettyjson.render(info.public.RUNE))
-        //
-        // //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "thor1zfjv26zx08s6skjwq20clxs076hptp45aktjm0"
-        // let amount = "10"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        console.log("info: ",prettyjson.render(info.public.RUNE))
+
+        //RUNE
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
+        let amount = "100"
+        let memo = ""
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)

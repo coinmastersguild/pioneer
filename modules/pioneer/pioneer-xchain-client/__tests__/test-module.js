@@ -82,6 +82,14 @@ let run_test = async function(){
         let isApproved = await app.isApproved(routerAddy,tokenAddress,amount)
         console.log("isApproved: ",isApproved)
 
+        if(!isApproved){
+            let txidApprove = await app.approve(routerAddy,tokenAddress,amount,true)
+            console.log("txidApprove: ",txidApprove)
+        } else {
+            log.info(tag,"Already Approved!")
+        }
+
+
         //console.log(app)
 
         //BTC

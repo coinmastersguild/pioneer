@@ -7,7 +7,49 @@
     </div>
     <q-page class="q-pt-xs" >
 
-      Wallets: {{wallets}}
+<!--      Wallets: {{wallets}}-->
+
+      <div class="q-pa-md">
+        <q-btn-dropdown
+          split
+          color="green"
+          push
+          glossy
+          no-caps
+          icon="explore"
+          :label="walletContextName"
+          @click="onMainClick"
+        >
+          <q-list>
+
+            <q-item clickable v-close-popup @click="onItemClick">
+              <q-item-section avatar>
+                <q-avatar icon="folder" color="primary" text-color="white" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Photos</q-item-label>
+                <q-item-label caption>February 22, 2016</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="info" color="amber" />
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="onItemClick">
+              <q-item-section avatar>
+                <q-avatar icon="assignment" color="secondary" text-color="white" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Vacation</q-item-label>
+                <q-item-label caption>February 22, 2016</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="info" color="amber" />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
 
       <q-separator />
 
@@ -35,15 +77,16 @@
 
               <q-card>
                 <q-card-section style="word-wrap: break-word;">
-                  <small>script type: {{walletInfo.public[coin.symbol].script_type}}</small>
-                  <q-separator />
-                  Address: {{walletInfo.masters[coin.symbol]}} <br/>
-                  {{copyText}}
-                  <q-icon @click=copyAddress(walletInfo.masters[coin.symbol]) name="content_copy"></q-icon>
-                  <q-separator />
-                  path: {{walletInfo.public[coin.symbol].path}}
-                  <q-separator />
-                  <small>xpub: {{walletInfo.public[coin.symbol].xpub}}</small>
+
+<!--                  <small>script type: {{walletInfo.public[coin.symbol].script_type}}</small>-->
+<!--                  <q-separator />-->
+<!--                  Address: {{walletInfo.masters[coin.symbol]}} <br/>-->
+<!--                  {{copyText}}-->
+<!--                  <q-icon @click=copyAddress(walletInfo.masters[coin.symbol]) name="content_copy"></q-icon>-->
+<!--                  <q-separator />-->
+<!--                  path: {{walletInfo.public[coin.symbol].path}}-->
+<!--                  <q-separator />-->
+<!--                  <small>xpub: {{walletInfo.public[coin.symbol].xpub}}</small>-->
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -83,6 +126,7 @@
       return {
         duration: 500,
         queryKey:"",
+        walletContextName:"",
         coins:[],
         walletInfo: {},
         wallets:[],
@@ -115,6 +159,10 @@
           //get value
           this.wallets = this.$store.getters['wallets'];
           console.log("wallets: ",this.wallets)
+
+          //set context to wallet0
+          this.walletContextName = this.wallets[0]
+
         },
         immediate: true
       },
@@ -153,6 +201,12 @@
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp']),
+      onMainClick() {
+        console.log("Main Click")
+      },
+      onItemClick(item) {
+        console.log("item Click: ",item)
+      },
       formatToPriceUSD(value) {
         return `$ ${Number(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
       },

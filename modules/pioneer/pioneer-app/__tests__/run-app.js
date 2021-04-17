@@ -33,7 +33,9 @@ let TEST_COINS = [
     'ETH',
     // 'ATOM'
     'LTC',
-    'BNB'
+    'BNB',
+    'USDT',
+    'SUSHI'
 ]
 
 let run_test = async function(){
@@ -56,7 +58,7 @@ let run_test = async function(){
             //console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("DM2HCV")
+            let pairResult = await App.pair("JGSIFK")
             console.log("pairResult: ",pairResult)
 
             //get wallets
@@ -119,6 +121,13 @@ let run_test = async function(){
                 let ethMaster = await context.getMaster("ETH")
                 console.log("ethMaster: ",ethMaster)
 
+                //USDT
+                let usdtBalance = await context.getBalance("USDT")
+                console.log("usdtBalance: ",usdtBalance)
+
+                //SUSHI
+                let sushiBalance = await context.getBalance("SUSHI")
+                console.log("sushiBalance: ",sushiBalance)
             }
 
             /*

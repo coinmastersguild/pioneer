@@ -928,6 +928,8 @@ module.exports = /** @class */ (function () {
                                 log.debug(tag, "gas_price: ", gas_price);
                                 gas_price = parseInt(gas_price);
                                 gas_price = gas_price + 1000000000;
+                                log.info(tag, "approval.tokenAddress: ", approval.tokenAddress);
+                                log.info(tag, "approval.amount: ", approval.amount);
                                 data = "0x" +
                                     "095ea7b3" + // ERC-20 contract approve function identifier
                                     (approval.contract).replace("0x", "").padStart(64, "0") +
@@ -946,7 +948,7 @@ module.exports = /** @class */ (function () {
                                     gasPrice: web3_utils_1.numberToHex(gas_price),
                                     gasLimit: web3_utils_1.numberToHex(gas_limit),
                                     value: web3_utils_1.numberToHex(0),
-                                    to: approval.contract,
+                                    to: approval.tokenAddress,
                                     data: data,
                                 };
                                 log.info("unsignedTxETH: ", ethTx);
@@ -1190,6 +1192,12 @@ module.exports = /** @class */ (function () {
                             if (intent.coin && intent.coin !== 'ETH')
                                 throw Error("approvals are ETH only!");
                             intent.coin = "ETH";
+                            if (!intent.contract)
+                                throw Error("102: contract required!");
+                            if (!intent.tokenAddress)
+                                throw Error("103: tokenAddress required!");
+                            if (!intent.amount)
+                                throw Error("104: amount required!");
                             approval = {
                                 contract: intent.contract,
                                 tokenAddress: intent.tokenAddress,
@@ -1231,8 +1239,8 @@ module.exports = /** @class */ (function () {
                                 signedTx_1.noBroadcast = true;
                             }
                             //if noBroadcast we MUST still release the inovation
-                            //do we pass noBroadcast to the broadcast post request
-                            //Notice NO asyc!
+                            //notice we pass noBroadcast to the broadcast post request
+                            //also Notice NO asyc here! tx lifecycle hooks bro!
                             broadcast_hook();
                             signedTx_1.invocationId = invocationId;
                             //
@@ -1687,7 +1695,7 @@ module.exports = /** @class */ (function () {
                             sequence = parseInt(sequence);
                             sequence = sequence.toString();
                             txType = "thorchain/MsgSend";
-                            gas = "100000";
+                            gas = "250000";
                             fee = "3000";
                             memo_1 = transaction.memo || "";
                             unsigned = {

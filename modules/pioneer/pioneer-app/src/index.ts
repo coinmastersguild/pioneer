@@ -878,6 +878,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                 //TODO validate seed
                 if(!wallet.mnemonic) throw Error("101: mnemonic required!")
                 if(!wallet.password) throw Error("102: password required!")
+                if(!wallet.masterAddress) throw Error("103: masterAddress required!")
                 if(!wallet.username) wallet.username = "defaultUser:"+uuidv4()
 
                 //filename
@@ -1196,7 +1197,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     log.info(tag,"txid: ", signedTx.txid)
                     clientEvents.events.emit('broadcast',signedTx)
                     break;
-                case 'approval':
+                case 'approve':
                     //Note this is ETH only
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId

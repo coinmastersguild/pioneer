@@ -16,7 +16,10 @@ export const keepkeyWatchPath = path.join(
     ".pioneer",
     "wallet_data/keepkey.watch.json"
 );
-export const seedDir = path.join(homedir, ".pioneer", "wallet_data");
+//wallets
+export const seedDir = path.join(homedir, ".pioneer", "wallets");
+//wallet_data Watch dir
+export const walletDir = path.join(homedir, ".pioneer", "wallet_data");
 export const pioneerPath = path.join(homedir, ".pioneer");
 export const modelDir = path.join(homedir, ".pioneer", "models");
 export const backtestDir = path.join(homedir, ".pioneer", "backtest");
@@ -40,6 +43,8 @@ export async function innitConfig(languageSelected: string) {
         // //console.log("isCreated: ", isCreated2);
 
         let isCreated3 = await mkdirp(seedDir);
+
+        let isCreated4 = await mkdirp(walletDir);
         // //console.log("isCreated: ", isCreated3);
 
         // //console.log(tag, " innit config checkpiont 2");
@@ -99,13 +104,15 @@ export async function initWallet(wallet: any) {
     try {
         if(!wallet.filename) throw Error("102: filename required for new wallet!")
 
-        //make the dir
+        //make the wallet dir
         let isCreated = await mkdirp(seedDir);
+        let isCreated2 = await mkdirp(walletDir);
 
         //if software
         let walletWrite: any = {};
         if(wallet.TYPE === 'citadel'){
-            if(!wallet.username) throw Error("102: username required for citadel wallets!")
+            if(!wallet.masterAddress) throw Error("102: masterAddress required for citadel wallets!")
+            if(!wallet.filename) wallet.filename = wallet.masterAddress+".wallet.json"
             //if passwordless
             if(wallet.temp) walletWrite.password = wallet.temp
             walletWrite.username = wallet.username;
@@ -115,6 +122,7 @@ export async function initWallet(wallet: any) {
             walletWrite.vault = wallet.seed_encrypted;
         } else if (wallet.TYPE === 'keepkey'){
             if(!wallet.deviceId) throw Error("102: deviceId required for keepkey wallets!")
+            if(!wallet.filename) wallet.filename = wallet.deviceId+".wallet.json"
             walletWrite = wallet
             walletWrite.username = wallet.deviceId;
             walletWrite.deviceId = wallet.deviceId;
@@ -126,7 +134,7 @@ export async function initWallet(wallet: any) {
         //let filename
         let filename = wallet.filename
 
-        let result = fs.writeFileSync(seedDir+"/"+filename, JSON.stringify(walletWrite));
+        let result = fs.writeFileSync(walletDir+"/"+filename, JSON.stringify(walletWrite));
         console.log("result: ", result);
 
         return result;

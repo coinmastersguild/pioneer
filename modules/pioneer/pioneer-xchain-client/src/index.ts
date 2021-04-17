@@ -528,18 +528,18 @@ module.exports = class wallet {
                 }
             }
 
-            this.approve = async function (spender: string, sender: string, amount: BaseAmount) {
+            this.approve = async function (spender: string, sender: string, amount: BaseAmount, noBroadcast?: boolean) {
                 let tag = TAG + " | getWallet | "
                 try {
                     //
                     let invocation:any = {
                         username:this.username,
                         coin:this.nativeAsset,
-                        spender,
-                        sender,
+                        contract:spender,
+                        tokenAddress:sender,
                         amount:amount.amount().toNumber()
                     }
-
+                    if(noBroadcast) invocation.noBroadcast = true
                     log.info(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke('approve',invocation)
                     console.log("result: ",result.data)
@@ -716,30 +716,34 @@ module.exports = class wallet {
         this.getBalance = async function (address?: Address, asset?: Asset): Promise<Balances> {
             let tag = TAG + " | getBalance | "
             try {
+                const balances:any = []
                 //TODO if address
                 //request to api
+                //if no params
+                //assume native on master
+                if(!address && !asset){
+                    let returnAssetAmount = ():number =>{
+                        return this.info.balances[this.nativeAsset]
+                    }
 
-                let returnAssetAmount = ():number =>{
-                    return this.info.balances[this.nativeAsset]
-                }
+                    let assetDescription: Asset = {
+                        // @ts-ignore
+                        chain:this.nativeAsset,
+                        symbol:this.nativeAsset,
+                        ticker:this.nativeAsset
+                    }
 
-                let assetDescription: Asset = {
-                    // @ts-ignore
-                    chain:this.nativeAsset,
-                    symbol:this.nativeAsset,
-                    ticker:this.nativeAsset
-                }
+                    log.info(tag,"returnAssetAmount",returnAssetAmount())
 
-                log.info(tag,"returnAssetAmount",returnAssetAmount())
-
-                // @ts-ignore
-                const balances: Balances = [
-                    {
+                    balances.push({
                         asset: assetDescription,
                         // @ts-ignore
                         amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(this.nativeAsset))),
-                    },
-                ]
+                    })
+
+                } else {
+
+                }
 
                 return balances
             } catch (e) {

@@ -153,8 +153,12 @@ const test_service = async function () {
         //tether
         //Router RUNE
         let contract = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
-        //USDT
-        let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        // //USDT
+        // let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+
+        //SUSHI
+        let tokenAddress = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
+
 
         //TODO approve max int?
         let amountApprove = 1000000000
@@ -166,13 +170,14 @@ const test_service = async function () {
             }
         }
 
-        let isApproved = await app.isApproved(contract,tokenAddress,amount)
+        log.info(tag,"app: ",app)
+        let isApproved = await client.isApproved(contract,tokenAddress,amount)
         log.info("isApproved: ",isApproved)
 
         //verify not already approved
 
         //build approvalTx
-        let txid = client.approve(contract,tokenAddress,amount)
+        let txid = await client.approve(contract,tokenAddress,amount,true)
         log.info("txid: ",txid)
 
         //TODO let confirm

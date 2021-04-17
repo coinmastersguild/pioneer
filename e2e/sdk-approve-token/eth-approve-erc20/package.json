@@ -17,7 +17,7 @@
   "dependencies": {
     "@babel/runtime": "^7.13.10",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "latest",
+    "@pioneer-platform/pioneer-app": "^7.1.25",
     "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",

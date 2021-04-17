@@ -40,7 +40,7 @@ const COIN_SUPPORT = [
     // 'DASH',
     // 'DGB',
     // 'DOGE',
-    // 'LTC',
+    'LTC',
     // 'RDD',
 ]
 
@@ -326,9 +326,15 @@ module.exports = {
 
             // let master = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0)
             let addressMaster:string = ""
-            if(coin === "BTC"){
-                 const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
-                 addressMaster = address
+            if(coin === "BTC" || true){
+                const { address } = bitcoin.payments.p2sh({
+                    redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] }),
+                    network:NETWORKS[coin.toLowerCase()],
+                });
+                addressMaster = address
+
+                //  const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
+                // addressMaster = address
             } else {
                 const { address } = bitcoin.payments.p2pkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
                 addressMaster = address

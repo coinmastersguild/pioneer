@@ -270,7 +270,7 @@ export async function onStart(event,data) {
     // }
     config.isTestnet = null
 
-    config.blockchains = ['bitcoin','ethereum','thorchain']
+    config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
     //start App
     if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")

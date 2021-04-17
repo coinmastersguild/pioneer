@@ -22,7 +22,7 @@
     "fix": "./node_modules/.bin/electron-builder install-app-deps"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-keepkey": "^1.10.11",
+    "@bithighlander/hdwallet-keepkey": "latest",
     "@chenfengyuan/vue-qrcode": "^1.0.2",
     "@peculiar/webcrypto": "^1.1.4",
     "@pioneer-platform/loggerdog": "latest",
@@ -30,7 +30,7 @@
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
     "@pioneer-platform/pioneer-hardware": "latest",
-    "@quasar/extras": "^1.10.2",
+    "@quasar/extras": "^1.10.3",
     "animated-number-vue": "^1.0.0",
     "app-root-dir": "^1.0.2",
     "axios": "^0.18.1",

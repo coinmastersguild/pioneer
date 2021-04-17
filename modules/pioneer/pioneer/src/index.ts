@@ -880,6 +880,9 @@ module.exports = class wallet {
                     gas_price = parseInt(gas_price)
                     gas_price = gas_price + 1000000000
 
+                    log.info(tag,"approval.tokenAddress: ",approval.tokenAddress)
+                    log.info(tag,"approval.amount: ",approval.amount)
+
                     let data =
                         "0x" +
                         "095ea7b3" + // ERC-20 contract approve function identifier
@@ -901,7 +904,7 @@ module.exports = class wallet {
                         gasPrice: numberToHex(gas_price),
                         gasLimit: numberToHex(gas_limit),
                         value: numberToHex(0),
-                        to: approval.contract,
+                        to: approval.tokenAddress,
                         data,
                         // chainId: 1,//TODO testnet
                     }
@@ -1112,6 +1115,12 @@ module.exports = class wallet {
                 if(intent.coin && intent.coin !== 'ETH') throw Error("approvals are ETH only!")
                 intent.coin = "ETH"
 
+                if(!intent.contract) throw Error("102: contract required!")
+                if(!intent.tokenAddress) throw Error("103: tokenAddress required!")
+                if(!intent.amount) throw Error("104: amount required!")
+                //TODO max approval
+                //if(!intent.amount) intent.amount = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+
                 let approval = {
                     contract:intent.contract,
                     tokenAddress:intent.tokenAddress,
@@ -1144,8 +1153,8 @@ module.exports = class wallet {
                     signedTx.noBroadcast = true
                 }
                 //if noBroadcast we MUST still release the inovation
-                //do we pass noBroadcast to the broadcast post request
-                //Notice NO asyc!
+                //notice we pass noBroadcast to the broadcast post request
+                //also Notice NO asyc here! tx lifecycle hooks bro!
                 broadcast_hook()
 
                 signedTx.invocationId = invocationId
@@ -1580,7 +1589,7 @@ module.exports = class wallet {
                     sequence = sequence.toString()
 
                     let txType = "thorchain/MsgSend"
-                    let gas = "100000"
+                    let gas = "250000"
                     let fee = "3000"
                     let memo = transaction.memo || ""
 
