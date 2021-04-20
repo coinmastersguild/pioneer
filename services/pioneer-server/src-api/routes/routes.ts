@@ -141,6 +141,7 @@ const models: TsoaRoute.Models = {
             "username": {"dataType":"string","required":true},
             "data": {"ref":"RegisterBodyData","required":true},
             "auth": {"dataType":"string","required":true},
+            "walletName": {"dataType":"string","required":true},
             "queryKey": {"dataType":"string"},
             "provider": {"ref":"AuthProviders","required":true},
         },
@@ -883,9 +884,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/info',
+        app.get('/api/v1/info/:walletId',
             function pioneerPrivateController_info(request: any, response: any, next: any) {
             const args = {
+                    walletId: {"in":"path","name":"walletId","required":true,"dataType":"string"},
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
             };
 

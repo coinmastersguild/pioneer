@@ -16,6 +16,9 @@ let connection = require('../index')
 //let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
 let conduit = connection.get('conduit')
+let usersDB = connection.get('users')
+let pubkeysDB = connection.get('pubkeys')
+
 
 //usersDB.createIndex({id: 1}, {unique: true})
 //txsDB.createIndex({txid: 1}, {unique: true})
@@ -27,18 +30,22 @@ read
 
 //remove duplicates
 
-console.log(conduit)
+// console.log(conduit)
 
 // console.log(txsDB)
 
 let run_test = async function(){
     try{
         console.log("test")
-        let resp = await conduit.findOne()
-        console.log("resp: ",resp)
+        // let resp = await conduit.findOne()
+        // console.log("resp: ",resp)
 
         // let resp = await txsDB.findOne()
         // console.log(resp)
+
+        // let resp = await usersDB.findOne()
+        // console.log(resp)
+
 
         //
         // let tx = { asset: 'ETH',
@@ -77,11 +84,11 @@ let run_test = async function(){
         // let resp = await txsDB.find(query)
         // console.log("resp: ",resp)
 
-        // var duplicates = [];
+        var duplicates = [];
 
-        // let resp = await txsDB.aggregate([
+        // let resp = await pubkeysDB.aggregate([
         //         {
-        //             $unwind:{path:"$txid"},
+        //             $unwind:{path:"$pubkey"},
         //         },
         //         {
         //             $group: {
@@ -105,16 +112,16 @@ let run_test = async function(){
         //     {allowDiskUse: true}       // For faster processing if set is larger
         // )
         //
-        // console.log(resp)
+        // // console.log(resp)
         //
-        // let dups = resp.dups
-
+        // resp = resp.dups
+        // console.log(resp)
 
         //{"asset":"ETH","txid":"0x00a0d8c2f70486cb16b13ba6eae3999c542c9720525e90851cf7b30c676d2fc9","addresses":["0x33b35c665496ba8e71b22373843376740401f106","0xfbb1b73c4f0bda4f67dca266ce6ef42f520fbb98"],"events":[{"type":"credit","address":"0x33b35c665496ba8e71b22373843376740401f106","amount":0.045,"asset":"ETH"},{"type":"debit","address":"0xfbb1b73c4f0bda4f67dca266ce6ef42f520fbb98","amount":-0.045,"asset":"ETH"}],"type":"transfer","time":"1502228587","height":4133732,"accounts":["highlander"]}
 
-        // let resp = await txsDB.aggregate([
+        // let resp = await pubkeysDB.aggregate([
         //         { $match: {
-        //                 txid: { "$ne": '' }  // discard selection criteria
+        //                 pubkey: { "$ne": '' }  // discard selection criteria
         //             }},
         //         { "$group": {
         //                 "_id": "$asin",
@@ -150,11 +157,11 @@ let run_test = async function(){
         // let result = await txsDB.distinct('txid')
         // console.log(result)
 
-        // Remove all duplicates in one go
-        //db.collectionName.remove({_id:{$in:duplicates}})
+        //Remove all duplicates in one go
+        // db.collectionName.remove({_id:{$in:duplicates}})
 
 
-        // txsDB.distinct("txid").forEach((num)=>{
+        // txsDB.distinct("pubkey").forEach((num)=>{
         //     var i = 0;
         //     db.collection.find({key: num}).forEach((doc)=>{
         //         if (i) console.log(num)

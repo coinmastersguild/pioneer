@@ -11,15 +11,14 @@ import {
     getConfig,
     getWallet,
     getWallets,
+    walletDataDir,
     pioneerConfig,
     pioneerPath,
     getApps,
     initWallet,
-    initApps,
     innitConfig,
     updateConfig,
-    backupWallet
-    // @ts-ignore
+    getWalletPublic
 } from "@pioneer-platform/pioneer-config";
 import {v4 as uuidv4} from 'uuid';
 
@@ -883,7 +882,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
 
                 //filename
                 let filename = wallet.masterAddress+".wallet.json"
-
+                log.info(tag,"filename: ",filename)
                 //does wallet exist
                 let alreadyExists = getWallet(filename)
                 log.debug(tag,"alreadyExists: ",alreadyExists)
@@ -909,6 +908,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
 
                     let walletNew:any = {
                         isTestnet,
+                        masterAddress:wallet.masterAddress,
                         TYPE:"citadel",
                         seed_encrypted,
                         hash,
@@ -917,15 +917,14 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                     }
                     if(wallet.temp) walletNew.temp = wallet.temp
 
-                    output = await initWallet(walletNew);
+                    await initWallet(walletNew);
+                    //TODO verify exists?
+                    output = true
                 } else {
                     throw Error("already exists")
                     //TODO verify?
                     //createWallet
                 }
-
-
-
                 break
             case "hardware":
                 log.info(tag,"wallet hardware: ",wallet)
@@ -949,9 +948,9 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                 walletFileNew.LABEL = wallet.label
                 walletFileNew.deviceId = wallet.deviceId
                 walletFileNew.filename = wallet.deviceId + ".watch.wallet.json"
-                // @ts-ignore
-                output = await initWallet(walletFileNew);
-
+                await initWallet(walletFileNew);
+                //TODO verify exists?
+                output = true
                 break
             default:
                 throw Error("unhandled wallet type! "+type)
@@ -977,15 +976,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         log.info(tag,"isTestnet: ",isTestnet)
         let output:any = {}
 
-
-
         //get wallets
         let wallets = await getWallets()
         log.debug(tag,"wallets: ",wallets)
         //TODO if testnet flag only show testnet wallets!
         output.walletFiles = wallets
         output.wallets = []
-        if(!config.username) config.username = "temp:"
         //if no password
         if(!config.password) config.password = config.temp
         if(!config.password) throw Error("101: password required!")
@@ -1026,6 +1022,22 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         if(!config.blockchains){
             config.blockchains = ['bitcoin','ethereum','thorchain']
         }
+
+        //verify wallet_data
+        // for(let i = 0; i < wallets.length; i++){
+        //     let walletName = wallets[i]
+        //     log.info(tag,"walletName: ",walletName)
+        //     let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
+        //     let watchWallet = getWalletPublic(fileNameWatch)
+        //     if(!watchWallet){
+        //         //create watch wallet
+        //     } else {
+        //         log.info(tag," Watch Only wallet found!")
+        //         //load
+        //     }
+        // }
+
+
 
         //Load wallets if setup
         for(let i = 0; i < wallets.length; i++){
@@ -1090,21 +1102,33 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 if(!walletFile.vault) throw Error("Wallet vault not found! ")
 
                 let mnemonic = await resultOut.decrypt()
+
+                //if wallet paths custom load
+                log.info(tag,"walletName: ",walletName)
+                let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
+                let watchWallet = getWalletPublic(fileNameWatch)
+                let walletPaths
+                if(watchWallet){
+                    walletPaths = watchWallet.paths
+                }
+
                 //TODO validate seed
                 if(!mnemonic) throw Error("unable to start wallet! invalid seed!")
                 // log.debug(tag,"mnemonic: ",mnemonic)
                 //load wallet to global
-                let configPioneer = {
+                let configPioneer:any = {
                     isTestnet,
                     mnemonic,
                     blockchains:config.blockchains,
-                    username:walletFile.username,
+                    username:config.username,
                     pioneerApi:true,
                     auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
                     authProvider:'shapeshift',
                     spec:URL_PIONEER_SPEC,
                     queryKey:config.queryKey
                 }
+                if(walletPaths) configPioneer.paths = walletPaths
+
                 log.info(tag,"configPioneer: ",configPioneer)
                 log.info(tag,"isTestnet: ",isTestnet)
                 let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
@@ -1124,12 +1148,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     WALLET_ID:walletFile.username,
                     TYPE:'watch',
                     CREATED: new Date().getTime(),
-                    VERSION:"0.1.3",
+                    VERSION:"0.1.4",
                     WALLET_PUBLIC:info.public,
                     WALLET_PUBKEYS:info.pubkeys
                 }
 
-                let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
+                let writePathPub = walletDataDir+"/"+fileNameWatch
                 log.info(tag,"writePathPub: ",writePathPub)
                 let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
                 log.info(tag,"writeSuccessPub: ",writeSuccessPub)

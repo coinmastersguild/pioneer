@@ -18,9 +18,9 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let tx = "13DF346E290F603E26C70D123D4F390B3CE4DC183F64EF3FD04963B4C7DA604B"
+let tx = "E694B6601CC553CACF3A62C3F32C84269B790385953F3E123AF0B1E235C2516E"
 // tx
-//let tx = "16E48DDF948274CA0153ED1341F803F5D421777FE19F190024ABF0A74EDBB212"
+// let tx = "7734844A08E7A545E9A9311A1D473B2472AFBB2685F6291076B013C8950349F9"
 network.transaction(tx)
     .then(function(resp){
         console.log("resp: ",JSON.stringify(resp))
@@ -33,14 +33,15 @@ network.transaction(tx)
 //         console.log("resp: ",resp)
 //     })
 //
-// let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
-// // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
-// // let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
-// // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+
+let address = "thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"
+// // // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
+// // // let address = "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj"
+// // // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
+network.getBalance(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")

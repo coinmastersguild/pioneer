@@ -47,11 +47,9 @@ let run_test = async function(){
         if(!config){
             console.log("First time startup")
 
-            // software
+            // software 1
             let wallet1 = {
-                isTestnet:true,
                 mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
-                username:username,
                 password
             }
 
@@ -63,6 +61,21 @@ let run_test = async function(){
             //create wallet files
             let successCreate = await App.createWallet('software',wallet1)
             console.log("successCreate: ",successCreate)
+
+
+            let wallet2 = {
+                mnemonic:process.env['WALLET_MAINNET_DEV_NEW'],
+                password
+            }
+
+            //get master for seed
+            let wallet2Eth = await ethCrypto.generateWalletFromSeed(wallet2.mnemonic)
+            wallet2.masterAddress = wallet2Eth.masterAddress
+
+            console.log("wallet2: ",wallet2)
+            //create wallet files
+            let successCreate2 = await App.createWallet('software',wallet2)
+            console.log("successCreate2: ",successCreate2)
 
             //init config
             //throw Error("Must setup!")
@@ -94,6 +107,8 @@ let run_test = async function(){
 
             let context = wallets[0]
             if(!context) throw Error("No Wallets on startup!")
+
+            //for each context
 
             /*
                 FIO

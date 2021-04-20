@@ -33,13 +33,13 @@ let run_test = async function(){
 
         let isTestnet = null
 
-        let context = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
+        let context = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
 
         //pioneer
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             context,
             username,
             pioneerApi:true,

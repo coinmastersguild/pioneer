@@ -53,12 +53,10 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,isTestnet);
 
         let info = await Wallet.init()
-        // console.log("INFO: ",info)
+        console.log("total Value: ",info)
+        // console.log("total Value: ",info.totalValueUsd)
 
-        // // console.log("total Value: ",info.totalValueUsd)
-        //
-        // let resultForget = await Wallet.forget()
-        //console.log("resultForget: ",resultForget.data)
+        //await Wallet.forget()
 
         // let info2 = await Wallet.getInfo()
         // console.log("info2: ",info2)
@@ -95,7 +93,7 @@ let run_test = async function(){
         /*
                THOR
          */
-        // console.log("info: ",prettyjson.render(info.public.RUNE))
+        console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
         // let masterRUNE = await Wallet.getMaster("RUNE")
@@ -103,11 +101,11 @@ let run_test = async function(){
         //
         // let balanceRUNE = await Wallet.getBalance("RUNE")
         // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
-        // let amount = "100"
-        // let memo = ""
 
+        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
+        // let amount = "0.00002"
+        // let memo = ""
+        //
         // let transfer = {
         //     coin:"RUNE",
         //     addressTo:address,
@@ -118,17 +116,7 @@ let run_test = async function(){
         // let transferSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferSigned: ",transferSigned)
         //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
-
-        // let intent = {
-        //     coin:"RUNE",
-        //     amount:"all",
-        //     address,
-        //     // noBroadcast:true,
-        // }
-        //
-        // let txid = await Wallet.sendToAddress(intent)
+        // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
 
         /*

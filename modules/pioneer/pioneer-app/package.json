@@ -24,7 +24,7 @@
     "@pioneer-platform/nedb": "latest",
     "@pioneer-platform/pioneer": "^7.0.26",
     "@pioneer-platform/pioneer-coins": "latest",
-    "@pioneer-platform/pioneer-config": "latest",
+    "@pioneer-platform/pioneer-config": "^6.3.30",
     "@pioneer-platform/pioneer-events": "^7.1.2",
     "@pioneer-platform/pioneer-hardware": "latest",
     "@types/node": "^13.13.50",

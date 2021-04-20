@@ -6,11 +6,16 @@
  */
 require('dotenv').config()
 require('dotenv').config({path:"../../../.env"})
+require('dotenv').config({path:"./../../.env"})
 require('dotenv').config({path:"../../../../.env"})
+
+// console.log(process.env)
+
 let packageInfo = require("../package.json")
 const TAG = " | "+packageInfo.name+" | "
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber,publisher,redis,redisQueue} = require('@pioneer-platform/default-redis')
+const blockbook = require('@pioneer-platform/blockbook')
 
 let queue = require("@pioneer-platform/redis-queue")
 let connection  = require("@pioneer-platform/default-mongo")
@@ -24,88 +29,148 @@ const networks:any = {
     // 'EOS' : require('@pioneer-platform/eos-network'),
     'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
+    'RUNE' : require('@pioneer-platform/thor-network'),
 }
 networks.ANY.init('full')
+networks.ETH.init()
 
 let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
 let utxosDB = connection.get('utxo')
+let pubkeysDB = connection.get('pubkeys')
+let unspentDB = connection.get('unspent')
 
 usersDB.createIndex({id: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
+pubkeysDB.createIndex({pubkey: 1}, {unique: true})
+unspentDB.createIndex({txid: 1}, {unique: true})
 
-let UTXO_COINS = [
-    'BTC',
-    'BCH'
-]
+let push_balance_event = async function(work:any,balance:string){
+    let tag = TAG+" | push_balance_event | "
+    try{
+        let balanceEvent = {
+            username:work.username,
+            coin:work.coin,
+            network:work.coin,
+            balance
+        }
+        publisher.publish('',JSON.stringify(balanceEvent))
+    }catch(e){
+        log.error(tag,e)
+    }
+}
 
 let do_work = async function(){
     let tag = TAG+" | do_work | "
+    let work
     try{
 
         //TODO normalize queue names
-        let allWork = await queue.count("pioneer:pubkey:queue:ingest")
+        let allWork = await queue.count("pioneer:pubkey:ingest")
         log.debug(tag,"allWork: ",allWork)
 
-        let work = await queue.getWork("pioneer:pubkey:queue:ingest", 1)
+        work = await queue.getWork("pioneer:pubkey:ingest", 1)
         if(work){
             log.info("work: ",work)
 
-            //
-            let utxos = []
+            //TODO just type the work damnit
+            if(work.address) work.pubkey = work.address
+            if(work.zpub) work.type = "zpub"
+            if(work.zpub) work.pubkey = work.zpub
+            if(work.xpub) work.type = "xpub"
+            if(work.xpub) work.pubkey = work.xpub
+            if(!work.type && work.address) work.type = "address"
+
+
+            if(!work.username) throw Error("102: invalid work! missing username")
+            if(!work.pubkey) throw Error("103: invalid work! missing pubkey")
+            if(!work.coin) throw Error("104: invalid work! missing coin")
+            if(!work.type) throw Error("105: invalid work! missing type")
+            if(!work.queueId) throw Error("106: invalid work! missing queueId")
+            if(work.type !== 'address' && work.type !== 'xpub' && work.type !== 'zpub') throw Error("Unknown type! "+work.type)
 
             //if xpub
-            if(work.xpub){
-                //get unspent
-                let inputs = await networks.ANY.utxosByXpub(work.coin,work.xpub)
+            if(work.type === "xpub" || work.type === "zpub"){
 
-                for(let i = 0; i < inputs.length; i++){
-                    let input = inputs[i]
-                    log.info(tag,"input: ",input)
+                //get balance
+                let balance = await blockbook.getBalanceByXpub(work.coin,work.pubkey)
+                log.info(tag,work.username + " Balance ("+work.coin+"): ",balance)
 
-                    //get hex info
-                    let rawInfo = await networks.ANY.getTransaction(work.coin,input.txid)
-                    log.info(tag,"rawInfo: ",rawInfo)
+                //update balance cache
+                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.coin,balance)
+                if(updateResult) push_balance_event(work,balance)
+                log.info(tag,"updateResult: ",updateResult)
 
-                    input.hex = rawInfo.hex
-                    input.coin = work.coin
-                    input.accounts = [work.account]
-                    input.addresses = [] //TODO get from raw?
-                    utxos.push({insertOne:input})
+                //TODO if change push new balance over socket to user
+
+                //TODO if BCH get slp tokens
+
+            } else if(work.type === "address") {
+                // if ETH get tokens
+                if(work.coin === 'ETH'){
+                    // get ethPlorer list
+                    let ethInfo = await networks['ETH'].getBalanceTokens(work.pubkey)
+                    log.debug(tag,"ethInfo: ",ethInfo)
+
+                    //forEach
+                    let tokens = Object.keys(ethInfo.balances)
+                    for(let i = 0; i < tokens.length; i++){
+                        let token = tokens[i]
+                        let balance = ethInfo.balances[token]
+                        //update balance cache
+                        let updateResult = await redis.hset(work.username+":assets:"+work.walletId,token,balance)
+                        if(updateResult) push_balance_event(work,balance)
+                        log.info(tag,"updateResult: ",updateResult)
+                        //TODO if change push new balance over socket to user
+                    }
+
+                    // get blockbook tokens
+                    // validate ethPlorer
+
+                    // filter LP positions
+
+                    // Price LP positions
+
                 }
 
-                //save to db
-                if(utxos.length > 0){
-                    let resultSaveDB = await utxosDB.bulkWrite(utxos)
-                    console.log("resultSaveDB: ",resultSaveDB)
-                }
-            } else {
+                // if BSC get tokens
+
+                // if BNB get tokens
+
+                //
+
+
+                //get balance
+                if(!networks[work.coin] || !networks[work.coin].getBalance) throw Error("102: coin not supported! "+work.coin)
+
+                let balance = await networks[work.coin].getBalance(work.pubkey)
                 //
                 log.info(tag,"address ingestion")
-
+                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.coin,balance)
+                if(updateResult) push_balance_event(work,balance)
                 //if eth get info
+                //TODO if change push new balance over socket to user
 
+            } else {
+                //unhandled work!
+                log.error(work)
             }
 
-            //is already in mongo?
-            //TODO effecient query if partial synced?
-
-            //get tx history
-            //let txHistory = await network
-
-            //get current balances
-
-            //update mongo
+            //release
+            redis.lpush(work.queueId,JSON.stringify({success:true}))
 
         }
     } catch(e) {
         log.error(tag,"e: ",e)
+        log.error(tag,"e: ",e.message)
+        work.error = e.message
+        queue.createWork("pioneer:pubkey:ingest:deadletter",work)
         //TODO dead letter queue?
         //TODO fix errors dont shh them (need cointainers)
         //log.debug(tag,"Error checking for blocks: ", e)
         //toss back into work queue? (at end)
-        await sleep(10000)
+        //await sleep(10000)
     }
     //dont stop working even if error
     do_work()

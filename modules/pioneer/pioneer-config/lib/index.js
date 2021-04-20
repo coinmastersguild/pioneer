@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logLevel = exports.updateConfig = exports.setConfig = exports.getConfig = exports.getWallet = exports.getWallets = exports.getKeepkeyWatch = exports.checkConfigs = exports.backupWallet = exports.deleteWallet = exports.deleteConfig = exports.initWallet = exports.getApps = exports.initApps = exports.innitConfig = exports.watchOnlyDir = exports.logDir = exports.backupDir = exports.appDir = exports.backtestDir = exports.modelDir = exports.pioneerPath = exports.seedDir = exports.keepkeyWatchPath = exports.configPath = exports.pioneerConfig = void 0;
+exports.logLevel = exports.updateConfig = exports.setConfig = exports.getConfig = exports.getWalletPublic = exports.getWallet = exports.getWalletsPublic = exports.getWallets = exports.getKeepkeyWatch = exports.checkConfigs = exports.backupWallet = exports.deleteWallet = exports.deleteConfig = exports.initWallet = exports.getApps = exports.initApps = exports.innitConfig = exports.watchOnlyDir = exports.logDir = exports.backupDir = exports.appDir = exports.backtestDir = exports.modelDir = exports.pioneerPath = exports.walletDataDir = exports.seedDir = exports.keepkeyWatchPath = exports.configPath = exports.pioneerConfig = void 0;
 var path_1 = __importDefault(require("path"));
 var TAG = " | Config | ";
 var fs = require("fs-extra");
@@ -50,7 +50,10 @@ var uuid_1 = require("uuid");
 exports.pioneerConfig = path_1.default.join(homedir, ".pioneer", "pioneer.json");
 exports.configPath = path_1.default.join(homedir, ".pioneer", "pioneer.json");
 exports.keepkeyWatchPath = path_1.default.join(homedir, ".pioneer", "wallet_data/keepkey.watch.json");
-exports.seedDir = path_1.default.join(homedir, ".pioneer", "wallet_data");
+//wallets
+exports.seedDir = path_1.default.join(homedir, ".pioneer", "wallets");
+//wallet_data Watch dir
+exports.walletDataDir = path_1.default.join(homedir, ".pioneer", "wallet_data");
 exports.pioneerPath = path_1.default.join(homedir, ".pioneer");
 exports.modelDir = path_1.default.join(homedir, ".pioneer", "models");
 exports.backtestDir = path_1.default.join(homedir, ".pioneer", "backtest");
@@ -60,14 +63,14 @@ exports.logDir = path_1.default.join(exports.pioneerPath, "log");
 exports.watchOnlyDir = path_1.default.join(exports.pioneerPath, "watch");
 function innitConfig(languageSelected) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, isCreated, isCreated2, isCreated3, queryKey, config, e_1;
+        var tag, output, isCreated, isCreated2, isCreated3, isCreated4, queryKey, config, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = TAG + " | importConfig | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 5, , 6]);
+                    _a.trys.push([1, 6, , 7]);
                     output = {};
                     return [4 /*yield*/, mkdirp(exports.pioneerPath)];
                 case 2:
@@ -78,6 +81,9 @@ function innitConfig(languageSelected) {
                     return [4 /*yield*/, mkdirp(exports.seedDir)];
                 case 4:
                     isCreated3 = _a.sent();
+                    return [4 /*yield*/, mkdirp(exports.walletDataDir)];
+                case 5:
+                    isCreated4 = _a.sent();
                     queryKey = uuid_1.v4();
                     config = {};
                     config.locale = "english";
@@ -86,12 +92,12 @@ function innitConfig(languageSelected) {
                     //config.version = finder.next().value.version;
                     config.isCli = true;
                     fs.writeFileSync(exports.pioneerConfig, JSON.stringify(config));
-                    return [3 /*break*/, 6];
-                case 5:
+                    return [3 /*break*/, 7];
+                case 6:
                     e_1 = _a.sent();
                     console.error(tag, "e: ", e_1);
                     return [2 /*return*/, {}];
-                case 6: return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
@@ -152,23 +158,28 @@ exports.getApps = getApps;
 //innit Wallet
 function initWallet(wallet) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, isCreated, walletWrite, filename, result, e_4;
+        var tag, isCreated, isCreated2, walletWrite, filename, result, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tag = TAG + " | initWallet | ";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _a.trys.push([1, 5, , 6]);
                     if (!wallet.filename)
                         throw Error("102: filename required for new wallet!");
                     return [4 /*yield*/, mkdirp(exports.seedDir)];
                 case 2:
                     isCreated = _a.sent();
+                    return [4 /*yield*/, mkdirp(exports.walletDataDir)];
+                case 3:
+                    isCreated2 = _a.sent();
                     walletWrite = {};
                     if (wallet.TYPE === 'citadel') {
-                        if (!wallet.username)
-                            throw Error("102: username required for citadel wallets!");
+                        if (!wallet.masterAddress)
+                            throw Error("102: masterAddress required for citadel wallets!");
+                        if (!wallet.filename)
+                            wallet.filename = wallet.masterAddress + ".wallet.json";
                         //if passwordless
                         if (wallet.temp)
                             walletWrite.password = wallet.temp;
@@ -181,6 +192,8 @@ function initWallet(wallet) {
                     else if (wallet.TYPE === 'keepkey') {
                         if (!wallet.deviceId)
                             throw Error("102: deviceId required for keepkey wallets!");
+                        if (!wallet.filename)
+                            wallet.filename = wallet.deviceId + ".wallet.json";
                         walletWrite = wallet;
                         walletWrite.username = wallet.deviceId;
                         walletWrite.deviceId = wallet.deviceId;
@@ -190,14 +203,15 @@ function initWallet(wallet) {
                     }
                     walletWrite.created = new Date().getTime();
                     filename = wallet.filename;
-                    result = fs.writeFileSync(exports.seedDir + "/" + filename, JSON.stringify(walletWrite));
-                    //console.log("result: ", result);
+                    return [4 /*yield*/, fs.writeFile(exports.seedDir + "/" + filename, JSON.stringify(walletWrite))];
+                case 4:
+                    result = _a.sent();
                     return [2 /*return*/, result];
-                case 3:
+                case 5:
                     e_4 = _a.sent();
                     console.error(tag, "e: ", e_4);
-                    return [2 /*return*/, {}];
-                case 4: return [2 /*return*/];
+                    throw e_4;
+                case 6: return [2 /*return*/];
             }
         });
     });
@@ -340,6 +354,26 @@ function getWallets() {
     });
 }
 exports.getWallets = getWallets;
+function getWalletsPublic() {
+    return __awaiter(this, void 0, void 0, function () {
+        var walletsPublic, e_8;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fs.readdir(exports.walletDataDir)];
+                case 1:
+                    walletsPublic = _a.sent();
+                    return [2 /*return*/, walletsPublic];
+                case 2:
+                    e_8 = _a.sent();
+                    return [2 /*return*/, {}];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getWalletsPublic = getWalletsPublic;
 function getWallet(walletName) {
     try {
         if (!walletName)
@@ -356,6 +390,22 @@ function getWallet(walletName) {
     }
 }
 exports.getWallet = getWallet;
+function getWalletPublic(walletName) {
+    try {
+        if (!walletName)
+            throw Error("walletName required");
+        var walletBuff = fs.readFileSync(exports.walletDataDir + "/" + walletName);
+        var walletString = walletBuff.toString();
+        var wallet = JSON.parse(walletString);
+        if (Object.keys(wallet).length === 0)
+            wallet = null;
+        return wallet;
+    }
+    catch (e) {
+        return null;
+    }
+}
+exports.getWalletPublic = getWalletPublic;
 function getConfig() {
     try {
         var output = JSON.parse(fs.readFileSync(exports.configPath));

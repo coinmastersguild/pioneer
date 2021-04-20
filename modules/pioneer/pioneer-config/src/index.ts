@@ -19,7 +19,7 @@ export const keepkeyWatchPath = path.join(
 //wallets
 export const seedDir = path.join(homedir, ".pioneer", "wallets");
 //wallet_data Watch dir
-export const walletDir = path.join(homedir, ".pioneer", "wallet_data");
+export const walletDataDir = path.join(homedir, ".pioneer", "wallet_data");
 export const pioneerPath = path.join(homedir, ".pioneer");
 export const modelDir = path.join(homedir, ".pioneer", "models");
 export const backtestDir = path.join(homedir, ".pioneer", "backtest");
@@ -44,7 +44,7 @@ export async function innitConfig(languageSelected: string) {
 
         let isCreated3 = await mkdirp(seedDir);
 
-        let isCreated4 = await mkdirp(walletDir);
+        let isCreated4 = await mkdirp(walletDataDir);
         // //console.log("isCreated: ", isCreated3);
 
         // //console.log(tag, " innit config checkpiont 2");
@@ -106,7 +106,7 @@ export async function initWallet(wallet: any) {
 
         //make the wallet dir
         let isCreated = await mkdirp(seedDir);
-        let isCreated2 = await mkdirp(walletDir);
+        let isCreated2 = await mkdirp(walletDataDir);
 
         //if software
         let walletWrite: any = {};
@@ -133,9 +133,7 @@ export async function initWallet(wallet: any) {
 
         //let filename
         let filename = wallet.filename
-
-        let result = fs.writeFileSync(walletDir+"/"+filename, JSON.stringify(walletWrite));
-        console.log("result: ", result);
+        let result = await fs.writeFile(seedDir+"/"+filename, JSON.stringify(walletWrite));
 
         return result;
     } catch (e) {
@@ -262,6 +260,20 @@ export async function getWallets() {
     }
 }
 
+export async function getWalletsPublic() {
+    try {
+        //all files with .wallet. in wallet_data
+
+        //list folders
+        let walletsPublic = await fs.readdir(walletDataDir)
+
+
+        return walletsPublic
+    } catch (e) {
+        return {};
+    }
+}
+
 export function getWallet(walletName?:string) {
     try {
         if(!walletName) throw Error("walletName required")
@@ -274,6 +286,20 @@ export function getWallet(walletName?:string) {
         return null;
     }
 }
+
+export function getWalletPublic(walletName?:string) {
+    try {
+        if(!walletName) throw Error("walletName required")
+        let walletBuff = fs.readFileSync(walletDataDir+"/"+walletName);
+        let walletString = walletBuff.toString()
+        let wallet = JSON.parse(walletString)
+        if(Object.keys(wallet).length === 0) wallet = null
+        return wallet
+    } catch (e) {
+        return null;
+    }
+}
+
 
 export function getConfig() {
     try {

@@ -5,6 +5,10 @@
 
 const TAG = " | Pioneer network | "
 
+require('dotenv').config()
+require('dotenv').config({path:"../../../../.env"});
+require('dotenv').config({path:"../../../.env"});
+require('dotenv').config({path:"../../../../.env"});
 
 // const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const bitcoin = require("bitcoinjs-lib");
@@ -509,8 +513,6 @@ const get_wallet_info = async function () {
                 }
             }
         }
-
-
 
         /*
                RUNE asset info

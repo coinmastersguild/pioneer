@@ -9,12 +9,13 @@ let TAG = ' | API | '
 
 const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
+log.info(TAG,"PIONEER VERSION: ",pjson.version)
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 let connection  = require("@pioneer-platform/default-mongo")
 let queue = require("@pioneer-platform/redis-queue")
 
 var randomstring = require("randomstring");
-
+let coincap = require('@pioneer-platform/coincap')
 
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
@@ -25,6 +26,7 @@ usersDB.createIndex({id: 1}, {unique: true})
 usersDB.createIndex({username: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
+pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 
 const axios = require('axios')
 const network = require("@pioneer-platform/network")
@@ -114,6 +116,7 @@ interface RegisterBody {
     username:string
     data:RegisterBodyData,
     auth:string,
+    walletName: string,
     queryKey?:string,
     provider:AuthProviders
 }
@@ -165,25 +168,27 @@ export class pioneerPrivateController extends Controller {
         let tag = TAG + " | forget | "
         try{
             log.debug(tag,"queryKey: ",authorization)
-
+            let output:any = {}
             let accountInfo = await redis.hgetall(authorization)
             let username = accountInfo.username
             if(!username) throw Error("unknown token! token: "+authorization)
             log.debug(tag,"accountInfo: ",accountInfo)
 
             //del redis
-            redis.del(accountInfo.username+":cache:walletInfo")
-            redis.del(authorization)
-            redis.del(accountInfo.username)
+            output.cacheWallet = await redis.del(accountInfo.username+":cache:walletInfo")
+            output.cacheAuth = await redis.del(authorization)
+            output.cacheUser = await redis.del(accountInfo.username)
 
             //delete mongo
-            let userInfo = await usersDB.remove({username})
-            if(!userInfo) {
-                throw Error("102: unknown user! username: "+username)
-            }
-            log.debug(tag,"userInfo: ",userInfo)
+            output.userDelete = await usersDB.remove({username})
 
-            return true
+            //remove all pubkeys
+            output.pubkeysDelete = await pubkeysDB.remove({tags:{ $all: [accountInfo.username]}})
+
+            //remove all pubkeys
+            output.txsDelete = await txsDB.remove({tags:{ $all: [accountInfo.username]}})
+
+            return output
         }catch(e){
             let errorResp:Error = {
                 success:false,
@@ -209,16 +214,18 @@ export class pioneerPrivateController extends Controller {
 
 
      */
-    @Get('/info')
-    public async info(@Header('Authorization') authorization: string): Promise<any> {
+    @Get('/info/{walletId}')
+    public async info(walletId:string,@Header('Authorization') authorization: string): Promise<any> {
         let tag = TAG + " | info | "
         try{
-            log.debug(tag,"queryKey: ",authorization)
+            log.info(tag,"queryKey: ",authorization)
+            log.info(tag,"walletId: ",walletId)
 
             let accountInfo = await redis.hgetall(authorization)
             if(!accountInfo) throw Error("unknown token! token:"+authorization)
             log.info(tag,"accountInfo: ",accountInfo)
 
+            let walletInfo:any
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
                 let isTestnet = accountInfo.isTestnet || false
@@ -229,16 +236,20 @@ export class pioneerPrivateController extends Controller {
                     log.error(tag,"invalid accountInfo: ",accountInfo)
                     throw Error("invalid token info! token:"+authorization)
                 }
+                //get user context
+                if(!walletId){
+                    let userInfo = await redis.hgetall(username)
+                    log.info(tag,"userInfo: ",userInfo)
+                    walletId = userInfo.context
+                    if(!walletId) throw Error("No walletId on username! username: "+username)
+                }
+
                 //get cache
-                let walletInfo:any = await redis.get(accountInfo.username+":cache:walletInfo")
+                walletInfo = await redis.get(accountInfo.username+":"+walletId+":cache:walletInfo")
 
-                //TODO dont nerf cache! clear when new asset
                 if(walletInfo){
-                    log.debug(tag,"user info cached!: ")
-                    log.info(tag,"user info cached!: ",walletInfo)
-
-                    //push to pubkeys sync?
-
+                    log.info(tag,"user info cached!: ")
+                    log.debug(tag,"user info cached!: ",walletInfo)
                     try{
                         walletInfo = JSON.parse(walletInfo)
                         walletInfo.username = username
@@ -247,55 +258,40 @@ export class pioneerPrivateController extends Controller {
                         throw Error("103: invalid cache!")
                     }
                 }else{
-                    log.debug(tag,"user info cached!: ")
-                    log.debug(tag,"username: ",username)
-                    //get pubkeys from mongo
-                    let userInfo = await usersDB.findOne({username})
-                    if(!userInfo) {
-                        throw Error("102: unknown user! username: "+username)
-                    }
-                    log.debug(tag,"userInfo: ",userInfo)
+                    walletInfo = {}
+                    log.debug(tag,"user info NOT cached!: ")
+                    log.info(tag,"walletId: ",walletId)
+                    //get pubkeys from mongo with walletId tagged
+                    let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [walletId]}})
+                    log.info(tag,"pubkeysMongo: ",pubkeysMongo)
 
                     //reformat
-                    let pubkeys = {}
-                    for(let i = 0; i < userInfo.pubkeys.length; i++){
-                        let pubkeyInfo = userInfo.pubkeys[i]
-                        pubkeys[pubkeyInfo.coin] = pubkeyInfo
+                    let pubkeys:any = []
 
-                        //TODO dont do this for multi-wallet
-                        //validate (migrate)
-                        if(!pubkeys[pubkeyInfo.coin].script_type || !pubkeys[pubkeyInfo.coin].network ||!pubkeys[pubkeyInfo.coin].coin){
-                            log.error("Invalid pubkey found for user!")
-                            //delete
-                            await usersDB.remove({username})
-                            //generate
-                            //save
-                        }
+                    for(let i = 0; i < pubkeysMongo.length; i++){
+                        let pubkeyInfo = pubkeysMongo[i]
+                        delete pubkeyInfo._id
+                        //TODO validate pubkeys?
+
+                        pubkeys.push(pubkeyInfo)
                     }
 
-                    //import into wallet
-                    log.info(tag,"isTestnet: ",isTestnet)
-                    if(isTestnet){
-                        await network.init('full',{
-                            pubkeys
-                        },isTestnet)
-                    }else{
-                        await network.init('full',{
-                            pubkeys
-                        })
-                    }
+                    //build wallet info
+                    walletInfo.pubkeys = pubkeys
 
-                    //get wallet info
-                    walletInfo = await network.getInfo()
+                    //get asset balances
+                    let assetBalances = await redis.hgetall(username+":assets:"+walletId)
+                    log.info(tag,"assetBalances: ",assetBalances)
+                    walletInfo.balances = assetBalances
+                    //get value of portfolio
+                    let valuePortfolio = await coincap.valuePortfolio(assetBalances)
+                    log.info(tag,"valuePortfolio: ",valuePortfolio)
+                    walletInfo.valueUsds = valuePortfolio.values
+                    walletInfo.totalValueUsd = valuePortfolio.total
                     walletInfo.username = username
-
-                    //apps
+                    walletInfo.walletId = walletId
                     walletInfo.apps = await redis.smembers(username+":apps")
-
-                    log.info(tag,"walletInfo: ",walletInfo)
-
-                    //write to cache
-                    await redis.setex(accountInfo.username+":cache:walletInfo",PIONEER_INFO_CACHE_TIME,JSON.stringify(walletInfo))
+                    await redis.setex(accountInfo.username+":"+walletId+":cache:walletInfo",PIONEER_INFO_CACHE_TIME,JSON.stringify(walletInfo))
                 }
 
                 return walletInfo
@@ -725,7 +721,7 @@ export class pioneerPrivateController extends Controller {
      *
      *  NOTE:
      *
-     *  Any already REGISTERED user may use this name to register additional coins
+     *  Any already REGISTERED user may use this name to register additional coins/pubkeys or update context or state
      *
      *
      *  Output:
@@ -743,7 +739,9 @@ export class pioneerPrivateController extends Controller {
         try{
             let output:any = {}
             let newKey
-            log.debug(tag,"body: ",body)
+            log.info(tag,"body: ",body)
+
+            if(!body.walletName) throw Error("walletName required on body!")
 
             //if auth found in redis
             const authInfo = await redis.hgetall(authorization)
@@ -751,11 +749,6 @@ export class pioneerPrivateController extends Controller {
             let isTestnet = authInfo.isTestnet || false
             if(body.isTestnet && Object.keys(authInfo).length != 0 && !isTestnet) throw Error(" Username already registerd on mainnet! please create a new")
             log.debug(tag,"authInfo: ",authInfo)
-
-            //isTestnet
-            if(body.isTestnet){
-                isTestnet = true
-            }
 
             let username
             if(Object.keys(authInfo).length > 0){
@@ -784,79 +777,19 @@ export class pioneerPrivateController extends Controller {
             }
             if(!username) username = body.username
 
-            let userInfoMongo = await usersDB.findOne({username})
+            let userInfoMongo:any = await usersDB.findOne({username})
             log.info(tag,"userInfoMongo: ",userInfoMongo)
 
-            log.info("checkpoint 2 post mongo query!")
-            if(!userInfoMongo || newKey || true){ //TODO wtf with true?
-                log.info("checkpoint 2a no mongo info!")
-                //TODO if newKey
-                //verify auth!
-
-                //is available on fio?
-                // let isAvailable = await networks['FIO'].isAvailable(username)
-                // if(!isAvailable) throw Error("username not available!")
-
-                //register fio pubkey
-
-                //register all supported chains
-
-                let registered = new Date().getTime()
-                if(!body.data.pubkeys) throw Error("105: missing pubkeys!")
-                if(body.data.pubkeys.length === 0) throw Error("105: empty pubkeys!")
-
-                log.debug(tag,"pubkeys: ",body.data.pubkeys)
-
-                let coins = Object.keys(body.data.pubkeys)
-                let pubkeys = []
-
-                for(let i = 0; i < coins.length; i++){
-                    let coin = coins[i]
-                    let pubkey = body.data.pubkeys[coin]
-                    log.debug(tag,"pubkey: ",body.data.pubkeys[coin])
-
-                    //validate pubkey
-                    if(!pubkey.coin) throw Error("Invalid pubkey required field: coin")
-                    if(!pubkey.script_type) throw Error("Invalid pubkey required field: script_type coin:"+pubkey.coin)
-                    if(!pubkey.network) throw Error("Invalid pubkey required field: network coin:"+pubkey.coin)
-
-                    pubkeys.push(pubkey)
-                }
-                //pubkey index
-                let pubkeyIndex = pubkeys.length
-
-                //coin index
-                let coinIndex = coins.length
-
-                //register username
+            if(!userInfoMongo){
+                //create user
                 let userInfo:any = {
-                    registered,
-                    id:uuidv4(), //TODO does this mean we change id every register!?!?
+                    registered: new Date().getTime(),
+                    id:"pioneer:"+pjson.version+":"+uuidv4(), //user ID versioning!
                     username:body.username,
                     verified:true,
-                    blockchains:body.blockchains,
-                    pubkeys,
-                    coins,
-                    ssInfo:{},
-                    pubkeyIndex,
-                    coinIndex
+                    wallets:[body.walletName] // just one wallet for now
                 }
-                if(isTestnet) userInfo.isTestnet = true //NOTE: this saves as string if false
-                //save to mongo
-                log.info(tag,"userInfo: ",userInfo)
-
-                try{
-                    let mongoSuccess =  await usersDB.insert(userInfo) //TODO upsert?
-                    log.info(tag,"mongoSuccess: ",mongoSuccess)
-                }catch(e){
-                    log.error(tag,"mongo: ",e)
-                }
-
-                //save to redis
-                delete userInfo.ssInfo
-                delete userInfo.pubkeys
-                delete userInfo.pubkeys
-                delete userInfo.coins
+                output.resultSaveUserDB = await usersDB.insert(userInfo)
 
                 let redisSuccess = await redis.hmset(body.username,userInfo)
                 log.info(tag,"redisSuccess: ",redisSuccess)
@@ -867,31 +800,47 @@ export class pioneerPrivateController extends Controller {
                 let redisSuccessKey = await redis.hmset(authorization,userInfo)
                 log.info(tag,"redisSuccessKey: ",redisSuccessKey)
 
-                let result = await pioneer.register(body.username, pubkeys)
-                log.debug(tag,"result: ",result)
+                //Continue and register wallet
+                userInfoMongo = userInfo
 
-                //push
+                //Assume wallet new
+                output.result = await pioneer.register(body.username, body.data.pubkeys,body.walletName)
+                log.info(tag,"resultPioneer: ",output.result)
 
-            } else {
-                //TODO
-                log.info("user found... not doing anything")
-
-                //get pubkeys in body
-
-                //compair with register request
-
-                //add new keys
-
-                //update conflicts?
+                //set user context to only wallet
+                await redis.hset(body.username,'context',body.walletName)
             }
+
+            //get wallets
+            let userWallets = userInfoMongo.wallets
+            if(!userWallets) throw Error("No wallets found!")
+
+            //if current ! found
+            if(userWallets.indexOf(body.walletName) < 0){
+                log.info(tag,"Registering new walelt! walletName:",body.walletName)
+                //Register wallet! (this ONLY hits when already registered
+                output.newWallet = true
+                let pubkeys = body.data.pubkeys
+                output.result = await pioneer.register(body.username, pubkeys, body.walletName)
+                log.info(tag,"resultPioneer: ",output.result)
+
+                //set current context to newly registred wallet
+                //TODO flag to leave context? (silent register new wallet?)
+                await redis.hset(body.username,'context',body.walletName)
+            } else {
+                //wallet already known!
+                log.info(tag,"Wallet already known! walletName: ",body.walletName)
+
+                //get pubkey array
+                output.result = await pioneer.update(body.username, body.data.pubkeys,body.walletName)
+            }
+
             log.info("checkpoint 3")
             let userInfoRedis = await redis.hgetall(username)
             log.info(tag,"userInfoRedis: ",userInfoRedis)
             log.info("checkpoint 4 final ")
 
             output.success = true
-            //data
-            //output.result = result
             output.userInfo = userInfoRedis
 
             return output

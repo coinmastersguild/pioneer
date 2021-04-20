@@ -59,7 +59,6 @@ const pioneer = require("@bithighlander/hdwallet-native")
 //global
 const keyring = new hdwallet.Keyring()
 
-let IS_OFFLINE = false
 // let WALLET_BALANCES:any = {}
 // let WALLET_MODE:any
 let WALLET_COINS:any = []
@@ -86,7 +85,7 @@ WALLET_COINS.push('FIO')
 //TODO MOVEME coins module
 const HD_RUNE_KEYPATH="m/44'/931'/0'/0/0"
 const RUNE_CHAIN="thorchain"
-const RUNE_BASE=1000000
+const RUNE_BASE=100000000
 const RUNE_TX_FEE="100"
 const RUNE_MAX_GAS="100000"
 
@@ -122,6 +121,7 @@ export interface SendToAddress {
 export interface config {
     blockchains: string[];
     isTestnet?: boolean;
+    context: string
     spec:string,
     env:string,
     mode:string,
@@ -243,7 +243,7 @@ module.exports = class wallet {
     // private getBalanceAudit: (coin: string) => Promise<any>;
     private getBalance: (coin: string, address?:string) => any;
     // private getInfo: (verbosity: string) => Promise<any>;
-    private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
+    // private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
     // private getEosPubkey: () => Promise<any>;
     // private getEosAccountsByPubkey: (pubkey: string) => Promise<any>;
     // private validateEosUsername: (username: string) => Promise<any>;
@@ -276,6 +276,7 @@ module.exports = class wallet {
     private queryKey: string | undefined;
     private username: string;
     private type: HDWALLETS;
+    private offline: boolean;
     private isTestnet: boolean | null;
     private init: (type: string, config: config) => Promise<any>;
     private mnemonic: string | undefined;
@@ -285,7 +286,7 @@ module.exports = class wallet {
     private pioneerApi: boolean | undefined;
     private WALLET: any;
     private pubkeys: any;
-    private getInfo: (verbosity: string) => any;
+    private getInfo: (walletId: string) => any;
     private pioneer: any;
     private pioneerClient: any;
     private WALLET_BALANCES: any;
@@ -295,10 +296,13 @@ module.exports = class wallet {
     private addLiquidity: (addLiquidity: any) => Promise<any>;
     private buildApproval: (swap: any) => Promise<any>;
     private sendApproval: (intent: Approval) => Promise<any>;
+    private context: string; //Wallet File name
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
         this.isTestnet = false
+        this.offline = false //TODO supportme
         this.mode = config.mode
+        this.context = config.context
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
@@ -323,9 +327,9 @@ module.exports = class wallet {
                     case HDWALLETS.pioneer:
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
                         log.debug(tag,"checkpoint"," pioneer wallet detected! ")
-                        if(!config.mnemonic && !config.wallet) throw Error("102: mnemonic or wallet file required! ")
+                        if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
-                        //TODO load wallet
+
 
                         log.info(tag,"isTestnet: ",this.isTestnet)
                         //pair
@@ -421,6 +425,7 @@ module.exports = class wallet {
                         isTestnet:false,
                         username:this.username,
                         blockchains:this.blockchains,
+                        walletName:this.context,
                         data:{
                             pubkeys:this.pubkeys
                         },
@@ -428,29 +433,16 @@ module.exports = class wallet {
                         auth:this.auth,
                         provider:'shapeshift'
                     }
-                    log.debug("registerBody: ",register)
+                    log.info("registerBody: ",register)
                     log.debug("this.pioneerClient: ",this.pioneerClient)
                     let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                     log.debug("regsiterResponse: ",regsiterResponse)
 
-                    let walletInfo = await this.getInfo('')
-                    log.debug("walletInfo: ",walletInfo)
+                    let walletInfo = await this.getInfo(this.context)
+                    log.info("walletInfo: ",walletInfo)
 
                     this.WALLET_BALANCES = walletInfo.balances
                     //emitter.info = walletInfo
-
-                    //verify if remote is correct
-                    if(walletInfo.masters['ETH'].toLowerCase() === this.PUBLIC_WALLET['ETH'].master.toLowerCase()){
-                        //
-                        log.debug(tag,"Remote and local masters match!")
-                    }else{
-                        log.error(tag,"remote: ",walletInfo.masters['ETH'])
-                        log.error(tag,"local: ",this.PUBLIC_WALLET['ETH'].master)
-                        await this.pioneerClient.instance.Forget()
-                        throw Error("Clearing pioneer! migration!")
-                        // @ts-ignore
-                        this.init()
-                    }
 
                     return walletInfo
                 } else {
@@ -497,39 +489,33 @@ module.exports = class wallet {
         // this.coins = function () {
         //     return WALLET_COINS;
         // }
-        this.getInfo = async function () {
+        this.getInfo = async function (walletId) {
             let tag = TAG + " | getInfo | "
             try {
                 let walletInfo:any = {}
-                if(!IS_OFFLINE){
+                if(!this.offline){
                     //query api
-                    walletInfo = await this.pioneerClient.instance.Info()
+                    walletInfo = await this.pioneerClient.instance.Info(walletId)
                     log.debug(tag,"walletInfo: ",walletInfo)
                 }
-                walletInfo.data.public = this.PUBLIC_WALLET
-                walletInfo.data.private = this.PRIVATE_WALLET
                 return walletInfo.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getBalance = function (coin:string) {
-            return this.WALLET_BALANCES[coin] || 0;
-        }
+        // this.getBalance = function (coin:string) {
+        //     return this.WALLET_BALANCES[coin] || 0;
+        // }
         this.getMasterOfSeed = async function (mnemonic:string,coin?:string) {
             //master is ETH
             let wallet = await ethCrypto.generateWalletFromSeed(mnemonic)
             return wallet.masterAddress;
         }
-        this.getBalanceRemote = async function (coin:string,address?:string) {
-            let tag = TAG + " | getBalanceRemote | "
+        this.getBalance = async function (coin:string,address?:string) {
+            let tag = TAG + " | getBalance | "
             try {
-                //TODO support address
-                if(address) throw Error("102: getBalanceAddress not implented yet")
-
                 log.debug("coin detected: ",coin)
                 let output
-
                 let master
                 if(coin === "ETH"){
                     log.debug("ETH detected ")
@@ -1104,7 +1090,7 @@ module.exports = class wallet {
         //     return encrypt_message(msg,payerPubkey);
         // }
         this.sendApproval = async function (intent:Approval) {
-            let tag = TAG+" | sendToAddress | "
+            let tag = TAG+" | sendApproval | "
             try{
                 let invocationId
                 if(!intent.invocationId) {
@@ -1181,6 +1167,22 @@ module.exports = class wallet {
 
                 let addressFrom = await this.getMaster(intent.coin)
                 log.debug(tag,"addressFrom: ",addressFrom)
+
+                if(intent.amount === 'all'){
+                    //get balance
+                    let balance = await this.getBalance(intent.coin)
+                    log.info(tag,"balance: ",balance)
+
+                    //subtract fees
+                    intent.amount = String(parseFloat(balance) - 0.08)
+                    log.info(tag,"ALL amount: ",intent.amount)
+
+                    if(parseFloat(intent.amount) < 0) {
+                        throw Error("Balance lower then expected fee!")
+                    }
+
+                    //set amount
+                }
 
                 let transaction:Transaction = {
                     coin:intent.coin,
@@ -1480,8 +1482,8 @@ module.exports = class wallet {
 
                 }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
                     log.debug(tag,"checkpoint")
-                    let balanceEth = await this.getBalanceRemote('ETH')
-                    log.debug(tag,"getBalanceRemote: ",balanceEth)
+                    let balanceEth = await this.getBalance('ETH')
+                    log.debug(tag,"balanceEth: ",balanceEth)
 
                     let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                     nonceRemote = nonceRemote.data
@@ -1511,7 +1513,7 @@ module.exports = class wallet {
                         log.debug(tag,"knownCoins: ",knownCoins)
                         if(knownCoins.indexOf(coin) === -1) throw Error("107: unknown token! "+coin)
 
-                        let balanceToken = await this.getBalanceRemote(coin)
+                        let balanceToken = await this.getBalance(coin)
 
                         //verify token balance
                         if(amount > balanceToken) throw Error("103: Insufficient balance! ")
@@ -1590,7 +1592,7 @@ module.exports = class wallet {
 
                     let txType = "thorchain/MsgSend"
                     let gas = "250000"
-                    let fee = "3000"
+                    let fee = "2000000"
                     let memo = transaction.memo || ""
 
                     //sign tx
@@ -1673,20 +1675,22 @@ module.exports = class wallet {
                     txFinal = res
                     txFinal.signatures = res.signatures
 
-                    log.debug("FINAL: ****** ",txFinal)
-
-                    // @ts-ignore
-                    // const buffer = Buffer.from(broadcastString, 'base64');
-                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
+                    log.info("FINAL: ****** ",txFinal)
 
                     let broadcastString = {
                         tx:txFinal,
                         type:"cosmos-sdk/StdTx",
                         mode:"sync"
                     }
+
+                    // @ts-ignore
+                    const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
+                    let hash = sha256(buffer).toString().toUpperCase()
+                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
+
                     rawTx = {
-                        txid:"",
+                        txid:hash,
                         coin,
                         serialized:JSON.stringify(broadcastString)
                     }

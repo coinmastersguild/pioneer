@@ -39,6 +39,7 @@
   "dependencies": {
     "@pioneer-platform/binance-network": "latest",
     "@pioneer-platform/blocknative-client": "latest",
+    "@pioneer-platform/coincap": "^6.2.6",
     "@pioneer-platform/cosmos-network": "latest",
     "@pioneer-platform/default-mongo": "latest",
     "@pioneer-platform/default-redis": "latest",

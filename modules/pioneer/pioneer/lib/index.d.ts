@@ -9,6 +9,7 @@ export interface SendToAddress {
 export interface config {
     blockchains: string[];
     isTestnet?: boolean;
+    context: string;
     spec: string;
     env: string;
     mode: string;

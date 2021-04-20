@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-config",
-  "version": "6.3.23",
+  "version": "6.3.30",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
@@ -21,6 +21,7 @@
     "test:watch": "jest --coverage --watchAll",
     "build:watch": "onchange 'src/**/*.ts' -- npm run build",
     "view:coverage": "serve coverage/lcov-report",
+    "prepublish": "rm -Rf lib && npm run build",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "devDependencies": {

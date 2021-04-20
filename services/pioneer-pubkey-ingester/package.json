@@ -10,21 +10,23 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/cosmos-network": "latest",
+    "@pioneer-platform/bnb-network": "^6.2.2",
+    "@pioneer-platform/cosmos-network": "^6.2.11",
     "@pioneer-platform/default-mongo": "latest",
     "@pioneer-platform/default-redis": "latest",
     "@pioneer-platform/fio-network": "latest",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/network": "latest",
+    "@pioneer-platform/network": "^6.3.88",
     "@pioneer-platform/redis-queue": "latest",
-    "@pioneer-platform/utxo-network": "latest",
-    "chai": "^4.3.0",
+    "@pioneer-platform/thor-network": "^6.2.5",
+    "@pioneer-platform/utxo-network": "^6.2.18",
+    "chai": "^4.3.4",
     "dotenv": "^8.1.0",
     "wait-promise": "^0.4.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
-    "@types/node": "^13.13.45",
+    "@types/node": "^13.13.50",
     "nodemon": "^2.0.7",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.9"

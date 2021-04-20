@@ -6,6 +6,7 @@
 
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
 let pioneerApi = require("../lib")
@@ -17,14 +18,16 @@ process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 
 
-// let username = process.env['TEST_USERNAME_2']
-// let queryKey = process.env['TEST_QUERY_KEY_2']
+let username = process.env['TEST_USERNAME_2']
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
-let queryKey = 'key:d9c55eff-a8d0-48e1-bb0f-db131e5576a0'
-let username  = 'user:1911ccde-89df-4fc4-8a71-56097b9d418b'
+// let queryKey = 'key:d9c55eff-a8d0-48e1-bb0f-db131e5576a0'
+// let username  = 'user:1911ccde-89df-4fc4-8a71-56097b9d418b'
 
 // let username = process.env['TEST_USERNAME_1']
 // let queryKey = process.env['TEST_QUERY_KEY_1']
+
+let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
 
 let run_test = async function(){
     try{
@@ -33,7 +36,7 @@ let run_test = async function(){
             username,
             spec
         }
-
+        console.log("config: ",config)
 
         //get config
         let pioneer = new pioneerApi(spec,config)
@@ -44,10 +47,10 @@ let run_test = async function(){
         //get online
 
         //get txid {coin,txid}
-        let coin = "BTC"
-        let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
-        let txInfo = await pioneer.instance.GetTransaction({coin,txid})
-        console.log("txInfo: ",txInfo)
+        // let coin = "BTC"
+        // let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
+        // let txInfo = await pioneer.instance.GetTransaction({coin,txid})
+        // console.log("txInfo: ",txInfo)
 
         //if username not online abort
         // let onlineUsers = await pioneer.instance.Online()
@@ -58,8 +61,8 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        // let info = await pioneer.instance.Info()
-        // console.log("info: ",info.data)
+        let info = await pioneer.instance.Info(walletId)
+        console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data

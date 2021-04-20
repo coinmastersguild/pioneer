@@ -59,6 +59,7 @@ let sleep = wait.sleep;
 
 let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
+let pubkeysDB = connection.get('pubkeys')
 //let txsRawDB = connection.get('transactions-raw')
 let inputsDB = connection.get('unspent')
 
@@ -66,148 +67,322 @@ usersDB.createIndex({id: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 //txsRawDB.createIndex({txhash: 1}, {unique: true})
 inputsDB.createIndex({txid: 1}, {unique: true})
+pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 
-
-const BALANCE_ON_REGISTER = false
+const BALANCE_ON_REGISTER = true
 
 module.exports = {
-    register: async function (account:string, xpubs:any) {
-        return register_xpubs(account, xpubs);
+    register: async function (username:string, xpubs:any, walletId:string) {
+        return register_pubkeys(username, xpubs, walletId);
+    },
+    update: async function (username:string, xpubs:any, walletId:string) {
+        return update_pubkeys(username, xpubs, walletId);
     },
 }
 
-let register_xpubs = async function (account:string, pubkeys:any) {
-    let tag = TAG + " | register_xpubs | "
+let register_xpub = async function (username:string, pubkey:any, walletId:string) {
+    let tag = TAG + " | register_xpub | "
     try {
-        log.info(tag,"input: ",{account,pubkeys})
+        if(!pubkey.coin) throw Error("102: invalid pubkey! missing coin!")
+        if(!pubkey.symbol) pubkey.symbol = pubkey.coin
+        let xpub = pubkey.xpub
+        //save info
+        redis.sadd(xpub+":username", username)
+        redis.hset(xpub, "xpub", pubkey.xpub)
+        redis.hset(xpub, "username", username)
+        redis.hset(xpub, "coin", pubkey.coin)
+        redis.hset(xpub, "network", pubkey.symbol)
+        redis.hset(xpub, "type", pubkey.script_type)
 
+
+        //if zpub add zpub
+        let queueId = uuid.generate()
+        if(pubkey.zpub){
+            let work = {
+                type:'zpub',
+                pubkey:pubkey.zpub,
+                coin:pubkey.coin,
+                network:pubkey.coin,
+                asset:pubkey.coin,
+                queueId,
+                username,
+                walletId,
+                inserted: new Date().getTime()
+            }
+            await queue.createWork("pioneer:pubkey:ingest",work)
+        } else if (pubkey.xpub){
+            //add to queue
+            let work = {
+                type:'xpub',
+                coin:pubkey.coin,
+                pubkey:pubkey.xpub,
+                network:pubkey.coin,
+                asset:pubkey.coin,
+                queueId,
+                username,
+                xpub,
+                inserted: new Date().getTime()
+            }
+            await queue.createWork("pioneer:pubkey:ingest",work)
+        } else {
+            log.error(tag,"pubkey: ",pubkey)
+            throw Error("Attempting to register an invalid xpub! ")
+        }
+
+        return queueId
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_address = async function (username:string, pubkey:any, walletId:string) {
+    let tag = TAG + " | register_address | "
+    try {
+        if(!pubkey.symbol) pubkey.symbol = pubkey.coin
+        let address = pubkey.pubkey
+        let coin = pubkey.coin
+        redis.sadd(address+":username", username)
+        redis.hset(address, "address", address)
+        redis.hset(address, "coin", pubkey.symbol)
+        redis.hset(address, "network", pubkey.coin)
+
+        let queueId = uuid.generate()
+
+        //add to work
+        let work = {
+            type:'address',
+            coin:pubkey.coin,
+            pubkey:address,
+            network:pubkey.coin,
+            asset:pubkey.coin,
+            walletId,
+            queueId,
+            username,
+            address,
+            inserted: new Date().getTime()
+        }
+        log.info("adding work: ",work)
+
+        queue.createWork("pioneer:pubkey:ingest",work)
+
+        return queueId
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let update_pubkeys = async function (username:string, pubkeys:any, walletId:string) {
+    let tag = TAG + " | update_pubkeys | "
+    try {
+        log.info(tag,"input: ",{username,pubkeys,walletId})
+        let saveActions = []
         //generate addresses
         let output:any = {}
         output.work = []
 
+        let allPubkeys = []
+        let PubkeyMap = {}
         for (let i = 0; i < pubkeys.length; i++) {
             let pubkeyInfo = pubkeys[i]
-            log.info(tag,"pubkeyInfo: ",pubkeyInfo)
+            allPubkeys.push(pubkeyInfo.pubkey)
+            PubkeyMap[pubkeyInfo.pubkey] = pubkeyInfo
+        }
+        //remove duplicates
+        allPubkeys = Array.from(new Set(allPubkeys))
 
-            if(!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
+        //get pubkeys from mongo
+        log.info(tag,"allPubkeys: ",allPubkeys)
+        let allKnownPubkeys = await pubkeysDB.find({"pubkey" : {"$in" : allPubkeys}})
+        log.info(tag,"allKnownPubkeys: ",allKnownPubkeys)
 
-            //if eth use master
-            if(pubkeyInfo.coin === 'ETH'){
-                //register to blocknative
-                blocknative.submitAddress("ETH",pubkeyInfo.master)
+        //
+        let knownPubkeys = []
+        for(let i = 0; i < allKnownPubkeys.length; i++){
+            knownPubkeys.push(allKnownPubkeys[i].pubkey)
+        }
+        log.info(tag,"allKnownPubkeys: ",allKnownPubkeys.length)
+        log.info(tag,"allPubkeys: ",allPubkeys.length)
+        if(allPubkeys.length > allKnownPubkeys.length){
+            //build diff array known
+            let unknown = allPubkeys.filter(x => !knownPubkeys.includes(x));
+            log.info(tag,"unknown: ",unknown)
+            log.info(tag,"Registering pubkeys : ",unknown.length)
 
-                let address = pubkeyInfo.master
-                let coin = pubkeyInfo.symbol
-                redis.sadd(address+":accounts", account)
-                redis.hset(address, "lastUpdate", new Date().getTime())
-                redis.hset(address, "address", address)
-                redis.hset(address, "account", account)
-                redis.hset(address, "coin", pubkeyInfo.symbol)
-                redis.hset(address, "network", coin)
+            //TODO register unkonw!
 
-                let work = {
-                    coin,
-                    queueId:uuid.generate(),
-                    account,
-                    address,
-                    inserted: new Date().getTime()
+            //if(BALANCE_ON_REGISTER){} //TODO dont return till work complete
+            for(let i = 0; i < unknown.length; i++){
+                let pubkey = unknown[i]
+                let pubkeyInfo = PubkeyMap[pubkey]
+                //save to mongo
+                let entryMongo:any = {
+                    coin:pubkeyInfo.coin,
+                    path:pubkeyInfo.path,
+                    script_type:pubkeyInfo.script_type,
+                    xpub:true,
+                    network:pubkeyInfo.network,
+                    created:new Date().getTime(),
+                    tags:[username,pubkeyInfo.coin,pubkeyInfo.network,walletId],
                 }
-                log.info("adding work: ",work)
-                output.work.push(work.queueId)
-                log.info("queue: ",coin.toUpperCase()+":address:queue:ingest")
-                let resultQue = await queue.createWork(coin.toUpperCase()+":address:queue:ingest",work)
-                log.info(tag,"resultQue: ",resultQue)
+
+                if(pubkeyInfo.type === "xpub" || pubkeyInfo.type === "zpub"){
+                    let xpub = pubkeyInfo.xpub
+
+                    entryMongo.pubkey = xpub
+                    entryMongo.xpub = true
+                    saveActions.push({insertOne:entryMongo})
+
+                    let queueId = await register_xpub(username,pubkeyInfo,walletId)
+
+                    //add to Mutex array for async xpub register option
+                    output.work.push(queueId)
+
+                } else if(pubkeyInfo.type === "address"){
+                    entryMongo.pubkey = pubkeyInfo.pubkey
+                    let queueId = await register_address(username,pubkeyInfo,walletId)
+                    output.work.push(queueId)
+                } else {
+                    log.error("Unhandled type: ",pubkeyInfo.type)
+                }
             }
 
-            if(pubkeyInfo.type === "xpub"){
-                let xpub = pubkeyInfo.xpub
-                //TODO deal with tpub
-                //
-                if(!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
-
-                //save info
-                redis.sadd(xpub+":accounts", account)
-                redis.hset(xpub, "xpub", xpub)
-                redis.hset(xpub, "account", account)
-                redis.hset(xpub, "coin", pubkeyInfo.coin)
-                redis.hset(xpub, "network", pubkeyInfo.symbol)
-                redis.hset(xpub, "type", pubkeyInfo.script_type)
-
-                //add to queue
-                let work = {
-                    queueId:uuid.generate(),
-                    account,
-                    xpub,
-                    inserted: new Date().getTime()
-                }
-                queue.createWork(pubkeyInfo.symbol.toUpperCase()+":xpub:queue:ingest",work)
-
-                //if zpub add zpub
-                if(pubkeyInfo.zpub){
-                    let work = {
-                        queueId:uuid.generate(),
-                        account,
-                        zpub:pubkeyInfo.zpub,
-                        inserted: new Date().getTime()
+            if (BALANCE_ON_REGISTER) {
+                output.results = []
+                //verifies balances returned are final
+                log.info(tag, " BALANCE VERIFY ON")
+                //let isDone
+                let isDone = false
+                while (!isDone) {
+                    //block on
+                    log.info(tag, "output.work: ", output.work)
+                    let promised = []
+                    for (let i = 0; i < output.work.length; i++) {
+                        let promise = redisQueue.blpop(output.work[i], 30)
+                        promised.push(promise)
                     }
-                    queue.createWork(pubkeyInfo.symbol.toUpperCase()+":zpub:queue:ingest",work)
-                    output.work.push(work.queueId)
-                }
 
-                //Mutex on xpub register
-                output.work.push(work.queueId)
-            } else if(pubkeyInfo.type === "address"){
-                let address = pubkeyInfo.pubkey
-                let coin = pubkeyInfo.symbol
-                redis.sadd(address+":accounts", account)
-                redis.hset(address, "address", address)
-                redis.hset(address, "account", account)
-                redis.hset(address, "coin", pubkeyInfo.symbol)
-                redis.hset(address, "network", coin)
+                    output.results = await Promise.all(promised)
 
-                //add to work
-                let work = {
-                    coin,
-                    queueId:uuid.generate(),
-                    account,
-                    address,
-                    inserted: new Date().getTime()
+                    isDone = true
                 }
-                log.info("adding work: ",work)
-                output.work.push(work.queueId)
-                queue.createWork(coin.toUpperCase()+":address:queue:ingest",work)
+            }
+
+            //save pubkeys in mongo
+            try {
+                let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
+                log.info(tag, "result: ", result)
+            } catch (e) {
+
+            }
+        } else {
+            log.info(tag," No new pubkeys! ")
+        }
+
+
+
+        log.info(tag," return object: ",output)
+        return output
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_pubkeys = async function (username: string, pubkeys: any, walletId: string) {
+    let tag = TAG + " | register_pubkeys | "
+    try {
+        log.info(tag, "input: ", {username, pubkeys, walletId})
+        let saveActions = []
+        //generate addresses
+        let output: any = {}
+        output.work = []
+
+        for (let i = 0; i < pubkeys.length; i++) {
+            let pubkeyInfo = pubkeys[i]
+            log.info(tag, "pubkeyInfo: ", pubkeyInfo)
+            if (!pubkeyInfo.coin) throw Error("Invalid pubkey required field: coin")
+            //hack missing symbol
+            if (!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
+            if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.coin)
+            if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.coin)
+
+            //if eth use master
+            if (pubkeyInfo.coin === 'ETH') {
+                //register to blocknative
+                blocknative.submitAddress("ETH", pubkeyInfo.master)
+            }
+
+            //save to mongo
+            let entryMongo: any = {
+                coin: pubkeyInfo.coin,
+                asset: pubkeyInfo.coin,
+                path: pubkeyInfo.path,
+                script_type: pubkeyInfo.script_type,
+                network: pubkeyInfo.network,
+                created: new Date().getTime(),
+                tags: [username, pubkeyInfo.coin, pubkeyInfo.network, walletId],
+            }
+
+            if (pubkeyInfo.type === "xpub") {
+                let xpub = pubkeyInfo.xpub
+
+                entryMongo.pubkey = xpub
+                entryMongo.xpub = xpub
+                entryMongo.xpub = true
+                entryMongo.type = 'xpub'
+                saveActions.push({insertOne: entryMongo})
+
+                let queueId = await register_xpub(username, pubkeyInfo, walletId)
+
+                //add to Mutex array for async xpub register option
+                output.work.push(queueId)
+
+            } else if (pubkeyInfo.type === "address") {
+                entryMongo.pubkey = pubkeyInfo.pubkey
+                entryMongo.master = pubkeyInfo.pubkey
+                entryMongo.address = pubkeyInfo.address
+                let queueId = await register_address(username, pubkeyInfo, walletId)
+
+                output.work.push(queueId)
+
             } else {
-                log.error("Unhandled type: ",pubkeyInfo.type)
+                log.error("Unhandled type: ", pubkeyInfo.type)
             }
         }
 
-        if(BALANCE_ON_REGISTER){
+        //save pubkeys in mongo
+        try {
+            let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
+            log.info(tag, "result: ", result)
+        } catch (e) {
+
+        }
+
+        if (BALANCE_ON_REGISTER) {
             output.results = []
             //verifies balances returned are final
-            log.info(tag," BALANCE VERIFY ON")
+            log.info(tag, " BALANCE VERIFY ON")
             //let isDone
             let isDone = false
-            while(!isDone){
+            while (!isDone) {
                 //block on
-                //TODO await.all faster?
-                for(let i = 0; i < output.work.length; i++ ){
-
-                    //TODO does this block the entire server??? wat???
-                    let resultSync = await redisQueue.blpop(output.work[i],60)
-                    log.info(tag,"resultSync: ",resultSync)
-                    resultSync = JSON.parse(resultSync[1])
-                    resultSync.id = output.work[i]
-                    //save value into redis
-
-                    //save into output
-                    output.results.push(resultSync)
+                log.info(tag, "output.work: ", output.work)
+                let promised = []
+                for (let i = 0; i < output.work.length; i++) {
+                    let promise = redisQueue.blpop(output.work[i], 30)
+                    promised.push(promise)
                 }
+
+                output.results = await Promise.all(promised)
+
                 isDone = true
             }
         }
 
 
-        log.info(tag," return object: ",output)
+        log.info(tag, " return object: ", output)
         return output
     } catch (e) {
         console.error(tag, "e: ", e)
