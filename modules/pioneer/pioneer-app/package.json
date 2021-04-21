@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "7.1.25",
+  "version": "7.1.27",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
     "@pioneer-platform/eth-crypto": "^6.2.3",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/nedb": "latest",
-    "@pioneer-platform/pioneer": "^7.0.26",
+    "@pioneer-platform/pioneer": "^7.0.28",
     "@pioneer-platform/pioneer-coins": "latest",
     "@pioneer-platform/pioneer-config": "^6.3.30",
     "@pioneer-platform/pioneer-events": "^7.1.2",
@@ -36,7 +36,7 @@
     "cli-table": "^0.3.6",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.2.0",
-    "eosjs": "^21.0.3",
+    "eosjs": "^21.0.4",
     "fetch": "^1.1.0",
     "fs-extra": "^9.0.1",
     "node-fetch": "^2.6.1",

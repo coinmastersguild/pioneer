@@ -81,6 +81,8 @@ export default store => {
 
     for(let i = 0; i < data.wallets.length; i++){
       let wallet = data.wallets[i]
+      console.log("wallet: ",wallet)
+
       store.commit('registerWallet',wallet)
     }
 

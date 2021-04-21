@@ -27,6 +27,7 @@ let FAUCET_ADDRESSES = {
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
 
+
 let run_test = async function(){
     try{
         console.log("*** Running test module ***")
@@ -44,7 +45,7 @@ let run_test = async function(){
             username,
             pioneerApi:true,
             spec:urlSpec,
-            queryKey,
+            queryKey:"asasdfgadsfgdsfg",
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
@@ -53,12 +54,14 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,isTestnet);
 
         let info = await Wallet.init()
-        // console.log("INFO: ",info)
+        console.log("INFO: ",info)
 
-        // // console.log("total Value: ",info.totalValueUsd)
-        //
+        console.log("total Value: ",info.totalValueUsd)
+
+        //expect masters
+
         // let resultForget = await Wallet.forget()
-        //console.log("resultForget: ",resultForget.data)
+        // console.log("resultForget: ",resultForget.data)
 
         // let info2 = await Wallet.getInfo()
         // console.log("info2: ",info2)
@@ -98,16 +101,16 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
         // let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
         // let amount = "100"
         // let memo = ""
-
+        //
         // let transfer = {
         //     coin:"RUNE",
         //     addressTo:address,

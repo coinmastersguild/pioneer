@@ -27,19 +27,34 @@ let FAUCET_ADDRESSES = {
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
 
+
+let walletKeepkeyWatch = require('./data/keepkey.watch.wallet.json')
+
 let run_test = async function(){
     try{
         console.log("*** Running test module ***")
 
         let isTestnet = null
 
-        let context = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
+        //keepkey
+        let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
+
+        // //wallet old
+        // let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
 
         //pioneer
         let config = {
             isTestnet:false,
             blockchains,
+
+            type:'pioneer',
             mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+
+            // type:'keepkey',
+            // hardware:true,
+            // wallet:walletKeepkeyWatch,
+
+
             context,
             username,
             pioneerApi:true,
@@ -50,7 +65,7 @@ let run_test = async function(){
         }
 
         //init wallet offline
-        let Wallet = new WalletClass('pioneer',config,isTestnet);
+        let Wallet = new WalletClass(config.type,config,isTestnet);
 
         let info = await Wallet.init()
         // console.log("INFO: ",info)
@@ -58,7 +73,7 @@ let run_test = async function(){
         // // console.log("total Value: ",info.totalValueUsd)
         //
         // let resultForget = await Wallet.forget()
-        //console.log("resultForget: ",resultForget.data)
+        // console.log("resultForget: ",resultForget.data)
 
         // let info2 = await Wallet.getInfo()
         // console.log("info2: ",info2)
@@ -98,28 +113,28 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
-        // let amount = "100"
-        // let memo = ""
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
 
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
+        let amount = "1"
+        let memo = ""
+
+        let transfer = {
+            coin:"RUNE",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         // let intent = {
         //     coin:"RUNE",

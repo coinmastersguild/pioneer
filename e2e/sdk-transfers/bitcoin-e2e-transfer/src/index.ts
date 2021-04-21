@@ -104,7 +104,7 @@ const test_service = async function () {
             eventPairReceived = true
         })
 
-        let seedChains = ['bitcoin']
+        let seedChains = ['bitcoin','thorchain']
         await app.init(seedChains)
 
         //pair sdk
@@ -148,12 +148,12 @@ const test_service = async function () {
 
         //get address from faucet
         //TODO get this from api
-        let address = "0xc3affff54122658b89c31183cec4f15514f34624"
+        let address = "bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h"
 
         //send to faucet
         let sendPayload:any = {
             blockchain:BLOCKCHAIN,
-            asset:'ETH',
+            asset:'BTC',
             amount:TEST_AMOUNT,
             address,
         }

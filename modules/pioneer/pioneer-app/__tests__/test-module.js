@@ -30,12 +30,12 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 //console.log("password: ",password)
 
 let TEST_COINS = [
-    'BTC',
-    'BCH',
-    'ETH',
-    // 'ATOM',
-    'BNB',
-    'LTC'
+    // 'BTC',
+    // 'BCH',
+    // 'ETH',
+    // // 'ATOM',
+    // 'BNB',
+    // 'LTC'
 ]
 
 let run_test = async function(){
@@ -45,65 +45,33 @@ let run_test = async function(){
 
         //if no config
         if(!config){
-            console.log("First time startup")
-
-            // software 1
-            let wallet1 = {
-                mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
-                password
-            }
-
-            //get master for seed
-            let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
-            wallet1.masterAddress = walletEth.masterAddress
-
-            console.log("wallet1: ",wallet1)
-            //create wallet files
-            let successCreate = await App.createWallet('software',wallet1)
-            console.log("successCreate: ",successCreate)
-
-
-            let wallet2 = {
-                mnemonic:process.env['WALLET_MAINNET_DEV_NEW'],
-                password
-            }
-
-            //get master for seed
-            let wallet2Eth = await ethCrypto.generateWalletFromSeed(wallet2.mnemonic)
-            wallet2.masterAddress = wallet2Eth.masterAddress
-
-            console.log("wallet2: ",wallet2)
-            //create wallet files
-            let successCreate2 = await App.createWallet('software',wallet2)
-            console.log("successCreate2: ",successCreate2)
-
-            //init config
-            //throw Error("Must setup!")
-            //create
-            //init config
-            await App.initConfig("english");
-            // App.updateConfig({isTestnet:true});
-            App.updateConfig({username});
-            App.updateConfig({temp:password});
-            App.updateConfig({created: new Date().getTime()});
+            console.log("First time startup (run pair multi)")
 
         } else {
             config.password = password
             config.username = username
 
+            console.log("config: ",config)
+            config.blockchains = ['bitcoin','ethereum','thorchain']
+
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("C5K4ES")
+            // let pairResult = await App.pair("YWYPQH")
             // console.log("pairResult: ",pairResult)
 
             //get wallets
-            // let wallets = await App.getWallets()
-            // //console.log("wallets: ",wallets)
-            //
-            // let context = wallets[0]
-            // if(!context) throw Error("No Wallets on startup!")
+            let wallets = await App.getWallets()
+            // console.log("wallets: ",wallets)
+
+            let contextName = App.context()
+            console.log("contextName: ",contextName)
+
+            let context = wallets[contextName]
+
+
+            if(!context) throw Error("No Wallets on startup!")
 
             //for each context
 

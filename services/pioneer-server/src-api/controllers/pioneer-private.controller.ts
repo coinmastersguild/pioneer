@@ -225,6 +225,8 @@ export class pioneerPrivateController extends Controller {
             if(!accountInfo) throw Error("unknown token! token:"+authorization)
             log.info(tag,"accountInfo: ",accountInfo)
 
+
+
             let walletInfo:any
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
@@ -234,8 +236,12 @@ export class pioneerPrivateController extends Controller {
                 let username = accountInfo.username
                 if(!username){
                     log.error(tag,"invalid accountInfo: ",accountInfo)
-                    throw Error("invalid token info! token:"+authorization)
+                    throw Error("unknown token. token:"+authorization)
                 }
+                //
+                let isKnownWallet = await redis.sismember(username+':wallets',walletId)
+                log.info(tag,"isKnownWallet: ",isKnownWallet)
+
                 //get user context
                 if(!walletId){
                     let userInfo = await redis.hgetall(username)
@@ -244,55 +250,42 @@ export class pioneerPrivateController extends Controller {
                     if(!walletId) throw Error("No walletId on username! username: "+username)
                 }
 
-                //get cache
-                walletInfo = await redis.get(accountInfo.username+":"+walletId+":cache:walletInfo")
+                walletInfo = {}
+                log.debug(tag,"user info NOT cached!: ")
+                log.info(tag,"walletId: ",walletId)
+                //get pubkeys from mongo with walletId tagged
+                let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [walletId]}})
+                log.info(tag,"pubkeysMongo: ",pubkeysMongo)
 
-                if(walletInfo){
-                    log.info(tag,"user info cached!: ")
-                    log.debug(tag,"user info cached!: ",walletInfo)
-                    try{
-                        walletInfo = JSON.parse(walletInfo)
-                        walletInfo.username = username
-                        return walletInfo;
-                    }catch(e){
-                        throw Error("103: invalid cache!")
-                    }
-                }else{
-                    walletInfo = {}
-                    log.debug(tag,"user info NOT cached!: ")
-                    log.info(tag,"walletId: ",walletId)
-                    //get pubkeys from mongo with walletId tagged
-                    let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [walletId]}})
-                    log.info(tag,"pubkeysMongo: ",pubkeysMongo)
+                //reformat
+                let pubkeys:any = []
+                let masters:any = {}
+                for(let i = 0; i < pubkeysMongo.length; i++){
+                    let pubkeyInfo = pubkeysMongo[i]
+                    delete pubkeyInfo._id
+                    //TODO validate pubkeys?
 
-                    //reformat
-                    let pubkeys:any = []
-
-                    for(let i = 0; i < pubkeysMongo.length; i++){
-                        let pubkeyInfo = pubkeysMongo[i]
-                        delete pubkeyInfo._id
-                        //TODO validate pubkeys?
-
-                        pubkeys.push(pubkeyInfo)
-                    }
-
-                    //build wallet info
-                    walletInfo.pubkeys = pubkeys
-
-                    //get asset balances
-                    let assetBalances = await redis.hgetall(username+":assets:"+walletId)
-                    log.info(tag,"assetBalances: ",assetBalances)
-                    walletInfo.balances = assetBalances
-                    //get value of portfolio
-                    let valuePortfolio = await coincap.valuePortfolio(assetBalances)
-                    log.info(tag,"valuePortfolio: ",valuePortfolio)
-                    walletInfo.valueUsds = valuePortfolio.values
-                    walletInfo.totalValueUsd = valuePortfolio.total
-                    walletInfo.username = username
-                    walletInfo.walletId = walletId
-                    walletInfo.apps = await redis.smembers(username+":apps")
-                    await redis.setex(accountInfo.username+":"+walletId+":cache:walletInfo",PIONEER_INFO_CACHE_TIME,JSON.stringify(walletInfo))
+                    masters[pubkeyInfo.coin] = pubkeyInfo.master
+                    pubkeys.push(pubkeyInfo)
                 }
+
+                //build wallet info
+                walletInfo.pubkeys = pubkeys
+                walletInfo.masters = masters
+
+                //get asset balances
+                let assetBalances = await redis.hgetall(username+":assets:"+walletId)
+                log.info(tag,"assetBalances: ",assetBalances)
+                walletInfo.balances = assetBalances
+                //get value of portfolio
+                let valuePortfolio = await coincap.valuePortfolio(assetBalances)
+                log.info(tag,"valuePortfolio: ",valuePortfolio)
+                walletInfo.valueUsds = valuePortfolio.values
+                walletInfo.totalValueUsd = valuePortfolio.total
+                redis.hset(username,'totalValueUsd',valuePortfolio.total)
+                walletInfo.username = username
+                walletInfo.walletId = walletId
+                walletInfo.apps = await redis.smembers(username+":apps")
 
                 return walletInfo
             }else{
@@ -302,6 +295,88 @@ export class pioneerPrivateController extends Controller {
                 }
             }
 
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    @Get('/user')
+    public async user(@Header('Authorization') authorization: string): Promise<any> {
+        let tag = TAG + " | info | "
+        try{
+            log.info(tag,"queryKey: ",authorization)
+
+            let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) {
+                return {
+                    success:false,
+                    error:"QueryKey not registerd!"
+                }
+            } else {
+                log.info(tag,"accountInfo: ",accountInfo)
+                let username = accountInfo.username
+                if(!username){
+
+                }
+                let userInfo = await redis.hgetall(username)
+                log.info(tag,"userInfo: ",userInfo)
+                if(Object.keys(userInfo).length === 0){
+                    return {
+                        success:false,
+                        error:"QueryKey not paired!"
+                    }
+                }else{
+                    //wallets
+                    let wallets = await redis.smembers(username+":wallets")
+                    userInfo.wallets = wallets
+                    return userInfo
+                }
+            }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+
+    /**
+     Get the balances for a given username
+     */
+    @Get('/context')
+    public async context(@Header('Authorization') authorization): Promise<any> {
+        let tag = TAG + " | balance | "
+        try{
+            log.debug(tag,"queryKey: ",authorization)
+
+
+            let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) throw Error("unknown token! token:"+authorization)
+            log.info(tag,"accountInfo: ",accountInfo)
+
+            let walletInfo:any
+            if(accountInfo){
+                let username = accountInfo.username
+                if(!username){
+                    log.error(tag,"invalid accountInfo: ",accountInfo)
+                    throw Error("unknown token. token:"+authorization)
+                }
+                let userInfo = await redis.hgetall(username)
+                log.info(tag,"userInfo: ",userInfo)
+                return userInfo.context
+            } else {
+                throw Error("102: invalid auth token!")
+            }
         }catch(e){
             let errorResp:Error = {
                 success:false,
@@ -740,7 +815,6 @@ export class pioneerPrivateController extends Controller {
             let output:any = {}
             let newKey
             log.info(tag,"body: ",body)
-
             if(!body.walletName) throw Error("walletName required on body!")
 
             //if auth found in redis
@@ -780,7 +854,7 @@ export class pioneerPrivateController extends Controller {
             let userInfoMongo:any = await usersDB.findOne({username})
             log.info(tag,"userInfoMongo: ",userInfoMongo)
 
-            if(!userInfoMongo){
+            if(newKey){
                 //create user
                 let userInfo:any = {
                     registered: new Date().getTime(),
@@ -789,7 +863,10 @@ export class pioneerPrivateController extends Controller {
                     verified:true,
                     wallets:[body.walletName] // just one wallet for now
                 }
-                output.resultSaveUserDB = await usersDB.insert(userInfo)
+
+                if(!userInfoMongo){
+                    output.resultSaveUserDB = await usersDB.insert(userInfo)
+                }
 
                 let redisSuccess = await redis.hmset(body.username,userInfo)
                 log.info(tag,"redisSuccess: ",redisSuccess)
@@ -809,11 +886,17 @@ export class pioneerPrivateController extends Controller {
 
                 //set user context to only wallet
                 await redis.hset(body.username,'context',body.walletName)
+
+                //add to wallet set
+                await redis.sadd(username+':wallets',body.walletName)
             }
 
             //get wallets
             let userWallets = userInfoMongo.wallets
             if(!userWallets) throw Error("No wallets found!")
+
+            //add to wallet set
+            await redis.sadd(username+':wallets',body.walletName)
 
             //if current ! found
             if(userWallets.indexOf(body.walletName) < 0){
@@ -826,7 +909,10 @@ export class pioneerPrivateController extends Controller {
 
                 //set current context to newly registred wallet
                 //TODO flag to leave context? (silent register new wallet?)
-                await redis.hset(body.username,'context',body.walletName)
+                //await redis.hset(body.username,'context',body.walletName)
+
+                //push new wallet to wallets
+                output.updateDBUser = await usersDB.update({},{ $addToSet: { "wallets": body.walletName } })
             } else {
                 //wallet already known!
                 log.info(tag,"Wallet already known! walletName: ",body.walletName)
@@ -864,7 +950,7 @@ export class pioneerPrivateController extends Controller {
 
     @Post('/import')
     public async import(@Header('Authorization') authorization: string, @Body() body: importBody): Promise<any> {
-        let tag = TAG + " | register | "
+        let tag = TAG + " | import | "
         try{
             let output:any = {}
             let newKey

@@ -13,7 +13,8 @@
     "docker:push": ""
   },
   "dependencies": {
-    "@babel/runtime": "^7.13.10",
+    "@babel/runtime": "^7.13.16",
+    "@pioneer-platform/eth-crypto": "^6.2.3",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "latest",

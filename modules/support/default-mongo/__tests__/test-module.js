@@ -46,6 +46,36 @@ let run_test = async function(){
         // let resp = await usersDB.findOne()
         // console.log(resp)
 
+        //push second wallet
+        //make sure eunique
+        // let respPush = await usersDB.update({},{ $addToSet: { "wallets": "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json" } })
+        // console.log(respPush)
+
+
+        let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
+        let walletId2 = '0xc3affff54122658b89c31183cec4f15514f34624.wallet.json'
+
+        //get pubkeys by user
+        let resp = await pubkeysDB.find({tags:{$all:[walletId]}})
+        for(let i = 0; i < resp.length; i++){
+            let pubkey = resp[i]
+            console.log("pubkey: ",pubkey.network)
+        }
+
+        // let resp2 = await pubkeysDB.find({tags:{$all:[walletId2]}})
+        // console.log(resp2.length)
+        // for(let i = 0; i < resp2.length; i++){
+        //     let pubkey = resp2[i]
+        //     console.log("pubkey: ",pubkey.network)
+        // }
+
+
+        //get pubkeys by wallet
+
+        //get pubkeys by user by network
+
+        //get pubkeys by wallet by network
+
 
         //
         // let tx = { asset: 'ETH',

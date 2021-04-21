@@ -32,7 +32,7 @@ let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
 let run_test = async function(){
     try{
         let config = {
-            queryKey,
+            queryKey:"efcadc18-4170-423d-ad27-605bed7e6b88",
             username,
             spec
         }
@@ -61,8 +61,11 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        let info = await pioneer.instance.Info(walletId)
-        console.log("info: ",info.data)
+        let user = await pioneer.instance.User()
+        console.log("info: ",user)
+
+        // let info = await pioneer.instance.Info(walletId)
+        // console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data

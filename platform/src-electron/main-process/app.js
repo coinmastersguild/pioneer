@@ -245,10 +245,10 @@ export async function onStart(event,data) {
     log.info("walletFiles: ",walletFiles)
 
     if(!config.spec || true){
-      config.spec = "https://pioneers.dev/spec/swagger.json"
-      config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
-      // config.spec = "http://127.0.0.1:9001/spec/swagger.json"
-      // config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
+      // config.spec = "https://pioneers.dev/spec/swagger.json"
+      // config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
+      config.spec = "http://127.0.0.1:9001/spec/swagger.json"
+      config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
       //config.spec = "https://pioneers.dev/spec/swagger.json"
     }
 
@@ -279,6 +279,9 @@ export async function onStart(event,data) {
     let resultInit = await App.init(config)
     log.info(tag,"resultInit: ",resultInit)
 
+    //push init
+    event.sender.send('init',resultInit)
+
     event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
     event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
 
@@ -293,6 +296,7 @@ export async function onStart(event,data) {
       //TODO messages
       //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
     })
+
     //TODO blocks
     //txs
     //requests

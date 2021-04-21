@@ -1,7 +1,7 @@
-// require("dotenv").config({path:'./../../.env'})
-// require("dotenv").config({path:'../../../.env'})
-// require("dotenv").config({path:'../../../../.env'})
-// require("dotenv").config({path:'../../../../../.env'})
+require("dotenv").config({path:'./../../.env'})
+require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'../../../../../.env'})
 
 const prettyjson = require('prettyjson');
 let SDK = require('../lib/index.js')
@@ -25,7 +25,7 @@ let run_test = async function(){
 
         let config = {
             queryKey,
-            // username,
+            username,
             spec,
             wss,
             service:'asgardxasdas',
@@ -47,8 +47,10 @@ let run_test = async function(){
         // let code = await app.createPairingCode()
         // console.log("code: ",code)
 
+        console.log("app: ",app.context)
+
         //is paired?
-        let info = await app.getInfo()
+        let info = await app.getUserInfo()
         console.log("info: ",info)
 
         if(!info || info.error){
@@ -66,9 +68,21 @@ let run_test = async function(){
             let code = await app.createPairingCode()
             console.log("code: ",code)
         } else {
-            //get user
-            let user = await app.getUserParams()
-            console.log("user: ",user)
+            //get user wallets
+            let wallets = await app.wallets
+            console.log("wallets: ",wallets)
+
+            //get current context
+            let context = app.context
+            console.log("context: ",context)
+            if(context){
+                //get user
+                let user = await app.getUserParams()
+                console.log("user: ",user)
+            }
+            //switch context
+
+
 
             //binance
             // const address = await user.binance.client.getAddress();
@@ -81,18 +95,18 @@ let run_test = async function(){
 
             //ETH
 
-            //intergration test asgard-exchange
-            let blockchains = Object.keys(user.clients)
-            console.log("blockchains: ",blockchains)
-
-            for(let i = 0; i < blockchains.length; i++){
-                let blockchain = blockchains[i]
-                let client = user.clients[blockchain]
-
-                let balance = await client.getBalance()
-                //console.log(blockchain+ " balance: ",balance)
-                console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
-            }
+            // //intergration test asgard-exchange
+            // let blockchains = Object.keys(user.clients)
+            // console.log("blockchains: ",blockchains)
+            //
+            // for(let i = 0; i < blockchains.length; i++){
+            //     let blockchain = blockchains[i]
+            //     let client = user.clients[blockchain]
+            //
+            //     let balance = await client.getBalance()
+            //     //console.log(blockchain+ " balance: ",balance)
+            //     console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
+            // }
 
             //
             // //send eth

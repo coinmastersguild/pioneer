@@ -7,7 +7,7 @@
     </div>
     <q-page class="q-pt-xs" >
 
-<!--      Wallets: {{wallets}}-->
+      Wallets: {{wallets}}
 
       <div class="q-pa-md">
         <q-btn-dropdown

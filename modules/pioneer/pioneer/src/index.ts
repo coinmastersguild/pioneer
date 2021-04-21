@@ -365,9 +365,9 @@ module.exports = class wallet {
                         break;
                     case HDWALLETS.keepkey:
                         log.debug(tag," Keepkey mode! ")
-                        //if(!config.wallet) throw Error("Config is missing watch wallet!")
-                        //if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
-                        //if(!config.wallet.pubkeys) throw Error("Config watch wallet missing pubkeys!")
+                        if(!config.wallet) throw Error("Config is missing watch wallet!")
+                        if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
+                        if(!config.wallet.pubkeys) throw Error("Config watch wallet missing pubkeys!")
 
                         //load wallet from keepkey
                         this.WALLET = wallet
@@ -431,7 +431,7 @@ module.exports = class wallet {
                         },
                         queryKey:this.queryKey,
                         auth:this.auth,
-                        provider:'shapeshift'
+                        provider:'bitcoin'
                     }
                     log.info("registerBody: ",register)
                     log.debug("this.pioneerClient: ",this.pioneerClient)
@@ -441,7 +441,7 @@ module.exports = class wallet {
                     let walletInfo = await this.getInfo(this.context)
                     log.info("walletInfo: ",walletInfo)
 
-                    this.WALLET_BALANCES = walletInfo.balances
+                    if(walletInfo && walletInfo.balances) this.WALLET_BALANCES = walletInfo.balances
                     //emitter.info = walletInfo
 
                     return walletInfo

@@ -45,6 +45,13 @@ const uuid = require('short-uuid');
 let blocknative = require("@pioneer-platform/blocknative-client")
 blocknative.init()
 
+let {
+    supportedBlockchains,
+    supportedAssets,
+    getPaths,
+    get_address_from_xpub
+} = require('@pioneer-platform/pioneer-coins')
+
 //const bcrypt = require('bcryptjs');
 var numbro = require("numbro");
 
@@ -80,6 +87,7 @@ module.exports = {
     },
 }
 
+
 let register_xpub = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_xpub | "
     try {
@@ -98,9 +106,15 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
         //if zpub add zpub
         let queueId = uuid.generate()
         if(pubkey.zpub){
+            //get master
+            let account = 0
+            let index = 0
+            let address = await get_address_from_xpub(pubkey.xpub,pubkey.scriptType,pubkey.coin,account,index,false,false)
+
             let work = {
                 type:'zpub',
                 pubkey:pubkey.zpub,
+                master:address,
                 coin:pubkey.coin,
                 network:pubkey.coin,
                 asset:pubkey.coin,
@@ -111,11 +125,16 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
             }
             await queue.createWork("pioneer:pubkey:ingest",work)
         } else if (pubkey.xpub){
-            //add to queue
+            //get master
+            let account = 0
+            let index = 0
+            let address = await get_address_from_xpub(pubkey.xpub,pubkey.scriptType,pubkey.coin,account,index,false,false)
+
             let work = {
                 type:'xpub',
                 coin:pubkey.coin,
                 pubkey:pubkey.xpub,
+                master:address,
                 network:pubkey.coin,
                 asset:pubkey.coin,
                 queueId,
@@ -160,6 +179,7 @@ let register_address = async function (username:string, pubkey:any, walletId:str
             queueId,
             username,
             address,
+            master:address,
             inserted: new Date().getTime()
         }
         log.info("adding work: ",work)
@@ -220,6 +240,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 let entryMongo:any = {
                     coin:pubkeyInfo.coin,
                     path:pubkeyInfo.path,
+                    master:pubkeyInfo.master,
                     script_type:pubkeyInfo.script_type,
                     xpub:true,
                     network:pubkeyInfo.network,
@@ -246,6 +267,8 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 } else {
                     log.error("Unhandled type: ",pubkeyInfo.type)
                 }
+
+                saveActions.push({insertOne: entryMongo})
             }
 
             if (BALANCE_ON_REGISTER) {
@@ -274,7 +297,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
                 log.info(tag, "result: ", result)
             } catch (e) {
-
+                log.error(tag,"Failed to update pubkeys! e: ",e)
             }
         } else {
             log.info(tag," No new pubkeys! ")
@@ -307,6 +330,7 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
             if (!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
             if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.coin)
             if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.coin)
+            if (!pubkeyInfo.master) throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.coin)
 
             //if eth use master
             if (pubkeyInfo.coin === 'ETH') {
@@ -357,7 +381,7 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
             let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
             log.info(tag, "result: ", result)
         } catch (e) {
-
+            log.error(tag,"e: ",e)
         }
 
         if (BALANCE_ON_REGISTER) {

@@ -63,7 +63,7 @@ let IS_LOGGED_IN = false;
 
 let DATABASES:any = {}
 
-let WALLET_CONTEXT = 0
+let WALLET_CONTEXT = ""
 let ACCOUNT = ''
 let WALLET_PUBLIC:any = {}
 let WALLET_PRIVATE:any = {}
@@ -75,7 +75,7 @@ let SOCKET_CLIENT:any
 
 //
 let TOTAL_VALUE_USD_LOADED:number = 0
-let WALLETS_LOADED: any[] = []
+let WALLETS_LOADED: any = {}
 let IS_SEALED =false
 let MASTER_MAP:any = {}
 let WALLET_VALUE_MAP:any = {}
@@ -100,6 +100,9 @@ module.exports = {
     },
     initConfig: function (language: any) {
         return innitConfig(language);
+    },
+    context: function () {
+        return WALLET_CONTEXT;
     },
     getAutonomousStatus: function () {
         return AUTONOMOUS;
@@ -164,12 +167,12 @@ module.exports = {
         return getWallets();
     },
     selectWallet: function (selection:string) {
-        for(let i = 0; i < WALLETS_LOADED.length; i++){
-            let wallet = WALLETS_LOADED[i]
-            log.debug("wallet: ",wallet)
-            //if(wallet)
+        if(WALLETS_LOADED[selection]){
+            WALLET_CONTEXT = selection
+            return true;
+        } else {
+            throw Error("invalid wallet name! selection: "+selection)
         }
-        return true;
     },
     unlockWallet: function (wallet:string,password:string) {
         return unlock_wallet(wallet,password);
@@ -1021,6 +1024,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         if(!config.blockchains){
             config.blockchains = ['bitcoin','ethereum','thorchain']
+            log.info(tag,"Config Blockchains not set! default min",config.blockchains)
         }
 
         //verify wallet_data
@@ -1042,50 +1046,78 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //Load wallets if setup
         for(let i = 0; i < wallets.length; i++){
             let walletName = wallets[i]
-            log.debug(tag,"walletName: ",walletName)
+            log.info(tag,"walletName: ",walletName)
             let walletFile = getWallet(walletName)
-            log.debug(tag,"walletFile: ",walletFile)
+            log.info(tag,"walletFile: ",walletFile)
             if(!walletFile.TYPE) walletFile.TYPE = walletFile.type
             if(walletFile.TYPE === 'keepkey'){
+                log.info(tag,"Loading keepkey wallet! ")
+
                 if(!walletFile.pubkeys) throw Error("102: invalid keepkey wallet!")
                 //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
+
+                //if wallet paths custom load
+                log.info(tag,"walletName: ",walletName)
+                let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
+                let watchWallet = getWalletPublic(fileNameWatch)
+                let walletPaths
+                if(watchWallet){
+                    walletPaths = watchWallet.paths
+                } else {
+                    log.info(tag,"walletFile: ",walletFile)
+                }
+
+                //load
                 let configPioneer = {
-                    isTestnet,
                     hardware:true,
                     vendor:"keepkey",
                     blockchains:config.blockchains,
                     pubkeys:walletFile.pubkeys,
                     wallet:walletFile,
+                    context:walletName,
                     username:config.username,
                     pioneerApi:true,
                     spec:URL_PIONEER_SPEC,
                     queryKey:config.queryKey,
                     auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
-                    authProvider:'shapeshift'
+                    authProvider:'bitcoin'
                 }
                 log.debug(tag,"KEEPKEY init config: ",configPioneer)
                 let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
                 //init
                 let walletInfo = await wallet.init(KEEPKEY)
                 log.info(tag,"walletInfo: ",walletInfo)
-                WALLETS_LOADED.push(wallet)
+                WALLETS_LOADED[walletName] = wallet
 
                 //info
-                let info = await wallet.getInfo()
+                let info = await wallet.getInfo(walletName)
                 info.name = walletFile.username
                 info.type = 'keepkey'
                 output.wallets.push(info)
-                log.debug(tag,"info: ",info.totalValueUsd)
+                log.info(tag,"info: ",info)
+
+                //validate at least 1 pubkey per enabled blockchain
+                let pubkeyNetworks =  new Set()
+                for(let i = 0; i < info.pubkeys.length; i++){
+                    let pubkey = info.pubkeys[i]
+                    pubkeyNetworks.add(pubkey.coin)
+                }
+                log.info(tag,"pubkeyNetworks: ",pubkeyNetworks)
+
+                //TODO iterate over blockchains config and verify
+
+                //else register individual pubkeys until complete
+
 
                 //write pubkeys
-                let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
-                log.info(tag,"writePathPub: ",writePathPub)
-                let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
-                log.info(tag,"writeSuccessPub: ",writeSuccessPub)
+                // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
+                // log.info(tag,"writePathPub: ",writePathPub)
+                // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
+                // log.info(tag,"writeSuccessPub: ",writeSuccessPub)
 
                 //global total valueUSD
                 TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
-                WALLET_VALUE_MAP[configPioneer.username] = info.totalValueUsd
+                WALLET_VALUE_MAP[walletName] = info.totalValueUsd
             }else if(walletFile.TYPE === 'seedwords'){
                 //decrypt
                 // @ts-ignore
@@ -1103,7 +1135,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                 let mnemonic = await resultOut.decrypt()
 
-                //if wallet paths custom load
+                //Load public wallet file
+                //Loads wallet state and custom pathing
                 log.info(tag,"walletName: ",walletName)
                 let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
                 let watchWallet = getWalletPublic(fileNameWatch)
@@ -1119,6 +1152,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 let configPioneer:any = {
                     isTestnet,
                     mnemonic,
+                    context:walletName,
                     blockchains:config.blockchains,
                     username:config.username,
                     pioneerApi:true,
@@ -1132,17 +1166,24 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 log.info(tag,"configPioneer: ",configPioneer)
                 log.info(tag,"isTestnet: ",isTestnet)
                 let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
-                WALLETS_LOADED.push(wallet)
+                WALLETS_LOADED[walletName] = wallet
 
                 //init
                 let walletClient = await wallet.init()
 
                 //info
-                let info = await wallet.getInfo()
+                let info = await wallet.getInfo(walletName)
                 info.name = walletFile.username
                 info.type = 'software'
                 output.wallets.push(info)
-                log.debug(tag,"info: ",info.totalValueUsd)
+                log.info(tag,"info: ",info)
+
+                let pubkeyNetworks =  new Set()
+                for(let i = 0; i < info.pubkeys.length; i++){
+                    let pubkey = info.pubkeys[i]
+                    pubkeyNetworks.add(pubkey.coin)
+                }
+                log.info(tag,"pubkeyNetworks: ",pubkeyNetworks)
 
                 let walletInfoPub = {
                     WALLET_ID:walletFile.username,
@@ -1163,7 +1204,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                 //global total valueUSD
                 TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
-                WALLET_VALUE_MAP[configPioneer.username] = info.totalValueUsd
+                WALLET_VALUE_MAP[walletName] = info.totalValueUsd
 
             }else{
                 throw Error("unhandled wallet type! "+walletFile.TYPE)
@@ -1173,9 +1214,18 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         output.WALLET_VALUE_MAP = WALLET_VALUE_MAP
         log.debug(tag,"TOTAL_VALUE_USD_LOADED: ",TOTAL_VALUE_USD_LOADED)
 
+        //get remote user info
+        let userInfo = await network.instance.User()
+        userInfo = userInfo.data
+        log.info(tag,"userInfo: ",userInfo)
+        log.info(tag,"context: ",userInfo.context)
+        WALLET_CONTEXT = userInfo.context
 
         //after registered start socket
         //sub all to events
+        if(!config.username) throw Error("102: config.username not set!")
+        if(!config.queryKey) throw Error("103: config.queryKey not set!")
+
         let configEvents = {
             username:config.username,
             queryKey:config.queryKey,
@@ -1184,8 +1234,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //sub ALL events
         let clientEvents = new Events.Events(configEvents.wss,configEvents)
-        clientEvents.init()
-        clientEvents.pair()
+        await clientEvents.init()
+        await clientEvents.subscribeToKey()
+        await clientEvents.pair()
         //on blocks update lastBlockHeight
 
         //on payments update balances

@@ -65,7 +65,6 @@ export class SDK {
     private createPairingCode: () => Promise<any>;
     private queryKey: string;
     private service: string;
-    private getInfo: () => Promise<any>;
     private isTestnet: boolean;
     private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
     private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
@@ -76,6 +75,12 @@ export class SDK {
     private blockchains: any
     private startSocket: () => Promise<any>;
     private isPaired: boolean
+    private context: string;
+    private info: any;
+    private wallets: any[];
+    private totalValueUsd: number;
+    private getUserInfo: () => Promise<any>;
+    private getWalletInfo: () => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -92,7 +97,10 @@ export class SDK {
         this.queryKey = config.queryKey
         this.spec = config.spec
         this.clients = {}
+        this.context = ""
+        this.wallets = []
         this.events = {}
+        this.totalValueUsd = 0
         this.blockchains = []
         this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
@@ -117,6 +125,17 @@ export class SDK {
                 }
                 if(this.blockchains.length === 0) throw Error("Failed to init! must have blockchains!")
                 this.pioneerApi = await this.pioneerApi.init()
+
+                //log.info(tag,"this.pioneerApi: ",this.pioneerApi)
+                //get global info
+                let userInfo = await this.pioneerApi.User()
+                userInfo = userInfo.data
+                log.info(tag,"userInfo: ",userInfo)
+                if(!this.username)this.username = userInfo.username
+                this.wallets = userInfo.wallets
+                this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
+                this.context = userInfo.context
+
                 return this.pioneerApi
             }catch(e){
                 log.error(tag,e)
@@ -156,11 +175,19 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getInfo = async function () {
-            let tag = TAG + " | getInfo | "
+        this.getUserInfo = async function () {
+            let tag = TAG + " | getUserInfo | "
             try {
-                let result = await this.pioneerApi.Info()
-
+                let result = await this.pioneerApi.User()
+                return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getWalletInfo = async function () {
+            let tag = TAG + " | getWalletInfo | "
+            try {
+                let result = await this.pioneerApi.Info(this.context)
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -168,7 +195,7 @@ export class SDK {
         }
         // @ts-ignore
         this.sendToAddress = async function (intent:SendToAddress) {
-            let tag = TAG + " | getInfo | "
+            let tag = TAG + " | sendToAddress | "
             try {
 
                 //build a tx
@@ -213,9 +240,10 @@ export class SDK {
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
-                let result = await this.pioneerApi.Info()
+                let result = await this.pioneerApi.Info(this.context)
                 result = result.data
 
+                log.info(tag,"result: ",result)
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 

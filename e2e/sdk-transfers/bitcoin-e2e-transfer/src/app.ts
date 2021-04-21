@@ -18,7 +18,7 @@ let assert = require('assert')
 //test app
 let App = require("@pioneer-platform/pioneer-app")
 const log = require("@pioneer-platform/loggerdog")()
-
+const ethCrypto = require("@pioneer-platform/eth-crypto")
 //general dev envs
 let seed = process.env['WALLET_MAINNET_DEV_OLD']
 let password = process.env['WALLET_PASSWORD']
@@ -26,6 +26,7 @@ let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
 let spec = process.env['URL_PIONEER_SPEC']
 let wss = process.env['URL_PIONEER_SOCKET']
+
 
 export async function startApp() {
     let tag = " | app_assert_env_start | "
@@ -40,12 +41,16 @@ export async function startApp() {
         let config = await App.getConfig()
         assert(config === null)
 
-        let wallet1 = {
+        let wallet1:any = {
             isTestnet:true,
             mnemonic:seed,
             username:username,
             password
         }
+
+        //get master for seed
+        let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
+        wallet1.masterAddress = walletEth.masterAddress
 
         //create wallet files
         let successCreate = await App.createWallet('software',wallet1)

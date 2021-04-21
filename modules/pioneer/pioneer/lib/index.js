@@ -277,9 +277,12 @@ module.exports = /** @class */ (function () {
                         case 10: return [3 /*break*/, 19];
                         case 11:
                             log.debug(tag, " Keepkey mode! ");
-                            //if(!config.wallet) throw Error("Config is missing watch wallet!")
-                            //if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
-                            //if(!config.wallet.pubkeys) throw Error("Config watch wallet missing pubkeys!")
+                            if (!config.wallet)
+                                throw Error("Config is missing watch wallet!");
+                            if (!config.wallet.WALLET_PUBLIC)
+                                throw Error("Config watch wallet missing WALLET_PUBLIC!");
+                            if (!config.wallet.pubkeys)
+                                throw Error("Config watch wallet missing pubkeys!");
                             //load wallet from keepkey
                             this.WALLET = wallet;
                             log.info(tag, "IN paths: ", paths);
@@ -360,7 +363,7 @@ module.exports = /** @class */ (function () {
                                 },
                                 queryKey: this.queryKey,
                                 auth: this.auth,
-                                provider: 'shapeshift'
+                                provider: 'bitcoin'
                             };
                             log.info("registerBody: ", register);
                             log.debug("this.pioneerClient: ", this.pioneerClient);
@@ -372,7 +375,8 @@ module.exports = /** @class */ (function () {
                         case 23:
                             walletInfo = _k.sent();
                             log.info("walletInfo: ", walletInfo);
-                            this.WALLET_BALANCES = walletInfo.balances;
+                            if (walletInfo && walletInfo.balances)
+                                this.WALLET_BALANCES = walletInfo.balances;
                             //emitter.info = walletInfo
                             return [2 /*return*/, walletInfo];
                         case 24:
