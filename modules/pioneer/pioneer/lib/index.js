@@ -84,7 +84,7 @@ var ethCrypto = require("@pioneer-platform/eth-crypto");
 var coincap = require("@pioneer-platform/coincap");
 //All paths
 //TODO make paths adjustable!
-var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, nativeToBaseAmount = _a.nativeToBaseAmount, baseAmountToNative = _a.baseAmountToNative;
+var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, nativeToBaseAmount = _a.nativeToBaseAmount, baseAmountToNative = _a.baseAmountToNative, UTXO_COINS = _a.UTXO_COINS;
 //support
 var support = __importStar(require("./support"));
 var web3_utils_1 = require("web3-utils");
@@ -202,7 +202,7 @@ module.exports = /** @class */ (function () {
         };
         this.init = function (wallet) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _c, i, pubkey, _d, i, pubkey, _e, _f, _g, _h, _j, register, regsiterResponse, walletInfo, e_1;
+                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _c, blockchainsEnabled, i, pubkey, _d, i, pubkey, _e, _f, _g, _h, _j, register, regsiterResponse, walletInfo, e_1;
                 return __generator(this, function (_k) {
                     switch (_k.label) {
                         case 0:
@@ -250,6 +250,8 @@ module.exports = /** @class */ (function () {
                             log.debug("pubkeys ", this.pubkeys);
                             log.debug("pubkeys.length ", this.pubkeys.length);
                             log.debug("paths.length ", paths.length);
+                            log.debug("blockchainsEnabled: ", this.blockchains.length);
+                            blockchainsEnabled = this.blockchains.length;
                             i = 0;
                             _k.label = 6;
                         case 6:
@@ -475,48 +477,51 @@ module.exports = /** @class */ (function () {
         };
         this.getBalance = function (coin, address) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, output, master, e_3;
+                var tag, output, pubkey, e_3;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | getBalance | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 9, , 10]);
+                            _a.trys.push([1, 10, , 11]);
                             log.debug("coin detected: ", coin);
                             output = void 0;
-                            master = void 0;
+                            pubkey = void 0;
                             if (!(coin === "ETH")) return [3 /*break*/, 3];
                             log.debug("ETH detected ");
-                            return [4 /*yield*/, this.getMaster('ETH')];
+                            return [4 /*yield*/, this.PUBLIC_WALLET[coin].master];
                         case 2:
-                            master = _a.sent();
-                            return [3 /*break*/, 7];
+                            pubkey = _a.sent();
+                            return [3 /*break*/, 8];
                         case 3:
                             if (!(tokenData.tokens.indexOf(coin) >= 0 && coin !== 'EOS')) return [3 /*break*/, 5];
                             log.debug("token detected ");
                             return [4 /*yield*/, this.getMaster('ETH')];
                         case 4:
-                            master = _a.sent();
-                            return [3 /*break*/, 7];
-                        case 5: return [4 /*yield*/, this.getMaster(coin)];
-                        case 6:
-                            master = _a.sent();
-                            _a.label = 7;
+                            pubkey = _a.sent();
+                            return [3 /*break*/, 8];
+                        case 5:
+                            if (!(UTXO_COINS.indexOf(coin) >= 0)) return [3 /*break*/, 6];
+                            //get xpub/zpub
+                            pubkey = this.PUBLIC_WALLET[coin].pubkey;
+                            return [3 /*break*/, 8];
+                        case 6: return [4 /*yield*/, this.PUBLIC_WALLET[coin].master];
                         case 7:
-                            log.debug(tag, "this.pioneer: ", this.pioneerClient);
-                            if (!address)
-                                address = master;
-                            return [4 /*yield*/, this.pioneerClient.instance.GetAddressBalance({ coin: coin, address: address })];
+                            pubkey = _a.sent();
+                            _a.label = 8;
                         case 8:
+                            log.info(tag, "pubkey: ", pubkey);
+                            return [4 /*yield*/, this.pioneerClient.instance.GetPubkeyBalance({ coin: coin, pubkey: pubkey })];
+                        case 9:
                             output = _a.sent();
                             output = output.data;
                             return [2 /*return*/, output];
-                        case 9:
+                        case 10:
                             e_3 = _a.sent();
                             log.error(tag, "e: ", e_3);
                             throw e_3;
-                        case 10: return [2 /*return*/];
+                        case 11: return [2 /*return*/];
                     }
                 });
             });

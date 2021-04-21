@@ -17,6 +17,19 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+const axiosRetry = require('axios-retry');
+
+axiosRetry(axios, {
+    retries: 3, // number of retries
+    retryDelay: (retryCount: number) => {
+        console.log(`retry attempt: ${retryCount}`);
+        return retryCount * 2000; // time interval between retries
+    },
+    retryCondition: (error: { response: { status: number; }; }) => {
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 
 import { getBlockBooks } from "./blockbooks";
 
@@ -121,6 +134,7 @@ let get_transaction = async function(coin:string,txid:string){
                 'User-Agent': fakeUa()
             },
         };
+
         let resp = await axios(body)
 
         // let output = await BLOCKBOOKS[coin].getTx(txid)

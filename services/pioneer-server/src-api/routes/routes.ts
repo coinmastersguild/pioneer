@@ -351,11 +351,11 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/getAddressBalance/:coin/:address',
-            function pioneerPublicController_getAddressBalance(request: any, response: any, next: any) {
+        app.get('/api/v1/getPubkeyBalance/:coin/:pubkey',
+            function pioneerPublicController_getPubkeyBalance(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -370,7 +370,7 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new pioneerPublicController();
 
 
-            const promise = controller.getAddressBalance.apply(controller, validatedArgs as any);
+            const promise = controller.getPubkeyBalance.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

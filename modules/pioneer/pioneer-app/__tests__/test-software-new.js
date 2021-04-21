@@ -30,7 +30,7 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 //console.log("password: ",password)
 
 let TEST_COINS = [
-    // 'BTC',
+    'BTC',
     // 'BCH',
     // 'ETH',
     // // 'ATOM',
@@ -63,7 +63,7 @@ let run_test = async function(){
 
             //get wallets
             let wallets = await App.getWallets()
-            //console.log("wallets: ",wallets)
+            console.log("wallets: ",wallets)
 
             //let contextName = App.context()
 

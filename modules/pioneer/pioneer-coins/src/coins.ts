@@ -25,32 +25,15 @@ enum HDWALLETS {
 
 /*
 
-    Feature Flagged coin support
-
-    "Bitcoin",
-    "Testnet",
-    "BitcoinCash",
-    "BitcoinGold",
-    "Litecoin",
-    "EOS",
-    "FIO",
-    "Dash",
-    "DigiByte",
-    "Dogecoin",
-
-    sample .env file
-
-    #Feature flag by network
-    FEATURE_BITCOIN_BLOCKCHAIN=true
-    FEATURE_ETHEREUM_BLOCKCHAIN=true
-    FEATURE_THORCHAIN_BLOCKCHAIN=true
-
-    # notes this enables NATIVE chain asset only!
-    # Tokens PER BLOCKCHAIN are flagged seperatly
-    #FEATURE_ETHEREUM_TOKENS=true
 
 */
 
+export const UTXO_COINS = [
+    'BTC',
+    'BCH',
+    'LTC',
+    'TEST'
+]
 
 /*
     Name maps

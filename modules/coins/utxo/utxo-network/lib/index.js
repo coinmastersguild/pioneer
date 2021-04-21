@@ -497,7 +497,7 @@ var get_balance_by_xpub = function (coin, xpub) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, BLOCKBOOK.getUtxosForXpub(xpub, { confirmed: true })];
+                    return [4 /*yield*/, blockbook.utxosByXpub(coin, xpub)];
                 case 2:
                     output = _a.sent();
                     log.debug(tag, "output: ", output);

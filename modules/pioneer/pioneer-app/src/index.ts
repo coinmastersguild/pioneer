@@ -975,14 +975,13 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
     let tag = TAG+" | init_wallet | ";
     try {
         DATABASES = await nedb.init()
-        if(config.isTestnet) isTestnet = true
-        log.info(tag,"isTestnet: ",isTestnet)
         let output:any = {}
 
         //get wallets
         let wallets = await getWallets()
         log.debug(tag,"wallets: ",wallets)
         //TODO if testnet flag only show testnet wallets!
+
         output.walletFiles = wallets
         output.wallets = []
         //if no password

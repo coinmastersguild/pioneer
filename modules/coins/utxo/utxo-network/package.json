@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-network",
-  "version": "6.2.18",
+  "version": "6.2.21",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -27,7 +27,7 @@
     "request-promise-native": "^1.0.9"
   },
   "devDependencies": {
-    "@types/node": "^13.13.48",
+    "@types/node": "^13.13.50",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.9"
   }

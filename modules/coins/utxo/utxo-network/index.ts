@@ -409,7 +409,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
 let get_balance_by_xpub = async function(coin:string,xpub:any){
     let tag = TAG + " | get_balance_by_xpub | "
     try{
-        let output = await BLOCKBOOK.getUtxosForXpub(xpub, { confirmed: true })
+        let output = await blockbook.utxosByXpub(coin,xpub)
         log.debug(tag,"output: ",output)
 
         let balance = 0
@@ -418,7 +418,6 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         for(let i = 0; i < output.length; i++){
             let uxto = output[i]
             balance = balance + parseInt(uxto.value)
-
         }
 
         return balance / 100000000

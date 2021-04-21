@@ -37,10 +37,10 @@ let run_test = async function(){
         let isTestnet = null
 
         //keepkey
-        let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
+        //let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
 
         // //wallet old
-        // let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
+        let context = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
 
         //pioneer
         let config = {
@@ -48,7 +48,7 @@ let run_test = async function(){
             blockchains,
 
             type:'pioneer',
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
 
             // type:'keepkey',
             // hardware:true,
@@ -68,7 +68,7 @@ let run_test = async function(){
         let Wallet = new WalletClass(config.type,config,isTestnet);
 
         let info = await Wallet.init()
-        // console.log("INFO: ",info)
+        console.log("INFO: ",info)
 
         // // console.log("total Value: ",info.totalValueUsd)
         //
@@ -113,28 +113,28 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
-
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
-
-        let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
-        let amount = "1"
-        let memo = ""
-
-        let transfer = {
-            coin:"RUNE",
-            addressTo:address,
-            amount,
-            memo
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
+        //
+        // let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
+        // let amount = "1"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let intent = {
         //     coin:"RUNE",
@@ -219,75 +219,44 @@ let run_test = async function(){
                BTC
          */
         // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-        //
-        //
+
+
         // let masterBTC = await Wallet.getMaster("BTC")
         // console.log("masterBTC: ",masterBTC)
         //
         // let balanceBTC = await Wallet.getBalance("BTC")
         // console.log("balanceBTC: ",balanceBTC)
-        // //
-        // let amount = "0.00001"
-        // // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
-        // let feeLevel = 5
-        //
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
-        //     amount,
-        //     feeLevel
-        // }
 
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
-        //     amount,
-        //     memo,
-        //     feeLevel
-        // }
-        //
-
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let transferSigned = {
-        //
-        // }
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BCH
          */
 
-        // console.log("info: ",prettyjson.render(info.public.BCH),"\n")
         //
-        // //
-        // let masterBTC = await Wallet.getMaster("BCH")
-        // console.log("masterBCH: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BCH")
-        // console.log("balanceBCH: ",balanceBTC)
-        //
-        // let amount = "0.0001"
-        // let memo = null //Uses OP_RETURN outputs
-        // let feeLevel = 5
-        //
-        // //TODO offer input override
-        // let transfer = {
-        //     coin:"BCH",
-        //     addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
-        //     amount,
-        //     memo,
-        //     feeLevel
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let masterBTC = await Wallet.getMaster("BCH")
+        console.log("masterBCH: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BCH")
+        console.log("balanceBCH: ",balanceBTC)
+
+        let amount = "0.0012"
+        let memo = null //Uses OP_RETURN outputs
+        let feeLevel = 5
+
+        //TODO offer input override
+        let transfer = {
+            coin:"BCH",
+            addressTo:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
+            amount,
+            memo,
+            feeLevel
+        }
+
+        let transferSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                ATOM

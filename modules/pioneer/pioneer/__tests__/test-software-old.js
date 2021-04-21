@@ -61,6 +61,50 @@ let run_test = async function(){
         // let info2 = await Wallet.getInfo()
         // console.log("info2: ",info2)
 
+
+        /*
+               BTC
+         */
+        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
+
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+        // //
+        // let amount = "0.00001"
+        // // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
+        // let feeLevel = 5
+        //
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
+        //     amount,
+        //     feeLevel
+        // }
+
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
+        //     amount,
+        //     memo,
+        //     feeLevel
+        // }
+        //
+
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let transferSigned = {
+        //
+        // }
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
+
         /*
             ETH
         */
@@ -93,7 +137,7 @@ let run_test = async function(){
         /*
                THOR
          */
-        console.log("info: ",prettyjson.render(info.public.RUNE))
+        //console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
         // let masterRUNE = await Wallet.getMaster("RUNE")
@@ -188,47 +232,7 @@ let run_test = async function(){
         // //expect instant txid
         // console.log("result: ",result)
         //TODO event emitter?
-        /*
-               BTC
-         */
-        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-        //
-        //
-        // let masterBTC = await Wallet.getMaster("BTC")
-        // console.log("masterBTC: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BTC")
-        // console.log("balanceBTC: ",balanceBTC)
-        // //
-        // let amount = "0.00001"
-        // // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
-        // let feeLevel = 5
-        //
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
-        //     amount,
-        //     feeLevel
-        // }
 
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
-        //     amount,
-        //     memo,
-        //     feeLevel
-        // }
-        //
-
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let transferSigned = {
-        //
-        // }
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
                BCH

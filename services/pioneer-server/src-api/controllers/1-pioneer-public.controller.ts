@@ -339,27 +339,29 @@ export class pioneerPublicController extends Controller {
     /**
      *  get balance of an address
      */
-    @Get('/getAddressBalance/{coin}/{address}')
-    public async getAddressBalance(coin:string,address:string) {
-        let tag = TAG + " | getAddressBalance | "
+    @Get('/getPubkeyBalance/{coin}/{pubkey}')
+    public async getPubkeyBalance(coin:string,pubkey:string) {
+        let tag = TAG + " | getPubkeyBalance | "
         try{
-
-            let output = await redis.get("cache:balance:"+address+":"+coin)
+            log.info(tag,{coin,pubkey})
+            let output = await redis.get("cache:balance:"+pubkey+":"+coin)
             networks.ETH.init({testnet:true})
             if(!output || CACHE_OVERRIDE){
                 //if coin = token, network = ETH
                 if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-                    output = await networks['ETH'].getBalanceToken(address,coin)
+                    output = await networks['ETH'].getBalanceToken(pubkey,coin)
                 } else if(coin === 'ETH'){
-                    output = await networks['ETH'].getBalanceAddress(address)
+                    output = await networks['ETH'].getBalanceAddress(pubkey)
+                } else if(UTXO_COINS.indexOf(coin) >= 0){
+                    //get xpub/zpub
+                    output = await networks['ANY'].getBalanceByXpub(coin,pubkey)
                 } else {
                     if(!networks[coin]) {
                         throw Error("109: coin not supported! coin: "+coin)
                     } else {
-                        output = await networks[coin].getBalance(address)
+                        output = await networks[coin].getBalance(pubkey)
                     }
                 }
-                redis.setex("cache:balance:"+address+":"+coin,CACHE_TIME,JSON.stringify(output))
             }
 
             return(output)

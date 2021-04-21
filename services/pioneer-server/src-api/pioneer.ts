@@ -271,6 +271,14 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 saveActions.push({insertOne: entryMongo})
             }
 
+            //save pubkeys in mongo
+            try {
+                let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
+                log.info(tag, "result: ", result)
+            } catch (e) {
+                log.error(tag,"Failed to update pubkeys! e: ",e)
+            }
+
             if (BALANCE_ON_REGISTER) {
                 output.results = []
                 //verifies balances returned are final
@@ -292,13 +300,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 }
             }
 
-            //save pubkeys in mongo
-            try {
-                let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
-                log.info(tag, "result: ", result)
-            } catch (e) {
-                log.error(tag,"Failed to update pubkeys! e: ",e)
-            }
+
         } else {
             log.info(tag," No new pubkeys! ")
         }
@@ -356,7 +358,19 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
                 entryMongo.xpub = xpub
                 entryMongo.xpub = true
                 entryMongo.type = 'xpub'
-                saveActions.push({insertOne: entryMongo})
+
+                let queueId = await register_xpub(username, pubkeyInfo, walletId)
+
+                //add to Mutex array for async xpub register option
+                output.work.push(queueId)
+
+            } else if (pubkeyInfo.type === "zpub") {
+                let zpub = pubkeyInfo.zpub
+
+                entryMongo.pubkey = zpub
+                entryMongo.zpub = zpub
+                entryMongo.zpub = true
+                entryMongo.type = 'zpub'
 
                 let queueId = await register_xpub(username, pubkeyInfo, walletId)
 
@@ -370,19 +384,24 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
                 let queueId = await register_address(username, pubkeyInfo, walletId)
 
                 output.work.push(queueId)
-
             } else {
                 log.error("Unhandled type: ", pubkeyInfo.type)
             }
+
+            //verify write
+            log.info(tag,"entryMongo: ",entryMongo)
+            //check exists
+            let keyExists = await pubkeysDB.findOne({pubkey:entryMongo.pubkey})
+            if(keyExists){
+                log.info(tag,"Key already registered! key: ",entryMongo)
+                //TODO update?
+            }else{
+                let saveMongo = await pubkeysDB.insert(entryMongo)
+                log.info(tag,"saveMongo: ",saveMongo)
+            }
+
         }
 
-        //save pubkeys in mongo
-        try {
-            let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
-            log.info(tag, "result: ", result)
-        } catch (e) {
-            log.error(tag,"e: ",e)
-        }
 
         if (BALANCE_ON_REGISTER) {
             output.results = []

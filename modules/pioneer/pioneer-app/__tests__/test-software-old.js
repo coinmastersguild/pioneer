@@ -31,11 +31,11 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let TEST_COINS = [
     'BTC',
-    'BCH',
-    'ETH',
-    // 'ATOM',
-    'BNB',
-    'LTC'
+    // 'BCH',
+    // 'ETH',
+    // // 'ATOM',
+    // 'BNB',
+    // 'LTC'
 ]
 
 let run_test = async function(){
@@ -50,13 +50,16 @@ let run_test = async function(){
         } else {
             config.password = password
             config.username = username
+            config.queryKey = queryKey
+
+            config.blockchains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
 
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("YWYPQH")
-            // console.log("pairResult: ",pairResult)
+            let pairResult = await App.pair("DQW2FW")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()

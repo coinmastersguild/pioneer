@@ -11,8 +11,15 @@ network.init('full')
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
-network.getTransaction("BTC",txid)
+// let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
+// network.getTransaction("BTC",txid)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
+
+let xpub = "zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR"
+network.getBalanceByXpub("BTC",xpub)
     .then(function(resp){
         console.log("resp: ",resp)
         //console.log("resp: ",JSON.stringify(resp))

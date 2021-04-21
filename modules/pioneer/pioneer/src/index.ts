@@ -32,7 +32,8 @@ const coincap = require("@pioneer-platform/coincap")
 let {
     getPaths,
     nativeToBaseAmount,
-    baseAmountToNative
+    baseAmountToNative,
+    UTXO_COINS,
 } = require('@pioneer-platform/pioneer-coins')
 
 
@@ -349,6 +350,9 @@ module.exports = class wallet {
                         log.debug("pubkeys ",this.pubkeys)
                         log.debug("pubkeys.length ",this.pubkeys.length)
                         log.debug("paths.length ",paths.length)
+                        log.debug("blockchainsEnabled: ",this.blockchains.length)
+                        let blockchainsEnabled = this.blockchains.length
+
                         for(let i = 0; i < this.pubkeys.length; i++){
                             let pubkey = this.pubkeys[i]
                             log.debug(tag,"pubkey: ",pubkey)
@@ -362,6 +366,8 @@ module.exports = class wallet {
                             }
                             this.PUBLIC_WALLET[pubkey.coin] = pubkey
                         }
+
+
                         break;
                     case HDWALLETS.keepkey:
                         log.debug(tag," Keepkey mode! ")
@@ -516,19 +522,21 @@ module.exports = class wallet {
             try {
                 log.debug("coin detected: ",coin)
                 let output
-                let master
+                let pubkey
                 if(coin === "ETH"){
                     log.debug("ETH detected ")
-                    master = await this.getMaster('ETH')
+                    pubkey = await this.PUBLIC_WALLET[coin].master
                 }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
                     log.debug("token detected ")
-                    master = await this.getMaster('ETH')
-                } else {
-                    master = await this.getMaster(coin)
+                    pubkey = await this.getMaster('ETH')
+                } else if(UTXO_COINS.indexOf(coin) >= 0){
+                    //get xpub/zpub
+                    pubkey = this.PUBLIC_WALLET[coin].pubkey
+                }else{
+                    pubkey = await this.PUBLIC_WALLET[coin].master
                 }
-                log.debug(tag,"this.pioneer: ",this.pioneerClient)
-                if(!address) address = master
-                output = await this.pioneerClient.instance.GetAddressBalance({coin,address})
+                log.info(tag,"pubkey: ",pubkey)
+                output = await this.pioneerClient.instance.GetPubkeyBalance({coin,pubkey})
                 output = output.data
                 return output
             } catch (e) {

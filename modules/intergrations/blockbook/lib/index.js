@@ -51,6 +51,18 @@ var axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+var axiosRetry = require('axios-retry');
+axiosRetry(axios, {
+    retries: 3,
+    retryDelay: function (retryCount) {
+        console.log("retry attempt: " + retryCount);
+        return retryCount * 2000; // time interval between retries
+    },
+    retryCondition: function (error) {
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 var blockbooks_1 = require("./blockbooks");
 var BLOCKBOOKS = {};
 var BLOCKBOOK_URLS = {};
