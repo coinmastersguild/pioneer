@@ -83,8 +83,8 @@ let run_test = async function(){
             // }
 
             //switch context
-            //let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
-            let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
+            let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+            //let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
 
             //resultContextSwitch
             let resultContextSwitch = await app.setContext(newContext)

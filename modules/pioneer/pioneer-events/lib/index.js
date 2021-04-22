@@ -71,6 +71,13 @@ var Events = /** @class */ (function () {
                             this.socket.on('connect', function () {
                                 log.info(tag, 'Connected to ' + _this.wss);
                                 _this.isConnected = true;
+                                //rejoin
+                                if (_this.username) {
+                                    _this.pair();
+                                }
+                                else {
+                                    _this.subscribeToKey();
+                                }
                             });
                             this.socket.on('subscribedToUsername', function () {
                                 log.info(tag, 'subscribed to ' + _this.username);
@@ -158,11 +165,6 @@ var Events = /** @class */ (function () {
                             username: this.username,
                             queryKey: config.queryKey
                         });
-                        //paired message?
-                        //release on successful pair
-                        // while(!this.isPaired){
-                        //     await sleep(300)
-                        // }
                         return [2 /*return*/, true];
                     }
                     catch (e) {

@@ -40,6 +40,12 @@ export class Events {
                 this.socket.on('connect', () => {
                     log.info(tag,'Connected to '+this.wss);
                     this.isConnected = true
+                    //rejoin
+                    if(this.username){
+                        this.pair()
+                    } else {
+                        this.subscribeToKey()
+                    }
                 });
 
                 this.socket.on('subscribedToUsername', () => {
@@ -109,14 +115,6 @@ export class Events {
                     username:this.username,
                     queryKey:config.queryKey
                 })
-
-                //paired message?
-
-                //release on successful pair
-                // while(!this.isPaired){
-                //     await sleep(300)
-                // }
-
                 return true
             } catch (e) {
                 log.error(tag, "e: ", e)

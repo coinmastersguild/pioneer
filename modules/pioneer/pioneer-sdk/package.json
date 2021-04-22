@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-sdk",
-  "version": "0.0.72",
+  "version": "0.0.74",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
