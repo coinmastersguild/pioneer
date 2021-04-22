@@ -58,8 +58,8 @@ let run_test = async function(){
             console.log("resultInit: ",resultInit)
 
             //pair
-            // let pairResult = await App.pair("YWYPQH")
-            // console.log("pairResult: ",pairResult)
+            let pairResult = await App.pair("WJTWYV")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()

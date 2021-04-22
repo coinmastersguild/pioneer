@@ -139,6 +139,7 @@ subscriber.subscribe('transactions:global:EOS');
 subscriber.subscribe('payments');
 subscriber.subscribe('invocations');
 subscriber.subscribe('pairings');
+subscriber.subscribe('context');
 
 subscriber.on('message', async function (channel, payloadS) {
     let tag = TAG + ' | publishToFront | ';
@@ -271,6 +272,27 @@ subscriber.on('message', async function (channel, payloadS) {
                 log.error("apiKey is not connected! queryKey: ",queryKey," online: ",usersByKey)
                 //throw Error("User is not connected!")
             }
+        }else if(channel === 'context'){
+            let context = JSON.parse(payloadS)
+            log.info(tag,"context: ",context)
+            log.info(tag,"context: ",context.username)
+            log.info(tag,"usersByUsername: ",usersByUsername)
+            //usersBySocketId
+            log.info(tag,"usersBySocketId: ",usersBySocketId)
+            log.info(tag,"usersByKey: ",usersByKey)
+
+            //send to user
+            if(usersByUsername[context.username]){
+                let sockets = usersByUsername[context.username]
+                log.info(tag,"sockets: ",sockets)
+                for(let i =0; i < sockets.length; i++){
+                    let socketid = sockets[i]
+                    if(globalSockets[socketid]){
+                        log.info(tag,"sending message to user!")
+                        globalSockets[socketid].emit('message', context);
+                    }
+                }
+            }
         }else{
             //TODO dont catchall globals?
             //globals
@@ -302,7 +324,6 @@ io.on('connection', async function(socket){
 
     //set into global
     globalSockets[socket.id] = socket
-
 
     socket.on('disconnect', function(){
         let username = usersByUsername[socket.id]

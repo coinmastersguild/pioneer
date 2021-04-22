@@ -188,7 +188,8 @@ module.exports = /** @class */ (function () {
         this.queryKey = config.queryKey;
         this.username = config.username;
         this.pioneerApi = config.pioneerApi;
-        this.blockchains = config.blockchains || ['bitcoin', 'ethereum'];
+        this.blockchains = config.blockchains || ['bitcoin', 'ethereum', 'thorchain'];
+        this.WALLET_BALANCES = {};
         this.type = type;
         this.spec = config.spec;
         this.mnemonic = config.mnemonic;
@@ -202,7 +203,7 @@ module.exports = /** @class */ (function () {
         };
         this.init = function (wallet) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _c, blockchainsEnabled, i, pubkey, _d, i, pubkey, _e, _f, _g, _h, _j, register, regsiterResponse, walletInfo, e_1;
+                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _c, blockchainsEnabled, i, pubkey, _d, i, pubkey, _e, _f, _g, _h, _j, register, regsiterResponse, walletInfo, coins, i, coin, balance, e_1;
                 return __generator(this, function (_k) {
                     switch (_k.label) {
                         case 0:
@@ -377,6 +378,14 @@ module.exports = /** @class */ (function () {
                         case 23:
                             walletInfo = _k.sent();
                             log.info("walletInfo: ", walletInfo);
+                            if (walletInfo.balances) {
+                                coins = Object.keys(walletInfo.balances);
+                                for (i = 0; i < coins.length; i++) {
+                                    coin = coins[i];
+                                    balance = walletInfo.balances[coin];
+                                    this.WALLET_BALANCES[coin] = balance;
+                                }
+                            }
                             if (walletInfo && walletInfo.balances)
                                 this.WALLET_BALANCES = walletInfo.balances;
                             //emitter.info = walletInfo
@@ -459,9 +468,9 @@ module.exports = /** @class */ (function () {
                 });
             });
         };
-        // this.getBalance = function (coin:string) {
-        //     return this.WALLET_BALANCES[coin] || 0;
-        // }
+        this.getBalance = function (coin) {
+            return this.WALLET_BALANCES[coin] || 0;
+        };
         this.getMasterOfSeed = function (mnemonic, coin) {
             return __awaiter(this, void 0, void 0, function () {
                 var wallet;
@@ -475,7 +484,7 @@ module.exports = /** @class */ (function () {
                 });
             });
         };
-        this.getBalance = function (coin, address) {
+        this.getBalanceRemote = function (coin, address) {
             return __awaiter(this, void 0, void 0, function () {
                 var tag, output, pubkey, e_3;
                 return __generator(this, function (_a) {
@@ -2099,8 +2108,8 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.pioneerClient.instance.Broadcast(null, signedTx)];
                         case 1:
                             resultBroadcast = _a.sent();
-                            log.info(tag, "resultBroadcast: ", resultBroadcast);
-                            return [2 /*return*/, resultBroadcast];
+                            log.info(tag, "resultBroadcast: ", resultBroadcast.data);
+                            return [2 /*return*/, resultBroadcast.data];
                     }
                 });
             });

@@ -81,6 +81,7 @@ export class SDK {
     private totalValueUsd: number;
     private getUserInfo: () => Promise<any>;
     private getWalletInfo: () => Promise<any>;
+    private setContext: (context: string) => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -180,6 +181,20 @@ export class SDK {
             try {
                 let result = await this.pioneerApi.User()
                 return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.setContext = async function (context:string) {
+            let tag = TAG + " | setContext | "
+            try {
+                if(this.wallets.indexOf(context) >= 0){
+                    this.context = context
+                    let result = await this.pioneerApi.SetContext(null,{context:this.context})
+                    return result.data
+                }else{
+                    return {success:false,error:"unknown context! context: "+context,options:this.wallets}
+                }
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

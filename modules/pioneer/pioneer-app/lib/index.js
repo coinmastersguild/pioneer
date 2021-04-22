@@ -914,9 +914,6 @@ let init_wallet = function (config, isTestnet) {
         let tag = TAG + " | init_wallet | ";
         try {
             DATABASES = yield nedb.init();
-            if (config.isTestnet)
-                isTestnet = true;
-            log.info(tag, "isTestnet: ", isTestnet);
             let output = {};
             //get wallets
             let wallets = yield pioneer_config_1.getWallets();
@@ -924,6 +921,9 @@ let init_wallet = function (config, isTestnet) {
             //TODO if testnet flag only show testnet wallets!
             output.walletFiles = wallets;
             output.wallets = [];
+            //get wallets remote
+            //if diff mark missing wallets
+            //if context not loaded change context
             //if no password
             if (!config.password)
                 config.password = config.temp;
@@ -1158,7 +1158,7 @@ let init_wallet = function (config, isTestnet) {
             //on payments update balances
             //on on invocations add to queue
             clientEvents.events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
-                log.info(tag, "**** Invoke: ", request);
+                log.info(tag, "**** message: ", request);
                 //TODO filter invocations by subscribers
                 //TODO autonomousOn/Off
                 //TODO verify auth to paired keys
@@ -1196,8 +1196,23 @@ let init_wallet = function (config, isTestnet) {
                         log.info(tag, "txid: ", signedTx.txid);
                         clientEvents.events.emit('broadcast', signedTx);
                         break;
+                    case 'context':
+                        //switch context
+                        if (WALLETS_LOADED[request.context]) {
+                            log.info(tag, "wallet context is now: ", request.context);
+                            if (request.context !== WALLET_CONTEXT) {
+                                WALLET_CONTEXT = request.context;
+                            }
+                            else {
+                                log.error("context already: ", request.context);
+                            }
+                        }
+                        else {
+                            log.error(tag, "Failed to switch! invalid context: ", request.context);
+                        }
+                        break;
                     default:
-                        log.error("Unknown invocation: " + request.type);
+                        log.error("Unknown event: " + request.type);
                     //push error
                     // code block
                 }

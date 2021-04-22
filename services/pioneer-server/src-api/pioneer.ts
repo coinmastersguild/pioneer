@@ -394,7 +394,11 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
             let keyExists = await pubkeysDB.findOne({pubkey:entryMongo.pubkey})
             if(keyExists){
                 log.info(tag,"Key already registered! key: ",entryMongo)
-                //TODO update?
+                //push wallet to tags
+                //add to tags
+                let pushTagMongo = await usersDB.update({pubkey:entryMongo.pubkey},
+                    { $addToSet: { tags: walletId } })
+                log.info(tag,"pushTagMongo: ",pushTagMongo)
             }else{
                 let saveMongo = await pubkeysDB.insert(entryMongo)
                 log.info(tag,"saveMongo: ",saveMongo)
@@ -419,7 +423,6 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
                 }
 
                 output.results = await Promise.all(promised)
-
                 isDone = true
             }
         }

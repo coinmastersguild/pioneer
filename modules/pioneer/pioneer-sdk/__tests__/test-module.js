@@ -24,7 +24,7 @@ let run_test = async function(){
         console.log("*** Running test module ***")
 
         let config = {
-            queryKey,
+            queryKey:"key:eab34be6-3fa1-43c7-8fcd-eb33053620b9",
             username,
             spec,
             wss,
@@ -75,14 +75,25 @@ let run_test = async function(){
             //get current context
             let context = app.context
             console.log("context: ",context)
-            if(context){
-                //get user
-                let user = await app.getUserParams()
-                console.log("user: ",user)
-            }
+
+            // if(context){
+            //     //get user
+            //     let user = await app.getUserParams()
+            //     console.log("user: ",user)
+            // }
+
             //switch context
+            //let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+            let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
+
+            //resultContextSwitch
+            let resultContextSwitch = await app.setContext(newContext)
+            console.log("resultContextSwitch: ",resultContextSwitch)
+
+            //
 
 
+            //verify user switched
 
             //binance
             // const address = await user.binance.client.getAddress();

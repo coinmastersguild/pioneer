@@ -84,6 +84,10 @@ interface PairBody {
     code:string
 }
 
+interface SetContextBody {
+    context:string
+}
+
 interface RegisterEosUsername {
     username:string
     pubkey:string
@@ -202,6 +206,7 @@ export class pioneerPrivateController extends Controller {
 
 
     /**
+     *
      Get the balances for a given username
 
      protect mongo with redis cache
@@ -224,8 +229,6 @@ export class pioneerPrivateController extends Controller {
             let accountInfo = await redis.hgetall(authorization)
             if(!accountInfo) throw Error("unknown token! token:"+authorization)
             log.info(tag,"accountInfo: ",accountInfo)
-
-
 
             let walletInfo:any
             if(accountInfo){
@@ -446,6 +449,70 @@ export class pioneerPrivateController extends Controller {
             throw new ApiError("error",503,"error: "+e.toString());
         }
     }
+
+    /**
+     * Update current account context
+     * @param request This is an application pairing submission
+     */
+
+    @Post('/setContext')
+    public async setContext(@Body() body: SetContextBody, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | setContext | "
+        try{
+            log.info(tag,"account: ",body)
+            log.info(tag,"Authorization: ",Authorization)
+            let output:any = {}
+            // get auth info
+            let authInfo = await redis.hgetall(Authorization)
+            log.info(tag,"authInfo: ",authInfo)
+            if(!authInfo) throw Error("108: unknown token! ")
+
+            // get user info
+            let userInfo = await redis.hgetall(authInfo.username)
+            if(!userInfo) throw Error("109: unknown username! ")
+            log.info(tag,"userInfo: ",userInfo)
+            output.username = authInfo.username
+            //get wallets
+            let allWallets = await redis.smembers(authInfo.username+":wallets")
+            log.info(tag,"allWallets: ",allWallets)
+            output.wallets = allWallets
+            if(allWallets.indexOf(body.context) >= 0){
+                //if conext is not current
+                if(userInfo.context !== body.context) {
+                    let contextSwitch = {
+                        type:"context",
+                        username:userInfo.username,
+                        context:body.context
+                    }
+                    publisher.publish('context',JSON.stringify(contextSwitch))
+                    output.success = true
+                    //update Redis to new context
+                    let updateRedis = await redis.hset(authInfo.username,'context',body.context)
+                    output.updateDB = updateRedis
+                } else {
+                    output.success = false
+                    output.error = 'context already set to body.context:'+body.context
+                }
+
+                return(output);
+            } else {
+                return {
+                    success: false,
+                    error: "invalid context! context: "+body.context,
+                    options:allWallets
+                }
+            }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
 
     /**
      * Pair an sdk with app
@@ -925,6 +992,11 @@ export class pioneerPrivateController extends Controller {
             let userInfoRedis = await redis.hgetall(username)
             log.info(tag,"userInfoRedis: ",userInfoRedis)
             log.info("checkpoint 4 final ")
+
+            //if no context, set
+            if(!userInfoRedis.context){
+                redis.hset(username,'context',body.walletName)
+            }
 
             output.success = true
             output.userInfo = userInfoRedis

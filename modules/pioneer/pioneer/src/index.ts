@@ -244,7 +244,7 @@ module.exports = class wallet {
     // private getBalanceAudit: (coin: string) => Promise<any>;
     private getBalance: (coin: string, address?:string) => any;
     // private getInfo: (verbosity: string) => Promise<any>;
-    // private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
+    private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
     // private getEosPubkey: () => Promise<any>;
     // private getEosAccountsByPubkey: (pubkey: string) => Promise<any>;
     // private validateEosUsername: (username: string) => Promise<any>;
@@ -307,7 +307,8 @@ module.exports = class wallet {
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
-        this.blockchains = config.blockchains || ['bitcoin','ethereum']
+        this.blockchains = config.blockchains || ['bitcoin','ethereum','thorchain']
+        this.WALLET_BALANCES = {}
         this.type = type
         this.spec = config.spec
         this.mnemonic = config.mnemonic
@@ -330,7 +331,6 @@ module.exports = class wallet {
                         log.debug(tag,"checkpoint"," pioneer wallet detected! ")
                         if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
-
 
                         log.info(tag,"isTestnet: ",this.isTestnet)
                         //pair
@@ -447,6 +447,15 @@ module.exports = class wallet {
                     let walletInfo = await this.getInfo(this.context)
                     log.info("walletInfo: ",walletInfo)
 
+                    if(walletInfo.balances){
+                        let coins = Object.keys(walletInfo.balances)
+                        for(let i = 0; i < coins.length; i++){
+                            let coin = coins[i]
+                            let balance = walletInfo.balances[coin]
+                            this.WALLET_BALANCES[coin] = balance
+                        }
+                    }
+
                     if(walletInfo && walletInfo.balances) this.WALLET_BALANCES = walletInfo.balances
                     //emitter.info = walletInfo
 
@@ -509,15 +518,15 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        // this.getBalance = function (coin:string) {
-        //     return this.WALLET_BALANCES[coin] || 0;
-        // }
+        this.getBalance = function (coin:string) {
+            return this.WALLET_BALANCES[coin] || 0;
+        }
         this.getMasterOfSeed = async function (mnemonic:string,coin?:string) {
             //master is ETH
             let wallet = await ethCrypto.generateWalletFromSeed(mnemonic)
             return wallet.masterAddress;
         }
-        this.getBalance = async function (coin:string,address?:string) {
+        this.getBalanceRemote = async function (coin:string,address?:string) {
             let tag = TAG + " | getBalance | "
             try {
                 log.debug("coin detected: ",coin)
@@ -2010,8 +2019,8 @@ module.exports = class wallet {
             }
             log.info(tag,"signedTx: ",signedTx)
             let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)
-            log.info(tag,"resultBroadcast: ",resultBroadcast)
-            return resultBroadcast;
+            log.info(tag,"resultBroadcast: ",resultBroadcast.data)
+            return resultBroadcast.data;
         }
     }
 }

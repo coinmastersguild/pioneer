@@ -32,8 +32,8 @@ let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
 let run_test = async function(){
     try{
         let config = {
-            queryKey:"efcadc18-4170-423d-ad27-605bed7e6b88",
-            username,
+            queryKey:"key:eab34be6-3fa1-43c7-8fcd-eb33053620b9",
+            username:'test-user-2',
             spec
         }
         console.log("config: ",config)
@@ -64,8 +64,8 @@ let run_test = async function(){
         let user = await pioneer.instance.User()
         console.log("info: ",user)
 
-        // let info = await pioneer.instance.Info(walletId)
-        // console.log("info: ",info.data)
+        let info = await pioneer.instance.Info(user.data.context)
+        console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data

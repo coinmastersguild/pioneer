@@ -53,7 +53,8 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,isTestnet);
 
         let info = await Wallet.init()
-        console.log("total Value: ",info)
+        console.log("INFO: ",info)
+
         // console.log("total Value: ",info.totalValueUsd)
 
         //await Wallet.forget()
@@ -65,8 +66,6 @@ let run_test = async function(){
         /*
                BTC
          */
-        console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-
 
         let masterBTC = await Wallet.getMaster("BTC")
         console.log("masterBTC: ",masterBTC)

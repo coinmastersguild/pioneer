@@ -49,7 +49,7 @@
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/network": "latest",
     "@pioneer-platform/pioneer-client": "latest",
-    "@pioneer-platform/pioneer-sdk": "0.0.57",
+    "@pioneer-platform/pioneer-sdk": "latest",
     "@pioneer-platform/redis-queue": "latest",
     "@pioneer-platform/secret-network": "latest",
     "@pioneer-platform/terra-network": "latest",

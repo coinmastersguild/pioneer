@@ -984,6 +984,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         output.walletFiles = wallets
         output.wallets = []
+
+        //get wallets remote
+
+        //if diff mark missing wallets
+        //if context not loaded change context
+
         //if no password
         if(!config.password) config.password = config.temp
         if(!config.password) throw Error("101: password required!")
@@ -1242,7 +1248,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //on on invocations add to queue
         clientEvents.events.on('message', async (request: any) => {
-            log.info(tag,"**** Invoke: ", request)
+            log.info(tag,"**** message: ", request)
             //TODO filter invocations by subscribers
 
             //TODO autonomousOn/Off
@@ -1286,8 +1292,21 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     log.info(tag,"txid: ", signedTx.txid)
                     clientEvents.events.emit('broadcast',signedTx)
                     break;
+                case 'context':
+                    //switch context
+                    if(WALLETS_LOADED[request.context]){
+                        log.info(tag,"wallet context is now: ",request.context)
+                        if(request.context !== WALLET_CONTEXT){
+                            WALLET_CONTEXT = request.context
+                        }else{
+                            log.error("context already: ",request.context)
+                        }
+                    } else {
+                        log.error(tag,"Failed to switch! invalid context: ",request.context)
+                    }
+                    break;
                 default:
-                    log.error("Unknown invocation: "+request.type)
+                    log.error("Unknown event: "+request.type)
                     //push error
                     // code block
             }
