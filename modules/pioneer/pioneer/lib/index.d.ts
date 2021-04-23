@@ -51,6 +51,12 @@ export interface Transaction {
     nonce?: number;
     feeLevel?: string;
 }
+export interface TransactionUnsigned {
+    coin: string;
+    transaction: Transaction;
+    HDwalletPayload: any;
+    verbal: any;
+}
 export interface CoinInfo {
     coin: string;
     note?: string;

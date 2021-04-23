@@ -64,7 +64,6 @@ const keyring = new hdwallet.Keyring()
 // let WALLET_MODE:any
 let WALLET_COINS:any = []
 
-
 //eth token info
 WALLET_COINS.push('ETH')
 //TODO support coinlist (coingecko)
@@ -168,6 +167,15 @@ export interface Transaction {
     memo?: string | undefined;
     nonce?:number
     feeLevel?:string
+}
+
+//TransactionUnsigned
+export interface TransactionUnsigned {
+    coin: string;
+    //TODO
+    transaction:Transaction,
+    HDwalletPayload:any, // this has specific types per blockchain?
+    verbal:any
 }
 
 export interface CoinInfo {
@@ -298,8 +306,18 @@ module.exports = class wallet {
     private buildApproval: (swap: any) => Promise<any>;
     private sendApproval: (intent: Approval) => Promise<any>;
     private context: string; //Wallet File name
+    private signTransaction: (transaction: TransactionUnsigned) => Promise<any>;
+    private getApproveQueue: () => any;
+    private getPendingQueue: () => any;
+    private getNextReview: () => any;
+    private addUnsigned: (unsigned: any) => any;
+    private addBroadcasted: (signed: any) => any;
+    private APPROVE_QUEUE: any[];
+    private PENDING_QUEUE: any[];
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
+        this.APPROVE_QUEUE = []
+        this.PENDING_QUEUE = []
         this.isTestnet = false
         this.offline = false //TODO supportme
         this.mode = config.mode
@@ -576,6 +594,26 @@ module.exports = class wallet {
         //     return register_eos_username(pubkey,username);
         // }
         /*
+            Queue
+                Unsigned tx's (ready to be reviewed approves)
+                Pending (broadcasted/unconfirmed, but available for replacement)
+         */
+        this.getApproveQueue = function () {
+            return this.APPROVE_QUEUE;
+        }
+        this.getPendingQueue = function () {
+            return this.PENDING_QUEUE;
+        }
+        this.getNextReview = function () {
+            return this.APPROVE_QUEUE.shift();
+        }
+        this.addUnsigned = function (unsigned:any) {
+            return this.APPROVE_QUEUE.push(unsigned);
+        }
+        this.addBroadcasted = function (signed:any) {
+            return this.PENDING_QUEUE.push(signed);
+        }
+        /*
         FIO commands
          */
         this.getFioPubkey = function () {
@@ -760,7 +798,7 @@ module.exports = class wallet {
             memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
             amount: "0.1"
         }
-         */
+        */
         this.addLiquidity = async function (addLiquidity:any) {
             let tag = TAG + " | addLiquidity | "
             try{
@@ -1210,43 +1248,163 @@ module.exports = class wallet {
                 if(intent.memo) transaction.memo = intent.memo
 
                 //build transfer
-                let signedTx = await this.buildTransfer(transaction)
-                log.info(tag,"signedTx: ",signedTx)
+                let unSignedTx = await this.buildTransfer(transaction)
+                log.info(tag,"unSignedTx: ",unSignedTx)
 
-                if(invocationId) signedTx.invocationId = invocationId
+                // let signedTx = await this.signTransaction(unSignedTx)
+                // log.info(tag,"signedTx: ",signedTx)
+
+                if(invocationId) unSignedTx.invocationId = invocationId
                 log.debug(tag,"transaction: ",transaction)
 
-                signedTx.broadcasted = false
-                let broadcast_hook = async () =>{
-                    try{
-                        log.info(tag,"signedTx: ",signedTx)
-                        //TODO flag for async broadcast
-                        let broadcastResult = await this.broadcastTransaction(intent.coin,signedTx)
-                        log.info(tag,"broadcastResult: ",broadcastResult)
-
-                        //push to invoke api
-                    }catch(e){
-                        log.error(tag,"Failed to broadcast transaction!")
-                    }
-                }
-                //broadcast hook
-                if(!intent.noBroadcast){
-                    signedTx.broadcasted = true
-                } else {
-                    signedTx.noBroadcast = true
-                }
-                //if noBroadcast we MUST still release the inovation
-                //do we pass noBroadcast to the broadcast post request
-                //Notice NO asyc!
-                broadcast_hook()
-
-                signedTx.invocationId = invocationId
+                unSignedTx.broadcasted = false
+                // let broadcast_hook = async () =>{
+                //     try{
+                //         log.info(tag,"signedTx: ",unSignedTx)
+                //         //TODO flag for async broadcast
+                //         let broadcastResult = await this.broadcastTransaction(intent.coin,unSignedTx)
+                //         log.info(tag,"broadcastResult: ",broadcastResult)
                 //
-                if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
-                return signedTx
+                //         //push to invoke api
+                //     }catch(e){
+                //         log.error(tag,"Failed to broadcast transaction!")
+                //     }
+                // }
+                // //broadcast hook
+                // if(!intent.noBroadcast){
+                //     unSignedTx.broadcasted = true
+                // } else {
+                //     unSignedTx.noBroadcast = true
+                // }
+                // //if noBroadcast we MUST still release the inovation
+                // //do we pass noBroadcast to the broadcast post request
+                // //Notice NO asyc!
+                // broadcast_hook()
+
+                unSignedTx.invocationId = invocationId
+                return unSignedTx
             }catch(e){
                 log.error(tag,e)
                 throw Error(e)
+            }
+        }
+        this.signTransaction = async function (unsignedTx:TransactionUnsigned) {
+            let tag = TAG + " | signTransaction | "
+            try {
+                let signedTx
+                let coin = unsignedTx.coin
+
+                let UTXOcoins = [
+                    'BTC',
+                    'BCH',
+                    'LTC'
+                ]
+
+                if(UTXOcoins.indexOf(coin) >= 0){
+                    const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
+                    log.info(tag,"res: ",res)
+
+                    //
+                    signedTx = {
+                        txid:res.txid,
+                        coin,
+                        serialized:res.serializedTx
+                    }
+                }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+                    log.info("unsignedTxETH: ",unsignedTx.HDwalletPayload)
+                    signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
+                    //debug https://flightwallet.github.io/decode-eth-tx/
+
+                    //txid
+                    //const txHash = await web3.utils.sha3(signed.rawTransaction);
+                    if(!signedTx.serialized) throw Error("Failed to sign!")
+
+                    const txid = keccak256(signedTx.serialized).toString('hex')
+                    log.info(tag,"txid: ",txid)
+
+                    signedTx.txid = txid
+                    signedTx.params = unsignedTx.transaction //input
+                } else if(coin === 'RUNE'){
+                    let res = await this.WALLET.thorchainSignTx(unsignedTx.HDwalletPayload);
+
+                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res*****: ",res)
+
+                    let txFinal:any
+                    txFinal = res
+                    txFinal.signatures = res.signatures
+
+                    log.info("FINAL: ****** ",txFinal)
+
+                    let broadcastString = {
+                        tx:txFinal,
+                        type:"cosmos-sdk/StdTx",
+                        mode:"sync"
+                    }
+
+                    // @ts-ignore
+                    const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
+                    let hash = sha256(buffer).toString().toUpperCase()
+                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
+
+                    signedTx = {
+                        txid:hash,
+                        coin,
+                        serialized:JSON.stringify(broadcastString)
+                    }
+                }else if(coin === 'ATOM'){
+                    let res = await this.WALLET.cosmosSignTx(unsignedTx.HDwalletPayload);
+
+                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res*****: ",res)
+
+                    let txFinal:any
+                    txFinal = res
+                    txFinal.signatures = res.signatures
+
+                    log.debug("FINAL: ****** ",txFinal)
+
+                    let broadcastString = {
+                        tx:txFinal,
+                        type:"cosmos-sdk/StdTx",
+                        mode:"sync"
+                    }
+                    signedTx = {
+                        txid:"",
+                        coin,
+                        serialized:JSON.stringify(broadcastString)
+                    }
+                } else if(coin === 'BNB'){
+                    const signedTxResponse = await this.WALLET.binanceSignTx(unsignedTx.HDwalletPayload)
+                    log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
+                    log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
+
+                    // this is undefined at first tx
+                    // let pubkeyHex = pubkey.toString('hex')
+                    // log.debug(tag,"pubkeyHex: ",pubkeyHex)
+
+                    let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
+                    log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
+
+                    const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
+                    let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
+                    signedTx = {
+                        txid:hash,
+                        serialized:signedTxResponse.serialized
+                    }
+                }else{
+                    //TODO EOS
+                    //FIO
+                    throw Error("Coin not supported! "+coin)
+                }
+
+
+                return signedTx
+            } catch (e) {
+                log.error(tag, "e: ", e)
+                throw e
             }
         }
         this.buildTransfer = async function (transaction:Transaction) {
@@ -1478,6 +1636,7 @@ module.exports = class wallet {
 
                     //hdwallet input
                     //TODO type this
+
                     let hdwalletTxDescription = {
                         opReturnData:memo,
                         coin: longName,
@@ -1487,15 +1646,25 @@ module.exports = class wallet {
                         locktime: 0,
                     }
 
-                    const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
-                    log.info(tag,"res: ",res)
 
-                    //
-                    rawTx = {
-                        txid:res.txid,
+                    let unsignedTx = {
                         coin,
-                        serialized:res.serializedTx
+                        transaction,
+                        HDwalletPayload:hdwalletTxDescription,
+                        verbal:"UTXO transaction"
                     }
+
+                    rawTx = unsignedTx
+
+                    // const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
+                    // log.info(tag,"res: ",res)
+                    //
+                    // //
+                    // rawTx = {
+                    //     txid:res.txid,
+                    //     coin,
+                    //     serialized:res.serializedTx
+                    // }
 
                 }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
                     log.debug(tag,"checkpoint")
@@ -1578,19 +1747,28 @@ module.exports = class wallet {
                         chainId
                     }
 
-                    log.info("unsignedTxETH: ",ethTx)
-                    rawTx = await this.WALLET.ethSignTx(ethTx)
-                    //debug https://flightwallet.github.io/decode-eth-tx/
+                    let unsignedTx = {
+                        coin,
+                        transaction,
+                        HDwalletPayload:ethTx,
+                        verbal:"Ethereum transaction"
+                    }
 
-                    //txid
-                    //const txHash = await web3.utils.sha3(signed.rawTransaction);
-                    if(!rawTx.serialized) throw Error("Failed to sign!")
+                    rawTx = unsignedTx
 
-                    const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.info(tag,"txid: ",txid)
-
-                    rawTx.txid = txid
-                    rawTx.params = txParams
+                    // log.info("unsignedTxETH: ",ethTx)
+                    // rawTx = await this.WALLET.ethSignTx(ethTx)
+                    // //debug https://flightwallet.github.io/decode-eth-tx/
+                    //
+                    // //txid
+                    // //const txHash = await web3.utils.sha3(signed.rawTransaction);
+                    // if(!rawTx.serialized) throw Error("Failed to sign!")
+                    //
+                    // const txid = keccak256(rawTx.serialized).toString('hex')
+                    // log.info(tag,"txid: ",txid)
+                    //
+                    // rawTx.txid = txid
+                    // rawTx.params = txParams
                 } else if(coin === 'RUNE'){
                     //get amount native
                     let amountNative = RUNE_BASE * parseFloat(amount)
@@ -1677,40 +1855,58 @@ module.exports = class wallet {
                         tx: unsigned,
                     }))
 
-                    let res = await this.WALLET.thorchainSignTx({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    });
-
-                    log.info("res: ",prettyjson.render(res))
-                    log.debug("res*****: ",res)
-
-                    let txFinal:any
-                    txFinal = res
-                    txFinal.signatures = res.signatures
-
-                    log.info("FINAL: ****** ",txFinal)
-
-                    let broadcastString = {
-                        tx:txFinal,
-                        type:"cosmos-sdk/StdTx",
-                        mode:"sync"
+                    let runeTx = {
+                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                            chain_id,
+                            account_number: account_number,
+                            sequence:sequence,
+                            tx: unsigned,
                     }
 
-                    // @ts-ignore
-                    const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
-                    let hash = sha256(buffer).toString().toUpperCase()
-                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
-
-                    rawTx = {
-                        txid:hash,
+                    //
+                    let unsignedTx = {
                         coin,
-                        serialized:JSON.stringify(broadcastString)
+                        transaction,
+                        HDwalletPayload:runeTx,
+                        verbal:"Thorchain transaction"
                     }
+
+                    rawTx = unsignedTx
+
+                    // let res = await this.WALLET.thorchainSignTx({
+                    //     addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                    //     chain_id,
+                    //     account_number: account_number,
+                    //     sequence:sequence,
+                    //     tx: unsigned,
+                    // });
+                    //
+                    // log.info("res: ",prettyjson.render(res))
+                    // log.debug("res*****: ",res)
+                    //
+                    // let txFinal:any
+                    // txFinal = res
+                    // txFinal.signatures = res.signatures
+                    //
+                    // log.info("FINAL: ****** ",txFinal)
+                    //
+                    // let broadcastString = {
+                    //     tx:txFinal,
+                    //     type:"cosmos-sdk/StdTx",
+                    //     mode:"sync"
+                    // }
+                    //
+                    // // @ts-ignore
+                    // const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
+                    // let hash = sha256(buffer).toString().toUpperCase()
+                    // // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+                    //
+                    //
+                    // rawTx = {
+                    //     txid:hash,
+                    //     coin,
+                    //     serialized:JSON.stringify(broadcastString)
+                    // }
                 }else if(coin === 'ATOM'){
                     //get amount native
                     let amountNative = ATOM_BASE * parseFloat(amount)
@@ -1784,34 +1980,50 @@ module.exports = class wallet {
                     }))
 
                     //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-
-                    let res = await this.WALLET.cosmosSignTx({
+                    let atomTx = {
                         addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
                         chain_id,
                         account_number: account_number,
                         sequence:sequence,
                         tx: unsigned,
-                    });
-
-                    log.info("res: ",prettyjson.render(res))
-                    log.debug("res*****: ",res)
-
-                    let txFinal:any
-                    txFinal = res
-                    txFinal.signatures = res.signatures
-
-                    log.debug("FINAL: ****** ",txFinal)
-
-                    let broadcastString = {
-                        tx:txFinal,
-                        type:"cosmos-sdk/StdTx",
-                        mode:"sync"
                     }
-                    rawTx = {
-                        txid:"",
+
+                    let unsignedTx = {
                         coin,
-                        serialized:JSON.stringify(broadcastString)
+                        transaction,
+                        HDwalletPayload:atomTx,
+                        verbal:"Thorchain transaction"
                     }
+
+                    rawTx = unsignedTx
+
+                    // let res = await this.WALLET.cosmosSignTx({
+                    //     addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                    //     chain_id,
+                    //     account_number: account_number,
+                    //     sequence:sequence,
+                    //     tx: unsigned,
+                    // });
+                    //
+                    // log.info("res: ",prettyjson.render(res))
+                    // log.debug("res*****: ",res)
+                    //
+                    // let txFinal:any
+                    // txFinal = res
+                    // txFinal.signatures = res.signatures
+                    //
+                    // log.debug("FINAL: ****** ",txFinal)
+                    //
+                    // let broadcastString = {
+                    //     tx:txFinal,
+                    //     type:"cosmos-sdk/StdTx",
+                    //     mode:"sync"
+                    // }
+                    // rawTx = {
+                    //     txid:"",
+                    //     coin,
+                    //     serialized:JSON.stringify(broadcastString)
+                    // }
                 }else if(coin === "BNB"){
                     //TODO move to tx builder module
                     //get account info
@@ -1876,31 +2088,48 @@ module.exports = class wallet {
                     // log.debug(tag,"bnbTx: ",JSON.stringify(bnbTx))
                     //bip32ToAddressNList(`m/44'/714'/0'/0/0`)
 
-                    //TODO verify addressFrom path
-                    const signedTxResponse = await this.WALLET.binanceSignTx({
+                    let binanceTx = {
                         addressNList: bip32ToAddressNList(`m/44'/714'/0'/0/0`),
                         chain_id: "Binance-Chain-Nile",
                         account_number: account_number,
                         sequence: sequence,
                         tx: bnbTx,
-                    })
-                    log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
-                    log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
+                     }
 
-                    // this is undefined at first tx
-                    // let pubkeyHex = pubkey.toString('hex')
-                    // log.debug(tag,"pubkeyHex: ",pubkeyHex)
-
-                    let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
-                    log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
-
-                    const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
-                    let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
-                    rawTx = {
-                        txid:hash,
-                        serialized:signedTxResponse.serialized
+                    let unsignedTx = {
+                        coin,
+                        transaction,
+                        HDwalletPayload:binanceTx,
+                        verbal:"Thorchain transaction"
                     }
+
+                    rawTx = unsignedTx
+
+                    //TODO verify addressFrom path
+                    // const signedTxResponse = await this.WALLET.binanceSignTx({
+                    //     addressNList: bip32ToAddressNList(`m/44'/714'/0'/0/0`),
+                    //     chain_id: "Binance-Chain-Nile",
+                    //     account_number: account_number,
+                    //     sequence: sequence,
+                    //     tx: bnbTx,
+                    // })
+                    // log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
+                    // log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
+                    //
+                    // // this is undefined at first tx
+                    // // let pubkeyHex = pubkey.toString('hex')
+                    // // log.debug(tag,"pubkeyHex: ",pubkeyHex)
+                    //
+                    // let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
+                    // log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
+                    //
+                    // const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
+                    // let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+                    //
+                    // rawTx = {
+                    //     txid:hash,
+                    //     serialized:signedTxResponse.serialized
+                    // }
                 }else if(coin === "EOS"){
                     throw Error ("666: EOS not supported yet!")
                     // amount = getEosAmount(amount)

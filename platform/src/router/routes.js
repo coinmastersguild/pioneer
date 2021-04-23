@@ -19,6 +19,12 @@ const routes = [
         props: true
       },
       {
+        path: '/approvals',
+        name: 'Approvals',
+        component: () => import('pages/Approvals.vue'),
+        props: true
+      },
+      {
         path: '/pioneer',
         name: 'Pioneer',
         component: () => import('pages/Pioneer.vue'),

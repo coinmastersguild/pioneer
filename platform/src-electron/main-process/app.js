@@ -247,6 +247,7 @@ export async function onStart(event,data) {
     if(!config.spec || true){
       // config.spec = "https://pioneers.dev/spec/swagger.json"
       // config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
+      config.wss = "ws://127.0.0.1:9001"
       config.spec = "http://127.0.0.1:9001/spec/swagger.json"
       config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
       //config.spec = "https://pioneers.dev/spec/swagger.json"
@@ -306,8 +307,8 @@ export async function onStart(event,data) {
     //TODO is context pref in config?
 
     //set primary context
-    let context = wallets[0]
-    WALLETS_LOADED = context
+    // let context = wallets[0]
+    // WALLETS_LOADED = context
 
     //load masters
     let info = await context.getInfo()
@@ -315,7 +316,7 @@ export async function onStart(event,data) {
     event.sender.send('setWalletInfoContext',info)
     //Start wallet interface
 
-
+    return resultInit
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};

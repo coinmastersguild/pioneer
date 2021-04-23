@@ -39,7 +39,6 @@ import {
 
 // const pioneer = require("@pioneer-platform/pioneer-client")
 const Hardware = require("@pioneer-platform/pioneer-hardware")
-const client = require("@pioneer-platform/pioneer-events")
 
 let URL_PIONEER_SPEC
 const WALLETS = []
@@ -80,6 +79,7 @@ if (process.env.PROD) {
 
 let mainWindow
 let previewWindow
+let approveWindow
 
 //TODO :pray: someday menubar again?
 // function createPreviewDashboard(){
@@ -100,6 +100,38 @@ let previewWindow
 //   return previewWindow
 // }
 
+//create pop-up approve
+function createApproveWindow () {
+  /**
+   * pop-up approve
+   *
+   * more options: https://www.electronjs.org/docs/api/browser-window
+   */
+  approveWindow = new BrowserWindow({
+    width: 600,
+    height: 600,
+    x:0, //Top of window
+    useContentSize: true,
+    //TODO make toggle
+    //remember last setting?
+    alwaysOnTop: true,
+    webPreferences: {
+      // Change from /quasar.conf.js > electron > nodeIntegration;
+      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
+      nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
+      nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+
+      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+      // preload: path.resolve(__dirname, 'electron-preload.js')
+    }
+  })
+
+  approveWindow.loadURL(process.env.APP_URL+"/#approvals")
+
+  approveWindow.on('closed', () => {
+    approveWindow = null
+  })
+}
 
 function createWindow () {
   /**
@@ -157,8 +189,8 @@ function createWindow () {
 
 app.on('ready', createWindow)
 
+
 app.on('window-all-closed', () => {
-  client.disconnect()
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -402,6 +434,26 @@ ipcMain.on('createWallet', async (event, data) => {
       //start wallet
       let onStartResult = await onStart(event,data)
       log.info(tag,"onStartResult: ",onStartResult)
+
+      //on on invocations add to queue
+      onStartResult.events.on('message', async (request) => {
+        log.info(tag,"**** message: ", request)
+        createApproveWindow()
+        //TODO open "onTop" window for each tx type
+        let signedTx
+        switch(request.type) {
+          case 'swap':
+            break;
+          case 'approve':
+            break;
+          case 'transfer':
+            break;
+          case 'context':
+            break;
+          default:
+            log.error("Unknown event: "+request.type)
+        }
+      })
 
 
       //f it, send it

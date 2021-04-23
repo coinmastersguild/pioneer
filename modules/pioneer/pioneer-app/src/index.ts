@@ -70,6 +70,7 @@ let WALLET_PRIVATE:any = {}
 let WALLET_PUBKEYS:any = []
 let WALLET_PASSWORD:any = ""
 let APPROVE_QUEUE:any = []
+let ALL_PENDING:any = []
 //
 let SOCKET_CLIENT:any
 
@@ -139,11 +140,14 @@ module.exports = {
     hardwareEnterPin: function (pin:string) {
         return Hardware.enterPin(pin);
     },
-    getPending: function () {
-        return pendingQueue;
-    },
-    getAproved: function () {
-        return approvedQueue;
+    // getPending: function () {
+    //     return pendingQueue;
+    // },
+    // getAproved: function () {
+    //     return approvedQueue;
+    // },
+    approveTransaction: function (context:string,invocationId:string) {
+        return approve_transaction(context,invocationId);
     },
     getConfig: function () {
         return getConfig();
@@ -435,6 +439,69 @@ module.exports = {
     //start wallet REST api
 
 };
+
+/*
+
+    approve_transaction
+
+    Notes:
+        Source:
+        Dapp:
+        amountUSD known:
+        expected Fee in USD:
+
+ */
+
+let approve_transaction = async function (context:string,invocationId:string) {
+    let tag = " | unlock_wallet | ";
+    try {
+        let transactionViewFinal:any = {}
+        let allUnapproved = []
+        //get all pending from all contexts
+        let wallets = Object.keys(WALLETS_LOADED)
+        for(let i = 0; i < wallets.length; i++){
+            let wallet = wallets[i]
+            //
+            let unApproved = WALLETS_LOADED[wallet].getApproveQueue()
+            for(let j = 0; j < unApproved.length; j++){
+                let unsignedTransaction = unApproved[j]
+                allUnapproved.push(unsignedTransaction)
+            }
+        }
+
+        //if context dont match
+        if(WALLET_CONTEXT !== context){
+            log.info(tag,"Signing transaction for wallet out of context!")
+            transactionViewFinal.outOfContext = true
+        }
+
+        //add warning to view
+        for(let i = 0; i < allUnapproved.length; i++){
+            let unsignedTransaction = allUnapproved[i]
+            if(unsignedTransaction.invocationId === invocationId){
+                transactionViewFinal.unsignedTransaction = unsignedTransaction
+                //approve transaction
+                let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unsignedTransaction)
+                transactionViewFinal.signedTx = signedTx
+                //broadcast
+                let broadcast = await WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unsignedTransaction.coin,signedTx)
+                transactionViewFinal.broadcast = broadcast
+                //add to pending
+                let walletPending = await WALLETS_LOADED[WALLET_CONTEXT].addBroadcasted({unsignedTransaction,signedTx,broadcast})
+                for(let j = 0; j < walletPending.length; j++){
+                    ALL_PENDING.push(walletPending[j])
+                }
+                transactionViewFinal.pending = ALL_PENDING
+            }
+        }
+
+        return transactionViewFinal
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
+};
+
 
 let pair_sdk_user = async function (code:string) {
     let tag = " | unlock_wallet | ";
@@ -760,12 +827,22 @@ let send_to_address = async function (intent:any) {
         if(!intent.coin) throw Error("102: invalid intent missing coin!")
         if(!intent.amount) throw Error("102: invalid intent missing amount!")
         log.info(tag,"params: ",intent)
+        intent.addressTo = intent.address
 
-        let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
-        log.info(tag,"txid: ", signedTx.txid)
+        log.info(tag,"Building TX on context: ",WALLET_CONTEXT)
+        //TODO check remote context match's local
+
+        //build tx add to approve queue
+        let unsignedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
+
+        //add to queue
+        WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(unsignedTx)
+
+        // let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
+        // log.info(tag,"txid: ", signedTx.txid)
         //
 
-        return signedTx
+        return unsignedTx
     } catch (e) {
         console.error(tag, "Error: ", e);
         throw e;
@@ -1288,9 +1365,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 case 'transfer':
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    signedTx = await send_to_address(request.invocation)
-                    log.info(tag,"txid: ", signedTx.txid)
-                    clientEvents.events.emit('broadcast',signedTx)
+                    let unSignedTx = await send_to_address(request.invocation)
+                    log.info(tag,"unSignedTx: ", unSignedTx)
+                    clientEvents.events.emit('approval',unSignedTx)
                     break;
                 case 'context':
                     //switch context
