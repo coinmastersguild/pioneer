@@ -57,9 +57,45 @@ let run_test = async function(){
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
 
+            resultInit.events.on('message', async (request) => {
+
+                //on request
+
+                //display for review
+
+                //approve
+
+                //
+                switch(request.type) {
+                    case 'transfer':
+                        console.log(" **** PROCESS EVENT ****  request: ",request)
+                        //review
+
+                        //approve
+                        console.log(" Approving transaction! ")
+                        let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
+                        console.log(" ***  signedTx: ",signedTx)
+
+                        //
+
+
+                        if(signedTx.success){
+                            //broadcast
+                            // let broadcastResult = await App.broadcastTransaction(request.invocation.coin,signedTx)
+                            // console.log("broadcastResult: ",broadcastResult)
+                        }
+
+
+                        break
+                    default:
+                        console.log("Unhandled type: ",request.type)
+                }
+            })
+
+
             //pair
-            let pairResult = await App.pair("WJTWYV")
-            console.log("pairResult: ",pairResult)
+            // let pairResult = await App.pair("WJTWYV")
+            // console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()

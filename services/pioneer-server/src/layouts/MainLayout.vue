@@ -6,9 +6,9 @@
         <q-toolbar-title>
           Pioneer
         </q-toolbar-title>
-        <div>total assets value (USD): {{totalValueUsd}}</div>
+<!--        <div>total assets value (USD): {{totalValueUsd}}</div>-->
         <br/>
-<!--        <div>API v{{ $q.version }}</div>-->
+        <div>API v{{ $q.version }}</div>
 
       </q-toolbar>
     </q-header>
@@ -38,6 +38,9 @@ export default {
   },
   async mounted() {
     try{
+      //on mount
+
+
       console.log("process.env",process.env)
       const newAccounts = await ethereum.request({
         method: 'eth_requestAccounts',

@@ -26,7 +26,7 @@ let run_test = async function(){
     try{
 
         let config = {
-            queryKey:"adsfgdfgds3sdfsd",
+            // queryKey:"adsfgdfgds3sdfsd",
             wss:"ws://127.0.0.1:9001"
         }
 
@@ -34,7 +34,9 @@ let run_test = async function(){
         let clientEvents = new Events.Events(config.pioneerWs,config)
         clientEvents.init()
 
-        clientEvents.subscribeToKey()
+        //let invocation = ""
+
+        // clientEvents.subscribeToKey()
 
         //info
         clientEvents.events.on('message',function(request){

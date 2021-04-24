@@ -34,13 +34,31 @@ import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Reque
 import * as express from 'express';
 
 //TODO enum for supported types
-//TODO typed payloads
 interface Invocation {
+    type?:string
+    noBroadcast?:boolean
+    invocationId?:string
+    address:string,
+    addressTo?:string,
+    meme?:string
+    coin:string
+    amount:string
+    context?:string
+    username:string
+
+}
+
+interface InvocationBody {
+    msg?: string;
+    context?: string;
     type:string
-    sender:string
-    recipient:string
-    asset:string
-    payload:any
+    username:string,
+    invocation:Invocation
+    invocationId?:string
+    auth?:string
+    service?:string
+    servicePubkey?:string
+    serviceHash?:string
 }
 
 
@@ -82,10 +100,9 @@ export class pioneerInvocationController extends Controller {
      */
 
     @Post('/invocation')
-    public async invocation(@Header('Authorization') authorization: string, @Body() body: any): Promise<any> {
+    public async invocation(@Header('Authorization') authorization: string, @Body() body: InvocationBody): Promise<any> {
         let tag = TAG + " | invocation | "
         try{
-            let output:any = {}
             log.info(tag,"body: ",body)
             //verify auth
 
@@ -103,20 +120,26 @@ export class pioneerInvocationController extends Controller {
             // invocationId
             let invocationId = "pioneer:invocation:v0.01:"+body.invocation.coin+":"+short.generate()
 
+            //TODO limit per user? DDOS protect?
+
             //origin
             //TODO signed by?
             body.invocationId = invocationId
+            if(body.invocation.context) body.context = body.invocation.context
             let entry = {
+                state:'created',
                 invocationId,
+                username:body.username,
+                tags:[body.username],
                 invocation:body
             }
 
             //TODO sequence
             //only accept 1 per username
-
             //save to mongo
             let mongoSave = await invocationsDB.insert(entry)
             log.info(tag,"mongoSave: ",mongoSave)
+
             if(onlineUsers.indexOf(body.username) >= 0){
                 body.invocationId = invocationId
                 //auth (app needs to verify!)
@@ -124,28 +147,28 @@ export class pioneerInvocationController extends Controller {
                 //send
                 publisher.publish("invocations",JSON.stringify(body))
 
+                // :( but this was cool
                 //block till confirmation
-                log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
-                let timeStart = new Date().getTime()
+                // log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
+                // let timeStart = new Date().getTime()
 
-                let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
-                let timeEnd = new Date().getTime()
-                log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+                // let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
+                // let timeEnd = new Date().getTime()
+                // log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+                //
+                // //if
+                // if(!txid[1]) throw Error("Failed to broadcast! timeout!")
+                // //TODO if timeout return invocationId
+                // output.success = true
+                // output.txid = txid[1]
+                // output.ttr = (timeEnd - timeStart)/1000
+                // if(body.invocation.noBroadcast) output.broadcast = false
 
-                //if
-                if(!txid[1]) throw Error("Failed to broadcast! timeout!")
-                //TODO if timeout return invocationId
-                output.success = true
-                output.txid = txid[1]
-                output.ttr = (timeEnd - timeStart)/1000
-                if(body.invocation.noBroadcast) output.broadcast = false
-                return output
             } else {
-                output.invocationId = invocationId
-                output.msg = "User is offline! username:"+body.invocation.username
-                return output
+                body.invocationId = invocationId
+                body.msg = "User is offline! username:"+body.invocation.username
             }
-
+            return body
         }catch(e){
             let errorResp:Error = {
                 success:false,

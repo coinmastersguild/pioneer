@@ -20,6 +20,7 @@ export class Events {
     private pair: (username?: string) => Promise<boolean>;
     private disconnect: () => Promise<void>;
     private subscribeToKey: () => Promise<boolean>;
+    private subscribeToInvocation: (invocationId: string) => Promise<boolean>;
     constructor(wss:string,config:any,isTestnet?:boolean) {
         this.wss = config.wss || 'wss://pioneers.dev'
         this.isConnected = false
@@ -87,6 +88,21 @@ export class Events {
                 this.username = username
             } catch (e) {
                 log.error(tag, "e: ", e)
+            }
+        }
+        this.subscribeToInvocation = async function (invocationId:string) {
+            let tag = TAG + " | subscribeToInvocation | "
+            try {
+
+                //attempt join
+                this.socket.emit('join',{
+                    invocationId
+                })
+
+                return true
+            } catch (e) {
+                log.error(tag, "e: ", e)
+                throw e
             }
         }
         this.subscribeToKey = async function () {

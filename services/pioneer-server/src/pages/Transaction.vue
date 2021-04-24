@@ -1,46 +1,80 @@
 <template>
-    <div>
-        <h2>Transaction page</h2>
-        User {{ $route.params.id }}
+    <div class="q-pa-md fixed-center" style="max-width:750px">
+        <h5>Transaction Status page</h5>
+        <small>Invocation: {{ $route.params.id }}</small>
+        <q-stepper
+                v-model="step"
+                ref="stepper"
+                alternative-labels
+                color="primary"
+                animated
+        >
+            <q-step
+                    :name="1"
+                    title="Reviewed and Signed"
+                    icon="settings"
+                    :done="step > 1"
+            >
+                Review Transaction
+
+                sign:
+            </q-step>
+
+            <q-step
+                    :name="2"
+                    title="Pending Transactions"
+                    caption="(broadcast)"
+                    icon="create_new_folder"
+                    :done="step > 2"
+            >
+                Fee levels:
+                <br/>
+                Time till next block:
+                <br/>
+                estimated time till confirmation:
+                <br/>
+                Rebuild/replace transaction:
+            </q-step>
+
+            <template v-slot:navigation>
+                <q-stepper-navigation>
+                    <q-btn @click="$refs.stepper.next()" color="primary" :label="step === 4 ? 'Finish' : 'Continue'" />
+                    <q-btn v-if="step > 1" flat color="primary" @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />
+                </q-stepper-navigation>
+            </template>
+        </q-stepper>
     </div>
 </template>
 
 <script>
-
-    let spec = 'http://127.0.0.1:9001/spec/swagger.json'
-    let pioneerApi = require("@pioneer-platform/pioneer-client")
-
-    let config = {
-        queryKey:"webonly",
-        username:"webonly",
-        spec
-    }
-
-
-    //get config
-    let pioneer = new pioneerApi(spec,config)
-
+    import { mapMutations, mapGetters, mapActions } from 'vuex'
     export default {
         name: "Transaction",
         data () {
             return {
                 status:"online",
+                step: 1
             }
+        },
+        computed: {
+            ...mapGetters(['getWalletSendInfo'])
         },
         async mounted() {
             try{
-                pioneer = await pioneer.init()
-                this.update()
+                //subscribe to invocation lifecycles
+                let invocationId = this.$route.params.id
+                console.log("invocationId: ",invocationId)
+
             }catch(e){
                 console.error(e)
             }
         },
         methods: {
+            ...mapMutations(['showModal', 'hideModal']),
+            ...mapActions(['addTx']),
             async update () {
                 //get info on invocation
-                console.log("pioneer: ",pioneer)
-                let invocationInfo = await pioneer.instance.Online()
-                console.log("invocationInfo: ",invocationInfo)
+
             },
         }
     }

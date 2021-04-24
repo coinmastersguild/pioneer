@@ -400,9 +400,9 @@ module.exports = {
     // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
     //     return send_to_address(coin,address,amount,memo);
     // },
-    // broadcastTransaction: async function (coin:string,rawTx:string) {
-    //     return broadcast_transaction(coin,rawTx);
-    // },
+    broadcastTransaction: async function (coin:string,rawTx:string) {
+        return broadcast_transaction(coin,rawTx);
+    },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
@@ -456,6 +456,8 @@ let approve_transaction = async function (context:string,invocationId:string) {
     let tag = " | unlock_wallet | ";
     try {
         let transactionViewFinal:any = {}
+        transactionViewFinal.success = false
+
         let allUnapproved = []
         //get all pending from all contexts
         let wallets = Object.keys(WALLETS_LOADED)
@@ -468,6 +470,19 @@ let approve_transaction = async function (context:string,invocationId:string) {
                 allUnapproved.push(unsignedTransaction)
             }
         }
+        log.info(tag,"*** allUnapproved: ",allUnapproved)
+        log.info(tag,"*** WALLET_CONTEXT: ",WALLET_CONTEXT)
+        log.info(tag,"*** context: ",context)
+
+        //get unApproved from remote
+        let remoteUnapproved = await network.instance.Invocations()
+        remoteUnapproved =remoteUnapproved.data
+
+        log.info(tag,"*** remoteUnapproved: ",remoteUnapproved)
+        for(let i = 0; i < remoteUnapproved.length; i++){
+            let remoteInovaction = remoteUnapproved[i]
+            allUnapproved.push(remoteInovaction)
+        }
 
         //if context dont match
         if(WALLET_CONTEXT !== context){
@@ -476,15 +491,37 @@ let approve_transaction = async function (context:string,invocationId:string) {
         }
 
         //add warning to view
+        log.info(tag,"allUnapproved: ",allUnapproved)
         for(let i = 0; i < allUnapproved.length; i++){
             let unsignedTransaction = allUnapproved[i]
+            log.info(tag,"unsignedTransaction: ",unsignedTransaction.invocationId)
+            log.info(tag,"invocationId: ",invocationId)
             if(unsignedTransaction.invocationId === invocationId){
+
                 transactionViewFinal.unsignedTransaction = unsignedTransaction
+                let unSignedTx
+                if(!unsignedTransaction.unSignedTx) {
+                    log.info("ERROR: THIS SHOULD NOT HIT! FAILED TO UPDATE INVOCATION FIXME")
+                    //log.error(tag,"e: ",unsignedTransaction)
+                    //build anyway
+                    unSignedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(unsignedTransaction.invocation.invocation)
+                    unSignedTx.invocationId = unsignedTransaction.invocationId
+                } else {
+                    unSignedTx = unsignedTransaction.unSignedTx
+                }
+                log.info(tag,"Signing transaction: ",unSignedTx)
+
                 //approve transaction
-                let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unsignedTransaction)
+                let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unSignedTx)
+                if(signedTx.txid) transactionViewFinal.success = true
+                transactionViewFinal.txid = signedTx.txid
                 transactionViewFinal.signedTx = signedTx
+
+                //validate
+                log.info(tag,"FINAL signedTx: ",signedTx)
+
                 //broadcast
-                let broadcast = await WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unsignedTransaction.coin,signedTx)
+                let broadcast = await WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unSignedTx.coin,signedTx)
                 transactionViewFinal.broadcast = broadcast
                 //add to pending
                 let walletPending = await WALLETS_LOADED[WALLET_CONTEXT].addBroadcasted({unsignedTransaction,signedTx,broadcast})
@@ -794,10 +831,10 @@ let broadcast_transaction = async function (coin:string,rawTx:string) {
         //if token, set network to ETH
 
         log.debug("Broadcasting tx coin: ",coin," rawTx: ",rawTx)
-        result = await Pioneer.broadcastTransaction('ETH',rawTx)
-        log.debug(tag,"result: ", result)
+        result = await network.instance.Broadcast(null,{coin,rawTx})
+        log.info(tag,"result: ", result)
 
-        return result;
+        return result.data;
     } catch (e) {
         console.error(tag, "Error: ", e);
         throw e;
@@ -830,17 +867,32 @@ let send_to_address = async function (intent:any) {
         intent.addressTo = intent.address
 
         log.info(tag,"Building TX on context: ",WALLET_CONTEXT)
+        if(!intent.context) intent.context = intent.context
         //TODO check remote context match's local
 
         //build tx add to approve queue
         let unsignedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
+        log.info(tag,"unsignedTx: ",unsignedTx)
+
+        log.info(tag,"WALLET_CONTEXT: ",WALLET_CONTEXT)
+
+        //push unsigned to invocation
+        let updateInno = {
+            invocationId:intent.invocationId,
+            invocation:intent,
+            unsignedTx
+        }
+        //log.info(tag,"Network.instance: ",network.instance)
+        let resultUpdateInvocation = await network.instance.UpdateInvocation(null,updateInno)
+        log.info(tag,"resultUpdateInvocation: ",resultUpdateInvocation.data)
 
         //add to queue
-        WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(unsignedTx)
+        let resultAdd = await WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(unsignedTx)
+        log.info(tag,"resultAdd: ",resultAdd)
 
-        // let signedTx = await WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent)
-        // log.info(tag,"txid: ", signedTx.txid)
-        //
+        //verify added
+        let resultNewQueue = await WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue()
+        log.info(tag,"resultNewQueue: ",resultNewQueue)
 
         return unsignedTx
     } catch (e) {
@@ -1375,6 +1427,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.info(tag,"wallet context is now: ",request.context)
                         if(request.context !== WALLET_CONTEXT){
                             WALLET_CONTEXT = request.context
+                            clientEvents.events.emit('context',request)
                         }else{
                             log.error("context already: ",request.context)
                         }

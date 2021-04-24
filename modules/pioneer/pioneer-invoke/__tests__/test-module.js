@@ -13,7 +13,7 @@ let Invoke = require("../lib")
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-
+const open = require("open");
 let spec = process.env['URL_PIONEER_SPEC']
 let seed_1 = process.env['WALLET_MAINNET_DEV']
 let password = process.env['WALLET_PASSWORD']
@@ -28,6 +28,9 @@ let invoker = process.env['TEST_USERNAME_2']
 //
 // let invoker = process.env['TEST_USERNAME_1']
 // let invokee = process.env['TEST_USERNAME_2']
+
+//open webpage with invocation
+
 
 let run_test = async function(){
     try{
@@ -104,6 +107,7 @@ let run_test = async function(){
         }
 
         let invocation = {
+            context:"0x33b35c665496ba8e71b22373843376740401f106.wallet.json",
             username:invoker,
             coin:txInput.asset.symbol,
             amount:txInput.amount.amount(),
@@ -115,6 +119,8 @@ let run_test = async function(){
         let result = await invoke.invoke('transfer',invocation)
         console.log("result: ",result.data)
 
+        //open invoke page
+        open("http://localhost:8080/#/invocation/"+result.data.invocationId)
     }catch(e){
         console.error(e)
     }

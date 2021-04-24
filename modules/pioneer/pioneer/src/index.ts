@@ -113,6 +113,7 @@ export interface SendToAddress {
     coin:string,
     amount:string,
     address:string,
+    addressTo?:string,
     memo?:string,
     invocationId?:string,
     noBroadcast?:boolean
@@ -166,13 +167,14 @@ export interface Transaction {
     amount: string;
     memo?: string | undefined;
     nonce?:number
-    feeLevel?:string
+    feeLevel?:string,
+    noBroadcast?:boolean
 }
 
 //TransactionUnsigned
 export interface TransactionUnsigned {
     coin: string;
-    //TODO
+    invocationId?:string,
     transaction:Transaction,
     HDwalletPayload:any, // this has specific types per blockchain?
     verbal:any
@@ -1216,8 +1218,11 @@ module.exports = class wallet {
                 } else {
                     invocationId = intent.invocationId
                 }
+                if(!intent.address && intent.addressTo) intent.address = intent.addressTo
                 intent.coin = intent.coin.toUpperCase()
-                log.debug(tag,"params: ",intent)
+                log.info(tag,"params: ",intent)
+                if(!intent.amount) throw Error("Amount required!")
+                if(!intent.address) throw Error("address required!")
                 //TODO verify input params
 
                 let addressFrom = await this.getMaster(intent.coin)
@@ -1243,43 +1248,24 @@ module.exports = class wallet {
                     coin:intent.coin,
                     addressTo:intent.address,
                     addressFrom,
-                    amount:intent.amount
+                    amount:intent.amount,
                 }
                 if(intent.memo) transaction.memo = intent.memo
+                if(intent.noBroadcast) transaction.noBroadcast = intent.noBroadcast
 
                 //build transfer
                 let unSignedTx = await this.buildTransfer(transaction)
                 log.info(tag,"unSignedTx: ",unSignedTx)
 
-                // let signedTx = await this.signTransaction(unSignedTx)
-                // log.info(tag,"signedTx: ",signedTx)
-
                 if(invocationId) unSignedTx.invocationId = invocationId
                 log.debug(tag,"transaction: ",transaction)
 
                 unSignedTx.broadcasted = false
-                // let broadcast_hook = async () =>{
-                //     try{
-                //         log.info(tag,"signedTx: ",unSignedTx)
-                //         //TODO flag for async broadcast
-                //         let broadcastResult = await this.broadcastTransaction(intent.coin,unSignedTx)
-                //         log.info(tag,"broadcastResult: ",broadcastResult)
-                //
-                //         //push to invoke api
-                //     }catch(e){
-                //         log.error(tag,"Failed to broadcast transaction!")
-                //     }
-                // }
-                // //broadcast hook
-                // if(!intent.noBroadcast){
-                //     unSignedTx.broadcasted = true
-                // } else {
-                //     unSignedTx.noBroadcast = true
-                // }
-                // //if noBroadcast we MUST still release the inovation
-                // //do we pass noBroadcast to the broadcast post request
-                // //Notice NO asyc!
-                // broadcast_hook()
+                if(!intent.noBroadcast){
+                    unSignedTx.broadcasted = true
+                } else {
+                    unSignedTx.noBroadcast = true
+                }
 
                 unSignedTx.invocationId = invocationId
                 return unSignedTx
@@ -1291,8 +1277,9 @@ module.exports = class wallet {
         this.signTransaction = async function (unsignedTx:TransactionUnsigned) {
             let tag = TAG + " | signTransaction | "
             try {
-                let signedTx
+                let signedTx:any = {}
                 let coin = unsignedTx.coin
+
 
                 let UTXOcoins = [
                     'BTC',
@@ -1400,6 +1387,9 @@ module.exports = class wallet {
                     throw Error("Coin not supported! "+coin)
                 }
 
+                //
+                if(unsignedTx.transaction.noBroadcast) signedTx.noBroadcast = true
+                if(unsignedTx.invocationId) signedTx.invocationId = unsignedTx.invocationId
 
                 return signedTx
             } catch (e) {

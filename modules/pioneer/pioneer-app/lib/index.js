@@ -75,6 +75,7 @@ let WALLET_PRIVATE = {};
 let WALLET_PUBKEYS = [];
 let WALLET_PASSWORD = "";
 let APPROVE_QUEUE = [];
+let ALL_PENDING = [];
 //
 let SOCKET_CLIENT;
 //
@@ -139,11 +140,14 @@ module.exports = {
     hardwareEnterPin: function (pin) {
         return Hardware.enterPin(pin);
     },
-    getPending: function () {
-        return pendingQueue;
-    },
-    getAproved: function () {
-        return approvedQueue;
+    // getPending: function () {
+    //     return pendingQueue;
+    // },
+    // getAproved: function () {
+    //     return approvedQueue;
+    // },
+    approveTransaction: function (context, invocationId) {
+        return approve_transaction(context, invocationId);
     },
     getConfig: function () {
         return pioneer_config_1.getConfig();
@@ -384,9 +388,11 @@ module.exports = {
     // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
     //     return send_to_address(coin,address,amount,memo);
     // },
-    // broadcastTransaction: async function (coin:string,rawTx:string) {
-    //     return broadcast_transaction(coin,rawTx);
-    // },
+    broadcastTransaction: function (coin, rawTx) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return broadcast_transaction(coin, rawTx);
+        });
+    },
     //TODO
     // getStakes: function (coin:string) {
     //     return pioneer.getStakes(coin);
@@ -401,6 +407,98 @@ module.exports = {
     sendToAddress: function (intent) {
         return send_to_address(intent);
     },
+};
+/*
+
+    approve_transaction
+
+    Notes:
+        Source:
+        Dapp:
+        amountUSD known:
+        expected Fee in USD:
+
+ */
+let approve_transaction = function (context, invocationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | unlock_wallet | ";
+        try {
+            let transactionViewFinal = {};
+            transactionViewFinal.success = false;
+            let allUnapproved = [];
+            //get all pending from all contexts
+            let wallets = Object.keys(WALLETS_LOADED);
+            for (let i = 0; i < wallets.length; i++) {
+                let wallet = wallets[i];
+                //
+                let unApproved = WALLETS_LOADED[wallet].getApproveQueue();
+                for (let j = 0; j < unApproved.length; j++) {
+                    let unsignedTransaction = unApproved[j];
+                    allUnapproved.push(unsignedTransaction);
+                }
+            }
+            log.info(tag, "*** allUnapproved: ", allUnapproved);
+            log.info(tag, "*** WALLET_CONTEXT: ", WALLET_CONTEXT);
+            log.info(tag, "*** context: ", context);
+            //get unApproved from remote
+            let remoteUnapproved = yield network.instance.Invocations();
+            remoteUnapproved = remoteUnapproved.data;
+            log.info(tag, "*** remoteUnapproved: ", remoteUnapproved);
+            for (let i = 0; i < remoteUnapproved.length; i++) {
+                let remoteInovaction = remoteUnapproved[i];
+                allUnapproved.push(remoteInovaction);
+            }
+            //if context dont match
+            if (WALLET_CONTEXT !== context) {
+                log.info(tag, "Signing transaction for wallet out of context!");
+                transactionViewFinal.outOfContext = true;
+            }
+            //add warning to view
+            log.info(tag, "allUnapproved: ", allUnapproved);
+            for (let i = 0; i < allUnapproved.length; i++) {
+                let unsignedTransaction = allUnapproved[i];
+                log.info(tag, "unsignedTransaction: ", unsignedTransaction.invocationId);
+                log.info(tag, "invocationId: ", invocationId);
+                if (unsignedTransaction.invocationId === invocationId) {
+                    transactionViewFinal.unsignedTransaction = unsignedTransaction;
+                    let unSignedTx;
+                    if (!unsignedTransaction.unSignedTx) {
+                        log.info("ERROR: THIS SHOULD NOT HIT! FAILED TO UPDATE INVOCATION FIXME");
+                        //log.error(tag,"e: ",unsignedTransaction)
+                        //build anyway
+                        unSignedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(unsignedTransaction.invocation.invocation);
+                        unSignedTx.invocationId = unsignedTransaction.invocationId;
+                    }
+                    else {
+                        unSignedTx = unsignedTransaction.unSignedTx;
+                    }
+                    log.info(tag, "Signing transaction: ", unSignedTx);
+                    //approve transaction
+                    let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unSignedTx);
+                    if (signedTx.txid)
+                        transactionViewFinal.success = true;
+                    transactionViewFinal.txid = signedTx.txid;
+                    transactionViewFinal.signedTx = signedTx;
+                    //validate
+                    log.info(tag, "FINAL signedTx: ", signedTx);
+                    //broadcast
+                    let broadcast = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unSignedTx.coin, signedTx);
+                    transactionViewFinal.broadcast = broadcast;
+                    //add to pending
+                    let walletPending = yield WALLETS_LOADED[WALLET_CONTEXT].addBroadcasted({ unsignedTransaction, signedTx, broadcast });
+                    for (let j = 0; j < walletPending.length; j++) {
+                        ALL_PENDING.push(walletPending[j]);
+                    }
+                    transactionViewFinal.pending = ALL_PENDING;
+                }
+            }
+            return transactionViewFinal;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
 };
 let pair_sdk_user = function (code) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -668,9 +766,9 @@ let broadcast_transaction = function (coin, rawTx) {
             //tier 1 apps
             //if token, set network to ETH
             log.debug("Broadcasting tx coin: ", coin, " rawTx: ", rawTx);
-            result = yield Pioneer.broadcastTransaction('ETH', rawTx);
-            log.debug(tag, "result: ", result);
-            return result;
+            result = yield network.instance.Broadcast(null, { coin, rawTx });
+            log.info(tag, "result: ", result);
+            return result.data;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -705,10 +803,31 @@ let send_to_address = function (intent) {
             if (!intent.amount)
                 throw Error("102: invalid intent missing amount!");
             log.info(tag, "params: ", intent);
-            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent);
-            log.info(tag, "txid: ", signedTx.txid);
-            //
-            return signedTx;
+            intent.addressTo = intent.address;
+            log.info(tag, "Building TX on context: ", WALLET_CONTEXT);
+            if (!intent.context)
+                intent.context = intent.context;
+            //TODO check remote context match's local
+            //build tx add to approve queue
+            let unsignedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent);
+            log.info(tag, "unsignedTx: ", unsignedTx);
+            log.info(tag, "WALLET_CONTEXT: ", WALLET_CONTEXT);
+            //push unsigned to invocation
+            let updateInno = {
+                invocationId: intent.invocationId,
+                invocation: intent,
+                unsignedTx
+            };
+            //log.info(tag,"Network.instance: ",network.instance)
+            let resultUpdateInvocation = yield network.instance.UpdateInvocation(null, updateInno);
+            log.info(tag, "resultUpdateInvocation: ", resultUpdateInvocation.data);
+            //add to queue
+            let resultAdd = yield WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(unsignedTx);
+            log.info(tag, "resultAdd: ", resultAdd);
+            //verify added
+            let resultNewQueue = yield WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue();
+            log.info(tag, "resultNewQueue: ", resultNewQueue);
+            return unsignedTx;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -1192,9 +1311,9 @@ let init_wallet = function (config, isTestnet) {
                         if (!request.invocationId)
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
-                        signedTx = yield send_to_address(request.invocation);
-                        log.info(tag, "txid: ", signedTx.txid);
-                        clientEvents.events.emit('broadcast', signedTx);
+                        let unSignedTx = yield send_to_address(request.invocation);
+                        log.info(tag, "unSignedTx: ", unSignedTx);
+                        clientEvents.events.emit('approval', unSignedTx);
                         break;
                     case 'context':
                         //switch context
@@ -1202,6 +1321,7 @@ let init_wallet = function (config, isTestnet) {
                             log.info(tag, "wallet context is now: ", request.context);
                             if (request.context !== WALLET_CONTEXT) {
                                 WALLET_CONTEXT = request.context;
+                                clientEvents.events.emit('context', request);
                             }
                             else {
                                 log.error("context already: ", request.context);

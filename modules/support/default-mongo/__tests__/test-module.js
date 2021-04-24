@@ -52,15 +52,15 @@ let run_test = async function(){
         // console.log(respPush)
 
 
-        let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
-        let walletId2 = '0xc3affff54122658b89c31183cec4f15514f34624.wallet.json'
-
-        //get pubkeys by user
-        let resp = await pubkeysDB.find({tags:{$all:[walletId]}})
-        for(let i = 0; i < resp.length; i++){
-            let pubkey = resp[i]
-            console.log("pubkey: ",pubkey.network)
-        }
+        // let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
+        // let walletId2 = '0xc3affff54122658b89c31183cec4f15514f34624.wallet.json'
+        //
+        // //get pubkeys by user
+        // let resp = await pubkeysDB.find({tags:{$all:[walletId]}})
+        // for(let i = 0; i < resp.length; i++){
+        //     let pubkey = resp[i]
+        //     console.log("pubkey: ",pubkey.network)
+        // }
 
         // let resp2 = await pubkeysDB.find({tags:{$all:[walletId2]}})
         // console.log(resp2.length)

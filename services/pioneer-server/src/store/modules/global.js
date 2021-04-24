@@ -1,7 +1,7 @@
 
 const state = {
-    masterEth: "",
-    modalComponent: "",
+    queryKey: "",
+    username: "",
 }
 
 const getters = {
@@ -10,7 +10,10 @@ const getters = {
 
 
 const mutations = {
-    setMasterEth(state, address) {
+    initPioneer(state, address) {
+        state.masterEth = address
+    },
+    subscribeInvocation(state, address) {
         state.masterEth = address
     },
     showModal(state, componentName) {

@@ -21,10 +21,6 @@ const short = require('short-uuid');
 const { queryString } = require("object-query-string");
 const os = require("os")
 
-// usersDB.createIndex({id: 1}, {unique: true})
-// txsDB.createIndex({txid: 1}, {unique: true})
-// txsRawDB.createIndex({txhash: 1}, {unique: true})
-
 //globals
 
 //modules

@@ -19,6 +19,7 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.1",
+    "open": "^8.0.6",
     "openapi-client-axios": "^3.6.1",
     "request": "^2.88.2",
     "socket.io-client": "^2.3.0",

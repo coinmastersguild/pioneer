@@ -12,6 +12,23 @@ const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 
+let connection  = require("@pioneer-platform/default-mongo")
+
+let usersDB = connection.get('users')
+let pubkeysDB = connection.get('pubkeys')
+let txsDB = connection.get('transactions')
+let invocationsDB = connection.get('invocations')
+let utxosDB = connection.get('utxo')
+
+usersDB.createIndex({id: 1}, {unique: true})
+usersDB.createIndex({username: 1}, {unique: true})
+txsDB.createIndex({txid: 1}, {unique: true})
+utxosDB.createIndex({txid: 1}, {unique: true})
+pubkeysDB.createIndex({pubkey: 1}, {unique: true})
+invocationsDB.createIndex({invocationId: 1}, {unique: true})
+
+txsDB.createIndex({invocationId: 1})
+
 /*
     Feature Flags per blockchain
 
@@ -85,7 +102,7 @@ interface BroadcastBody {
     serialized:string
     signature?:string
     type?:string
-    txid?:string
+    txid:string
     broadcastBody?:any
     noBroadcast?:boolean
     dscription?:any
@@ -499,7 +516,7 @@ export class pioneerPublicController extends Controller {
                         vout:vin.vout,
                         addr:vin.addresses[0], //TODO if multi? multisig?
                         scriptSig:{
-                            hex:"0014459a4d8600bfdaa52708eaae5be1dcf959069efc" //from input?
+                            hex:"0014459a4d8600bfdaa52708eaae5be1dcf959069efc" //from input? //TODO wtf is this hex?
                         },
                         valueSat:parseInt(vin.value),
                         value:parseInt(vin.value) / 100000000,
@@ -1005,10 +1022,11 @@ export class pioneerPublicController extends Controller {
      */
     @Post('/broadcast')
     public async broadcast(@Body() body: BroadcastBody): Promise<any> {
-        let tag = TAG + " | transactions | "
+        let tag = TAG + " | broadcast | "
         try{
             log.info("************************** CHECKPOINT *******************88 ")
             log.info(tag,"body: ",body)
+            if(!body.txid) throw Error("103: must known txid BEFORE broadcast! ")
             let result:any = {
                 success:false
             }
@@ -1020,8 +1038,16 @@ export class pioneerPublicController extends Controller {
             //if(!networks[coin]) throw Error("102: unknown network coin:"+coin)
 
             //if
+            let invocationInfo:any = {}
             if(body.invocationId){
-                if(!body.txid) throw Error("102 txid required for interactive hook!")
+                log.info(tag,"invocationId: ",body.invocationId)
+                //get invocation
+                let invocationInfoQuery = await invocationsDB.findOne({invocationId:body.invocationId})
+                log.info(tag,"invocationInfoQuery: ",invocationInfoQuery)
+                if(invocationInfoQuery){
+                    invocationInfo = invocationInfoQuery
+                }
+                log.info(tag,"invocationInfo: ",invocationInfo)
                 log.info(tag,"Release InvocationId: ",body.invocationId)
                 log.info(tag,"Release body.txid: ",body.txid)
                 redis.lpush(body.invocationId,body.txid)
@@ -1079,7 +1105,24 @@ export class pioneerPublicController extends Controller {
             } else {
                 result.success = true
                 result.broadcast = false
-                result = body.invocationId
+                //result = body.invocationId
+            }
+
+            let mongoEntry:any = body
+            //add to txsDB
+            let tags = ['internal',coin,'pending']
+            if(invocationInfo.username) tags.push(invocationInfo.username)
+            if(invocationInfo.context) tags.push(invocationInfo.context)
+            if(invocationInfo.type) tags.push(invocationInfo.type)
+            if(invocationInfo.invocation && invocationInfo.invocation.address) tags.push(invocationInfo.invocation.address)
+            mongoEntry.tags = tags
+            //mongoEntry.result = result
+            mongoEntry.pending = true
+            mongoEntry.broadcasted = new Date().getTime()
+            try{
+                result.saveTx = await txsDB.insert(mongoEntry)
+            }catch(e){
+                //duplicate
             }
 
             return(result);

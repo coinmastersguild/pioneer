@@ -21,12 +21,16 @@ let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 let txsDB = connection.get('transactions')
 let utxosDB = connection.get('utxo')
+let invocationsDB = connection.get('invocations')
 
 usersDB.createIndex({id: 1}, {unique: true})
 usersDB.createIndex({username: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
 utxosDB.createIndex({txid: 1}, {unique: true})
 pubkeysDB.createIndex({pubkey: 1}, {unique: true})
+invocationsDB.createIndex({invocationId: 1}, {unique: true})
+
+txsDB.createIndex({invocationId: 1})
 
 const axios = require('axios')
 const network = require("@pioneer-platform/network")
@@ -91,6 +95,12 @@ interface SetContextBody {
 interface RegisterEosUsername {
     username:string
     pubkey:string
+}
+
+interface UpdateInvocationBody {
+    invocationId:string,
+    invocation:any,
+    unsignedTx:any
 }
 
 interface TransactionsBody {
@@ -189,8 +199,11 @@ export class pioneerPrivateController extends Controller {
             //remove all pubkeys
             output.pubkeysDelete = await pubkeysDB.remove({tags:{ $all: [accountInfo.username]}})
 
-            //remove all pubkeys
+            //remove all txs
             output.txsDelete = await txsDB.remove({tags:{ $all: [accountInfo.username]}})
+
+            //remove all invocations
+            output.invocationsDelete = await invocationsDB.remove({tags:{ $all: [accountInfo.username]}})
 
             return output
         }catch(e){
@@ -352,6 +365,44 @@ export class pioneerPrivateController extends Controller {
         }
     }
 
+    @Get('/invocations')
+    public async invocations(@Header('Authorization') authorization: string): Promise<any> {
+        let tag = TAG + " | unapproved | "
+        try{
+            log.info(tag,"queryKey: ",authorization)
+
+            let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) {
+                return {
+                    success:false,
+                    error:"QueryKey not registerd!"
+                }
+            } else {
+                log.info(tag,"accountInfo: ",accountInfo)
+                let username = accountInfo.username
+                let userInfo = await redis.hgetall(username)
+                log.info(tag,"userInfo: ",userInfo)
+                if(Object.keys(userInfo).length === 0){
+                    return {
+                        success:false,
+                        error:"QueryKey not paired!"
+                    }
+                }else{
+                    //unapproved
+                    let invocations = await invocationsDB.find({tags:{ $all: [accountInfo.username]}})
+                    return invocations
+                }
+            }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     /**
      Get the balances for a given username
@@ -513,6 +564,32 @@ export class pioneerPrivateController extends Controller {
         }
     }
 
+    /**
+     * Pair an sdk with app
+     * @param request This is an application pairing submission
+     */
+
+    @Post('/updateInvocation')
+    public async updateInvocation(@Body() body: UpdateInvocationBody, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | pair | "
+        try{
+            log.info(tag,"account: ",body)
+            log.info(tag,"Authorization: ",Authorization)
+
+            //update database
+            let updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{unsignedTx:body.unsignedTx}})
+
+            return(updateResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     /**
      * Pair an sdk with app

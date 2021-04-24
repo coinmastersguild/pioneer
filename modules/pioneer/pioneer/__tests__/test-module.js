@@ -87,27 +87,39 @@ let run_test = async function(){
         let balanceETH = await Wallet.getBalance("ETH")
         console.log("balanceETH: ",balanceETH)
 
+        let invocationId = "pioneer:invocation:v0.01:ETH:98tzeFAHevjZC5C5pXBbxN"
         let address = "0x33b35c665496bA8E71B22373843376740401F106"
-        let amount = ""
+        let amount = "0.00123"
         let memo = ""
 
         let transfer = {
+            noBroadcast:true,
+            invocationId,
             coin:"ETH",
-            addressTo:address,
+            address:address,
             amount,
             memo
         }
 
-        let transferUnSigned = await Wallet.buildTransfer(transfer)
+        let transferUnSigned = await Wallet.sendToAddress(transfer)
         console.log("transferUnSigned: ",transferUnSigned)
 
-        let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        //add to queue
+        Wallet.addUnsigned(transferUnSigned)
+
+        //approve
+        let unsignedTx = Wallet.getNextReview()
+        console.log("unsignedTx: ",unsignedTx)
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
+
+        let transferSigned = await Wallet.signTransaction(unsignedTx)
         console.log("transferSigned: ",transferSigned)
 
-        let resultBroadcast = await Wallet.broadcastTransaction('ETH',transferSigned)
+        transferSigned.noBroadcast = true
+        let resultBroadcast = await Wallet.broadcastTransaction(unsignedTx.coin,transferSigned)
         console.log("resultBroadcast: ",resultBroadcast)
 
-        //
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
 

@@ -72,7 +72,7 @@ const models: TsoaRoute.Models = {
             "serialized": {"dataType":"string","required":true},
             "signature": {"dataType":"string"},
             "type": {"dataType":"string"},
-            "txid": {"dataType":"string"},
+            "txid": {"dataType":"string","required":true},
             "broadcastBody": {"dataType":"any"},
             "noBroadcast": {"dataType":"boolean"},
             "dscription": {"dataType":"any"},
@@ -85,6 +85,16 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "context": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpdateInvocationBody": {
+        "dataType": "refObject",
+        "properties": {
+            "invocationId": {"dataType":"string","required":true},
+            "invocation": {"dataType":"any","required":true},
+            "unsignedTx": {"dataType":"any","required":true},
         },
         "additionalProperties": false,
     },
@@ -173,6 +183,40 @@ const models: TsoaRoute.Models = {
             "image": {"dataType":"string","required":true},
             "version": {"dataType":"string","required":true},
             "description": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Invocation": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"string"},
+            "noBroadcast": {"dataType":"boolean"},
+            "invocationId": {"dataType":"string"},
+            "address": {"dataType":"string","required":true},
+            "addressTo": {"dataType":"string"},
+            "meme": {"dataType":"string"},
+            "coin": {"dataType":"string","required":true},
+            "amount": {"dataType":"string","required":true},
+            "context": {"dataType":"string"},
+            "username": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "InvocationBody": {
+        "dataType": "refObject",
+        "properties": {
+            "msg": {"dataType":"string"},
+            "context": {"dataType":"string"},
+            "type": {"dataType":"string","required":true},
+            "username": {"dataType":"string","required":true},
+            "invocation": {"ref":"Invocation","required":true},
+            "invocationId": {"dataType":"string"},
+            "auth": {"dataType":"string"},
+            "service": {"dataType":"string"},
+            "servicePubkey": {"dataType":"string"},
+            "serviceHash": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -937,6 +981,28 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/invocations',
+            function pioneerPrivateController_invocations(request: any, response: any, next: any) {
+            const args = {
+                    authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new pioneerPrivateController();
+
+
+            const promise = controller.invocations.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/context',
             function pioneerPrivateController_context(request: any, response: any, next: any) {
             const args = {
@@ -1002,6 +1068,29 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.setContext.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/updateInvocation',
+            function pioneerPrivateController_updateInvocation(request: any, response: any, next: any) {
+            const args = {
+                    body: {"in":"body","name":"body","required":true,"ref":"UpdateInvocationBody"},
+                    Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new pioneerPrivateController();
+
+
+            const promise = controller.updateInvocation.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1214,7 +1303,7 @@ export function RegisterRoutes(app: express.Router) {
             function pioneerInvocationController_invocation(request: any, response: any, next: any) {
             const args = {
                     authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"any"},
+                    body: {"in":"body","name":"body","required":true,"ref":"InvocationBody"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -2,6 +2,7 @@ export interface SendToAddress {
     coin: string;
     amount: string;
     address: string;
+    addressTo?: string;
     memo?: string;
     invocationId?: string;
     noBroadcast?: boolean;
@@ -50,9 +51,11 @@ export interface Transaction {
     memo?: string | undefined;
     nonce?: number;
     feeLevel?: string;
+    noBroadcast?: boolean;
 }
 export interface TransactionUnsigned {
     coin: string;
+    invocationId?: string;
     transaction: Transaction;
     HDwalletPayload: any;
     verbal: any;

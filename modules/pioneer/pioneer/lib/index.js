@@ -1283,15 +1283,14 @@ module.exports = /** @class */ (function () {
         };
         this.sendToAddress = function (intent) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, invocationId, addressFrom, balance, transaction, unSignedTx, signedTx_2, broadcast_hook, e_10;
-                var _this = this;
+                var tag, invocationId, addressFrom, balance, transaction, unSignedTx, e_10;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             tag = TAG + " | sendToAddress | ";
                             _a.label = 1;
                         case 1:
-                            _a.trys.push([1, 7, , 8]);
+                            _a.trys.push([1, 6, , 7]);
                             invocationId = void 0;
                             if (!intent.invocationId) {
                                 invocationId = "notset";
@@ -1299,8 +1298,14 @@ module.exports = /** @class */ (function () {
                             else {
                                 invocationId = intent.invocationId;
                             }
+                            if (!intent.address && intent.addressTo)
+                                intent.address = intent.addressTo;
                             intent.coin = intent.coin.toUpperCase();
-                            log.debug(tag, "params: ", intent);
+                            log.info(tag, "params: ", intent);
+                            if (!intent.amount)
+                                throw Error("Amount required!");
+                            if (!intent.address)
+                                throw Error("address required!");
                             return [4 /*yield*/, this.getMaster(intent.coin)];
                         case 2:
                             addressFrom = _a.sent();
@@ -1322,70 +1327,40 @@ module.exports = /** @class */ (function () {
                                 coin: intent.coin,
                                 addressTo: intent.address,
                                 addressFrom: addressFrom,
-                                amount: intent.amount
+                                amount: intent.amount,
                             };
                             if (intent.memo)
                                 transaction.memo = intent.memo;
+                            if (intent.noBroadcast)
+                                transaction.noBroadcast = intent.noBroadcast;
                             return [4 /*yield*/, this.buildTransfer(transaction)];
                         case 5:
                             unSignedTx = _a.sent();
                             log.info(tag, "unSignedTx: ", unSignedTx);
-                            return [4 /*yield*/, this.signTransaction(unSignedTx)];
-                        case 6:
-                            signedTx_2 = _a.sent();
-                            log.info(tag, "signedTx: ", signedTx_2);
                             if (invocationId)
-                                signedTx_2.invocationId = invocationId;
+                                unSignedTx.invocationId = invocationId;
                             log.debug(tag, "transaction: ", transaction);
-                            signedTx_2.broadcasted = false;
-                            broadcast_hook = function () { return __awaiter(_this, void 0, void 0, function () {
-                                var broadcastResult, e_11;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            _a.trys.push([0, 2, , 3]);
-                                            log.info(tag, "signedTx: ", signedTx_2);
-                                            return [4 /*yield*/, this.broadcastTransaction(intent.coin, signedTx_2)];
-                                        case 1:
-                                            broadcastResult = _a.sent();
-                                            log.info(tag, "broadcastResult: ", broadcastResult);
-                                            return [3 /*break*/, 3];
-                                        case 2:
-                                            e_11 = _a.sent();
-                                            log.error(tag, "Failed to broadcast transaction!");
-                                            return [3 /*break*/, 3];
-                                        case 3: return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                            //broadcast hook
+                            unSignedTx.broadcasted = false;
                             if (!intent.noBroadcast) {
-                                signedTx_2.broadcasted = true;
+                                unSignedTx.broadcasted = true;
                             }
                             else {
-                                signedTx_2.noBroadcast = true;
+                                unSignedTx.noBroadcast = true;
                             }
-                            //if noBroadcast we MUST still release the inovation
-                            //do we pass noBroadcast to the broadcast post request
-                            //Notice NO asyc!
-                            broadcast_hook();
-                            signedTx_2.invocationId = invocationId;
-                            //
-                            if (!signedTx_2.txid)
-                                throw Error("103: Pre-broadcast txid hash not implemented!");
-                            return [2 /*return*/, signedTx_2];
-                        case 7:
+                            unSignedTx.invocationId = invocationId;
+                            return [2 /*return*/, unSignedTx];
+                        case 6:
                             e_10 = _a.sent();
                             log.error(tag, e_10);
                             throw Error(e_10);
-                        case 8: return [2 /*return*/];
+                        case 7: return [2 /*return*/];
                     }
                 });
             });
         };
         this.signTransaction = function (unsignedTx) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, signedTx, coin, UTXOcoins, res, txid, res, txFinal, broadcastString, buffer, hash, res, txFinal, broadcastString, signedTxResponse, pubkeySigHex, buffer, hash, e_12;
+                var tag, signedTx, coin, UTXOcoins, res, txid, res, txFinal, broadcastString, buffer, hash, res, txFinal, broadcastString, signedTxResponse, pubkeySigHex, buffer, hash, e_11;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1393,7 +1368,7 @@ module.exports = /** @class */ (function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 13, , 14]);
-                            signedTx = void 0;
+                            signedTx = {};
                             coin = unsignedTx.coin;
                             UTXOcoins = [
                                 'BTC',
@@ -1499,11 +1474,17 @@ module.exports = /** @class */ (function () {
                         //TODO EOS
                         //FIO
                         throw Error("Coin not supported! " + coin);
-                        case 12: return [2 /*return*/, signedTx];
+                        case 12:
+                            //
+                            if (unsignedTx.transaction.noBroadcast)
+                                signedTx.noBroadcast = true;
+                            if (unsignedTx.invocationId)
+                                signedTx.invocationId = unsignedTx.invocationId;
+                            return [2 /*return*/, signedTx];
                         case 13:
-                            e_12 = _a.sent();
-                            log.error(tag, "e: ", e_12);
-                            throw e_12;
+                            e_11 = _a.sent();
+                            log.error(tag, "e: ", e_11);
+                            throw e_11;
                         case 14: return [2 /*return*/];
                     }
                 });
@@ -1511,7 +1492,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRateInfo, feeRate, amountSat, targets, totalInSatoshi, i, amountInSat, valueIn, valueOut, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, unsignedTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, runeTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, atomTx, unsignedTx, accountInfo, sequence, account_number, pubkey, bnbTx, binanceTx, unsignedTx, e_13;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRateInfo, feeRate, amountSat, targets, totalInSatoshi, i, amountInSat, valueIn, valueOut, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, unsignedTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, runeTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, atomTx, unsignedTx, accountInfo, sequence, account_number, pubkey, bnbTx, binanceTx, unsignedTx, e_12;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -2192,9 +2173,9 @@ module.exports = /** @class */ (function () {
                             _a.label = 27;
                         case 27: return [2 /*return*/, rawTx];
                         case 28:
-                            e_13 = _a.sent();
-                            log.error(tag, "e: ", e_13);
-                            throw e_13;
+                            e_12 = _a.sent();
+                            log.error(tag, "e: ", e_12);
+                            throw e_12;
                         case 29: return [2 /*return*/];
                     }
                 });
