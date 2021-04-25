@@ -49,7 +49,8 @@ let {
     supportedBlockchains,
     supportedAssets,
     getPaths,
-    get_address_from_xpub
+    get_address_from_xpub,
+    getNativeAssetForBlockchain
 } = require('@pioneer-platform/pioneer-coins')
 
 //const bcrypt = require('bcryptjs');
@@ -67,12 +68,10 @@ let sleep = wait.sleep;
 let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
 let pubkeysDB = connection.get('pubkeys')
-//let txsRawDB = connection.get('transactions-raw')
 let inputsDB = connection.get('unspent')
 
 usersDB.createIndex({id: 1}, {unique: true})
 txsDB.createIndex({txid: 1}, {unique: true})
-//txsRawDB.createIndex({txhash: 1}, {unique: true})
 inputsDB.createIndex({txid: 1}, {unique: true})
 pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 
@@ -82,71 +81,135 @@ module.exports = {
     register: async function (username:string, xpubs:any, walletId:string) {
         return register_pubkeys(username, xpubs, walletId);
     },
+    getPubkeys: async function (username:string, walletId:string) {
+        return get_and_verify_pubkeys(username, walletId);
+    },
     update: async function (username:string, xpubs:any, walletId:string) {
         return update_pubkeys(username, xpubs, walletId);
     },
 }
 
+let get_and_verify_pubkeys = async function (username:string, walletId:string) {
+    let tag = TAG + " | get_and_verify_pubkeys | "
+    try {
+        //get pubkeys from mongo with walletId tagged
+        let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [walletId]}})
+        log.info(tag,"pubkeysMongo: ",pubkeysMongo)
+
+        //get user info from mongo
+        let userInfo = await usersDB.findOne({username})
+        log.info(tag,"userInfo: ",userInfo)
+        let blockchains = userInfo.blockchains
+        if(!userInfo.blockchains) throw Error("Invalid user!")
+
+        //reformat
+        let pubkeys:any = []
+        let masters:any = {}
+        for(let i = 0; i < pubkeysMongo.length; i++){
+            let pubkeyInfo = pubkeysMongo[i]
+            delete pubkeyInfo._id
+            //TODO validate pubkeys?
+
+            if(!masters[pubkeyInfo.symbol] && pubkeyInfo.master)masters[pubkeyInfo.symbol] = pubkeyInfo.master
+            pubkeys.push(pubkeyInfo)
+        }
+
+        //verify pubkey list match's blockchains enabled
+        for(let i = 0; i < blockchains.length; i++){
+            let blockchain = blockchains[i]
+            let nativeAsset = getNativeAssetForBlockchain(blockchain)
+            if(!masters[nativeAsset]) {
+                log.error(tag,"blockchain: ",blockchain)
+                log.error(tag,"nativeAsset: ",nativeAsset)
+                log.error(tag,"masters: ",masters)
+                log.error(tag,"blockchains: ",blockchains)
+                throw Error(" Missing Master for supported blockchain! "+blockchain)
+            }
+        }
+
+        return {pubkeys,masters}
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_zpub = async function (username:string, pubkey:any, walletId:string) {
+    let tag = TAG + " | register_zpub | "
+    try {
+        if(!pubkey.zpub) throw Error("102: invalid pubkey! missing zpub!")
+        if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
+        if(!pubkey.symbol) throw Error("104: invalid pubkey! missing pubkey!")
+
+        //if zpub add zpub
+        let queueId = uuid.generate()
+
+        //get master
+        let account = 0
+        let index = 0
+        let address = await get_address_from_xpub(pubkey.zpub,pubkey.scriptType,pubkey.symbol,account,index,false,false)
+        log.info(tag,"Master(Local): ",address)
+        log.info(tag,"Master(hdwallet): ",pubkey.master)
+        if(address !== pubkey.master){
+            log.error(tag,"Local Master NOT VALID!!")
+            //revert to pubkey (assume hdwallet right)
+            address = pubkey.master
+        }
+        let work = {
+            type:'zpub',
+            pubkey:pubkey.zpub,
+            master:address,
+            network:pubkey.blockchain,
+            asset:pubkey.symbol,
+            queueId,
+            username,
+            walletId,
+            zpub:pubkey.zpub,
+            xpub:pubkey.zpub,
+            inserted: new Date().getTime()
+        }
+        await queue.createWork("pioneer:pubkey:ingest",work)
+
+        return queueId
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
 
 let register_xpub = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_xpub | "
     try {
-        if(!pubkey.coin) throw Error("102: invalid pubkey! missing coin!")
-        if(!pubkey.symbol) pubkey.symbol = pubkey.coin
-        let xpub = pubkey.xpub
-        //save info
-        redis.sadd(xpub+":username", username)
-        redis.hset(xpub, "xpub", pubkey.xpub)
-        redis.hset(xpub, "username", username)
-        redis.hset(xpub, "coin", pubkey.coin)
-        redis.hset(xpub, "network", pubkey.symbol)
-        redis.hset(xpub, "type", pubkey.script_type)
-
+        if(!pubkey.xpub) throw Error("102: invalid pubkey! missing xpub!")
+        if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
+        if(!pubkey.symbol) throw Error("104: invalid pubkey! missing symbol!")
 
         //if zpub add zpub
         let queueId = uuid.generate()
-        if(pubkey.zpub){
-            //get master
-            let account = 0
-            let index = 0
-            let address = await get_address_from_xpub(pubkey.xpub,pubkey.scriptType,pubkey.coin,account,index,false,false)
 
-            let work = {
-                type:'zpub',
-                pubkey:pubkey.zpub,
-                master:address,
-                coin:pubkey.coin,
-                network:pubkey.coin,
-                asset:pubkey.coin,
-                queueId,
-                username,
-                walletId,
-                inserted: new Date().getTime()
-            }
-            await queue.createWork("pioneer:pubkey:ingest",work)
-        } else if (pubkey.xpub){
-            //get master
-            let account = 0
-            let index = 0
-            let address = await get_address_from_xpub(pubkey.xpub,pubkey.scriptType,pubkey.coin,account,index,false,false)
-
-            let work = {
-                type:'xpub',
-                coin:pubkey.coin,
-                pubkey:pubkey.xpub,
-                master:address,
-                network:pubkey.coin,
-                asset:pubkey.coin,
-                queueId,
-                username,
-                xpub,
-                inserted: new Date().getTime()
-            }
-            await queue.createWork("pioneer:pubkey:ingest",work)
-        } else {
-            log.error(tag,"pubkey: ",pubkey)
-            throw Error("Attempting to register an invalid xpub! ")
+        //get master
+        let account = 0
+        let index = 0
+        let address = await get_address_from_xpub(pubkey.xpub,pubkey.scriptType,pubkey.symbol,account,index,false,false)
+        if(address !== pubkey.master){
+            log.error(tag,"Local Master NOT VALID!!")
+            //revert to pubkey (assume hdwallet right)
+            address = pubkey.master
         }
+        let work = {
+            type:'xpub',
+            blockchain:pubkey.blockchain,
+            pubkey:pubkey.xpub,
+            master:address,
+            network:pubkey.blockchain,
+            asset:pubkey.symbol,
+            queueId,
+            username,
+            xpub:pubkey.xpub,
+            inserted: new Date().getTime()
+        }
+        await queue.createWork("pioneer:pubkey:ingest",work)
+
 
         return queueId
     } catch (e) {
@@ -158,23 +221,17 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
 let register_address = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_address | "
     try {
-        if(!pubkey.symbol) pubkey.symbol = pubkey.coin
         let address = pubkey.pubkey
-        let coin = pubkey.coin
-        redis.sadd(address+":username", username)
-        redis.hset(address, "address", address)
-        redis.hset(address, "coin", pubkey.symbol)
-        redis.hset(address, "network", pubkey.coin)
-
         let queueId = uuid.generate()
 
         //add to work
         let work = {
             type:'address',
-            coin:pubkey.coin,
             pubkey:address,
-            network:pubkey.coin,
-            asset:pubkey.coin,
+            symbol:pubkey.symbol,
+            blockchain:pubkey.blockchain,
+            network:pubkey.network,
+            asset:pubkey.symbol,
             walletId,
             queueId,
             username,
@@ -236,30 +293,53 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
             for(let i = 0; i < unknown.length; i++){
                 let pubkey = unknown[i]
                 let pubkeyInfo = PubkeyMap[pubkey]
+                if(!pubkeyInfo.pubkey) throw Error("102: invalid pubkey! missing pubkey")
+                if(!pubkeyInfo.master) throw Error("102: invalid pubkey! missing master")
+                if(!pubkeyInfo.blockchain) throw Error("103: invalid pubkey! missing blockchain")
+
+                let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain)
+                if(!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!")
+                //hack
+                if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset
+
+
                 //save to mongo
                 let entryMongo:any = {
-                    coin:pubkeyInfo.coin,
+                    blockchain:pubkeyInfo.blockchain,
+                    symbol:nativeAsset,
+                    asset:nativeAsset,
                     path:pubkeyInfo.path,
                     master:pubkeyInfo.master,
                     script_type:pubkeyInfo.script_type,
-                    xpub:true,
                     network:pubkeyInfo.network,
                     created:new Date().getTime(),
-                    tags:[username,pubkeyInfo.coin,pubkeyInfo.network,walletId],
+                    tags:[username,pubkeyInfo.blockchain,pubkeyInfo.network,walletId],
                 }
 
-                if(pubkeyInfo.type === "xpub" || pubkeyInfo.type === "zpub"){
-                    let xpub = pubkeyInfo.xpub
-
-                    entryMongo.pubkey = xpub
-                    entryMongo.xpub = true
+                if(pubkeyInfo.type === "xpub" || pubkeyInfo.xpub){
+                    if(pubkeyInfo.xpub){
+                        entryMongo.pubkey = pubkeyInfo.xpub
+                        entryMongo.xpub = true
+                    } else {
+                        log.errro(tag,"pubkey: ",pubkeyInfo)
+                        throw Error("102: Invalid xpub pubkey!")
+                    }
                     saveActions.push({insertOne:entryMongo})
-
                     let queueId = await register_xpub(username,pubkeyInfo,walletId)
-
                     //add to Mutex array for async xpub register option
                     output.work.push(queueId)
-
+                } else if(pubkeyInfo.type === "zpub" || pubkeyInfo.zpub){
+                    if(pubkeyInfo.zpub){
+                        entryMongo.pubkey = pubkeyInfo.zpub
+                        entryMongo.zpub = true
+                    } else {
+                        log.errro(tag,"pubkey: ",pubkeyInfo)
+                        throw Error("102: Invalid zpub pubkey!")
+                    }
+                    saveActions.push({insertOne:entryMongo})
+                    let queueId = await register_zpub(username,pubkeyInfo,walletId)
+                    //add to Mutex array for async xpub register option
+                    output.work.push(queueId)
                 } else if(pubkeyInfo.type === "address"){
                     entryMongo.pubkey = pubkeyInfo.pubkey
                     let queueId = await register_address(username,pubkeyInfo,walletId)
@@ -268,7 +348,21 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                     log.error("Unhandled type: ",pubkeyInfo.type)
                 }
 
-                saveActions.push({insertOne: entryMongo})
+
+                //verify write
+                log.info(tag,"entryMongo: ",entryMongo)
+                //check exists
+                let keyExists = await pubkeysDB.findOne({pubkey:entryMongo.pubkey})
+                if(keyExists){
+                    log.info(tag,"Key already registered! key: ",entryMongo)
+                    //push wallet to tags
+                    //add to tags
+                    let pushTagMongo = await usersDB.update({pubkey:entryMongo.pubkey},
+                        { $addToSet: { tags: walletId } })
+                    log.info(tag,"pushTagMongo: ",pushTagMongo)
+                }else{
+                    saveActions.push({insertOne: entryMongo})
+                }
             }
 
             //save pubkeys in mongo
@@ -326,29 +420,28 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
 
         for (let i = 0; i < pubkeys.length; i++) {
             let pubkeyInfo = pubkeys[i]
-            log.info(tag, "pubkeyInfo: ", pubkeyInfo)
-            if (!pubkeyInfo.coin) throw Error("Invalid pubkey required field: coin")
-            //hack missing symbol
-            if (!pubkeyInfo.symbol) pubkeyInfo.symbol = pubkeyInfo.coin
-            if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.coin)
-            if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.coin)
-            if (!pubkeyInfo.master) throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.coin)
+            let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain)
+            if(!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!")
+            //hack
+            if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset
 
-            //if eth use master
-            if (pubkeyInfo.coin === 'ETH') {
-                //register to blocknative
-                blocknative.submitAddress("ETH", pubkeyInfo.master)
-            }
+            log.info(tag, "pubkeyInfo: ", pubkeyInfo)
+            if (!pubkeyInfo.blockchain) throw Error("Invalid pubkey required field: blockchain")
+            if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.blockchain)
+            if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.blockchain)
+            if (!pubkeyInfo.master) throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.blockchain)
+
 
             //save to mongo
             let entryMongo: any = {
-                coin: pubkeyInfo.coin,
-                asset: pubkeyInfo.coin,
+                blockchain: pubkeyInfo.blockchain,
+                symbol:nativeAsset,
+                asset: pubkeyInfo.blockchain,
                 path: pubkeyInfo.path,
                 script_type: pubkeyInfo.script_type,
-                network: pubkeyInfo.network,
+                network: pubkeyInfo.blockchain,
                 created: new Date().getTime(),
-                tags: [username, pubkeyInfo.coin, pubkeyInfo.network, walletId],
+                tags: [username, pubkeyInfo.blockchain,pubkeyInfo.symbol, pubkeyInfo.network, walletId],
             }
 
             if (pubkeyInfo.type === "xpub") {
@@ -358,6 +451,8 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
                 entryMongo.xpub = xpub
                 entryMongo.xpub = true
                 entryMongo.type = 'xpub'
+                entryMongo.master = pubkeyInfo.address
+                entryMongo.address = pubkeyInfo.address
 
                 let queueId = await register_xpub(username, pubkeyInfo, walletId)
 
@@ -371,6 +466,8 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
                 entryMongo.zpub = zpub
                 entryMongo.zpub = true
                 entryMongo.type = 'zpub'
+                entryMongo.master = pubkeyInfo.address
+                entryMongo.address = pubkeyInfo.address
 
                 let queueId = await register_xpub(username, pubkeyInfo, walletId)
 

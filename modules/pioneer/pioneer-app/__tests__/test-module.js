@@ -48,11 +48,11 @@ let run_test = async function(){
             console.log("First time startup (run pair multi)")
 
         } else {
+            //blockchains
+            if(!config.blockchains) throw Error("Invalid configuration!")
+
             config.password = password
             config.username = username
-
-            console.log("config: ",config)
-            config.blockchains = ['bitcoin','ethereum','thorchain']
 
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
@@ -73,17 +73,14 @@ let run_test = async function(){
 
                         //approve
                         console.log(" Approving transaction! ")
-                        let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
-                        console.log(" ***  signedTx: ",signedTx)
+                        // let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
+                        // console.log(" ***  signedTx: ",signedTx)
 
-                        //
-
-
-                        if(signedTx.success){
-                            //broadcast
-                            // let broadcastResult = await App.broadcastTransaction(request.invocation.coin,signedTx)
-                            // console.log("broadcastResult: ",broadcastResult)
-                        }
+                        // if(signedTx.success){
+                        //     //broadcast
+                        //     // let broadcastResult = await App.broadcastTransaction(request.invocation.coin,signedTx)
+                        //     // console.log("broadcastResult: ",broadcastResult)
+                        // }
 
 
                         break

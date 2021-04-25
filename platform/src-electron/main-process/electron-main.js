@@ -34,6 +34,7 @@ import {
   viewSeed,
   createWallet,
   onAttemptCreate,
+  approveTransaction
 } from './app'
 
 
@@ -101,7 +102,8 @@ let approveWindow
 // }
 
 //create pop-up approve
-function createApproveWindow () {
+function createApproveWindow (invocationId) {
+  log.info("LAUNCH APPROVE WINDOW")
   /**
    * pop-up approve
    *
@@ -126,7 +128,7 @@ function createApproveWindow () {
     }
   })
 
-  approveWindow.loadURL(process.env.APP_URL+"/#approvals")
+  approveWindow.loadURL(process.env.APP_URL+"/#invocations")
 
   approveWindow.on('closed', () => {
     approveWindow = null
@@ -205,7 +207,29 @@ app.on('activate', () => {
 ipcMain.on('onStart', async (event, data) => {
   const tag = TAG + ' | onStart | '
   try {
-    let result = await onStart(event,data)
+    let onStartResult = await onStart(event,data)
+    console.log("********* CHECKPOINT 3")
+    log.info(tag,"onStartResult: ",onStartResult)
+
+    //on on invocations add to queue
+    onStartResult.events.on('message', async (request) => {
+      log.info(tag,"**** message MAIN: ", request)
+      //TODO open "onTop" window for each tx type
+      let signedTx
+      switch(request.type) {
+        case 'swap':
+          break;
+        case 'approve':
+          break;
+        case 'transfer':
+          if(!approveWindow) createApproveWindow()
+          break;
+        case 'context':
+          break;
+        default:
+          log.error("Unknown event: "+request.type)
+      }
+    })
 
     //TODO get state from local db
 
@@ -230,100 +254,6 @@ ipcMain.on('onStart', async (event, data) => {
   }
 })
 
-// /*
-//     Pairing Code
-//  */
-// ipcMain.on('getPairingCode', async (event, data) => {
-//   const tag = TAG + ' | getPairingCode | '
-//   try {
-//
-//     let pairing = {
-//       email:"",
-//       password:"",
-//       vault:""
-//     }
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-//
-// /*
-//    Pioneer Eventing services
-//
-//  */
-//
-// ipcMain.on('onListen', async (event, data) => {
-//   const tag = TAG + ' | onListen | '
-//   try {
-//     log.info(tag,"start events!")
-//     //Start Event listener
-//     let config = await getConfig()
-//     if(!config.username) throw Error("invalid config! username")
-//     if(!config.queryKey) throw Error("invalid config! queryKey")
-//
-//     //TODO Pioneer WS URL env
-//
-//     let configEvents = {
-//       username:config.username,
-//       queryKey:config.queryKey,
-//       // pioneerWs:""
-//       pioneerWs:"ws://127.0.0.1:9001"
-//     }
-//
-//     //sub to events
-//     let events = await client.init(configEvents)
-//
-//     //TODO settings
-//
-//     //TODO subscribers
-//
-//     //info
-//     events.on('message',function(request){
-//       console.log("***** message: ",request)
-//
-//
-//       //TODO filtering
-//       const notification = {
-//         title: 'message',
-//         body: JSON.stringify(request)
-//       }
-//       new Notification(notification).show()
-//
-//       //push event to pending store
-//
-//       //open
-//       event.sender.send('navigation', {dialog: 'Request', action: 'open'})
-//
-//       console.log("open nav: Request")
-//     })
-//
-//     //blocks
-//     // events.on('block',function(block){
-//     //   console.log("block: ",block)
-//     // })
-//     //
-//     // //payments
-//     // events.on('block',function(block){
-//     //   console.log("block: ",block)
-//     // })
-//
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-// /*
-//
-//     Pioneer Primary Application Interface
-//                   -Highlander
-//
-//     IPC bride
-//
-//  */
-//
 ipcMain.on('onLogin', async (event, data) => {
   const tag = TAG + ' | onLogin | '
   try {
@@ -348,30 +278,6 @@ ipcMain.on('onTryPin', async (event, data) => {
     console.error(tag, e)
   }
 })
-//
-// //onTryPin
-// ipcMain.on('onAttemptCreate', async (event, data) => {
-//   const tag = TAG + ' | onAttemptCreate | '
-//   try {
-//     //is username available
-//     log.info(tag,"data: ",data)
-//
-//     // let result = await onAttemptCreate()
-//     //
-//     // if(result.success){
-//     //   //close window
-//     //   event.sender.send('navigation', {dialog: 'Username', action: 'close'})
-//     //   //open setup
-//     //   event.sender.send('navigation', {dialog: 'Setup', action: 'open'})
-//     // } else {
-//     //   event.sender.send('errors', {dialog: 'Username', action: 'create',error:result.error})
-//     // }
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
 
 ipcMain.on('attemptPair', async (event, data) => {
   const tag = TAG + ' | attemptPair | '
@@ -397,6 +303,22 @@ ipcMain.on('setMnemonic', async (event, data) => {
     log.info(tag,"data: ",data)
 
     TEMP_SEED = data.seed
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('approveTransaction', async (event, data) => {
+  const tag = TAG + ' | approveTransaction | '
+  try {
+
+    //context
+    //invocationId
+    //approveWindow = null
+
+    let resultApprove = await approveTransaction(event, data)
+    log.info(tag,"resultApprove: ",resultApprove)
 
   } catch (e) {
     console.error(tag, e)
@@ -433,11 +355,12 @@ ipcMain.on('createWallet', async (event, data) => {
 
       //start wallet
       let onStartResult = await onStart(event,data)
+      console.log("********* CHECKPOINT 3")
       log.info(tag,"onStartResult: ",onStartResult)
 
       //on on invocations add to queue
       onStartResult.events.on('message', async (request) => {
-        log.info(tag,"**** message: ", request)
+        log.info(tag,"**** message MAIN: ", request)
         createApproveWindow()
         //TODO open "onTop" window for each tx type
         let signedTx
@@ -468,58 +391,6 @@ ipcMain.on('createWallet', async (event, data) => {
   }
 })
 
-// ipcMain.on('viewSeed', async (event, data) => {
-//   const tag = TAG + ' | viewSeed | '
-//   try {
-//     let seed = await viewSeed()
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-// //checkPioneerUrl
-// ipcMain.on('checkPioneerUrl', async (event, data) => {
-//   const tag = TAG + ' | checkPioneerUrl | '
-//   try {
-//
-//     let status = await checkPioneerUrl(data)
-//
-//     if(status.online){
-//       event.sender.send('checkPioneerUrl',{ online:true,info:status})
-//     } else {
-//       event.sender.send('checkPioneerUrl',{ online:false,error:status})
-//     }
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//     event.sender.send('checkPioneerUrl',{ online:false,error:e})
-//   }
-// })
-//
-// ipcMain.on('setPioneerUrl', async (event, data) => {
-//   const tag = TAG + ' | checkPioneerUrl | '
-//   try {
-//     let urlSpec
-//     if(!data.urlSpec) {
-//       urlSpec = process.env['URL_PIONEER_SPEC']
-//       urlSpec = urlSpec.replace("\"","")
-//       urlSpec = urlSpec.replace("\"","")
-//     } else {
-//       urlSpec = data.urlSpec
-//     }
-//
-//     //URL_PIONEER_SPEC
-//     URL_PIONEER_SPEC = urlSpec
-//
-//     //push to ui
-//     event.sender.send('setPioneerUrl',{ urlSpec })
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-
 ipcMain.on('checkDevices', async (event, data) => {
   const tag = TAG + ' | checkDevices | '
   try {
@@ -547,73 +418,4 @@ ipcMain.on('onPairKeepkey', async (event, data) => {
     console.error(tag, e)
   }
 })
-//
-// // ipcMain.on('onCreate', async (event, data) => {
-// //   const tag = TAG + ' | onCreate | '
-// //   try {
-// //
-// //     //let result = await onCreate(data)
-// //
-// //     //TODO
-// //
-// //   } catch (e) {
-// //     console.error(tag, e)
-// //   }
-// // })
-//
-// ipcMain.on('loadInstalledApps', async (event, data) => {
-//   const tag = TAG + ' | loadInstalledApps | '
-//   try {
-//     log.info(tag," loadInstalledApps() ")
-//     let urlSpec = process.env['URL_PIONEER_SPEC']
-//     urlSpec = urlSpec.replace("\"","")
-//     urlSpec = urlSpec.replace("\"","")
-//
-//     log.info("Pioneer Server: ",urlSpec)
-//     await pioneer.init(urlSpec,{queryKey:'test'})
-//
-//     //check app directory
-//     let apps = await pioneer.apps({query:" "})
-//     //console.log("apps: ",apps)
-//
-//     for(let i = 0; i < apps.length; i++){
-//       let app = apps[i]
-//       APPS.push(app)
-//     }
-//
-//     //Apps
-//     event.sender.send('loadApps',{ APPS })
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-// let SEARCH_TERM = " "
-// ipcMain.on('onSearchApps', async (event, data) => {
-//   const tag = TAG + ' | searchApps | '
-//   try {
-//
-//
-//     // if(data.query !== SEARCH_TERM){
-//     //   log.info(tag," search term ",data)
-//     //   SEARCH_TERM = data.query
-//     //   let apps = await pioneer.apps({query:data.query})
-//     //   console.log("apps: ",apps)
-//     //
-//     //   for(let i = 0; i < apps.length; i++){
-//     //     let app = apps[i]
-//     //     APPS.push(app)
-//     //   }
-//     //
-//     //   //Apps
-//     //   event.sender.send('loadApps',{ APPS })
-//     // }
-//
-//   } catch (e) {
-//     console.error(tag, e)
-//   }
-// })
-//
-//
 

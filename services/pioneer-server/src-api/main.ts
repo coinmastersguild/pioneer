@@ -358,10 +358,10 @@ io.on('connection', async function(socket){
                 }
                 globalSockets[socket.id].emit('subscribedToUsername', subscribePayload);
             } else {
-                log.error(tag,"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username)
+                log.error(tag,"Failed to join! pubkeyInfo.username: "+queryKeyInfo.username+" msg.username: "+msg.username)
                 let error = {
                     code:6,
-                    msg:"Failed to join! pubkeyInfo.username:"+queryKeyInfo.username+" msg.username: "+msg.username
+                    msg:"Failed to join! pubkeyInfo.username: "+queryKeyInfo.username+" msg.username: "+msg.username
                 }
                 globalSockets[socket.id].emit('errorMessage', error);
             }
@@ -379,7 +379,7 @@ io.on('connection', async function(socket){
             globalSockets[socket.id].emit('connect', connectPayload);
             log.info(tag,"sdk subscribed to apiKey: ",msg.queryKey)
             log.info(tag,"usersByKey: ",usersByKey)
-        }else {
+        } else {
             log.error(tag,"invalid join request! ")
         }
     });

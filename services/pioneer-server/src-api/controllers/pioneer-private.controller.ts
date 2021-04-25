@@ -30,6 +30,10 @@ utxosDB.createIndex({txid: 1}, {unique: true})
 pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 invocationsDB.createIndex({invocationId: 1}, {unique: true})
 
+let {
+    getNativeAssetForBlockchain
+} = require('@pioneer-platform/pioneer-coins')
+
 txsDB.createIndex({invocationId: 1})
 
 const axios = require('axios')
@@ -101,6 +105,17 @@ interface UpdateInvocationBody {
     invocationId:string,
     invocation:any,
     unsignedTx:any
+}
+
+interface WalletInfo {
+    apps: any;
+    walletId: string;
+    username: any;
+    totalValueUsd: any;
+    valueUsds: any;
+    balances: any;
+    masters: any;
+    pubkeys: any;
 }
 
 interface TransactionsBody {
@@ -243,7 +258,7 @@ export class pioneerPrivateController extends Controller {
             if(!accountInfo) throw Error("unknown token! token:"+authorization)
             log.info(tag,"accountInfo: ",accountInfo)
 
-            let walletInfo:any
+            let walletInfo:any = {}
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
                 let isTestnet = accountInfo.isTestnet || false
@@ -265,29 +280,12 @@ export class pioneerPrivateController extends Controller {
                     walletId = userInfo.context
                     if(!walletId) throw Error("No walletId on username! username: "+username)
                 }
-
-                walletInfo = {}
-                log.debug(tag,"user info NOT cached!: ")
-                log.info(tag,"walletId: ",walletId)
-                //get pubkeys from mongo with walletId tagged
-                let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [walletId]}})
-                log.info(tag,"pubkeysMongo: ",pubkeysMongo)
-
-                //reformat
-                let pubkeys:any = []
-                let masters:any = {}
-                for(let i = 0; i < pubkeysMongo.length; i++){
-                    let pubkeyInfo = pubkeysMongo[i]
-                    delete pubkeyInfo._id
-                    //TODO validate pubkeys?
-
-                    masters[pubkeyInfo.coin] = pubkeyInfo.master
-                    pubkeys.push(pubkeyInfo)
-                }
-
+                let { pubkeys, masters } = await pioneer.getPubkeys(username,walletId)
                 //build wallet info
                 walletInfo.pubkeys = pubkeys
                 walletInfo.masters = masters
+                if(!walletInfo.pubkeys) throw Error("102: pioneer failed to collect pubkeys!")
+                if(!walletInfo.masters) throw Error("103: pioneer failed to collect masters!")
 
                 //get asset balances
                 let assetBalances = await redis.hgetall(username+":assets:"+walletId)
@@ -575,9 +573,38 @@ export class pioneerPrivateController extends Controller {
         try{
             log.info(tag,"account: ",body)
             log.info(tag,"Authorization: ",Authorization)
+            //TODO auth
 
             //update database
             let updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{unsignedTx:body.unsignedTx}})
+
+            return(updateResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
+     * Pair an sdk with app
+     * @param request This is an application pairing submission
+     */
+
+    @Post('/deleteInvocation')
+    public async deleteInvocation(@Body() body: UpdateInvocationBody, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | deleteInvocation | "
+        try{
+            log.info(tag,"account: ",body)
+            log.info(tag,"Authorization: ",Authorization)
+
+            //TODO auth
+            //update database
+            let updateResult = await invocationsDB.delete({invocationId:body.invocationId})
 
             return(updateResult);
         }catch(e){
@@ -745,7 +772,6 @@ export class pioneerPrivateController extends Controller {
             await redis.hset(newKey,'username',account)
             if(isMember)await redis.hset(newKey,'isMember',"true")
             await redis.hset(newKey,'created',createdDate)
-
 
             let output = {
                 queryKey:newKey,
@@ -960,6 +986,7 @@ export class pioneerPrivateController extends Controller {
             let newKey
             log.info(tag,"body: ",body)
             if(!body.walletName) throw Error("walletName required on body!")
+            if(!body.blockchains) throw Error("blockchains required on body!")
 
             //if auth found in redis
             const authInfo = await redis.hgetall(authorization)
@@ -1005,6 +1032,7 @@ export class pioneerPrivateController extends Controller {
                     id:"pioneer:"+pjson.version+":"+uuidv4(), //user ID versioning!
                     username:body.username,
                     verified:true,
+                    blockchains:body.blockchains,
                     wallets:[body.walletName] // just one wallet for now
                 }
 
@@ -1074,6 +1102,11 @@ export class pioneerPrivateController extends Controller {
             if(!userInfoRedis.context){
                 redis.hset(username,'context',body.walletName)
             }
+
+            //verify user
+            //get context
+
+            //get info on context
 
             output.success = true
             output.userInfo = userInfoRedis

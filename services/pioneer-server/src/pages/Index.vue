@@ -37,7 +37,7 @@
                       style="background: radial-gradient(circle, #000000 0%, #236303 100%)"
               >
                 <q-img height=50px width=50px src="../assets/GreenCompas.jpeg"></q-img>
-                {{item.i}}
+                i:{{item.i}}
                 x:{{item.x}}
                 y:{{item.y}}
               </q-card>

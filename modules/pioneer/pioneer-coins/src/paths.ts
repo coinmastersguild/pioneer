@@ -1,14 +1,14 @@
 
 
 
-export function getPaths(isTestnet?:boolean,blockchains?:any) {
+export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
     if(!blockchains) blockchains = []
     if(process.env['FEATURE_BITCOIN_BLOCKCHAIN'] || blockchains.indexOf('bitcoin') >= 0){
         if(isTestnet){
             output.push({
                 note:"Bitcoin testnet account 0",
-                coin: 'Bitcoin',
+                blockchain: 'bitcoin',
                 testnet:true,
                 symbol: 'BTC',
                 network: 'BTC',
@@ -23,7 +23,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
         }else{
             output.push({
                 note:"Bitcoin account 0",
-                coin: 'Bitcoin',
+                blockchain: 'bitcoin',
                 symbol: 'BTC',
                 network: 'BTC',
                 script_type:"p2wpkh", //bech32
@@ -49,7 +49,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Ethereum'
+            blockchain: 'ethereum'
         }
         if(isTestnet) entry.testnet = true
         output.push(entry)
@@ -64,7 +64,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             curve: 'secp256k1',
             script_type:"thorchain",
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Thorchain',
+            blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
         }
@@ -83,7 +83,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             curve: 'secp256k1',
             script_type:"thorchain",
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Thorchain',
+            blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
         }
@@ -103,7 +103,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Cosmos',
+            blockchain: 'cosmos',
             symbol: 'ATOM',
             network: 'ATOM',
         }
@@ -123,7 +123,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Binance',
+            blockchain: 'binance',
             symbol: 'BNB',
             network: 'BNB',
         }
@@ -143,7 +143,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'BitcoinCash',
+            blockchain: 'bitcoincash',
             symbol: 'BCH',
             network: 'BCH',
         }
@@ -163,7 +163,7 @@ export function getPaths(isTestnet?:boolean,blockchains?:any) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            coin: 'Litecoin',
+            blockchain: 'litecoin',
             symbol: 'LTC',
             network: 'LTC',
         }

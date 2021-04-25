@@ -104,6 +104,7 @@ export class pioneerInvocationController extends Controller {
         let tag = TAG + " | invocation | "
         try{
             log.info(tag,"body: ",body)
+            let output:any = {}
             //verify auth
 
             //verify user settings
@@ -146,29 +147,28 @@ export class pioneerInvocationController extends Controller {
                 body.auth = authorization
                 //send
                 publisher.publish("invocations",JSON.stringify(body))
-
                 // :( but this was cool
                 //block till confirmation
-                // log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
-                // let timeStart = new Date().getTime()
+                log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
+                let timeStart = new Date().getTime()
 
-                // let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
-                // let timeEnd = new Date().getTime()
-                // log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
-                //
-                // //if
-                // if(!txid[1]) throw Error("Failed to broadcast! timeout!")
-                // //TODO if timeout return invocationId
-                // output.success = true
-                // output.txid = txid[1]
-                // output.ttr = (timeEnd - timeStart)/1000
-                // if(body.invocation.noBroadcast) output.broadcast = false
+                let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
+                let timeEnd = new Date().getTime()
+                log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+
+                //if
+                if(!txid[1]) throw Error("Failed to broadcast! timeout!")
+                //TODO if timeout return invocationId
+                output.success = true
+                output.txid = txid[1]
+                output.ttr = (timeEnd - timeStart)/1000
+                if(body.invocation.noBroadcast) output.broadcast = false
 
             } else {
-                body.invocationId = invocationId
-                body.msg = "User is offline! username:"+body.invocation.username
+                output.invocationId = invocationId
+                output.msg = "User is offline! username:"+body.invocation.username
             }
-            return body
+            return output
         }catch(e){
             let errorResp:Error = {
                 success:false,

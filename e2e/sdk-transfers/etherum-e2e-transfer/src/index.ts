@@ -90,11 +90,14 @@ const test_service = async function () {
 
         let config = {
             queryKey,
-            username,
             spec,
             wss
         }
 
+        /*
+            Common Error()
+                if you pass a username before paired, the subscribe will failed!
+         */
 
         let app = new SDK.SDK(spec,config)
 
@@ -102,6 +105,7 @@ const test_service = async function () {
 
         let eventPairReceived = false
         events.on('message', async (request:any) => {
+            log.info(tag,"message: ",request)
             assert(request.queryKey)
             assert(request.username)
             assert(request.url)
@@ -126,6 +130,24 @@ const test_service = async function () {
         while(!eventPairReceived){
             await sleep(300)
         }
+        //get user
+        let userInfo = await app.getUserInfo()
+        log.info(tag,"userInfo: ",userInfo)
+        assert(userInfo)
+        assert(userInfo.context)
+        app.context = userInfo.context
+        let context = userInfo.context
+
+        //get context
+        //TODO I want this set!
+        // let context = await app.context
+        // log.info(tag,"context: ",context)
+        // assert(context)
+
+
+        //get pubkeys for context
+
+        //get info for context
 
         //assert sdk user
         //get user
@@ -161,9 +183,40 @@ const test_service = async function () {
         }
         sendPayload.noBroadcast = true
 
-        log.info(tag,"sendPayload: ",sendPayload)
-        let txid = await app.sendToAddress(sendPayload)
-        console.log("txid: ",txid)
+        //
+        let hookReturned = false
+        let send_hook_sdk = async () => {
+            try{
+                log.info(tag,"sendPayload: ",sendPayload)
+                let txid = await app.sendToAddress(sendPayload)
+                console.log("txid: ",txid)
+                hookReturned = true
+                //
+
+            }catch(e){
+                log.error(tag,e)
+            }
+        }
+        //sync (this will block until signed!)
+        send_hook_sdk()
+
+        //view invocation
+        let invocationsRemote = await app.getInvocations()
+        log.info(tag,"invocationsRemote: ",invocationsRemote)
+
+        for(let i = 0; i < invocationsRemote.length; i++){
+            let invocation = invocationsRemote[i]
+            log.info(tag,"invocation: ",invocation)
+
+            //if match
+
+            //validate
+
+            //approve
+        }
+
+
+
 
         //wait till confirmed
         // let confirmed = false

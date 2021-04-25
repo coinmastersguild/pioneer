@@ -437,33 +437,33 @@ let approve_transaction = function (context, invocationId) {
                     allUnapproved.push(unsignedTransaction);
                 }
             }
-            log.info(tag, "*** allUnapproved: ", allUnapproved);
-            log.info(tag, "*** WALLET_CONTEXT: ", WALLET_CONTEXT);
-            log.info(tag, "*** context: ", context);
+            log.debug(tag, "*** allUnapproved: ", allUnapproved);
+            log.debug(tag, "*** WALLET_CONTEXT: ", WALLET_CONTEXT);
+            log.debug(tag, "*** context: ", context);
             //get unApproved from remote
             let remoteUnapproved = yield network.instance.Invocations();
             remoteUnapproved = remoteUnapproved.data;
-            log.info(tag, "*** remoteUnapproved: ", remoteUnapproved);
+            log.debug(tag, "*** remoteUnapproved: ", remoteUnapproved);
             for (let i = 0; i < remoteUnapproved.length; i++) {
                 let remoteInovaction = remoteUnapproved[i];
                 allUnapproved.push(remoteInovaction);
             }
             //if context dont match
             if (WALLET_CONTEXT !== context) {
-                log.info(tag, "Signing transaction for wallet out of context!");
+                log.debug(tag, "Signing transaction for wallet out of context!");
                 transactionViewFinal.outOfContext = true;
             }
             //add warning to view
-            log.info(tag, "allUnapproved: ", allUnapproved);
+            log.debug(tag, "allUnapproved: ", allUnapproved);
             for (let i = 0; i < allUnapproved.length; i++) {
                 let unsignedTransaction = allUnapproved[i];
-                log.info(tag, "unsignedTransaction: ", unsignedTransaction.invocationId);
-                log.info(tag, "invocationId: ", invocationId);
+                log.debug(tag, "unsignedTransaction: ", unsignedTransaction.invocationId);
+                log.debug(tag, "invocationId: ", invocationId);
                 if (unsignedTransaction.invocationId === invocationId) {
                     transactionViewFinal.unsignedTransaction = unsignedTransaction;
                     let unSignedTx;
                     if (!unsignedTransaction.unSignedTx) {
-                        log.info("ERROR: THIS SHOULD NOT HIT! FAILED TO UPDATE INVOCATION FIXME");
+                        log.debug("ERROR: THIS SHOULD NOT HIT! FAILED TO UPDATE INVOCATION FIXME");
                         //log.error(tag,"e: ",unsignedTransaction)
                         //build anyway
                         unSignedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(unsignedTransaction.invocation.invocation);
@@ -472,7 +472,7 @@ let approve_transaction = function (context, invocationId) {
                     else {
                         unSignedTx = unsignedTransaction.unSignedTx;
                     }
-                    log.info(tag, "Signing transaction: ", unSignedTx);
+                    log.debug(tag, "Signing transaction: ", unSignedTx);
                     //approve transaction
                     let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unSignedTx);
                     if (signedTx.txid)
@@ -480,7 +480,7 @@ let approve_transaction = function (context, invocationId) {
                     transactionViewFinal.txid = signedTx.txid;
                     transactionViewFinal.signedTx = signedTx;
                     //validate
-                    log.info(tag, "FINAL signedTx: ", signedTx);
+                    log.debug(tag, "FINAL signedTx: ", signedTx);
                     //broadcast
                     let broadcast = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unSignedTx.coin, signedTx);
                     transactionViewFinal.broadcast = broadcast;
@@ -505,8 +505,8 @@ let pair_sdk_user = function (code) {
         let tag = " | unlock_wallet | ";
         try {
             //send code
-            log.info(tag, "network: ", network);
-            log.info(tag, "network: ", network.instance);
+            log.debug(tag, "network: ", network);
+            log.debug(tag, "network: ", network.instance);
             let result = yield network.instance.Pair(null, { code });
             return result.data;
         }
@@ -767,7 +767,7 @@ let broadcast_transaction = function (coin, rawTx) {
             //if token, set network to ETH
             log.debug("Broadcasting tx coin: ", coin, " rawTx: ", rawTx);
             result = yield network.instance.Broadcast(null, { coin, rawTx });
-            log.info(tag, "result: ", result);
+            log.debug(tag, "result: ", result);
             return result.data;
         }
         catch (e) {
@@ -780,9 +780,9 @@ let send_approval = function (intent) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | send_to_address | ";
         try {
-            log.info(tag, "params: ", intent);
+            log.debug(tag, "params: ", intent);
             let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendApproval(intent);
-            log.info(tag, "txid: ", signedTx.txid);
+            log.debug(tag, "txid: ", signedTx.txid);
             //
             return signedTx;
         }
@@ -802,31 +802,31 @@ let send_to_address = function (intent) {
                 throw Error("102: invalid intent missing coin!");
             if (!intent.amount)
                 throw Error("102: invalid intent missing amount!");
-            log.info(tag, "params: ", intent);
+            log.debug(tag, "params: ", intent);
             intent.addressTo = intent.address;
-            log.info(tag, "Building TX on context: ", WALLET_CONTEXT);
+            log.debug(tag, "Building TX on context: ", WALLET_CONTEXT);
             if (!intent.context)
                 intent.context = intent.context;
             //TODO check remote context match's local
             //build tx add to approve queue
             let unsignedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(intent);
-            log.info(tag, "unsignedTx: ", unsignedTx);
-            log.info(tag, "WALLET_CONTEXT: ", WALLET_CONTEXT);
+            log.debug(tag, "unsignedTx: ", unsignedTx);
+            log.debug(tag, "WALLET_CONTEXT: ", WALLET_CONTEXT);
             //push unsigned to invocation
             let updateInno = {
                 invocationId: intent.invocationId,
                 invocation: intent,
                 unsignedTx
             };
-            //log.info(tag,"Network.instance: ",network.instance)
+            //log.debug(tag,"Network.instance: ",network.instance)
             let resultUpdateInvocation = yield network.instance.UpdateInvocation(null, updateInno);
-            log.info(tag, "resultUpdateInvocation: ", resultUpdateInvocation.data);
+            log.debug(tag, "resultUpdateInvocation: ", resultUpdateInvocation.data);
             //add to queue
             let resultAdd = yield WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(unsignedTx);
-            log.info(tag, "resultAdd: ", resultAdd);
+            log.debug(tag, "resultAdd: ", resultAdd);
             //verify added
             let resultNewQueue = yield WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue();
-            log.info(tag, "resultNewQueue: ", resultNewQueue);
+            log.debug(tag, "resultNewQueue: ", resultNewQueue);
             return unsignedTx;
         }
         catch (e) {
@@ -840,13 +840,13 @@ let build_swap = function (swap, invocationId) {
         let tag = " | send_to_address | ";
         try {
             let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].buildSwap(swap);
-            log.info(tag, "txid: ", signedTx.txid);
+            log.debug(tag, "txid: ", signedTx.txid);
             if (invocationId)
                 signedTx.invocationId = invocationId;
             //broadcast hook
             let broadcast_hook = () => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    log.info(tag, "checkpoint: broadcast_hook: ", signedTx);
+                    log.debug(tag, "checkpoint: broadcast_hook: ", signedTx);
                     //TODO flag for async broadcast
                     if (!swap.asset.chain) {
                         log.error("Invalid Swap! swap: ", swap);
@@ -854,7 +854,7 @@ let build_swap = function (swap, invocationId) {
                     }
                     let broadcastResult = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(swap.asset.chain, signedTx);
                     broadcastResult = broadcastResult.data;
-                    log.info(tag, "broadcastResult: ", broadcastResult);
+                    log.debug(tag, "broadcastResult: ", broadcastResult);
                     //TODO push event to event emitter -> UI
                 }
                 catch (e) {
@@ -943,7 +943,7 @@ let create_wallet = function (type, wallet, isTestnet) {
                         wallet.username = "defaultUser:" + uuid_1.v4();
                     //filename
                     let filename = wallet.masterAddress + ".wallet.json";
-                    log.info(tag, "filename: ", filename);
+                    log.debug(tag, "filename: ", filename);
                     //does wallet exist
                     let alreadyExists = pioneer_config_1.getWallet(filename);
                     log.debug(tag, "alreadyExists: ", alreadyExists);
@@ -985,12 +985,12 @@ let create_wallet = function (type, wallet, isTestnet) {
                     }
                     break;
                 case "hardware":
-                    log.info(tag, "wallet hardware: ", wallet);
+                    log.debug(tag, "wallet hardware: ", wallet);
                     if (!wallet.deviceId)
                         throw Error("102: deviceId require for keepkey wallets!");
                     if (!wallet.wallet.WALLET_PUBLIC)
                         throw Error("103: WALLET_PUBLIC require for keepkey wallets!");
-                    log.info("hardware watch create!");
+                    log.debug("hardware watch create!");
                     let walletFileNew = {
                         isTestnet,
                         features: wallet.features,
@@ -1070,7 +1070,7 @@ let init_wallet = function (config, isTestnet) {
                 throw Error(" No wallets found! ");
             }
             if (config.hardware) {
-                log.info(tag, "Hardware enabled!");
+                log.debug(tag, "Hardware enabled!");
                 //start
                 KEEPKEY = yield Hardware.start();
                 KEEPKEY.events.on('event', function (event) {
@@ -1080,37 +1080,37 @@ let init_wallet = function (config, isTestnet) {
                 });
             }
             if (!config.blockchains) {
-                config.blockchains = ['bitcoin', 'ethereum', 'thorchain'];
-                log.info(tag, "Config Blockchains not set! default min", config.blockchains);
+                //no more missing coins bs
+                throw Error("Must specify blockchain configuration!");
             }
             //verify wallet_data
             // for(let i = 0; i < wallets.length; i++){
             //     let walletName = wallets[i]
-            //     log.info(tag,"walletName: ",walletName)
+            //     log.debug(tag,"walletName: ",walletName)
             //     let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
             //     let watchWallet = getWalletPublic(fileNameWatch)
             //     if(!watchWallet){
             //         //create watch wallet
             //     } else {
-            //         log.info(tag," Watch Only wallet found!")
+            //         log.debug(tag," Watch Only wallet found!")
             //         //load
             //     }
             // }
             //Load wallets if setup
             for (let i = 0; i < wallets.length; i++) {
                 let walletName = wallets[i];
-                log.info(tag, "walletName: ", walletName);
+                log.debug(tag, "walletName: ", walletName);
                 let walletFile = pioneer_config_1.getWallet(walletName);
-                log.info(tag, "walletFile: ", walletFile);
+                log.debug(tag, "walletFile: ", walletFile);
                 if (!walletFile.TYPE)
                     walletFile.TYPE = walletFile.type;
                 if (walletFile.TYPE === 'keepkey') {
-                    log.info(tag, "Loading keepkey wallet! ");
+                    log.debug(tag, "Loading keepkey wallet! ");
                     if (!walletFile.pubkeys)
                         throw Error("102: invalid keepkey wallet!");
                     //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
                     //if wallet paths custom load
-                    log.info(tag, "walletName: ", walletName);
+                    log.debug(tag, "walletName: ", walletName);
                     let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
                     let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
                     let walletPaths;
@@ -1118,7 +1118,7 @@ let init_wallet = function (config, isTestnet) {
                         walletPaths = watchWallet.paths;
                     }
                     else {
-                        log.info(tag, "walletFile: ", walletFile);
+                        log.debug(tag, "walletFile: ", walletFile);
                     }
                     //load
                     let configPioneer = {
@@ -1139,28 +1139,28 @@ let init_wallet = function (config, isTestnet) {
                     let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
                     //init
                     let walletInfo = yield wallet.init(KEEPKEY);
-                    log.info(tag, "walletInfo: ", walletInfo);
+                    log.debug(tag, "walletInfo: ", walletInfo);
                     WALLETS_LOADED[walletName] = wallet;
                     //info
                     let info = yield wallet.getInfo(walletName);
                     info.name = walletFile.username;
                     info.type = 'keepkey';
                     output.wallets.push(info);
-                    log.info(tag, "info: ", info);
+                    log.debug(tag, "info: ", info);
                     //validate at least 1 pubkey per enabled blockchain
                     let pubkeyNetworks = new Set();
                     for (let i = 0; i < info.pubkeys.length; i++) {
                         let pubkey = info.pubkeys[i];
                         pubkeyNetworks.add(pubkey.coin);
                     }
-                    log.info(tag, "pubkeyNetworks: ", pubkeyNetworks);
+                    log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
                     //TODO iterate over blockchains config and verify
                     //else register individual pubkeys until complete
                     //write pubkeys
                     // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
-                    // log.info(tag,"writePathPub: ",writePathPub)
+                    // log.debug(tag,"writePathPub: ",writePathPub)
                     // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
-                    // log.info(tag,"writeSuccessPub: ",writeSuccessPub)
+                    // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                     WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
@@ -1182,7 +1182,7 @@ let init_wallet = function (config, isTestnet) {
                     let mnemonic = yield resultOut.decrypt();
                     //Load public wallet file
                     //Loads wallet state and custom pathing
-                    log.info(tag, "walletName: ", walletName);
+                    log.debug(tag, "walletName: ", walletName);
                     let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
                     let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
                     let walletPaths;
@@ -1208,24 +1208,29 @@ let init_wallet = function (config, isTestnet) {
                     };
                     if (walletPaths)
                         configPioneer.paths = walletPaths;
-                    log.info(tag, "configPioneer: ", configPioneer);
-                    log.info(tag, "isTestnet: ", isTestnet);
+                    log.debug(tag, "configPioneer: ", configPioneer);
+                    log.debug(tag, "isTestnet: ", isTestnet);
                     let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
                     WALLETS_LOADED[walletName] = wallet;
                     //init
                     let walletClient = yield wallet.init();
                     //info
                     let info = yield wallet.getInfo(walletName);
+                    log.info(tag, "INFO: ", info);
+                    if (info.pubkeys)
+                        throw Error(" invalid wallet info returned! missing pubkeys!");
+                    if (info.masters)
+                        throw Error(" invalid wallet info returned! missing masters!");
                     info.name = walletFile.username;
                     info.type = 'software';
                     output.wallets.push(info);
-                    log.info(tag, "info: ", info);
+                    log.debug(tag, "info: ", info);
                     let pubkeyNetworks = new Set();
                     for (let i = 0; i < info.pubkeys.length; i++) {
                         let pubkey = info.pubkeys[i];
                         pubkeyNetworks.add(pubkey.coin);
                     }
-                    log.info(tag, "pubkeyNetworks: ", pubkeyNetworks);
+                    log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
                     let walletInfoPub = {
                         WALLET_ID: walletFile.username,
                         TYPE: 'watch',
@@ -1235,11 +1240,11 @@ let init_wallet = function (config, isTestnet) {
                         WALLET_PUBKEYS: info.pubkeys
                     };
                     let writePathPub = pioneer_config_1.walletDataDir + "/" + fileNameWatch;
-                    log.info(tag, "writePathPub: ", writePathPub);
+                    log.debug(tag, "writePathPub: ", writePathPub);
                     let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
-                    log.info(tag, "writeSuccessPub: ", writeSuccessPub);
+                    log.debug(tag, "writeSuccessPub: ", writeSuccessPub);
                     //
-                    log.info(tag, "info: ", info);
+                    log.debug(tag, "info: ", info);
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                     WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
@@ -1254,8 +1259,8 @@ let init_wallet = function (config, isTestnet) {
             //get remote user info
             let userInfo = yield network.instance.User();
             userInfo = userInfo.data;
-            log.info(tag, "userInfo: ", userInfo);
-            log.info(tag, "context: ", userInfo.context);
+            log.debug(tag, "userInfo: ", userInfo);
+            log.debug(tag, "context: ", userInfo.context);
             WALLET_CONTEXT = userInfo.context;
             //after registered start socket
             //sub all to events
@@ -1277,7 +1282,7 @@ let init_wallet = function (config, isTestnet) {
             //on payments update balances
             //on on invocations add to queue
             clientEvents.events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
-                log.info(tag, "**** message: ", request);
+                log.debug(tag, "**** message: ", request);
                 //TODO filter invocations by subscribers
                 //TODO autonomousOn/Off
                 //TODO verify auth to paired keys
@@ -1295,7 +1300,7 @@ let init_wallet = function (config, isTestnet) {
                         //Note this is ETH only
                         //TODO validate inputs
                         signedTx = yield build_swap(request.invocation, request.invocationId);
-                        log.info(tag, "txid: ", signedTx.txid);
+                        log.debug(tag, "txid: ", signedTx.txid);
                         clientEvents.events.emit('broadcast', signedTx);
                         break;
                     case 'approve':
@@ -1304,7 +1309,7 @@ let init_wallet = function (config, isTestnet) {
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
                         signedTx = yield send_approval(request.invocation);
-                        log.info(tag, "txid: ", signedTx.txid);
+                        log.debug(tag, "txid: ", signedTx.txid);
                         clientEvents.events.emit('broadcast', signedTx);
                         break;
                     case 'transfer':
@@ -1312,13 +1317,13 @@ let init_wallet = function (config, isTestnet) {
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
                         let unSignedTx = yield send_to_address(request.invocation);
-                        log.info(tag, "unSignedTx: ", unSignedTx);
+                        log.debug(tag, "unSignedTx: ", unSignedTx);
                         clientEvents.events.emit('approval', unSignedTx);
                         break;
                     case 'context':
                         //switch context
                         if (WALLETS_LOADED[request.context]) {
-                            log.info(tag, "wallet context is now: ", request.context);
+                            log.debug(tag, "wallet context is now: ", request.context);
                             if (request.context !== WALLET_CONTEXT) {
                                 WALLET_CONTEXT = request.context;
                                 clientEvents.events.emit('context', request);

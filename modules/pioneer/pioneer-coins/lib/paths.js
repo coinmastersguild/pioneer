@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPaths = void 0;
-function getPaths(isTestnet, blockchains) {
+function getPaths(blockchains, isTestnet) {
     var output = [];
     if (!blockchains)
         blockchains = [];
@@ -9,7 +9,7 @@ function getPaths(isTestnet, blockchains) {
         if (isTestnet) {
             output.push({
                 note: "Bitcoin testnet account 0",
-                coin: 'Bitcoin',
+                blockchain: 'bitcoin',
                 testnet: true,
                 symbol: 'BTC',
                 network: 'BTC',
@@ -25,7 +25,7 @@ function getPaths(isTestnet, blockchains) {
         else {
             output.push({
                 note: "Bitcoin account 0",
-                coin: 'Bitcoin',
+                blockchain: 'bitcoin',
                 symbol: 'BTC',
                 network: 'BTC',
                 script_type: "p2wpkh",
@@ -50,7 +50,7 @@ function getPaths(isTestnet, blockchains) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true,
-            coin: 'Ethereum'
+            blockchain: 'ethereum'
         };
         if (isTestnet)
             entry.testnet = true;
@@ -65,7 +65,7 @@ function getPaths(isTestnet, blockchains) {
             curve: 'secp256k1',
             script_type: "thorchain",
             showDisplay: true,
-            coin: 'Thorchain',
+            blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
         };
@@ -83,7 +83,7 @@ function getPaths(isTestnet, blockchains) {
             curve: 'secp256k1',
             script_type: "thorchain",
             showDisplay: true,
-            coin: 'Thorchain',
+            blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
         };
@@ -102,7 +102,7 @@ function getPaths(isTestnet, blockchains) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true,
-            coin: 'Cosmos',
+            blockchain: 'cosmos',
             symbol: 'ATOM',
             network: 'ATOM',
         };
@@ -121,7 +121,7 @@ function getPaths(isTestnet, blockchains) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true,
-            coin: 'Binance',
+            blockchain: 'binance',
             symbol: 'BNB',
             network: 'BNB',
         };
@@ -140,7 +140,7 @@ function getPaths(isTestnet, blockchains) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true,
-            coin: 'BitcoinCash',
+            blockchain: 'bitcoincash',
             symbol: 'BCH',
             network: 'BCH',
         };
@@ -159,7 +159,7 @@ function getPaths(isTestnet, blockchains) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: true,
-            coin: 'Litecoin',
+            blockchain: 'litecoin',
             symbol: 'LTC',
             network: 'LTC',
         };

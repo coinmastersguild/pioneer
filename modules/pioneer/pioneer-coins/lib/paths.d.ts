@@ -1,1 +1,1 @@
-export declare function getPaths(isTestnet?: boolean, blockchains?: any): any[];
+export declare function getPaths(blockchains?: any, isTestnet?: boolean): any[];

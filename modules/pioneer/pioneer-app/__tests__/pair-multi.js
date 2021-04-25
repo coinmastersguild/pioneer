@@ -38,6 +38,8 @@ let TEST_COINS = [
     'LTC'
 ]
 
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+
 let run_test = async function(){
     try{
 
@@ -91,6 +93,7 @@ let run_test = async function(){
         // App.updateConfig({isTestnet:true});
         App.updateConfig({username});
         App.updateConfig({temp:password});
+        App.updateConfig({blockchains})
         App.updateConfig({created: new Date().getTime()});
 
 

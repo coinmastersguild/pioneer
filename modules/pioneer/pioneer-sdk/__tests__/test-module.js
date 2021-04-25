@@ -25,7 +25,7 @@ let run_test = async function(){
 
         let config = {
             queryKey:"key:eab34be6-3fa1-43c7-8fcd-eb33053620b9",
-            username,
+            // username,
             spec,
             wss,
             service:'asgardxasdas',

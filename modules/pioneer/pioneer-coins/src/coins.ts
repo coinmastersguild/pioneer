@@ -39,22 +39,20 @@ export const UTXO_COINS = [
     Name maps
  */
 export const COIN_MAP = {
-    Bitcoin: "BTC",
-    Cosmos: "ATOM",
-    Testnet: "BTCT",
-    BitcoinCash: "BCH",
-    Litecoin: "LTC",
-    Dash: "DASH",
-    DigiByte: "DGB",
-    Dogecoin: "DOGE",
-    Ethereum: "ETH",
-    Cardano: "ADA",
-    Binance: "BNB",
-    Thorchain: "RUNE",
-    Eos: "EOS",
-    EOS: "EOS",
-    Fio: "FIO",
-    FIO: "FIO",
+    bitcoin: "BTC",
+    cosmos: "ATOM",
+    testnet: "TEST",
+    bitcoincash: "BCH",
+    litecoin: "LTC",
+    dash: "DASH",
+    digibyte: "DGB",
+    dogecoin: "DOGE",
+    ethereum: "ETH",
+    cardano: "ADA",
+    binance: "BNB",
+    thorchain: "RUNE",
+    eos: "EOS",
+    fio: "FIO",
 };
 
 export const COIN_MAP_LONG:any = {
@@ -73,6 +71,17 @@ export const COIN_MAP_LONG:any = {
     EOS: "Eos",
     FIO: "Fio",
 };
+
+export function getNativeAssetForBlockchain(blockchain:string){
+    // @ts-ignore
+    if(COIN_MAP[blockchain.toLowerCase()]){
+        // @ts-ignore
+        return COIN_MAP[blockchain.toLowerCase()]
+    } else {
+        throw Error(" Unknown blockchain! "+blockchain)
+    }
+}
+
 
 export const supportedBlockchains:any = [];
 export const supportedAssets:any = [];

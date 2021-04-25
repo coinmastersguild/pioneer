@@ -277,26 +277,28 @@ export async function onStart(event,data) {
     if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")
     config.password = WALLET_PASSWORD
     log.info(tag,"config: ",config)
+
     let resultInit = await App.init(config)
     log.info(tag,"resultInit: ",resultInit)
-
-    //push init
-    event.sender.send('init',resultInit)
-
-    event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
-    event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
-
-    let wallets = App.getWallets()
-    let walletNames = App.getWalletNames()
-    log.info(tag,"walletNames: ",walletNames)
-    event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
-
-    //wallet events
-    resultInit.events.on('message', async (request) => {
-      console.log("*** message: ", request)
-      //TODO messages
-      //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
-    })
+    //
+    // //push init
+    // // event.sender.send('init',resultInit)
+    // // event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
+    // // event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+    //
+    // // let wallets = App.getWallets()
+    // // let walletNames = App.getWalletNames()
+    // // log.info(tag,"walletNames: ",walletNames)
+    // //event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
+    //
+    // //wallet events
+    // resultInit.events.on('message', async (request) => {
+    //   console.log("*** message: ", request)
+    //   console.log("*** createApproveWindow: ", createApproveWindow)
+    //
+    //   //TODO messages
+    //   //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+    // })
 
     //TODO blocks
     //txs
@@ -311,11 +313,13 @@ export async function onStart(event,data) {
     // WALLETS_LOADED = context
 
     //load masters
-    let info = await context.getInfo()
-    log.info("info: ",info)
-    event.sender.send('setWalletInfoContext',info)
-    //Start wallet interface
+    // let info = await context.getInfo()
 
+    // log.info("info: ",info)
+    // event.sender.send('setWalletInfoContext',info)
+
+    //Start wallet interface
+    log.info(tag,"CHECKPOINT **** return start")
     return resultInit
   } catch (e) {
     console.error(tag, "e: ", e);
@@ -327,10 +331,20 @@ export async function setMnemonic(event, data) {
   let tag = TAG + " | setMnemonic | ";
   try {
     log.info(tag,"data: ",data)
-
-
     let resultCreate = await App.setSeed('software',wallet)
     return resultCreate
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function approveTransaction(event, data) {
+  let tag = TAG + " | setMnemonic | ";
+  try {
+    log.info(tag,"data: ",data)
+    let resultApprove = await App.approveTransaction(App.context(),data.invocationId)
+    return resultApprove
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};

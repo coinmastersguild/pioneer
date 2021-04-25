@@ -82,6 +82,7 @@ export class SDK {
     private getUserInfo: () => Promise<any>;
     private getWalletInfo: () => Promise<any>;
     private setContext: (context: string) => Promise<any>;
+    private getInvocations: () => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -107,7 +108,7 @@ export class SDK {
             let tag = TAG + " | init_wallet | "
             try{
 
-                log.info(tag,"blockchains: ",blockchains)
+                log.debug(tag,"blockchains: ",blockchains)
                 if(!blockchains) blockchains = []
                 if(!this.queryKey) throw Error(" You must create an api key! ")
                 this.pioneerApi = new Pioneer({
@@ -127,11 +128,9 @@ export class SDK {
                 if(this.blockchains.length === 0) throw Error("Failed to init! must have blockchains!")
                 this.pioneerApi = await this.pioneerApi.init()
 
-                //log.info(tag,"this.pioneerApi: ",this.pioneerApi)
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
                 if(!this.username)this.username = userInfo.username
                 this.wallets = userInfo.wallets
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
@@ -199,6 +198,15 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
+        this.getInvocations = async function () {
+            let tag = TAG + " | getInvocations | "
+            try {
+                let result = await this.pioneerApi.Invocations()
+                return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
         this.getWalletInfo = async function () {
             let tag = TAG + " | getWalletInfo | "
             try {
@@ -244,7 +252,7 @@ export class SDK {
 
                 let txid = await this.clients[intent.blockchain].transfer(txInput)
 
-                log.info("txid",txid)
+                log.debug("txid",txid)
 
                 return txid
             } catch (e) {
@@ -255,15 +263,21 @@ export class SDK {
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
+                if(!this.context){
+                    let userInfo = await this.pioneerApi.User()
+                    this.context = userInfo.context
+                }
+                if(!this.context) throw Error("cant not start without context! ")
+
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
 
-                log.info(tag,"result: ",result)
+                log.debug(tag,"result: ",result)
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 
-                log.info(tag,"this.spec: ",this.spec)
-                log.info(tag,"supportedBlockchains: ",supportedBlockchains)
+                log.debug(tag,"this.spec: ",this.spec)
+                log.debug(tag,"supportedBlockchains: ",supportedBlockchains)
                 if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
 
 

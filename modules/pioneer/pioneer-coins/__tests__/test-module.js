@@ -1,7 +1,7 @@
 
-require("dotenv").config({path:'./../../.env'})
-require("dotenv").config({path:'../../../.env'})
-require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'./../../.env'})
+// require("dotenv").config({path:'../../../.env'})
+// require("dotenv").config({path:'../../../../.env'})
 
 // import * as config ""
 let {
@@ -11,15 +11,18 @@ let {
     nativeToBaseAmount,
     getPaths,
     get_address_from_xpub,
-    normalize_pubkeys
+    normalize_pubkeys,
+    getNativeAssetForBlockchain
 } = require('../lib/index.js')
+
+
 
 let amountNative = 12000
 // console.log("base: ",baseAmountToNative("BTC",amountNative))
-console.log("base: ",nativeToBaseAmount("BTC",amountNative))
+// console.log("base: ",nativeToBaseAmount("BTC",amountNative))
 
-// let paths = getPaths(true,['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
-// console.log("paths: ",paths)
+let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
+console.log("paths: ",paths)
 //
 // console.log("supportedAssets: ",supportedAssets)
 //console.log("supportedBlockchains: ",supportedBlockchains)

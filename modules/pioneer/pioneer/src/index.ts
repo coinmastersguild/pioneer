@@ -34,6 +34,7 @@ let {
     nativeToBaseAmount,
     baseAmountToNative,
     UTXO_COINS,
+    getNativeAssetForBlockchain
 } = require('@pioneer-platform/pioneer-coins')
 
 
@@ -327,7 +328,7 @@ module.exports = class wallet {
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
-        this.blockchains = config.blockchains || ['bitcoin','ethereum','thorchain']
+        this.blockchains = config.blockchains
         this.WALLET_BALANCES = {}
         this.type = type
         this.spec = config.spec
@@ -343,6 +344,7 @@ module.exports = class wallet {
         this.init = async function (wallet?:any) {
             let tag = TAG + " | init_wallet | "
             try{
+                if(!this.blockchains && !wallet.blockchains) throw Error("Must Specify blockchain support! ")
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.isTestnet,this.blockchains)
                 switch (+HDWALLETS[this.type]) {
@@ -352,19 +354,44 @@ module.exports = class wallet {
                         if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
 
-                        log.info(tag,"isTestnet: ",this.isTestnet)
+                        log.debug(tag,"isTestnet: ",this.isTestnet)
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
 
                         //verify testnet
                         const isTestnet = false
-                        log.info(tag,"hdwallet isTestnet: ",isTestnet)
-
-                        log.info(tag,"paths: ",paths)
+                        log.debug(tag,"hdwallet isTestnet: ",isTestnet)
+                        log.info(tag,"paths: ",paths.length)
+                        log.info(tag,"blockchains: ",this.blockchains)
+                        //verify paths for each enabled blockchain
+                        for(let i = 0; i < this.blockchains.length; i++){
+                            let blockchain = this.blockchains[i]
+                            log.debug(tag,"blockchain: ",blockchain)
+                            //find blockchain in path
+                            let isFound = paths.find((path: { blockchain: string; }) => {
+                                return path.blockchain === blockchain
+                            })
+                            if(!isFound){
+                                throw Error("Failed to find path for blockchain: "+blockchain)
+                            }
+                        }
+                        log.info(tag,"Checkpoint valid paths ** ")
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
-                        log.info("pubkeys ",JSON.stringify(this.pubkeys))
+                        log.debug("pubkeys ",JSON.stringify(this.pubkeys))
 
+                        //verify pubkey for each blockchain
+                        for(let i = 0; i < this.blockchains.length; i++){
+                            let blockchain = this.blockchains[i]
+                            //find blockchain in path
+                            let isFound = this.pubkeys.find((pubkey: { blockchain: any; }) => {
+                                return pubkey.blockchain == blockchain
+                            })
+                            if(!isFound){
+                                throw Error("Failed to find path for blockchain: "+blockchain)
+                            }
+                        }
+                        log.info(tag,"Checkpoint valid pubkeys ** ")
                         //TODO verify hdwallet init successfull
 
                         log.debug("pubkeys ",this.pubkeys)
@@ -377,17 +404,16 @@ module.exports = class wallet {
                             let pubkey = this.pubkeys[i]
                             log.debug(tag,"pubkey: ",pubkey)
                             if(!pubkey) throw Error("empty pubkey!")
-                            if(!pubkey.coin){
-                                log.debug("pubkey: ",pubkey)
-                                throw Error("Invalid pubkey!")
+                            if(!pubkey.symbol){
+                                let nativeAsset = getNativeAssetForBlockchain(pubkey.blockchain)
+                                if(!nativeAsset) throw Error("102: blockchain not supported by coins module!  "+pubkey.blockchain)
+                                pubkey.symbol = nativeAsset
                             }
-                            if(isTestnet && pubkey.xpub && !pubkey.tpub){
-                                pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
-                            }
-                            this.PUBLIC_WALLET[pubkey.coin] = pubkey
+                            // if(isTestnet && pubkey.xpub && !pubkey.tpub){
+                            //     pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
+                            // }
+                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey
                         }
-
-
                         break;
                     case HDWALLETS.keepkey:
                         log.debug(tag," Keepkey mode! ")
@@ -397,30 +423,30 @@ module.exports = class wallet {
 
                         //load wallet from keepkey
                         this.WALLET = wallet
-                        log.info(tag,"IN paths: ",paths)
+                        log.debug(tag,"IN paths: ",paths)
                         //TODO why this no worky
                         // this.pubkeys = await this.WALLET.getPublicKeys(paths)
                         this.pubkeys = config.wallet.pubkeys
 
-                        log.info("pubkeys ",JSON.stringify(this.pubkeys))
-                        log.info("pubkeys.length ",this.pubkeys.length)
-                        log.info("paths.length ",paths.length)
-                        //if paths !== pubkeys throw? missing coin?
+                        log.debug("pubkeys ",JSON.stringify(this.pubkeys))
+                        log.debug("pubkeys.length ",this.pubkeys.length)
+                        log.debug("paths.length ",paths.length)
+                        //if paths !== pubkeys throw? missing symbol?
 
                         for(let i = 0; i < this.pubkeys.length; i++){
                             let pubkey = this.pubkeys[i]
                             log.debug(tag,"pubkey: ",pubkey)
                             if(!pubkey) throw Error("empty pubkey!")
-                            if(!pubkey.coin){
+                            if(!pubkey.symbol){
                                 log.debug("pubkey: ",pubkey)
                                 throw Error("Invalid pubkey!")
                             }
                             if(this.isTestnet && pubkey.xpub && !pubkey.tpub){
                                 pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
                             }
-                            this.PUBLIC_WALLET[pubkey.coin] = pubkey
+                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey
                         }
-                        log.info("this.PUBLIC_WALLET",this.PUBLIC_WALLET)
+                        log.debug("this.PUBLIC_WALLET",this.PUBLIC_WALLET)
 
                         break;
                     case HDWALLETS.metamask:
@@ -459,13 +485,17 @@ module.exports = class wallet {
                         auth:this.auth,
                         provider:'bitcoin'
                     }
-                    log.info("registerBody: ",register)
+                    log.debug("registerBody: ",register)
                     log.debug("this.pioneerClient: ",this.pioneerClient)
                     let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                     log.debug("regsiterResponse: ",regsiterResponse)
 
+                    log.info(tag,"getting info on context: ",this.context)
                     let walletInfo = await this.getInfo(this.context)
-                    log.info("walletInfo: ",walletInfo)
+                    log.info(tag,"walletInfo: ",walletInfo)
+
+                    //validate info
+                    log.debug("walletInfo: ",walletInfo)
 
                     if(walletInfo.balances){
                         let coins = Object.keys(walletInfo.balances)
@@ -564,7 +594,7 @@ module.exports = class wallet {
                 }else{
                     pubkey = await this.PUBLIC_WALLET[coin].master
                 }
-                log.info(tag,"pubkey: ",pubkey)
+                log.debug(tag,"pubkey: ",pubkey)
                 output = await this.pioneerClient.instance.GetPubkeyBalance({coin,pubkey})
                 output = output.data
                 return output
@@ -827,7 +857,7 @@ module.exports = class wallet {
 
                     let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,addLiquidity)
                     data = data.data
-                    log.info(tag,"txData: ",data)
+                    log.debug(tag,"txData: ",data)
 
                     let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                     nonceRemote = nonceRemote.data
@@ -846,8 +876,8 @@ module.exports = class wallet {
                     //if eth
                     let amountNative = parseFloat(addLiquidity.amount) * support.getBase('ETH')
                     amountNative = Number(parseInt(String(amountNative)))
-                    log.info("amountNative: ",amountNative)
-                    log.info("nonce: ",nonce)
+                    log.debug("amountNative: ",amountNative)
+                    log.debug("nonce: ",nonce)
 
                     //TODO if token
 
@@ -869,13 +899,13 @@ module.exports = class wallet {
                         // chainId: 1,//TODO testnet
                     }
 
-                    log.info("unsignedTxETH: ",ethTx)
+                    log.debug("unsignedTxETH: ",ethTx)
                     //send to hdwallet
                     rawTx = await this.WALLET.ethSignTx(ethTx)
                     rawTx.params = ethTx
 
                     const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.info(tag,"txid: ",txid)
+                    log.debug(tag,"txid: ",txid)
                     rawTx.txid = txid
 
                 } else if(UTXOcoins.indexOf(addLiquidity.inboundAddress.chain) >= 0){
@@ -923,8 +953,8 @@ module.exports = class wallet {
                     gas_price = parseInt(gas_price)
                     gas_price = gas_price + 1000000000
 
-                    log.info(tag,"approval.tokenAddress: ",approval.tokenAddress)
-                    log.info(tag,"approval.amount: ",approval.amount)
+                    log.debug(tag,"approval.tokenAddress: ",approval.tokenAddress)
+                    log.debug(tag,"approval.amount: ",approval.amount)
 
                     let data =
                         "0x" +
@@ -932,7 +962,7 @@ module.exports = class wallet {
                         (approval.contract).replace("0x", "").padStart(64, "0") +
                         (approval.amount).toString(16).padStart(64, "0");
 
-                    log.info(tag,"data: ",data)
+                    log.debug(tag,"data: ",data)
 
                     let ethTx = {
                         // addressNList: support.bip32ToAddressNList(masterPathEth),
@@ -952,13 +982,13 @@ module.exports = class wallet {
                         // chainId: 1,//TODO testnet
                     }
 
-                    log.info("unsignedTxETH: ",ethTx)
+                    log.debug("unsignedTxETH: ",ethTx)
                     //send to hdwallet
                     rawTx = await this.WALLET.ethSignTx(ethTx)
                     rawTx.params = ethTx
 
                     const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.info(tag,"txid: ",txid)
+                    log.debug(tag,"txid: ",txid)
                     rawTx.txid = txid
                     return rawTx
                 }catch(e){
@@ -992,7 +1022,7 @@ module.exports = class wallet {
 
                     let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,swap)
                     data = data.data
-                    log.info(tag,"txData: ",data)
+                    log.debug(tag,"txData: ",data)
 
                     let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                     nonceRemote = nonceRemote.data
@@ -1011,8 +1041,8 @@ module.exports = class wallet {
                     //if eth
                     let amountNative = parseFloat(swap.amount) * support.getBase('ETH')
                     amountNative = Number(parseInt(String(amountNative)))
-                    log.info("amountNative: ",amountNative)
-                    log.info("nonce: ",nonce)
+                    log.debug("amountNative: ",amountNative)
+                    log.debug("nonce: ",nonce)
 
                     //TODO if token
 
@@ -1034,13 +1064,13 @@ module.exports = class wallet {
                         // chainId: 1,//TODO testnet
                     }
 
-                    log.info("unsignedTxETH: ",ethTx)
+                    log.debug("unsignedTxETH: ",ethTx)
                     //send to hdwallet
                     rawTx = await this.WALLET.ethSignTx(ethTx)
                     rawTx.params = ethTx
 
                     const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.info(tag,"txid: ",txid)
+                    log.debug(tag,"txid: ",txid)
                     rawTx.txid = txid
 
                 } else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
@@ -1171,7 +1201,7 @@ module.exports = class wallet {
                 }
 
                 let signedTx = await this.buildApproval(approval)
-                log.info(tag,"signedTx: ",signedTx)
+                log.debug(tag,"signedTx: ",signedTx)
 
                 if(invocationId) signedTx.invocationId = invocationId
                 log.debug(tag,"invocationId: ",invocationId)
@@ -1179,10 +1209,10 @@ module.exports = class wallet {
                 signedTx.broadcasted = false
                 let broadcast_hook = async () =>{
                     try{
-                        log.info(tag,"signedTx: ",signedTx)
+                        log.debug(tag,"signedTx: ",signedTx)
                         //TODO flag for async broadcast
                         let broadcastResult = await this.broadcastTransaction('ETH',signedTx)
-                        log.info(tag,"broadcastResult: ",broadcastResult)
+                        log.debug(tag,"broadcastResult: ",broadcastResult)
 
                         //push to invoke api
                     }catch(e){
@@ -1220,7 +1250,7 @@ module.exports = class wallet {
                 }
                 if(!intent.address && intent.addressTo) intent.address = intent.addressTo
                 intent.coin = intent.coin.toUpperCase()
-                log.info(tag,"params: ",intent)
+                log.debug(tag,"params: ",intent)
                 if(!intent.amount) throw Error("Amount required!")
                 if(!intent.address) throw Error("address required!")
                 //TODO verify input params
@@ -1231,11 +1261,11 @@ module.exports = class wallet {
                 if(intent.amount === 'all'){
                     //get balance
                     let balance = await this.getBalance(intent.coin)
-                    log.info(tag,"balance: ",balance)
+                    log.debug(tag,"balance: ",balance)
 
                     //subtract fees
                     intent.amount = String(parseFloat(balance) - 0.08)
-                    log.info(tag,"ALL amount: ",intent.amount)
+                    log.debug(tag,"ALL amount: ",intent.amount)
 
                     if(parseFloat(intent.amount) < 0) {
                         throw Error("Balance lower then expected fee!")
@@ -1255,7 +1285,7 @@ module.exports = class wallet {
 
                 //build transfer
                 let unSignedTx = await this.buildTransfer(transaction)
-                log.info(tag,"unSignedTx: ",unSignedTx)
+                log.debug(tag,"unSignedTx: ",unSignedTx)
 
                 if(invocationId) unSignedTx.invocationId = invocationId
                 log.debug(tag,"transaction: ",transaction)
@@ -1289,7 +1319,7 @@ module.exports = class wallet {
 
                 if(UTXOcoins.indexOf(coin) >= 0){
                     const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
-                    log.info(tag,"res: ",res)
+                    log.debug(tag,"res: ",res)
 
                     //
                     signedTx = {
@@ -1298,7 +1328,7 @@ module.exports = class wallet {
                         serialized:res.serializedTx
                     }
                 }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-                    log.info("unsignedTxETH: ",unsignedTx.HDwalletPayload)
+                    log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
                     //debug https://flightwallet.github.io/decode-eth-tx/
 
@@ -1307,21 +1337,21 @@ module.exports = class wallet {
                     if(!signedTx.serialized) throw Error("Failed to sign!")
 
                     const txid = keccak256(signedTx.serialized).toString('hex')
-                    log.info(tag,"txid: ",txid)
+                    log.debug(tag,"txid: ",txid)
 
                     signedTx.txid = txid
                     signedTx.params = unsignedTx.transaction //input
                 } else if(coin === 'RUNE'){
                     let res = await this.WALLET.thorchainSignTx(unsignedTx.HDwalletPayload);
 
-                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res: ",prettyjson.render(res))
                     log.debug("res*****: ",res)
 
                     let txFinal:any
                     txFinal = res
                     txFinal.signatures = res.signatures
 
-                    log.info("FINAL: ****** ",txFinal)
+                    log.debug("FINAL: ****** ",txFinal)
 
                     let broadcastString = {
                         tx:txFinal,
@@ -1343,7 +1373,7 @@ module.exports = class wallet {
                 }else if(coin === 'ATOM'){
                     let res = await this.WALLET.cosmosSignTx(unsignedTx.HDwalletPayload);
 
-                    log.info("res: ",prettyjson.render(res))
+                    log.debug("res: ",prettyjson.render(res))
                     log.debug("res*****: ",res)
 
                     let txFinal:any
@@ -1416,7 +1446,7 @@ module.exports = class wallet {
                     addressFrom = await this.getMaster(coin)
                 }
                 if(!addressFrom) throw Error("102: unable to get master address! ")
-                log.info(tag,"addressFrom: ",addressFrom)
+                log.debug(tag,"addressFrom: ",addressFrom)
 
                 let rawTx
 
@@ -1427,25 +1457,25 @@ module.exports = class wallet {
                 ]
 
                 if(UTXOcoins.indexOf(coin) >= 0){
-                    log.info(tag,"Build UTXO tx! ",coin)
+                    log.debug(tag,"Build UTXO tx! ",coin)
 
                     //list unspent
-                    log.info(tag,"coin: ",coin)
-                    log.info(tag,"xpub: ",this.PUBLIC_WALLET[coin].xpub)
+                    log.debug(tag,"coin: ",coin)
+                    log.debug(tag,"xpub: ",this.PUBLIC_WALLET[coin].xpub)
 
                     // let unspentInputs = await this.pioneerClient.instance.GetUtxos({coin})
 
                     let input
-                    log.info(tag,"isTestnet: ",isTestnet)
+                    log.debug(tag,"isTestnet: ",isTestnet)
                     if(this.isTestnet && false){ //Seriously fuck testnet flagging!
                         input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }else{
                         input = {coin,xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }
-                    log.info(tag,"input: ",input)
+                    log.debug(tag,"input: ",input)
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
                     unspentInputs = unspentInputs.data
-                    log.info(tag,"unspentInputs: ",unspentInputs)
+                    log.debug(tag,"unspentInputs: ",unspentInputs)
 
                     let utxos = []
                     for(let i = 0; i < unspentInputs.length; i++){
@@ -1477,7 +1507,7 @@ module.exports = class wallet {
                     // let feeRate = 1
                     let feeRateInfo = await this.pioneerClient.instance.GetFeeInfo({coin})
                     feeRateInfo = feeRateInfo.data
-                    log.info(tag,"feeRateInfo: ",feeRateInfo)
+                    log.debug(tag,"feeRateInfo: ",feeRateInfo)
                     let feeRate
                     if(coin === 'BTC'){
                         feeRate = feeRateInfo
@@ -1489,7 +1519,7 @@ module.exports = class wallet {
                         throw Error("Fee's not configured for coin:"+coin)
                     }
 
-                    log.info(tag,"feeRate: ",feeRate)
+                    log.debug(tag,"feeRate: ",feeRate)
                     if(!feeRate) throw Error("Can not build TX without fee Rate!")
                     //buildTx
 
@@ -1498,7 +1528,7 @@ module.exports = class wallet {
                     //use coinselect to select inputs
                     let amountSat = parseFloat(amount) * 100000000
                     amountSat = parseInt(amountSat.toString())
-                    log.info(tag,"amount satoshi: ",amountSat)
+                    log.debug(tag,"amount satoshi: ",amountSat)
                     let targets = [
                         {
                             address,
@@ -1515,16 +1545,16 @@ module.exports = class wallet {
                         let amountInSat = utxos[i].value
                         totalInSatoshi = totalInSatoshi + amountInSat
                     }
-                    log.info(tag,"totalInSatoshi: ",totalInSatoshi)
-                    log.info(tag,"totalInBase: ",nativeToBaseAmount(coin,totalInSatoshi))
+                    log.debug(tag,"totalInSatoshi: ",totalInSatoshi)
+                    log.debug(tag,"totalInBase: ",nativeToBaseAmount(coin,totalInSatoshi))
                     let valueIn = await coincap.getValue(coin,nativeToBaseAmount(coin,totalInSatoshi))
-                    log.info(tag,"totalInValue: ",valueIn)
+                    log.debug(tag,"totalInValue: ",valueIn)
 
                     //amount out
-                    log.info(tag,"amountOutSat: ",amountSat)
-                    log.info(tag,"amountOutBase: ",amount)
+                    log.debug(tag,"amountOutSat: ",amountSat)
+                    log.debug(tag,"amountOutBase: ",amount)
                     let valueOut = await coincap.getValue(coin,nativeToBaseAmount(coin,amountSat))
-                    log.info(tag,"valueOut: ",valueOut)
+                    log.debug(tag,"valueOut: ",valueOut)
 
                     if(valueOut < 1){
                         throw Error(" Dollar to play bro, DUST tx refused")
@@ -1534,9 +1564,9 @@ module.exports = class wallet {
                         throw Error("Sum of input less than output! YOUR BROKE! ")
                     }
 
-                    log.info(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
+                    log.debug(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
                     let selectedResults = coinSelect(utxos, targets, feeRate)
-                    log.info(tag,"result coinselect algo: ",selectedResults)
+                    log.debug(tag,"result coinselect algo: ",selectedResults)
 
                     //value of all outputs
 
@@ -1554,7 +1584,7 @@ module.exports = class wallet {
                     for(let i = 0; i < selectedResults.inputs.length; i++){
                         //get input info
                         let inputInfo = selectedResults.inputs[i]
-                        log.info(tag,"inputInfo: ",inputInfo)
+                        log.debug(tag,"inputInfo: ",inputInfo)
                         let input = {
                             addressNList:support.bip32ToAddressNList(inputInfo.path),
                             scriptType:"p2pkh",
@@ -1576,7 +1606,7 @@ module.exports = class wallet {
                     if(coin === 'BCH'){
                         //if cashaddr convert to legacy
                         let type = bchaddr.detectAddressFormat(changeAddress)
-                        log.info(tag,"type: ",type)
+                        log.debug(tag,"type: ",type)
                         if(type === 'cashaddr'){
                             changeAddress = bchaddr.toLegacyAddress(changeAddress)
                         }
@@ -1647,7 +1677,7 @@ module.exports = class wallet {
                     rawTx = unsignedTx
 
                     // const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
-                    // log.info(tag,"res: ",res)
+                    // log.debug(tag,"res: ",res)
                     //
                     // //
                     // rawTx = {
@@ -1746,7 +1776,7 @@ module.exports = class wallet {
 
                     rawTx = unsignedTx
 
-                    // log.info("unsignedTxETH: ",ethTx)
+                    // log.debug("unsignedTxETH: ",ethTx)
                     // rawTx = await this.WALLET.ethSignTx(ethTx)
                     // //debug https://flightwallet.github.io/decode-eth-tx/
                     //
@@ -1755,7 +1785,7 @@ module.exports = class wallet {
                     // if(!rawTx.serialized) throw Error("Failed to sign!")
                     //
                     // const txid = keccak256(rawTx.serialized).toString('hex')
-                    // log.info(tag,"txid: ",txid)
+                    // log.debug(tag,"txid: ",txid)
                     //
                     // rawTx.txid = txid
                     // rawTx.params = txParams
@@ -1765,10 +1795,10 @@ module.exports = class wallet {
                     amountNative = parseInt(amountNative.toString())
 
                     //get account number
-                    log.info(tag,"addressFrom: ",addressFrom)
+                    log.debug(tag,"addressFrom: ",addressFrom)
                     let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
                     masterInfo = masterInfo.data
-                    log.info(tag,"masterInfo: ",masterInfo.data)
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
 
                     let sequence = masterInfo.result.value.sequence || 0
                     let account_number = masterInfo.result.value.account_number
@@ -1820,10 +1850,10 @@ module.exports = class wallet {
                         addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
                         showDisplay: false,
                     });
-                    log.info(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.info(tag,"fromAddress: ",addressFrom)
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
 
-                    log.info("res: ",prettyjson.render({
+                    log.debug("res: ",prettyjson.render({
                         addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
                         chain_id,
                         account_number: account_number,
@@ -1837,7 +1867,7 @@ module.exports = class wallet {
                         throw Error("Can not sign, address mismatch")
                     }
 
-                    log.info(tag,"******* signTx: ",JSON.stringify({
+                    log.debug(tag,"******* signTx: ",JSON.stringify({
                         addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
                         chain_id,
                         account_number: account_number,
@@ -1871,14 +1901,14 @@ module.exports = class wallet {
                     //     tx: unsigned,
                     // });
                     //
-                    // log.info("res: ",prettyjson.render(res))
+                    // log.debug("res: ",prettyjson.render(res))
                     // log.debug("res*****: ",res)
                     //
                     // let txFinal:any
                     // txFinal = res
                     // txFinal.signatures = res.signatures
                     //
-                    // log.info("FINAL: ****** ",txFinal)
+                    // log.debug("FINAL: ****** ",txFinal)
                     //
                     // let broadcastString = {
                     //     tx:txFinal,
@@ -1903,10 +1933,10 @@ module.exports = class wallet {
                     amountNative = parseInt(amountNative.toString())
 
                     //get account number
-                    log.info(tag,"addressFrom: ",addressFrom)
+                    log.debug(tag,"addressFrom: ",addressFrom)
                     let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'ATOM',address:addressFrom})
                     masterInfo = masterInfo.data
-                    log.info(tag,"masterInfo: ",masterInfo.data)
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
 
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
@@ -1958,10 +1988,10 @@ module.exports = class wallet {
                         addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
                         showDisplay: false,
                     });
-                    log.info(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.info(tag,"fromAddress: ",addressFrom)
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
 
-                    log.info("res: ",prettyjson.render({
+                    log.debug("res: ",prettyjson.render({
                         addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
                         chain_id,
                         account_number: account_number,
@@ -1995,7 +2025,7 @@ module.exports = class wallet {
                     //     tx: unsigned,
                     // });
                     //
-                    // log.info("res: ",prettyjson.render(res))
+                    // log.debug("res: ",prettyjson.render(res))
                     // log.debug("res*****: ",res)
                     //
                     // let txFinal:any
@@ -2236,9 +2266,9 @@ module.exports = class wallet {
             }else{
                 signedTx.coin = coin
             }
-            log.info(tag,"signedTx: ",signedTx)
+            log.debug(tag,"signedTx: ",signedTx)
             let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)
-            log.info(tag,"resultBroadcast: ",resultBroadcast.data)
+            log.debug(tag,"resultBroadcast: ",resultBroadcast.data)
             return resultBroadcast.data;
         }
     }

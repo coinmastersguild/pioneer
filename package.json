@@ -15,6 +15,5 @@
     "deploy": ""
   },
   "dependencies": {
-    "@bithighlander/hdwallet-native": "^1.10.12"
   }
 }

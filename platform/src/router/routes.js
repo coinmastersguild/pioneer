@@ -19,9 +19,9 @@ const routes = [
         props: true
       },
       {
-        path: '/approvals',
-        name: 'Approvals',
-        component: () => import('pages/Approvals.vue'),
+        path: '/invocations',
+        name: 'Invocations',
+        component: () => import('pages/Invocations.vue'),
         props: true
       },
       {

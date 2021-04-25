@@ -18,6 +18,7 @@ let assert = require('assert')
 //test app
 let App = require("@pioneer-platform/pioneer-app")
 const log = require("@pioneer-platform/loggerdog")()
+const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
 let seed = process.env['WALLET_MAINNET_DEV_OLD']
@@ -40,11 +41,14 @@ export async function startApp() {
         let config = await App.getConfig()
         assert(config === null)
 
-        let wallet1 = {
+        let wallet1:any = {
             mnemonic:seed,
             username:username,
             password
         }
+        //get master for seed
+        let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
+        wallet1.masterAddress = walletEth.masterAddress
 
         //create wallet files
         let successCreate = await App.createWallet('software',wallet1)
@@ -72,13 +76,37 @@ export async function startApp() {
         config.password = password
         config.username = username
 
-        //get wallets
+        resultInit.events.on('message', async (request:any) => {
+            switch(request.type) {
+                case 'transfer':
+                    log.info(tag," **** PROCESS EVENT ****  request: ",request)
+                    break
+                default:
+                    console.log("Unhandled type: ",request.type)
+            }
+        })
+
+            //get wallets
         let wallets = await App.getWallets()
 
         //assert only 1
-        let context = wallets[0]
+        let context = wallets[App.context()]
 
         return context
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export async function approveTransaction(invocationId:string) {
+    let tag = " | sendPairingCode | "
+    try {
+
+        let signedTx = await App.approveTransaction(App.context(),invocationId)
+        log.info(tag," ***  signedTx: ",signedTx)
+
+        return signedTx
     } catch (e) {
         log.error(e)
         throw e

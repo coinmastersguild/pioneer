@@ -49,7 +49,8 @@ let run_test = async function(){
         if(!config){
             console.log("First time startup, run pair first")
         } else {
-            //if force keepkey
+            //blockchains
+            if(!config.blockchains) throw Error("Invalid configuration!")
 
             config.password = password
             config.username = username
@@ -58,8 +59,8 @@ let run_test = async function(){
             //console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("NKVUVF")
-            console.log("pairResult: ",pairResult)
+            // let pairResult = await App.pair("ZMPML2")
+            // console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
@@ -71,8 +72,21 @@ let run_test = async function(){
             let context = wallets[contextName]
             if(!context) throw Error("No Wallets on startup!")
 
-            // let context = wallets[0]
-            // if(!context) throw Error("No Wallets on startup!")
+            //AutonomousOn
+            resultInit.events.on('message', async (request) => {
+                switch(request.type) {
+                    //TODO swap/approve
+                    case 'transfer':
+                        console.log(" **** PROCESS EVENT ****  request: ",request)
+                        //approve
+                        console.log(" Approving transaction! ")
+                        let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
+                        console.log(" ***  signedTx: ",signedTx)
+                        break
+                    default:
+                        console.log("Unhandled type: ",request.type)
+                }
+            })
 
             /*
                 FIO

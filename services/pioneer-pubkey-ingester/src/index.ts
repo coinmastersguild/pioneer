@@ -51,8 +51,8 @@ let push_balance_event = async function(work:any,balance:string){
     try{
         let balanceEvent = {
             username:work.username,
-            coin:work.coin,
-            network:work.coin,
+            symbol:work.symbol,
+            network:work.symbol,
             balance
         }
         publisher.publish('',JSON.stringify(balanceEvent))
@@ -73,19 +73,13 @@ let do_work = async function(){
         work = await queue.getWork("pioneer:pubkey:ingest", 1)
         if(work){
             log.info("work: ",work)
-
-            //TODO just type the work damnit
-            if(work.address) work.pubkey = work.address
-            if(work.zpub) work.type = "zpub"
-            if(work.zpub) work.pubkey = work.zpub
-            if(work.xpub) work.type = "xpub"
-            if(work.xpub) work.pubkey = work.xpub
+            if(!work.symbol && work.asset) work.symbol = work.asset
             if(!work.type && work.address) work.type = "address"
 
-
+            if(!work.symbol) throw Error("101: invalid work! missing symbol")
             if(!work.username) throw Error("102: invalid work! missing username")
             if(!work.pubkey) throw Error("103: invalid work! missing pubkey")
-            if(!work.coin) throw Error("104: invalid work! missing coin")
+            if(!work.blockchain) throw Error("104: invalid work! missing blockchain")
             if(!work.type) throw Error("105: invalid work! missing type")
             if(!work.queueId) throw Error("106: invalid work! missing queueId")
             if(work.type !== 'address' && work.type !== 'xpub' && work.type !== 'zpub') throw Error("Unknown type! "+work.type)
@@ -94,11 +88,11 @@ let do_work = async function(){
             if(work.type === "xpub" || work.type === "zpub"){
 
                 //get balance
-                let balance = await blockbook.getBalanceByXpub(work.coin,work.pubkey)
-                log.info(tag,work.username + " Balance ("+work.coin+"): ",balance)
+                let balance = await blockbook.getBalanceByXpub(work.symbol,work.pubkey)
+                log.info(tag,work.username + " Balance ("+work.symbol+"): ",balance)
 
                 //update balance cache
-                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.coin,balance)
+                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.symbol,balance)
                 if(updateResult) push_balance_event(work,balance)
                 log.info(tag,"updateResult: ",updateResult)
 
@@ -108,7 +102,12 @@ let do_work = async function(){
 
             } else if(work.type === "address") {
                 // if ETH get tokens
-                if(work.coin === 'ETH'){
+                if(work.symbol === 'ETH'){
+                    //if eth use master
+
+                    //     //register to blocknative
+                    //     blocknative.submitAddress("ETH", pubkeyInfo.master)
+
                     // get ethPlorer list
                     let ethInfo = await networks['ETH'].getBalanceTokens(work.pubkey)
                     log.debug(tag,"ethInfo: ",ethInfo)
@@ -142,12 +141,12 @@ let do_work = async function(){
 
 
                 //get balance
-                if(!networks[work.coin] || !networks[work.coin].getBalance) throw Error("102: coin not supported! "+work.coin)
+                if(!networks[work.symbol] || !networks[work.symbol].getBalance) throw Error("102: coin not supported! "+work.symbol)
 
-                let balance = await networks[work.coin].getBalance(work.pubkey)
+                let balance = await networks[work.symbol].getBalance(work.pubkey)
                 //
                 log.info(tag,"address ingestion")
-                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.coin,balance)
+                let updateResult = await redis.hset(work.username+":assets:"+work.walletId,work.symbol,balance)
                 if(updateResult) push_balance_event(work,balance)
                 //if eth get info
                 //TODO if change push new balance over socket to user

@@ -120,7 +120,7 @@ let run_test = async function(){
         console.log("result: ",result.data)
 
         //open invoke page
-        open("http://localhost:8080/#/invocation/"+result.data.invocationId)
+        // open("http://localhost:8080/#/invocation/"+result.data.invocationId)
     }catch(e){
         console.error(e)
     }
