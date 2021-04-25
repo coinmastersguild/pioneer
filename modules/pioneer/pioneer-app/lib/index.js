@@ -92,8 +92,8 @@ let urlSpec = URL_PIONEER_SPEC;
 let KEEPKEY;
 let network;
 //chingle
-// let opts:any = {}
-// var player = require('play-sound')(opts = {})
+let opts = {};
+var player = require('play-sound')(opts = {});
 let AUTONOMOUS = false;
 module.exports = {
     init: function (config, isTestnet) {
@@ -146,6 +146,13 @@ module.exports = {
     // getAproved: function () {
     //     return approvedQueue;
     // },
+    //await network.instance.Invocations()
+    getInvocations: function (context) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let output = yield network.instance.Invocations();
+            return output.data;
+        });
+    },
     approveTransaction: function (context, invocationId) {
         return approve_transaction(context, invocationId);
     },
@@ -363,12 +370,13 @@ module.exports = {
     exportWallet: function (walletId, format) {
         return export_wallet(walletId, format);
     },
-    // playChingle: function () {
-    //   player.play('./assets/chaching.mp3', function(err:any){
-    //     if (err) throw err
-    //   })
-    //   return true;
-    // },
+    playChingle: function () {
+        player.play('../assets/chaching.mp3', function (err) {
+            if (err)
+                throw err;
+        });
+        return true;
+    },
     // getBalance: function (coin:string) {
     //     return get_balance(coin);
     // },
@@ -1217,9 +1225,9 @@ let init_wallet = function (config, isTestnet) {
                     //info
                     let info = yield wallet.getInfo(walletName);
                     log.info(tag, "INFO: ", info);
-                    if (info.pubkeys)
+                    if (!info.pubkeys)
                         throw Error(" invalid wallet info returned! missing pubkeys!");
-                    if (info.masters)
+                    if (!info.masters)
                         throw Error(" invalid wallet info returned! missing masters!");
                     info.name = walletFile.username;
                     info.type = 'software';

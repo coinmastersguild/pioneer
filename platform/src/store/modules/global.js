@@ -9,6 +9,7 @@ const state = {
     tradeRate: {},
     rateLoading: false,
     tradeOrder: {},
+    invocations:[],
     apps: [
     ],
     txPanel: true
@@ -20,6 +21,7 @@ const getters = {
     // getLedgerConnected: (state) => state.ledgerConnected,
     getRate: (state) => state.tradeRate,
     getApps: (state) => state.apps,
+    getInvocations: (state) => state.invocations,
     getTradeOrder: (state) => state.tradeOrder,
     getRateLoading: (state) => state.rateLoading,
     txPanelVisible: (state) => state.txPanel
@@ -43,6 +45,7 @@ const mutations = {
     setRateLoading: (state, loading) => (state.rateLoading = loading),
     setTradeOrder: (state, order) => (state.tradeOrder = order),
     addApp: (state, app) => state.apps.unshift(app),
+    addInvocation: (state, invocation) => state.invocations.unshift(invocation),
     removeApp: (state, app) => {
         const i = state.apps.map(item => item._id).indexOf(app._id)
         state.apps.splice(i, 1)

@@ -65,6 +65,12 @@ export default store => {
       store.commit('registerApp',app)
     }
   })
+  ipcRenderer.on('setContext', (event, data) => {
+    console.log(' setContext event! ')
+    console.log('data: ', data)
+    store.commit('setContext',data)
+
+  })
   ipcRenderer.on('setWalletInfoContext', (event, data) => {
     console.log(' setWalletInfoContext event! ')
     console.log('data: ', data)
@@ -104,8 +110,17 @@ export default store => {
       store.commit('registerWallet',wallet)
     }
   })
+  ipcRenderer.on('invocations', (event, data) => {
+    console.log('invocations event! ')
+    console.log('data: ', data)
+
+    for(let i = 0; i < data.length; i++){
+      const invocation = data[i]
+      store.commit('addInvocation',invocation)
+    }
+  })
   ipcRenderer.on('loadApps', (event, data) => {
-    console.log('init event! ')
+    console.log('loadApps event! ')
     console.log('data: ', data)
     console.log('APPS: ', data.APPS)
 

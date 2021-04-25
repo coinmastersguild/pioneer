@@ -216,7 +216,7 @@ module.exports = /** @class */ (function () {
                             if (!this.blockchains && !wallet.blockchains)
                                 throw Error("Must Specify blockchain support! ");
                             log.debug(tag, "checkpoint");
-                            paths = getPaths(this.isTestnet, this.blockchains);
+                            paths = getPaths(this.blockchains);
                             _a = +HDWALLETS[this.type];
                             switch (_a) {
                                 case HDWALLETS.pioneer: return [3 /*break*/, 2];
@@ -441,7 +441,7 @@ module.exports = /** @class */ (function () {
             try {
                 var output = [];
                 if (format === 'keepkey') {
-                    var paths = getPaths(this.isTestnet, this.blockchains);
+                    var paths = getPaths(this.blockchains);
                     for (var i = 0; i < paths.length; i++) {
                         var path = paths[i];
                         var pathForKeepkey = {};
@@ -455,7 +455,7 @@ module.exports = /** @class */ (function () {
                     }
                 }
                 else {
-                    var paths = getPaths(this.isTestnet, this.blockchains);
+                    var paths = getPaths(this.blockchains);
                     output = paths;
                 }
                 return output;

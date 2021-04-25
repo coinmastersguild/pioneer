@@ -176,7 +176,7 @@ module.exports = class wallet {
     private username: string;
     private pioneerApi: any;
     private info: any
-    private init: () => Promise<any>;
+    private init: (context: string) => Promise<any>;
     private queryKey: string;
     private service: string;
     private getNetwork: () => any;
@@ -211,8 +211,10 @@ module.exports = class wallet {
     private call: (<T>(address: Address, abi: any, func: string, params: Array<any>) => Promise<T>) | undefined;
     private estimateApproveFee: ((contractAddress: string, asset: any) => Promise<BigNumber>) | undefined;
     private approve: ((spender: string, sender: string, amount: BaseAmount) => Promise<any>) | undefined;
+    private context: string;
     constructor(spec:string,config:any) {
         this.username = ''
+        this.context = ''
         this.network = config.blockchain
         this.nativeAsset = config.nativeAsset
         this.service = config.service || 'unknown'
@@ -223,7 +225,7 @@ module.exports = class wallet {
         }
         this.queryKey = config.queryKey
         this.spec = config.spec
-        this.init = async function () {
+        this.init = async function (context:string) {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.queryKey) throw Error(" You must create an api key! ")
@@ -239,7 +241,7 @@ module.exports = class wallet {
 
                 //get info
                 // @ts-ignore
-                let info = await this.pioneerApi.Info()
+                let info = await this.pioneerApi.Info(context)
                 //TODO error handling
                 this.info = info.data
                 this.username = this.info.username

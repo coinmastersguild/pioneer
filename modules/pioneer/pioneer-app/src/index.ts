@@ -146,6 +146,11 @@ module.exports = {
     // getAproved: function () {
     //     return approvedQueue;
     // },
+    //await network.instance.Invocations()
+    getInvocations: async function (context?:string) {
+        let output = await network.instance.Invocations()
+        return output.data;
+    },
     approveTransaction: function (context:string,invocationId:string) {
         return approve_transaction(context,invocationId);
     },
@@ -375,7 +380,7 @@ module.exports = {
 
 
     // playChingle: function () {
-    //   player.play('./assets/chaching.mp3', function(err:any){
+    //   player.play('../assets/chaching.mp3', function(err:any){
     //     if (err) throw err
     //   })
     //   return true;
@@ -1308,8 +1313,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 //info
                 let info = await wallet.getInfo(walletName)
                 log.info(tag,"INFO: ",info)
-                if(info.pubkeys) throw Error(" invalid wallet info returned! missing pubkeys!")
-                if(info.masters) throw Error(" invalid wallet info returned! missing masters!")
+                if(!info.pubkeys) throw Error(" invalid wallet info returned! missing pubkeys!")
+                if(!info.masters) throw Error(" invalid wallet info returned! missing masters!")
 
                 info.name = walletFile.username
                 info.type = 'software'

@@ -10,8 +10,8 @@ require("dotenv").config({path:'../../../../.env'})
 
 let App = require("../lib")
 
-let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
-if(!WALLET_PASSWORD) throw Error(".env not found!")
+// let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
+// if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
@@ -21,10 +21,10 @@ process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
-let password = process.env['WALLET_PASSWORD']
+let password = process.env['WALLET_PASSWORD'] || 'password'
 // let username = process.env['TEST_USERNAME_1']
 
-let username = process.env['TEST_USERNAME_2']
+// let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
 let queryKey = process.env['TEST_QUERY_KEY_2']
 
 //console.log("password: ",password)
@@ -52,7 +52,7 @@ let run_test = async function(){
             if(!config.blockchains) throw Error("Invalid configuration!")
 
             config.password = password
-            config.username = username
+            // config.username = username
 
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
@@ -91,8 +91,8 @@ let run_test = async function(){
 
 
             //pair
-            // let pairResult = await App.pair("WJTWYV")
-            // console.log("pairResult: ",pairResult)
+            let pairResult = await App.pair("1B5NI8")
+            console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
@@ -102,11 +102,14 @@ let run_test = async function(){
             console.log("contextName: ",contextName)
 
             let context = wallets[contextName]
-
-
             if(!context) throw Error("No Wallets on startup!")
 
-            //for each context
+            //get invocations
+            let invocations = await App.getInvocations()
+            console.log("invocations: ",invocations)
+
+            App.playChingle()
+
 
             /*
                 FIO

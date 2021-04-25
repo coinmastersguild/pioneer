@@ -289,6 +289,12 @@ export class pioneerPrivateController extends Controller {
 
                 //get asset balances
                 let assetBalances = await redis.hgetall(username+":assets:"+walletId)
+                //fill in 0's
+                let allAssets = Object.keys(walletInfo.masters)
+                for(let i = 0; i < allAssets.length; i++){
+                    let asset = allAssets[i]
+                    if(!assetBalances[asset]) assetBalances[asset] = 42 //HACK FIXME
+                }
                 log.info(tag,"assetBalances: ",assetBalances)
                 walletInfo.balances = assetBalances
                 //get value of portfolio

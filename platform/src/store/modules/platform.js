@@ -1,5 +1,6 @@
 const state = {
     testnet:false,
+    context:"",
     username:"",
     pioneerUrl:"",
     pioneerLive:false,
@@ -60,11 +61,7 @@ const mutations = {
       }
     },
     registerWallet(state, wallet) {
-      if (state.wallets.filter(e => e.type === wallet.type).length === 0) {
-        state.wallets.push(wallet)
-      } else {
-        console.log("wallet type already added")
-      }
+      state.wallets.push(wallet)
     },
     registerDevice(state, device) {
       if (state.devices.filter(e => e.type === devices.type).length === 0) {
@@ -112,6 +109,9 @@ const mutations = {
     },
     setWalletInfo(state,value){
       state.walletInfo = value
+    },
+    setContext(state,value){
+      state.context = value
     },
     setViewSeed(state,value){
       state.mnemonic = value

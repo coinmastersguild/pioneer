@@ -22,6 +22,10 @@
         </q-item>
       </div>
 
+      <q-item clickable to="/invocations" class="justify-center user-header" style="">
+        <q-icon size=md name="published_with_changes"></q-icon>
+      </q-item>
+
       <div v-if="featureContacts">
         <q-item clickable to="/contacts" class="justify-center user-header" style="">
           <q-icon size=md name="admin_panel_settings"></q-icon>

@@ -24,7 +24,7 @@ let run_test = async function(){
         console.log("*** Running test module ***")
 
         let config = {
-            queryKey:"key:eab34be6-3fa1-43c7-8fcd-eb33053620b9",
+            queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338",
             // username,
             spec,
             wss,
@@ -76,19 +76,24 @@ let run_test = async function(){
             let context = app.context
             console.log("context: ",context)
 
-            // if(context){
-            //     //get user
-            //     let user = await app.getUserParams()
-            //     console.log("user: ",user)
-            // }
+            //start socket
+            let events = await app.startSocket()
+            console.log("events: ",events)
+            events.on('message', async (request) => {
+                console.log("**** message: ", request)
+            })
 
+            //get user
+            let user = await app.getUserParams()
+            console.log("user: ",user)
+            if(!user.clients) throw Error("Failed to create user!")
             //switch context
-            let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
-            //let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
-
-            //resultContextSwitch
-            let resultContextSwitch = await app.setContext(newContext)
-            console.log("resultContextSwitch: ",resultContextSwitch)
+            // let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+            // //let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
+            //
+            // //resultContextSwitch
+            // let resultContextSwitch = await app.setContext(newContext)
+            // console.log("resultContextSwitch: ",resultContextSwitch)
 
             //
 
@@ -106,18 +111,18 @@ let run_test = async function(){
 
             //ETH
 
-            // //intergration test asgard-exchange
-            // let blockchains = Object.keys(user.clients)
-            // console.log("blockchains: ",blockchains)
-            //
-            // for(let i = 0; i < blockchains.length; i++){
-            //     let blockchain = blockchains[i]
-            //     let client = user.clients[blockchain]
-            //
-            //     let balance = await client.getBalance()
-            //     //console.log(blockchain+ " balance: ",balance)
-            //     console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
-            // }
+            //intergration test asgard-exchange
+            let blockchains = Object.keys(user.clients)
+            console.log("blockchains: ",blockchains)
+
+            for(let i = 0; i < blockchains.length; i++){
+                let blockchain = blockchains[i]
+                let client = user.clients[blockchain]
+
+                let balance = await client.getBalance()
+                //console.log(blockchain+ " balance: ",balance)
+                console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
+            }
 
             //
             // //send eth

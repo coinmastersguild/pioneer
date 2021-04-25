@@ -346,7 +346,7 @@ module.exports = class wallet {
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("Must Specify blockchain support! ")
                 log.debug(tag,"checkpoint")
-                let paths = getPaths(this.isTestnet,this.blockchains)
+                let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
@@ -523,7 +523,7 @@ module.exports = class wallet {
             try {
                 let output:any = []
                 if(format === 'keepkey'){
-                    let paths = getPaths(this.isTestnet,this.blockchains)
+                    let paths = getPaths(this.blockchains)
                     for(let i = 0; i < paths.length; i++){
                         let path = paths[i]
                         let pathForKeepkey:any = {}
@@ -537,7 +537,7 @@ module.exports = class wallet {
                         output.push(pathForKeepkey)
                     }
                 } else {
-                    let paths = getPaths(this.isTestnet,this.blockchains)
+                    let paths = getPaths(this.blockchains)
                     output = paths
                 }
                 return output

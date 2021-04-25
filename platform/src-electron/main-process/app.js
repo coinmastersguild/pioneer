@@ -22,8 +22,8 @@ const Hardware = require("@pioneer-platform/pioneer-hardware")
 
 //Globals
 let WALLETS_LOADED = []
-let WALLET_LOADED = {}
-let WALLET_CONTEXT = 0
+let WALLETS_NAMES = []
+let WALLET_CONTEXT = ""
 let FIO_ACCEPT = false
 let FIO_REJECT = false
 let PASSWORDLESS_ENABLE = false
@@ -138,7 +138,7 @@ export async function onStart(event,data) {
 
     let configStatus = checkConfigs()
     let config = await App.getConfig()
-
+    delete config.isTestnet
     log.info(tag,"config: ",config)
     log.debug(tag,"configStatus() | configStatus: ", configStatus)
 
@@ -260,7 +260,7 @@ export async function onStart(event,data) {
       return true
     }
 
-    let isTestnet = null
+    // let isTestnet = null
     //TODO testnet feature
     //if feature flag mainnet
     // if(process.env['MAINNET_FEATURE']){
@@ -269,7 +269,7 @@ export async function onStart(event,data) {
     //   isTestnet = true
     //   config.isTestnet = isTestnet
     // }
-    config.isTestnet = null
+    // config.isTestnet = null
 
     config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
@@ -280,25 +280,26 @@ export async function onStart(event,data) {
 
     let resultInit = await App.init(config)
     log.info(tag,"resultInit: ",resultInit)
-    //
-    // //push init
-    // // event.sender.send('init',resultInit)
-    // // event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
-    // // event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
-    //
-    // // let wallets = App.getWallets()
-    // // let walletNames = App.getWalletNames()
-    // // log.info(tag,"walletNames: ",walletNames)
-    // //event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
-    //
-    // //wallet events
-    // resultInit.events.on('message', async (request) => {
-    //   console.log("*** message: ", request)
-    //   console.log("*** createApproveWindow: ", createApproveWindow)
-    //
-    //   //TODO messages
-    //   //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
-    // })
+
+    //push init
+    // event.sender.send('init',resultInit)
+    event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
+    event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+
+    let wallets = App.getWallets()
+    WALLETS_LOADED = wallets
+    let walletNames = App.getWalletNames()
+    WALLETS_NAMES = walletNames
+    log.info(tag,"walletNames: ",walletNames)
+    event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
+
+    //wallet events
+    resultInit.events.on('message', async (request) => {
+      console.log("*** message: ", request)
+
+      //TODO messages
+      //event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
+    })
 
     //TODO blocks
     //txs
@@ -307,16 +308,22 @@ export async function onStart(event,data) {
 
 
     //TODO is context pref in config?
+    let contextName = App.context()
+    console.log("contextName: ",contextName)
+    event.sender.send('setContext',contextName)
+    //get wallets
 
-    //set primary context
-    // let context = wallets[0]
-    // WALLETS_LOADED = context
+    let context = wallets[contextName]
+
+    //get invocations
+    let invocationsRemote = await App.getInvocations()
+    log.info(tag,"invocationsRemote: ",invocationsRemote)
+    event.sender.send('invocations',invocationsRemote)
 
     //load masters
-    // let info = await context.getInfo()
-
-    // log.info("info: ",info)
-    // event.sender.send('setWalletInfoContext',info)
+    let info = await context.getInfo(contextName)
+    log.info("(context) info: ",info)
+    event.sender.send('setWalletInfoContext',info)
 
     //Start wallet interface
     log.info(tag,"CHECKPOINT **** return start")

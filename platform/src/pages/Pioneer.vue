@@ -5,48 +5,44 @@
       <h4>Pioneer</h4>
 
     </div>
-    <q-page class="q-pt-xs" >
+    <q-page class="" >
+      <div class="">
+        Apps: {{apps}}
+      </div>
+      <div>
+        <q-btn
+          @click="openPair"
+          color="primary"
+          label="Pair"
+        ></q-btn>
+      </div>
 
-      Wallets: {{wallets}}
-
-      <div class="q-pa-md">
+      <div>
+        <h5>Wallets</h5>
+<!--        {{wallets}}-->
         <q-btn-dropdown
-          split
           color="green"
           push
           glossy
           no-caps
           icon="explore"
           :label="walletContextName"
-          @click="onMainClick"
         >
           <q-list>
-
-            <q-item clickable v-close-popup @click="onItemClick">
-              <q-item-section avatar>
-                <q-avatar icon="folder" color="primary" text-color="white" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Photos</q-item-label>
-                <q-item-label caption>February 22, 2016</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="info" color="amber" />
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-close-popup @click="onItemClick">
-              <q-item-section avatar>
-                <q-avatar icon="assignment" color="secondary" text-color="white" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Vacation</q-item-label>
-                <q-item-label caption>February 22, 2016</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon name="info" color="amber" />
-              </q-item-section>
-            </q-item>
+            <div v-for="(wallet, index) in wallets" :key="index" class="q-mb-sm">
+              <q-item clickable v-close-popup @click="onItemClick(wallet)">
+                <q-item-section avatar>
+                  <q-avatar icon="account_balance_wallet" color="primary" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{wallet}}</q-item-label>
+                  <q-item-label caption></q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+            </div>
           </q-list>
         </q-btn-dropdown>
       </div>
@@ -153,6 +149,19 @@
       }
     },
     watch: {
+      "$store.state.context": {
+        handler: function(value) {
+          console.log("value: ",value)
+          //get value
+          this.context = this.$store.getters['getContext'];
+          console.log("context: ",this.context)
+
+          //set context to wallet0
+          this.walletContextName = this.context
+
+        },
+        immediate: true
+      },
       "$store.state.wallets": {
         handler: function(value) {
           console.log("value: ",value)
@@ -200,9 +209,13 @@
       ...mapGetters(['getApps','layout','getWalletInfo']),
     },
     methods: {
-      ...mapMutations(['addApp', 'removeApp']),
+      ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),
       onMainClick() {
         console.log("Main Click")
+      },
+      openPair(item) {
+        console.log("item Click: ",item)
+        this.showModal('Pair')
       },
       onItemClick(item) {
         console.log("item Click: ",item)

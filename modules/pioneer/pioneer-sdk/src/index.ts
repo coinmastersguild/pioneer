@@ -265,14 +265,17 @@ export class SDK {
             try {
                 if(!this.context){
                     let userInfo = await this.pioneerApi.User()
+                    userInfo = userInfo.data
+                    log.info(tag,"userInfo: ",userInfo)
                     this.context = userInfo.context
                 }
-                if(!this.context) throw Error("cant not start without context! ")
-
+                if(!this.context) throw Error("can not start without context! ")
+                if(!this.blockchains) throw Error("can not start without blockchains")
+                log.info(tag,"context: ",this.context)
+                log.info(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-
-                log.debug(tag,"result: ",result)
+                log.info(tag,"result: ",result)
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 
@@ -288,7 +291,7 @@ export class SDK {
                         nativeAsset:'BNB',
                         queryKey:this.queryKey
                     })
-                    await binance.init()
+                    await binance.init(this.context)
                     this.clients['binance'] = binance
                 }
 
@@ -299,7 +302,7 @@ export class SDK {
                         nativeAsset:'BTC',
                         queryKey:this.queryKey
                     })
-                    await bitcoin.init()
+                    await bitcoin.init(this.context)
                     this.clients['bitcoin'] = bitcoin
                 }
 
@@ -310,7 +313,7 @@ export class SDK {
                         nativeAsset:'RUNE',
                         queryKey:this.queryKey
                     })
-                    await thorchain.init()
+                    await thorchain.init(this.context)
                     this.clients['thorchain'] = thorchain
                 }
 
@@ -321,7 +324,7 @@ export class SDK {
                         nativeAsset:'ETH',
                         queryKey:this.queryKey
                     })
-                    await ethereum.init()
+                    await ethereum.init(this.context)
                     this.clients['ethereum'] = ethereum
                 }
 
@@ -332,7 +335,7 @@ export class SDK {
                         nativeAsset:'BCH',
                         queryKey:this.queryKey
                     })
-                    await bitcoin.init()
+                    await bitcoin.init(this.context)
                     this.clients['bitcoinCash'] = bitcoin
                 }
 
@@ -343,7 +346,7 @@ export class SDK {
                         nativeAsset:'LTC',
                         queryKey:this.queryKey
                     })
-                    await bitcoin.init()
+                    await bitcoin.init(this.context)
                     this.clients['litecoin'] = bitcoin
                 }
 

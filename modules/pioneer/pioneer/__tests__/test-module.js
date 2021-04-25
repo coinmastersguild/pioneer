@@ -1,13 +1,13 @@
-require("dotenv").config({path:'./../../.env'})
-require("dotenv").config({path:'../../../.env'})
-require("dotenv").config({path:'../../../../.env'})
-require("dotenv").config({path:'../../../../../.env'})
+// require("dotenv").config({path:'./../../.env'})
+// require("dotenv").config({path:'../../../.env'})
+// require("dotenv").config({path:'../../../../.env'})
+// require("dotenv").config({path:'../../../../../.env'})
 
 const prettyjson = require('prettyjson');
 let WalletClass = require('../lib/index.js')
 
-//let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-let urlSpec = process.env['URL_PIONEER_SPEC']
+let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+//let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let walletName = "local_new_2"
 
@@ -24,8 +24,8 @@ let FAUCET_ADDRESSES = {
 
 }
 
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+// let username = process.env['TEST_USERNAME_2']
+// let queryKey = process.env['TEST_QUERY_KEY_2']
 
 
 let walletKeepkeyWatch = require('./data/keepkey.watch.wallet.json')
@@ -48,7 +48,7 @@ let run_test = async function(){
             blockchains,
 
             type:'pioneer',
-            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
+            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'] || 'alcohol woman abuse must during monitor noble actual mixed trade anger aisle',
 
             // type:'keepkey',
             // hardware:true,
@@ -56,16 +56,16 @@ let run_test = async function(){
 
 
             context,
-            username,
+            username:'test-user-2',
             pioneerApi:true,
             spec:urlSpec,
-            queryKey,
+            queryKey:'6ee250b2-2442-4760-b696-a72ccd664ac3',
             auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
             authProvider:'shapeshift'
         }
 
         //init wallet offline
-        let Wallet = new WalletClass(config.type,config,isTestnet);
+        let Wallet = new WalletClass(config.type,config);
 
         let info = await Wallet.init()
         console.log("INFO: ",info)

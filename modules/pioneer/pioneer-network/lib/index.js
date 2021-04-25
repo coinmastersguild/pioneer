@@ -40,6 +40,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var TAG = " | Pioneer network | ";
+require('dotenv').config();
+require('dotenv').config({ path: "../../../../.env" });
+require('dotenv').config({ path: "../../../.env" });
+require('dotenv').config({ path: "../../../../.env" });
 // const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 var bitcoin = require("bitcoinjs-lib");
 var ethUtils = require('ethereumjs-util');
