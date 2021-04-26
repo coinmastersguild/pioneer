@@ -4,7 +4,7 @@
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
     if(!blockchains) blockchains = []
-    if(process.env['FEATURE_BITCOIN_BLOCKCHAIN'] || blockchains.indexOf('bitcoin') >= 0){
+    if(blockchains.indexOf('bitcoin') >= 0){
         if(isTestnet){
             output.push({
                 note:"Bitcoin testnet account 0",
@@ -37,7 +37,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         }
     }
 
-    if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN'] || blockchains.indexOf('ethereum') >= 0){
+    if(blockchains.indexOf('ethereum') >= 0){
         let entry:any = {
             note:" ETH primary (default)",
             symbol: 'ETH',
@@ -55,7 +55,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN'] || blockchains.indexOf('thorchain') >= 0){
+    if(blockchains.indexOf('thorchain') >= 0){
         let entry:any = {
             note:" Default RUNE path ",
             type:"address",
@@ -74,7 +74,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_SECRET_BLOCKCHAIN'] || blockchains.indexOf('secret') >= 0){
+    if(blockchains.indexOf('secret') >= 0){
         let entry:any = {
             note:" Default Secret path ",
             type:"address",
@@ -93,7 +93,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_COSMOS_BLOCKCHAIN'] || blockchains.indexOf('cosmos') >= 0){
+    if(blockchains.indexOf('cosmos') >= 0){
         let entry:any = {
             note:" Default ATOM path ",
             type:"address",
@@ -113,7 +113,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_BINANCE_BLOCKCHAIN'] || blockchains.indexOf('binance') >= 0){
+    if(blockchains.indexOf('binance') >= 0){
         let entry:any = {
             note:"Binance default path",
             type:"address",
@@ -133,7 +133,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN'] || blockchains.indexOf('bitcoincash') >= 0){
+    if(blockchains.indexOf('bitcoincash') >= 0){
         let entry:any = {
             note:"Bitcoin Cash Default path",
             type:"xpub",
@@ -153,7 +153,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(process.env['FEATURE_LITECOIN_BLOCKCHAIN'] || blockchains.indexOf('litecoin') >= 0){
+    if(blockchains.indexOf('litecoin') >= 0){
         let entry:any = {
             note:"Litecoin Default path",
             type:"xpub",

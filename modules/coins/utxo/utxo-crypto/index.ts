@@ -260,7 +260,7 @@ module.exports = {
                     if(scriptType === 'bech32'){
                         const { address } = bitcoin.payments.p2wpkh({ pubkey: Buffer.from(pubkey,'hex') });
                         output = address
-                    } else if(scriptType === 'legacy'){
+                    } else if(scriptType === 'legacy' || 'p2pkh'){
                         const { address } = bitcoin.payments.p2pkh({ pubkey: Buffer.from(pubkey,'hex') });
                         output = address
                     }

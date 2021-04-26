@@ -40,10 +40,11 @@ let nedb = require("@pioneer-platform/nedb")
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events")
 
-// let {
-//     getPaths,
-//     get_address_from_xpub
-// } = require('@pioneer-platform/pioneer-coins')
+let {
+    getPaths,
+    get_address_from_xpub,
+    getNativeAssetForBlockchain
+} = require('@pioneer-platform/pioneer-coins')
 
 // @ts-ignore
 import { Crypto } from "@peculiar/webcrypto";
@@ -200,8 +201,8 @@ module.exports = {
         AUTH_TOKEN = auth;
         return true;
     },
-    pairKeepkey: function (wallet:any) {
-        return pair_keepkey(wallet);
+    pairKeepkey: function (wallet:any,blockchains:any) {
+        return pair_keepkey(wallet,blockchains);
     },
     // getAccountInfo: function (asset:string,account:string) {
     //     return network.getAccountInfo(asset,account);
@@ -578,7 +579,7 @@ let unlock_wallet = async function (wallet:any,password:string) {
 };
 
 
-let pair_keepkey = async function (keepkeyWallet:any) {
+let pair_keepkey = async function (keepkeyWallet:any,blockchains:any) {
     let tag = " | pair_keepkey | ";
     try {
 
@@ -602,10 +603,27 @@ let pair_keepkey = async function (keepkeyWallet:any) {
             updateConfig({paired});
         }
 
+        //verify pubkeys
+        log.info(tag,"pubkeys: ",keepkeyWallet.pubkeys)
+        for(let i = 0; i < blockchains.length; i++){
+            let blockchain = blockchains[i]
+            let symbol = getNativeAssetForBlockchain(blockchain)
+            log.info(tag,"symbol: ",symbol)
+            //find in pubkeys
+            let isFound = keepkeyWallet.pubkeys.find((path: { blockchain: string; }) => {
+                return path.blockchain === blockchain
+            })
+            if(!isFound){
+                throw Error("Failed to find path for blockchain: "+blockchain)
+            }
+            //verify master
+        }
+
         //use as ID
         keepkeyWallet.deviceId = deviceId
         //createWallet
         await create_wallet('hardware',keepkeyWallet)
+        return true
     } catch (e) {
         console.error(tag, "Error: ", e);
         throw e;
@@ -1190,6 +1208,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             log.debug(tag,"walletFile: ",walletFile)
             if(!walletFile.TYPE) walletFile.TYPE = walletFile.type
             if(walletFile.TYPE === 'keepkey'){
+                if(!output.devices) output.devices = []
                 log.debug(tag,"Loading keepkey wallet! ")
 
                 if(!walletFile.pubkeys) throw Error("102: invalid keepkey wallet!")
@@ -1205,6 +1224,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 } else {
                     log.debug(tag,"walletFile: ",walletFile)
                 }
+                //get device info from walletFile
+                if(!walletFile.features) throw Error("Invalid wallet file missing device features!")
+                output.devices.push(walletFile.features)
 
                 //load
                 let configPioneer = {
@@ -1363,6 +1385,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         log.debug(tag,"userInfo: ",userInfo)
         log.debug(tag,"context: ",userInfo.context)
         WALLET_CONTEXT = userInfo.context
+        output.context = WALLET_CONTEXT
 
         //after registered start socket
         //sub all to events

@@ -91,8 +91,8 @@ let run_test = async function(){
 
 
             //pair
-            let pairResult = await App.pair("1B5NI8")
-            console.log("pairResult: ",pairResult)
+            // let pairResult = await App.pair("1B5NI8")
+            // console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
@@ -108,7 +108,7 @@ let run_test = async function(){
             let invocations = await App.getInvocations()
             console.log("invocations: ",invocations)
 
-            App.playChingle()
+            // App.playChingle()
 
 
             /*

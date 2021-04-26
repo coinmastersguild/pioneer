@@ -1,101 +1,97 @@
 <template>
-
   <q-page>
     <div class="page-header">
-      <h4>Pioneer</h4>
-
+      <div><h4>Pioneer</h4></div>
     </div>
-    <q-page class="" >
-      <div class="">
-        Apps: {{apps}}
-      </div>
-      <div>
-        <q-btn
-          @click="openPair"
-          color="primary"
-          label="Pair"
-        ></q-btn>
-      </div>
-
-      <div>
-        <h5>Wallets</h5>
-<!--        {{wallets}}-->
-        <q-btn-dropdown
-          color="green"
-          push
-          glossy
-          no-caps
-          icon="explore"
-          :label="walletContextName"
-        >
-          <q-list>
-            <div v-for="(wallet, index) in wallets" :key="index" class="q-mb-sm">
-              <q-item clickable v-close-popup @click="onItemClick(wallet)">
-                <q-item-section avatar>
-                  <q-avatar icon="account_balance_wallet" color="primary" text-color="white" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{wallet}}</q-item-label>
-                  <q-item-label caption></q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-icon name="info" color="amber" />
-                </q-item-section>
-              </q-item>
-            </div>
-          </q-list>
-        </q-btn-dropdown>
-      </div>
-
-      <q-separator />
-
-<!--      {{walletInfo}}-->
-
-      <div class="q-pa-md" style="max-width: 550px">
-        <q-list bordered class="rounded-borders" style="width:550px;">
-          <div v-for="coin in coins" :key="coin.symbol">
-<!--            {{coin}}-->
-<!--            {{coin.symbol}}-->
-            <q-expansion-item style="width:550px;">
-              <template v-slot:header style="width:550px;">
-                <q-item-section avatar>
-                  <q-img :src="coin.icon"></q-img>
-                </q-item-section>
-
-                <q-item-section>
-                  {{coin.symbol}} ({{walletInfo.public[coin.symbol].long}})
-                </q-item-section>
-
-                <q-item-section side>
-                  <animated-number :value="walletInfo.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>
-                </q-item-section>
-              </template>
-
-              <q-card>
-                <q-card-section style="word-wrap: break-word;">
-
-<!--                  <small>script type: {{walletInfo.public[coin.symbol].script_type}}</small>-->
-<!--                  <q-separator />-->
-<!--                  Address: {{walletInfo.masters[coin.symbol]}} <br/>-->
-<!--                  {{copyText}}-->
-<!--                  <q-icon @click=copyAddress(walletInfo.masters[coin.symbol]) name="content_copy"></q-icon>-->
-<!--                  <q-separator />-->
-<!--                  path: {{walletInfo.public[coin.symbol].path}}-->
-<!--                  <q-separator />-->
-<!--                  <small>xpub: {{walletInfo.public[coin.symbol].xpub}}</small>-->
-                </q-card-section>
-              </q-card>
-            </q-expansion-item>
-
-            <q-separator />
-
+      <q-card>
+        <div v-if="!context">
+          <h4>Loading...</h4>
+        </div>
+        <div v-if="context">
+          <div class="">
+            Apps: {{apps}}
+          </div>
+          <div>
+            <q-btn
+              @click="openPair"
+              color="primary"
+              label="Pair"
+            ></q-btn>
           </div>
 
-        </q-list>
-      </div>
+          <div>
+            <q-btn-dropdown
+              color="green"
+              push
+              glossy
+              no-caps
+              icon="explore"
+              :label="context.slice(0,10)"
+            >
+              <q-list>
+                <div v-for="(wallet, index) in wallets" :key="index" class="q-mb-sm">
+                  <q-item clickable v-close-popup @click="onItemClick(wallet)">
+                    <q-item-section avatar>
+                      <q-avatar icon="account_balance_wallet" color="primary" text-color="white" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{wallet.walletId.slice(0, 10)}}</q-item-label>
+                      <q-item-label caption></q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                      <q-icon name="info" color="amber" />
+                    </q-item-section>
+                  </q-item>
+                </div>
+              </q-list>
+            </q-btn-dropdown>
+          </div>
 
-    </q-page>
+          <div class="q-pa-md" style="max-width: 550px">
+<!--            {{coins}}-->
+            <div v-for="coin in coins" :key="coin.symbol">
+<!--                          {{coin}}-->
+<!--                          {{coin.symbol}}-->
+<!--                              {{coin.icon}}-->
+              <q-expansion-item style="width:550px;">
+                <template v-slot:header style="width:550px;">
 
+                  <q-item-section avatar>
+                    <q-img :src="coin.icon"></q-img>
+                  </q-item-section>
+
+                  <q-item-section>
+                    {{coin.symbol}}
+                  </q-item-section>
+
+                  <q-item-section side>
+
+                    <animated-number :value="walletContext.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>
+                  </q-item-section>
+                </template>
+
+                <q-card>
+                  <q-card-section style="word-wrap: break-word;">
+                    <small>script type: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].script_type}}</small>
+                                      <q-separator />
+                                      Address: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].master}} <br/>
+                                      {{copyText}}
+                                      <q-icon @click=copyAddress(coin.symbol) name="content_copy"></q-icon>
+                                      <q-separator />
+<!--                                      path: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0]}}-->
+                                      <q-separator />
+                                      <small>xpub: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].pubkey}}</small>
+                  </q-card-section>
+                </q-card>
+              </q-expansion-item>
+
+              <q-separator />
+
+            </div>
+          </div>
+
+        </div>
+      </q-card>
   </q-page>
 </template>
 
@@ -120,12 +116,13 @@
     },
     data () {
       return {
+        context:null,
         duration: 500,
         queryKey:"",
-        walletContextName:"",
         coins:[],
         walletInfo: {},
         wallets:[],
+        walletContext:{},
         apps:[],
         devMode:false,
         installing: [],
@@ -154,11 +151,6 @@
           console.log("value: ",value)
           //get value
           this.context = this.$store.getters['getContext'];
-          console.log("context: ",this.context)
-
-          //set context to wallet0
-          this.walletContextName = this.context
-
         },
         immediate: true
       },
@@ -169,20 +161,11 @@
           this.wallets = this.$store.getters['wallets'];
           console.log("wallets: ",this.wallets)
 
-          //set context to wallet0
-          this.walletContextName = this.wallets[0]
+          let currentWallet = this.wallets.filter(e => e.walletId === this.context)
 
-        },
-        immediate: true
-      },
-      "$store.state.walletInfo": {
-        handler: function(value) {
-          console.log("value: ",value)
-          this.walletInfo = this.$store.getters['getWalletInfo'];
-          console.log("walletInfo: ",this.walletInfo)
-
-          if(this.walletInfo && this.walletInfo.masters){
-            let coins = Object.keys(this.walletInfo.masters)
+          this.walletContext = currentWallet[0]
+          if(this.walletContext){
+            let coins = Object.keys(currentWallet[0].masters)
             let coinList = []
             for(let i = 0; i < coins.length; i++){
               let coin = coins[i]
@@ -192,21 +175,13 @@
               })
             }
             this.coins = coinList
-            console.log("coins: ",coinList)
           }
         },
         immediate: true
-      },
-      // "$store.state.coins": {
-      //   handler: function(value) {
-      //     this.coins = this.$store.getters['coins'];
-      //     console.log("coins: ",this.coins)
-      //   },
-      //   immediate: true
-      // }
+      }
     },
     computed: {
-      ...mapGetters(['getApps','layout','getWalletInfo']),
+      ...mapGetters(['getApps','layout','getWalletInfo','getContext']),
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),
@@ -253,4 +228,5 @@
   .my-card {
     height: 100%;
   }
+  body {background: #333;}
 </style>

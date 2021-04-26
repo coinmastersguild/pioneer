@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-crypto",
-  "version": "6.2.3",
+  "version": "6.2.4",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

@@ -51,10 +51,7 @@ const approvedQueue = queue({ approved: [] });
 let nedb = require("@pioneer-platform/nedb");
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events");
-// let {
-//     getPaths,
-//     get_address_from_xpub
-// } = require('@pioneer-platform/pioneer-coins')
+let { getPaths, get_address_from_xpub, getNativeAssetForBlockchain } = require('@pioneer-platform/pioneer-coins');
 // @ts-ignore
 const webcrypto_1 = require("@peculiar/webcrypto");
 const native = __importStar(require("@bithighlander/hdwallet-native"));
@@ -92,8 +89,8 @@ let urlSpec = URL_PIONEER_SPEC;
 let KEEPKEY;
 let network;
 //chingle
-let opts = {};
-var player = require('play-sound')(opts = {});
+// let opts:any = {}
+// var player = require('play-sound')(opts = {})
 let AUTONOMOUS = false;
 module.exports = {
     init: function (config, isTestnet) {
@@ -203,8 +200,8 @@ module.exports = {
         AUTH_TOKEN = auth;
         return true;
     },
-    pairKeepkey: function (wallet) {
-        return pair_keepkey(wallet);
+    pairKeepkey: function (wallet, blockchains) {
+        return pair_keepkey(wallet, blockchains);
     },
     // getAccountInfo: function (asset:string,account:string) {
     //     return network.getAccountInfo(asset,account);
@@ -370,13 +367,12 @@ module.exports = {
     exportWallet: function (walletId, format) {
         return export_wallet(walletId, format);
     },
-    playChingle: function () {
-        player.play('../assets/chaching.mp3', function (err) {
-            if (err)
-                throw err;
-        });
-        return true;
-    },
+    // playChingle: function () {
+    //   player.play('../assets/chaching.mp3', function(err:any){
+    //     if (err) throw err
+    //   })
+    //   return true;
+    // },
     // getBalance: function (coin:string) {
     //     return get_balance(coin);
     // },
@@ -538,7 +534,7 @@ let unlock_wallet = function (wallet, password) {
         }
     });
 };
-let pair_keepkey = function (keepkeyWallet) {
+let pair_keepkey = function (keepkeyWallet, blockchains) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | pair_keepkey | ";
         try {
@@ -559,10 +555,26 @@ let pair_keepkey = function (keepkeyWallet) {
                 paired.push(deviceId);
                 pioneer_config_1.updateConfig({ paired });
             }
+            //verify pubkeys
+            log.info(tag, "pubkeys: ", keepkeyWallet.pubkeys);
+            for (let i = 0; i < blockchains.length; i++) {
+                let blockchain = blockchains[i];
+                let symbol = getNativeAssetForBlockchain(blockchain);
+                log.info(tag, "symbol: ", symbol);
+                //find in pubkeys
+                let isFound = keepkeyWallet.pubkeys.find((path) => {
+                    return path.blockchain === blockchain;
+                });
+                if (!isFound) {
+                    throw Error("Failed to find path for blockchain: " + blockchain);
+                }
+                //verify master
+            }
             //use as ID
             keepkeyWallet.deviceId = deviceId;
             //createWallet
             yield create_wallet('hardware', keepkeyWallet);
+            return true;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -1113,6 +1125,8 @@ let init_wallet = function (config, isTestnet) {
                 if (!walletFile.TYPE)
                     walletFile.TYPE = walletFile.type;
                 if (walletFile.TYPE === 'keepkey') {
+                    if (!output.devices)
+                        output.devices = [];
                     log.debug(tag, "Loading keepkey wallet! ");
                     if (!walletFile.pubkeys)
                         throw Error("102: invalid keepkey wallet!");
@@ -1128,6 +1142,10 @@ let init_wallet = function (config, isTestnet) {
                     else {
                         log.debug(tag, "walletFile: ", walletFile);
                     }
+                    //get device info from walletFile
+                    if (!walletFile.features)
+                        throw Error("Invalid wallet file missing device features!");
+                    output.devices.push(walletFile.features);
                     //load
                     let configPioneer = {
                         hardware: true,
@@ -1270,6 +1288,7 @@ let init_wallet = function (config, isTestnet) {
             log.debug(tag, "userInfo: ", userInfo);
             log.debug(tag, "context: ", userInfo.context);
             WALLET_CONTEXT = userInfo.context;
+            output.context = WALLET_CONTEXT;
             //after registered start socket
             //sub all to events
             if (!config.username)

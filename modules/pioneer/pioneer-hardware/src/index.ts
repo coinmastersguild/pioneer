@@ -24,7 +24,8 @@ const usbDetect = require('@bithighlander/usb-detection');
 
 let {
     getPaths,
-    normalize_pubkeys
+    normalize_pubkeys,
+    getNativeAssetForBlockchain
 } = require('@pioneer-platform/pioneer-coins')
 
 
@@ -46,6 +47,7 @@ let IS_CONNECTED = false
 //coins? from device? anything
 let KEEPKEY_SUPPORT = [
     'BTC',
+    'LTC',
     'BCH',
     'DOGE',
     'RUNE',
@@ -68,6 +70,9 @@ let KEEPKEY_STATE = {
 }
 
 module.exports = {
+    allDevices: function () {
+        return get_all_usb_devices();
+    },
     start: function () {
         return start_hardware();
     },
@@ -77,17 +82,19 @@ module.exports = {
     info: function () {
         return hardware_info();
     },
-    getPubkeys: function (blockchains?:[string],isTestnet?:boolean) {
+    getPubkeys: function (blockchains:[string],isTestnet?:boolean) {
         return get_pubkeys(blockchains,isTestnet);
     },
     isLocked: function () {
         return get_lock_status();
     },
-    unlock: function () {
-        return get_pubkeys();
+    //This ugly because HOW i request keepkey to display pin
+    //FIXME plz
+    unlock: function (blockchains:any) {
+        return get_pubkeys(blockchains);
     },
-    displayPin: function () {
-        return display_pin();
+    displayPin: function (blockchains:any) {
+        return display_pin(blockchains);
     },
     enterPin: function (pin:string) {
         return enter_keepkey_pin(pin);
@@ -99,6 +106,19 @@ module.exports = {
         //TODO validate mnemonic
         return KEEPKEY_WALLET.loadDevice({mnemonic});
     },
+};
+
+let get_all_usb_devices = async function () {
+    let tag = " | get_all_usb_devices | ";
+    try {
+        //
+        let devices = await usbDetect.find()
+        log.info(tag,"devices: ",devices)
+        return []
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
 };
 
 let hardware_info = async function () {
@@ -162,7 +182,7 @@ let get_lock_status = async function () {
 };
 
 
-let display_pin = async function () {
+let display_pin = async function (blockchains:any) {
     let tag = " | display_pin | ";
     try {
         let output:any = {}
@@ -170,7 +190,7 @@ let display_pin = async function () {
         log.debug("KEEPKEY_WALLET: ",KEEPKEY_WALLET)
 
         //TODO HACK, better way to display then request pubkey?
-        await get_pubkeys()
+        await get_pubkeys(blockchains)
         // let paths = getPaths()
         // paths = [paths[0]]
         // const result = await KEEPKEY_WALLET.getPublicKeys(paths)
@@ -210,13 +230,28 @@ let enter_keepkey_pin = async function (pin:string) {
 
 
 
-let get_pubkeys = async function (blockchains?:[string],isTestnet?:boolean) {
+let get_pubkeys = async function (blockchains:any,isTestnet?:boolean) {
     let tag = " | get_pubkeys | ";
     try {
-        //TODO if blockchains === true? then just testnet?
+        if(!blockchains) throw Error("Blockchains specify required!")
         let output:any = {}
+        log.info(tag,"blockchains: ",blockchains)
+        let paths = getPaths(blockchains)
+        log.info(tag,"getPaths: ",paths)
+        //verify paths
+        for(let i = 0; i < blockchains.length; i++){
+            let blockchain = blockchains[i]
+            let symbol = getNativeAssetForBlockchain(blockchain)
+            log.info(tag,"symbol: ",symbol)
+            //find in pubkeys
+            let isFound = paths.find((path: { blockchain: string; }) => {
+                return path.blockchain === blockchain
+            })
+            if(!isFound){
+                throw Error("Failed to find path for blockchain: "+blockchain)
+            }
+        }
 
-        let paths = getPaths(isTestnet, blockchains)
         let pathsKeepkey:any = []
         for(let i = 0; i < paths.length; i++){
             let path = paths[i]
@@ -229,33 +264,56 @@ let get_pubkeys = async function (blockchains?:[string],isTestnet?:boolean) {
             pathForKeepkey.script_type = 'p2pkh'
             //showDisplay
             pathForKeepkey.showDisplay = false
-            if(KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0){
-                pathsKeepkey.push(pathForKeepkey)
-            }
-            // if(KEEPKEY_SUPPORT.indexOf(path.symbol) >= 0){
-            //     pathsKeepkey.push(pathForKeepkey)
-            // }
+            pathsKeepkey.push(pathForKeepkey)
         }
 
-        log.info("***** paths: ",pathsKeepkey)
+
+        log.info("***** paths IN: ",pathsKeepkey.length)
         //NOTE: keepkey returns an ordered array.
         //To build verbose pubkey info we must rebuild based on order
         const result = await KEEPKEY_WALLET.getPublicKeys(pathsKeepkey);
+        log.info("***** pubkeys OUT: ",result.length)
+        if(pathsKeepkey.length !== result.length) {
+            log.error(tag, {pathsKeepkey})
+            log.error(tag, {result})
+            throw Error("Device unable to get path!")
+        }
         log.info("rawResult: ",result)
         log.info("rawResult: ",JSON.stringify(result))
 
 
         //rebuild
         log.info(tag,"isTestnet: ",isTestnet)
-        let pubkeys = await normalize_pubkeys('keepkey',result,paths,isTestnet)
+        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
         output.pubkeys = pubkeys
-        log.debug(tag,"pubkeys: ",pubkeys)
+        if(pubkeys.length !== result.length) {
+            log.error(tag, {pathsKeepkey})
+            log.error(tag, {result})
+            throw Error("Failed to Normalize pubkeys!")
+        }
+        log.info(tag,"pubkeys: (normalized) ",pubkeys.length)
+        log.info(tag,"pubkeys: (normalized) ",pubkeys)
 
         //add feature info to pubkey
         let keyedWallet:any = {}
         for(let i = 0; i < pubkeys.length; i++){
             let pubkey = pubkeys[i]
-            keyedWallet[pubkey.coin] = pubkey
+            keyedWallet[pubkey.symbol] = pubkey
+        }
+
+        //verify pubkeys
+        for(let i = 0; i < blockchains.length; i++){
+            let blockchain = blockchains[i]
+            let symbol = getNativeAssetForBlockchain(blockchain)
+            log.info(tag,"symbol: ",symbol)
+            //find in pubkeys
+            let isFound = pubkeys.find((path: { blockchain: string; }) => {
+                return path.blockchain === blockchain
+            })
+            if(!isFound){
+                throw Error("Failed to find pubkey for blockchain: "+blockchain)
+            }
+            //verify master
         }
 
         let features = await KEEPKEY_WALLET.features;

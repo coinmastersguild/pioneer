@@ -16,6 +16,10 @@ const prettyjson = require('prettyjson');
 
 prompt.start();
 
+let blockchains = [
+    'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'
+]
+
 let run_test = async function(){
     try{
 
@@ -35,7 +39,7 @@ let run_test = async function(){
             let lockStatus = await Hardware.isLocked()
             console.log("lockStatus: ",lockStatus)
             if(lockStatus){
-                Hardware.displayPin()
+                Hardware.displayPin(blockchains)
                 prompt.get(['pin'], async function (err, result) {
                     if (err) { return onErr(err); }
                     console.log('Command-line input received:');
@@ -59,15 +63,10 @@ let run_test = async function(){
 
 
             //blockchains
-            let blockchains = [
-                'bitcoin',
-                'ethereum',
-                'thorchain'
-            ]
 
 
             //get pubkeys
-            let pubkeys = await Hardware.getPubkeys(blockchains,true)
+            let pubkeys = await Hardware.getPubkeys(blockchains)
             console.log("pubkeys: ",pubkeys)
             console.log("pubkeys: ",prettyjson.render(pubkeys))
         }else{

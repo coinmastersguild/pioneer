@@ -1,6 +1,6 @@
 const state = {
     testnet:false,
-    context:"",
+    context:null,
     username:"",
     pioneerUrl:"",
     pioneerLive:false,
@@ -11,6 +11,7 @@ const state = {
     viewSeed: "",
     layout:[],
     wallets: [],
+    walletContexts: [],
     devices: [],
     walletInfo: {}, //Current wallet context
     mnemonic: null,
@@ -28,9 +29,13 @@ const getters = {
     getUsername:state => state.username,
     getTotal:state => state.totalUsd,
     wallets:state => state.wallets,
+    getWallets:state => state.wallets,
     layout:state => state.layout,
     devices:state => state.devices,
+    getDevices:state => state.devices,
     getCoins:state => state.coins,
+    context:state => state.context,
+    getContext:state => state.context,
     getPubkeys:state => state.pubkeys,
     getPioneerLive: state => state.pioneerLive,
     getPioneerUrl: state => state.pioneerUrl,
@@ -62,13 +67,6 @@ const mutations = {
     },
     registerWallet(state, wallet) {
       state.wallets.push(wallet)
-    },
-    registerDevice(state, device) {
-      if (state.devices.filter(e => e.type === devices.type).length === 0) {
-        state.devices.push(device)
-      } else {
-        console.log("device already added")
-      }
     },
     viewSeed(state, apps) {
       //
@@ -107,11 +105,18 @@ const mutations = {
     setTotal(state,value){
       state.totalUsd = value
     },
-    setWalletInfo(state,value){
-      state.walletInfo = value
+    addDevice(state,value){
+      if (state.devices.filter(e => e.deviceId === value.deviceId).length === 0) {
+        state.devices.push(value)
+      } else {
+        console.log("device already loaded!")
+      }
     },
     setContext(state,value){
+      console.log("** Setting context: ",value)
+      console.log("** Setting state.context: ",state.context)
       state.context = value
+      console.log("** Setting state.context: ",state.context)
     },
     setViewSeed(state,value){
       state.mnemonic = value

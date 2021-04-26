@@ -5,7 +5,7 @@ function getPaths(blockchains, isTestnet) {
     var output = [];
     if (!blockchains)
         blockchains = [];
-    if (process.env['FEATURE_BITCOIN_BLOCKCHAIN'] || blockchains.indexOf('bitcoin') >= 0) {
+    if (blockchains.indexOf('bitcoin') >= 0) {
         if (isTestnet) {
             output.push({
                 note: "Bitcoin testnet account 0",
@@ -38,7 +38,7 @@ function getPaths(blockchains, isTestnet) {
             });
         }
     }
-    if (process.env['FEATURE_ETHEREUM_BLOCKCHAIN'] || blockchains.indexOf('ethereum') >= 0) {
+    if (blockchains.indexOf('ethereum') >= 0) {
         var entry = {
             note: " ETH primary (default)",
             symbol: 'ETH',
@@ -56,7 +56,7 @@ function getPaths(blockchains, isTestnet) {
             entry.testnet = true;
         output.push(entry);
     }
-    if (process.env['FEATURE_THORCHAIN_BLOCKCHAIN'] || blockchains.indexOf('thorchain') >= 0) {
+    if (blockchains.indexOf('thorchain') >= 0) {
         var entry = {
             note: " Default RUNE path ",
             type: "address",
@@ -74,7 +74,7 @@ function getPaths(blockchains, isTestnet) {
         }
         output.push(entry);
     }
-    if (process.env['FEATURE_SECRET_BLOCKCHAIN'] || blockchains.indexOf('secret') >= 0) {
+    if (blockchains.indexOf('secret') >= 0) {
         var entry = {
             note: " Default Secret path ",
             type: "address",
@@ -92,7 +92,7 @@ function getPaths(blockchains, isTestnet) {
         }
         output.push(entry);
     }
-    if (process.env['FEATURE_COSMOS_BLOCKCHAIN'] || blockchains.indexOf('cosmos') >= 0) {
+    if (blockchains.indexOf('cosmos') >= 0) {
         var entry = {
             note: " Default ATOM path ",
             type: "address",
@@ -111,7 +111,7 @@ function getPaths(blockchains, isTestnet) {
         }
         output.push(entry);
     }
-    if (process.env['FEATURE_BINANCE_BLOCKCHAIN'] || blockchains.indexOf('binance') >= 0) {
+    if (blockchains.indexOf('binance') >= 0) {
         var entry = {
             note: "Binance default path",
             type: "address",
@@ -130,7 +130,7 @@ function getPaths(blockchains, isTestnet) {
         }
         output.push(entry);
     }
-    if (process.env['FEATURE_BITCOINCASH_BLOCKCHAIN'] || blockchains.indexOf('bitcoincash') >= 0) {
+    if (blockchains.indexOf('bitcoincash') >= 0) {
         var entry = {
             note: "Bitcoin Cash Default path",
             type: "xpub",
@@ -149,7 +149,7 @@ function getPaths(blockchains, isTestnet) {
         }
         output.push(entry);
     }
-    if (process.env['FEATURE_LITECOIN_BLOCKCHAIN'] || blockchains.indexOf('litecoin') >= 0) {
+    if (blockchains.indexOf('litecoin') >= 0) {
         var entry = {
             note: "Litecoin Default path",
             type: "xpub",

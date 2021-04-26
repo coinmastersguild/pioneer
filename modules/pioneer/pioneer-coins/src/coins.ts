@@ -56,20 +56,20 @@ export const COIN_MAP = {
 };
 
 export const COIN_MAP_LONG:any = {
-    BTC: "Bitcoin",
-    ATOM: "Cosmos",
+    BTC: "bitcoin",
+    ATOM: "cosmos",
     BTCT: "testnet",
-    BCH: "BitcoinCash",
-    LTC: "Litecoin",
-    DASH: "Dash",
-    DGB: "DigiByte",
-    DOGE: "Dogecoin",
-    RUNE: "Thorchain",
-    ETH: "Ethereum",
-    ADA: "Cardano",
-    BNB: "Binance",
-    EOS: "Eos",
-    FIO: "Fio",
+    BCH: "bitcoincash",
+    LTC: "litecoin",
+    DASH: "dash",
+    DGB: "digiByte",
+    DOGE: "dogecoin",
+    RUNE: "thorchain",
+    ETH: "ethereum",
+    ADA: "cardano",
+    BNB: "binance",
+    EOS: "eos",
+    FIO: "fio",
 };
 
 export function getNativeAssetForBlockchain(blockchain:string){
@@ -394,6 +394,12 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
         log.info(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
         if(!isTestnet) isTestnet = false
 
+        if(pathsIn.length !== pubkeys.length){
+            log.error(tag,"pubkeys: ",pubkeys)
+            log.error(tag,"pathsIn: ",pathsIn)
+            throw Error("102: invalid input, paths dont match!")
+        }
+
         //paths by symbol
         let pathsBySymbol:any = {}
         for(let i = 0; i < pathsIn.length; i++){
@@ -421,16 +427,18 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     pubkey.pubkey = pubkeys[i].xpub
                     pubkey.xpub = pubkeys[i].xpub
                     let normalized:any = {}
-                    //get "real" coin
                     normalized.note = pubkey.note
-                    normalized.coin = pubkey.symbol
-                    normalized.long = COIN_MAP_LONG[pubkey.symbol]
-                    normalized.network = pubkey.symbol
+                    normalized.symbol = pubkey.symbol
+                    normalized.blockchain = COIN_MAP_LONG[pubkey.symbol]
+                    normalized.network = COIN_MAP_LONG[pubkey.symbol]
                     //normalized.path = addressNListToBIP32(pubkey.addressNList)
 
                     //get master address
                     let address = await get_address_from_xpub(pubkey.xpub,pubkey.script_type,pubkey.symbol,0,0,false, isTestnet)
-
+                    if(!address){
+                        log.error("Failed to get address for pubkey: ",pubkey)
+                        throw Error("address master required for valid pubkey")
+                    }
                     if(pubkey.symbol === 'ETH'){
                         normalized.type = "address"
                         normalized.pubkey = address
@@ -446,8 +454,8 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     }
 
                     normalized.xpub = pubkey.xpub
-                    normalized.master = address //TODO
-                    normalized.address = address //TODO
+                    normalized.master = address
+                    normalized.address = address
 
                     output.push(normalized)
                 }
@@ -460,6 +468,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
         return output
     } catch (e) {
         log.error(tag, "e: ", e)
+        throw e
     }
 }
 
@@ -485,6 +494,7 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
                 //TODO more types
                 console.log("CHECKPOINT")
                 output = await cloneCrypto.generateAddress('BTC',publicKey,'p2pkh', isTestnet)
+                console.log("CHECKPOINT2 : ",output)
                 break;
             case 'BCH':
                 //TODO more types
@@ -492,22 +502,26 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
                 break;
             case 'DOGE':
                 //TODO more types
-                output = await cloneCrypto.generateAddress('DOGE',publicKey,'bech32', isTestnet)
+                output = await cloneCrypto.generateAddress('DOGE',publicKey,'p2pkh', isTestnet)
                 break;
             case 'DASH':
                 //TODO more types
-                output = await cloneCrypto.generateAddress('DASH',publicKey,'bech32', isTestnet)
+                output = await cloneCrypto.generateAddress('DASH',publicKey,'p2pkh', isTestnet)
                 break;
             case 'LTC':
-                //TODO more types
-                output = await cloneCrypto.generateAddress('LTC',publicKey,'bech32', isTestnet)
+                //TODO more script types
+                output = await cloneCrypto.generateAddress('LTC',publicKey,'p2pkh', isTestnet)
                 break;
             case 'ETH':
                 output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
                 break;
             case 'RUNE':
                 // code block
-                output = createBech32Address(publicKey,'tthor')
+                if(!isTestnet){
+                    output = createBech32Address(publicKey,'thor')
+                } else {
+                    output = createBech32Address(publicKey,'tthor')
+                }
                 break;
             case 'ATOM':
                 // code block

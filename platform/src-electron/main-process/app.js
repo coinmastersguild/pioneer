@@ -280,6 +280,10 @@ export async function onStart(event,data) {
 
     let resultInit = await App.init(config)
     log.info(tag,"resultInit: ",resultInit)
+    //push devices
+    if(resultInit.devices){
+      event.sender.send('loadDevices',{devices:resultInit.devices})
+    }
 
     //push init
     // event.sender.send('init',resultInit)
@@ -291,7 +295,7 @@ export async function onStart(event,data) {
     let walletNames = App.getWalletNames()
     WALLETS_NAMES = walletNames
     log.info(tag,"walletNames: ",walletNames)
-    event.sender.send('updateWalletsLoaded',resultInit.walletFiles)
+    event.sender.send('updateWallets',resultInit.wallets)
 
     //wallet events
     resultInit.events.on('message', async (request) => {
@@ -321,9 +325,9 @@ export async function onStart(event,data) {
     event.sender.send('invocations',invocationsRemote)
 
     //load masters
-    let info = await context.getInfo(contextName)
-    log.info("(context) info: ",info)
-    event.sender.send('setWalletInfoContext',info)
+    // let info = await context.getInfo(contextName)
+    // log.info("(context) info: ",info)
+    // event.sender.send('setWalletInfoContext',info)
 
     //Start wallet interface
     log.info(tag,"CHECKPOINT **** return start")

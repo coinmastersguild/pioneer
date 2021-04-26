@@ -66,16 +66,23 @@ export default store => {
     }
   })
   ipcRenderer.on('setContext', (event, data) => {
-    console.log(' setContext event! ')
+    console.log(' setContext event! ',data)
     console.log('data: ', data)
     store.commit('setContext',data)
 
   })
+  ipcRenderer.on('loadDevices', (event, data) => {
+    console.log(' loadDevices event! ')
+    console.log('data: ', data)
+    for(let i = 0; i < data.devices.length; i++){
+      let device = data.devices[i]
+      store.commit('addDevice',device)
+    }
+  })
   ipcRenderer.on('setWalletInfoContext', (event, data) => {
     console.log(' setWalletInfoContext event! ')
     console.log('data: ', data)
-    store.commit('setWalletInfo',data)
-
+    // store.commit('setWalletInfo',data)
   })
   ipcRenderer.on('init', (event, data) => {
     console.log('init event! ')
@@ -103,8 +110,8 @@ export default store => {
     console.log('updateTotalValue: ', data)
     store.commit('setTotal',data)
   })
-  ipcRenderer.on('updateWalletsLoaded', (event, data) => {
-    console.log('updateWalletsLoaded: ', data)
+  ipcRenderer.on('updateWallets', (event, data) => {
+    console.log('updateWallets: ', data)
     for(let i = 0; i < data.length; i++){
       let wallet = data[i]
       store.commit('registerWallet',wallet)

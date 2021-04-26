@@ -37,6 +37,7 @@
       name: "Hardware",
       data() {
         return {
+          isLoaded:false
         };
       },
       methods: {

@@ -29,7 +29,7 @@
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
-    "@pioneer-platform/pioneer-hardware": "latest",
+    "@pioneer-platform/pioneer-hardware": "^6.3.18",
     "@quasar/extras": "^1.10.4",
     "animated-number-vue": "^1.0.0",
     "app-root-dir": "^1.0.2",

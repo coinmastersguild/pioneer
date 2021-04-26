@@ -84,6 +84,9 @@ let do_work = async function(){
             if(!work.queueId) throw Error("106: invalid work! missing queueId")
             if(work.type !== 'address' && work.type !== 'xpub' && work.type !== 'zpub') throw Error("Unknown type! "+work.type)
 
+            //TODO lookup last update
+            //if < x time, refuse to do work
+
             //if xpub
             if(work.type === "xpub" || work.type === "zpub"){
 
@@ -123,6 +126,16 @@ let do_work = async function(){
                         log.info(tag,"updateResult: ",updateResult)
                         //TODO if change push new balance over socket to user
                     }
+
+                    //blockbook get txids
+
+
+                    //get txid diff from mongo
+
+                    //do lookup on mongo/ find unknown
+
+                    //batch lookup unknown txids
+
 
                     // get blockbook tokens
                     // validate ethPlorer

@@ -59,7 +59,7 @@ module.exports = function (ctx) {
         CONTACTS_FEATURE:false,
         UI_THEME_FEATURE:false,
         UI_LIGHT_MODE_FEATURE:false,
-        ADD_WALLET_FEATURE:false,
+        ADD_WALLET_FEATURE:true,
         UI_APP_STORE_FEATURE:true,
         FEATURE_BITCOIN_BLOCKCHAIN:true,
         FEATURE_ETHEREUM_BLOCKCHAIN:true,
