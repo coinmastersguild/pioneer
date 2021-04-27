@@ -9,10 +9,12 @@
         icon="autorenew"
       >
         <div v-for="(invocation, index) in invocations" :key="index" class="q-mb-sm">
+          <div @click="openInvocation(invocation)">
           <q-badge color="accent">
             {{ invocations.length - index }}
           </q-badge>
           {{invocation}}
+          </div>
         </div>
       </q-pull-to-refresh>
     </div>
@@ -54,7 +56,7 @@
           },
         },
         methods: {
-          ...mapMutations(['showModal','hideModal']),
+          ...mapMutations(['showModal','hideModal','setInvocationContext']),
           refresh (done) {
             setTimeout(() => {
               //this.items.push()
@@ -68,6 +70,13 @@
             this.$q.electron.ipcRenderer.send('approveTransaction', {invocationId});
 
             remote.getCurrentWindow().close()
+          },
+          openInvocation(invocation) {
+            console.log("invocationId: ",invocation)
+            console.log("invocationId: ",invocation.invocationId)
+            this.setInvocationContext(invocation.invocationId)
+            //set current invocation in state
+            this.showModal('Invocation')
           },
           // close: function () {
           //   this.hideModal()

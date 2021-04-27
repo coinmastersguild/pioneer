@@ -107,6 +107,11 @@ interface UpdateInvocationBody {
     unsignedTx:any
 }
 
+interface IgnoreShitcoins {
+    coins:any[]
+    shitcoins?:any[]
+}
+
 interface WalletInfo {
     apps: any;
     walletId: string;
@@ -232,6 +237,82 @@ export class pioneerPrivateController extends Controller {
         }
     }
 
+    /*
+        Get user info for queryKey
+     */
+
+    @Get('/user')
+    public async user(@Header('Authorization') authorization: string): Promise<any> {
+        let tag = TAG + " | info | "
+        try{
+            log.info(tag,"queryKey: ",authorization)
+
+            let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) {
+                return {
+                    success:false,
+                    error:"QueryKey not registerd!"
+                }
+            } else {
+                log.info(tag,"accountInfo: ",accountInfo)
+                let username = accountInfo.username
+                if(!username){
+
+                }
+                let userInfo = await redis.hgetall(username)
+                log.info(tag,"userInfo: ",userInfo)
+                if(Object.keys(userInfo).length === 0){
+                    return {
+                        success:false,
+                        error:"QueryKey not paired!"
+                    }
+                }else{
+                    //wallets
+                    let userInfoMongo = await usersDB.findOne({username})
+                    log.info(tag,"userInfoMongo: ",userInfoMongo)
+                    if(!userInfoMongo) {
+                        throw Error("102: unknown user! username: "+username)
+                    }
+                    log.info(tag,"userInfo: ",userInfo)
+
+                    //context
+                    if(!userInfo.context){
+                        if(userInfoMongo.wallets && userInfoMongo.wallets.length > 0){
+                            userInfo.context = userInfoMongo.wallets[0]
+                        }else{
+                            log.info(tag,"Invalid Mongo userInfoMongo: ",userInfoMongo.wallets)
+                            log.info(tag,"Invalid Mongo userInfoMongo: ",typeof(userInfoMongo.wallets))
+                            log.error(tag,"Invalid Mongo entry: ",userInfoMongo)
+                            throw Error("102: invalid mongo user! ")
+                        }
+                    }
+
+                    //contextInvoke
+                    //If context revoked, update redis, clear context
+
+                    //totalValueUsd
+                    if(!userInfo.totalValueUsd){
+                        //TODO get balances for all wallets
+                    }
+                    //
+                    if(!userInfo.totalValueUsd){
+                        //TODO get balances for current context
+                    }
+
+
+                    return userInfo
+                }
+            }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
 
     /**
      *
@@ -293,7 +374,7 @@ export class pioneerPrivateController extends Controller {
                 let allAssets = Object.keys(walletInfo.masters)
                 for(let i = 0; i < allAssets.length; i++){
                     let asset = allAssets[i]
-                    if(!assetBalances[asset]) assetBalances[asset] = 42 //HACK FIXME
+                    if(!assetBalances[asset]) assetBalances[asset] = 0
                 }
                 log.info(tag,"assetBalances: ",assetBalances)
                 walletInfo.balances = assetBalances
@@ -315,49 +396,6 @@ export class pioneerPrivateController extends Controller {
                 }
             }
 
-        }catch(e){
-            let errorResp:Error = {
-                success:false,
-                tag,
-                e
-            }
-            log.error(tag,"e: ",{errorResp})
-            throw new ApiError("error",503,"error: "+e.toString());
-        }
-    }
-
-    @Get('/user')
-    public async user(@Header('Authorization') authorization: string): Promise<any> {
-        let tag = TAG + " | info | "
-        try{
-            log.info(tag,"queryKey: ",authorization)
-
-            let accountInfo = await redis.hgetall(authorization)
-            if(!accountInfo) {
-                return {
-                    success:false,
-                    error:"QueryKey not registerd!"
-                }
-            } else {
-                log.info(tag,"accountInfo: ",accountInfo)
-                let username = accountInfo.username
-                if(!username){
-
-                }
-                let userInfo = await redis.hgetall(username)
-                log.info(tag,"userInfo: ",userInfo)
-                if(Object.keys(userInfo).length === 0){
-                    return {
-                        success:false,
-                        error:"QueryKey not paired!"
-                    }
-                }else{
-                    //wallets
-                    let wallets = await redis.smembers(username+":wallets")
-                    userInfo.wallets = wallets
-                    return userInfo
-                }
-            }
         }catch(e){
             let errorResp:Error = {
                 success:false,
@@ -579,12 +617,50 @@ export class pioneerPrivateController extends Controller {
         try{
             log.info(tag,"account: ",body)
             log.info(tag,"Authorization: ",Authorization)
-            //TODO auth
+            //TODO auth?
 
             //update database
             let updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{unsignedTx:body.unsignedTx}})
 
             return(updateResult);
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
+     * Ignore a Coin from a users view
+     * @param request This is an application pairing submission
+     */
+
+    @Post('/ignoreShitcoin')
+    public async ignoreShitcoin(@Body() body: IgnoreShitcoins, @Header() Authorization: any): Promise<any> {
+        let tag = TAG + " | ignoreShitcoin | "
+        try{
+            let output:any = {}
+            log.info(tag,"account: ",body)
+            log.info(tag,"Authorization: ",Authorization)
+            let coins = body.coins || body.shitcoins
+
+            // get auth info
+            let authInfo = await redis.hgetall(Authorization)
+            log.info(tag,"authInfo: ",authInfo)
+            if(!authInfo) throw Error("108: unknown token! ")
+
+            if(authInfo.username){
+                output.updateDBUser = await usersDB.update({},{ $addToSet: { "hidden": coins } })
+            }else{
+                output.success = false
+                output.error = "No username tied to queryKey"
+            }
+
+            return(output);
         }catch(e){
             let errorResp:Error = {
                 success:false,
@@ -1106,14 +1182,14 @@ export class pioneerPrivateController extends Controller {
 
             //if no context, set
             if(!userInfoRedis.context){
+                userInfoRedis.context = body.walletName
                 redis.hset(username,'context',body.walletName)
             }
-
+            output.context = userInfoRedis.context
             //verify user
-            //get context
 
             //get info on context
-
+            output.username = username
             output.success = true
             output.userInfo = userInfoRedis
 

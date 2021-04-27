@@ -16,23 +16,39 @@ function getPaths(blockchains, isTestnet) {
                 script_type: "p2wpkh",
                 available_scripts_types: ['p2pkh', 'p2sh', 'p2wpkh', 'p2sh-p2wpkh'],
                 type: "zpub",
-                addressNList: [0x80000000 + 44, 0x80000000 + 1, 0x80000000 + 0],
-                addressNListMaster: [0x80000000 + 44, 0x80000000 + 1, 0x80000000 + 0, 0, 0],
+                addressNList: [0x80000000 + 84, 0x80000000 + 1, 0x80000000 + 0],
+                addressNListMaster: [0x80000000 + 84, 0x80000000 + 1, 0x80000000 + 0, 0, 0],
                 curve: 'secp256k1',
                 showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             });
         }
         else {
+            //legacy  bip44
+            // output.push({
+            //     note:"Bitcoin account 0",
+            //     blockchain: 'bitcoin',
+            //     symbol: 'BTC',
+            //     network: 'BTC',
+            //     script_type:"p2pkh",
+            //     available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
+            //     type:"zpub",
+            //     addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0],
+            //     addressNListMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+            //     curve: 'secp256k1',
+            //     showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            // })
+            //TODO non-native segwit wraped p2sh
+            //bech32 bip84
             output.push({
-                note: "Bitcoin account 0",
+                note: "Bitcoin account Native Segwit (Bech32)",
                 blockchain: 'bitcoin',
                 symbol: 'BTC',
                 network: 'BTC',
                 script_type: "p2wpkh",
                 available_scripts_types: ['p2pkh', 'p2sh', 'p2wpkh', 'p2sh-p2wpkh'],
                 type: "zpub",
-                addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0],
-                addressNListMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+                addressNList: [0x80000000 + 84, 0x80000000 + 0, 0x80000000 + 0],
+                addressNListMaster: [0x80000000 + 84, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
                 curve: 'secp256k1',
                 showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             });

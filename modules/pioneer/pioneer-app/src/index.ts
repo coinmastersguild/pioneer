@@ -103,8 +103,14 @@ module.exports = {
     initConfig: function (language: any) {
         return innitConfig(language);
     },
-    context: function () {
-        return WALLET_CONTEXT;
+    context: async function () {
+        if(!WALLET_CONTEXT){
+            //get from remote
+            let output = await network.instance.User()
+            return output.data.context;
+        } else {
+            return WALLET_CONTEXT;
+        }
     },
     getAutonomousStatus: function () {
         return AUTONOMOUS;
@@ -233,8 +239,13 @@ module.exports = {
      *
      *
      */
-    getUsers: function () {
-        return [];
+    getUserInfo: function () {
+        let output = network.instance.User()
+        return output.data;
+    },
+    getUsersOnline: function () {
+        let output = network.instance.Online()
+        return output.data;
     },
     pingUser: function () {
         return [];
@@ -1382,6 +1393,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote user info
         let userInfo = await network.instance.User()
         userInfo = userInfo.data
+        if(!userInfo.context) throw Error("Invalid user info! missing context!")
         log.debug(tag,"userInfo: ",userInfo)
         log.debug(tag,"context: ",userInfo.context)
         WALLET_CONTEXT = userInfo.context
@@ -1482,6 +1494,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
             //add to history
         })
+        output.context = WALLET_CONTEXT
+        if(!output.context) throw Error("")
 
         output.events = clientEvents.events
         return output

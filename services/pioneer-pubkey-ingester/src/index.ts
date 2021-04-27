@@ -75,7 +75,7 @@ let do_work = async function(){
             log.info("work: ",work)
             if(!work.symbol && work.asset) work.symbol = work.asset
             if(!work.type && work.address) work.type = "address"
-
+            if(!work.walletId) throw Error("100: invalid work! missing walletId")
             if(!work.symbol) throw Error("101: invalid work! missing symbol")
             if(!work.username) throw Error("102: invalid work! missing username")
             if(!work.pubkey) throw Error("103: invalid work! missing pubkey")

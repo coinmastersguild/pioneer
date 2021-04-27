@@ -99,12 +99,11 @@ let run_test = async function(){
 
                 //pair
                 try{
-                    let pairResult = await App.pair("OR5AEK")
+                    let pairResult = await App.pair("NGRIUY")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 
                 }
-
 
                 //get wallets
                 let wallets = await App.getWallets()
@@ -126,10 +125,10 @@ let run_test = async function(){
 
                 //Device unlocked ready for requests
                 /*
-                ETH thorchain swap
+                    ETH thorchain swap
                 */
                 let masterETH = await context.getMaster("ETH")
-                console.log("reference: ","0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8")
+                // console.log("reference: ","0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8")
                 console.log("masterETH: ",masterETH)
 
                 let balanceETH = await context.getBalance("ETH")

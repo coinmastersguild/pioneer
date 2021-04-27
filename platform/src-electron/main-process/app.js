@@ -290,9 +290,9 @@ export async function onStart(event,data) {
     event.sender.send('updateTotalValue',resultInit.TOTAL_VALUE_USD_LOADED)
     event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
 
-    let wallets = App.getWallets()
+    let wallets = await App.getWallets()
     WALLETS_LOADED = wallets
-    let walletNames = App.getWalletNames()
+    let walletNames = await App.getWalletNames()
     WALLETS_NAMES = walletNames
     log.info(tag,"walletNames: ",walletNames)
     event.sender.send('updateWallets',resultInit.wallets)
@@ -312,12 +312,13 @@ export async function onStart(event,data) {
 
 
     //TODO is context pref in config?
-    let contextName = App.context()
+    let contextName = await App.context()
     console.log("contextName: ",contextName)
+    if(!contextName) {
+      contextName = WALLETS_LOADED[0].walletId
+    }
     event.sender.send('setContext',contextName)
-    //get wallets
 
-    let context = wallets[contextName]
 
     //get invocations
     let invocationsRemote = await App.getInvocations()
@@ -332,6 +333,52 @@ export async function onStart(event,data) {
     //Start wallet interface
     log.info(tag,"CHECKPOINT **** return start")
     return resultInit
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function refreshPioneer(event, data) {
+  let tag = TAG + " | refreshPioneer | ";
+  try {
+    //is initialized?
+    let config = await App.getConfig()
+    if(config){
+      log.info(tag,"loadConfig: ",config)
+      event.sender.send('loadConfig',{
+        config
+      })
+    } else {
+      //TODO
+      //launch startup
+      //event.sender.send('navigation',{ dialog: 'Welcome', action: 'open'})
+    }
+
+    let userInfo = await App.getUserInfo()
+    log.info(tag,"userInfo: ",userInfo)
+    if(userInfo){
+      if(userInfo.context){
+        event.sender.send('setContext',userInfo.context)
+      }
+      if(userInfo.contextInvoke){
+        //launch invoke dialog
+        event.sender.send('setContextInvoke',userInfo.contextInvoke)
+      }
+    }
+
+    //wallets
+    let walletNames = await App.getWalletNames()
+    if(walletNames){
+      WALLETS_NAMES = walletNames
+      log.info(tag,"walletNames: ",walletNames)
+    }
+
+
+    //get global online
+    let usersOnline = await App.getUsersOnline()
+    log.info(tag,"usersOnline: ",usersOnline)
+
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};
@@ -354,7 +401,7 @@ export async function approveTransaction(event, data) {
   let tag = TAG + " | setMnemonic | ";
   try {
     log.info(tag,"data: ",data)
-    let resultApprove = await App.approveTransaction(App.context(),data.invocationId)
+    let resultApprove = await App.approveTransaction(await App.context(),data.invocationId)
     return resultApprove
   } catch (e) {
     console.error(tag, "e: ", e);

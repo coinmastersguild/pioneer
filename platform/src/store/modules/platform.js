@@ -1,6 +1,7 @@
 const state = {
     testnet:false,
     context:null,
+    invocationContext:null,
     username:"",
     pioneerUrl:"",
     pioneerLive:false,
@@ -36,6 +37,7 @@ const getters = {
     getCoins:state => state.coins,
     context:state => state.context,
     getContext:state => state.context,
+    getInvocationContext:state => state.invocationContext,
     getPubkeys:state => state.pubkeys,
     getPioneerLive: state => state.pioneerLive,
     getPioneerUrl: state => state.pioneerUrl,
@@ -112,11 +114,14 @@ const mutations = {
         console.log("device already loaded!")
       }
     },
+    setInvocationContext(state,value){
+      state.invocationContext = value
+    },
     setContext(state,value){
-      console.log("** Setting context: ",value)
-      console.log("** Setting state.context: ",state.context)
+      // console.log("** Setting context: ",value)
+      // console.log("** Setting state.context: ",state.context)
       state.context = value
-      console.log("** Setting state.context: ",state.context)
+      // console.log("** Setting state.context: ",state.context)
     },
     setViewSeed(state,value){
       state.mnemonic = value

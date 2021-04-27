@@ -214,6 +214,7 @@ export default {
 
       //get all the things
       let testnet = await this.$store.getters['isTestnet']
+      let context = await this.$store.getters['getContext']
       let username = await this.$store.getters['getUsername']
       let total = await this.$store.getters['getTotal']
       let walletsLoaded = await this.$store.getters['wallets']
@@ -224,7 +225,7 @@ export default {
       let balances = await this.$store.getters['getBalances']
 
       this.totalValueUsd = total
-      console.log("STATE: ",{testnet,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
+      console.log("STATE: ",{context, testnet,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
 
     },
     openSettings() {

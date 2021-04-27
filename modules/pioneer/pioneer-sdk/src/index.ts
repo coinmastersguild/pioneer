@@ -352,6 +352,7 @@ export class SDK {
 
                 let output:any = {
                     type: 'pioneer',
+                    context:this.context,
                     wallet: thorAddress,
                     keystore:{},
                     clients:this.clients

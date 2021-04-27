@@ -136,13 +136,6 @@
     },
     mounted() {
       try{
-        //TODO get from main
-        let devices = [device]
-
-        for(let i = 0; i < devices.length; i++){
-          let device = devices[i]
-
-        }
       }catch(e){
         console.error(e)
       }

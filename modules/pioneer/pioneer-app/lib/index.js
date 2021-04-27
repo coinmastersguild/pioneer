@@ -100,7 +100,16 @@ module.exports = {
         return pioneer_config_1.innitConfig(language);
     },
     context: function () {
-        return WALLET_CONTEXT;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!WALLET_CONTEXT) {
+                //get from remote
+                let output = yield network.instance.User();
+                return output.data.context;
+            }
+            else {
+                return WALLET_CONTEXT;
+            }
+        });
     },
     getAutonomousStatus: function () {
         return AUTONOMOUS;
@@ -232,8 +241,13 @@ module.exports = {
      *
      *
      */
-    getUsers: function () {
-        return [];
+    getUserInfo: function () {
+        let output = network.instance.User();
+        return output.data;
+    },
+    getUsersOnline: function () {
+        let output = network.instance.Online();
+        return output.data;
     },
     pingUser: function () {
         return [];
@@ -1285,6 +1299,8 @@ let init_wallet = function (config, isTestnet) {
             //get remote user info
             let userInfo = yield network.instance.User();
             userInfo = userInfo.data;
+            if (!userInfo.context)
+                throw Error("Invalid user info! missing context!");
             log.debug(tag, "userInfo: ", userInfo);
             log.debug(tag, "context: ", userInfo.context);
             WALLET_CONTEXT = userInfo.context;
@@ -1374,6 +1390,9 @@ let init_wallet = function (config, isTestnet) {
                 //update status on server
                 //add to history
             }));
+            output.context = WALLET_CONTEXT;
+            if (!output.context)
+                throw Error("");
             output.events = clientEvents.events;
             return output;
         }

@@ -65,7 +65,7 @@ let run_test = async function(){
             let wallets = await App.getWallets()
             console.log("wallets: ",wallets)
 
-            let contextName = App.context()
+            let contextName = await App.context()
 
             let context = wallets[contextName]
             if(!context) throw Error("No Wallets on startup!")

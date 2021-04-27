@@ -66,7 +66,7 @@ let run_test = async function(){
             let wallets = await App.getWallets()
             console.log("wallets: ",wallets)
 
-            let contextName = App.context()
+            let contextName = await App.context()
             console.log("Wallet selected: ",contextName)
 
             let context = wallets[contextName]

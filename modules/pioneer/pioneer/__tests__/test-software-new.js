@@ -18,7 +18,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
 let FAUCET_ADDRESSES = {
 
@@ -249,14 +249,12 @@ let run_test = async function(){
                BCH
          */
 
-        // console.log("info: ",prettyjson.render(info.public.BCH),"\n")
         //
-        // //
-        // let masterBTC = await Wallet.getMaster("BCH")
-        // console.log("masterBCH: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BCH")
-        // console.log("balanceBCH: ",balanceBTC)
+        let masterBTC = await Wallet.getMaster("BCH")
+        console.log("masterBCH: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BCH")
+        console.log("balanceBCH: ",balanceBTC)
         //
         // let amount = "0.0001"
         // let memo = null //Uses OP_RETURN outputs

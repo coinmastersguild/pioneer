@@ -27,12 +27,20 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 // let username = process.env['TEST_USERNAME_1']
 // let queryKey = process.env['TEST_QUERY_KEY_1']
 
-let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
+let walletId = 'keepkey-pubkeys-343733331147363327003800'
 
 let run_test = async function(){
     try{
+        //get config
+
+
+        // let config = {
+        //     queryKey,
+        //     username,
+        //     spec
+        // }
         let config = {
-            queryKey:"key:eab34be6-3fa1-43c7-8fcd-eb33053620b9",
+            queryKey:"eb8aaf95-bcdb-431c-a12c-866136c2b4bf",
             username:'test-user-2',
             spec
         }

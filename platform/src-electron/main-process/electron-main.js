@@ -34,7 +34,8 @@ import {
   viewSeed,
   createWallet,
   onAttemptCreate,
-  approveTransaction
+  approveTransaction,
+  refreshPioneer
 } from './app'
 
 
@@ -204,6 +205,26 @@ app.on('activate', () => {
   }
 })
 
+/*
+    refreshPioneer
+
+ */
+
+ipcMain.on('refreshPioneer', async (event, data) => {
+  const tag = TAG + ' | refreshPioneer | '
+  try {
+    let resultRefresh = await refreshPioneer(event, data)
+    log.info(tag,"resultRefresh: ",resultRefresh)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+/*
+    App Start
+
+ */
+
 ipcMain.on('onStart', async (event, data) => {
   const tag = TAG + ' | onStart | '
   try {
@@ -234,19 +255,19 @@ ipcMain.on('onStart', async (event, data) => {
     //TODO get state from local db
 
     //push layout
-    let layout = [
-      {
-        "name":"Welcome",
-        "icon":"assets/GreenCompas.jpeg",
-        "x":0,
-        "y":0,
-        "w":2,
-        "h":2,
-        "i":"0"
-      },
-    ];
-
-    event.sender.send('dashboard', {layout})
+    // let layout = [
+    //   {
+    //     "name":"Welcome",
+    //     "icon":"assets/GreenCompas.jpeg",
+    //     "x":0,
+    //     "y":0,
+    //     "w":2,
+    //     "h":2,
+    //     "i":"0"
+    //   },
+    // ];
+    //
+    // event.sender.send('dashboard', {layout})
 
 
   } catch (e) {

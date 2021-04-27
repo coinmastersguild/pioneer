@@ -8,11 +8,11 @@ network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
 
-network.getTransaction('BCH',"8325a7aa74bedf03ba78926cca4e4ae94af666ac0272ca37e97408c46fad82ee")
-    .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
-    })
+// network.getTransaction('BCH',"")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.utxosByXpub("BCH","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
 //     .then(function(resp){
@@ -24,10 +24,16 @@ network.getTransaction('BCH',"8325a7aa74bedf03ba78926cca4e4ae94af666ac0272ca37e9
 //         console.log("txid: ",resp)
 //     })
 
-// network.utxosByXpub("BTC","zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i")
+// network.utxosByXpub("BCH","zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR")
 //     .then(function(resp){
 //         console.log(resp)
 //     })
+
+
+network.utxosByXpub("BTC","zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR")
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")
 //     .then(function(resp){

@@ -165,6 +165,7 @@ export interface Transaction {
     coin: string;
     addressFrom: string;
     addressTo: string;
+    address?: string;
     amount: string;
     memo?: string | undefined;
     nonce?:number
@@ -1430,13 +1431,15 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
+                log.info(tag,"transaction: ",transaction)
                 isTestnet = false
                 let coin = transaction.coin.toUpperCase()
-                let address = transaction.addressTo
+                let address = transaction.address
+                if(!address) address = transaction.addressTo
                 let amount = transaction.amount
-                if(!coin) throw Error("Invalid transaction missing coin!")
-                if(!address) throw Error("Invalid transaction missing address!")
-                if(!amount) throw Error("Invalid transaction missing amount!")
+                if(!coin) throw Error("102: Invalid transaction missing coin!")
+                if(!address) throw Error("103: Invalid transaction missing address!")
+                if(!amount) throw Error("104: Invalid transaction missing amount!")
 
                 let memo = transaction.memo
                 let addressFrom
@@ -1450,13 +1453,7 @@ module.exports = class wallet {
 
                 let rawTx
 
-                let UTXOcoins = [
-                    'BTC',
-                    'BCH',
-                    'LTC'
-                ]
-
-                if(UTXOcoins.indexOf(coin) >= 0){
+                if(UTXO_COINS.indexOf(coin) >= 0){
                     log.debug(tag,"Build UTXO tx! ",coin)
 
                     //list unspent
@@ -1468,7 +1465,7 @@ module.exports = class wallet {
                     let input
                     log.debug(tag,"isTestnet: ",isTestnet)
                     if(this.isTestnet && false){ //Seriously fuck testnet flagging!
-                        input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].pubkey}
+                        // input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }else{
                         input = {coin,xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }
@@ -1509,6 +1506,7 @@ module.exports = class wallet {
                     feeRateInfo = feeRateInfo.data
                     log.debug(tag,"feeRateInfo: ",feeRateInfo)
                     let feeRate
+                    //TODO dynamic all the things
                     if(coin === 'BTC'){
                         feeRate = feeRateInfo
                     }else if(coin === 'BCH'){
@@ -1557,7 +1555,15 @@ module.exports = class wallet {
                     log.debug(tag,"valueOut: ",valueOut)
 
                     if(valueOut < 1){
-                        throw Error(" Dollar to play bro, DUST tx refused")
+                        if(coin === 'BCH'){
+                            log.info(tag," God bless you sir's :BCH:")
+                        } else {
+                            log.info("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
+                        }
+                        //Expensive coins
+                        if(["BTC","ETH","RUNE"].indexOf(coin) >= 0){
+                            throw Error("You dont want to do this!")
+                        }
                     }
 
                     if(nativeToBaseAmount(coin,totalInSatoshi) < amount){

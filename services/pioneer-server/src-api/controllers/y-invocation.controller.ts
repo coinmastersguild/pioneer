@@ -40,7 +40,7 @@ interface Invocation {
     invocationId?:string
     address:string,
     addressTo?:string,
-    meme?:string
+    memo?:string
     coin:string
     amount:string
     context?:string

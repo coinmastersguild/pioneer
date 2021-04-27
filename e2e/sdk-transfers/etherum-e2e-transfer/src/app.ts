@@ -90,7 +90,7 @@ export async function startApp() {
         let wallets = await App.getWallets()
 
         //assert only 1
-        let context = wallets[App.context()]
+        let context = wallets[await App.context()]
 
         return context
     } catch (e) {

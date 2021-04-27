@@ -141,6 +141,9 @@
         this.$nextTick(function () {
           this.show = true;
         })
+
+        setTimeout(this.updateContext,2000)
+
       }catch(e){
         console.error(e)
       }
@@ -148,9 +151,9 @@
     watch: {
       "$store.state.context": {
         handler: function(value) {
-          console.log("value: ",value)
           //get value
           this.context = this.$store.getters['getContext'];
+          console.log("this.context: ",this.context)
         },
         immediate: true
       },
@@ -187,6 +190,10 @@
       ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),
       onMainClick() {
         console.log("Main Click")
+      },
+      updateContext() {
+        this.context = this.$store.getters['getContext'];
+        console.log("this.context: ",this.context)
       },
       openPair(item) {
         console.log("item Click: ",item)

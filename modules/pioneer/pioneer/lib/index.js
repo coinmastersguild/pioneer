@@ -1523,7 +1523,7 @@ module.exports = /** @class */ (function () {
         };
         this.buildTransfer = function (transaction) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, coin, address, amount, memo, addressFrom, rawTx, UTXOcoins, input, unspentInputs, utxos, i, input_1, utxo, feeRateInfo, feeRate, amountSat, targets, totalInSatoshi, i, amountInSat, valueIn, valueOut, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, unsignedTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, runeTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, atomTx, unsignedTx, accountInfo, sequence, account_number, pubkey, bnbTx, binanceTx, unsignedTx, e_12;
+                var tag, coin, address, amount, memo, addressFrom, rawTx, input, unspentInputs, utxos, i, input_1, utxo, feeRateInfo, feeRate, amountSat, targets, totalInSatoshi, i, amountInSat, valueIn, valueOut, selectedResults, inputs, outputs, i, inputInfo, input_2, changeAddress, type_1, i, outputInfo, output, output, longName, hdwalletTxDescription, unsignedTx, balanceEth, nonceRemote, nonce, gas_limit, gas_price, txParams, amountNative, knownCoins, balanceToken, abiInfo, metaData, amountNative, transfer_data, masterPathEth, chainId, ethTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_1, unsigned, chain_id, fromAddress, runeTx, unsignedTx, amountNative, masterInfo, sequence, account_number, txType, gas, fee, memo_2, unsigned, chain_id, fromAddress, atomTx, unsignedTx, accountInfo, sequence, account_number, pubkey, bnbTx, binanceTx, unsignedTx, e_12;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1531,16 +1531,19 @@ module.exports = /** @class */ (function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 28, , 29]);
+                            log.info(tag, "transaction: ", transaction);
                             isTestnet = false;
                             coin = transaction.coin.toUpperCase();
-                            address = transaction.addressTo;
+                            address = transaction.address;
+                            if (!address)
+                                address = transaction.addressTo;
                             amount = transaction.amount;
                             if (!coin)
-                                throw Error("Invalid transaction missing coin!");
+                                throw Error("102: Invalid transaction missing coin!");
                             if (!address)
-                                throw Error("Invalid transaction missing address!");
+                                throw Error("103: Invalid transaction missing address!");
                             if (!amount)
-                                throw Error("Invalid transaction missing amount!");
+                                throw Error("104: Invalid transaction missing amount!");
                             memo = transaction.memo;
                             addressFrom = void 0;
                             if (!transaction.addressFrom) return [3 /*break*/, 2];
@@ -1555,12 +1558,7 @@ module.exports = /** @class */ (function () {
                                 throw Error("102: unable to get master address! ");
                             log.debug(tag, "addressFrom: ", addressFrom);
                             rawTx = void 0;
-                            UTXOcoins = [
-                                'BTC',
-                                'BCH',
-                                'LTC'
-                            ];
-                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 10];
+                            if (!(UTXO_COINS.indexOf(coin) >= 0)) return [3 /*break*/, 10];
                             log.debug(tag, "Build UTXO tx! ", coin);
                             //list unspent
                             log.debug(tag, "coin: ", coin);
@@ -1568,7 +1566,7 @@ module.exports = /** @class */ (function () {
                             input = void 0;
                             log.debug(tag, "isTestnet: ", isTestnet);
                             if (this.isTestnet && false) { //Seriously fuck testnet flagging!
-                                input = { coin: "TEST", xpub: this.PUBLIC_WALLET[coin].pubkey };
+                                // input = {coin:"TEST",xpub:this.PUBLIC_WALLET[coin].pubkey}
                             }
                             else {
                                 input = { coin: coin, xpub: this.PUBLIC_WALLET[coin].pubkey };
@@ -1608,6 +1606,7 @@ module.exports = /** @class */ (function () {
                             feeRateInfo = feeRateInfo.data;
                             log.debug(tag, "feeRateInfo: ", feeRateInfo);
                             feeRate = void 0;
+                            //TODO dynamic all the things
                             if (coin === 'BTC') {
                                 feeRate = feeRateInfo;
                             }
@@ -1651,7 +1650,16 @@ module.exports = /** @class */ (function () {
                             valueOut = _a.sent();
                             log.debug(tag, "valueOut: ", valueOut);
                             if (valueOut < 1) {
-                                throw Error(" Dollar to play bro, DUST tx refused");
+                                if (coin === 'BCH') {
+                                    log.info(tag, " God bless you sir's :BCH:");
+                                }
+                                else {
+                                    log.info("ALERT DUST! sending less that 1usd. (hope you know what you are doing)");
+                                }
+                                //Expensive coins
+                                if (["BTC", "ETH", "RUNE"].indexOf(coin) >= 0) {
+                                    throw Error("You dont want to do this!");
+                                }
                             }
                             if (nativeToBaseAmount(coin, totalInSatoshi) < amount) {
                                 throw Error("Sum of input less than output! YOUR BROKE! ");

@@ -99,6 +99,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IgnoreShitcoins": {
+        "dataType": "refObject",
+        "properties": {
+            "coins": {"dataType":"array","array":{"dataType":"any"},"required":true},
+            "shitcoins": {"dataType":"array","array":{"dataType":"any"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PairBody": {
         "dataType": "refObject",
         "properties": {
@@ -195,7 +204,7 @@ const models: TsoaRoute.Models = {
             "invocationId": {"dataType":"string"},
             "address": {"dataType":"string","required":true},
             "addressTo": {"dataType":"string"},
-            "meme": {"dataType":"string"},
+            "memo": {"dataType":"string"},
             "coin": {"dataType":"string","required":true},
             "amount": {"dataType":"string","required":true},
             "context": {"dataType":"string"},
@@ -936,6 +945,28 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/user',
+            function pioneerPrivateController_user(request: any, response: any, next: any) {
+            const args = {
+                    authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new pioneerPrivateController();
+
+
+            const promise = controller.user.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/info/:walletId',
             function pioneerPrivateController_info(request: any, response: any, next: any) {
             const args = {
@@ -956,28 +987,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.info.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/user',
-            function pioneerPrivateController_user(request: any, response: any, next: any) {
-            const args = {
-                    authorization: {"in":"header","name":"Authorization","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new pioneerPrivateController();
-
-
-            const promise = controller.user.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1091,6 +1100,29 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.updateInvocation.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/ignoreShitcoin',
+            function pioneerPrivateController_ignoreShitcoin(request: any, response: any, next: any) {
+            const args = {
+                    body: {"in":"body","name":"body","required":true,"ref":"IgnoreShitcoins"},
+                    Authorization: {"in":"header","name":"Authorization","required":true,"dataType":"any"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new pioneerPrivateController();
+
+
+            const promise = controller.ignoreShitcoin.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

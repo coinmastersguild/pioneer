@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/platform",
-  "version": "7.2.3",
+  "version": "7.2.4",
   "description": "Pioneer Platform SDK",
   "productName": "pioneer-platform",
   "author": "highlander <bithighlander@gmail.com>",
@@ -29,7 +29,7 @@
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
-    "@pioneer-platform/pioneer-hardware": "^6.3.18",
+    "@pioneer-platform/pioneer-hardware": "^6.3.19",
     "@quasar/extras": "^1.10.4",
     "animated-number-vue": "^1.0.0",
     "app-root-dir": "^1.0.2",
@@ -44,7 +44,7 @@
     "generate-password": "^1.6.0",
     "menubar": "^9.0.1",
     "module-alias": "^2.2.2",
-    "quasar": "^1.15.10",
+    "quasar": "^1.15.11",
     "unique-names-generator": "^4.3.1",
     "vue-grid-layout": "^2.3.12",
     "vue-i18n": "^8.24.3",
@@ -54,7 +54,7 @@
     "vue2-transitions": "^0.3.0"
   },
   "devDependencies": {
-    "@quasar/app": "^2.2.4",
+    "@quasar/app": "^2.2.5",
     "babel-eslint": "^10.0.1",
     "devtron": "^1.4.0",
     "electron": "^9.4.4",

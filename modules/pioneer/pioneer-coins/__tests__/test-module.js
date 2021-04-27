@@ -32,19 +32,22 @@ console.log("paths: ",paths)
 //get
 let result = [
     {
-        xpub: 'xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH'
+        xpub: 'xpub6CbHtkFXTk5sJtSGShj48f3pWpqe1XXdnrFQusS4JC5WHSjong83E2Mm37zrZkMVMJcx7K5ACodZUQGqepGy6Fbu5DNRN3m3HWcHnT44dRD'
     },
     {
-        xpub: 'xpub6D54vV8eUYHMVBZCnz4SLjuiQngXURVCGKKGoJrWUDRegdMByLTJKfRs64q3UKiQCsSHJPtCQehTvERczdghS7gb8oedWSyNDtBU1zYDJtb'
+        xpub: 'xpub6Bf8Sx3kwr64FNcVPdX3hXnSqUpTgMRKdy8DmXqH6ucF8tJXq3bQfQC2HtxSxqgnePuGQ3LYFHt5imw9V2Wnc5ypPYxTeAYKa2Y3WuWcByj'
     },
     {
-        xpub: 'xpub6FkHm9bKQbvo1T28h8haU9iXBojqejUsS5JEvdmaDnbyfYN6jLd9M8VrhMS8ibEHcpTefHu9yxC7rfffLeWPS4jDqT1Vq5r2k3D9ySwm4uL'
+        xpub: 'xpub6G5eZd31CkbSBC9ZTD8zrSiBjyHiPM23rejNV37iBHnuGzYWiv94f9LgZyVHm7ysVeHPWmZWSWScHiVSCyBc6ebcogCivss8Tys8LPtmvGv'
     },
     {
-        xpub: 'xpub6FkHm9bKQbvo1T28h8haU9iXBojqejUsS5JEvdmaDnbyfYN6jLd9M8VrhMS8ibEHcpTefHu9yxC7rfffLeWPS4jDqT1Vq5r2k3D9ySwm4uL'
+        xpub: 'xpub6FjMZmNXj8meezdSUWudQ3WSUfRNwfN9Eodu9h8ijz7p1FKhg1UxxPdbAYAS1Se3ybG5pfEGAUukRkV1mubLH3819jQqhjM14qnymNCAhDi'
     },
     {
-        xpub: 'xpub6CAgnVoFsaZ3iMaW4jmUpvCvduYGEF1b2g5PQjBQ6oWWyqEpufNRMBN1b4MQaWubnGAnTBt1pEQSwAUaFxNz8B6Ct8fq5s6RYhshNMYK4uk'
+        xpub: 'xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K'
+    },
+    {
+        xpub: 'xpub6CqACLchVFzXdgKnuWrEun6oC65wmmC1XJy22xb9NSXFPDmb3gcECi17SVptNujJ1uqN8iY8JpWkhpzXxGSMokYjf3UEYjq5GGqrVqbgjfr'
     }
 ]
 

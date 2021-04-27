@@ -89,6 +89,8 @@ let run_test = async function(){
                 }
             })
 
+            let userInfo = await App.getUserInfo()
+            console.log("userInfo: ",userInfo)
 
             //pair
             // let pairResult = await App.pair("1B5NI8")
@@ -98,7 +100,7 @@ let run_test = async function(){
             let wallets = await App.getWallets()
             // console.log("wallets: ",wallets)
 
-            let contextName = App.context()
+            let contextName = await App.context()
             console.log("contextName: ",contextName)
 
             let context = wallets[contextName]

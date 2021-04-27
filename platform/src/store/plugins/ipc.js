@@ -65,11 +65,23 @@ export default store => {
       store.commit('registerApp',app)
     }
   })
+  ipcRenderer.on('loadConfig', (event, data) => {
+    console.log(' loadConfig event! ',data)
+    console.log('data: ', data)
+    if(data){
+      store.commit('setLocale',data.locale)
+      store.commit('setUsername',data.username)
+      store.commit('setQueryKey',data.queryKey)
+      store.commit('setBlockchains',data.blockchains)
+      //store.commit('isTestnet',data.isTestnet)
+    }
+  })
   ipcRenderer.on('setContext', (event, data) => {
     console.log(' setContext event! ',data)
     console.log('data: ', data)
-    store.commit('setContext',data)
-
+    if(data){
+      store.commit('setContext',data)
+    }
   })
   ipcRenderer.on('loadDevices', (event, data) => {
     console.log(' loadDevices event! ')

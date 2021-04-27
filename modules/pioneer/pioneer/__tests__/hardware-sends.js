@@ -116,53 +116,78 @@ let run_test = async function(){
             console.log("total Value: ",walletInfo.totalValueUsd)
 
             /*
+                BCH transfer
+             */
+            // let transfer = {
+            //     coin:"BCH",
+            //     addressTo:"bitcoincash:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj",
+            //     amount:"0.0001",
+            //     memo:"=:LTC.LTC:LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB:24838655",
+            //     feeLevel:5
+            // }
+            //
+            // let transferBuilt = await Wallet.buildTransfer(transfer)
+            // console.log("transferSigned: ",transferSigned)
+            //
+            // let transferSigned = await Wallet.signTransaction(transferBuilt)
+            // console.log("transferSigned: ",transferSigned)
+
+            //
+            // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
+            // console.log("resultBroadcast: ",resultBroadcast)
+
+            /*
                 ETH thorchain swap
              */
             let masterETH = await Wallet.getMaster("ETH")
             console.log("reference: ","0x3f2329C9ADFbcCd9A84f52c906E936A42dA18CB8")
             console.log("masterETH: ",masterETH)
-            //
-            // let balanceETH = await Wallet.getBalance("ETH")
-            // console.log("balanceETH: ",balanceETH)
 
-            let swap = {
-                inboundAddress: {
-                    chain: 'ETH',
-                    pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
-                    address: '0x36286e570c412531aad366154eea9867b0e71755',
-                    router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
-                    halted: false
-                },
-                asset: {
-                    chain: 'ETH',
-                    symbol: 'ETH',
-                    ticker: 'ETH',
-                    iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
-                },
-                memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-                amount: "0.0123"
-            }
+            let balanceETH = await Wallet.getBalance("ETH")
+            console.log("balanceETH: ",balanceETH)
 
-
-            let result = await Wallet.buildSwap(swap)
-            console.log("swapResult: ",result)
-            //
-            // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
-            // console.log("resultBroadcast: ",resultBroadcast)
-
-            // let transfer = {
-            //     coin:"ETH",
-            //     addressTo:"0x33b35c665496bA8E71B22373843376740401F106"
+            // let swap = {
+            //     inboundAddress: {
+            //         chain: 'ETH',
+            //         pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
+            //         address: '0x36286e570c412531aad366154eea9867b0e71755',
+            //         router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
+            //         halted: false
+            //     },
+            //     asset: {
+            //         chain: 'ETH',
+            //         symbol: 'ETH',
+            //         ticker: 'ETH',
+            //         iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+            //     },
+            //     memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
+            //     amount: "0.0123"
             // }
             //
-            // let amount = 0.0001
-            // transfer.amount = amount
             //
-            // let result = await Wallet.buildTransfer(transfer)
-            // console.log("transfer: ",result)
+            // let result = await Wallet.buildSwap(swap)
+            // console.log("swapResult: ",result)
             //
             // let resultBroadcast = await Wallet.broadcastTransaction('ETH',result)
             // console.log("resultBroadcast: ",resultBroadcast)
+
+            let transfer = {
+                coin:"ETH",
+                address:"0x33b35c665496bA8E71B22373843376740401F106"
+            }
+
+            let amount = 0.001
+            transfer.amount = amount
+
+
+            let transactionBuilt = await Wallet.buildTransfer(transfer)
+            console.log("transactionBuilt: ",transactionBuilt)
+
+            let signedTx = await Wallet.signTransaction(transactionBuilt)
+            console.log("signedTx: ",signedTx)
+
+            let resultBroadcast = await Wallet.broadcastTransaction('ETH',signedTx)
+            console.log("resultBroadcast: ",resultBroadcast)
         }
 
 

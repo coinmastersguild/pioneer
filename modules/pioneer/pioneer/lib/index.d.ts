@@ -47,6 +47,7 @@ export interface Transaction {
     coin: string;
     addressFrom: string;
     addressTo: string;
+    address?: string;
     amount: string;
     memo?: string | undefined;
     nonce?: number;

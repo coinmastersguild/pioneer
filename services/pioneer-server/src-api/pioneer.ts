@@ -137,10 +137,11 @@ let get_and_verify_pubkeys = async function (username:string, walletId:string) {
 let register_zpub = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_zpub | "
     try {
+        if(!walletId) throw Error("101: walletId required!")
         if(!pubkey.zpub) throw Error("102: invalid pubkey! missing zpub!")
         if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
         if(!pubkey.symbol) throw Error("104: invalid pubkey! missing pubkey!")
-
+        log.info(tag,"pubkey: ",pubkey)
         //if zpub add zpub
         let queueId = uuid.generate()
 
@@ -157,15 +158,15 @@ let register_zpub = async function (username:string, pubkey:any, walletId:string
         }
         let work = {
             type:'zpub',
-            pubkey:pubkey.zpub,
+            blockchain:pubkey.blockchain,
+            pubkey:pubkey.pubkey,
             master:address,
             network:pubkey.blockchain,
             asset:pubkey.symbol,
             queueId,
             username,
             walletId,
-            zpub:pubkey.zpub,
-            xpub:pubkey.zpub,
+            zpub:pubkey.pubkey,
             inserted: new Date().getTime()
         }
         await queue.createWork("pioneer:pubkey:ingest",work)
@@ -180,7 +181,6 @@ let register_zpub = async function (username:string, pubkey:any, walletId:string
 let register_xpub = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_xpub | "
     try {
-        if(!pubkey.xpub) throw Error("102: invalid pubkey! missing xpub!")
         if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
         if(!pubkey.symbol) throw Error("104: invalid pubkey! missing symbol!")
 
@@ -197,6 +197,7 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
             address = pubkey.master
         }
         let work = {
+            walletId,
             type:'xpub',
             blockchain:pubkey.blockchain,
             pubkey:pubkey.xpub,
@@ -301,7 +302,6 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                 if(!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!")
                 //hack
                 if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset
-
 
                 //save to mongo
                 let entryMongo:any = {

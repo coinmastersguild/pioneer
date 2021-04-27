@@ -298,7 +298,14 @@ let get_pubkeys = async function (blockchains:any,isTestnet?:boolean) {
         let keyedWallet:any = {}
         for(let i = 0; i < pubkeys.length; i++){
             let pubkey = pubkeys[i]
-            keyedWallet[pubkey.symbol] = pubkey
+            if(!keyedWallet[pubkey.symbol]){
+                keyedWallet[pubkey.symbol] = pubkey
+            }else{
+                if(!keyedWallet['available']) keyedWallet['available'] = []
+                //add to secondary pubkeys
+                keyedWallet['available'].push(pubkey)
+            }
+
         }
 
         //verify pubkeys
@@ -326,6 +333,8 @@ let get_pubkeys = async function (blockchains:any,isTestnet?:boolean) {
             "TYPE": "watch",
             "CREATED": new Date().getTime(),
             "VERSION": "0.1.3",
+            "BLOCKCHAINS: ":blockchains,
+            "PUBKEYS":pubkeys,
             "WALLET_PUBLIC":keyedWallet,
             "PATHS":paths
         }
