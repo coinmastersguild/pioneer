@@ -183,6 +183,10 @@ export default {
 
       //TODO startup
       this.$q.electron.ipcRenderer.send('onStart', {})
+
+      //refresh on startup
+      setTimeout(this.refreshPioneer,3000)
+
       // this.showModal('Connect');
       //
       // this.$q.electron.ipcRenderer.send('onListen', {})

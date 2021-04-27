@@ -1,5 +1,7 @@
 const state = {
     testnet:false,
+    blockchains:[],
+    locale:"english",
     context:null,
     invocationContext:null,
     username:"",
@@ -66,6 +68,12 @@ const mutations = {
       } else {
         console.log("app already in dashboard")
       }
+    },
+    setLocale(state, locale) {
+      state.locale = locale
+    },
+    setBlockchains(state, blockchains) {
+      state.blockchains = blockchains
     },
     registerWallet(state, wallet) {
       state.wallets.push(wallet)

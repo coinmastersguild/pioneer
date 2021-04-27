@@ -269,6 +269,7 @@ export class pioneerPrivateController extends Controller {
                 }else{
                     //wallets
                     let userInfoMongo = await usersDB.findOne({username})
+                    userInfo.wallets = userInfoMongo.wallets
                     log.info(tag,"userInfoMongo: ",userInfoMongo)
                     if(!userInfoMongo) {
                         throw Error("102: unknown user! username: "+username)

@@ -35,7 +35,8 @@ import {
   createWallet,
   onAttemptCreate,
   approveTransaction,
-  refreshPioneer
+  refreshPioneer,
+  updateContext
 } from './app'
 
 
@@ -269,6 +270,17 @@ ipcMain.on('onStart', async (event, data) => {
     //
     // event.sender.send('dashboard', {layout})
 
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('updateContext', async (event, data) => {
+  const tag = TAG + ' | updateContext | '
+  try {
+
+    updateContext(event, data)
 
   } catch (e) {
     console.error(tag, e)

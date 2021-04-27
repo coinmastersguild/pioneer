@@ -107,10 +107,21 @@ module.exports = {
         if(!WALLET_CONTEXT){
             //get from remote
             let output = await network.instance.User()
-            return output.data.context;
-        } else {
-            return WALLET_CONTEXT;
+            if(output.data.context){
+                log.info("Found remote context! context: ",output.data.context)
+                WALLET_CONTEXT = output.data.context
+            } else {
+                //failed to get remote!
+                log.info("failed to get remote context!",output.data)
+                let walletNames = await Object.keys(WALLETS_LOADED)
+                if(walletNames.length > 0){
+                    WALLET_CONTEXT = walletNames[0]
+                    let resultUpdateContextRemote = await network.instance.SetContext(null,{context:WALLET_CONTEXT})
+                    log.info("resultUpdateContextRemote: ",resultUpdateContextRemote)
+                }
+            }
         }
+        return WALLET_CONTEXT;
     },
     getAutonomousStatus: function () {
         return AUTONOMOUS;
@@ -182,12 +193,17 @@ module.exports = {
     getWalletNames: function () {
         return getWallets();
     },
-    selectWallet: function (selection:string) {
-        if(WALLETS_LOADED[selection]){
-            WALLET_CONTEXT = selection
-            return true;
+    setContext: async function (context:string) {
+        log.info("context: ",context)
+        if(context && WALLETS_LOADED[context]){
+            //does it match current
+            if(context !== WALLET_CONTEXT){
+                WALLET_CONTEXT = context
+            }
+            network.instance.SetContext(null,{context})
         } else {
-            throw Error("invalid wallet name! selection: "+selection)
+            log.error("WALLETS_LOADED: ",WALLETS_LOADED)
+            throw Error("invalid wallet context! context: "+context)
         }
     },
     unlockWallet: function (wallet:string,password:string) {
@@ -239,12 +255,12 @@ module.exports = {
      *
      *
      */
-    getUserInfo: function () {
-        let output = network.instance.User()
+    getUserInfo: async function () {
+        let output = await network.instance.User()
         return output.data;
     },
-    getUsersOnline: function () {
-        let output = network.instance.Online()
+    getUsersOnline: async function () {
+        let output = await network.instance.Online()
         return output.data;
     },
     pingUser: function () {
@@ -1141,11 +1157,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         let output:any = {}
 
         //get wallets
-        let wallets = await getWallets()
-        log.debug(tag,"wallets: ",wallets)
+        let walletFiles = await getWallets()
+        log.info(tag,"walletFiles: ",walletFiles)
         //TODO if testnet flag only show testnet wallets!
 
-        output.walletFiles = wallets
+        output.walletFiles = walletFiles
         output.wallets = []
 
         //get wallets remote
@@ -1174,7 +1190,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         })
         network = await network.init()
 
-        if(!wallets){
+        if(!walletFiles){
             throw Error(" No wallets found! ")
         }
 
@@ -1212,8 +1228,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
 
         //Load wallets if setup
-        for(let i = 0; i < wallets.length; i++){
-            let walletName = wallets[i]
+        for(let i = 0; i < walletFiles.length; i++){
+            let walletName = walletFiles[i]
             log.debug(tag,"walletName: ",walletName)
             let walletFile = getWallet(walletName)
             log.debug(tag,"walletFile: ",walletFile)
@@ -1394,10 +1410,28 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         let userInfo = await network.instance.User()
         userInfo = userInfo.data
         if(!userInfo.context) throw Error("Invalid user info! missing context!")
-        log.debug(tag,"userInfo: ",userInfo)
-        log.debug(tag,"context: ",userInfo.context)
-        WALLET_CONTEXT = userInfo.context
-        output.context = WALLET_CONTEXT
+        if(walletFiles.indexOf(userInfo.context) >= 0){
+            log.debug(tag,"userInfo: ",userInfo)
+            log.debug(tag,"context: ",userInfo.context)
+            WALLET_CONTEXT = userInfo.context
+            output.context = WALLET_CONTEXT
+        } else {
+            log.info(tag,"remote context NOT in loaded wallet")
+            //set remote context to position0
+            log.info(tag,"walletNames: ",walletFiles)
+            let newContext = walletFiles[0]
+            if(newContext){
+                log.info(tag,"newContext: ",newContext)
+                let resultUpdateContext = await network.instance.SetContext(null,{context:newContext})
+                resultUpdateContext = resultUpdateContext.data
+                log.info(tag,"resultUpdateContext: ",resultUpdateContext)
+                WALLET_CONTEXT = newContext
+                output.context = WALLET_CONTEXT
+            } else {
+                throw Error("Could not figure out context!")
+            }
+        }
+
 
         //after registered start socket
         //sub all to events

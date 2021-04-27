@@ -310,15 +310,26 @@ export async function onStart(event,data) {
     //requests
     //globals
 
+    //get user info
+    let userInfo = await App.getuserInfo()
+    if(!userInfo.context || userInfo.context !== WALLET_CONTEXT) {
+      WALLET_CONTEXT = userInfo.context
+      event.sender.send('setContext',userInfo.context)
+      let resultUpdateConextRemote = await App.selectWallet(data.context)
+      log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+    }
+
 
     //TODO is context pref in config?
     let contextName = await App.context()
     console.log("contextName: ",contextName)
-    if(!contextName) {
-      contextName = WALLETS_LOADED[0].walletId
+    if(contextName && contextName !== WALLET_CONTEXT){
+      log.info(tag,"Local context not matching remote! setting to local")
+      WALLET_CONTEXT = userInfo.context
+      event.sender.send('setContext',userInfo.context)
+      let resultUpdateConextRemote = await App.selectWallet(data.context)
+      log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
     }
-    event.sender.send('setContext',contextName)
-
 
     //get invocations
     let invocationsRemote = await App.getInvocations()
@@ -379,6 +390,29 @@ export async function refreshPioneer(event, data) {
     let usersOnline = await App.getUsersOnline()
     log.info(tag,"usersOnline: ",usersOnline)
 
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function updateConext(event, data) {
+  let tag = TAG + " | setMnemonic | ";
+  try {
+    log.info(tag,"data: ",data)
+    if(data.context){
+      //TODO is differnt then remote?
+      if(data.context !== WALLET_CONTEXT){
+        log.info(tag,"Current context match's update?")
+      }
+
+      //TODO verify in wallet array?
+
+      //verify local wallets match remote available
+
+      let resultCreate = await App.selectWallet(data.context)
+      return resultCreate
+    }
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};

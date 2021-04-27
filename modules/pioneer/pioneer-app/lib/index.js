@@ -104,11 +104,22 @@ module.exports = {
             if (!WALLET_CONTEXT) {
                 //get from remote
                 let output = yield network.instance.User();
-                return output.data.context;
+                if (output.data.context) {
+                    log.info("Found remote context! context: ", output.data.context);
+                    WALLET_CONTEXT = output.data.context;
+                }
+                else {
+                    //failed to get remote!
+                    log.info("failed to get remote context!", output.data);
+                    let walletNames = yield Object.keys(WALLETS_LOADED);
+                    if (walletNames.length > 0) {
+                        WALLET_CONTEXT = walletNames[0];
+                        let resultUpdateContextRemote = yield network.instance.SetContext(null, { context: WALLET_CONTEXT });
+                        log.info("resultUpdateContextRemote: ", resultUpdateContextRemote);
+                    }
+                }
             }
-            else {
-                return WALLET_CONTEXT;
-            }
+            return WALLET_CONTEXT;
         });
     },
     getAutonomousStatus: function () {
@@ -183,14 +194,21 @@ module.exports = {
     getWalletNames: function () {
         return pioneer_config_1.getWallets();
     },
-    selectWallet: function (selection) {
-        if (WALLETS_LOADED[selection]) {
-            WALLET_CONTEXT = selection;
-            return true;
-        }
-        else {
-            throw Error("invalid wallet name! selection: " + selection);
-        }
+    setContext: function (context) {
+        return __awaiter(this, void 0, void 0, function* () {
+            log.info("context: ", context);
+            if (context && WALLETS_LOADED[context]) {
+                //does it match current
+                if (context !== WALLET_CONTEXT) {
+                    WALLET_CONTEXT = context;
+                }
+                network.instance.SetContext(null, { context });
+            }
+            else {
+                log.error("WALLETS_LOADED: ", WALLETS_LOADED);
+                throw Error("invalid wallet context! context: " + context);
+            }
+        });
     },
     unlockWallet: function (wallet, password) {
         return unlock_wallet(wallet, password);
@@ -242,12 +260,16 @@ module.exports = {
      *
      */
     getUserInfo: function () {
-        let output = network.instance.User();
-        return output.data;
+        return __awaiter(this, void 0, void 0, function* () {
+            let output = yield network.instance.User();
+            return output.data;
+        });
     },
     getUsersOnline: function () {
-        let output = network.instance.Online();
-        return output.data;
+        return __awaiter(this, void 0, void 0, function* () {
+            let output = yield network.instance.Online();
+            return output.data;
+        });
     },
     pingUser: function () {
         return [];
@@ -1069,10 +1091,10 @@ let init_wallet = function (config, isTestnet) {
             DATABASES = yield nedb.init();
             let output = {};
             //get wallets
-            let wallets = yield pioneer_config_1.getWallets();
-            log.debug(tag, "wallets: ", wallets);
+            let walletFiles = yield pioneer_config_1.getWallets();
+            log.info(tag, "walletFiles: ", walletFiles);
             //TODO if testnet flag only show testnet wallets!
-            output.walletFiles = wallets;
+            output.walletFiles = walletFiles;
             output.wallets = [];
             //get wallets remote
             //if diff mark missing wallets
@@ -1100,7 +1122,7 @@ let init_wallet = function (config, isTestnet) {
                 queryKey: config.queryKey
             });
             network = yield network.init();
-            if (!wallets) {
+            if (!walletFiles) {
                 throw Error(" No wallets found! ");
             }
             if (config.hardware) {
@@ -1131,8 +1153,8 @@ let init_wallet = function (config, isTestnet) {
             //     }
             // }
             //Load wallets if setup
-            for (let i = 0; i < wallets.length; i++) {
-                let walletName = wallets[i];
+            for (let i = 0; i < walletFiles.length; i++) {
+                let walletName = walletFiles[i];
                 log.debug(tag, "walletName: ", walletName);
                 let walletFile = pioneer_config_1.getWallet(walletName);
                 log.debug(tag, "walletFile: ", walletFile);
@@ -1301,10 +1323,29 @@ let init_wallet = function (config, isTestnet) {
             userInfo = userInfo.data;
             if (!userInfo.context)
                 throw Error("Invalid user info! missing context!");
-            log.debug(tag, "userInfo: ", userInfo);
-            log.debug(tag, "context: ", userInfo.context);
-            WALLET_CONTEXT = userInfo.context;
-            output.context = WALLET_CONTEXT;
+            if (walletFiles.indexOf(userInfo.context) >= 0) {
+                log.debug(tag, "userInfo: ", userInfo);
+                log.debug(tag, "context: ", userInfo.context);
+                WALLET_CONTEXT = userInfo.context;
+                output.context = WALLET_CONTEXT;
+            }
+            else {
+                log.info(tag, "remote context NOT in loaded wallet");
+                //set remote context to position0
+                log.info(tag, "walletNames: ", walletFiles);
+                let newContext = walletFiles[0];
+                if (newContext) {
+                    log.info(tag, "newContext: ", newContext);
+                    let resultUpdateContext = yield network.instance.SetContext(null, { context: newContext });
+                    resultUpdateContext = resultUpdateContext.data;
+                    log.info(tag, "resultUpdateContext: ", resultUpdateContext);
+                    WALLET_CONTEXT = newContext;
+                    output.context = WALLET_CONTEXT;
+                }
+                else {
+                    throw Error("Could not figure out context!");
+                }
+            }
             //after registered start socket
             //sub all to events
             if (!config.username)

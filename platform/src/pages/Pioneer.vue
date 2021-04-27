@@ -96,6 +96,7 @@
 </template>
 
 <script>
+  import { ipcRenderer } from 'electron'
   import accountSelector from '../components/AccountSelector'
   import { mapMutations, mapGetters } from 'vuex'
   import VueGridLayout from 'vue-grid-layout';
@@ -142,7 +143,15 @@
           this.show = true;
         })
 
-        setTimeout(this.updateContext,2000)
+        setTimeout(this.updateWalletContext,2000)
+
+        //
+        ipcRenderer.on('refreshPioneer', (event, data) => {
+          console.log("Refresh Pioneer! **** pioneer.vue")
+          //
+          this.updateWalletContext()
+          this.updateContext()
+        })
 
       }catch(e){
         console.error(e)
@@ -153,7 +162,7 @@
         handler: function(value) {
           //get value
           this.context = this.$store.getters['getContext'];
-          console.log("this.context: ",this.context)
+          console.log("watch: this.context: ",this.context)
         },
         immediate: true
       },
@@ -161,24 +170,8 @@
         handler: function(value) {
           console.log("value: ",value)
           //get value
-          this.wallets = this.$store.getters['wallets'];
-          console.log("wallets: ",this.wallets)
-
-          let currentWallet = this.wallets.filter(e => e.walletId === this.context)
-
-          this.walletContext = currentWallet[0]
-          if(this.walletContext){
-            let coins = Object.keys(currentWallet[0].masters)
-            let coinList = []
-            for(let i = 0; i < coins.length; i++){
-              let coin = coins[i]
-              coinList.push({
-                symbol:coin,
-                icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
-              })
-            }
-            this.coins = coinList
-          }
+          this.updateWalletContext()
+          this.updateContext()
         },
         immediate: true
       }
@@ -190,6 +183,36 @@
       ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),
       onMainClick() {
         console.log("Main Click")
+      },
+      updateWalletContext() {
+        //get value
+        this.wallets = this.$store.getters['wallets'];
+        console.log("wallets: ",this.wallets)
+        console.log("this.context: ",this.context)
+        this.updateContext()
+        let currentWallet = this.wallets.filter(e => e.walletId === this.context)
+        console.log("currentWallet: ",currentWallet)
+        this.walletContext = currentWallet[0]
+        if(this.walletContext){
+          let coins = Object.keys(currentWallet[0].masters)
+          let coinList = []
+          for(let i = 0; i < coins.length; i++){
+            let coin = coins[i]
+            coinList.push({
+              symbol:coin,
+              icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
+            })
+          }
+          this.coins = coinList
+        } else if(this.wallets.length > 0){
+          //set context to current
+          this.context = this.wallets[0].walletId
+          this.$q.electron.ipcRenderer.send('updateContext', {
+            context:this.context,
+            reason:"current context not in wallet array!"
+          });
+
+        }
       },
       updateContext() {
         this.context = this.$store.getters['getContext'];
