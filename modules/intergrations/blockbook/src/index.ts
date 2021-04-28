@@ -52,9 +52,9 @@ module.exports = {
     getEthInfo:function (address:string,filter?:string) {
         return get_eth_info_by_address(address,filter);
     },
-    // txsByXpub: function (coin:string,addresses:any) {
-    //     return get_txs_by_xpub(coin,addresses);
-    // },
+    txsByXpub: function (coin:string,addresses:any) {
+        return get_txs_by_xpub(coin,addresses);
+    },
     utxosByXpub: function (coin:string,xpub:any) {
         return get_utxos_by_xpub(coin,xpub);
     },
@@ -64,6 +64,31 @@ module.exports = {
     broadcast: function (coin:string,hex:string) {
         return broadcast_transaction(coin,hex);
     },
+}
+
+let get_txs_by_xpub = async function(coin:string,xpub:string){
+    let tag = TAG + " | FA get_txs_by_xpub | "
+    try{
+
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
+        console.log("url: ",url)
+        let body = {
+            method: 'GET',
+            url,
+            headers: {
+                'content-type': 'application/json',
+                'User-Agent': fakeUa()
+            },
+        };
+        let resp = await axios(body)
+
+        // let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
+        // log.debug(tag,"output: ",output)
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+    }
 }
 
 let get_eth_info_by_address = async function(address:string,filter?:string){

@@ -30,7 +30,7 @@ network.init()
 //     })
 
 
-network.utxosByXpub("BTC","zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR")
+network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
     .then(function(resp){
         console.log(resp)
     })

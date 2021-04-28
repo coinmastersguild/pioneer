@@ -7,6 +7,7 @@ const state = {
     username:"",
     pioneerUrl:"",
     pioneerLive:false,
+    usersOnline:[],
     coins: [],
     pubkeys: [],
     apps: [],
@@ -16,6 +17,9 @@ const state = {
     wallets: [],
     walletContexts: [],
     devices: [],
+    allUsbDevices:[],
+    allKeepKeys:[],
+    keepKeyState:0,
     walletInfo: {}, //Current wallet context
     mnemonic: null,
     walltedLoaded: false,
@@ -39,11 +43,15 @@ const getters = {
     getCoins:state => state.coins,
     context:state => state.context,
     getContext:state => state.context,
+    getKeepKeyState:state => state.keepKeyState,
     getInvocationContext:state => state.invocationContext,
     getPubkeys:state => state.pubkeys,
     getPioneerLive: state => state.pioneerLive,
     getPioneerUrl: state => state.pioneerUrl,
     getMnemonic: state => state.mnemonic,
+    getUsersOnline: state => state.usersOnline,
+    getAllUsbDevices: state => state.allUsbDevices,
+    getAllKeepKeys: state => state.allKeepKeys,
     walletStart: (state) => state.walletStart,
     getWalletSendInfo: state => state.walletSendInfo,
     getMasterAddresses: state => state.masterAddresses,
@@ -78,6 +86,11 @@ const mutations = {
     registerWallet(state, wallet) {
       state.wallets.push(wallet)
     },
+    setKeepKeyState(state, stateKeepKey) {
+      console.log("Setting KeepKeyState! *** ",stateKeepKey)
+      state.keepKeyState = stateKeepKey
+      console.log("Setting state.keepKeyState *** ",state.keepKeyState)
+    },
     viewSeed(state, apps) {
       //
     },
@@ -98,10 +111,32 @@ const mutations = {
           state.coins.push(coin)
           if(map[app]) state.coins.push(map[coin])
         }
-      },
+    },
     addCoin(state, coin) {
         state.coins.push([coin])
         if(map[coin]) state.coins.push(map[coin])
+    },
+    addUsbDevices(state, devices) {
+      for(let i = 0; i < devices.length; i++){
+        const device = devices[i]
+        if (state.allUsbDevices.filter(e => e.deviceName === device.deviceName).length === 0) {
+          state.allUsbDevices.push(device)
+        }
+      }
+    },
+    addUsbDevice(state, device) {
+      state.allUsbDevices.push(device)
+    },
+    addKeepKeys(state, devices) {
+      for(let i = 0; i < devices.length; i++){
+        const device = devices[i]
+        if (state.allKeepKeys.filter(e => e.deviceName === device.deviceName).length === 0) {
+          state.allKeepKeys.push(device)
+        }
+      }
+    },
+    addKeepKey(state, device) {
+      state.allKeepKeys.push(device)
     },
     addMasterAddress(state,asset,address){
         state.masterAddresses[asset] = address
@@ -143,6 +178,9 @@ const mutations = {
     },
     setPioneerLive(state,value){
       state.pioneerLive = value
+    },
+    setUsersOnline(state,value){
+      state.usersOnline = value
     },
     setTestnet(state,value){
       state.testnet = value

@@ -17,7 +17,7 @@
 
 <script>
   export default {
-    name: "Hardware"
+    name: "HardwareRecovery"
   }
 </script>
 

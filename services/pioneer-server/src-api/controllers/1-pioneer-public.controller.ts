@@ -187,6 +187,8 @@ export class pioneerPublicController extends Controller {
         let tag = TAG + " | globals | "
         try{
             let globals = await redis.hgetall('globals')
+            let online = await redis.smembers('online')
+            globals.online = online
             globals.blockchains = blockchains
             return(globals)
         }catch(e){
@@ -308,12 +310,12 @@ export class pioneerPublicController extends Controller {
      *  get public user info
      * @param account
      */
-    @Get('/user/{username}')
-    public async user(username:string) {
-        let tag = TAG + " | getAccount | "
+    @Get('/username/{username}')
+    public async username(username:string) {
+        let tag = TAG + " | getUsername | "
         try{
             let output:any = {}
-            if(!username) throw Error("102: address required! ")
+            if(!username) throw Error("102: username required! ")
 
             //get from cache
             let accountInfo = await redis.hgetall(username)
@@ -322,19 +324,19 @@ export class pioneerPublicController extends Controller {
             if(Object.keys(accountInfo).length === 0){
                 //pioneer domain
                 try{
-                    let domain = "@scatter"
-                    let isAvailable = await networks['FIO'].isAvailable(username+domain)
+                    //TODO add fio back
+                    //let domain = "@scatter"
+                    //let isAvailable = await networks['FIO'].isAvailable(username+domain)
                     //TODO opt out fio
 
-                    output.available = isAvailable
+                    output.available = true
                     output.username = username
                 }catch(e){
                     output.isValid = false
                     output.username = username
                 }
-
             } else if (accountInfo.isPublic){
-                output.accountInfo = accountInfo
+                //TODO what do we want to share?
             } else {
                 output.isTaken = true
                 output.created = accountInfo.created

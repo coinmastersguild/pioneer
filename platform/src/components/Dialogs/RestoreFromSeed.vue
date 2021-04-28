@@ -120,14 +120,22 @@
     >
       Restore a Software Wallet from seed
     </q-btn>
+    <div>
+      <q-btn
+        label="Go Back"
+        @click="goBack"
+      >
+      </q-btn>
+    </div>
   </q-card>
 </template>
 <script>
-
+  let featureRecoverHardware = process.env['FEATURE_RECOVER_HARDWARED']
   import { mapMutations } from 'vuex'
   export default {
     props: {
       showModal: {
+        featureRecoverHardware,
         type: Boolean,
         default: false
       }
@@ -278,10 +286,19 @@
       delete_ () {
         if (this.seeds.length > 0) this.seeds.pop()
       },
-      openHardwareRecovery () {
+      goBack () {
         // this.clearup()
         this.hideModal()
-        this.showModal("HardwareRecovery")
+        this.showModal("Setup")
+      },
+      openHardwareRecovery () {
+        // this.clearup()
+        if(this.featureRecoverHardware){
+          this.hideModal()
+          this.showModal("HardwareRecovery")
+        }else{
+          alert("Feature not supported!")
+        }
       }
     }
   }

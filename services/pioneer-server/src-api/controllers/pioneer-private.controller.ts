@@ -369,6 +369,16 @@ export class pioneerPrivateController extends Controller {
                 if(!walletInfo.pubkeys) throw Error("102: pioneer failed to collect pubkeys!")
                 if(!walletInfo.masters) throw Error("103: pioneer failed to collect masters!")
 
+                //wallets
+                let userInfoMongo = await usersDB.findOne({username})
+                walletInfo.wallets = userInfoMongo.wallets
+                walletInfo.blockchains = userInfoMongo.blockchains
+
+                log.info(tag,"userInfoMongo: ",userInfoMongo)
+                if(!userInfoMongo) {
+                    throw Error("102: unknown user! username: "+username)
+                }
+
                 //get asset balances
                 let assetBalances = await redis.hgetall(username+":assets:"+walletId)
                 //fill in 0's

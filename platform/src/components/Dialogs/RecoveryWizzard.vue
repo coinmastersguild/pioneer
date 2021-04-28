@@ -59,6 +59,21 @@
         class="full-width"
         flat
       />
+      <q-btn
+        v-if="featureRestoreKeystore"
+        color="white"
+        align="left"
+        @click="importKeystore"
+        label="Restore from X-Chain keystore"
+        icon="account_balance_wallet"
+        class="full-width"
+        flat
+      />
+      <q-btn
+        @click="goBack()"
+        label="Go Back"
+        align="left"
+      />
     </q-card-actions>
 
   </q-card>
@@ -66,23 +81,32 @@
 <script>
 
   let featureKeepkey = process.env['KEEPKEY_FEATURE']
+  let featureRestoreKeystore = process.env['FEATURE_RESTORE_KEYSTORE']
 
   import { mapMutations } from 'vuex'
   export default {
     data() {
       return {
         showKeepkey: featureKeepkey,
+        featureRestoreKeystore
       };
     },
     methods: {
       ...mapMutations(['showModal','hideModal']),
+      importKeystore: function () {
+        //TODO
+      },
       openRestore: function () {
         this.hideModal()
         this.showModal('RestoreFromSeed')
       },
+      goBack: function () {
+        this.hideModal()
+        this.showModal('Setup')
+      },
       openConnect: function () {
         this.hideModal()
-        this.showModal('Hardware')
+        this.showModal('HardwareConnect')
       }
     }
   }

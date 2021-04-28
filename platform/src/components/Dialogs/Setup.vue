@@ -20,24 +20,24 @@
             <q-tooltip content-class="bg-accent">Keepkey, Ledger and Trezor wallets supported</q-tooltip>
             </q-btn> -->
           <q-btn
-            color="white"
-            @click="openRestore"
-            label="Restore from seed..."
-            icon="account_balance_wallet"
+            v-if="showKeepkey"
+            color="blue"
+            @click="openConnect"
             class="full-width"
+            icon="settings_ethernet"
+            align="left"
+            size="lg"
+            label="Connect Hardware Wallet"
             flat
-        />
-        <q-btn
-          v-if="showKeepkey"
-          color="blue"
-          @click="openConnect"
-          class="full-width"
-          icon="settings_ethernet"
-          align="left"
-          size="lg"
-          label="Connect Hardware Wallet"
-          flat
-        />
+          />
+
+          <q-btn
+            color="yellowBright"
+            @click="openSoftwareCreate"
+            icon="warning"
+            align="left"
+            label="I dont have a Hardware Wallet..."
+          />
         </q-card-actions>
     </q-card>
 </template>
@@ -60,13 +60,17 @@ export default {
       openCreate: function () {
         this.$q.electron.ipcRenderer.send('createWallet', {});
       },
+      openSoftwareCreate: function () {
+        this.hideModal()
+        this.showModal('SoftwareCreate')
+      },
       openRestore: function () {
         this.hideModal()
         this.showModal('Restore')
       },
       openConnect: function () {
         this.hideModal()
-        this.showModal('Hardware')
+        this.showModal('HardwareConnect')
       }
     }
 }

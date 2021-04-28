@@ -390,8 +390,8 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/user/:username',
-            function pioneerPublicController_user(request: any, response: any, next: any) {
+        app.get('/api/v1/username/:username',
+            function pioneerPublicController_username(request: any, response: any, next: any) {
             const args = {
                     username: {"in":"path","name":"username","required":true,"dataType":"string"},
             };
@@ -408,7 +408,7 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new pioneerPublicController();
 
 
-            const promise = controller.user.apply(controller, validatedArgs as any);
+            const promise = controller.username.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -181,19 +181,8 @@ export default {
       console.log("Main Layout Mounted!")
       //Open connect
 
-      //TODO startup
-      this.$q.electron.ipcRenderer.send('onStart', {})
-
-      //refresh on startup
-      setTimeout(this.refreshPioneer,3000)
-
-      // this.showModal('Connect');
-      //
-      // this.$q.electron.ipcRenderer.send('onListen', {})
-      //
-      // //start hardware
-      // // this.showModal('Pin');
-      // this.$q.electron.ipcRenderer.send('startHardware', {})
+      //support partial setup exit
+      this.$q.electron.ipcRenderer.send('continueSetup', {})
 
     } catch (e) {
       console.error(e);

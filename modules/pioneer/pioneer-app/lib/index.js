@@ -92,7 +92,11 @@ let network;
 // let opts:any = {}
 // var player = require('play-sound')(opts = {})
 let AUTONOMOUS = false;
+let IS_INIT = false;
 module.exports = {
+    isInitialized: function () {
+        return IS_INIT;
+    },
     init: function (config, isTestnet) {
         return init_wallet(config, isTestnet);
     },
@@ -1088,17 +1092,13 @@ let init_wallet = function (config, isTestnet) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = TAG + " | init_wallet | ";
         try {
-            DATABASES = yield nedb.init();
-            let output = {};
-            //get wallets
-            let walletFiles = yield pioneer_config_1.getWallets();
-            log.info(tag, "walletFiles: ", walletFiles);
-            //TODO if testnet flag only show testnet wallets!
-            output.walletFiles = walletFiles;
-            output.wallets = [];
-            //get wallets remote
-            //if diff mark missing wallets
-            //if context not loaded change context
+            if (IS_INIT)
+                throw Error("App already initialized!");
+            network = new Network(URL_PIONEER_SPEC, {
+                queryKey: config.queryKey
+            });
+            network = yield network.init();
+            // DATABASES = await nedb.init()
             //if no password
             if (!config.password)
                 config.password = config.temp;
@@ -1118,10 +1118,56 @@ let init_wallet = function (config, isTestnet) {
             }
             if (!URL_PIONEER_SOCKET)
                 URL_PIONEER_SOCKET = "wss://pioneers.dev";
-            network = new Network(URL_PIONEER_SPEC, {
-                queryKey: config.queryKey
-            });
-            network = yield network.init();
+            let output = {};
+            //get wallets
+            let walletFiles = yield pioneer_config_1.getWallets();
+            log.info(tag, "walletFiles: ", walletFiles);
+            let walletDescriptions = [];
+            //TODO if testnet flag only show testnet wallets!
+            //TODO get public wallets from wallet_data dir
+            //if missing generate
+            //get remote has more wallets
+            let userInfoRemote = yield network.instance.User();
+            userInfoRemote = userInfoRemote.data;
+            log.info(tag, "userInfoRemote: ", userInfoRemote);
+            if (userInfoRemote.wallets) {
+                for (let i = 0; i < userInfoRemote.wallets; i++) {
+                    let walletRemote = userInfoRemote[i];
+                    //if found in local
+                    let match = walletFiles.filter((e) => e === walletRemote);
+                    if (match[0]) {
+                        log.info(tag, "Found remote wallet locally! wallet: ", walletRemote);
+                        let walletDescription = {
+                            name: walletRemote,
+                            remote: true,
+                            local: true,
+                            status: 'online'
+                        };
+                        walletDescriptions.push(walletDescription);
+                    }
+                    else {
+                        log.info(tag, "Remote wallet NOT found localy: ", walletRemote);
+                        //push it anyway
+                        walletFiles.push(walletRemote);
+                        //mark it offline
+                        output.offline(walletRemote);
+                        //remote wallet not found locally
+                        //else mark offline
+                    }
+                }
+            }
+            else {
+                log.info(tag, 'new user detected!');
+            }
+            log.info(tag, "Checkpoint0: status remote wallets: output: ", output);
+            //note, if local has more wallets then remote, its ok, we register them below!
+            //if missing, mark "offline" add
+            output.offline = [];
+            output.walletFiles = walletFiles;
+            output.wallets = [];
+            //get wallets remote
+            //if diff mark missing wallets
+            //if context not loaded change context
             if (!walletFiles) {
                 throw Error(" No wallets found! ");
             }
@@ -1139,180 +1185,176 @@ let init_wallet = function (config, isTestnet) {
                 //no more missing coins bs
                 throw Error("Must specify blockchain configuration!");
             }
-            //verify wallet_data
-            // for(let i = 0; i < wallets.length; i++){
-            //     let walletName = wallets[i]
-            //     log.debug(tag,"walletName: ",walletName)
-            //     let fileNameWatch = walletName.replace(".wallet.json",".watch.wallet.json")
-            //     let watchWallet = getWalletPublic(fileNameWatch)
-            //     if(!watchWallet){
-            //         //create watch wallet
-            //     } else {
-            //         log.debug(tag," Watch Only wallet found!")
-            //         //load
-            //     }
-            // }
             //Load wallets if setup
             for (let i = 0; i < walletFiles.length; i++) {
                 let walletName = walletFiles[i];
-                log.debug(tag, "walletName: ", walletName);
-                let walletFile = pioneer_config_1.getWallet(walletName);
-                log.debug(tag, "walletFile: ", walletFile);
-                if (!walletFile.TYPE)
-                    walletFile.TYPE = walletFile.type;
-                if (walletFile.TYPE === 'keepkey') {
-                    if (!output.devices)
-                        output.devices = [];
-                    log.debug(tag, "Loading keepkey wallet! ");
-                    if (!walletFile.pubkeys)
-                        throw Error("102: invalid keepkey wallet!");
-                    //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
-                    //if wallet paths custom load
+                //if !offline aka, online!
+                log.info(tag, "output.offline: ", output.offline);
+                log.info(tag, "output.offline: ", output.offline);
+                if (output.offline.indexOf(walletName) < 0) {
+                    log.info(tag, "wallet is online! ", walletName);
                     log.debug(tag, "walletName: ", walletName);
-                    let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
-                    let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
-                    let walletPaths;
-                    if (watchWallet) {
-                        walletPaths = watchWallet.paths;
+                    let walletFile = pioneer_config_1.getWallet(walletName);
+                    log.debug(tag, "walletFile: ", walletFile);
+                    if (!walletFile.TYPE)
+                        walletFile.TYPE = walletFile.type;
+                    if (walletFile.TYPE === 'keepkey') {
+                        if (!output.devices)
+                            output.devices = [];
+                        log.debug(tag, "Loading keepkey wallet! ");
+                        if (!walletFile.pubkeys)
+                            throw Error("102: invalid keepkey wallet!");
+                        //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
+                        //if wallet paths custom load
+                        log.debug(tag, "walletName: ", walletName);
+                        let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
+                        let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
+                        let walletPaths;
+                        if (watchWallet) {
+                            walletPaths = watchWallet.paths;
+                        }
+                        else {
+                            log.debug(tag, "walletFile: ", walletFile);
+                        }
+                        //get device info from walletFile
+                        if (!walletFile.features)
+                            throw Error("Invalid wallet file missing device features!");
+                        output.devices.push(walletFile.features);
+                        //load
+                        let configPioneer = {
+                            hardware: true,
+                            vendor: "keepkey",
+                            blockchains: config.blockchains,
+                            pubkeys: walletFile.pubkeys,
+                            wallet: walletFile,
+                            context: walletName,
+                            username: config.username,
+                            pioneerApi: true,
+                            spec: URL_PIONEER_SPEC,
+                            queryKey: config.queryKey,
+                            auth: process.env['SHAPESHIFT_AUTH'] || 'lol',
+                            authProvider: 'bitcoin'
+                        };
+                        log.debug(tag, "KEEPKEY init config: ", configPioneer);
+                        let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
+                        //init
+                        let walletInfo = yield wallet.init(KEEPKEY);
+                        log.debug(tag, "walletInfo: ", walletInfo);
+                        WALLETS_LOADED[walletName] = wallet;
+                        //info
+                        let info = yield wallet.getInfo(walletName);
+                        info.name = walletFile.username;
+                        info.type = 'keepkey';
+                        output.wallets.push(info);
+                        log.debug(tag, "info: ", info);
+                        //validate at least 1 pubkey per enabled blockchain
+                        let pubkeyNetworks = new Set();
+                        for (let i = 0; i < info.pubkeys.length; i++) {
+                            let pubkey = info.pubkeys[i];
+                            pubkeyNetworks.add(pubkey.coin);
+                        }
+                        log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
+                        //TODO iterate over blockchains config and verify
+                        //else register individual pubkeys until complete
+                        //write pubkeys
+                        // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
+                        // log.debug(tag,"writePathPub: ",writePathPub)
+                        // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
+                        // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
+                        //global total valueUSD
+                        TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
+                        WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
+                    }
+                    else if (walletFile.TYPE === 'seedwords') {
+                        //decrypt
+                        // @ts-ignore
+                        globalThis.crypto = new webcrypto_1.Crypto();
+                        // @ts-ignore
+                        const engine = new native.crypto.engines.WebCryptoEngine();
+                        // @ts-ignore
+                        const walletCrypto = new native.crypto.EncryptedWallet(engine);
+                        //if wallet has pw, use it
+                        if (walletFile.password)
+                            config.password = walletFile.password;
+                        const resultOut = yield walletCrypto.init(walletFile.username, config.password, walletFile.vault);
+                        if (!walletFile.vault)
+                            throw Error("Wallet vault not found! ");
+                        let mnemonic = yield resultOut.decrypt();
+                        //Load public wallet file
+                        //Loads wallet state and custom pathing
+                        log.debug(tag, "walletName: ", walletName);
+                        let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
+                        let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
+                        let walletPaths;
+                        if (watchWallet) {
+                            walletPaths = watchWallet.paths;
+                        }
+                        //TODO validate seed
+                        if (!mnemonic)
+                            throw Error("unable to start wallet! invalid seed!");
+                        // log.debug(tag,"mnemonic: ",mnemonic)
+                        //load wallet to global
+                        let configPioneer = {
+                            isTestnet,
+                            mnemonic,
+                            context: walletName,
+                            blockchains: config.blockchains,
+                            username: config.username,
+                            pioneerApi: true,
+                            auth: process.env['SHAPESHIFT_AUTH'] || 'lol',
+                            authProvider: 'shapeshift',
+                            spec: URL_PIONEER_SPEC,
+                            queryKey: config.queryKey
+                        };
+                        if (walletPaths)
+                            configPioneer.paths = walletPaths;
+                        log.debug(tag, "configPioneer: ", configPioneer);
+                        log.debug(tag, "isTestnet: ", isTestnet);
+                        let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
+                        WALLETS_LOADED[walletName] = wallet;
+                        //init
+                        let walletClient = yield wallet.init();
+                        //info
+                        let info = yield wallet.getInfo(walletName);
+                        log.info(tag, "INFO: ", info);
+                        if (!info.pubkeys)
+                            throw Error(" invalid wallet info returned! missing pubkeys!");
+                        if (!info.masters)
+                            throw Error(" invalid wallet info returned! missing masters!");
+                        info.name = walletFile.username;
+                        info.type = 'software';
+                        output.wallets.push(info);
+                        log.debug(tag, "info: ", info);
+                        let pubkeyNetworks = new Set();
+                        for (let i = 0; i < info.pubkeys.length; i++) {
+                            let pubkey = info.pubkeys[i];
+                            pubkeyNetworks.add(pubkey.coin);
+                        }
+                        log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
+                        let walletInfoPub = {
+                            WALLET_ID: walletFile.username,
+                            TYPE: 'watch',
+                            CREATED: new Date().getTime(),
+                            VERSION: "0.1.4",
+                            WALLET_PUBLIC: info.public,
+                            WALLET_PUBKEYS: info.pubkeys
+                        };
+                        let writePathPub = pioneer_config_1.walletDataDir + "/" + fileNameWatch;
+                        log.debug(tag, "writePathPub: ", writePathPub);
+                        let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
+                        log.debug(tag, "writeSuccessPub: ", writeSuccessPub);
+                        //
+                        log.debug(tag, "info: ", info);
+                        //global total valueUSD
+                        TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
+                        WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
                     }
                     else {
-                        log.debug(tag, "walletFile: ", walletFile);
+                        throw Error("unhandled wallet type! " + walletFile.TYPE);
                     }
-                    //get device info from walletFile
-                    if (!walletFile.features)
-                        throw Error("Invalid wallet file missing device features!");
-                    output.devices.push(walletFile.features);
-                    //load
-                    let configPioneer = {
-                        hardware: true,
-                        vendor: "keepkey",
-                        blockchains: config.blockchains,
-                        pubkeys: walletFile.pubkeys,
-                        wallet: walletFile,
-                        context: walletName,
-                        username: config.username,
-                        pioneerApi: true,
-                        spec: URL_PIONEER_SPEC,
-                        queryKey: config.queryKey,
-                        auth: process.env['SHAPESHIFT_AUTH'] || 'lol',
-                        authProvider: 'bitcoin'
-                    };
-                    log.debug(tag, "KEEPKEY init config: ", configPioneer);
-                    let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
-                    //init
-                    let walletInfo = yield wallet.init(KEEPKEY);
-                    log.debug(tag, "walletInfo: ", walletInfo);
-                    WALLETS_LOADED[walletName] = wallet;
-                    //info
-                    let info = yield wallet.getInfo(walletName);
-                    info.name = walletFile.username;
-                    info.type = 'keepkey';
-                    output.wallets.push(info);
-                    log.debug(tag, "info: ", info);
-                    //validate at least 1 pubkey per enabled blockchain
-                    let pubkeyNetworks = new Set();
-                    for (let i = 0; i < info.pubkeys.length; i++) {
-                        let pubkey = info.pubkeys[i];
-                        pubkeyNetworks.add(pubkey.coin);
-                    }
-                    log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
-                    //TODO iterate over blockchains config and verify
-                    //else register individual pubkeys until complete
-                    //write pubkeys
-                    // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
-                    // log.debug(tag,"writePathPub: ",writePathPub)
-                    // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
-                    // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
-                    //global total valueUSD
-                    TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
-                    WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
-                }
-                else if (walletFile.TYPE === 'seedwords') {
-                    //decrypt
-                    // @ts-ignore
-                    globalThis.crypto = new webcrypto_1.Crypto();
-                    // @ts-ignore
-                    const engine = new native.crypto.engines.WebCryptoEngine();
-                    // @ts-ignore
-                    const walletCrypto = new native.crypto.EncryptedWallet(engine);
-                    //if wallet has pw, use it
-                    if (walletFile.password)
-                        config.password = walletFile.password;
-                    const resultOut = yield walletCrypto.init(walletFile.username, config.password, walletFile.vault);
-                    if (!walletFile.vault)
-                        throw Error("Wallet vault not found! ");
-                    let mnemonic = yield resultOut.decrypt();
-                    //Load public wallet file
-                    //Loads wallet state and custom pathing
-                    log.debug(tag, "walletName: ", walletName);
-                    let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
-                    let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
-                    let walletPaths;
-                    if (watchWallet) {
-                        walletPaths = watchWallet.paths;
-                    }
-                    //TODO validate seed
-                    if (!mnemonic)
-                        throw Error("unable to start wallet! invalid seed!");
-                    // log.debug(tag,"mnemonic: ",mnemonic)
-                    //load wallet to global
-                    let configPioneer = {
-                        isTestnet,
-                        mnemonic,
-                        context: walletName,
-                        blockchains: config.blockchains,
-                        username: config.username,
-                        pioneerApi: true,
-                        auth: process.env['SHAPESHIFT_AUTH'] || 'lol',
-                        authProvider: 'shapeshift',
-                        spec: URL_PIONEER_SPEC,
-                        queryKey: config.queryKey
-                    };
-                    if (walletPaths)
-                        configPioneer.paths = walletPaths;
-                    log.debug(tag, "configPioneer: ", configPioneer);
-                    log.debug(tag, "isTestnet: ", isTestnet);
-                    let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
-                    WALLETS_LOADED[walletName] = wallet;
-                    //init
-                    let walletClient = yield wallet.init();
-                    //info
-                    let info = yield wallet.getInfo(walletName);
-                    log.info(tag, "INFO: ", info);
-                    if (!info.pubkeys)
-                        throw Error(" invalid wallet info returned! missing pubkeys!");
-                    if (!info.masters)
-                        throw Error(" invalid wallet info returned! missing masters!");
-                    info.name = walletFile.username;
-                    info.type = 'software';
-                    output.wallets.push(info);
-                    log.debug(tag, "info: ", info);
-                    let pubkeyNetworks = new Set();
-                    for (let i = 0; i < info.pubkeys.length; i++) {
-                        let pubkey = info.pubkeys[i];
-                        pubkeyNetworks.add(pubkey.coin);
-                    }
-                    log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
-                    let walletInfoPub = {
-                        WALLET_ID: walletFile.username,
-                        TYPE: 'watch',
-                        CREATED: new Date().getTime(),
-                        VERSION: "0.1.4",
-                        WALLET_PUBLIC: info.public,
-                        WALLET_PUBKEYS: info.pubkeys
-                    };
-                    let writePathPub = pioneer_config_1.walletDataDir + "/" + fileNameWatch;
-                    log.debug(tag, "writePathPub: ", writePathPub);
-                    let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
-                    log.debug(tag, "writeSuccessPub: ", writeSuccessPub);
-                    //
-                    log.debug(tag, "info: ", info);
-                    //global total valueUSD
-                    TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
-                    WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
                 }
                 else {
-                    throw Error("unhandled wallet type! " + walletFile.TYPE);
+                    log.info(tag, "wallet is offline!");
                 }
             }
             output.TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED;
@@ -1434,6 +1476,8 @@ let init_wallet = function (config, isTestnet) {
             output.context = WALLET_CONTEXT;
             if (!output.context)
                 throw Error("");
+            //global init
+            IS_INIT = true;
             output.events = clientEvents.events;
             return output;
         }

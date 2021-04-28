@@ -411,7 +411,7 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "walletInfo: ", walletInfo);
                             //validate info
                             log.debug("walletInfo: ", walletInfo);
-                            if (walletInfo.balances) {
+                            if (walletInfo && walletInfo.balances) {
                                 coins = Object.keys(walletInfo.balances);
                                 for (i = 0; i < coins.length; i++) {
                                     coin = coins[i];

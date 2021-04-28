@@ -83,6 +83,21 @@ export default store => {
       store.commit('setContext',data)
     }
   })
+  ipcRenderer.on('pushPioneerStatus', (event, data) => {
+    console.log(' pushPioneerStatus! ',data)
+    console.log('data: ', data)
+    //
+    if(data.online){
+      store.commit('setPioneerLive',true)
+    }
+    if(data.pioneerUrl){
+      store.commit('setPioneerUrl',data.pioneerUrl)
+    }
+    //usersOnline
+    if(data.global && data.global.online){
+      store.commit('setUsersOnline',data.global.online)
+    }
+  })
   ipcRenderer.on('loadDevices', (event, data) => {
     console.log(' loadDevices event! ')
     console.log('data: ', data)
@@ -175,12 +190,31 @@ export default store => {
   ipcRenderer.on('hardwareInit', (event, data) => {
     console.log('**** hardwareInit', data)
     //TODO if not already in state
-
-    //enable keepkey icon
-    store.commit('connectKeepkey',true)
-
-    //push device info to devices
-    store.commit('registerDevice',data.info)
+    //
+    // //enable keepkey icon
+    // store.commit('connectKeepkey',true)
+    //
+    // //push device info to devices
+    // store.commit('registerDevice',data.info)
+  })
+  ipcRenderer.on('allUsbDevices', (event, data) => {
+    console.log('allUsbDevices event: ', data.allUsbDevices)
+    if(data && data.allUsbDevices){
+      store.commit('addUsbDevices',data.allUsbDevices)
+    }
+  })
+  ipcRenderer.on('allKeepKeys', (event, data) => {
+    console.log('allKeepKeys event: ', data.allKeepKeys)
+    if(data && data.allKeepKeys){
+      store.commit('addKeepKeys',data.allKeepKeys)
+    }
+  })
+  ipcRenderer.on('hardwareState', (event, data) => {
+    console.log('hardwareState state: ', data.state)
+    if(data && data.state){
+      console.log('hardwareState state: data.state.state **** ', data.state.state)
+      store.commit('setKeepKeyState',data.state.state)
+    }
   })
   ipcRenderer.on('events', (event, data) => {
     //event

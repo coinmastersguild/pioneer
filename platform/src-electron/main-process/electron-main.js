@@ -10,7 +10,7 @@
  * @type {string}
  */
 
-const TAG = ' | WALLET-MAIN | '
+const TAG = ' | ELECTRON-MAIN | '
 const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification } from 'electron'
 //import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
@@ -28,15 +28,15 @@ import {
   onStart,
   onLogin,
   attemptPair,
-  onCreate,
-  onPairKeepkey,
   checkPioneerUrl,
-  viewSeed,
   createWallet,
-  onAttemptCreate,
+  onAttemptCreateUsername,
   approveTransaction,
   refreshPioneer,
-  updateContext
+  updateContext,
+  continueSetup,
+  startHardware,
+  getUsbDevices
 } from './app'
 
 
@@ -206,6 +206,40 @@ app.on('activate', () => {
   }
 })
 
+//onAttemptCreateUsername
+ipcMain.on('onAttemptCreateUsername', async (event, data) => {
+  const tag = TAG + ' | onAttemptCreateUsername | '
+  try {
+    let createUserResult = await onAttemptCreateUsername(event, data)
+    log.info(tag,"createUserResult: ",createUserResult)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+//continueSetup
+ipcMain.on('continueSetup', async (event, data) => {
+  const tag = TAG + ' | continueSetup | '
+  try {
+    //TODO how can this return null sometimes??? without error?
+    let setupResult = await continueSetup(event, data)
+    log.info(tag,"setupResult: ",setupResult)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+//getUsbDevices
+ipcMain.on('getUsbDevices', async (event, data) => {
+  const tag = TAG + ' | getUsbDevices | '
+  try {
+    let getUsbDevicesResult = await getUsbDevices(event, data)
+    log.info(tag,"getUsbDevicesResult: ",getUsbDevicesResult)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
 /*
     refreshPioneer
 
@@ -216,6 +250,22 @@ ipcMain.on('refreshPioneer', async (event, data) => {
   try {
     let resultRefresh = await refreshPioneer(event, data)
     log.info(tag,"resultRefresh: ",resultRefresh)
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+/*
+    refreshPioneer
+
+ */
+
+ipcMain.on('startHardware', async (event, data) => {
+  const tag = TAG + ' | startHardware | '
+  try {
+    log.info(tag,"Checkpoint -1")
+    let resultStartHardware = await startHardware(event, data)
+    // log.info(tag,"resultStartHardware: ",resultStartHardware)
   } catch (e) {
     console.error(tag, e)
   }
@@ -306,6 +356,18 @@ ipcMain.on('onTryPin', async (event, data) => {
     //try pin
     Hardware.enterPin(data.pin)
     //if wrong?
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('checkPioneerUrl', async (event, data) => {
+  const tag = TAG + ' | checkPioneerUrl | '
+  try {
+    log.info(tag,"checkPioneerUrl",data)
+    //
+    checkPioneerUrl(event, data)
 
   } catch (e) {
     console.error(tag, e)

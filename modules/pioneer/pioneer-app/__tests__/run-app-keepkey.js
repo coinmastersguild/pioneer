@@ -78,8 +78,20 @@ let run_test = async function(){
 
                 //if already started
 
+                //verify not inited
+                let isInit = App.isInitialized()
+                if(isInit) throw Error("App already initialized")
+
+                //test
+
                 let resultInit = await App.init(config,isTestnet)
                 //console.log("resultInit: ",resultInit)
+
+                let isInit2 = App.isInitialized()
+                if(!isInit2) throw Error("App should be initialized")
+
+                //TODO should refuse to init again
+
 
                 //AutonomousOn
                 resultInit.events.on('message', async (request) => {
@@ -98,12 +110,16 @@ let run_test = async function(){
                 })
 
                 //pair
-                try{
-                    let pairResult = await App.pair("NGRIUY")
-                    console.log("pairResult: ",pairResult)
-                }catch(e){
+                // try{
+                //     let pairResult = await App.pair("NGRIUY")
+                //     console.log("pairResult: ",pairResult)
+                // }catch(e){
+                //
+                // }
 
-                }
+                //get user info
+                let userInfo = await App.getUserInfo()
+                console.log("userInfo: ",userInfo)
 
                 //get wallets
                 let wallets = await App.getWallets()

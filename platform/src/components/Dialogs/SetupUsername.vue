@@ -10,14 +10,22 @@
         <p>Please create a user</p>
       </div>
       <div v-if="!pioneerLive">
-        <q-input
-          filled
-          v-model="pioneerUrl"
-          label="Pioneer URL"
-          hint=""
-          lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Please type something']"
-        />
+        live: {{pioneerLive}}
+        <br/>
+
+        <div v-if="featureSelfHost">
+          <q-input
+            filled
+            v-model="pioneerUrl"
+            label="Pioneer URL"
+            hint=""
+            lazy-rules
+            :rules="[ val => val && val.length > 0 || 'Please type something']"
+          />
+        </div>
+        <div v-if="!featureSelfHost">
+          PioneerUrl: {{pioneerUrl}}
+        </div>
         <small>Attempting to connect...</small>
         <q-spinner
           color="primary"
@@ -33,14 +41,16 @@
           filled
           v-model="username"
           label="Username"
+          v-on:input="checkName"
           lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Please type something unique']"
+          :rules="[ val => val && val.length > 3 || error]"
         />
       </div>
-<!--  TODO      <q-toggle v-model="accept" label="I accept the license and terms" />-->
     </q-card-section>
       <q-card-actions align="center" class="q-pb-lg q-pl-md q-pr-md">
         <div v-if="pioneerLive">
+          <small>online: {{usersOnlineCount}}</small>
+          <small>users: {{usersOnline}}</small>
           <q-btn label="Continue" type="submit" color="primary" />
         </div>
         <div v-if="!pioneerLive">
@@ -61,7 +71,7 @@
       Offer changing of url if not live
 
    */
-
+  let featureSelfHost = process.env['SELF_HOST_FEATURE']
 
   //TODO offer pre-generated name
   // import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
@@ -70,24 +80,37 @@
   export default {
     data () {
       return {
+        featureSelfHost,
         error:false,
         pioneerLive:false,
+        usersOnline:[],
+        usersOnlineCount:0,
         username: "",
         pioneerUrl:"",
         password:""
       }
     },
     computed: {
-      ...mapGetters(['pioneerUrl','pioneerLive']),
+      ...mapGetters(['getPioneerUrl','getPioneerStatus','getUsersOnline']),
     },
     async mounted() {
       try{
+
         this.$q.electron.ipcRenderer.send('checkPioneerUrl', {});
       }catch(e){
         console.error(e)
       }
     },
     watch: {
+      "$store.state.usersOnline": {
+        handler: function() {
+          const usersOnline = this.$store.getters['getUsersOnline'];
+          console.log("usersOnline: ",usersOnline)
+          this.usersOnline = usersOnline
+          this.usersOnlineCount = usersOnline.length
+        },
+        immediate: true
+      },
       "$store.state.pioneerUrl": {
         handler: function() {
           const pioneerUrl = this.$store.getters['getPioneerUrl'];
@@ -128,7 +151,7 @@
           payload.urlSpec = this.pioneerUrl
         }
 
-        this.$q.electron.ipcRenderer.send('onAttemptCreate', payload);
+        this.$q.electron.ipcRenderer.send('onAttemptCreateUsername', payload);
 
         //check username
 
@@ -151,6 +174,20 @@
         //     message: this.error
         //   })
         // }
+      },
+
+      checkName () {
+        //update url
+        console.log("checkName: ",this.username)
+
+        if(this.username.length > 3){
+          //check on remote
+          this.$q.electron.ipcRenderer.send('checkUsernameAvailable', {username:this.username});
+        } else {
+          this.error = "Too Short!"
+        }
+
+        //test url
       },
       onTest () {
         //update url

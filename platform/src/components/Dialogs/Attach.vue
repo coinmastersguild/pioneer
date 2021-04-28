@@ -21,7 +21,7 @@
       },
       openConnect: function () {
         this.hideModal()
-        this.showModal('Hardware')
+        this.showModal('HardwareConnect')
       }
     }
   }

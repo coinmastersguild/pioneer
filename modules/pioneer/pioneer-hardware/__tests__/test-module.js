@@ -22,6 +22,13 @@ let blockchains = [
 
 let run_test = async function(){
     try{
+        //get all usb devices
+        let allDevices = await Hardware.allDevices()
+        console.log("allDevices: ",allDevices.length)
+
+        //get all keepkeys
+        let allKeepkeys = await Hardware.listKeepKeys()
+        console.log("allKeepkeys: ",allKeepkeys)
 
         let KEEPKEY = await Hardware.start()
         KEEPKEY.events.on('event', async function(event) {

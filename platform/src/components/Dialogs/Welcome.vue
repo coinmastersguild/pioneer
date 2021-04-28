@@ -8,14 +8,14 @@
       <br>
       <div v-if="!usePrivateNode">
         <div class="q-gutter-sm">
-          <q-checkbox v-model="acceptTerms" label="Using Public Rosetta Servers may link your public crypto activity with your IP address as well as other metadata. I understand the risks."></q-checkbox>
+          <q-checkbox v-model="acceptTerms" label="Using Public Servers (Pioneer/Rosetta/Bloockbook) may link your public crypto activity with your IP address as well as other metadata. I understand the risks."></q-checkbox>
         </div>
       </div>
       <div class="q-px-sm">
       </div>
       <small>Self Host & configure</small><q-toggle v-model="usePrivateNode" color="green"/>
       <div v-if="!usePrivateNode">
-        <q-btn @click="onSubmitQuick" label="Continue to using Public Nodes" type="configure" color="primary" class="q-ml-sm"/>
+        <q-btn @click="onSubmitQuick" label="Continue using Public Nodes" type="configure" color="primary" class="q-ml-sm"/>
       </div>
       <div v-if="usePrivateNode">
         <q-btn @click="onSetupPioneer" label="Continue to Node Setup" type="configure" color="primary" class="q-ml-sm"/>
@@ -90,7 +90,7 @@
         if(this.acceptTerms){
           this.$q.electron.ipcRenderer.send('setPioneerUrl', {});
           this.hideModal()
-          this.showModal('Username')
+          this.showModal('SetupUsername')
         }else{
           console.error("Must Accept terms!")
           alert("Must Accept terms!")

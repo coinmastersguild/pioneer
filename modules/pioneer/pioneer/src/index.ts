@@ -498,7 +498,7 @@ module.exports = class wallet {
                     //validate info
                     log.debug("walletInfo: ",walletInfo)
 
-                    if(walletInfo.balances){
+                    if(walletInfo && walletInfo.balances){
                         let coins = Object.keys(walletInfo.balances)
                         for(let i = 0; i < coins.length; i++){
                             let coin = coins[i]
