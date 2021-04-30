@@ -53,8 +53,8 @@ export default {
       let account = newAccounts[0]
 
       //TODO use env
-      //let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-      let urlSpec = "https://pioneers.dev/spec/swagger.json"
+      let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+      //let urlSpec = "https://pioneers.dev/spec/swagger.json"
 
       if(account){
         let config = {

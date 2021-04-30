@@ -69,28 +69,33 @@ let run_test = async function(){
         /*
             ETH
         */
-        // console.log("info: ",prettyjson.render(info.public.ETH))
-        //
-        // //RUNE
-        // let masterETH = await Wallet.getMaster("ETH")
-        // console.log("masterETH: ",masterETH)
-        //
-        // let balanceETH = await Wallet.getBalance("ETH")
-        // console.log("balanceETH: ",balanceETH)
 
-        // let address = "tthor1x00pfwyx8xld45sdlmyn29vjf7ev0mv380z4y6"
-        // let amount = "2"
-        // let memo = ""
+        let masterETH = await Wallet.getMaster("ETH")
+        console.log("masterETH: ",masterETH)
+
+        let balanceETH = await Wallet.getBalance("ETH")
+        console.log("balanceETH: ",balanceETH)
+
+        let address = "0x33b35c665496bA8E71B22373843376740401F106"
+        let amount = "0.001"
+        let memo = ""
+
+        let transfer = {
+            coin:"ETH",
+            addressTo:address,
+            amount,
+            memo
+        }
+
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
         //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
         // console.log("transferSigned: ",transferSigned)
+
+        // let resultBroadcast = await Wallet.broadcastTransaction('ETH',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
         //
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)

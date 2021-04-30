@@ -402,7 +402,7 @@ let start_hardware = async function () {
         let walletFound = false
 
         let startReponse = await getDevice(keyring);
-
+        log.info(tag,"startReponse: ",startReponse)
         if(startReponse.error){
             switch(startReponse.errorCode) {
                 case 1:
@@ -411,9 +411,9 @@ let start_hardware = async function () {
                         msg:"no devices detected!"
                     }
                     break;
-                case 2:
+                case -1:
                     KEEPKEY_STATE = {
-                        state:2,
+                        state:-1,
                         msg:"unable to claim!"
                     }
                     break;
@@ -442,39 +442,47 @@ let start_hardware = async function () {
 
         //else wait for connect
         if(walletFound){
+            log.info(tag,"wallet found on startup!")
             KEEPKEY_WALLET =  await createWallet()
             log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
         }
 
         usbDetect.on('add:11044:1', async function(device:any) {
             emitter.emit('event',{event:"connect",msg:"add Keepkey!",code:'add:11044:1'})
+            log.info(tag,"add:11044:1 device: ",device)
+
             // TODO BUG no devices found!?
             // KEEPKEY_WALLET = await createWallet()
+
         });
 
         usbDetect.on('remove:11044:1', function(device:any) {
             emitter.emit('event',{event:"disconnect",msg:"removeing Keepkey!",code:'remove:11044:1'})
             keyring.removeAll()
+            log.info("shutting down connection")
+            process.exit(1)
         });
 
         usbDetect.on('add:11044:2', async function(device:any) {
             log.debug("Connecting to Keepkey!")
             emitter.emit('event',{event:"connect",msg:"Connecting to Keepkey!",code:'add:11044:2'})
-            await sleep(2000)
+            await sleep(300)
             KEEPKEY_WALLET =  await createWallet()
             log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
 
             //get lock status
-            let lockStatus = await KEEPKEY_WALLET.isLocked()
-            if(lockStatus){
-                KEEPKEY_STATE = {
-                    state:3,
-                    msg:"device locked!"
-                }
-            } else {
-                KEEPKEY_STATE = {
-                    state:4,
-                    msg:"unlocked"
+            if(KEEPKEY_WALLET){
+                let lockStatus = await KEEPKEY_WALLET.isLocked()
+                if(lockStatus){
+                    KEEPKEY_STATE = {
+                        state:3,
+                        msg:"device locked!"
+                    }
+                } else {
+                    KEEPKEY_STATE = {
+                        state:4,
+                        msg:"unlocked"
+                    }
                 }
             }
         });
@@ -482,7 +490,10 @@ let start_hardware = async function () {
         usbDetect.on('remove:11044:2', async function(device:any) {
             log.debug("Keepkey Disconnected!")
             emitter.emit('event',{event:"disconnect",msg:"Keepkey Disconnected!"})
-
+            KEEPKEY_STATE = {
+                state:0,
+                msg:"unable to claim device!"
+            }
             //disconnect
             // const wallet:any = Object.values(keyring.wallets)[0]
             // if (!!wallet) { // @ts-ignore
@@ -491,7 +502,7 @@ let start_hardware = async function () {
             await keyring.removeAll()
             //webUsbAdapter.clearDevices()
         });
-        //
+
 
         //get current state
 
@@ -503,8 +514,17 @@ let start_hardware = async function () {
         KEEPKEY_WALLET.events = emitter
         return KEEPKEY_WALLET;
     } catch (e) {
-        console.error(tag, "Error: ", e);
-        throw e;
+        //if claim interface
+        log.error(tag,"e: ",e)
+        log.error(tag,"message: ",e.message)
+        if(e.message.indexOf("claimInterface")){
+            //
+            return KEEPKEY_WALLET
+        } else {
+            //unhandled
+            log.error(tag, "Error: ", e);
+            throw e;
+        }
     }
 };
 
@@ -567,18 +587,18 @@ let getDevice = async function(keyring: Keyring) {
         }
         return wallet;
     } catch (e) {
-        log.error(tag,"*** e: ",e.toString())
-        e = e.toString()
-        if(e.indexOf("no devices found")){
+        //log.error(tag,"*** e: ",e.toString())
+        log.info("failed to get device: ",e.message)
+        if(e.message.indexOf("no devices found") >= 0){
             return {
                 error:true,
                 errorCode: 1,
                 errorMessage:"No devices"
             }
-        } else if(e.indexOf("claim")){
+        } else if(e.message.indexOf("claimInterface")>= 0){
             return {
                 error:true,
-                errorCode: 1,
+                errorCode: -1,
                 errorMessage:"Unable to claim!"
             }
         } else {
@@ -587,7 +607,6 @@ let getDevice = async function(keyring: Keyring) {
                 errorMessage:e
             }
         }
-
     }
 }
 
@@ -613,28 +632,16 @@ let getDevice = async function(keyring: Keyring) {
 //     return wallet;
 // }
 
-let createWallet = async function (attempts:any = 0) {
+//fuck polling
+let createWallet = async function () {
     let tag = " | createWallet | ";
     try {
 
         const keyring = new Keyring();
 
+        let wallet = await getDevice(keyring);
 
-        let wallet
-        //wait for connect
-        let isConnected = false
-        while(!isConnected){
-            try{
-                wallet = await getDevice(keyring);
-                isConnected = true
-            }catch(e){
-                log.debug("No devices connected!")
-            }
-            await sleep(300)
-        }
-
-        if (wallet) {
-
+        if(!wallet.error){
             wallet.transport.on(Events.BUTTON_REQUEST, async () => {
                 // if (autoButton && supportsDebugLink(wallet)) {
                 //     await wallet.pressYes();
@@ -647,16 +654,70 @@ let createWallet = async function (attempts:any = 0) {
                 emitter.emit('event',{event:"hardwareEvent",msg:"hardware event occurred!",values})
             });
 
-            return wallet;
+            return wallet
         } else {
-            //no wallet connected yet!
+            log.info(tag," Device not able to claim yet")
             return null
         }
+
+        // if (wallet) {
+        //
+        //
+        //     return wallet;
+        // } else {
+        //     //no wallet connected yet!
+        //     return null
+        // }
     } catch (error) {
         log.error(tag,"failed to createWallet!")
         throw Error(error)
     }
 };
+
+// let createWallet = async function (attempts:any = 0) {
+//     let tag = " | createWallet | ";
+//     try {
+//
+//         const keyring = new Keyring();
+//
+//
+//         let wallet
+//         //wait for connect
+//         let isConnected = false
+//         while(!isConnected){
+//             try{
+//                 wallet = await getDevice(keyring);
+//                 isConnected = true
+//             }catch(e){
+//                 log.debug("No devices connected!")
+//             }
+//             await sleep(300)
+//         }
+//
+//         if (wallet) {
+//
+//             wallet.transport.on(Events.BUTTON_REQUEST, async () => {
+//                 // if (autoButton && supportsDebugLink(wallet)) {
+//                 //     await wallet.pressYes();
+//                 // }
+//                 emitter.emit('event',{event:"buttonRequest",msg:"Accept event on KeepKey to continue!"})
+//             });
+//
+//             wallet.transport.onAny((event: string[], ...values: any[]) => {
+//                 console.info(event, ...values)
+//                 emitter.emit('event',{event:"hardwareEvent",msg:"hardware event occurred!",values})
+//             });
+//
+//             return wallet;
+//         } else {
+//             //no wallet connected yet!
+//             return null
+//         }
+//     } catch (error) {
+//         log.error(tag,"failed to createWallet!")
+//         throw Error(error)
+//     }
+// };
 
 // @ts-ignore
 // let createHidWallet = async function (attempts:any = 0) {

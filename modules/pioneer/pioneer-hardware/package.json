@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-hardware",
-  "version": "6.3.20",
+  "version": "6.3.21",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

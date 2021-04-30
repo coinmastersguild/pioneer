@@ -32,7 +32,7 @@ export default store => {
   })
   ipcRenderer.on('hardware', (event, data) => {
     //event
-    console.log('hardware event: ', data)
+    //console.log('hardware event: ', data)
 
     switch(data.event.event) {
       case "connect":
@@ -46,7 +46,8 @@ export default store => {
         // code block
         break;
       default:
-        console.log("unhandled event! ",data.event)
+        //TODO Spammy
+        //console.log("unhandled event! ",data.event)
     }
 
     //
@@ -79,8 +80,15 @@ export default store => {
   ipcRenderer.on('setContext', (event, data) => {
     console.log(' setContext event! ',data)
     console.log('data: ', data)
+    if(data.context){
+      store.commit('setContext',data.context)
+    }
+  })
+  ipcRenderer.on('setContextInvoke', (event, data) => {
+    console.log(' setContext event! ',data)
+    console.log('data: ', data)
     if(data){
-      store.commit('setContext',data)
+      store.commit('setInvocationContext',data)
     }
   })
   ipcRenderer.on('pushPioneerStatus', (event, data) => {
@@ -133,15 +141,19 @@ export default store => {
     //load wallet info
 
   })
+  ipcRenderer.on('updateWallets', (event, data) => {
+    console.log('updateWallets: ', data)
+    store.commit('registerWallets',data)
+  })
+  //appPubkeys
   ipcRenderer.on('updateTotalValue', (event, data) => {
     console.log('updateTotalValue: ', data)
     store.commit('setTotal',data)
   })
-  ipcRenderer.on('updateWallets', (event, data) => {
-    console.log('updateWallets: ', data)
-    for(let i = 0; i < data.length; i++){
-      let wallet = data[i]
-      store.commit('registerWallet',wallet)
+  ipcRenderer.on('addPubkeys', (event, data) => {
+    console.log('appPubkeys event: ', data)
+    if(data.pubkeys){
+      store.commit('appPubkeys',data.pubkeys)
     }
   })
   ipcRenderer.on('invocations', (event, data) => {
@@ -170,6 +182,31 @@ export default store => {
     //load wallet info
 
   })
+  ipcRenderer.on('updateConfig', (event, data) => {
+    //blockchains
+    if(data.blockchains){
+      store.commit('setBlockchains',data.blockchains)
+    }
+    //username
+    if(data.username){
+      store.commit('setUsername',data.username)
+    }
+    //queryKey
+    if(data.queryKey){
+      store.commit('setQueryKey',data.queryKey)
+    }
+    //locale
+    if(data.locale){
+      store.commit('setLocale',data.locale)
+    }
+    //wss
+
+    //spec
+    if(data.pioneerUrl){
+      store.commit('setPioneerUrl',data.pioneerUrl)
+    }
+    //password
+  })
   ipcRenderer.on('checkPioneerUrl', (event, data) => {
     console.log('checkPioneerUrl: ', data)
     console.log('checkPioneerUrl: online: ', data.online)
@@ -197,6 +234,13 @@ export default store => {
     // //push device info to devices
     // store.commit('registerDevice',data.info)
   })
+  ipcRenderer.on('pairKeepkey', (event, data) => {
+    console.log('**** pairKeepkey', data)
+    if(data.success){
+      //paired
+      //....
+    }
+  })
   ipcRenderer.on('allUsbDevices', (event, data) => {
     console.log('allUsbDevices event: ', data.allUsbDevices)
     if(data && data.allUsbDevices){
@@ -213,7 +257,14 @@ export default store => {
     console.log('hardwareState state: ', data.state)
     if(data && data.state){
       console.log('hardwareState state: data.state.state **** ', data.state.state)
-      store.commit('setKeepKeyState',data.state.state)
+      store.commit('setKeepKeyState',{state:data.state.state})
+    }
+  })
+  ipcRenderer.on('hardwareStatus', (event, data) => {
+    console.log('hardwareStatus msg: ', data.state.msg)
+    if(data && data.state && data.state.msg){
+      console.log('hardwareState state: data.state.state **** ', data.state.msg)
+      store.commit('setKeepKeyStatus',{status:data.state.msg})
     }
   })
   ipcRenderer.on('events', (event, data) => {

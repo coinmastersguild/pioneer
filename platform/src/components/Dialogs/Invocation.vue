@@ -2,7 +2,16 @@
   <q-card class="text-center q-pb-lg" style="min-width:450px;">
     <q-card class="my-card">
       <q-card-section>
-        {{invocationContext}}
+        <div class="text-left">
+          <small>invocation</small>
+          {{invocationContext}}
+        </div>
+        <div class="text-right">
+          type: {{invocation.invocation.type}}
+        </div>
+
+
+
         <div class="text-h6"></div>
         <div class="text-subtitle2"></div>
       </q-card-section>
@@ -93,8 +102,11 @@
         loading: false,
         error: false,
         items: [],
+        wallets:[],
+        walletContext:{},
         invocations: [],
         invocationContext: null,
+        context:"",
         invocation: {}
       };
     },
@@ -106,9 +118,26 @@
       }
     },
     computed: {
-      ...mapGetters(['getInvocations','getInvocationContext'])
+      ...mapGetters(['getInvocations','getInvocationContext','getApps','layout','getWalletInfo','getContext'])
     },
     watch: {
+      "$store.state.context": {
+        handler: function(value) {
+          //get value
+          this.context = this.$store.getters['getContext'];
+          console.log("watch: this.context: ",this.context)
+        },
+        immediate: true
+      },
+      "$store.state.wallets": {
+        handler: function(value) {
+          console.log("value: ",value)
+          //get value
+          this.updateWalletContext()
+          this.updateContext()
+        },
+        immediate: true
+      },
       "$store.state.invocationContext": {
         handler: function (value) {
           console.log("value: ", value)
@@ -136,6 +165,36 @@
           //this.items.push()
           done()
         }, 1000)
+      },
+      updateWalletContext() {
+        //get value
+        this.wallets = this.$store.getters['wallets'];
+        console.log("wallets: ",this.wallets)
+        console.log("this.context: ",this.context)
+        this.updateContext()
+        let currentWallet = this.wallets.filter(e => e.walletId === this.context)
+        console.log("currentWallet: ",currentWallet)
+        this.walletContext = currentWallet[0]
+        if(this.walletContext){
+          let coins = Object.keys(currentWallet[0].masters)
+          let coinList = []
+          for(let i = 0; i < coins.length; i++){
+            let coin = coins[i]
+            coinList.push({
+              symbol:coin,
+              icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
+            })
+          }
+          this.coins = coinList
+        } else if(this.wallets.length > 0){
+          //set context to current
+          this.context = this.wallets[0].walletId
+          this.$q.electron.ipcRenderer.send('updateContext', {
+            context:this.context,
+            reason:"current context not in wallet array!"
+          });
+
+        }
       },
       approve(invocationId) {
         console.log("invocationId: ",invocationId)

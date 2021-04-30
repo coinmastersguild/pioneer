@@ -67,7 +67,7 @@
           onStartPioneer: async function () {
             console.log("start Pioneer")
             //
-            this.$q.electron.ipcRenderer.send('onStartPioneer', {});
+            this.$q.electron.ipcRenderer.send('onStart', {});
           },
           onStopPioneer: async function () {
             console.log("start Pioneer")

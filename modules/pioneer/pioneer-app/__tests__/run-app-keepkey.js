@@ -72,8 +72,9 @@ let run_test = async function(){
             if(keepkeyStatus.state > 3) {
                 let isTestnet = true
 
-                config.password = password
-                config.username = username
+                //Local override
+                // config.password = password
+                // config.username = username
                 config.hardware = true
 
                 //if already started

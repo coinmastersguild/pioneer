@@ -78,6 +78,9 @@ pubkeysDB.createIndex({pubkey: 1}, {unique: true})
 const BALANCE_ON_REGISTER = true
 
 module.exports = {
+    refresh: async function (username:string) {
+        return get_and_rescan_pubkeys(username);
+    },
     register: async function (username:string, xpubs:any, walletId:string) {
         return register_pubkeys(username, xpubs, walletId);
     },
@@ -88,6 +91,59 @@ module.exports = {
         return update_pubkeys(username, xpubs, walletId);
     },
 }
+
+let get_and_rescan_pubkeys = async function (username:string) {
+    let tag = TAG + " | get_and_rescan_pubkeys | "
+    try {
+        //get pubkeys from mongo with walletId tagged
+        let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [username]}})
+        log.info(tag,"pubkeysMongo: ",pubkeysMongo)
+
+        //get user info from mongo
+        let userInfo = await usersDB.findOne({username})
+        log.info(tag,"userInfo: ",userInfo)
+        let blockchains = userInfo.blockchains
+        if(!userInfo.blockchains) throw Error("Invalid user!")
+
+        //reformat
+        let pubkeys:any = []
+        let masters:any = {}
+        for(let i = 0; i < pubkeysMongo.length; i++){
+            let pubkeyInfo = pubkeysMongo[i]
+            delete pubkeyInfo._id
+
+            //for each wallet by user
+            for(let j = 0; j < userInfo.wallets.length; j++){
+                let walletId = userInfo.wallets[i]
+                if(pubkeyInfo.type === 'zpub'){
+                    //if walletId found in tags
+                    let match = pubkeyInfo.tags.filter((e: any) => e === walletId)
+                    if(match.length > 0){
+                        register_zpub(username,pubkeyInfo,walletId)
+                    }
+                }else if(pubkeyInfo.type === 'xpub'){
+                    let match = pubkeyInfo.tags.filter((e: any) => e === walletId)
+                    if(match.length > 0){
+                        register_xpub(username,pubkeyInfo,walletId)
+                    }
+                }else if(pubkeyInfo.type === 'address'){
+                    let match = pubkeyInfo.tags.filter((e: any) => e === walletId)
+                    if(match.length > 0){
+                        register_address(username,pubkeyInfo,walletId)
+                    }
+                }
+            }
+        }
+
+
+
+        return {pubkeys,masters}
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
 
 let get_and_verify_pubkeys = async function (username:string, walletId:string) {
     let tag = TAG + " | get_and_verify_pubkeys | "
@@ -181,7 +237,8 @@ let register_zpub = async function (username:string, pubkey:any, walletId:string
 let register_xpub = async function (username:string, pubkey:any, walletId:string) {
     let tag = TAG + " | register_xpub | "
     try {
-        if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
+        if(!pubkey.pubkey) throw Error("102: invalid pubkey! missing pubkey!")
+        if(pubkey.pubkey === true) throw Error("103: invalid pubkey! === true wtf!")
         if(!pubkey.symbol) throw Error("104: invalid pubkey! missing symbol!")
 
         //if zpub add zpub
@@ -200,7 +257,7 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
             walletId,
             type:'xpub',
             blockchain:pubkey.blockchain,
-            pubkey:pubkey.xpub,
+            pubkey:pubkey.pubkey,
             master:address,
             network:pubkey.blockchain,
             asset:pubkey.symbol,
@@ -449,7 +506,6 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
 
                 entryMongo.pubkey = xpub
                 entryMongo.xpub = xpub
-                entryMongo.xpub = true
                 entryMongo.type = 'xpub'
                 entryMongo.master = pubkeyInfo.address
                 entryMongo.address = pubkeyInfo.address
@@ -464,7 +520,6 @@ let register_pubkeys = async function (username: string, pubkeys: any, walletId:
 
                 entryMongo.pubkey = zpub
                 entryMongo.zpub = zpub
-                entryMongo.zpub = true
                 entryMongo.type = 'zpub'
                 entryMongo.master = pubkeyInfo.address
                 entryMongo.address = pubkeyInfo.address

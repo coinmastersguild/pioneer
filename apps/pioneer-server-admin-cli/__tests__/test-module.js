@@ -20,8 +20,8 @@ queue.getWork("pioneer:pubkey:ingest:deadletter",100)
 
 
 //drop all deadletter
-// redis.del("pioneer:pubkey:ingest:deadletter")
-//     .then(function(result){
-//         console.log("drop deadletter: ",result)
-//     })
+redis.del("pioneer:pubkey:ingest:deadletter")
+    .then(function(result){
+        console.log("drop deadletter: ",result)
+    })
 

@@ -83,8 +83,10 @@ let MASTER_MAP = {};
 let WALLET_VALUE_MAP = {};
 let CONTEXT_WALLET_SELECTED;
 //urlSpec
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json';
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev';
+// let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+// let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json';
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001';
 let urlSpec = URL_PIONEER_SPEC;
 let KEEPKEY;
 let network;
@@ -852,6 +854,36 @@ let send_approval = function (intent) {
         }
     });
 };
+let app_to_queue = function (intent) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | app_to_queue | ";
+        try {
+            if (!intent.address)
+                throw Error("102: invalid intent missing address!");
+            if (!intent.coin)
+                throw Error("102: invalid intent missing coin!");
+            if (!intent.amount)
+                throw Error("102: invalid intent missing amount!");
+            log.debug(tag, "params: ", intent);
+            intent.addressTo = intent.address;
+            log.debug(tag, "Building TX on context: ", WALLET_CONTEXT);
+            if (!intent.context)
+                intent.context = intent.context;
+            //TODO check remote context match's local
+            //add to queue
+            let resultAdd = yield WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(intent);
+            log.debug(tag, "resultAdd: ", resultAdd);
+            //verify added
+            let resultNewQueue = yield WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue();
+            log.debug(tag, "resultNewQueue: ", resultNewQueue);
+            return resultNewQueue;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
 let send_to_address = function (intent) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | send_to_address | ";
@@ -1111,13 +1143,15 @@ let init_wallet = function (config, isTestnet) {
             if (config.urlSpec || config.spec) {
                 URL_PIONEER_SPEC = config.urlSpec || config.spec;
             }
+            //if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json"
             if (!URL_PIONEER_SPEC)
-                URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json";
+                URL_PIONEER_SPEC = "http://127.0.0.1:9001/spec/swagger.json";
             if (config.pioneerSocket || config.wss) {
                 URL_PIONEER_SOCKET = config.pioneerSocket || config.wss;
             }
+            // if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
             if (!URL_PIONEER_SOCKET)
-                URL_PIONEER_SOCKET = "wss://pioneers.dev";
+                URL_PIONEER_SOCKET = "ws://127.0.0.1:9001";
             let output = {};
             //get wallets
             let walletFiles = yield pioneer_config_1.getWallets();
@@ -1363,8 +1397,30 @@ let init_wallet = function (config, isTestnet) {
             //get remote user info
             let userInfo = yield network.instance.User();
             userInfo = userInfo.data;
-            if (!userInfo.context)
-                throw Error("Invalid user info! missing context!");
+            if (!userInfo.context) {
+                if (walletFiles.length === 0) {
+                    throw Error("You must first create/pair a wallet to use app!");
+                }
+                else {
+                    //no context found remote
+                    //setting a context from 0
+                    log.info(tag, "offline: ", output.offline);
+                    for (let i = 0; i < walletFiles.length; i++) {
+                        let walletFile = walletFiles[i];
+                        if (output.offline.indexOf(walletFile) >= 0) {
+                            log.info(tag, "wallet is offline: ", walletFile);
+                        }
+                        else {
+                            log.info(tag, "Setting New Context newContext: ", walletFile);
+                            let resultUpdateContext = yield network.instance.SetContext(null, { context: walletFile });
+                            resultUpdateContext = resultUpdateContext.data;
+                            log.info(tag, "resultUpdateContext: ", resultUpdateContext);
+                            WALLET_CONTEXT = walletFile;
+                            output.context = WALLET_CONTEXT;
+                        }
+                    }
+                }
+            }
             if (walletFiles.indexOf(userInfo.context) >= 0) {
                 log.debug(tag, "userInfo: ", userInfo);
                 log.debug(tag, "context: ", userInfo.context);
@@ -1375,18 +1431,6 @@ let init_wallet = function (config, isTestnet) {
                 log.info(tag, "remote context NOT in loaded wallet");
                 //set remote context to position0
                 log.info(tag, "walletNames: ", walletFiles);
-                let newContext = walletFiles[0];
-                if (newContext) {
-                    log.info(tag, "newContext: ", newContext);
-                    let resultUpdateContext = yield network.instance.SetContext(null, { context: newContext });
-                    resultUpdateContext = resultUpdateContext.data;
-                    log.info(tag, "resultUpdateContext: ", resultUpdateContext);
-                    WALLET_CONTEXT = newContext;
-                    output.context = WALLET_CONTEXT;
-                }
-                else {
-                    throw Error("Could not figure out context!");
-                }
             }
             //after registered start socket
             //sub all to events
@@ -1423,6 +1467,7 @@ let init_wallet = function (config, isTestnet) {
                 let signedTx;
                 switch (request.type) {
                     case 'swap':
+                        //TODO make interactive!
                         //Note this is ETH only
                         //TODO validate inputs
                         signedTx = yield build_swap(request.invocation, request.invocationId);
@@ -1430,6 +1475,7 @@ let init_wallet = function (config, isTestnet) {
                         clientEvents.events.emit('broadcast', signedTx);
                         break;
                     case 'approve':
+                        //TODO make interactive!
                         //Note this is ETH only
                         if (!request.invocationId)
                             throw Error("102: invalid invocation! missing id!");
@@ -1442,9 +1488,9 @@ let init_wallet = function (config, isTestnet) {
                         if (!request.invocationId)
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
-                        let unSignedTx = yield send_to_address(request.invocation);
-                        log.debug(tag, "unSignedTx: ", unSignedTx);
-                        clientEvents.events.emit('approval', unSignedTx);
+                        let invokeQueue = yield app_to_queue(request.invocation);
+                        log.info(tag, "invokeQueue: ", invokeQueue);
+                        clientEvents.events.emit('invokeQueue', invokeQueue);
                         break;
                     case 'context':
                         //switch context

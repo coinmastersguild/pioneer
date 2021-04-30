@@ -76,12 +76,14 @@ let run_test = async function(){
             let pubkeys = await Hardware.getPubkeys(blockchains)
             console.log("pubkeys: ",pubkeys)
             console.log("pubkeys: ",prettyjson.render(pubkeys))
+        } else if(state.state < 0){
+            console.log("Failed to claim!")
+            console.log("Please unplug the device!")
+            console.log("Please exif all tabs and client that may connect to keepkey!")
+            console.log("Please reconnect the device!")
         }else{
             console.log(state)
             console.log("Please connect a device!")
-
-            await sleep(2000)
-            run_test()
         }
 
     }catch(e){

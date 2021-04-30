@@ -83,8 +83,10 @@ let MASTER_MAP:any = {}
 let WALLET_VALUE_MAP:any = {}
 let CONTEXT_WALLET_SELECTED
 //urlSpec
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+// let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+// let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001'
 
 let urlSpec = URL_PIONEER_SPEC
 
@@ -911,6 +913,41 @@ let send_approval = async function (intent:any) {
     }
 };
 
+let app_to_queue = async function (invocation:any) {
+    let tag = " | app_to_queue | ";
+    try {
+        if(!invocation.invocationId) throw Error("102: invalid intent missing invocationId!")
+        if(!invocation.type) throw Error("102: invalid intent missing type!")
+        if(!invocation.address) throw Error("102: invalid intent missing address!")
+        if(!invocation.coin) throw Error("102: invalid intent missing coin!")
+        if(!invocation.amount) throw Error("102: invalid intent missing amount!")
+        log.debug(tag,"invocation: ",invocation)
+        invocation.addressTo = invocation.address
+
+        log.debug(tag,"Building TX on context: ",WALLET_CONTEXT)
+        if(!invocation.context) invocation.context = invocation.context
+        //TODO check remote context match's local
+
+        //add to queue
+        let resultAdd = await WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(invocation)
+        log.debug(tag,"resultAdd: ",resultAdd)
+
+        //verify added
+        let resultNewQueue = await WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue()
+        log.debug(tag,"resultNewQueue: ",resultNewQueue)
+
+        let output = {
+            invocationId:invocation.invocationId,
+            invocation,
+            queue:resultNewQueue,
+        }
+        return output
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
+};
+
 let send_to_address = async function (intent:any) {
     let tag = " | send_to_address | ";
     try {
@@ -1172,12 +1209,14 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         if(config.urlSpec || config.spec){
             URL_PIONEER_SPEC = config.urlSpec || config.spec
         }
-        if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json"
+        //if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json"
+        if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "http://127.0.0.1:9001/spec/swagger.json"
 
         if(config.pioneerSocket || config.wss){
             URL_PIONEER_SOCKET = config.pioneerSocket || config.wss
         }
-        if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
+        // if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
+        if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "ws://127.0.0.1:9001"
 
         let output:any = {}
 
@@ -1448,7 +1487,28 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote user info
         let userInfo = await network.instance.User()
         userInfo = userInfo.data
-        if(!userInfo.context) throw Error("Invalid user info! missing context!")
+        if(!userInfo.context) {
+            if(walletFiles.length === 0){
+                throw Error("You must first create/pair a wallet to use app!")
+            } else {
+                //no context found remote
+                //setting a context from 0
+                log.info(tag,"offline: ",output.offline)
+                for(let i = 0; i < walletFiles.length; i++){
+                    let walletFile = walletFiles[i]
+                    if(output.offline.indexOf(walletFile) >= 0){
+                        log.info(tag,"wallet is offline: ",walletFile)
+                    } else {
+                        log.info(tag,"Setting New Context newContext: ",walletFile)
+                        let resultUpdateContext = await network.instance.SetContext(null,{context:walletFile})
+                        resultUpdateContext = resultUpdateContext.data
+                        log.info(tag,"resultUpdateContext: ",resultUpdateContext)
+                        WALLET_CONTEXT = walletFile
+                        output.context = WALLET_CONTEXT
+                    }
+                }
+            }
+        }
         if(walletFiles.indexOf(userInfo.context) >= 0){
             log.debug(tag,"userInfo: ",userInfo)
             log.debug(tag,"context: ",userInfo.context)
@@ -1458,17 +1518,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             log.info(tag,"remote context NOT in loaded wallet")
             //set remote context to position0
             log.info(tag,"walletNames: ",walletFiles)
-            let newContext = walletFiles[0]
-            if(newContext){
-                log.info(tag,"newContext: ",newContext)
-                let resultUpdateContext = await network.instance.SetContext(null,{context:newContext})
-                resultUpdateContext = resultUpdateContext.data
-                log.info(tag,"resultUpdateContext: ",resultUpdateContext)
-                WALLET_CONTEXT = newContext
-                output.context = WALLET_CONTEXT
-            } else {
-                throw Error("Could not figure out context!")
-            }
+
         }
 
 
@@ -1517,6 +1567,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             let signedTx
             switch(request.type) {
                 case 'swap':
+                    //TODO make interactive!
                     //Note this is ETH only
                     //TODO validate inputs
                     signedTx = await build_swap(request.invocation,request.invocationId)
@@ -1524,6 +1575,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     clientEvents.events.emit('broadcast',signedTx)
                     break;
                 case 'approve':
+                    //TODO make interactive!
                     //Note this is ETH only
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
@@ -1534,9 +1586,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 case 'transfer':
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    let unSignedTx = await send_to_address(request.invocation)
-                    log.debug(tag,"unSignedTx: ", unSignedTx)
-                    clientEvents.events.emit('approval',unSignedTx)
+                    let invokeQueue = await app_to_queue(request.invocation)
+                    log.info(tag,"invokeQueue: ", invokeQueue)
+                    clientEvents.events.emit('invokeQueue',invokeQueue)
                     break;
                 case 'context':
                     //switch context

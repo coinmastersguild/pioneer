@@ -90,12 +90,12 @@ let run_test = async function(){
             console.log("\n \n PIN ENTRY \n \n " + table.toString() + "\n \n");
 
             let wallet = await Hardware.getPubkeys(blockchains)
+
             //init
             wallet.hardware = true
             wallet.type = 'keepkey'
             wallet.features = KEEPKEY.features
             console.log("wallet: ",wallet)
-
 
             let success = await App.pairKeepkey(wallet,blockchains)
             console.log("success: ",success)

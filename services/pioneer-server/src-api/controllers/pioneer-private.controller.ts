@@ -385,7 +385,7 @@ export class pioneerPrivateController extends Controller {
                 let allAssets = Object.keys(walletInfo.masters)
                 for(let i = 0; i < allAssets.length; i++){
                     let asset = allAssets[i]
-                    if(!assetBalances[asset]) assetBalances[asset] = 0
+                    if(!assetBalances[asset]) assetBalances[asset] = '0'
                 }
                 log.info(tag,"assetBalances: ",assetBalances)
                 walletInfo.balances = assetBalances
@@ -445,6 +445,41 @@ export class pioneerPrivateController extends Controller {
                     let invocations = await invocationsDB.find({tags:{ $all: [accountInfo.username]}})
                     return invocations
                 }
+            }
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+    /**
+     Get the balances for a given username
+     */
+    @Get('/refresh')
+    public async refresh(@Header('Authorization') authorization): Promise<any> {
+        let tag = TAG + " | balance | "
+        try{
+            log.debug(tag,"queryKey: ",authorization)
+
+
+            let accountInfo = await redis.hgetall(authorization)
+            if(!accountInfo) throw Error("unknown token! token:"+authorization)
+            log.info(tag,"accountInfo: ",accountInfo)
+
+            if(accountInfo){
+                let refreshedTime = await redis.get(accountInfo.username+":lastRefresh")
+                if(!refreshedTime){
+                    //get all pubkeys for username
+
+                    //re-submit to pubkey ingester
+                }
+            } else {
+                throw Error("102: invalid auth token!")
             }
         }catch(e){
             let errorResp:Error = {

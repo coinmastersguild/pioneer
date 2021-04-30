@@ -72,7 +72,8 @@
         icon="explore"
         label="Keepkey Connected to Application"
         v-ripple
-        :active="keepKeyConnectedApplication"
+        :header-class="keepKeyConnectedApplication ? 'text-green' : ''"
+        :disable="keepKeyConnectedApplication"
       >
         <q-card>
           <q-card-section>
@@ -102,6 +103,8 @@
         label="Keepkey Unlocked"
         v-ripple
         :active="keepKeyUnlocked"
+        :header-class="keepKeyUnlocked ? 'text-green' : ''"
+        :disable="keepKeyUnlocked"
       >
         <q-card>
           <q-card-section>
@@ -110,6 +113,31 @@
           </q-card-section>
         </q-card>
       </q-expansion-item>
+
+        <q-expansion-item
+          popup
+          expand-icon-toggle
+          expand-separator
+          icon="offline_share"
+          label="Keepkey Paired with Application"
+          v-ripple
+          :active="keepKeyPaired"
+          :header-class="keepKeyPaired ? 'text-green' : ''"
+          :disable="keepKeyPaired"
+        >
+          <q-card>
+            <q-card-section>
+              <div>
+                {{devices}}
+              </div>
+              Keepkey Wallet file generated from pubkeys.
+
+              <div>
+                <small>dir /.pioneer/wallets/deviceId*.watch.wallet.json</small>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
 
       </q-list>
     </div>
@@ -135,16 +163,20 @@
 
 <script>
   import { mapMutations, mapGetters } from 'vuex'
+  import {ipcRenderer} from "electron";
     export default {
       name: "HardwareConnect",
       data() {
         return {
           keepKeyStatus:'',
+          onSuccess:false,
           keepKeyState:0,
           allUsbDevices:[],
           allKeepKeys:[],
+          devices:[],
           firmwareVersion:"",
           activeColor:"header-green",
+          keepKeyPaired:false,
           firmwareUpdateRequired:false,
           isLoaded:false,
           driversValid: true,
@@ -161,16 +193,72 @@
           //startHardware
           this.getUsbInfo()
           this.startHardwareConnection()
+
+          //sub to hardware
+          //TODO why the f do I need this, and watcher not work?
+          ipcRenderer.on('hardwareState', (event, data) => {
+            console.log('HARDWARE COMPONENT hardwareState state: ', data.state)
+            if(data && data.state){
+              if(data.state.state === -1){
+                this.keepKeyStatus = 'Device already Claimed! can not continue... '
+                alert(" KeepKey device is claimed by a seperate Application! \n 1. please close all browser tabs \n 2. exit any other keepkey applications \n 3. disconect device  \n 4. reconnect device")
+              }
+
+
+              if(data.state.state === 4){
+
+                this.keepKeyUnlocked = true
+                this.keepKeyConnectedComputer = true
+                this.keepKeyInUsbList = true
+                this.keepKeyConnectedApplication = true
+                this.isLoaded = true
+                this.keepKeyStatus = 'UnLocked!'
+                this.pairHardware()
+                //only start once
+                if(!this.onSuccess)setTimeout(this.openStartup,1000)
+                this.onSuccess = true
+              }
+            }
+          })
         }catch(e){
           console.error(e)
         }
       },
       watch: {
+        "$store.state.devices": {
+          handler: function() {
+            this.devices = this.$store.getters['getDevices'];
+            console.log("devices: ",this.devices)
+            //TODO multiple devices
+            //if any connected device without wallet then dont continue
+            if(this.devices.length > 0){
+              //is paired
+              //continue
+              setTimeout(this.openStartup,1000)
+            }
+          },
+          immediate: true
+        },
+        "$store.state.keepKeyStatus": {
+          handler: function() {
+            this.keepKeyStatus = this.$store.getters['getKeepKeyStatus'];
+            console.log("*** getKeepKeyStatus: ",this.keepKeyStatus)
+            if(this.keepKeyStatus && this.keepKeyStatus.status === "unlocked"){
+              this.keepKeyUnlocked = true
+              this.keepKeyConnectedComputer = true
+              this.keepKeyInUsbList = true
+              this.keepKeyConnectedApplication = true
+              this.isLoaded = true
+              this.keepKeyStatus = 'UnLocked!'
+            }
+          },
+          immediate: true
+        },
         "$store.state.keepKeyState": {
           handler: function() {
             this.keepKeyState = this.$store.getters['getKeepKeyState'];
             console.log("*** keepKeyState: ",this.keepKeyState)
-            if(this.keepKeyState === 4){
+            if(this.keepKeyState && this.keepKeyState.state === 4){
               this.keepKeyUnlocked = true
               this.keepKeyConnectedComputer = true
               this.keepKeyInUsbList = true
@@ -201,11 +289,15 @@
           immediate: true
         },
       },
+      computed: {
+        ...mapGetters(['getAllUsbDevices','getAllKeepKeys','getKeepKeyState','getKeepKeyStatus']),
+      },
       methods: {
         ...mapMutations(['showModal','hideModal']),
-        ...mapGetters(['getAllUsbDevices','getAllKeepKeys','getKeepKeyState']),
-        updateDevices: function () {
-          this.$q.electron.ipcRenderer.send('checkDevices', {});
+        //...mapGetters(['getAllUsbDevices','getAllKeepKeys','getKeepKeyState','getKeepKeyStatus']),
+        pairHardware: function () {
+          console.log("pairing hardware!")
+          this.$q.electron.ipcRenderer.send('onPairKeepKey', {});
         },
         getUsbInfo: function () {
           //
@@ -214,6 +306,10 @@
         startHardwareConnection: function () {
           //
           this.$q.electron.ipcRenderer.send('startHardware', {});
+        },
+        openStartup: function () {
+          this.hideModal()
+          this.showModal('Startup')
         },
         openRestore: function () {
           this.hideModal()

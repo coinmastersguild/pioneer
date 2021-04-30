@@ -125,6 +125,8 @@
   name: 'Settings',
   data () {
     return {
+      wallets:[],
+      pioneerLive:false,
       isLoggedIn:false,
       pioneerUrl:'',
       username:'',
@@ -143,7 +145,7 @@
     }
   },
   computed: {
-    ...mapGetters(['wallets']),
+    ...mapGetters(['getAllUsbDevices','getAllKeepKeys','getKeepKeyState','getKeepKeyStatus']),
     splitPhrase: function() {
       if(this.mnemonic && this.mnemonic.length > 0) {
         const parts = this.mnemonic.split(' ')
@@ -156,27 +158,22 @@
   watch: {
     "$store.state.pioneerUrl": {
       handler: function() {
-        const pioneerUrl = this.$store.getters['getPioneerUrl'];
-        console.log("Settings: pioneerUrl: ",pioneerUrl)
-        this.pioneerUrl = pioneerUrl
+        this.pioneerUrl = this.$store.getters['getPioneerUrl'];
+        console.log("Settings: pioneerUrl: ",this.pioneerUrl)
       },
       immediate: true
     },
     "$store.state.pioneerLive": {
       handler: function() {
-        const pioneerLive = this.$store.getters['getPioneerLive'];
-        console.log("Settings: pioneerLive: ",pioneerLive)
-        this.pioneerLive = pioneerLive
+        this.pioneerLive = this.$store.getters['getPioneerLive'];
+        console.log("Settings: pioneerLive: ",this.pioneerLive)
       },
       immediate: true
     },
     "$store.state.username": {
       handler: function (value) {
         console.log("username loaded!")
-        console.log("value: ",value)
-        const username = this.$store.getters['getUsername'];
-        console.log("Settings: username: ",username)
-        this.username = username
+        this.username = this.$store.getters['getUsername'];
       },
       immediate: true // provides initial (not changed yet) state
     },
@@ -189,8 +186,7 @@
     },
     "$store.state.wallets": {
       handler: function (value) {
-        console.log("wallet registered!")
-        console.log("value: ",value)
+        this.wallets = this.$store.getters['getWallets'];
       },
       immediate: true // provides initial (not changed yet) state
     }

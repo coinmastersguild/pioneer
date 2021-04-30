@@ -21,6 +21,19 @@
         <q-list align="left" separator style="width: 418px">
           <q-item clickable v-ripple>
             <q-item-section>
+              context: {{context}}
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-ripple>
+            <q-item-section>
+              Wallets: {{walletContexts}}</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple>
+            <q-item-section>
+              Devices: {{devices}}</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple>
+            <q-item-section>
               Username: {{username}}</q-item-section>
           </q-item>
 
@@ -34,8 +47,6 @@
           <q-item clickable v-ripple>
             <q-item-section>
               <q-item-section>
-                WalletId: {{walletId}}
-
                 <br/>
                 total Value: {{totalValueUsd}}
 
@@ -50,19 +61,10 @@
         </q-list>
       </div>
 
-
 <!--      <q-btn-->
 <!--        color="primary"-->
-<!--        @click="checkWallet"-->
-<!--        label="Update"-->
-<!--        size="lg"-->
-<!--        class="font-weight-medium q-pl-md q-pr-md"-->
-<!--        style="font-size:1rem;"-->
-<!--      ></q-btn>-->
-<!--      <q-btn-->
-<!--        color="primary"-->
-<!--        @click="changeWallet"-->
-<!--        label="Change Wallet"-->
+<!--        @click="addWallet"-->
+<!--        label="Add an additional Wallet"-->
 <!--        size="lg"-->
 <!--        class="font-weight-medium q-pl-md q-pr-md"-->
 <!--        style="font-size:1rem;"-->
@@ -75,14 +77,29 @@
 <!--        class="font-weight-medium q-pl-md q-pr-md"-->
 <!--        style="font-size:1rem;"-->
 <!--      ></q-btn>-->
-<!--      <q-btn-->
-<!--        color="primary"-->
-<!--        @click="startPlatform"-->
-<!--        label="Continue"-->
-<!--        size="lg"-->
-<!--        class="font-weight-medium q-pl-md q-pr-md"-->
-<!--        style="font-size:1rem;"-->
-<!--      ></q-btn>-->
+
+      <div v-if="isReady">
+        <q-btn
+          color="primary"
+          @click="startPlatform"
+          label="Continue"
+          size="lg"
+          class="font-weight-medium q-pl-md q-pr-md"
+          style="font-size:1rem;"
+        ></q-btn>
+        <q-icon name="done" />
+      </div>
+      <div v-if="!isReady">
+        <q-btn
+          @click="refreshPioneer"
+          label="refresh"
+          size="lg"
+          class="font-weight-medium q-pl-md q-pr-md"
+          style="font-size:1rem;"
+        ></q-btn>
+        <q-icon name="done" />
+      </div>
+
     </q-card-actions>
   </q-card>
 </template>
@@ -92,6 +109,11 @@
   export default {
     data () {
       return {
+        isStarted:false,
+        wallets:[],
+        walletContexts:[],
+        devices:[],
+        context:"",
         isReady:false,
         walletId:"",
         masterAddressBtc:"",
@@ -111,43 +133,125 @@
     },
     mounted() {
       try{
+        if(!this.isStarted){
+          this.onStart()
+          this.isStarted = true
+        }
+
+        //
+
 
       }catch(e){
         console.error(e)
       }
     },
     watch: {
+      "$store.state.context": {
+        handler: function(value) {
+          //get value
+          this.context = this.$store.getters['getContext'];
+          console.log("watch: this.context: ",this.context)
+        },
+        immediate: true
+      },
+      "$store.state.walletContexts": {
+        handler: function(value) {
+          //get value
+          this.walletContexts = this.$store.getters['getWalletContexts'];
+          console.log("wallets: ",this.walletContexts)
+        },
+        immediate: true
+      },
+      "$store.state.wallets": {
+        handler: function(value) {
+          //get value
+          this.wallets = this.$store.getters['getWallets'];
+          console.log("wallets: ",this.wallets)
+
+          //if wallets and context then ready
+          if(this.wallet.length > 0 && this.context){
+            this.isReady = true;
+          }
+        },
+        immediate: true
+      },
       "$store.state.totalUsd": {
         handler: function(value) {
-          console.log("TOTAL USD CHANGED!")
           //get value
           const totalUsd = this.$store.getters['getTotal'];
           console.log("TOTAL USD: ",totalUsd)
           this.totalValueUsd = totalUsd
-          this.isReady = true
-          this.hideModal()
+
+        },
+        immediate: true // provides initial (not changed yet) state
+      },
+      "$store.state.username": {
+        handler: function(value) {
+          //get value
+          this.username = this.$store.getters['getUsername'];
+          console.log("username: ",this.username)
+        },
+        immediate: true // provides initial (not changed yet) state
+      },
+      "$store.state.queryKey": {
+        handler: function(value) {
+          //get value
+          this.queryKey = this.$store.getters['getQueryKey'];
+          console.log("username: ",this.username)
         },
         immediate: true // provides initial (not changed yet) state
       }
     },
     computed: {
-      ...mapGetters(['getTotal']),
+      ...mapGetters(['getTotal','getUsername','getQueryKey','getWallets','getContext']),
     },
     methods: {
       ...mapMutations(['showModal','hideModal']),
-      onReset () {
-        this.username = null
+      onStart () {
+        this.$q.electron.ipcRenderer.send('onStart', {});
+      },
+      async refreshPioneer() {
+        console.log("refresh everything!")
+        //refresh
+        this.$q.electron.ipcRenderer.send('refreshPioneer', {});
+
+        //get all the things
+        this.context = await this.$store.getters['getContext']
+        this.username = await this.$store.getters['getUsername']
+        this.queryKey = await this.$store.getters['getQueryKey']
+        let total = await this.$store.getters['getTotal']
+        this.wallets = await this.$store.getters['wallets']
+        this.devices = await this.$store.getters['devices']
+        this.isPioneerLive = await this.$store.getters['getPioneerLive']
+        let pioneerUrl = await this.$store.getters['getPioneerUrl']
+        let seed = await this.$store.getters['getMnemonic']
+        let balances = await this.$store.getters['getBalances']
+        this.totalValueUsd = total
+        console.log("STATE: ",this)
+        //console.log("STATE: ",{context:this.context, testnet,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
+
+        //if wallets and context then ready
+        if(this.wallets.length > 0 && this.context){
+          this.isReady = true;
+        } else {
+          console.log("Wallet not ready to start!")
+        }
+
       },
       startPlatform: function () {
         this.hideModal()
       },
+      addWallet () {
+        // this.hideModal()
+        // this.showModal('Setup')
+      },
       addPath () {
-        this.hideModal()
+        // this.hideModal()
         //open migrate
         //this.showModal('Setup')
       },
       changeWallet: function () {
-        this.hideModal()
+        // this.hideModal()
         //open migrate
         //this.showModal('Setup')
       }

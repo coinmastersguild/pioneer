@@ -9,6 +9,7 @@ const state = {
     pioneerLive:false,
     usersOnline:[],
     coins: [],
+    paths: [],
     pubkeys: [],
     apps: [],
     totalUsd: 0,
@@ -20,6 +21,7 @@ const state = {
     allUsbDevices:[],
     allKeepKeys:[],
     keepKeyState:0,
+    keepKeyStatus:"unknown",
     walletInfo: {}, //Current wallet context
     mnemonic: null,
     walltedLoaded: false,
@@ -40,10 +42,12 @@ const getters = {
     layout:state => state.layout,
     devices:state => state.devices,
     getDevices:state => state.devices,
+    getWalletContexts:state => state.walletContexts,
     getCoins:state => state.coins,
     context:state => state.context,
     getContext:state => state.context,
     getKeepKeyState:state => state.keepKeyState,
+    getKeepKeyStatus:state => state.keepKeyStatus,
     getInvocationContext:state => state.invocationContext,
     getPubkeys:state => state.pubkeys,
     getPioneerLive: state => state.pioneerLive,
@@ -83,13 +87,24 @@ const mutations = {
     setBlockchains(state, blockchains) {
       state.blockchains = blockchains
     },
+    registerWallets(state, wallets) {
+      for(let i = 0; i < wallets.length; i++){
+        const wallet = wallets[i]
+        if (state.wallets.filter(e => e.walletId === wallet.walletId).length === 0) {
+          state.walletContexts.push(wallet.walletId)
+          state.wallets.push(wallet)
+        }
+      }
+    },
     registerWallet(state, wallet) {
+      state.walletContexts.push(wallet.walletId)
       state.wallets.push(wallet)
     },
     setKeepKeyState(state, stateKeepKey) {
-      console.log("Setting KeepKeyState! *** ",stateKeepKey)
       state.keepKeyState = stateKeepKey
-      console.log("Setting state.keepKeyState *** ",state.keepKeyState)
+    },
+    setKeepKeyStatus(state, statusKeepKey) {
+      state.keepKeyStatus = statusKeepKey
     },
     viewSeed(state, apps) {
       //
@@ -100,10 +115,6 @@ const mutations = {
         state.apps.push(app)
         if(map[app]) state.apps.push(map[app])
       }
-    },
-    addPubkey(state, coin) {
-      state.coins.push([coin])
-      if(map[coin]) state.coins.push(map[coin])
     },
     addCoins(state, coins) {
         for(let i = 0; i < coins.length; i++){
@@ -137,6 +148,17 @@ const mutations = {
     },
     addKeepKey(state, device) {
       state.allKeepKeys.push(device)
+    },
+    appPubkeys(state, pubkeys) {
+      for(let i = 0; i < pubkeys.length; i++){
+        const pubkey = pubkeys[i]
+        if (state.pubkeys.filter(e => e.pubkey === pubkey.pubkey).length === 0) {
+          state.pubkeys.push(device)
+        }
+      }
+    },
+    addPubkey(state, pubkey) {
+      state.pubkeys.push(pubkey)
     },
     addMasterAddress(state,asset,address){
         state.masterAddresses[asset] = address

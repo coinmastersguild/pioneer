@@ -40,7 +40,7 @@ let run_test = async function(){
         //     spec
         // }
         let config = {
-            queryKey:"eb8aaf95-bcdb-431c-a12c-866136c2b4bf",
+            queryKey:"key:b36de6c2-671f-4ac2-9602-deb26fd6d627",
             username:'test-user-2',
             spec
         }
@@ -70,10 +70,10 @@ let run_test = async function(){
         // if(!isOnline) throw Error("User not connected!")
 
         let user = await pioneer.instance.User()
-        console.log("info: ",user)
+        console.log("info: ",user.data)
 
-        let info = await pioneer.instance.Info(user.data.context)
-        console.log("info: ",info.data)
+        // let info = await pioneer.instance.Info(user.data.context)
+        // console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data
