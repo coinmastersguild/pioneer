@@ -14,7 +14,7 @@ const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/de
 let connection  = require("@pioneer-platform/default-mongo")
 let queue = require("@pioneer-platform/redis-queue")
 const short = require('short-uuid');
-
+let sign = require('@pioneer-platform/signing')
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 let txsDB = connection.get('transactions')
@@ -28,6 +28,10 @@ utxosDB.createIndex({txid: 1}, {unique: true})
 
 //globals
 let BLOCKING_TIMEOUT_INVOCATION = process.env['BLOCKING_TIMEOUT_INVOCATION'] || 60
+let PIONEER_SIGNING_PUBKEY = process.env['PIONEER_SIGNING_PUBKEY']
+let PIONEER_SIGNING_PRIVKEY = process.env['PIONEER_SIGNING_PRIVKEY']
+if(!PIONEER_SIGNING_PUBKEY) throw Error("PIONEER_SIGNING_PUBKEY required to run server!")
+if(!PIONEER_SIGNING_PRIVKEY) throw Error("PIONEER_SIGNING_PRIVKEY required to run server!")
 
 //rest-ts
 import { Body, Controller, Get, Post, Route, Tags, SuccessResponse, Query, Request, Response, Header } from 'tsoa';
@@ -59,8 +63,8 @@ interface InvocationBody {
     service?:string
     servicePubkey?:string
     serviceHash?:string
+    mode?:'sync' | 'async'
 }
-
 
 
 //types
@@ -99,15 +103,21 @@ export class pioneerInvocationController extends Controller {
      *
      */
 
-    @Post('/invocation')
-    public async invocation(@Header('Authorization') authorization: string, @Body() body: InvocationBody): Promise<any> {
+    @Post('/invoke')
+    public async invoke(@Header('Authorization') authorization: string, @Body() body: InvocationBody): Promise<any> {
         let tag = TAG + " | invocation | "
         try{
             log.info(tag,"body: ",body)
             let output:any = {}
+            //mode
+            let mode = 'async'
+            if(body.mode && body.mode === 'sync') mode = 'async'
+
             //verify auth
 
             //verify user settings
+
+            //is invokeion valid?
 
             //is user online?
             let onlineUsers = await redis.smembers("online")
@@ -119,21 +129,44 @@ export class pioneerInvocationController extends Controller {
                 //does user exist on fio?
 
             // invocationId
-            let invocationId = "pioneer:invocation:v0.01:"+body.invocation.coin+":"+short.generate()
+            if(!body.invocationId){
+                body.invocationId = "pioneer:invocation:v0.01:"+body.invocation.coin+":"+short.generate()
+            }
+            let invocationId = body.invocationId
 
             //TODO limit per user? DDOS protect?
 
             //origin
+
             //TODO signed by?
-            body.invocationId = invocationId
+
+            //get approveTx for dapp
+            //verify sign on approveTx
+            //verify address match on invocation
+            //if valid Dapp, sign as notary
+
+
+            //is signed by authed by server
+            let notary = PIONEER_SIGNING_PUBKEY
+            let invocationSerliazed = JSON.stringify(body.invocation)
+            let notarySig = sign.sign(notary,invocationSerliazed,PIONEER_SIGNING_PRIVKEY)
+
             if(body.invocation.context) body.context = body.invocation.context
             let entry = {
                 state:'created',
                 invocationId,
                 username:body.username,
                 tags:[body.username],
-                invocation:body
+                invocation:body.invocation,
+                notary,
+                notarySig
             }
+
+            //verify invoke type is known
+
+            //give fee rating/recommendation
+
+            //
 
             //TODO sequence
             //only accept 1 per username
@@ -147,22 +180,28 @@ export class pioneerInvocationController extends Controller {
                 body.auth = authorization
                 //send
                 publisher.publish("invocations",JSON.stringify(body))
-                // :( but this was cool
-                //block till confirmation
-                log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
-                let timeStart = new Date().getTime()
 
-                let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
-                let timeEnd = new Date().getTime()
-                log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+                //if sync
+                if(mode === 'sync'){
+                    // :( but this was cool
+                    //block till confirmation
+                    log.info(tag," STARTING BLOCKING INVOKE id: ",invocationId)
+                    let timeStart = new Date().getTime()
 
-                //if
-                if(!txid[1]) throw Error("Failed to broadcast! timeout!")
-                //TODO if timeout return invocationId
-                output.success = true
-                output.txid = txid[1]
-                output.ttr = (timeEnd - timeStart)/1000
-                if(body.invocation.noBroadcast) output.broadcast = false
+                    let txid = await redisQueue.blpop(invocationId,BLOCKING_TIMEOUT_INVOCATION)
+                    let timeEnd = new Date().getTime()
+                    log.info(tag," END BLOCKING INVOKE T: ",(timeEnd - timeStart)/1000)
+
+                    //if
+                    if(!txid[1]) throw Error("Failed to broadcast! timeout!")
+                    //TODO if timeout return invocationId
+                    output.success = true
+                    output.txid = txid[1]
+                    output.ttr = (timeEnd - timeStart)/1000
+                    if(body.invocation.noBroadcast) output.broadcast = false
+                }else{
+                    output.invocationId = body.invocationId
+                }
 
             } else {
                 output.invocationId = invocationId

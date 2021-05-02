@@ -1,0 +1,23 @@
+{
+  "name": "@pioneer-platform/signing",
+  "version": "0.0.3",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "test": "npm run build && node __tests__/test-module.js",
+    "lint": "prettier --write '**/**/*.ts'",
+    "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
+    "build": "tsc -p .",
+    "prepublish": "npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "3.3.2",
+    "bitcoinjs-message": "2.0.0",
+    "@pioneer-platform/loggerdog": "latest",
+    "@types/node": "^13.13.12",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  }
+}

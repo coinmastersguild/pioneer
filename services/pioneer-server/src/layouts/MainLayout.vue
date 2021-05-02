@@ -24,6 +24,7 @@
 //Pioneer SDK
 let App = require("@pioneer-platform/pioneer-sdk")
 const axios = require('axios')
+import {mapGetters, mapMutations} from "vuex";
 
 export default {
   name: 'MainLayout',
@@ -47,37 +48,43 @@ export default {
       })
 
       console.log("newAccounts: ",newAccounts)
-
       let domain = location.toString()
-
       let account = newAccounts[0]
+      console.log("Account Metamask: ",account)
+      console.log("domain: ",domain)
 
-      //TODO use env
-      let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-      //let urlSpec = "https://pioneers.dev/spec/swagger.json"
+      //pioneer SDK
+      // let resultInit = this.init()
+      // console.log("resultInit: ",resultInit)
 
-      if(account){
-        let config = {
-          addresses:newAccounts,
-          domain,
-          spec:urlSpec
-        }
+      let resultInit = this.init('init')
+      console.log("resultInit: ",resultInit)
 
-        //init
-        let app = new App('testapp',config)
+      let resultStart = await this.onStart()
+      console.log("resultStart: ",resultStart)
 
-        //init metamask
-        let info = await app.init()
-        console.log("total Value: ",info.totalValueUsd)
-        this.totalValueUsd = info.totalValueUsd
-      }
 
 
     }catch(e){
       console.error(e)
     }
   },
+  watch: {
+    "$store.state.invocations": {
+      handler: function (value) {
+        console.log("value: ", value)
+        //get value
+        this.invocations = this.$store.getters['getInvocationContext'];
+        console.log("invocations: ", this.invocations)
+      },
+      immediate: true
+    },
+  },
+  computed: {
+    ...mapGetters(['getUsername'])
+  },
   methods: {
+    ...mapMutations(['init','onStart']),
     onItemClick () {
       console.log('Clicked on an Item')
 

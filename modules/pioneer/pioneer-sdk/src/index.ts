@@ -83,6 +83,11 @@ export class SDK {
     private getWalletInfo: () => Promise<any>;
     private setContext: (context: string) => Promise<any>;
     private getInvocations: () => Promise<any>;
+    private invocationContext: string;
+    private assetContext: string;
+    private assetBalanceUsdValueContext: string;
+    private assetBalanceNativeContext: string;
+    private getInvocation: (invocationId: string) => Promise<any>;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -100,6 +105,10 @@ export class SDK {
         this.spec = config.spec
         this.clients = {}
         this.context = ""
+        this.invocationContext = ""
+        this.assetContext = ""
+        this.assetBalanceNativeContext = ""
+        this.assetBalanceUsdValueContext = ""
         this.wallets = []
         this.events = {}
         this.totalValueUsd = 0
@@ -135,6 +144,10 @@ export class SDK {
                 this.wallets = userInfo.wallets
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
                 this.context = userInfo.context
+                this.invocationContext = userInfo.invocationContext
+                this.assetContext = userInfo.assetContext
+                this.assetBalanceNativeContext = userInfo.assetBalanceNativeContext
+                this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
 
                 return this.pioneerApi
             }catch(e){
@@ -194,6 +207,16 @@ export class SDK {
                 }else{
                     return {success:false,error:"unknown context! context: "+context,options:this.wallets}
                 }
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getInvocation = async function (invocationId:string) {
+            let tag = TAG + " | getInvocations | "
+            try {
+                if(!invocationId) invocationId = this.invocationContext
+                let result = await this.pioneerApi.Invocation(invocationId)
+                return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

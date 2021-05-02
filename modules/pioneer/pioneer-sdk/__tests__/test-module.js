@@ -24,11 +24,11 @@ let run_test = async function(){
         console.log("*** Running test module ***")
 
         let config = {
-            queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338",
+            queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338aa",
             // username,
             spec,
             wss,
-            service:'asgardxasdas',
+            service:'pioneers.dev',
             url:'swaps.pro'
         }
 
@@ -38,116 +38,14 @@ let run_test = async function(){
         let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
         await app.init(seedChains)
 
-        //init
-        // let app = new SDK(urlSpec,config)
-        // await app.init()
         //
-        //console.log("app: ",app)
+        let invocationId = "pioneer:invocation:v0.01:BCH:3dj828UpYcPY4SD1s4gLHc"
 
-        // let code = await app.createPairingCode()
-        // console.log("code: ",code)
+        //TODO sub to invocationId
 
-        console.log("app: ",app.context)
-
-        //is paired?
-        let info = await app.getUserInfo()
-        console.log("info: ",info)
-
-        if(!info || info.error){
-            console.log("Not paired! ")
-
-            //create pairing code
-
-            //start socket
-            let events = await app.startSocket()
-            console.log("events: ",events)
-            events.on('message', async (request) => {
-                console.log("**** message: ", request)
-            })
-
-            let code = await app.createPairingCode()
-            console.log("code: ",code)
-        } else {
-            //get user wallets
-            let wallets = await app.wallets
-            console.log("wallets: ",wallets)
-
-            //get current context
-            let context = app.context
-            console.log("context: ",context)
-
-            //start socket
-            let events = await app.startSocket()
-            console.log("events: ",events)
-            events.on('message', async (request) => {
-                console.log("**** message: ", request)
-            })
-
-            //get user
-            let user = await app.getUserParams()
-            console.log("user: ",user)
-            if(!user.clients) throw Error("Failed to create user!")
-            //switch context
-            // let newContext = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
-            // //let newContext = "0x33b35c665496ba8e71b22373843376740401f106.wallet.json"
-            //
-            // //resultContextSwitch
-            // let resultContextSwitch = await app.setContext(newContext)
-            // console.log("resultContextSwitch: ",resultContextSwitch)
-
-            //
-
-
-            //verify user switched
-
-            //binance
-            // const address = await user.binance.client.getAddress();
-            // const bncBalances = await user.binance.bncClient.getBalance(address);
-            //
-            // console.log("user: ",address)
-            // console.log("bncBalances: ",bncBalances)
-
-            //BTC
-
-            //ETH
-
-            //intergration test asgard-exchange
-            let blockchains = Object.keys(user.clients)
-            console.log("blockchains: ",blockchains)
-
-            for(let i = 0; i < blockchains.length; i++){
-                let blockchain = blockchains[i]
-                let client = user.clients[blockchain]
-
-                let balance = await client.getBalance()
-                //console.log(blockchain+ " balance: ",balance)
-                console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
-            }
-
-            //
-            // //send eth
-            // let payload = {
-            //     blockchain:'ethereum',
-            //     asset:'ETH',
-            //     amount:0.00011,
-            //     address:'0xc3affff54122658b89c31183cec4f15514f34624',
-            //     noBroadcast:true,
-            // }
-            // let txid = await app.sendToAddress(payload)
-            // console.log("txid: ",txid)
-
-            // let payload = {
-            //     blockchain:'litecoin',
-            //     asset:'LTC',
-            //     amount:0.00011,
-            //     address:'LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB',
-            //     noBroadcast:true,
-            // }
-            // let txid = await app.sendToAddress(payload)
-            // console.log("txid: ",txid)
-
-        }
-
+        //get invocation
+        let invocation =  await app.getInvocation(invocationId)
+        console.log(invocation)
 
 
     }catch(e){

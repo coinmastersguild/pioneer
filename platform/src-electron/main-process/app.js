@@ -646,6 +646,17 @@ export async function refreshPioneer(event, data) {
         } else {
           log.info(tag,"No wallets loaded!")
         }
+
+        //wallets
+        let wallets = await App.getWallets()
+        if(wallets){
+          WALLETS_LOADED = wallets
+          log.info(tag,"registering wallets: ",wallets)
+          event.sender.send('updateWallets',wallets)
+        } else {
+          log.info(tag,"No wallets loaded!")
+        }
+
       } else {
         log.info(tag,"Wallet not started yet! ")
       }

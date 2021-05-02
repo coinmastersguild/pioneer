@@ -29,6 +29,12 @@ let invoker = process.env['TEST_USERNAME_2']
 // let invoker = process.env['TEST_USERNAME_1']
 // let invokee = process.env['TEST_USERNAME_2']
 
+
+let signingPubkey = process.env['DAPP_SIGNING_PUBKEY']
+let signingPrivkey = process.env['DAPP_SIGNING_PRIVKEY']
+console.log("signingPubkey: ",signingPubkey)
+console.log("signingPrivkey: ",signingPrivkey)
+
 //open webpage with invocation
 
 
@@ -36,6 +42,8 @@ let run_test = async function(){
     try{
         let config = {
             queryKey,
+            signingPubkey,
+            signingPrivkey,
             username:invoker,
             spec
         }
@@ -147,7 +155,10 @@ let run_test = async function(){
         console.log("result: ",result.data)
 
         //open invoke page
-        // open("http://localhost:8080/#/invocation/"+result.data.invocationId)
+        open("http://localhost:8081/#/invocation/"+result.data.invocationId)
+
+        // open("http://localhost:9001/#/invocation/"+result.data.invocationId)
+
     }catch(e){
         console.error(e)
     }

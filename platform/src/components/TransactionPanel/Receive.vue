@@ -10,13 +10,12 @@
                     <q-btn round dense flat icon="file_copy" @click="copyAddress(from.address)">
                         <q-tooltip content-class="bg-primary" content-style="font-size: 0.75rem" :offset="[10, 10]">
                             {{copyText}}
-                        </q-tooltip> 
-                                             
+                        </q-tooltip>
                     </q-btn>
                 </template>
             </q-input>
         </q-card>
-        <accountSelector v-model="from" label="Account" />     
+        <accountSelector v-model="from" label="Account" />
     </div>
 </template>
 
@@ -35,7 +34,7 @@ export default {
     data () {
         return {
             from: this.currentAccount || null,
-            copyText: 'Copy Address'         
+            copyText: 'Copy Address'
         }
     },
     methods: {
@@ -49,9 +48,9 @@ export default {
                 })
                 .catch(() => {
                 // fail
-                })        
+                })
         }
-    }    
+    }
 }
 </script>
 <style lang="scss" scoped>

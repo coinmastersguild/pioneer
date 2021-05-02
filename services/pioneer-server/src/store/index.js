@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import global from './modules/global'
+import pioneer from './modules/pioneer'
 Vue.use(Vuex)
 
 /**
@@ -11,7 +11,7 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      global,
+      pioneer,
     },
     strict: true,
   });

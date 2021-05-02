@@ -330,7 +330,6 @@ ipcMain.on('onStart', async (event, data) => {
     onStartResult.events.on('message', async (request) => {
       log.info(tag,"**** message MAIN: ", request)
       //TODO open "onTop" window for each tx type
-      let signedTx
       switch(request.type) {
         case 'swap':
           break;

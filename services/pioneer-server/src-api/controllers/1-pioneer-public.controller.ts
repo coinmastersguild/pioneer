@@ -356,6 +356,29 @@ export class pioneerPublicController extends Controller {
     }
 
     /**
+     *  get public user info
+     * @param invocation
+     */
+    @Get('/invocation/{invocationId}')
+    public async invocation(invocationId:string) {
+        let tag = TAG + " | getInvocation | "
+        try{
+            if(!invocationId) throw Error("102: invocationId required! ")
+            let output = await invocationsDB.findOne({invocationId})
+            return(output)
+        }catch(e){
+            let errorResp:Error = {
+                success:false,
+                tag,
+                e
+            }
+            log.error(tag,"e: ",{errorResp})
+            throw new ApiError("error",503,"error: "+e.toString());
+        }
+    }
+
+
+    /**
      *  get balance of an address
      */
     @Get('/getPubkeyBalance/{coin}/{pubkey}')

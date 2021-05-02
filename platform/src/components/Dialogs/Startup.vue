@@ -167,9 +167,8 @@
           //get value
           this.wallets = this.$store.getters['getWallets'];
           console.log("wallets: ",this.wallets)
-
           //if wallets and context then ready
-          if(this.wallet.length > 0 && this.context){
+          if(this.wallets.length > 0 && this.context){
             this.isReady = true;
           }
         },

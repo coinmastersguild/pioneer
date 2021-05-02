@@ -1,7 +1,13 @@
 <template>
-    <div class="q-pa-md fixed-center" style="max-width:750px">
+    <div class="q-pa-md">
         <h5>Transaction Status page</h5>
-        <small>Invocation: {{ $route.params.id }}</small>
+        <small>Invocation: {{ invocationContext }}</small>
+        <br/>
+        status: {{invocation.state}}
+        <br/>
+        <q-btn class="primary" @click="onUpdate">
+            Refresh
+        </q-btn>
         <q-stepper
                 v-model="step"
                 ref="stepper"
@@ -15,9 +21,15 @@
                     icon="settings"
                     :done="step > 1"
             >
-                Review Transaction
+                Complete transaction in Pioneer App
 
-                sign:
+                <q-spinner
+                        color="primary"
+                        size="5rem"
+                        v-if="!isLoaded"
+                        key="spinner"
+                />
+
             </q-step>
 
             <q-step
@@ -36,45 +48,119 @@
                 Rebuild/replace transaction:
             </q-step>
 
-            <template v-slot:navigation>
-                <q-stepper-navigation>
-                    <q-btn @click="$refs.stepper.next()" color="primary" :label="step === 4 ? 'Finish' : 'Continue'" />
-                    <q-btn v-if="step > 1" flat color="primary" @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />
-                </q-stepper-navigation>
-            </template>
+            <q-step
+                    :name="3"
+                    title="Pending Transactions"
+                    caption="(broadcast)"
+                    icon="create_new_folder"
+                    :done="step > 3"
+            >
+
+            </q-step>
+
+<!--            <template v-slot:navigation>-->
+<!--                <q-stepper-navigation>-->
+<!--                    <q-btn @click="$refs.stepper.next()" color="primary" :label="step === 4 ? 'Finish' : 'Continue'" />-->
+<!--                    <q-btn v-if="step > 1" flat color="primary" @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />-->
+<!--                </q-stepper-navigation>-->
+<!--            </template>-->
         </q-stepper>
     </div>
 </template>
 
 <script>
+    /*
+        Invocation Info
+
+        Stages:
+            build
+            sign
+            broadcast
+
+
+
+     */
+
     import { mapMutations, mapGetters, mapActions } from 'vuex'
     export default {
         name: "Transaction",
         data () {
             return {
+                invocationContext:"",
+                invocation:"",
                 status:"online",
                 step: 1
             }
         },
-        computed: {
-            ...mapGetters(['getWalletSendInfo'])
-        },
         async mounted() {
             try{
+
+                let resultInit = this.init('init')
+                console.log("resultInit: ",resultInit)
+
+                let resultStart = await this.onStart()
+                console.log("resultStart: ",resultStart)
+
                 //subscribe to invocation lifecycles
                 let invocationId = this.$route.params.id
                 console.log("invocationId: ",invocationId)
-
+                this.invocationContext = invocationId
+                this.invocaction = invocationId
+                // this.invocaction = await this.setInvocationContext(invocationId)
+                console.log("invocaction: ",this.invocaction)
             }catch(e){
                 console.error(e)
             }
         },
-        methods: {
-            ...mapMutations(['showModal', 'hideModal']),
-            ...mapActions(['addTx']),
-            async update () {
-                //get info on invocation
+        watch: {
+            "$store.state.invocationContext": {
+                handler: function (value) {
+                    //get value
+                    // this.invocationContext = this.$store.getters['getInvocationContext'];
+                    // console.log("invocations: ", this.invocations)
+                },
+                immediate: true
+            },
+            "$store.state.invocation": {
+                handler: function (value) {
 
+                    //get value
+                    this.invocation = this.$store.getters['getInvocation'];
+                    console.log("invocations: ", this.invocation)
+                },
+                immediate: true
+            },
+            "$store.state.invocations": {
+                handler: function (value) {
+
+                    //get value
+                    this.invocations = this.$store.getters['getInvocations'];
+
+                    //get current context
+
+                    //set as local
+                    console.log("invocations: ", this.invocations)
+                },
+                immediate: true
+            },
+        },
+        computed: {
+            ...mapGetters(['getUsername'])
+        },
+        methods: {
+            ...mapMutations(['showModal', 'hideModal','setInvocationContext','onStart','init']),
+            ...mapActions(['fetchData']),
+            //onUpdate
+            async onUpdate () {
+                console.log("updating invocation")
+                //get info on invocation
+                console.log("updating invocation: ",this.invocationContext)
+                // this.$store.commit('getInvocationInfo', this.invocationContext)
+
+                this.invocation = this.$store.getters['getInvocation'];
+                console.log("invocations: ", this.invocation)
+
+                this.fetchData(this.invocationContext)
             },
         }
     }

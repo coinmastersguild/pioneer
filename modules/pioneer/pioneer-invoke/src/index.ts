@@ -10,7 +10,8 @@
  */
 const TAG = " | Pioneer-client-ts | "
 const log = require("@pioneer-platform/loggerdog")()
-
+const short = require('short-uuid');
+let sign = require('@pioneer-platform/signing')
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
 
@@ -31,12 +32,18 @@ module.exports = class wallet {
     private init: (type: string, config: any) => Promise<any>;
     private spec: string;
     private queryKey: any;
-    private pioneerApi: any
+    private pioneerApi: any;
+    private appName: string;
+    private signingPubkey: string;
+    private signingPrivkey: string;
     private invoke: (type:string, invocation: Invocation) => Promise<void>;
     private online: () => Promise<any>;
     constructor(spec:string,config:any) {
         this.spec = spec
+        this.appName = config.appName || 'notSet'
         this.queryKey = config.queryKey
+        this.signingPubkey = config.signingPubkey
+        this.signingPrivkey = config.signingPrivkey
         this.init = async function () {
             let tag = TAG + " | init_wallet | "
             try{
@@ -69,16 +76,25 @@ module.exports = class wallet {
         this.invoke = async function (type,invocation:any) {
             let tag = TAG + " | invoke | "
             try{
-                //
+                //create invocationId
+                let invocationId = "pioneer:invocation:v0.01:"+invocation.coin+":"+short.generate()
+
+                //sign
+                let msg = JSON.stringify(invocation)
+                let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
+
+                //Dapps sign all invocations
                 let request:any = {
-                    type,
+                    pubkey:this.signingPubkey,
+                    appName:this.appName,
                     username:invocation.username,
-                    //TODO auth
-                    //TODO sig
-                    invocation
+                    type,
+                    invocation,
+                    invocationSig,
+                    invocationId
                 }
                 //
-                let result = this.pioneerApi.instance.Invocation(null, request)
+                let result = this.pioneerApi.instance.Invoke(null, request)
                 return result
             }catch(e){
                 log.error(tag,e)

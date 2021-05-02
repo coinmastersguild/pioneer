@@ -1,54 +1,51 @@
 <template>
-  <q-page class="flex flex-center">
+  <div>
+    <q-splitter
+            v-model="splitterModel"
+            style="height: 250px"
+    >
 
-
-
-<!--    <div>-->
-<!--      <h7>Pioneer status: {{status}}</h7>-->
-
-<!--      <br/>-->
-<!--      <br/>-->
-<!--      <br/>-->
-<!--      <a href="https://github.com/BitHighlander/pioneer-platform/releases">Download platform</a>-->
-
-<!--    </div>-->
-    <div id="content" style="width: 100%;">
-      <grid-layout v-if="show"
-                   :layout.sync="layout"
-                   :col-num="12"
-                   :row-height="30"
-                   :is-draggable="draggable"
-                   :is-resizable="resizable"
-                   :vertical-compact="true"
-                   :use-css-transforms="true"
-                   :responsive="responsive"
-      >
-        <grid-item v-for="item in layout"
-                   :x="item.x"
-                   :y="item.y"
-                   :w="item.w"
-                   :h="item.h"
-                   :i="item.i"
+      <template v-slot:before>
+        <q-tabs
+                v-model="tab"
+                vertical
+                class="text-teal"
         >
-          <span class="text">
-            <q-card-section>
-              <q-card
-                      class="my-card text-white"
-                      style="background: radial-gradient(circle, #000000 0%, #236303 100%)"
-              >
-                <q-img height=50px width=50px src="../assets/GreenCompas.jpeg"></q-img>
-                i:{{item.i}}
-                x:{{item.x}}
-                y:{{item.y}}
-              </q-card>
-            </q-card-section>
-          </span>
-        </grid-item>
-      </grid-layout>
-    </div>
+          <q-tab name="network" icon="public" label="Network" />
+          <div v-if="isPaired">
+            <q-tab name="user" icon="account_circle" label="User" />
+            <q-tab name="invocations" icon="auto_fix_high" label="Invocations" />
+          </div>
+        </q-tabs>
+      </template>
 
+      <template v-slot:after>
+        <q-tab-panels
+                v-model="tab"
+                animated
+                swipeable
+                vertical
+                transition-prev="jump-up"
+                transition-next="jump-up"
+        >
+          <q-tab-panel name="network">
+            <div class="text-h4 q-mb-md"></div>
+            users online
+          </q-tab-panel>
 
-  </q-page>
+          <q-tab-panel name="alarms">
+            <div class="text-h4 q-mb-md">User</div>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima assumenda consectetur culpa fuga nulla ullam. In, libero.</p>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima assumenda consectetur culpa fuga nulla ullam. In, libero.</p>
+          </q-tab-panel>
+
+          <q-tab-panel name="invocations">
+          </q-tab-panel>
+        </q-tab-panels>
+      </template>
+
+    </q-splitter>
+  </div>
 </template>
 
 <script>
@@ -74,6 +71,8 @@ export default {
   },
   data () {
     return {
+      isPaired:false,
+      splitterModel: 20,
       status:"online",
       layout: testLayout,
       draggable: true,
@@ -81,6 +80,7 @@ export default {
       responsive: true,
       index: 0,
       show: false,
+      tab:"",
     }
   },
   mounted: function () {
