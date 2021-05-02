@@ -35,6 +35,7 @@ const state = {
 
 const getters = {
     isTestnet:state => state.testnet,
+    username:state => state.username,
     getUsername:state => state.username,
     getTotal:state => state.totalUsd,
     wallets:state => state.wallets,

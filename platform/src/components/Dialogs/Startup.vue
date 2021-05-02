@@ -139,7 +139,7 @@
         }
 
         //
-
+        setTimetout(this.refreshPioneer,2000)
 
       }catch(e){
         console.error(e)
@@ -219,7 +219,7 @@
         this.username = await this.$store.getters['getUsername']
         this.queryKey = await this.$store.getters['getQueryKey']
         let total = await this.$store.getters['getTotal']
-        this.wallets = await this.$store.getters['wallets']
+        // this.wallets = await this.$store.getters['wallets']
         this.devices = await this.$store.getters['devices']
         this.isPioneerLive = await this.$store.getters['getPioneerLive']
         let pioneerUrl = await this.$store.getters['getPioneerUrl']
