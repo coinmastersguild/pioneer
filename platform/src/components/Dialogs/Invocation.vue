@@ -6,8 +6,8 @@
           <small>invocation</small>
           {{invocationContext}}
         </div>
-        <div class="text-right">
-          type: {{invocation.invocation.type}}
+        <div class="text-center">
+          state: {{invocation.state}}
         </div>
 
 
@@ -24,17 +24,69 @@
 
       <q-separator />
 
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels v-model="tab" animated class="q-pa-md bg-grey-10 text-white">
         <q-tab-panel name="build">
           <q-item clickable v-ripple>
             <q-item-section>
-              <q-item-label>type: {{invocation.invocation.type}}</q-item-label>
-              <q-item-label caption>Coin: {{invocation.invocation.invocation.coin}}</q-item-label>
-              <q-item-label caption>amount: {{invocation.invocation.invocation.amount}}</q-item-label>
-              <q-item-label caption>address: {{invocation.invocation.invocation.address}}</q-item-label>
+              {{context}}
+              <div>
+                <h5>sending {{invocation.invocation.coin}} to the following address. {{invocation.invocation.address}}</h5>
+              </div>
+              <q-space />
+              <small class="text-left">Source of funds: </small>
+              <q-btn-dropdown
+                push
+                glossy
+                no-caps
+                icon="account_balance_wallet"
+                :label="context.slice(0,10) + ' balance: '+assetBalanceNativeContext+' ('+assetContext+') '+assetBalanceUsdValueContext+' USD' "
+              >
+                <q-list>
+                  <div v-for="(wallet, index) in wallets" :key="index" class="q-mb-sm">
+                    <q-item clickable v-close-popup @click="onItemClick(wallet.walletId)">
+                      <q-item-section avatar>
+                        <q-avatar icon="account_balance_wallet" color="primary" text-color="white" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{wallet.walletId.slice(0, 10)}}</q-item-label>
+                        <q-item-label caption></q-item-label>
+                      </q-item-section>
+                      <q-item-section side>
+                        <q-icon name="info" color="amber" />
+                      </q-item-section>
+                    </q-item>
+                  </div>
+                </q-list>
+              </q-btn-dropdown>
+
+              <div>
+                <q-space />
+                <q-space />
+                <q-space />
+                <q-space />
+                Destination: {{invocation.invocation.address}}
+                <small>external</small>
+              </div>
+
+              <div>
+                <q-space />
+                <q-space />
+                <q-space />
+                <q-space />
+                Fee's 1 sat/byte === 1cent
+
+              </div>
+
+<!--              <div>Amount Availaible: {{invocation.invocation.amount}}</div>-->
+<!--              <h5>Amount: {{invocation.invocation.amount}}</h5>-->
+<!--              <h5>Value USD: {{invocation.invocation.amount}}</h5>-->
+
+<!--              <q-item-label caption>Coin: {{invocation.invocation.coin}}</q-item-label>-->
+<!--              <q-item-label caption>amount: {{invocation.invocation.amount}}</q-item-label>-->
+<!--              <q-item-label caption>address: {{invocation.invocation.address}}</q-item-label>-->
             </q-item-section>
           </q-item>
-          <small>Review Intent and submit for transaction building</small>
+
           <div>
             <q-btn
               color="primary"
@@ -45,7 +97,9 @@
         </q-tab-panel>
 
         <q-tab-panel name="sign">
-          This should show the Build transaction
+          <div>
+            {{unsignedTx}}
+          </div>
 
           Review fee's
 
@@ -56,7 +110,7 @@
           Mark noBroadcast
           <q-btn
             color="primary"
-            @click="sign()"
+            @click="sign(invocationContext)"
             label="Sign Transaction"
             size="lg"
             class="font-weight-medium q-pl-md q-pr-md"
@@ -92,6 +146,7 @@
 
 <script>
   import {mapGetters, mapMutations} from "vuex";
+  import {ipcRenderer} from "electron";
 
   export default {
     name: "Invocation",
@@ -107,12 +162,27 @@
         invocations: [],
         invocationContext: null,
         context:"",
-        invocation: {}
+        assetContext:"",
+        assetBalanceNativeContext:"",
+        assetBalanceUsdValueContext:"",
+        invocation: {},
+        unsignedTx: {},
+        signedTx: {}
       };
     },
     mounted() {
       try{
 
+        ipcRenderer.on('transactionBuilt', (event, data) => {
+          console.log('transactionBuilt event! ',data)
+          this.unsignedTx = data.unsignedTx
+          this.tab = 'sign'
+        })
+        ipcRenderer.on('transactionSigned', (event, data) => {
+          console.log('transactionSigned event! ',data)
+          this.signedTx = data.signedTx
+          this.tab = 'broadcast'
+        })
       }catch(e){
         console.error(e)
       }
@@ -121,11 +191,48 @@
       ...mapGetters(['getInvocations','getInvocationContext','getApps','layout','getWalletInfo','getContext'])
     },
     watch: {
+      "$store.state.invocationContextState": {
+        handler: function(value) {
+          //get value
+          this.invocationContextState = this.$store.getters['getInvocationContextState'];
+          console.log("watch: this.invocationContextState: ",this.invocationContextState)
+
+          if(this.invocationContextState === 'built'){
+            this.tab = 'sign'
+          }
+
+        },
+        immediate: true
+      },
       "$store.state.context": {
         handler: function(value) {
           //get value
           this.context = this.$store.getters['getContext'];
           console.log("watch: this.context: ",this.context)
+        },
+        immediate: true
+      },
+      "$store.state.assetContext": {
+        handler: function(value) {
+          //get value
+          this.assetContext = this.$store.getters['getAssetContext'];
+          console.log("watch: this.assetContext: ",this.assetContext)
+        },
+        immediate: true
+      },
+      "$store.state.assetBalanceNativeContext": {
+        handler: function(value) {
+          //get value
+          this.assetBalanceNativeContext = this.$store.getters['getAssetBalanceNativeContext'];
+          console.log("watch: this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
+        },
+        immediate: true
+      },
+      "$store.state.assetBalanceUsdValueContext": {
+        handler: function(value) {
+          //get value
+          this.assetBalanceUsdValueContext = this.$store.getters['getAssetBalanceUsdValueContext'];
+          console.log("watch: this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
         },
         immediate: true
       },
@@ -193,18 +300,18 @@
             context:this.context,
             reason:"current context not in wallet array!"
           });
-
         }
       },
-      approve(invocationId) {
-        console.log("invocationId: ",invocationId)
-        //tryLogin
-        this.$q.electron.ipcRenderer.send('approveTransaction', {invocationId});
-        remote.getCurrentWindow().close()
+      onItemClick(context) {
+        console.log("set context: ",context)
+        if(context !== this.context){
+          this.context = context
+          this.$q.electron.ipcRenderer.send('setContext', {context});
+        }
       },
       build(invocationId) {
         console.log("invocationId: ",invocationId)
-        this.$q.electron.ipcRenderer.send('approveTransaction', {invocationId});
+        this.$q.electron.ipcRenderer.send('buildTransaction', {invocationId});
       },
       sign(invocationId) {
         console.log("invocationId: ",invocationId)

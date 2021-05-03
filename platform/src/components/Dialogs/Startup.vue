@@ -133,13 +133,6 @@
     },
     mounted() {
       try{
-        if(!this.isStarted){
-          this.onStart()
-          this.isStarted = true
-        }
-
-        //
-        setTimetout(this.refreshPioneer,2000)
 
       }catch(e){
         console.error(e)

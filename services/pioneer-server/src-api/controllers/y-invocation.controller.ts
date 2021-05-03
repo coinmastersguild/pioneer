@@ -154,6 +154,7 @@ export class pioneerInvocationController extends Controller {
             if(body.invocation.context) body.context = body.invocation.context
             let entry = {
                 state:'created',
+                type:body.invocation.type,
                 invocationId,
                 username:body.username,
                 tags:[body.username],

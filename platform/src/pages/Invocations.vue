@@ -31,7 +31,8 @@
             loading: false,
             error: false,
             items: [],
-            invocations: []
+            invocations: [],
+            walletContext:{},
           };
         },
         mounted() {
@@ -77,6 +78,40 @@
             this.setInvocationContext(invocation.invocationId)
             //set current invocation in state
             this.showModal('Invocation')
+          },
+          updateWalletContext() {
+            this.context = this.$store.getters['getContext'];
+            console.log("this.context: ",this.context)
+
+            //get value
+            this.wallets = this.$store.getters['wallets'];
+            if(this.wallets.length > 0){
+              let currentWallet = this.wallets.filter(e => e.walletId === this.context)
+              currentWallet = currentWallet[0]
+              console.log("currentWallet: ",currentWallet)
+              if(currentWallet && currentWallet.masters){
+                this.walletContext = currentWallet
+                console.log("masters:",currentWallet.masters)
+                console.log("coins:",Object.keys(currentWallet.masters))
+                let coins = Object.keys(currentWallet.masters)
+                let coinList = []
+                for(let i = 0; i < coins.length; i++){
+                  let coin = coins[i]
+                  coinList.push({
+                    symbol:coin,
+                    icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
+                  })
+                }
+                this.coins = coinList
+              }else{
+                //invalid, force update to a valid wallet
+                this.context = this.wallets[0].walletId
+                this.$q.electron.ipcRenderer.send('updateContext', {
+                  context:this.context,
+                  reason:"current context not in wallet array!"
+                });
+              }
+            }
           },
           // close: function () {
           //   this.hideModal()

@@ -76,6 +76,7 @@ module.exports = class wallet {
         this.invoke = async function (type,invocation:any) {
             let tag = TAG + " | invoke | "
             try{
+                if(!type) throw Error("invocation Type required!")
                 //create invocationId
                 let invocationId = "pioneer:invocation:v0.01:"+invocation.coin+":"+short.generate()
 

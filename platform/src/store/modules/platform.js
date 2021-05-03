@@ -4,6 +4,7 @@ const state = {
     locale:"english",
     context:null,
     invocationContext:null,
+    invocationContextState:"",
     username:"",
     pioneerUrl:"",
     pioneerLive:false,
@@ -50,6 +51,7 @@ const getters = {
     getKeepKeyState:state => state.keepKeyState,
     getKeepKeyStatus:state => state.keepKeyStatus,
     getInvocationContext:state => state.invocationContext,
+    getInvocationContextState:state => state.invocationContextState,
     getPubkeys:state => state.pubkeys,
     getPioneerLive: state => state.pioneerLive,
     getPioneerUrl: state => state.pioneerUrl,
@@ -188,6 +190,9 @@ const mutations = {
       // console.log("** Setting state.context: ",state.context)
       state.context = value
       // console.log("** Setting state.context: ",state.context)
+    },
+    setInvocationContextState(state,value){
+      state.invocationContextState = value
     },
     setViewSeed(state,value){
       state.mnemonic = value

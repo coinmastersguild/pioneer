@@ -703,12 +703,128 @@ export async function setMnemonic(event, data) {
   }
 }
 
-export async function approveTransaction(event, data) {
-  let tag = TAG + " | setMnemonic | ";
+export async function buildTransaction(event, data) {
+  let tag = TAG + " | buildTransaction | ";
   try {
     log.info(tag,"data: ",data)
-    let resultApprove = await App.approveTransaction(await App.context(),data.invocationId)
-    return resultApprove
+    //get invocation
+
+    //TODO validate type and fields
+
+    let invocation = await App.getInvocation(data.invocationId)
+    log.info(tag,"invocation: ",invocation)
+
+    if(!invocation.type) invocation.type = invocation.invocation.type
+
+    let context
+    if(!data.context){
+      context = WALLET_CONTEXT
+    }
+    if(!context) {
+      log.error("context: ",context)
+      log.error("Available: ",Object.keys(WALLETS_LOADED))
+      throw Error("103: could not find context!")
+    }
+    let walletContext = WALLETS_LOADED[context]
+    log.info(tag,"walletContext: ",walletContext)
+
+    switch(invocation.type) {
+      case 'transfer':
+        console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
+
+        //TODO validate transfer object
+
+        let transferUnSigned = await walletContext.buildTransfer(invocation.invocation)
+        log.info(" **** RESULT TRANSACTION ****  transferUnSigned: ",transferUnSigned)
+
+        let invocationId = invocation.invocationId
+        let updateBody = {
+          invocationId,
+          invocation,
+          unsignedTx:transferUnSigned
+        }
+        log.info(tag,"updateBody: ",updateBody)
+
+        //update invocation remote
+        let resultUpdate = await App.updateInvocation(updateBody)
+        log.info(tag,"resultUpdate: ",resultUpdate)
+
+        //push update to sign tab
+        event.sender.send('transactionBuilt', {invocationId,invocation,unsignedTx:transferUnSigned,resultUpdate})
+
+        break
+      case 'approve':
+        console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+        let approvalSigned = await walletContext.buildApproval(invocation.invocation)
+        console.log(" **** RESULT TRANSACTION ****  approvalSigned: ",approvalSigned)
+        break
+      case 'swap':
+        console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+        let swapSigned = await walletContext.buildSwap(invocation.invocation)
+        console.log(" **** RESULT TRANSACTION ****  swapSigned: ",swapSigned)
+        break
+      default:
+        console.error("Unhandled type: ",invocation.type)
+        console.error("Unhandled: ",invocation)
+    }
+
+    //types
+    //transfer (all coins + eth (except swaps)
+    //approve
+    //swap
+
+
+    // let resultBuild = await App.buildTransfer(await App.context(),data.invocationId)
+    //
+    // return resultBuild
+
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function approveTransaction(event, data) {
+  let tag = TAG + " | approveTransaction | ";
+  try {
+    //get invocation
+
+    let invocation = await App.getInvocation(data.invocationId)
+    log.info(tag,"invocation: ",invocation)
+
+    //
+    let context
+    if(!data.context){
+      context = WALLET_CONTEXT
+    }
+    if(!context) {
+      log.error("context: ",context)
+      log.error("Available: ",Object.keys(WALLETS_LOADED))
+      throw Error("103: could not find context!")
+    }
+    let walletContext = WALLETS_LOADED[context]
+    log.info(tag,"walletContext: ",walletContext)
+
+    //get
+
+    let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
+
+    //update invocation
+    let invocationId = invocation.invocationId
+    let updateBody = {
+      invocationId,
+      invocation,
+      unsignedTx:invocation.unsignedTx,
+      signedTx
+    }
+
+    //update invocation remote
+    let resultUpdate = await App.updateInvocation(updateBody)
+    log.info(tag,"resultUpdate: ",resultUpdate)
+
+    //push update to sign tab
+    event.sender.send('transactionSigned', {invocationId,invocation,unsignedTx:invocation.unsignedTx,signedTx,resultUpdate})
+
   } catch (e) {
     console.error(tag, "e: ", e);
     return {error:e};

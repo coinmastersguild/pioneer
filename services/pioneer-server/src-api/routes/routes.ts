@@ -95,6 +95,7 @@ const models: TsoaRoute.Models = {
             "invocationId": {"dataType":"string","required":true},
             "invocation": {"dataType":"any","required":true},
             "unsignedTx": {"dataType":"any","required":true},
+            "signedTx": {"dataType":"any"},
         },
         "additionalProperties": false,
     },

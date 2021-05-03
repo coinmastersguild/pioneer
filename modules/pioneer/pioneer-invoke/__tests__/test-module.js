@@ -95,34 +95,35 @@ let run_test = async function(){
         // console.log("result: ",result.data)
 
 
-        // let txInput = {
-        //     "asset":
-        //         {
-        //             "chain":"ETH",
-        //             "symbol":"ETH",
-        //             "ticker":"ETH"
-        //         },
-        //     "amount":
-        //         {
-        //             "type":"BASE",
-        //             "decimal":18,
-        //             amount: function(){
-        //                 return "0.000123"
-        //             }
-        //         },
-        //     "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
-        //     "memo":""
-        // }
-        //
-        // let invocation = {
-        //     context:"0x33b35c665496ba8e71b22373843376740401f106.wallet.json",
-        //     username:invoker,
-        //     coin:txInput.asset.symbol,
-        //     amount:txInput.amount.amount(),
-        //     address:txInput.recipient,
-        //     memo:txInput.memo,
-        //     noBroadcast:true
-        // }
+        let txInput = {
+            "asset":
+                {
+                    "chain":"ETH",
+                    "symbol":"ETH",
+                    "ticker":"ETH"
+                },
+            "amount":
+                {
+                    "type":"BASE",
+                    "decimal":18,
+                    amount: function(){
+                        return "0.000123"
+                    }
+                },
+            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
+            "memo":""
+        }
+
+        let invocation = {
+            type:"transfer",
+            context:"0x33b35c665496ba8e71b22373843376740401f106.wallet.json",
+            username:invoker,
+            coin:txInput.asset.symbol,
+            amount:txInput.amount.amount(),
+            address:txInput.recipient,
+            memo:txInput.memo,
+            noBroadcast:true
+        }
 
         // let testSwap = {
         //     type: 'transfer',
@@ -140,16 +141,17 @@ let run_test = async function(){
         //     auth: 'key:2ec1460e-c460-41ce-99d1-c324c5a3b977'
         // }
 
-        let invocation =  {
-            username: 'test-user-2',
-            coin: 'BCH',
-            amount: '0.0751396',
-            address: 'qqmjn5apwwge6yeehlvdfru4hm2u4yjrjyyn78wfwz',
-            invocationId: 'pioneer:invocation:v0.01:BCH:eWSEefK85hMVYqGfsZsWCv',
-            addressTo: 'qqmjn5apwwge6yeehlvdfru4hm2u4yjrjyyn78wfwz',
-            memo: "=:LTC.LTC:LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB:24838655",
-            context: undefined
-        }
+        // let invocation =  {
+        //     type:'transfer',
+        //     username: 'test-user-2',
+        //     coin: 'BCH',
+        //     amount: '0.0751396',
+        //     address: 'qqmjn5apwwge6yeehlvdfru4hm2u4yjrjyyn78wfwz',
+        //     invocationId: 'pioneer:invocation:v0.01:BCH:eWSEefK85hMVYqGfsZsWCv',
+        //     addressTo: 'qqmjn5apwwge6yeehlvdfru4hm2u4yjrjyyn78wfwz',
+        //     memo: "=:LTC.LTC:LKrRH5UyM5T8WreSfRjfv4jnJ1AxsmmKxB:24838655",
+        //     context: undefined
+        // }
 
         let result = await invoke.invoke('transfer',invocation)
         console.log("result: ",result.data)

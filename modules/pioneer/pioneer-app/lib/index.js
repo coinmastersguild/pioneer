@@ -170,6 +170,21 @@ module.exports = {
     //     return approvedQueue;
     // },
     //await network.instance.Invocations()
+    /*
+
+     */
+    updateInvocation: function (updateBody) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let output = yield network.instance.UpdateInvocation(null, updateBody);
+            return output.data;
+        });
+    },
+    getInvocation: function (invocationId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let output = yield network.instance.Invocation(invocationId);
+            return output.data;
+        });
+    },
     getInvocations: function (context) {
         return __awaiter(this, void 0, void 0, function* () {
             let output = yield network.instance.Invocations();
@@ -854,29 +869,38 @@ let send_approval = function (intent) {
         }
     });
 };
-let app_to_queue = function (intent) {
+let app_to_queue = function (invocation) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | app_to_queue | ";
         try {
-            if (!intent.address)
+            if (!invocation.invocationId)
+                throw Error("102: invalid intent missing invocationId!");
+            if (!invocation.type)
+                throw Error("102: invalid intent missing type!");
+            if (!invocation.address)
                 throw Error("102: invalid intent missing address!");
-            if (!intent.coin)
+            if (!invocation.coin)
                 throw Error("102: invalid intent missing coin!");
-            if (!intent.amount)
+            if (!invocation.amount)
                 throw Error("102: invalid intent missing amount!");
-            log.debug(tag, "params: ", intent);
-            intent.addressTo = intent.address;
+            log.debug(tag, "invocation: ", invocation);
+            invocation.addressTo = invocation.address;
             log.debug(tag, "Building TX on context: ", WALLET_CONTEXT);
-            if (!intent.context)
-                intent.context = intent.context;
+            if (!invocation.context)
+                invocation.context = invocation.context;
             //TODO check remote context match's local
             //add to queue
-            let resultAdd = yield WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(intent);
+            let resultAdd = yield WALLETS_LOADED[WALLET_CONTEXT].addUnsigned(invocation);
             log.debug(tag, "resultAdd: ", resultAdd);
             //verify added
             let resultNewQueue = yield WALLETS_LOADED[WALLET_CONTEXT].getApproveQueue();
             log.debug(tag, "resultNewQueue: ", resultNewQueue);
-            return resultNewQueue;
+            let output = {
+                invocationId: invocation.invocationId,
+                invocation,
+                queue: resultNewQueue,
+            };
+            return output;
         }
         catch (e) {
             console.error(tag, "Error: ", e);

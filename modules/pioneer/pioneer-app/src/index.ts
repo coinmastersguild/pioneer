@@ -99,6 +99,14 @@ let network:any
 let AUTONOMOUS = false
 let IS_INIT = false
 
+
+export interface UpdateInvocationBody {
+    invocationId:string,
+    invocation:any,
+    unsignedTx:any
+}
+
+
 module.exports = {
     isInitialized: function () {
         return IS_INIT;
@@ -171,6 +179,17 @@ module.exports = {
     //     return approvedQueue;
     // },
     //await network.instance.Invocations()
+    /*
+
+     */
+    updateInvocation: async function (updateBody:UpdateInvocationBody) {
+        let output = await network.instance.UpdateInvocation(null,updateBody)
+        return output.data;
+    },
+    getInvocation: async function (invocationId:string) {
+        let output = await network.instance.Invocation(invocationId)
+        return output.data;
+    },
     getInvocations: async function (context?:string) {
         let output = await network.instance.Invocations()
         return output.data;

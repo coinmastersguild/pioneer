@@ -156,6 +156,17 @@ export default store => {
       store.commit('appPubkeys',data.pubkeys)
     }
   })
+  ipcRenderer.on('transactionBuilt', (event, data) => {
+    console.log('transactionBuilt event! ')
+    console.log('transactionBuilt event! ')
+    //invocation context state to sign
+    store.commit('setInvocationContextState','built')
+  })
+  ipcRenderer.on('transactionSigned', (event, data) => {
+    console.log('transactionBuilt event! ',data)
+    //invocation context state to broadcast
+    store.commit('setInvocationContextState','signed')
+  })
   ipcRenderer.on('invocations', (event, data) => {
     console.log('invocations event! ')
     console.log('data: ', data)

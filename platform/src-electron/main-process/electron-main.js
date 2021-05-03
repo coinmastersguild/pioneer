@@ -38,13 +38,17 @@ import {
   continueSetup,
   startHardware,
   getUsbDevices,
-  onPairKeepKey
+  onPairKeepKey,
+  buildTransaction
 } from './app'
 
 
 // const pioneer = require("@pioneer-platform/pioneer-client")
 const Hardware = require("@pioneer-platform/pioneer-hardware")
 
+
+//Globals
+let IS_APP_STARTED = false
 let URL_PIONEER_SPEC
 const WALLETS = []
 const APPS = []
@@ -263,6 +267,11 @@ ipcMain.on('continueSetup', async (event, data) => {
         event.sender.send('navigation',{ dialog: 'Startup', action: 'open'})
         isSetup = true
       }
+      //if app !started
+      if(!IS_APP_STARTED){
+        IS_APP_STARTED = true
+        onStart(event, data)
+      }
       await sleep(2000)
     }
 
@@ -411,6 +420,24 @@ ipcMain.on('setMnemonic', async (event, data) => {
     log.info(tag,"data: ",data)
 
     TEMP_SEED = data.seed
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+
+
+ipcMain.on('buildTransaction', async (event, data) => {
+  const tag = TAG + ' | buildTransaction | '
+  try {
+
+    //context
+    //invocationId
+    //approveWindow = null
+
+    let transferUnSigned = await buildTransaction(event, data)
+    log.info(tag,"transferUnSigned: ",transferUnSigned)
 
   } catch (e) {
     console.error(tag, e)

@@ -191,7 +191,7 @@
       }
     },
     computed: {
-      ...mapGetters(['getApps','layout','getWalletInfo','getContext']),
+      ...mapGetters(['getApps','layout','getWalletInfo','getContext','getInvocations']),
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),

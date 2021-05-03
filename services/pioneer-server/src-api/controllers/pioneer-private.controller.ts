@@ -104,7 +104,8 @@ interface RegisterEosUsername {
 interface UpdateInvocationBody {
     invocationId:string,
     invocation:any,
-    unsignedTx:any
+    unsignedTx:any,
+    signedTx?:any
 }
 
 interface IgnoreShitcoins {
@@ -666,7 +667,14 @@ export class pioneerPrivateController extends Controller {
             //TODO auth?
 
             //update database
-            let updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{unsignedTx:body.unsignedTx}})
+            let updateResult
+            if(body.unsignedTx){
+                updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{unsignedTx:body.unsignedTx}})
+            }
+
+            if(body.signedTx){
+                updateResult = await invocationsDB.update({invocationId:body.invocationId},{$set:{signedTx:body.signedTx}})
+            }
 
             return(updateResult);
         }catch(e){

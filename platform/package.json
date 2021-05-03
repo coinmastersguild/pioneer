@@ -27,7 +27,7 @@
     "@peculiar/webcrypto": "^1.1.4",
     "@pioneer-platform/eth-crypto": "^6.2.3",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "^7.1.49",
+    "@pioneer-platform/pioneer-app": "^7.1.51",
     "@pioneer-platform/pioneer-client": "latest",
     "@pioneer-platform/pioneer-config": "latest",
     "@pioneer-platform/pioneer-events": "latest",
