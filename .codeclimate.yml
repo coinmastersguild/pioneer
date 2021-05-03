@@ -4,6 +4,7 @@ exclude_patterns:
   - "dist/*"
   - "lib/*"
   - "**/lib/**"
+  - "**/routes/**"
   - "e2e/*"
   - "api/*"
   - "routes/*"
