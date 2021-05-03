@@ -3,6 +3,7 @@ exclude_patterns:
   - "db/"
   - "dist/*"
   - "lib/*"
+  - "**/lib/**"
   - "e2e/*"
   - "api/*"
   - "routes/*"
