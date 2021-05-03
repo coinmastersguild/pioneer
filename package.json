@@ -14,6 +14,5 @@
     "patch-service-account": "kubectl --kubeconfig=\"kubeconfig.yml\" patch serviceaccount default -p '{\"imagePullSecrets\": [{\"name\": \"registry-pioneer\"}]}'",
     "deploy": ""
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

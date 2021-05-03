@@ -32,7 +32,6 @@ let nedb = require("pioneer-platform/nedb")
 const log = require("@pioneer-platform/loggerdog")()
 
 //app
-
 module.exports = {
     init: function (type:string,config:any,isTestnet:boolean) {
         return init_wallet(type,config,isTestnet);

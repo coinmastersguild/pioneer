@@ -20,7 +20,12 @@ const emitter = new EventEmitter();
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 
-const usbDetect = require('@bithighlander/usb-detection');
+// const usbDetect = require('@bithighlander/usb-detection');
+// const usbDetect = require('usb-detection');
+
+//usb
+var usb = require('usb')
+
 
 let {
     getPaths,
@@ -116,7 +121,7 @@ let get_keepKey_usb_devices = async function () {
     try {
         let output:any = []
         //
-        let devices = await usbDetect.find()
+        let devices = await usb.getDeviceList()
         log.debug(tag,"devices: ",devices)
         for(let i = 0; i < devices.length; i++){
             let device = devices[i]
@@ -140,7 +145,7 @@ let get_all_usb_devices = async function () {
     let tag = " | get_all_usb_devices | ";
     try {
         //
-        let devices = await usbDetect.find()
+        let devices = await usb.getDeviceList()
         log.debug(tag,"devices: ",devices)
         return devices
     } catch (e) {
@@ -396,7 +401,7 @@ let start_hardware = async function () {
     let tag = " | start_hardware | ";
     try {
         //detect connection event
-        usbDetect.startMonitoring();
+        //usbDetect.startMonitoring();
         // usb dis/connect listeners
 
         let walletFound = false
@@ -447,61 +452,70 @@ let start_hardware = async function () {
             log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
         }
 
-        usbDetect.on('add:11044:1', async function(device:any) {
-            emitter.emit('event',{event:"connect",msg:"add Keepkey!",code:'add:11044:1'})
-            log.info(tag,"add:11044:1 device: ",device)
 
-            // TODO BUG no devices found!?
-            // KEEPKEY_WALLET = await createWallet()
+        usb.on('attach', function(device: any) {
+            console.log("attach device: ",device)
+        })
 
-        });
+        usb.on('detach', function(device: any) {
+            console.log("detach device: ",device)
+        })
 
-        usbDetect.on('remove:11044:1', function(device:any) {
-            emitter.emit('event',{event:"disconnect",msg:"removeing Keepkey!",code:'remove:11044:1'})
-            keyring.removeAll()
-            log.info("shutting down connection")
-            process.exit(1)
-        });
-
-        usbDetect.on('add:11044:2', async function(device:any) {
-            log.debug("Connecting to Keepkey!")
-            emitter.emit('event',{event:"connect",msg:"Connecting to Keepkey!",code:'add:11044:2'})
-            await sleep(300)
-            KEEPKEY_WALLET =  await createWallet()
-            log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
-
-            //get lock status
-            if(KEEPKEY_WALLET){
-                let lockStatus = await KEEPKEY_WALLET.isLocked()
-                if(lockStatus){
-                    KEEPKEY_STATE = {
-                        state:3,
-                        msg:"device locked!"
-                    }
-                } else {
-                    KEEPKEY_STATE = {
-                        state:4,
-                        msg:"unlocked"
-                    }
-                }
-            }
-        });
-
-        usbDetect.on('remove:11044:2', async function(device:any) {
-            log.debug("Keepkey Disconnected!")
-            emitter.emit('event',{event:"disconnect",msg:"Keepkey Disconnected!"})
-            KEEPKEY_STATE = {
-                state:0,
-                msg:"unable to claim device!"
-            }
-            //disconnect
-            // const wallet:any = Object.values(keyring.wallets)[0]
-            // if (!!wallet) { // @ts-ignore
-            //     wallet.transport.disconnect()
-            // }
-            await keyring.removeAll()
-            //webUsbAdapter.clearDevices()
-        });
+        // usbDetect.on('add:11044:1', async function(device:any) {
+        //     emitter.emit('event',{event:"connect",msg:"add Keepkey!",code:'add:11044:1'})
+        //     log.info(tag,"add:11044:1 device: ",device)
+        //
+        //     // TODO BUG no devices found!?
+        //     // KEEPKEY_WALLET = await createWallet()
+        //
+        // });
+        //
+        // usbDetect.on('remove:11044:1', function(device:any) {
+        //     emitter.emit('event',{event:"disconnect",msg:"removeing Keepkey!",code:'remove:11044:1'})
+        //     keyring.removeAll()
+        //     log.info("shutting down connection")
+        //     process.exit(1)
+        // });
+        //
+        // usbDetect.on('add:11044:2', async function(device:any) {
+        //     log.debug("Connecting to Keepkey!")
+        //     emitter.emit('event',{event:"connect",msg:"Connecting to Keepkey!",code:'add:11044:2'})
+        //     await sleep(300)
+        //     KEEPKEY_WALLET =  await createWallet()
+        //     log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
+        //
+        //     //get lock status
+        //     if(KEEPKEY_WALLET){
+        //         let lockStatus = await KEEPKEY_WALLET.isLocked()
+        //         if(lockStatus){
+        //             KEEPKEY_STATE = {
+        //                 state:3,
+        //                 msg:"device locked!"
+        //             }
+        //         } else {
+        //             KEEPKEY_STATE = {
+        //                 state:4,
+        //                 msg:"unlocked"
+        //             }
+        //         }
+        //     }
+        // });
+        //
+        // usbDetect.on('remove:11044:2', async function(device:any) {
+        //     log.debug("Keepkey Disconnected!")
+        //     emitter.emit('event',{event:"disconnect",msg:"Keepkey Disconnected!"})
+        //     KEEPKEY_STATE = {
+        //         state:0,
+        //         msg:"unable to claim device!"
+        //     }
+        //     //disconnect
+        //     // const wallet:any = Object.values(keyring.wallets)[0]
+        //     // if (!!wallet) { // @ts-ignore
+        //     //     wallet.transport.disconnect()
+        //     // }
+        //     await keyring.removeAll()
+        //     //webUsbAdapter.clearDevices()
+        // });
 
 
         //get current state
