@@ -125,7 +125,7 @@ let get_keepKey_usb_devices = async function () {
         log.debug(tag,"devices: ",devices)
         for(let i = 0; i < devices.length; i++){
             let device = devices[i]
-            log.info(tag,"device: ",device)
+            log.debug(tag,"device: ",device)
             if(device.deviceName === 'KeepKey'){
                 output.push(device)
             }
@@ -407,7 +407,7 @@ let start_hardware = async function () {
         let walletFound = false
 
         let startReponse = await getDevice(keyring);
-        log.info(tag,"startReponse: ",startReponse)
+        log.debug(tag,"startReponse: ",startReponse)
         if(startReponse.error){
             switch(startReponse.errorCode) {
                 case 1:
@@ -447,7 +447,7 @@ let start_hardware = async function () {
 
         //else wait for connect
         if(walletFound){
-            log.info(tag,"wallet found on startup!")
+            log.debug(tag,"wallet found on startup!")
             KEEPKEY_WALLET =  await createWallet()
             log.debug(tag,"KEEPKEY_WALLET: ",KEEPKEY_WALLET)
         }
@@ -463,7 +463,7 @@ let start_hardware = async function () {
 
         // usbDetect.on('add:11044:1', async function(device:any) {
         //     emitter.emit('event',{event:"connect",msg:"add Keepkey!",code:'add:11044:1'})
-        //     log.info(tag,"add:11044:1 device: ",device)
+        //     log.debug(tag,"add:11044:1 device: ",device)
         //
         //     // TODO BUG no devices found!?
         //     // KEEPKEY_WALLET = await createWallet()
@@ -473,7 +473,7 @@ let start_hardware = async function () {
         // usbDetect.on('remove:11044:1', function(device:any) {
         //     emitter.emit('event',{event:"disconnect",msg:"removeing Keepkey!",code:'remove:11044:1'})
         //     keyring.removeAll()
-        //     log.info("shutting down connection")
+        //     log.debug("shutting down connection")
         //     process.exit(1)
         // });
         //

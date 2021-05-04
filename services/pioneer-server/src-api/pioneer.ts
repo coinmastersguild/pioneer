@@ -196,7 +196,8 @@ let register_zpub = async function (username:string, pubkey:any, walletId:string
         if(!walletId) throw Error("101: walletId required!")
         if(!pubkey.zpub) throw Error("102: invalid pubkey! missing zpub!")
         if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
-        if(!pubkey.symbol) throw Error("104: invalid pubkey! missing pubkey!")
+        if(pubkey.pubkey == true) throw Error("104:(zpub) invalid pubkey! == true wtf!")
+        if(!pubkey.symbol) throw Error("105: invalid pubkey! missing pubkey!")
         log.info(tag,"pubkey: ",pubkey)
         //if zpub add zpub
         let queueId = uuid.generate()
@@ -216,15 +217,16 @@ let register_zpub = async function (username:string, pubkey:any, walletId:string
             type:'zpub',
             blockchain:pubkey.blockchain,
             pubkey:pubkey.pubkey,
-            master:address,
+            master:pubkey.master,
             network:pubkey.blockchain,
             asset:pubkey.symbol,
             queueId,
             username,
             walletId,
-            zpub:pubkey.pubkey,
+            zpub:pubkey.zpub,
             inserted: new Date().getTime()
         }
+        log.info(tag,"Creating work! ",work)
         await queue.createWork("pioneer:pubkey:ingest",work)
 
         return queueId
@@ -238,7 +240,7 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
     let tag = TAG + " | register_xpub | "
     try {
         if(!pubkey.pubkey) throw Error("102: invalid pubkey! missing pubkey!")
-        if(pubkey.pubkey === true) throw Error("103: invalid pubkey! === true wtf!")
+        if(pubkey.pubkey == true) throw Error("103:(xpub) invalid pubkey! === true wtf!")
         if(!pubkey.symbol) throw Error("104: invalid pubkey! missing symbol!")
 
         //if zpub add zpub
@@ -258,7 +260,7 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
             type:'xpub',
             blockchain:pubkey.blockchain,
             pubkey:pubkey.pubkey,
-            master:address,
+            master:pubkey.master,
             network:pubkey.blockchain,
             asset:pubkey.symbol,
             queueId,
@@ -266,6 +268,7 @@ let register_xpub = async function (username:string, pubkey:any, walletId:string
             xpub:pubkey.xpub,
             inserted: new Date().getTime()
         }
+        log.info(tag,"Creating work! ",work)
         await queue.createWork("pioneer:pubkey:ingest",work)
 
 
@@ -345,18 +348,17 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
             log.info(tag,"unknown: ",unknown)
             log.info(tag,"Registering pubkeys : ",unknown.length)
 
-            //TODO register unkonw!
-
             //if(BALANCE_ON_REGISTER){} //TODO dont return till work complete
             for(let i = 0; i < unknown.length; i++){
                 let pubkey = unknown[i]
                 let pubkeyInfo = PubkeyMap[pubkey]
+                log.info(tag,"pubkeyInfo: ",pubkeyInfo)
                 if(!pubkeyInfo.pubkey) throw Error("102: invalid pubkey! missing pubkey")
                 if(!pubkeyInfo.master) throw Error("102: invalid pubkey! missing master")
                 if(!pubkeyInfo.blockchain) throw Error("103: invalid pubkey! missing blockchain")
-
+                if(pubkey.pubkey === true) throw Error("104: invalid pubkey! === true wtf!")
                 let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain)
-                if(!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!")
+                if(!nativeAsset) throw Error("105: invalid pubkey! unsupported by coins module!")
                 //hack
                 if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset
 
@@ -367,6 +369,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                     asset:nativeAsset,
                     path:pubkeyInfo.path,
                     master:pubkeyInfo.master,
+                    pubkey:pubkeyInfo.pubkey,
                     script_type:pubkeyInfo.script_type,
                     network:pubkeyInfo.network,
                     created:new Date().getTime(),
@@ -375,8 +378,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
 
                 if(pubkeyInfo.type === "xpub" || pubkeyInfo.xpub){
                     if(pubkeyInfo.xpub){
-                        entryMongo.pubkey = pubkeyInfo.xpub
-                        entryMongo.xpub = true
+                        entryMongo.pubkey = pubkeyInfo.pubkey
                     } else {
                         log.errro(tag,"pubkey: ",pubkeyInfo)
                         throw Error("102: Invalid xpub pubkey!")
@@ -387,8 +389,7 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                     output.work.push(queueId)
                 } else if(pubkeyInfo.type === "zpub" || pubkeyInfo.zpub){
                     if(pubkeyInfo.zpub){
-                        entryMongo.pubkey = pubkeyInfo.zpub
-                        entryMongo.zpub = true
+                        entryMongo.pubkey = pubkeyInfo.pubkey
                     } else {
                         log.errro(tag,"pubkey: ",pubkeyInfo)
                         throw Error("102: Invalid zpub pubkey!")
@@ -418,17 +419,29 @@ let update_pubkeys = async function (username:string, pubkeys:any, walletId:stri
                         { $addToSet: { tags: walletId } })
                     log.info(tag,"pushTagMongo: ",pushTagMongo)
                 }else{
-                    saveActions.push({insertOne: entryMongo})
+                    // saveActions.push({insertOne: entryMongo})
+
+                    //final check
+                    if(!entryMongo.pubkey || entryMongo.pubkey == true){
+                        log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** pubkeyInfo: ",pubkeyInfo)
+                        log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** entryMongo: ",entryMongo)
+                        throw Error("105: unable to save invalid pubkey!")
+                    } else {
+                        let resultSave = await pubkeysDB.insert(entryMongo)
+                        log.info(tag,"resultSave: ",resultSave)
+                        //TODO throw if error (better get error then not fail fast)
+                    }
+
                 }
             }
 
             //save pubkeys in mongo
-            try {
-                let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
-                log.info(tag, "result: ", result)
-            } catch (e) {
-                log.error(tag,"Failed to update pubkeys! e: ",e)
-            }
+            // try {
+            //     let result = await pubkeysDB.bulkWrite(saveActions, {ordered: false})
+            //     log.info(tag, "result: ", result)
+            // } catch (e) {
+            //     log.error(tag,"Failed to update pubkeys! e: ",e)
+            // }
 
             if (BALANCE_ON_REGISTER) {
                 output.results = []

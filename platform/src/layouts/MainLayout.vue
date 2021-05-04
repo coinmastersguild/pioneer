@@ -50,6 +50,11 @@
         <q-menu fit :offset="[-16, -3]">
           <q-list style="min-width: 100px">
             <q-list>
+              <q-item tag="label" v-ripple>
+                <q-item-section>
+                  <q-item-label @click="openPin">Open Pin Winodw <q-icon name="add"></q-icon> </q-item-label>
+                </q-item-section>
+              </q-item>
               <q-item v-if="featureAddWallet" tag="label" v-ripple>
                 <q-item-section>
                   <q-item-label @click="onAddWallet">Add Wallet <q-icon name="add"></q-icon> </q-item-label>
@@ -196,6 +201,9 @@ export default {
   },
   methods: {
     ...mapMutations(['showModal', 'hideModal']),
+    openPin() {
+      this.showModal('Pin')
+    },
     onAddWallet() {
       this.showModal('Setup')
     },

@@ -41,7 +41,6 @@ let run_test = async function(){
         let state = await Hardware.state()
         console.log("state: ",state)
 
-
         if(state.state > 2){
             //get lock status
             let lockStatus = await Hardware.isLocked()
@@ -74,32 +73,9 @@ let run_test = async function(){
 
 
             //get pubkeys
-            // let pubkeys = await Hardware.getPubkeys(blockchains)
-            // console.log("pubkeys: ",pubkeys)
-            // console.log("pubkeys: ",prettyjson.render(pubkeys))
-
-
-            //sign tx
-            // let ethTx = {
-            //     "nonce":"0x0",
-            //     "gasPrice":"0x5FB9ACA00",
-            //     "gasLimit":"0x186A0",
-            //     "value":"0x00",
-            //     "to":"0x41e5560054824ea6b0732e656e3ad64e20e94e45",
-            //     "chainId":3,
-            //     "data":"0x1fece7b400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000031535741503a4254432e4254433a6d6b7152467a786d6b434758396a78677071714648637852556d4c4a634c444265723a31000000000000000000000000000000",
-            //     "addressNList":[
-            //         2147483692,
-            //         2147483708,
-            //         2147483648,
-            //         0,
-            //         0
-            //     ]
-            // }
-            //
-            //
-            // let rawTx = await KEEPKEY.ethSignTx(ethTx)
-            console.log("rawTx: ",rawTx)
+            let pubkeys = await Hardware.getPubkeys(blockchains)
+            console.log("pubkeys: ",pubkeys)
+            console.log("pubkeys: ",prettyjson.render(pubkeys))
         } else if(state.state < 0){
             console.log("Failed to claim!")
             console.log("Please unplug the device!")
@@ -109,34 +85,6 @@ let run_test = async function(){
             console.log(state)
             console.log("Please connect a device!")
         }
-
-
-        // //get lock status
-        // let lockStatus = await Hardware.isLocked()
-        // console.log("lockStatus: ",lockStatus)
-        //
-        //
-        // //
-        // let ethTx = {
-        //     "nonce":"0x0",
-        //     "gasPrice":"0x5FB9ACA00",
-        //     "gasLimit":"0x186A0",
-        //     "value":"0x00",
-        //     "to":"0x41e5560054824ea6b0732e656e3ad64e20e94e45",
-        //     "chainId":3,
-        //     "data":"0x1fece7b400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000031535741503a4254432e4254433a6d6b7152467a786d6b434758396a78677071714648637852556d4c4a634c444265723a31000000000000000000000000000000",
-        //     "addressNList":[
-        //         2147483692,
-        //         2147483708,
-        //         2147483648,
-        //         0,
-        //         0
-        //     ]
-        // }
-        //
-        //
-        // let rawTx = await KEEPKEY.ethSignTx(ethTx)
-        // console.log("rawTx: ",rawTx)
 
     }catch(e){
         console.error(e)

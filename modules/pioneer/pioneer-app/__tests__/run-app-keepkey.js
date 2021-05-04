@@ -110,13 +110,12 @@ let run_test = async function(){
                     }
                 })
 
-                //pair
-                // try{
-                //     let pairResult = await App.pair("NGRIUY")
-                //     console.log("pairResult: ",pairResult)
-                // }catch(e){
-                //
-                // }
+                try{
+                    let pairResult = await App.pair("F6DY9H")
+                    console.log("pairResult: ",pairResult)
+                }catch(e){
+
+                }
 
                 //get user info
                 let userInfo = await App.getUserInfo()
@@ -193,10 +192,24 @@ let run_test = async function(){
                 // console.log("resultBroadcast: ",resultBroadcast)
 
                 console.log("system ready....")
-            } else if(keepkeyStatus.state === 2){
+            } else if(keepkeyStatus.state === 3){
                 //prompt pin
                 console.log("Device Locked!")
-                Hardware.displayPin()
+                Hardware.displayPin(blockchains)
+
+                let table = new Table({
+                    colWidths: [5, 5, 5]
+                });
+
+                table.push(["1", "2", "3"]);
+                table.push(["4", "5", "6"]);
+                table.push(["7", "8", "9"]);
+
+                table = table.sort(function (a, b) {
+                    return b[2] - a[2];
+                });
+                console.log("\n \n PIN ENTRY \n \n " + table.toString() + "\n \n");
+
                 prompt.get(['pin'], async function (err, result) {
                     if (err) { return onErr(err); }
                     console.log('Command-line input received:');
@@ -204,8 +217,8 @@ let run_test = async function(){
                     KEEPKEY.sendPin(result.pin)
                 });
 
-                await sleep(2000)
-                run_test()
+                // await sleep(2000)
+                // run_test()
             } else {
 
                 await sleep(2000)

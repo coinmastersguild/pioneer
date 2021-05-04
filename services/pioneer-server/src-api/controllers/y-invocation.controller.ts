@@ -151,7 +151,13 @@ export class pioneerInvocationController extends Controller {
             let invocationSerliazed = JSON.stringify(body.invocation)
             let notarySig = sign.sign(notary,invocationSerliazed,PIONEER_SIGNING_PRIVKEY)
 
+            //normalize
+            if(!body.invocation.type) body.invocation.type = body.type
             if(body.invocation.context) body.context = body.invocation.context
+
+            //validate
+            if(!body.invocation.type) throw Error("Invocation type required!")
+
             let entry = {
                 state:'created',
                 type:body.invocation.type,

@@ -219,17 +219,7 @@ module.exports = {
         return getWallets();
     },
     setContext: async function (context:string) {
-        log.info("context: ",context)
-        if(context && WALLETS_LOADED[context]){
-            //does it match current
-            if(context !== WALLET_CONTEXT){
-                WALLET_CONTEXT = context
-            }
-            network.instance.SetContext(null,{context})
-        } else {
-            log.error("WALLETS_LOADED: ",WALLETS_LOADED)
-            throw Error("invalid wallet context! context: "+context)
-        }
+        return set_context(context)
     },
     unlockWallet: function (wallet:string,password:string) {
         return unlock_wallet(wallet,password);
@@ -496,6 +486,29 @@ module.exports = {
 
     //start wallet REST api
 
+};
+
+let set_context = async function (context:string) {
+    let tag = " | unlock_wallet | ";
+    try {
+
+        log.info("context: ",context)
+        if(context && WALLETS_LOADED[context]){
+            //does it match current
+            if(context !== WALLET_CONTEXT){
+                WALLET_CONTEXT = context
+            }
+            network.instance.SetContext(null,{context})
+        } else {
+            log.error("WALLETS_LOADED: ",WALLETS_LOADED)
+            throw Error("invalid wallet context! context: "+context)
+        }
+
+        return true
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
 };
 
 /*
@@ -1329,6 +1342,14 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 log.debug(tag,"walletFile: ",walletFile)
                 if(!walletFile.TYPE) walletFile.TYPE = walletFile.type
                 if(walletFile.TYPE === 'keepkey'){
+                    if(!KEEPKEY){
+                        //start
+                        KEEPKEY = await Hardware.start()
+
+                        KEEPKEY.events.on('event', async function(event:any) {
+                            //events.emit('keepkey',{event})
+                        });
+                    }
                     if(!output.devices) output.devices = []
                     log.debug(tag,"Loading keepkey wallet! ")
 
@@ -1367,6 +1388,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     log.debug(tag,"KEEPKEY init config: ",configPioneer)
                     let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
                     //init
+                    if(!KEEPKEY) throw Error("Can not start hardware wallet without global KEEPKEY")
                     let walletInfo = await wallet.init(KEEPKEY)
                     log.debug(tag,"walletInfo: ",walletInfo)
                     WALLETS_LOADED[walletName] = wallet
@@ -1535,9 +1557,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             output.context = WALLET_CONTEXT
         } else {
             log.info(tag,"remote context NOT in loaded wallet")
-            //set remote context to position0
+            //set remote context to position0 local
             log.info(tag,"walletNames: ",walletFiles)
-
+            log.info(tag,"Position 0 context: ",walletFiles[0])
+            //
+            set_context(walletFiles[0])
         }
 
 

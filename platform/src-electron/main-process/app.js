@@ -73,7 +73,7 @@ export async function onPairKeepKey(event, data) {
     wallet.type = 'keepkey'
     wallet.features = KEEPKEY.features
     console.log("wallet: ",wallet)
-    event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
+    //event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
 
 
     let resultPairKeepKey = await App.pairKeepkey(wallet,blockchains)
@@ -166,12 +166,12 @@ export async function continueSetup(event, data) {
               }
             } else {
               log.info(tag,"Checkpoint6b wallet failed to load")
-              event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
+              //event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
               //this doesnt seem to return?
               return {
                 setup:false,
                 success:false,
-                result:"setup required!"
+                result:"setup required! wallet not initialized"
               }
             }
           } else {
@@ -201,7 +201,7 @@ export async function continueSetup(event, data) {
           return {
             setup:false,
             success:false,
-            result:"setup required!"
+            result:"setup required! network not found!"
           }
         } else {
           log.info(tag,"Checkpoint3b invalid config :( trying again")
@@ -209,7 +209,7 @@ export async function continueSetup(event, data) {
           return {
             setup:false,
             success:false,
-            result:"setup required!"
+            result:"setup required! missing config params"
           }
         }
       }
@@ -332,9 +332,10 @@ export async function startHardware(event, data) {
     let state = await Hardware.state()
     event.sender.send('hardwareState',{ state })
     event.sender.send('hardwareStatus',{ state })
-    log.debug(tag,"state: ",state)
+    log.info(tag,"state: ",state)
 
-    if(state > 1){
+    if(parseInt(state.state) > 1){
+      log.info(tag,"Connected to device!")
       //lockStatus
       let lockStatus = await Hardware.isLocked()
       event.sender.send('hardwareLockStatus',{ lockStatus })
@@ -343,7 +344,7 @@ export async function startHardware(event, data) {
       //if locked
       if(lockStatus){
         KEEPKEY_STATUS = 'locked'
-        Hardware.displayPin()
+        Hardware.displayPin(blockchains)
         //open pin
         event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
       } else {
@@ -726,7 +727,7 @@ export async function buildTransaction(event, data) {
       throw Error("103: could not find context!")
     }
     let walletContext = WALLETS_LOADED[context]
-    log.info(tag,"walletContext: ",walletContext)
+    log.info(tag,"walletContext: ",walletContext.walletId)
 
     switch(invocation.type) {
       case 'transfer':
@@ -803,10 +804,13 @@ export async function approveTransaction(event, data) {
       throw Error("103: could not find context!")
     }
     let walletContext = WALLETS_LOADED[context]
-    log.info(tag,"walletContext: ",walletContext)
+    log.info(tag,"walletContext: ",walletContext.walletId)
 
     //get
+    //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
+    //unsinged TX
+    log.info(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
     let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
     //update invocation
@@ -824,6 +828,66 @@ export async function approveTransaction(event, data) {
 
     //push update to sign tab
     event.sender.send('transactionSigned', {invocationId,invocation,unsignedTx:invocation.unsignedTx,signedTx,resultUpdate})
+
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+export async function broadcastTransaction(event, data) {
+  let tag = TAG + " | broadcastTransaction | ";
+  try {
+    //get invocation
+
+    let invocation = await App.getInvocation(data.invocationId)
+    log.info(tag,"invocation: ",invocation)
+
+    //
+    let context
+    if(!data.context){
+      context = WALLET_CONTEXT
+    }
+    if(!context) {
+      log.error("context: ",context)
+      log.error("Available: ",Object.keys(WALLETS_LOADED))
+      throw Error("103: could not find context!")
+    }
+    let walletContext = WALLETS_LOADED[context]
+    log.info(tag,"walletContext: ",walletContext.walletId)
+
+    //normalize
+    if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
+    //override noBroadcast
+    if(invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = false
+
+    let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
+
+
+
+    //update invocation
+    let invocationId = invocation.invocationId
+    let updateBody = {
+      invocationId:invocation.invocation.invocationId,
+      invocation:invocation.invocation,
+      unsignedTx:invocation.unsignedTx,
+      signedTx:invocation.signedTx,
+      broadcastResult
+    }
+    log.info(tag,"updateBody: ",updateBody)
+    //update invocation remote
+    let resultUpdate = await App.updateInvocation(updateBody)
+    log.info(tag,"resultUpdate: ",resultUpdate)
+
+    //push update to sign tab
+    event.sender.send('transactionSigned', {
+      invocationId,
+      invocation,
+      unsignedTx:invocation.unsignedTx,
+      signedTx:invocation.signedTx,
+      broadcastResult,
+      resultUpdate
+    })
 
   } catch (e) {
     console.error(tag, "e: ", e);

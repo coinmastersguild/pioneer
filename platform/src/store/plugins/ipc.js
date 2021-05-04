@@ -91,6 +91,13 @@ export default store => {
       store.commit('setInvocationContext',data)
     }
   })
+  ipcRenderer.on('setInvocationContext', (event, data) => {
+    console.log(' setContext event! ',data)
+    console.log('data: ', data)
+    if(data.invocationId){
+      store.commit('setInvocationContext',data.invocationId)
+    }
+  })
   ipcRenderer.on('pushPioneerStatus', (event, data) => {
     console.log(' pushPioneerStatus! ',data)
     console.log('data: ', data)

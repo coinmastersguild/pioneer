@@ -47,47 +47,47 @@ let run_test = async function(){
         // }
 
         //ethereum
-        let config = {
-            network:'mainnet',
-            blockchain:blockchains[1],
-            nativeAsset:'ETH',
-            queryKey,
-            username,
-            spec:urlSpec
-        }
-
         // let config = {
-        //     network:'bitcoinCash',
-        //     blockchain:'bitcoinCash',
-        //     nativeAsset:'BCH',
+        //     network:'mainnet',
+        //     blockchain:blockchains[1],
+        //     nativeAsset:'ETH',
         //     queryKey,
         //     username,
         //     spec:urlSpec
         // }
 
+        let config = {
+            network:'mainnet',
+            blockchain:'bitcoincash',
+            nativeAsset:'BCH',
+            queryKey,
+            username,
+            spec:urlSpec
+        }
+
         //init
         let app = new SDK(urlSpec,config)
         await app.init()
 
-        //0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B
-        let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
-        let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
-
-        let amount = {
-            amount:function(){
-                return BigNumber.BigNumber.from(10000000)
-            }
-        }
-
-        let isApproved = await app.isApproved(routerAddy,tokenAddress,amount)
-        console.log("isApproved: ",isApproved)
-
-        if(!isApproved){
-            let txidApprove = await app.approve(routerAddy,tokenAddress,amount,true)
-            console.log("txidApprove: ",txidApprove)
-        } else {
-            log.info(tag,"Already Approved!")
-        }
+        // //0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B
+        // let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+        // let tokenAddress = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+        //
+        // let amount = {
+        //     amount:function(){
+        //         return BigNumber.BigNumber.from(10000000)
+        //     }
+        // }
+        //
+        // let isApproved = await app.isApproved(routerAddy,tokenAddress,amount)
+        // console.log("isApproved: ",isApproved)
+        //
+        // if(!isApproved){
+        //     let txidApprove = await app.approve(routerAddy,tokenAddress,amount,true)
+        //     console.log("txidApprove: ",txidApprove)
+        // } else {
+        //     log.info(tag,"Already Approved!")
+        // }
 
 
         //console.log(app)
@@ -269,21 +269,21 @@ let run_test = async function(){
         // }
 
         //BCH transfer* object to RUNE
-        // let transfer = {
-        //     "amount": {
-        //         "type": "BASE",
-        //         "decimal": 8,
-        //         amount: function(){
-        //             return "0.0101"
-        //         }
-        //     },
-        //     "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
-        //     "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
-        //     "feeRate": 1
-        // }
-        //
-        // let txid = await app.transfer(transfer)
-        // console.log('TXID: ',txid)
+        let transfer = {
+            "amount": {
+                "type": "BASE",
+                "decimal": 8,
+                amount: function(){
+                    return "0.0101"
+                }
+            },
+            "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
+            "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
+            "feeRate": 1
+        }
+
+        let txid = await app.transfer(transfer)
+        console.log('TXID: ',txid)
 
     }catch(e){
         console.error(e)

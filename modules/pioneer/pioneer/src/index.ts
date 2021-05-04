@@ -1469,10 +1469,10 @@ module.exports = class wallet {
                     }else{
                         input = {coin,xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }
-                    log.debug(tag,"input: ",input)
+                    log.info(tag,"input: ",input)
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
                     unspentInputs = unspentInputs.data
-                    log.debug(tag,"unspentInputs: ",unspentInputs)
+                    log.info(tag,"unspentInputs: ",unspentInputs)
 
                     let utxos = []
                     for(let i = 0; i < unspentInputs.length; i++){

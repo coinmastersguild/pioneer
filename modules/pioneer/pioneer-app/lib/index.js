@@ -217,18 +217,7 @@ module.exports = {
     },
     setContext: function (context) {
         return __awaiter(this, void 0, void 0, function* () {
-            log.info("context: ", context);
-            if (context && WALLETS_LOADED[context]) {
-                //does it match current
-                if (context !== WALLET_CONTEXT) {
-                    WALLET_CONTEXT = context;
-                }
-                network.instance.SetContext(null, { context });
-            }
-            else {
-                log.error("WALLETS_LOADED: ", WALLETS_LOADED);
-                throw Error("invalid wallet context! context: " + context);
-            }
+            return set_context(context);
         });
     },
     unlockWallet: function (wallet, password) {
@@ -468,6 +457,30 @@ module.exports = {
     sendToAddress: function (intent) {
         return send_to_address(intent);
     },
+};
+let set_context = function (context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | unlock_wallet | ";
+        try {
+            log.info("context: ", context);
+            if (context && WALLETS_LOADED[context]) {
+                //does it match current
+                if (context !== WALLET_CONTEXT) {
+                    WALLET_CONTEXT = context;
+                }
+                network.instance.SetContext(null, { context });
+            }
+            else {
+                log.error("WALLETS_LOADED: ", WALLETS_LOADED);
+                throw Error("invalid wallet context! context: " + context);
+            }
+            return true;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
 };
 /*
 
@@ -1257,6 +1270,15 @@ let init_wallet = function (config, isTestnet) {
                     if (!walletFile.TYPE)
                         walletFile.TYPE = walletFile.type;
                     if (walletFile.TYPE === 'keepkey') {
+                        if (!KEEPKEY) {
+                            //start
+                            KEEPKEY = yield Hardware.start();
+                            KEEPKEY.events.on('event', function (event) {
+                                return __awaiter(this, void 0, void 0, function* () {
+                                    //events.emit('keepkey',{event})
+                                });
+                            });
+                        }
                         if (!output.devices)
                             output.devices = [];
                         log.debug(tag, "Loading keepkey wallet! ");
@@ -1296,6 +1318,8 @@ let init_wallet = function (config, isTestnet) {
                         log.debug(tag, "KEEPKEY init config: ", configPioneer);
                         let wallet = new Pioneer('keepkey', configPioneer, isTestnet);
                         //init
+                        if (!KEEPKEY)
+                            throw Error("Can not start hardware wallet without global KEEPKEY");
                         let walletInfo = yield wallet.init(KEEPKEY);
                         log.debug(tag, "walletInfo: ", walletInfo);
                         WALLETS_LOADED[walletName] = wallet;
@@ -1453,8 +1477,11 @@ let init_wallet = function (config, isTestnet) {
             }
             else {
                 log.info(tag, "remote context NOT in loaded wallet");
-                //set remote context to position0
+                //set remote context to position0 local
                 log.info(tag, "walletNames: ", walletFiles);
+                log.info(tag, "Position 0 context: ", walletFiles[0]);
+                //
+                set_context(walletFiles[0]);
             }
             //after registered start socket
             //sub all to events

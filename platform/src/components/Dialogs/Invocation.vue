@@ -60,19 +60,11 @@
               </q-btn-dropdown>
 
               <div>
-                <q-space />
-                <q-space />
-                <q-space />
-                <q-space />
                 Destination: {{invocation.invocation.address}}
                 <small>external</small>
               </div>
 
               <div>
-                <q-space />
-                <q-space />
-                <q-space />
-                <q-space />
                 Fee's 1 sat/byte === 1cent
 
               </div>
@@ -124,13 +116,30 @@
           allow broadcast
 
           allow recreate tx (replacement)
+          <q-btn
+            color="primary"
+            @click="broadcast(invocationContext)"
+            label="Broadcast Transaction"
+            size="lg"
+            class="font-weight-medium q-pl-md q-pr-md"
+            style="font-size:1rem;"
+          ></q-btn>
         </q-tab-panel>
       </q-tab-panels>
       <div>
+        <div v-if="!isBroadcasting">
+          <q-btn
+            color="red"
+            @click="cancel()"
+            label="Reject"
+            size="lg"
+            class="font-weight-medium q-pl-md q-pr-md"
+            style="font-size:1rem;"
+          ></q-btn>
+        </div>
         <q-btn
-          color="red"
-          @click="cancel()"
-          label="Reject"
+          @click="close()"
+          label="Exit Invocation"
           size="lg"
           class="font-weight-medium q-pl-md q-pr-md"
           style="font-size:1rem;"
@@ -156,6 +165,7 @@
         txBuilt: false,
         loading: false,
         error: false,
+        isBroadcasting:false,
         items: [],
         wallets:[],
         walletContext:{},
@@ -318,9 +328,9 @@
         this.$q.electron.ipcRenderer.send('approveTransaction', {invocationId});
 
       },
-      broadcast() {
-
-
+      broadcast(invocationId) {
+        this.isBroadcasting = true
+        this.$q.electron.ipcRenderer.send('broadcastTransaction', {invocationId});
       },
       cancel() {
         //mark invocation context rejected

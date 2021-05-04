@@ -1571,12 +1571,12 @@ module.exports = /** @class */ (function () {
                             else {
                                 input = { coin: coin, xpub: this.PUBLIC_WALLET[coin].pubkey };
                             }
-                            log.debug(tag, "input: ", input);
+                            log.info(tag, "input: ", input);
                             return [4 /*yield*/, this.pioneerClient.instance.ListUnspent(input)];
                         case 5:
                             unspentInputs = _a.sent();
                             unspentInputs = unspentInputs.data;
-                            log.debug(tag, "unspentInputs: ", unspentInputs);
+                            log.info(tag, "unspentInputs: ", unspentInputs);
                             utxos = [];
                             for (i = 0; i < unspentInputs.length; i++) {
                                 input_1 = unspentInputs[i];

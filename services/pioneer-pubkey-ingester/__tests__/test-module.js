@@ -30,6 +30,19 @@ let ASSET = "ETH"
 //     inserted: 1594510142838
 // }
 
+// let work = {
+//     coin: 'BCH',
+//     type: 'xpub',
+//     walletId: 'keepkey-pubkeys-343733331147363327003800',
+//     username: 'test-user-2',
+//     symbol: 'BCH',
+//     blockchain: "bitcoincash",
+//     queueId: 'j9ZbcfjasdFy6kqShnupHXLWi',
+//     account: 'tesasdasdtaddress',
+//     pubkey:"xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K",
+//     inserted: 1594510142838
+// }
+
 let work = {
     coin: 'BCH',
     type: 'xpub',
@@ -42,7 +55,6 @@ let work = {
     pubkey:"xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K",
     inserted: 1594510142838
 }
-
 
 
 console.log("inserted:",work)

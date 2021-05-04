@@ -29,11 +29,10 @@ network.init()
 //         console.log(resp)
 //     })
 
-
-network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")
 //     .then(function(resp){
@@ -81,13 +80,10 @@ network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2E
 //         //     })
 //     })
 
-
-// network.getInfo()
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-
-
+network.getInfo()
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getInfo()
 //     .then(function(resp){

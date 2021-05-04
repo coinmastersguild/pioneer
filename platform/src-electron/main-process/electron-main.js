@@ -39,7 +39,8 @@ import {
   startHardware,
   getUsbDevices,
   onPairKeepKey,
-  buildTransaction
+  buildTransaction,
+  broadcastTransaction
 } from './app'
 
 
@@ -88,7 +89,7 @@ if (process.env.PROD) {
 
 let mainWindow
 let previewWindow
-let approveWindow
+// let approveWindow
 
 //TODO :pray: someday menubar again?
 // function createPreviewDashboard(){
@@ -110,37 +111,59 @@ let approveWindow
 // }
 
 //create pop-up approve
-function createApproveWindow (invocationId) {
-  log.info("LAUNCH APPROVE WINDOW")
-  /**
-   * pop-up approve
-   *
-   * more options: https://www.electronjs.org/docs/api/browser-window
-   */
-  approveWindow = new BrowserWindow({
-    width: 600,
-    height: 600,
-    x:0, //Top of window
-    useContentSize: true,
-    //TODO make toggle
-    //remember last setting?
-    alwaysOnTop: true,
-    webPreferences: {
-      // Change from /quasar.conf.js > electron > nodeIntegration;
-      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-      nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
-      nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+// function createApproveWindow (invocationId) {
+//   log.info("LAUNCH APPROVE WINDOW")
+//   /**
+//    * pop-up approve
+//    *
+//    * more options: https://www.electronjs.org/docs/api/browser-window
+//    */
+//   approveWindow = new BrowserWindow({
+//     width: 600,
+//     height: 600,
+//     x:0, //Top of window
+//     useContentSize: true,
+//     //TODO make toggle
+//     //remember last setting?
+//     alwaysOnTop: true,
+//     webPreferences: {
+//       // Change from /quasar.conf.js > electron > nodeIntegration;
+//       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
+//       nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
+//       nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+//
+//       // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+//       // preload: path.resolve(__dirname, 'electron-preload.js')
+//     }
+//   })
+//
+//   approveWindow.loadURL(process.env.APP_URL+"/#invocations")
+//
+//   approveWindow.on('closed', () => {
+//     approveWindow = null
+//   })
+// }
 
-      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
-      // preload: path.resolve(__dirname, 'electron-preload.js')
-    }
-  })
+function bringWindowToFront(){
+  try{
 
-  approveWindow.loadURL(process.env.APP_URL+"/#invocations")
+    //
+    mainWindow.setAlwaysOnTop(true)
 
-  approveWindow.on('closed', () => {
-    approveWindow = null
-  })
+  }catch(e){
+    log.error(e)
+  }
+}
+
+function releaseWindowFromTop(){
+  try{
+
+    //
+    mainWindow.setAlwaysOnTop(false)
+
+  }catch(e){
+    log.error(e)
+  }
 }
 
 function createWindow () {
@@ -252,6 +275,7 @@ ipcMain.on('onAttemptCreateUsername', async (event, data) => {
 })
 
 //continueSetup
+//Note this is designed to be called over and over untill setup complete
 ipcMain.on('continueSetup', async (event, data) => {
   const tag = TAG + ' | continueSetup | '
   try {
@@ -259,21 +283,35 @@ ipcMain.on('continueSetup', async (event, data) => {
     let setupResult = await continueSetup(event, data)
     log.info(tag,"setupResult: ",setupResult)
 
-    let isSetup = false
-    while(!isSetup){
-      let resultSetup = await continueSetup(event, data)
-      log.info(tag,"resultSetup: ",resultSetup)
-      if(resultSetup.setup) {
-        event.sender.send('navigation',{ dialog: 'Startup', action: 'open'})
-        isSetup = true
-      }
+
+    let resultSetup = await continueSetup(event, data)
+    log.info(tag,"resultSetup: ",resultSetup)
+    if(resultSetup.setup) {
+      log.info(tag,"Setup complete starting App")
+      event.sender.send('navigation',{ dialog: 'Startup', action: 'open'})
       //if app !started
       if(!IS_APP_STARTED){
         IS_APP_STARTED = true
-        onStart(event, data)
+        onStartMain(event, data)
       }
-      await sleep(2000)
     }
+
+
+    // let isSetup = false
+    // while(!isSetup){
+    //   let resultSetup = await continueSetup(event, data)
+    //   log.info(tag,"resultSetup: ",resultSetup)
+    //   if(resultSetup.setup) {
+    //     event.sender.send('navigation',{ dialog: 'Startup', action: 'open'})
+    //     isSetup = true
+    //   }
+    //   //if app !started
+    //   if(!IS_APP_STARTED){
+    //     IS_APP_STARTED = true
+    //     onStart(event, data)
+    //   }
+    //   await sleep(10000)
+    // }
 
   } catch (e) {
     console.error(tag, e)
@@ -299,6 +337,11 @@ ipcMain.on('getUsbDevices', async (event, data) => {
 ipcMain.on('refreshPioneer', async (event, data) => {
   const tag = TAG + ' | refreshPioneer | '
   try {
+    //if app !started
+    if(!IS_APP_STARTED){
+      IS_APP_STARTED = true
+      onStartMain(event, data)
+    }
     let resultRefresh = await refreshPioneer(event, data)
     log.info(tag,"resultRefresh: ",resultRefresh)
   } catch (e) {
@@ -328,24 +371,27 @@ ipcMain.on('startHardware', async (event, data) => {
 
  */
 
-ipcMain.on('onStart', async (event, data) => {
-  const tag = TAG + ' | onStart | '
-  try {
-    log.info(tag,"checkpoint 0")
+let onStartMain = async function(event, data){
+  const tag = TAG + ' | onStartMain | '
+  try{
     let onStartResult = await onStart(event,data)
     log.info(tag,"onStartResult: ",onStartResult)
 
     //on on invocations add to queue
     onStartResult.events.on('message', async (request) => {
       log.info(tag,"**** message MAIN: ", request)
-      //TODO open "onTop" window for each tx type
+      if(!request.invocationId) throw Error("102: invalid invocation!")
       switch(request.type) {
         case 'swap':
           break;
         case 'approve':
           break;
         case 'transfer':
-          if(!approveWindow) createApproveWindow()
+          //open invocation window
+          event.sender.send('navigation',{ dialog: 'Invocation', action: 'open'})
+          //set invocationConext to invocationId
+          event.sender.send('setInvocationContext',{ invocationId:request.invocationId})
+          bringWindowToFront()
           break;
         case 'context':
           break;
@@ -353,6 +399,16 @@ ipcMain.on('onStart', async (event, data) => {
           log.error("Unknown event: "+request.type)
       }
     })
+  }catch(e){
+    throw Error("Failed to start!")
+  }
+}
+
+ipcMain.on('onStart', async (event, data) => {
+  const tag = TAG + ' | onStart | '
+  try {
+    log.info(tag,"checkpoint 0")
+    onStartMain(event, data)
 
   } catch (e) {
     console.error(tag, e)
@@ -454,6 +510,22 @@ ipcMain.on('approveTransaction', async (event, data) => {
 
     let resultApprove = await approveTransaction(event, data)
     log.info(tag,"resultApprove: ",resultApprove)
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('broadcastTransaction', async (event, data) => {
+  const tag = TAG + ' | broadcastTransaction | '
+  try {
+
+    //context
+    //invocationId
+    //approveWindow = null
+
+    let resultBroadcast = await broadcastTransaction(event, data)
+    log.info(tag,"resultBroadcast: ",resultBroadcast)
 
   } catch (e) {
     console.error(tag, e)
