@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "modules/**/*",
+      "modules/**/**/*",
       "servocess/**/*",
       "apps/**/*",
       "e2e/**/*",
