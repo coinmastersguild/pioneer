@@ -24,7 +24,7 @@
     "version:patch": "lerna version patch --yes",
     "version:minor": "lerna version minor --yes",
     "version:major": "lerna version major --yes",
-    "publish": "lerna publish from-package --yes"
+    "publish": "lerna publish from-package --no-private --yes"
   },
   "dependencies": {
     "lerna": "^4.0.0"
