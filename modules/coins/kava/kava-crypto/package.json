@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/thor-crypto",
+  "name": "@pioneer-platform/kava-crypto",
   "version": "6.2.2",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

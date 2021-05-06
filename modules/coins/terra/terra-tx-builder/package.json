@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/terra-tx-builder",
+  "name": "@pioneer-platform/terra-tx-builder-main",
   "version": "0.0.1",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

@@ -1,5 +1,5 @@
 {
-  "name": "eth-e2e-app-v1",
+  "name": "atom-e2e-app-v1",
   "version": "6.2.0",
   "scripts": {
     "npm": "npm i",

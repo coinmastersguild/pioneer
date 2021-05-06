@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/thor-network",
+  "name": "@pioneer-platform/thor-tx-parser",
   "version": "6.2.4",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

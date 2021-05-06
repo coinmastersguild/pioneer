@@ -1,18 +1,29 @@
 {
   "name": "pioneer-platform",
-  "version": "1.0.0",
+  "version": "6.2.6",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "modules/**/*",
+      "servocess/**/*",
+      "apps/**/*",
+      "e2e/**/*",
+      "platform"
+    ]
+  },
   "scripts": {
-    "clean": "sh scripts/clean.sh",
-    "build:rest": "cd services/pioneer-server && npm run docker:push:all",
-    "set:context": "doctl kubernetes cluster kubeconfig save 2f6cb3a2-8812-41dd-80d9-bf48c3070f68",
-    "create:wallet": "pioneer-cli wallet create",
-    "create:wallet:testnet": "pioneer-cli wallet create --format citadel --testnet --walletId testnet --seed 'alcohol woman abuse must during monitor noble actual mixed trade anger aisle'",
-    "update": "sh scripts/refresh.sh",
-    "make": "sh scripts/npm-install-all",
-    "test": "echo lol",
-    "publish": "sh scripts/npm-publish-all",
-    "patch-service-account": "kubectl --kubeconfig=\"kubeconfig.yml\" patch serviceaccount default -p '{\"imagePullSecrets\": [{\"name\": \"registry-pioneer\"}]}'",
-    "deploy": ""
+    "yarn": "yarn",
+    "build": "lerna run build --include-dependencies --scope @pioneer-platform/*",
+    "clean": "lerna run clean --scope @pioneer-platform/* && rm -rf coverage dist node_modules",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
+    "lint:ts": "tsc --noEmit",
+    "test": "jest --coverage --passWithNoTests",
+    "test:nocoverage": "jest",
+    "version:major": "lerna version major --yes",
+    "version:minor": "lerna version minor --yes",
+    "version:patch": "lerna version patch --yes"
   },
   "dependencies": {}
 }

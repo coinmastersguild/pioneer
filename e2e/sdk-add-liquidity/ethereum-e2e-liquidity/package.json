@@ -1,5 +1,5 @@
 {
-  "name": "eth-e2e-sdk",
+  "name": "eth-e2e-sdk-liquidity",
   "version": "0.0.1",
   "scripts": {
     "npm": "npm i",
