@@ -1,6 +1,7 @@
 {
   "name": "eth-e2e-sdk",
   "version": "0.0.1",
+  "private": true,
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",

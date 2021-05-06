@@ -1,5 +1,6 @@
 {
   "name": "eth-e2e-sdk-transfer",
+  "private": true,
   "version": "0.0.1",
   "scripts": {
     "npm": "npm i",
@@ -28,5 +29,6 @@
   "devDependencies": {
     "jest-json-reporter": "^1.2.2",
     "jest-junit": "^6.2.1"
-  }
+  },
+  "gitHead": "147b64747002cb12937fa7bdef02bfe6ae08fff0"
 }

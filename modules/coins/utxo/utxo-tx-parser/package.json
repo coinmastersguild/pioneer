@@ -16,5 +16,6 @@
     "transaction-hex-decoder": "^1.0.2",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
-  }
+  },
+  "gitHead": "147b64747002cb12937fa7bdef02bfe6ae08fff0"
 }
