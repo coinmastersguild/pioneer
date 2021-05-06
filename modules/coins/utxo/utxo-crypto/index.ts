@@ -288,94 +288,97 @@ module.exports = {
         });
         return address
     },
-    generateAddressPrivkey: async function (mnemonic:string,path:string) {
-        const seed = await bip39.mnemonicToSeed(mnemonic)
-        let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
-
-        //parse path
-        // "m/44'/714'/0'/0/093"
-        mk = mk.derive(path)
-        let privateKey = mk.privateKey
-        let publicKey = mk.publicKey
-
-        //let address = createBNBAddress(mk.publicKey)
-
-        return {privateKey,publicKey}
-    },
-    generateWalletFromSeed: async function (mnemonic:string,isTestnet?:boolean) {
-        let output:Wallet = {
-            coins:{}
-        }
-        //for each coin
-        for(let i = 0; i < COIN_SUPPORT.length; i++){
-            let coin = COIN_SUPPORT[i]
-
-            let pathXpub = "m/44'/"+SLIP_44[coin]+"'/0'"
-            log.info("path: ",pathXpub)
-            const {xpub} = await deriveMasterKey(mnemonic,pathXpub)
-
-
-            let pathMaster = "m/44'/"+SLIP_44[coin]+"'/0'/0/0"
-            //let pathMaster = "m/44'/"+SLIP_44[coin]+"'/1'"
-            log.info("pathMaster: ",pathMaster)
-            const {masterKey} = await deriveMasterKey(mnemonic,pathXpub)
-
-            const { privateKey, publicKey } = deriveKeypair(masterKey,pathMaster)
-            //const bnbAddress = createBNBAddress(publicKey)
-
-
-            // let master = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0)
-            let addressMaster:string = ""
-            if(coin === "BTC" || true){
-                const { address } = bitcoin.payments.p2sh({
-                    redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] }),
-                    network:NETWORKS[coin.toLowerCase()],
-                });
-                addressMaster = address
-
-                //  const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
-                // addressMaster = address
-            } else {
-                const { address } = bitcoin.payments.p2pkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
-                addressMaster = address
-            }
-
-            log.info(addressMaster)
-
-            let coinInfo: any = {
-                coin,
-                master:addressMaster,
-                //privateKey:privateKey.toString('hex'),
-                privateKey:privateKey.toString(`hex`),
-                privateKeyWif:wif.encode(128, privateKey, true),
-                publicKey:publicKey.toString(`hex`),
-                xpub
-            }
-
-            if(coin === "TEST"){
-                //get tpub
-                let tpub = await this.xpubConvert(xpub,'tpub')
-                coinInfo.tpub = tpub
-            }
-
-            if(coin === "BTC"){
-                let root = new BIP84.fromSeed(mnemonic)
-                let child0 = root.deriveAccount(0)
-                let account0 = new BIP84.fromZPrv(child0)
-                let zpub = account0.getAccountPublicKey()
-                let master = account0.getAddress(0)
-                log.info("master: ",master)
-                coinInfo.master = account0.getAddress(0)
-                coinInfo.zpub = zpub
-            }
-
-            log.info({coinInfo})
-
-            output.coins[coin] = coinInfo
-
-        }
-        return output
-    },
+    // generateAddressPrivkey: async function (mnemonic:string,path:string) {
+    //     let seed = await bip39.mnemonicToSeed(mnemonic)
+    //     //@ts-ignore
+    //     let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+    //
+    //     //parse path
+    //     // "m/44'/714'/0'/0/093"
+    //     mk = mk.derive(path)
+    //     let privateKey = mk.privateKey
+    //     let publicKey = mk.publicKey
+    //
+    //     //let address = createBNBAddress(mk.publicKey)
+    //
+    //     return {privateKey,publicKey}
+    // },
+    //TODO admeback friken ts
+    // generateWalletFromSeed: async function (mnemonic:string,isTestnet?:boolean) {
+    //     let output:Wallet = {
+    //         coins:{}
+    //     }
+    //     //for each coin
+    //     for(let i = 0; i < COIN_SUPPORT.length; i++){
+    //         let coin = COIN_SUPPORT[i]
+    //
+    //         let pathXpub = "m/44'/"+SLIP_44[coin]+"'/0'"
+    //         log.info("path: ",pathXpub)
+    //         const {xpub} = await deriveMasterKey(mnemonic,pathXpub)
+    //
+    //
+    //         let pathMaster = "m/44'/"+SLIP_44[coin]+"'/0'/0/0"
+    //         //let pathMaster = "m/44'/"+SLIP_44[coin]+"'/1'"
+    //         log.info("pathMaster: ",pathMaster)
+    //         const {masterKey} = await deriveMasterKey(mnemonic,pathXpub)
+    //
+    //         const { privateKey, publicKey } = deriveKeypair(masterKey,pathMaster)
+    //         //const bnbAddress = createBNBAddress(publicKey)
+    //
+    //
+    //         // let master = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0)
+    //         let addressMaster:string | undefined = ""
+    //         if(coin === "BTC" || true){
+    //             const { address } = bitcoin.payments.p2sh({
+    //                 redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] }),
+    //                 network:NETWORKS[coin.toLowerCase()],
+    //             });
+    //             addressMaster = address
+    //
+    //             //  const { address } = bitcoin.payments.p2wpkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
+    //             // addressMaster = address
+    //         } else {
+    //             const { address } = bitcoin.payments.p2pkh({ pubkey: publicKey, network:NETWORKS[coin.toLowerCase()] });
+    //             addressMaster = address
+    //         }
+    //
+    //         log.info(addressMaster)
+    //
+    //         let coinInfo: any = {
+    //             coin,
+    //             master:addressMaster,
+    //             //privateKey:privateKey.toString('hex'),
+    //             privateKey:privateKey.toString(`hex`),
+    //             privateKeyWif:wif.encode(128, privateKey, true),
+    //             // @ts-ignore
+    //             publicKey:publicKey.toString(),
+    //             xpub
+    //         }
+    //
+    //         if(coin === "TEST"){
+    //             //get tpub
+    //             let tpub = await this.xpubConvert(xpub,'tpub')
+    //             coinInfo.tpub = tpub
+    //         }
+    //
+    //         if(coin === "BTC"){
+    //             let root = new BIP84.fromSeed(mnemonic)
+    //             let child0 = root.deriveAccount(0)
+    //             let account0 = new BIP84.fromZPrv(child0)
+    //             let zpub = account0.getAccountPublicKey()
+    //             let master = account0.getAddress(0)
+    //             log.info("master: ",master)
+    //             coinInfo.master = account0.getAddress(0)
+    //             coinInfo.zpub = zpub
+    //         }
+    //
+    //         log.info({coinInfo})
+    //
+    //         output.coins[coin] = coinInfo
+    //
+    //     }
+    //     return output
+    // },
     generateSeed: function () {
         let randomBytesFunc = standardRandomBytesFunc
         const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)
@@ -396,30 +399,31 @@ function standardRandomBytesFunc(size:any) {
 
 
 
-async function deriveMasterKey(mnemonic:string,path:string) {
-    // throws if mnemonic is invalid
-    bip39.validateMnemonic(mnemonic)
-
-    const seed = await bip39.mnemonicToSeed(mnemonic)
-    // let masterKey =  new HDKey.fromMasterSeed(new Buffer(seed, 'hex'), coininfo(network).versions.bip32.versions)
-    // log.debug("masterKey: ",masterKey)
-    let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
-    log.debug(mk.publicExtendedKey)
-
-    //get key
-    mk = mk.derive(path)
-    log.debug(mk.publicExtendedKey)
-
-    //get correct address with xpub
-    let xpub = mk.publicExtendedKey
-    log.debug("xpub: ",xpub)
-
-    let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).publicKey
-    log.debug("publicKey: ",publicKey)
-
-    const masterKey = bip32.fromSeed(seed)
-    return {masterKey,xpub}
-}
+// async function deriveMasterKey(mnemonic:string,path:string) {
+//     // throws if mnemonic is invalid
+//     bip39.validateMnemonic(mnemonic)
+//
+//     let seed = await bip39.mnemonicToSeed(mnemonic)
+//     // let masterKey =  new HDKey.fromMasterSeed(new Buffer(seed, 'hex'), coininfo(network).versions.bip32.versions)
+//     // log.debug("masterKey: ",masterKey)
+//     //@ts-ignore
+//     let mk = new HDKey.fromMasterSeed(Buffer.from(seed))
+//     log.debug(mk.publicExtendedKey)
+//
+//     //get key
+//     mk = mk.derive(path)
+//     log.debug(mk.publicExtendedKey)
+//
+//     //get correct address with xpub
+//     let xpub = mk.publicExtendedKey
+//     log.debug("xpub: ",xpub)
+//
+//     let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).publicKey
+//     log.debug("publicKey: ",publicKey)
+//
+//     const masterKey = bip32.fromSeed(seed)
+//     return {masterKey,xpub}
+// }
 
 function deriveKeypair(masterKey:any,path:string) {
     const master = masterKey.derivePath(path)

@@ -13,5 +13,6 @@ export declare class Events {
     private pair;
     private disconnect;
     private subscribeToKey;
+    private subscribeToInvocation;
     constructor(wss: string, config: any, isTestnet?: boolean);
 }

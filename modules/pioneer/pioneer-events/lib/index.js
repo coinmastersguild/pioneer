@@ -130,6 +130,26 @@ var Events = /** @class */ (function () {
                 });
             });
         };
+        this.subscribeToInvocation = function (invocationId) {
+            return __awaiter(this, void 0, void 0, function () {
+                var tag;
+                return __generator(this, function (_a) {
+                    tag = TAG + " | subscribeToInvocation | ";
+                    try {
+                        //attempt join
+                        this.socket.emit('join', {
+                            invocationId: invocationId
+                        });
+                        return [2 /*return*/, true];
+                    }
+                    catch (e) {
+                        log.error(tag, "e: ", e);
+                        throw e;
+                    }
+                    return [2 /*return*/];
+                });
+            });
+        };
         this.subscribeToKey = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var tag;

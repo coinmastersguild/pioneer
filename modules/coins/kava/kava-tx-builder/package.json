@@ -11,12 +11,9 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@cosmostation/cosmosjs": "^0.9.5",
     "@kava-labs/javascript-sdk": "^4.0.1-beta.2",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/terra-network": "^0.0.1",
-    "@terra-money/core": "^2.0.9",
-    "@terra-money/terra.js": "^1.6.0",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
