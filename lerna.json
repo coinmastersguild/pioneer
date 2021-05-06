@@ -4,7 +4,7 @@
   "command": {
     "publish": {
       "message": "chore(release): publish %v",
-      "ignoreChanges": ["**/*.md"]
+      "ignoreChanges": ["**/*.md","**/lib/**"]
     }
   },
   "packages": ["module/*"],

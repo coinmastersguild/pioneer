@@ -21,10 +21,10 @@
     "lint:ts": "tsc --noEmit",
     "test": "jest --coverage --passWithNoTests",
     "test:nocoverage": "jest",
-    "version:major": "lerna version major --yes",
-    "version:minor": "lerna version minor --yes",
     "version:patch": "lerna version patch --yes",
-    "publish": "lerna version patch --yes"
+    "version:minor": "lerna version minor --yes",
+    "version:major": "lerna version major --yes",
+    "publish": "lerna publish from-package --yes"
   },
   "dependencies": {
     "lerna": "^4.0.0"
