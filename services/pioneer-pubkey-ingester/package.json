@@ -1,6 +1,7 @@
 {
   "name": "pioneer-pubkey-ingester",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "npm": "npm i",
     "start": "node lib/index",

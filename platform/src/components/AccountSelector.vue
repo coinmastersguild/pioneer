@@ -43,8 +43,6 @@
 </template>
 
 <script>
-import Coins from '../statics/coins'
-import coinMap from '../statics/coinMap'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -62,7 +60,7 @@ export default {
     },
     data() {
       return {
-        coins: Coins
+        // coins: Coins
       }
     },
     computed: {

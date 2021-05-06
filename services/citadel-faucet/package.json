@@ -1,6 +1,7 @@
 {
   "name": "citadel-faucet-server",
   "version": "0.0.11",
+  "private": true,
   "description": "A facet to asset with testing the pioneer SDK",
   "main": "dist/main.js",
   "productName": "Citadel",

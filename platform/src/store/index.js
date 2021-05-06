@@ -5,7 +5,6 @@ import Vuex from 'vuex'
 import global from './modules/global'
 import wallet from './modules/platform'
 import auth from './modules/auth'
-import coincap from './modules/coincap'
 
 
 import ipc from './plugins/ipc'
@@ -18,7 +17,6 @@ Vue.use(Vuex)
  * Get coinMap
  */
 
-import coinMap from '../statics/coinMap'
 
 /*
  * If not building with SSR mode, you can
@@ -38,8 +36,7 @@ export default function (/* { ssrContext } */) {
     modules: {
       global,
       wallet,
-      auth,
-      coincap
+      auth
     },
     plugins: [ipc],
     strict: true,

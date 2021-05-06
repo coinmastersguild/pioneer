@@ -1,6 +1,7 @@
 {
   "name": "@pioneer-platform/platform",
   "version": "7.2.4",
+  "private": true,
   "description": "Pioneer Platform SDK",
   "productName": "pioneer-platform",
   "author": "highlander <bithighlander@gmail.com>",
