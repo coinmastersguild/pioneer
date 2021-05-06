@@ -7,6 +7,6 @@
       "ignoreChanges": ["**/*.md","**/lib/**"]
     }
   },
-  "packages": ["modules/**/**"],
+  "packages": ["modules/**/**/*"],
   "useWorkspaces": true
 }

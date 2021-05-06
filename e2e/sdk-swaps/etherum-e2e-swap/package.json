@@ -3,8 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "npm": "npm i",
-    "npm-update": "npm update",
     "start": "node lib/index.js",
     "build": "tsc -p .",
     "test": "rm -Rf ~/.pioneer && npm run build && npm run start",
@@ -12,8 +10,7 @@
     "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
     "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
     "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
-    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push",
-    "fix": "npm rebuild"
+    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
     "@babel/runtime": "^7.14.0",
@@ -25,6 +22,7 @@
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
+    "typescript": "^4.2.4",
     "wait-promise": "^0.4.1"
   },
   "devDependencies": {
