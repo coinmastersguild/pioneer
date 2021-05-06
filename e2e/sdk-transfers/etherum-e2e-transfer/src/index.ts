@@ -158,14 +158,6 @@ const test_service = async function () {
         let blockchains = Object.keys(user.clients)
         log.info("blockchains: ",blockchains)
 
-        // for(let i = 0; i < blockchains.length; i++){
-        //     let blockchain = blockchains[i]
-        //     let client = user.clients[blockchain]
-        //
-        //     let balance = await client.getBalance()
-        //     log.info(blockchain+ " balance: ",balance.amount.amount())
-        // }
-
         let client = user.clients['ethereum']
         let balanceSdk = await client.getBalance()
         log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
@@ -174,6 +166,14 @@ const test_service = async function () {
         //TODO get this from api
         let address = "0xc3affff54122658b89c31183cec4f15514f34624"
 
+        //view invocation
+        let invocationsRemote = await app.getInvocations()
+        log.info(tag,"invocationsRemote: ",invocationsRemote)
+
+        //if >
+
+
+        //get estimate on invocation
         //send to faucet
         let sendPayload:any = {
             blockchain:BLOCKCHAIN,
@@ -183,38 +183,27 @@ const test_service = async function () {
         }
         sendPayload.noBroadcast = true
 
-        //
-        let hookReturned = false
-        let send_hook_sdk = async () => {
-            try{
-                log.info(tag,"sendPayload: ",sendPayload)
-                let txid = await app.sendToAddress(sendPayload)
-                console.log("txid: ",txid)
-                hookReturned = true
-                //
+        //check invocation
 
-            }catch(e){
-                log.error(tag,e)
-            }
-        }
-        //sync (this will block until signed!)
-        send_hook_sdk()
+        //if valid
 
-        //view invocation
-        let invocationsRemote = await app.getInvocations()
-        log.info(tag,"invocationsRemote: ",invocationsRemote)
+        //invoke
 
-        for(let i = 0; i < invocationsRemote.length; i++){
-            let invocation = invocationsRemote[i]
-            log.info(tag,"invocation: ",invocation)
+        //get invocationId
 
-            //if match
+        //validate invocation
 
-            //validate
+        //build invocation
 
-            //approve
-        }
+        //validate invocation
 
+        //broadcast tranaction
+
+        //validate invocation
+
+        //get eta on confirmation
+
+        //replace transaction
 
 
 

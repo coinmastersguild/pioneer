@@ -832,6 +832,9 @@ module.exports = class wallet {
             amount: "0.1"
         }
         */
+        // @ts-ignore
+        // @ts-ignore
+        // @ts-ignore
         this.addLiquidity = async function (addLiquidity:any) {
             let tag = TAG + " | addLiquidity | "
             try{
@@ -938,65 +941,66 @@ module.exports = class wallet {
             }
         },
         this.buildApproval = async function (approval:any) {
-                let tag = TAG + " | buildApproval | "
-                try{
-                    let rawTx
+            let tag = TAG + " | buildApproval | "
+            try{
+                let rawTx
 
-                    let addressFrom = await this.getMaster('ETH')
+                let addressFrom = await this.getMaster('ETH')
 
-                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                    nonceRemote = nonceRemote.data
-                    let nonce = approval.nonce || nonceRemote
-                    let gas_limit = 80000 //TODO dynamic gas limit?
-                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
-                    gas_price = gas_price.data
-                    log.debug(tag,"gas_price: ",gas_price)
-                    gas_price = parseInt(gas_price)
-                    gas_price = gas_price + 1000000000
+                let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
+                nonceRemote = nonceRemote.data
+                let nonce = approval.nonce || nonceRemote
+                let gas_limit = 80000 //TODO dynamic gas limit?
+                let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                gas_price = gas_price.data
+                log.debug(tag,"gas_price: ",gas_price)
+                gas_price = parseInt(gas_price)
+                gas_price = gas_price + 1000000000
 
-                    log.debug(tag,"approval.tokenAddress: ",approval.tokenAddress)
-                    log.debug(tag,"approval.amount: ",approval.amount)
+                log.debug(tag,"approval.tokenAddress: ",approval.tokenAddress)
+                log.debug(tag,"approval.amount: ",approval.amount)
 
-                    let data =
-                        "0x" +
-                        "095ea7b3" + // ERC-20 contract approve function identifier
-                        (approval.contract).replace("0x", "").padStart(64, "0") +
-                        (approval.amount).toString(16).padStart(64, "0");
+                let data =
+                    "0x" +
+                    "095ea7b3" + // ERC-20 contract approve function identifier
+                    (approval.contract).replace("0x", "").padStart(64, "0") +
+                    (approval.amount).toString(16).padStart(64, "0");
 
-                    log.debug(tag,"data: ",data)
+                log.debug(tag,"data: ",data)
 
-                    let ethTx = {
-                        // addressNList: support.bip32ToAddressNList(masterPathEth),
-                        "addressNList":[
-                            2147483692,
-                            2147483708,
-                            2147483648,
-                            0,
-                            0
-                        ],
-                        nonce: numberToHex(nonce),
-                        gasPrice: numberToHex(gas_price),
-                        gasLimit: numberToHex(gas_limit),
-                        value: numberToHex(0),
-                        to: approval.tokenAddress,
-                        data,
-                        // chainId: 1,//TODO testnet
-                    }
-
-                    log.debug("unsignedTxETH: ",ethTx)
-                    //send to hdwallet
-                    rawTx = await this.WALLET.ethSignTx(ethTx)
-                    rawTx.params = ethTx
-
-                    const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.debug(tag,"txid: ",txid)
-                    rawTx.txid = txid
-                    return rawTx
-                }catch(e){
-                    log.error(e)
-                    throw e
+                let ethTx = {
+                    // addressNList: support.bip32ToAddressNList(masterPathEth),
+                    "addressNList":[
+                        2147483692,
+                        2147483708,
+                        2147483648,
+                        0,
+                        0
+                    ],
+                    nonce: numberToHex(nonce),
+                    gasPrice: numberToHex(gas_price),
+                    gasLimit: numberToHex(gas_limit),
+                    value: numberToHex(0),
+                    to: approval.tokenAddress,
+                    data,
+                    // chainId: 1,//TODO testnet
                 }
-            },
+
+                log.debug("unsignedTxETH: ",ethTx)
+                //send to hdwallet
+                // rawTx = await this.WALLET.ethSignTx(ethTx)
+                // rawTx.params = ethTx
+                //
+                // const txid = keccak256(rawTx.serialized).toString('hex')
+                // log.debug(tag,"txid: ",txid)
+                // rawTx.txid = txid
+                return ethTx
+            }catch(e){
+                log.error(e)
+                throw e
+            }
+        },
+        //@ts-ignore
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
@@ -1066,31 +1070,17 @@ module.exports = class wallet {
                     }
 
                     log.debug("unsignedTxETH: ",ethTx)
+                    rawTx = ethTx
                     //send to hdwallet
-                    rawTx = await this.WALLET.ethSignTx(ethTx)
-                    rawTx.params = ethTx
-
-                    const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.debug(tag,"txid: ",txid)
-                    rawTx.txid = txid
+                    // rawTx = await this.WALLET.ethSignTx(ethTx)
+                    // rawTx.params = ethTx
+                    //
+                    // const txid = keccak256(rawTx.serialized).toString('hex')
+                    // log.debug(tag,"txid: ",txid)
+                    // rawTx.txid = txid
 
                 } else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
-                    if(!swap.memo) throw Error("Memo required for swaps!")
-                    //UTXO coins
-                    let coin = swap.inboundAddress.chain
-                    let addressFrom = await this.getMaster(coin) //TODO this silly in utxo
-                    //build transfer with memo
-                    let transfer:Transaction = {
-                        coin:"BTC",
-                        addressTo:swap.inboundAddress.address,
-                        addressFrom,
-                        amount:swap.amount,
-                        feeLevel:swap.feeLevel,
-                        memo:swap.memo
-                    }
-
-                    rawTx = await this.buildTransfer(transfer)
-                    console.log("rawTx: ",rawTx)
+                    throw Error("NOT SUPPORTED! Use transfer with memo!")
 
                 } else {
                     throw Error("Chain not supported! "+swap.inboundAddress.chain)

@@ -14,7 +14,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.1",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "^7.0.27",
+    "@pioneer-platform/pioneer-app": "latest",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",

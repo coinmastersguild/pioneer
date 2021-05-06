@@ -70,22 +70,22 @@ let run_test = async function(){
             ETH
         */
 
-        let masterETH = await Wallet.getMaster("ETH")
-        console.log("masterETH: ",masterETH)
-
-        let balanceETH = await Wallet.getBalance("ETH")
-        console.log("balanceETH: ",balanceETH)
-
-        let address = "0x33b35c665496bA8E71B22373843376740401F106"
-        let amount = "0.001"
-        let memo = ""
-
-        let transfer = {
-            coin:"ETH",
-            addressTo:address,
-            amount,
-            memo
-        }
+        // let masterETH = await Wallet.getMaster("ETH")
+        // console.log("masterETH: ",masterETH)
+        //
+        // let balanceETH = await Wallet.getBalance("ETH")
+        // console.log("balanceETH: ",balanceETH)
+        //
+        // let address = "0x33b35c665496bA8E71B22373843376740401F106"
+        // let amount = "0.001"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"ETH",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
 
         // let transferUnSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferUnSigned: ",transferUnSigned)
@@ -251,16 +251,45 @@ let run_test = async function(){
         // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
+            BTC
+         */
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+        //
+        let amount = "0.0001"
+        let memo = null //Uses OP_RETURN outputs
+        let feeLevel = 5
+
+        //TODO offer input override
+        let transfer = {
+            coin:"BTC",
+            addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
+            amount,
+            memo,
+            feeLevel
+        }
+
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",JSON.stringify(transferUnSigned))
+        //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
+
+        /*
                BCH
          */
 
-        //
-        let masterBTC = await Wallet.getMaster("BCH")
-        console.log("masterBCH: ",masterBTC)
 
-        let balanceBTC = await Wallet.getBalance("BCH")
-        console.log("balanceBCH: ",balanceBTC)
-        //
+        let masterBCH = await Wallet.getMaster("BCH")
+        console.log("masterBCH: ",masterBCH)
+
+        let balanceBCH = await Wallet.getBalance("BCH")
+        console.log("balanceBCH: ",balanceBCH)
+        // //
         // let amount = "0.0001"
         // let memo = null //Uses OP_RETURN outputs
         // let feeLevel = 5
@@ -274,9 +303,12 @@ let run_test = async function(){
         //     feeLevel
         // }
         //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
         //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
+
         // let resultBroadcast = await Wallet.broadcastTransaction('BCH',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)
 

@@ -842,6 +842,9 @@ module.exports = /** @class */ (function () {
             amount: "0.1"
         }
         */
+        // @ts-ignore
+        // @ts-ignore
+        // @ts-ignore
         this.addLiquidity = function (addLiquidity) {
             return __awaiter(this, void 0, void 0, function () {
                 var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, txid, coin, addressFrom, transfer, e_4;
@@ -958,14 +961,14 @@ module.exports = /** @class */ (function () {
         },
             this.buildApproval = function (approval) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var tag, rawTx, addressFrom, nonceRemote, nonce, gas_limit, gas_price, data, ethTx, txid, e_5;
+                    var tag, rawTx, addressFrom, nonceRemote, nonce, gas_limit, gas_price, data, ethTx, e_5;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
                                 tag = TAG + " | buildApproval | ";
                                 _a.label = 1;
                             case 1:
-                                _a.trys.push([1, 6, , 7]);
+                                _a.trys.push([1, 5, , 6]);
                                 rawTx = void 0;
                                 return [4 /*yield*/, this.getMaster('ETH')];
                             case 2:
@@ -1008,41 +1011,41 @@ module.exports = /** @class */ (function () {
                                     data: data,
                                 };
                                 log.debug("unsignedTxETH: ", ethTx);
-                                return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
-                            case 5:
                                 //send to hdwallet
-                                rawTx = _a.sent();
-                                rawTx.params = ethTx;
-                                txid = keccak256(rawTx.serialized).toString('hex');
-                                log.debug(tag, "txid: ", txid);
-                                rawTx.txid = txid;
-                                return [2 /*return*/, rawTx];
-                            case 6:
+                                // rawTx = await this.WALLET.ethSignTx(ethTx)
+                                // rawTx.params = ethTx
+                                //
+                                // const txid = keccak256(rawTx.serialized).toString('hex')
+                                // log.debug(tag,"txid: ",txid)
+                                // rawTx.txid = txid
+                                return [2 /*return*/, ethTx];
+                            case 5:
                                 e_5 = _a.sent();
                                 log.error(e_5);
                                 throw e_5;
-                            case 7: return [2 /*return*/];
+                            case 6: return [2 /*return*/];
                         }
                     });
                 });
             },
+            //@ts-ignore
             this.buildSwap = function (swap) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, txid, coin, addressFrom, transfer, e_6;
+                    var tag, rawTx, UTXOcoins, addressFrom, data, nonceRemote, nonce, gas_limit, gas_price, masterPathEth, amountNative, ethTx, e_6;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
                                 tag = TAG + " | buildSwap | ";
                                 _a.label = 1;
                             case 1:
-                                _a.trys.push([1, 14, , 15]);
+                                _a.trys.push([1, 10, , 11]);
                                 rawTx = void 0;
                                 UTXOcoins = [
                                     'BTC',
                                     'BCH',
                                     'LTC'
                                 ];
-                                if (!(swap.inboundAddress.chain === 'ETH')) return [3 /*break*/, 9];
+                                if (!(swap.inboundAddress.chain === 'ETH')) return [3 /*break*/, 8];
                                 addressFrom = void 0;
                                 if (!swap.addressFrom) return [3 /*break*/, 2];
                                 addressFrom = swap.addressFrom;
@@ -1096,46 +1099,22 @@ module.exports = /** @class */ (function () {
                                     data: data,
                                 };
                                 log.debug("unsignedTxETH: ", ethTx);
-                                return [4 /*yield*/, this.WALLET.ethSignTx(ethTx)];
+                                rawTx = ethTx;
+                                return [3 /*break*/, 9];
                             case 8:
-                                //send to hdwallet
-                                rawTx = _a.sent();
-                                rawTx.params = ethTx;
-                                txid = keccak256(rawTx.serialized).toString('hex');
-                                log.debug(tag, "txid: ", txid);
-                                rawTx.txid = txid;
-                                return [3 /*break*/, 13];
-                            case 9:
-                                if (!(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0)) return [3 /*break*/, 12];
-                                if (!swap.memo)
-                                    throw Error("Memo required for swaps!");
-                                coin = swap.inboundAddress.chain;
-                                return [4 /*yield*/, this.getMaster(coin)
-                                    //build transfer with memo
-                                ]; //TODO this silly in utxo
+                                if (UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0) {
+                                    throw Error("NOT SUPPORTED! Use transfer with memo!");
+                                }
+                                else {
+                                    throw Error("Chain not supported! " + swap.inboundAddress.chain);
+                                }
+                                _a.label = 9;
+                            case 9: return [2 /*return*/, rawTx];
                             case 10:
-                                addressFrom = _a.sent() //TODO this silly in utxo
-                                ;
-                                transfer = {
-                                    coin: "BTC",
-                                    addressTo: swap.inboundAddress.address,
-                                    addressFrom: addressFrom,
-                                    amount: swap.amount,
-                                    feeLevel: swap.feeLevel,
-                                    memo: swap.memo
-                                };
-                                return [4 /*yield*/, this.buildTransfer(transfer)];
-                            case 11:
-                                rawTx = _a.sent();
-                                console.log("rawTx: ", rawTx);
-                                return [3 /*break*/, 13];
-                            case 12: throw Error("Chain not supported! " + swap.inboundAddress.chain);
-                            case 13: return [2 /*return*/, rawTx];
-                            case 14:
                                 e_6 = _a.sent();
                                 log.error(e_6);
                                 throw e_6;
-                            case 15: return [2 /*return*/];
+                            case 11: return [2 /*return*/];
                         }
                     });
                 });

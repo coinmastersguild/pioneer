@@ -13,14 +13,17 @@
     "docker:push": ""
   },
   "dependencies": {
-    "@babel/runtime": "^7.13.10",
+    "@babel/runtime": "^7.14.0",
+    "@pioneer-platform/eth-crypto": "^6.2.3",
     "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/midgard-client": "latest",
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
+    "uuid": "^8.3.2",
     "wait-promise": "^0.4.1"
   },
   "devDependencies": {

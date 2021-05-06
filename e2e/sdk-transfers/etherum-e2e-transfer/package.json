@@ -14,8 +14,8 @@
     "fix": "npm rebuild"
   },
   "dependencies": {
-    "@babel/runtime": "^7.13.17",
-    "@pioneer-platform/eth-crypto": "^6.2.3",
+    "@babel/runtime": "^7.14.0",
+    "@pioneer-platform/eth-crypto": "latest",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "latest",

@@ -566,6 +566,7 @@ export async function onStart(event,data) {
 
     //get user info
     let userInfo = await App.getUserInfo()
+    if(!userInfo.context) throw Error("113: invalid user! missing context!")
     if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
       log.info(tag,"set context to remote")
       WALLET_CONTEXT = userInfo.context
@@ -577,15 +578,15 @@ export async function onStart(event,data) {
 
     //TODO is context pref in config?
     //redundant to above?
-    let contextName = await App.context()
-    console.log("contextName: ",contextName)
-    if(contextName && contextName !== WALLET_CONTEXT){
-      log.info(tag,"Local context not matching remote! setting to local")
-      WALLET_CONTEXT = userInfo.context
-      event.sender.send('setContext',{context:userInfo.context})
-      let resultUpdateConextRemote = await App.setContext(contextName)
-      log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
-    }
+    // let contextName = await App.context()
+    // console.log("contextName: ",contextName)
+    // if(contextName && contextName !== WALLET_CONTEXT){
+    //   log.info(tag,"Local context not matching remote! setting to local")
+    //   WALLET_CONTEXT = userInfo.context
+    //   event.sender.send('setContext',{context:userInfo.context})
+    //   let resultUpdateConextRemote = await App.setContext(contextName)
+    //   log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+    // }
 
     //get invocations
     let invocationsRemote = await App.getInvocations()
@@ -810,7 +811,7 @@ export async function approveTransaction(event, data) {
     //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
     //unsinged TX
-    log.info(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
+    log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
     let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
     //update invocation

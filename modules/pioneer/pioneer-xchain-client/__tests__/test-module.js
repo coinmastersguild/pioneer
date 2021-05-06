@@ -269,21 +269,21 @@ let run_test = async function(){
         // }
 
         //BCH transfer* object to RUNE
-        let transfer = {
-            "amount": {
-                "type": "BASE",
-                "decimal": 8,
-                amount: function(){
-                    return "0.0101"
-                }
-            },
-            "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
-            "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
-            "feeRate": 1
-        }
-
-        let txid = await app.transfer(transfer)
-        console.log('TXID: ',txid)
+        // let transfer = {
+        //     "amount": {
+        //         "type": "BASE",
+        //         "decimal": 8,
+        //         amount: function(){
+        //             return "0.0101"
+        //         }
+        //     },
+        //     "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
+        //     "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
+        //     "feeRate": 1
+        // }
+        //
+        // let txid = await app.transfer(transfer)
+        // console.log('TXID: ',txid)
 
     }catch(e){
         console.error(e)

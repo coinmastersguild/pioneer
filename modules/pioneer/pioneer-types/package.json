@@ -1,0 +1,20 @@
+{
+  "name": "@pioneer-platform/pioneer-sync",
+  "version": "6.3.75",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "npm-update": "npm update",
+    "test": "npm run build && node __tests__/test-module.js",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.47",
+    "@types/source-map-support": "^0.5.3",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.9.7"
+  }
+}

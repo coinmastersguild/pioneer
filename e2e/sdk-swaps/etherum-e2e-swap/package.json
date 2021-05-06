@@ -15,9 +15,10 @@
     "fix": "npm rebuild"
   },
   "dependencies": {
-    "@babel/runtime": "^7.13.10",
+    "@babel/runtime": "^7.14.0",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-app": "latest",
+    "@pioneer-platform/midgard-client": "0.0.1",
+    "@pioneer-platform/pioneer-app": "^7.1.54",
     "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",

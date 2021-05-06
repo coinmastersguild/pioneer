@@ -47,10 +47,13 @@ import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
-
+let midgard = require("@pioneer-platform/midgard-client")
 const {
     startApp,
-    sendPairingCode
+    sendPairingCode,
+    buildTransaction,
+    approveTransaction,
+    broadcastTransaction
 } = require('./app')
 
 let BLOCKCHAIN = 'ethereum'
@@ -58,7 +61,9 @@ let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || 0.0002
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.0001
 let spec = process.env['URL_PIONEER_SPEC']
-let NO_BROADCAST = process.env['E2E_NO_BROADCAST'] || null
+let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
+let wss = process.env['URL_PIONEER_SOCKET']
+let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -88,13 +93,22 @@ const test_service = async function () {
 
         let config = {
             queryKey,
-            username,
-            spec
+            //username,
+            spec,
+            wss
         }
 
         let app = new SDK.SDK(spec,config)
+        let events = await app.startSocket()
+        let eventPairReceived = false
+        events.on('message', async (request:any) => {
+            assert(request.queryKey)
+            assert(request.username)
+            assert(request.url)
+            eventPairReceived = true
+        })
 
-        let seedChains = ['ethereum']
+        let seedChains = ['ethereum','thorchain']
         await app.init(seedChains)
 
         //pair sdk
@@ -108,85 +122,111 @@ const test_service = async function () {
         log.info("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
+        //dont release till pair event
+        while(!eventPairReceived){
+            await sleep(300)
+        }
+
         //assert sdk user
         //get user
         let user = await app.getUserParams()
         log.info("user: ",user)
+        assert(user.context)
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
         log.info("blockchains: ",blockchains)
 
-        // for(let i = 0; i < blockchains.length; i++){
-        //     let blockchain = blockchains[i]
-        //     let client = user.clients[blockchain]
-        //
-        //     let balance = await client.getBalance()
-        //     log.info(blockchain+ " balance: ",balance.amount.amount())
-        // }
-
         let client = user.clients['ethereum']
         let balanceSdk = await client.getBalance()
         log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
-        //get address from faucet
-        //TODO get this from api
-        let address = "0xc3affff54122658b89c31183cec4f15514f34624"
+        //get pool address
+        let poolInfo = await midgard.getPoolAddress()
+        //filter by chain
+        let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
+        log.info(tag,"ethVault: ",ethVault)
+        assert(ethVault[0])
+        ethVault = ethVault[0]
+        assert(ethVault.address)
+        assert(ethVault.router)
+        const vaultAddressEth = ethVault.address
+        const gasRate = ethVault.gas_rate
+        assert(vaultAddressEth)
+        assert(gasRate)
 
-        //Raw from asgardx
-        // let swap = {
-        //     type: 'swap',
-        //     username: 'test-user-2',
-        //     invocation: {
-        //         inboundAddress: {
-        //             chain: 'ETH',
-        //             pub_key: 'thorpub1addwnpepqf477x09wsp8rakssrh84dm00j77glhw0v5rmd76dy4tn7n430jf5f2u0lw',
-        //             address: '0x40c47fb75dcd6d978f03f4d738d289056a226b47',
-        //             router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
-        //             gas_rate: '90'
-        //         },
-        //         asset: {
-        //             chain: 'ETH',
-        //             symbol: 'ETH',
-        //             ticker: 'ETH',
-        //             iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
-        //         },
-        //         memo: '=:BTC.BTC:bc1qx2grtsuukf6wh8x65e3202cw42hp2cftccmapu',
-        //         amount: 0.01
-        //     },
-        //     invocationId: 'pioneer:invocation:v0.01:undefined:2HeGmqrkohCDRKUPqaDW8o',
-        //     auth: '',
-        //     noBroadcast:true
+        let options:any = {
+            verbose: true,
+            txidOnResp: false, // txidOnResp is the output format
+        }
+
+        let swap = {
+            inboundAddress: ethVault,
+            asset: {
+                chain: 'ETH',
+                symbol: 'ETH',
+                ticker: 'ETH',
+                iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+            },
+            memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
+            amount: TEST_AMOUNT,
+            noBroadcast:true
+        }
+
+        let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+        log.info(tag,"responseSwap: ",responseSwap)
+        // let invocationId = responseSwap.invocationId
+        //
+        // let transaction = {
+        //     invocationId,
+        //     context:user.context
+        // }
+        // //build
+        // let unsignedTx = await buildTransaction(transaction)
+        // log.info(tag,"unsignedTx: ",unsignedTx)
+        //
+        // //get invocation
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        //
+        // //sign transaction
+        // let signedTx = await buildTransaction(transaction)
+        // log.info(tag,"signedTx: ",signedTx)
+        //
+        // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        //
+        // //get invocation info EToC
+        //
+        // let isConfirmed = false
+        // //wait for confirmation
+        //
+        // //wait for swap
+        // while(!isConfirmed){
+        //     //get invocationInfo
+        //     let invocationInfo = await app.getInvocation(invocationId)
+        //     log.info(tag,"invocationInfo: ",invocationInfo)
+        //
+        //
+        //     //if
+        //     // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+        //     // log.info(tag,"txInfo: ",txInfo)
+        //     //
+        //     // if(txInfo.confirmations > 0){
+        //     //     isConfirmed = true
+        //     // }
+        //
+        //     await sleep(3000)
         // }
 
-
-
-
-        //send to faucet
-        // let sendPayload:any = {
-        //     blockchain:BLOCKCHAIN,
-        //     asset:'ETH',
-        //     amount:TEST_AMOUNT,
-        //     address,
-        // }
-        // sendPayload.noBroadcast = true
-        //
-        // log.info(tag,"sendPayload: ",sendPayload)
-        // let txid = await app.swap(sendPayload)
-        // console.log("txid: ",txid)
-
-        //wait till confirmed
-        // let confirmed = false
-        // while(!confirmed){
-        //
-        //     //get transaction
-        //
-        //     //wait
-        //     await sleep(1000)
-        // }
-        //TODO request return from faucet
-
-        //expect event
 
         //process
         process.exit(0)

@@ -151,17 +151,32 @@ const test_service = async function () {
         let address = "1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG"
 
         //send to faucet
-        let sendPayload:any = {
-            blockchain:BLOCKCHAIN,
-            asset:'BCH',
-            amount:TEST_AMOUNT,
-            address,
-        }
-        sendPayload.noBroadcast = true
+        // let sendPayload:any = {
+        //     blockchain:BLOCKCHAIN,
+        //     asset:'BCH',
+        //     amount:TEST_AMOUNT,
+        //     address,
+        // }
+        // sendPayload.noBroadcast = true
 
-        log.info(tag,"sendPayload: ",sendPayload)
-        let txid = await app.sendToAddress(sendPayload)
-        console.log("txid: ",txid)
+        let transfer = {
+            "amount": {
+                "type": "BASE",
+                "decimal": 8,
+                amount: function(){
+                    return "0.0101"
+                }
+            },
+            "recipient": "qr3z3r5j263mh2t3x5y6skmcfc3r3z9pvsuy7k9tad",
+            "memo": "=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5",
+            "feeRate": 1
+        }
+
+        user.clients.bitcoinCash.transfer()
+
+        // log.info(tag,"sendPayload: ",sendPayload)
+        // let txid = await app.sendToAddress(sendPayload)
+        // console.log("txid: ",txid)
 
         //process
         process.exit(0)

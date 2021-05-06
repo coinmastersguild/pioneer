@@ -109,6 +109,188 @@ let run_test = async function(){
             console.log("Please connect a device!")
         }
 
+        //example BARE MIN FIELDS STRIPPED DOWN
+        // "txid":"b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //     tx: {
+        //     "txid": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //         "version": 1,
+        //         "vin": [
+        //         {
+        //             "txid": "a3b6284d252846ce8305d50edd7239831dc291716ec1752918d876d6ea05f681",
+        //             "vout": 1,
+        //             "scriptSig": {
+        //                 "hex": "47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43"
+        //             },
+        //         }
+        //     ],
+        //         "vout": [
+        //         {
+        //             "value": "0.00978000",
+        //             "scriptPubKey": {
+        //                 "hex": "76a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac",
+        //             },
+        //         },
+        //         {
+        //             "value": "0.00010000",
+        //             "scriptPubKey": {
+        //                 "hex": "76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac",
+        //             },
+        //         }
+        //     ],
+        // }
+
+
+        // let btcTx = {
+        //     //"opReturnData":"=:THOR.RUNE:thor142vegztpy2yq8uzmdvjyx646agrmlpsl6x84hw:580535444",
+        //     "coin":"Bitcoin",
+        //     //"hex":"01000000000101b5f79ad72bac050d61de487c7e697a1b6696072195e9f26877319902a7e15f780100000000ffffffff02e803000000000000160014586d610cebab2b00070cc0b7c2ef30daae040d071bad09000000000016001487b367ee3dbbcd7997aa598c34330ea3f1f9b39702483045022100ce14789303877baa8d0b6ca3c910a12ce24e4305ee75bac6efb4c4c437a979a202204a6dd63542e8d76e55f8c37c0a72a7c13e908d372a27347452c3f0ec8f972c530121023400effc03c3add95bd56ae57949d72304a86e1835788a9436ba62cc34a2867000000000",
+        //     "inputs":[
+        //         {
+        //             "addressNList":[
+        //                 2147483732,
+        //                 2147483648,
+        //                 2147483648,
+        //                 0,
+        //                 0
+        //             ],
+        //             "scriptType":"p2pkh",
+        //             "amount":"634139",
+        //             "vout":1,
+        //             "txid":"b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //             tx: {
+        //                 "txid": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //                 "version": 1,
+        //                 "vin": [
+        //                     {
+        //                         "txid": "a3b6284d252846ce8305d50edd7239831dc291716ec1752918d876d6ea05f681",
+        //                         "vout": 1,
+        //                         "n": 0,
+        //                         "scriptSig": {
+        //                             "hex": "47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43"
+        //                         },
+        //                         "sequence": 4294967295,
+        //                         "addr": "1ParaEza5Ew5ioT5c8zR2wSSvArqiSQbpT",
+        //                         "valueSat": 989000,
+        //                         "value": 0.00989
+        //                     }
+        //                 ],
+        //                 "vout": [
+        //                     {
+        //                         "value": "0.00978000",
+        //                         "n": 0,
+        //                         "scriptPubKey": {
+        //                             "hex": "76a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac",
+        //                         },
+        //                         "spentTxId": "171113f0745f570d18199efcb944b8f742fc590c700a41968081c5655338e4fc",
+        //                         "spentIndex": 0,
+        //                         "spentHeight": 355935
+        //                     },
+        //                     {
+        //                         "value": "0.00010000",
+        //                         "n": 1,
+        //                         "scriptPubKey": {
+        //                             "hex": "76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac",
+        //                         },
+        //                     }
+        //                 ],
+        //             }
+        //         }
+        //     ],
+        //     "outputs":[
+        //         {
+        //             "address":"bc1q6m9u2qsu8mh8y7v8rr2ywavtj8g5arzlyhcej7",
+        //             "addressType":"spend",
+        //             "scriptType":"p2wpkh",
+        //             "amount":"2005",
+        //             "isChange":false
+        //         },
+        //         {
+        //             "address":"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
+        //             "addressType":"spend",
+        //             "scriptType":"p2wpkh",
+        //             "amount":"23",
+        //             "isChange":false
+        //         }
+        //     ],
+        //     "version":1,
+        //     "locktime":0
+        // }
+
+
+        //example works
+        // let input = {
+        //     addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+        //     scriptType: 'p2pkh',
+        //     amount: String(10000),
+        //     vout: 1,
+        //     txid: 'b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea',
+        //     tx: {
+        //         "txid": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //         "hash": "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea",
+        //         "version": 1,
+        //         "size": 257,
+        //         "vsize": 257,
+        //         "weight": 1028,
+        //         "locktime": 0,
+        //         "vin": [
+        //             {
+        //                 "txid": "a3b6284d252846ce8305d50edd7239831dc291716ec1752918d876d6ea05f681",
+        //                 "vout": 1,
+        //                 "n": 0,
+        //                 "scriptSig": {
+        //                     "asm": "304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce3[ALL] 045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43",
+        //                     "hex": "47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43"
+        //                 },
+        //                 "sequence": 4294967295,
+        //                 "addr": "1ParaEza5Ew5ioT5c8zR2wSSvArqiSQbpT",
+        //                 "valueSat": 989000,
+        //                 "value": 0.00989
+        //             }
+        //         ],
+        //         "vout": [
+        //             {
+        //                 "value": "0.00978000",
+        //                 "n": 0,
+        //                 "scriptPubKey": {
+        //                     "asm": "OP_DUP OP_HASH160 f7b9e0239571434f0ccfdba6f772a6d23f2cfb13 OP_EQUALVERIFY OP_CHECKSIG",
+        //                     "hex": "76a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac",
+        //                     "reqSigs": 1,
+        //                     "addresses": ["1ParaEza5Ew5ioT5c8zR2wSSvArqiSQbpT"],
+        //                     "type": "pubkeyhash"
+        //                 },
+        //                 "spentTxId": "171113f0745f570d18199efcb944b8f742fc590c700a41968081c5655338e4fc",
+        //                 "spentIndex": 0,
+        //                 "spentHeight": 355935
+        //             },
+        //             {
+        //                 "value": "0.00010000",
+        //                 "n": 1,
+        //                 "scriptPubKey": {
+        //                     "asm": "OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG",
+        //                     "hex": "76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac",
+        //                     "reqSigs": 1,
+        //                     "addresses": ["1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"],
+        //                     "type": "pubkeyhash"
+        //                 },
+        //                 "spentTxId": "84da2a3cc29a3e0fb8a3a28882c6fb59a426a95952d484ec2422c5a47b6f93d4",
+        //                 "spentIndex": 2,
+        //                 "spentHeight": 370585
+        //             }
+        //         ],
+        //         "blockhash": "000000000000000005c60c504e109684bb0886ab95520ad6a5af0d384f587a6a",
+        //         "blockheight": 335414,
+        //         "confirmations": 258975,
+        //         "time": 1419279547,
+        //         "blocktime": 1419279547,
+        //         "valueOut": 0.00988,
+        //         "valueIn": 0.00989,
+        //         "fees": 0.00001
+        //     },
+        //     hex:"010000000181f605ead676d8182975c16e7191c21d833972dd0ed50583ce4628254d28b6a3010000008a47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43ffffffff0250ec0e00000000001976a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac10270000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac00000000",
+        // }
+
+
+
 
         // //get lock status
         // let lockStatus = await Hardware.isLocked()
