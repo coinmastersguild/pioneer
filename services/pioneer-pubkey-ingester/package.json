@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "npm": "npm i",
+    "yarn": "yarn",
     "start": "node lib/index",
     "test": "npm run build && node lib/index",
     "build": "tsc -p .",

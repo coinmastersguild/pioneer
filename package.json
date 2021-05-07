@@ -5,9 +5,9 @@
   "workspaces": {
     "packages": [
       "modules/**/**/*",
-      "servocess/**/*",
+      "services/**/*",
       "apps/**/*",
-      "e2e/**/*",
+      "e2e/**/**/*",
       "platform"
     ]
   },
@@ -27,6 +27,7 @@
     "publish": "lerna publish from-package --no-private --yes"
   },
   "dependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "^4.0.0",
+    "yarn": "^1.22.10"
   }
 }

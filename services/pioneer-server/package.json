@@ -9,7 +9,7 @@
   "capacitorId": "",
   "author": "highlander <bithighlander@gmail.com>",
   "scripts": {
-    "npm": "npm i",
+    "yarn": "yarn",
     "npm-upgrade": "npm update",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",

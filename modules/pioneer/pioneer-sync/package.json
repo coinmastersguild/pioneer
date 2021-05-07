@@ -26,7 +26,6 @@
     "@pioneer-platform/cosmos-network": "latest",
     "@pioneer-platform/eth-network": "^6.3.4",
     "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/nedb": "0.0.2",
     "@pioneer-platform/pioneer-coincap": "latest",
     "@pioneer-platform/pioneer-coins": "^6.2.21",
     "@pioneer-platform/pioneer-eth-token-data": "latest",

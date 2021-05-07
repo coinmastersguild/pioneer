@@ -28,7 +28,6 @@
 
 const TAG = " | Pioneer sync state | "
 
-let nedb = require("pioneer-platform/nedb")
 const log = require("@pioneer-platform/loggerdog")()
 
 //app
