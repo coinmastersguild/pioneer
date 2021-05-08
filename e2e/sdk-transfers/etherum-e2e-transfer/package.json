@@ -1,7 +1,7 @@
 {
   "name": "@pioneer-platform/eth-e2e-sdk-transfer",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",

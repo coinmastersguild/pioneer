@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/blockbook",
-  "version": "6.2.17",
+  "version": "1.0.0",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

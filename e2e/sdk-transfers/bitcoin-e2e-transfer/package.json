@@ -1,7 +1,7 @@
 {
   "name": "@pioneer-platform/bitcoin-e2e-sdk-transfer",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.13.17",
-    "@pioneer-platform/eth-crypto": "^6.2.3",
+    "@pioneer-platform/eth-crypto": "^1.0.0",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "0.0.68",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/redis-queue",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -9,7 +9,7 @@
     "prepublish": "tsc"
   },
   "dependencies": {
-    "@pioneer-platform/default-redis": "0.0.2",
+    "@pioneer-platform/default-redis": "^1.0.0",
     "@pioneer-platform/loggerdog": "latest",
     "@types/node": "^13.13.12",
     "ts-node": "^8.10.2",

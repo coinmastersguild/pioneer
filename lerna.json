@@ -1,12 +1,18 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "npmClient": "yarn",
   "command": {
     "publish": {
       "message": "pioneer(release): version %v",
-      "ignoreChanges": ["**/*.md","**/lib/**"]
+      "ignoreChanges": [
+        "**/*.md",
+        "**/lib/**"
+      ]
     }
   },
-  "packages": ["modules/**/**/*","e2e/**/**/*"],
+  "packages": [
+    "modules/**/**/*",
+    "e2e/**/**/*"
+  ],
   "useWorkspaces": true
 }
