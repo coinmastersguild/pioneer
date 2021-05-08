@@ -26,5 +26,6 @@
     "typescript": "^3.9.7",
     "wait-promise": "^0.4.1",
     "when": "^3.7.8"
-  }
+  },
+  "gitHead": "a7134cba061266688e48ea1a9f6895f6999ef178"
 }

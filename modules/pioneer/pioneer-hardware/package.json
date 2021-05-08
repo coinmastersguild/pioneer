@@ -33,5 +33,6 @@
     "typescript": "^3.9.7",
     "usb": "^1.7.0",
     "wait-promise": "^0.4.1"
-  }
+  },
+  "gitHead": "a7134cba061266688e48ea1a9f6895f6999ef178"
 }
