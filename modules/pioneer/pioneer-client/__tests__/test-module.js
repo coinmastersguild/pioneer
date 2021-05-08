@@ -40,8 +40,8 @@ let run_test = async function(){
         //     spec
         // }
         let config = {
-            queryKey:"key:b36de6c2-671f-4ac2-9602-deb26fd6d627",
-            username:'test-user-2',
+            queryKey:"e95b453a-e7e5-4ec1-a60b-6a3773167992",
+            username:'test-user-3',
             spec
         }
         console.log("config: ",config)
@@ -50,7 +50,7 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
-        console.log("pioneer: ",pioneer)
+        // console.log("pioneer: ",pioneer)
 
         //get online
 
@@ -72,8 +72,8 @@ let run_test = async function(){
         let user = await pioneer.instance.User()
         console.log("info: ",user.data)
 
-        // let info = await pioneer.instance.Info(user.data.context)
-        // console.log("info: ",info.data)
+        let info = await pioneer.instance.Info(user.data.context)
+        console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data

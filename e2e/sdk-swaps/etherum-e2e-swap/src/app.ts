@@ -240,7 +240,6 @@ export async function approveTransaction(transaction:any) {
         log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
-
         //update invocation
         let invocationId = invocation.invocationId
         let updateBody = {

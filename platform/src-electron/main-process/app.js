@@ -620,8 +620,8 @@ export async function refreshPioneer(event, data) {
 
       //if App is init
       let initStatus = App.isInitialized()
-      //DEBUGING
-      if(initStatus || true){
+      log.info(tag,"initStatus: ",initStatus)
+      if(initStatus){
         let userInfo = await App.getUserInfo()
         log.info(tag,"userInfo: ",userInfo)
         if(userInfo){

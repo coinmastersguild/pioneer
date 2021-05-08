@@ -418,13 +418,16 @@ module.exports = class wallet {
                         }
                         break;
                     case HDWALLETS.keepkey:
-                        log.debug(tag," Keepkey mode! ")
-                        if(!config.wallet) throw Error("Config is missing watch wallet!")
-                        if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
-                        if(!config.wallet.pubkeys) throw Error("Config watch wallet missing pubkeys!")
-
+                        log.info(tag," Keepkey mode! ")
+                        log.debug(tag,"**** wallet: ",wallet)
+                        if(!config.wallet) throw Error("102: Config is missing watch wallet!")
+                        if(!config.wallet.WALLET_PUBLIC) throw Error("103: Config watch wallet missing WALLET_PUBLIC!")
+                        if(!config.wallet.pubkeys) throw Error("104: Config watch wallet missing pubkeys!")
+                        if(!wallet.features.deviceId) throw Error("105: invalid wallet! missing wallet.features.deviceId")
+                        this.walletId = wallet.features.deviceId + ".wallet.json"
                         //load wallet from keepkey
                         this.WALLET = wallet
+
                         log.debug(tag,"IN paths: ",paths)
                         //TODO why this no worky
                         // this.pubkeys = await this.WALLET.getPublicKeys(paths)
@@ -474,6 +477,33 @@ module.exports = class wallet {
                         queryKey:config.queryKey
                     });
                     log.debug("baseUrl: ",await this.pioneerClient.getBaseURL())
+
+                    //get user status
+                    let userInfo = await this.pioneerClient.instance.User()
+                    userInfo = userInfo.data
+                    log.info(tag,"userInfo: ",userInfo)
+                    log.info(tag,"userInfo: ",userInfo.blockchains)
+                    log.info(tag,"userInfo: ",userInfo.blockchains.length)
+
+                    log.info(tag,"blockchains: ",this.blockchains)
+                    log.info(tag,"blockchains: ",this.blockchains.length)
+                    if(userInfo.blockchains.length !== this.blockchains.length){
+                        log.error(tag,"Pubkeys OUT OF SYNC!")
+                        //register pubkey 1 by 1 with async on
+
+                        //if failure give reason
+                    }
+
+                    //count blockchains
+
+                    //count pubkeys
+
+                    //if missing register key
+
+                    //if incomplete
+
+                    //register missing pubkeys
+
                     //API
                     let register = {
                         isTestnet:false,

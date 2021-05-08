@@ -205,14 +205,14 @@ module.exports = /** @class */ (function () {
         };
         this.init = function (wallet) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _loop_1, this_1, i, _c, _loop_2, this_2, i, blockchainsEnabled, i, pubkey, nativeAsset, i, pubkey, _d, _e, _f, _g, _h, register, regsiterResponse, walletInfo, coins, i, coin, balance, e_1;
+                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _loop_1, this_1, i, _c, _loop_2, this_2, i, blockchainsEnabled, i, pubkey, nativeAsset, i, pubkey, _d, _e, _f, _g, _h, userInfo, register, regsiterResponse, walletInfo, coins, i, coin, balance, e_1;
                 return __generator(this, function (_j) {
                     switch (_j.label) {
                         case 0:
                             tag = TAG + " | init_wallet | ";
                             _j.label = 1;
                         case 1:
-                            _j.trys.push([1, 21, , 22]);
+                            _j.trys.push([1, 22, , 23]);
                             if (!this.blockchains && !wallet.blockchains)
                                 throw Error("Must Specify blockchain support! ");
                             log.debug(tag, "checkpoint");
@@ -309,13 +309,17 @@ module.exports = /** @class */ (function () {
                             }
                             return [3 /*break*/, 14];
                         case 6:
-                            log.debug(tag, " Keepkey mode! ");
+                            log.info(tag, " Keepkey mode! ");
+                            log.debug(tag, "**** wallet: ", wallet);
                             if (!config.wallet)
-                                throw Error("Config is missing watch wallet!");
+                                throw Error("102: Config is missing watch wallet!");
                             if (!config.wallet.WALLET_PUBLIC)
-                                throw Error("Config watch wallet missing WALLET_PUBLIC!");
+                                throw Error("103: Config watch wallet missing WALLET_PUBLIC!");
                             if (!config.wallet.pubkeys)
-                                throw Error("Config watch wallet missing pubkeys!");
+                                throw Error("104: Config watch wallet missing pubkeys!");
+                            if (!wallet.features.deviceId)
+                                throw Error("105: invalid wallet! missing wallet.features.deviceId");
+                            this.walletId = wallet.features.deviceId + ".wallet.json";
                             //load wallet from keepkey
                             this.WALLET = wallet;
                             log.debug(tag, "IN paths: ", paths);
@@ -367,7 +371,7 @@ module.exports = /** @class */ (function () {
                         case 14:
                             if (!this.pubkeys)
                                 throw Error("103: failed to init wallet! missing pubkeys!");
-                            if (!this.pioneerApi) return [3 /*break*/, 19];
+                            if (!this.pioneerApi) return [3 /*break*/, 20];
                             if (!this.spec)
                                 throw Error("102:  Api spec required! ");
                             if (!this.queryKey)
@@ -386,6 +390,20 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.pioneerClient.getBaseURL()];
                         case 16:
                             _g.apply(_f, _h.concat([_j.sent()]));
+                            return [4 /*yield*/, this.pioneerClient.instance.User()];
+                        case 17:
+                            userInfo = _j.sent();
+                            userInfo = userInfo.data;
+                            log.info(tag, "userInfo: ", userInfo);
+                            log.info(tag, "userInfo: ", userInfo.blockchains);
+                            log.info(tag, "userInfo: ", userInfo.blockchains.length);
+                            log.info(tag, "blockchains: ", this.blockchains);
+                            log.info(tag, "blockchains: ", this.blockchains.length);
+                            if (userInfo.blockchains.length !== this.blockchains.length) {
+                                log.error(tag, "Pubkeys OUT OF SYNC!");
+                                //register pubkey 1 by 1 with async on
+                                //if failure give reason
+                            }
                             register = {
                                 isTestnet: false,
                                 username: this.username,
@@ -401,12 +419,12 @@ module.exports = /** @class */ (function () {
                             log.debug("registerBody: ", register);
                             log.debug("this.pioneerClient: ", this.pioneerClient);
                             return [4 /*yield*/, this.pioneerClient.instance.Register(null, register)];
-                        case 17:
+                        case 18:
                             regsiterResponse = _j.sent();
                             log.debug("regsiterResponse: ", regsiterResponse);
                             log.info(tag, "getting info on context: ", this.walletId);
                             return [4 /*yield*/, this.getInfo(this.walletId)];
-                        case 18:
+                        case 19:
                             walletInfo = _j.sent();
                             log.debug(tag, "walletInfo: ", walletInfo);
                             //validate info
@@ -423,15 +441,15 @@ module.exports = /** @class */ (function () {
                                 this.WALLET_BALANCES = walletInfo.balances;
                             //emitter.info = walletInfo
                             return [2 /*return*/, walletInfo];
-                        case 19:
+                        case 20:
                             log.debug(tag, "Offline mode!");
-                            _j.label = 20;
-                        case 20: return [3 /*break*/, 22];
-                        case 21:
+                            _j.label = 21;
+                        case 21: return [3 /*break*/, 23];
+                        case 22:
                             e_1 = _j.sent();
                             log.error(tag, e_1);
                             throw e_1;
-                        case 22: return [2 /*return*/];
+                        case 23: return [2 /*return*/];
                     }
                 });
             });
