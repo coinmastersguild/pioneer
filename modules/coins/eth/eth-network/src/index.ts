@@ -65,7 +65,7 @@ import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@
 import * as etherscanAPI from './etherscan-api'
 
 //
-const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
+// const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
 
@@ -488,21 +488,22 @@ const get_balance_tokens = async function(address:string){
 const get_balance_token = async function(address:string,token:string){
 	let tag = TAG + " | get_balance | "
 	try{
+		throw Error("TODO")
 		//
-		let abiInfo = tokenData.ABI[token]
-		if(!abiInfo) return 0
-		//console.log(tag,"abiInfo: ",abiInfo)
-
+		// let abiInfo = tokenData.ABI[token]
+		// if(!abiInfo) return 0
+		// //console.log(tag,"abiInfo: ",abiInfo)
 		//
-		let ABI = abiInfo.ABI
-		let metaData = abiInfo.metaData
-
+		// //
+		// let ABI = abiInfo.ABI
+		// let metaData = abiInfo.metaData
 		//
-		let contract = new web3.eth.Contract(ABI,metaData.contractAddress);
-		let balance = await contract.methods.balanceOf(address).call()
-		log.info(tag,"balance: ",balance)
-
-		return balance/metaData.BASE
+		// //
+		// let contract = new web3.eth.Contract(ABI,metaData.contractAddress);
+		// let balance = await contract.methods.balanceOf(address).call()
+		// log.info(tag,"balance: ",balance)
+		//
+		// return balance/metaData.BASE
 	}catch(e){
 		console.error(tag,e)
 	}

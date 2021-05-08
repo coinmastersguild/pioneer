@@ -365,6 +365,12 @@ export class pioneerPublicController extends Controller {
         try{
             if(!invocationId) throw Error("102: invocationId required! ")
             let output = await invocationsDB.findOne({invocationId})
+            if(!output){
+                output = {
+                    error:true,
+                    message:"No invocation found with ID: "+invocationId
+                }
+            }
             return(output)
         }catch(e){
             let errorResp:Error = {

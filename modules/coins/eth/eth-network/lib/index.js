@@ -83,7 +83,7 @@ var utils_1 = require("./utils");
 var xchain_util_1 = require("@xchainjs/xchain-util");
 var etherscanAPI = __importStar(require("./etherscan-api"));
 //
-var tokenData = require("@pioneer-platform/pioneer-eth-token-data");
+// const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 var log = require('@pioneer-platform/loggerdog')();
 var ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey';
 var utils_2 = require("ethers/lib/utils");
@@ -556,40 +556,37 @@ var get_balance_tokens = function (address) {
 };
 var get_balance_token = function (address, token) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, abiInfo, ABI, metaData, contract, balance, e_9;
+        var tag;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    tag = TAG + " | get_balance | ";
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    abiInfo = tokenData.ABI[token];
-                    if (!abiInfo)
-                        return [2 /*return*/, 0
-                            //console.log(tag,"abiInfo: ",abiInfo)
-                            //
-                        ];
-                    ABI = abiInfo.ABI;
-                    metaData = abiInfo.metaData;
-                    contract = new web3.eth.Contract(ABI, metaData.contractAddress);
-                    return [4 /*yield*/, contract.methods.balanceOf(address).call()];
-                case 2:
-                    balance = _a.sent();
-                    log.info(tag, "balance: ", balance);
-                    return [2 /*return*/, balance / metaData.BASE];
-                case 3:
-                    e_9 = _a.sent();
-                    console.error(tag, e_9);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+            tag = TAG + " | get_balance | ";
+            try {
+                throw Error("TODO");
+                //
+                // let abiInfo = tokenData.ABI[token]
+                // if(!abiInfo) return 0
+                // //console.log(tag,"abiInfo: ",abiInfo)
+                //
+                // //
+                // let ABI = abiInfo.ABI
+                // let metaData = abiInfo.metaData
+                //
+                // //
+                // let contract = new web3.eth.Contract(ABI,metaData.contractAddress);
+                // let balance = await contract.methods.balanceOf(address).call()
+                // log.info(tag,"balance: ",balance)
+                //
+                // return balance/metaData.BASE
             }
+            catch (e) {
+                console.error(tag, e);
+            }
+            return [2 /*return*/];
         });
     });
 };
 var get_balance = function (address) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, e_10;
+        var tag, output, e_9;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -604,8 +601,8 @@ var get_balance = function (address) {
                     output = (_a.sent()) / BASE;
                     return [2 /*return*/, output];
                 case 3:
-                    e_10 = _a.sent();
-                    console.error(tag, e_10);
+                    e_9 = _a.sent();
+                    console.error(tag, e_9);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -614,7 +611,7 @@ var get_balance = function (address) {
 };
 var get_transaction = function (txid) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, e_11;
+        var tag, output, _a, _b, e_10;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -639,8 +636,8 @@ var get_transaction = function (txid) {
                     _b.receipt = _c.sent();
                     return [2 /*return*/, output];
                 case 4:
-                    e_11 = _c.sent();
-                    console.error(tag, e_11);
+                    e_10 = _c.sent();
+                    console.error(tag, e_10);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -649,7 +646,7 @@ var get_transaction = function (txid) {
 };
 var check_online_status = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_12;
+        var tag, output, _a, _b, _c, _d, networkName, _e, _f, e_11;
         return __generator(this, function (_g) {
             switch (_g.label) {
                 case 0:
@@ -717,8 +714,8 @@ var check_online_status = function () {
                     _f.syncing = _g.sent();
                     return [2 /*return*/, output];
                 case 8:
-                    e_12 = _g.sent();
-                    console.error(tag, e_12);
+                    e_11 = _g.sent();
+                    console.error(tag, e_11);
                     return [3 /*break*/, 9];
                 case 9: return [2 /*return*/];
             }

@@ -17,7 +17,6 @@
     "@ethersproject/providers": "^5.1.0",
     "@pioneer-platform/blockbook": "^6.2.13",
     "@pioneer-platform/loggerdog": "0.0.1",
-    "@pioneer-platform/pioneer-eth-token-data": "^6.2.7",
     "@xchainjs/xchain-client": "latest",
     "@xchainjs/xchain-util": "^0.2.6",
     "axios": "^0.21.1",
