@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
   "dependencies": {
     "@babel/runtime": "^7.14.0",
     "@peculiar/webcrypto": "latest",
-    "@pioneer-platform/eth-crypto": "^2.0.0",
+    "@pioneer-platform/eth-crypto": "^3.0.0",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/nedb": "latest",
     "@pioneer-platform/pioneer": "latest",
