@@ -1418,6 +1418,7 @@ module.exports = /** @class */ (function () {
                             if (!signedTx.serialized)
                                 throw Error("Failed to sign!");
                             txid = keccak256(signedTx.serialized).toString('hex');
+                            txid = "0x" + txid;
                             log.debug(tag, "txid: ", txid);
                             signedTx.txid = txid;
                             signedTx.params = unsignedTx.transaction; //input

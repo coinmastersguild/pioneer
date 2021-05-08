@@ -21,7 +21,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_MAINNET_DEV_OLD']
+let seed = process.env['WALLET_MAINNET_DEV_NEW']
 let password = process.env['WALLET_PASSWORD']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
@@ -239,6 +239,7 @@ export async function approveTransaction(transaction:any) {
         //unsinged TX
         log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
+
 
         //update invocation
         let invocationId = invocation.invocationId

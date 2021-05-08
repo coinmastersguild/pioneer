@@ -863,12 +863,20 @@ export class pioneerPublicController extends Controller {
         let tag = TAG + " | getFee | "
         try{
             log.info(tag,"mempool tx: ",body)
+            if(!body.amount) throw Error(" amount field required! ")
+            if(!body.asset) throw Error(" asset field required! ")
+            if(!body.asset.symbol) throw Error(" asset symbol field required! ")
+
+            if(body.asset.symbol !== 'ETH') throw Error("Unhandled asset!")
+
+
 
             //TODO filter by body.asset.chain
             //if()
 
             //TODO handle mainnet/testnet switch
-            networks.ETH.init({testnet:true})
+
+            networks.ETH.init()
 
             console.log("networks['ETH']: ",networks['ETH'])
             let feeResult = networks['ETH'].getFees(body)

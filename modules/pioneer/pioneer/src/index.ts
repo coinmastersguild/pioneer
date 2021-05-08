@@ -1336,7 +1336,8 @@ module.exports = class wallet {
                     //const txHash = await web3.utils.sha3(signed.rawTransaction);
                     if(!signedTx.serialized) throw Error("Failed to sign!")
 
-                    const txid = keccak256(signedTx.serialized).toString('hex')
+                    let txid = keccak256(signedTx.serialized).toString('hex')
+                    txid = "0x"+txid
                     log.debug(tag,"txid: ",txid)
 
                     signedTx.txid = txid

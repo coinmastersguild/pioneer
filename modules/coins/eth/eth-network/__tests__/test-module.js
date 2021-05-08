@@ -4,19 +4,25 @@ require("dotenv").config({path:'../../../../.env'})
 require("dotenv").config({path:'../../../../../.env'})
 
 let network = require("../lib/index")
-network.init({testnet:true})
+network.init()
+
+//basic
+network.getTransaction("0x06d3de5c93e87f1541d97773efa93b3afaa99b464c4aa6ef606df9234f1afaf7")
+    .then(function(resp){
+        console.log(resp)
+    })
 
 //thorchain is approved
 let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
 let masterAddy = "0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
 let tokenAddress = "DAC17F958D2EE523A2206206994597C13D831EC7"
 
-console.log({routerAddy,masterAddy})
-
-network.getAllowance(tokenAddress,routerAddy,masterAddy)
-    .then(function(resp){
-        console.log(resp)
-    })
+// console.log({routerAddy,masterAddy})
+//
+// network.getAllowance(tokenAddress,routerAddy,masterAddy)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 
 //DEX
@@ -102,6 +108,13 @@ network.getAllowance(tokenAddress,routerAddy,masterAddy)
 
 // let entry = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8,amount:function(){return .98}},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
 // let entry = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
+//
+
+// let entry = {
+//     asset: { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' },
+//     amount: 0.0641287519747189,
+//     recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e'
+// }
 //
 // network.getFees(entry)
 //     .then(function(resp){

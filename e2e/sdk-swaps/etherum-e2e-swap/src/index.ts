@@ -6,18 +6,15 @@
 
     verify empty
 
-    request deposit from faucet
+    build sign broadcast swap
 
     watch till confirmed
 
-    send back to faucet
-
-    report
+    report to leeroy server results
 
 
 
     SDK Arch pattern ***
-
 
         Start and configure app
 
@@ -28,9 +25,6 @@
 
         * check balances
         * check tx history
-        * request faucet addresses
-        * send x into faucet
-        * request withdrawalf rom faucet
         * verify payment
 
  */
@@ -48,6 +42,14 @@ let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
+let coincap = require("@pioneer-platform/coincap")
+
+let {
+    supportedBlockchains,
+    baseAmountToNative,
+    nativeToBaseAmount,
+} = require("@pioneer-platform/pioneer-coins")
+
 const {
     startApp,
     sendPairingCode,
@@ -138,8 +140,69 @@ const test_service = async function () {
         log.info("blockchains: ",blockchains)
 
         let client = user.clients['ethereum']
+
+        //get master
+        let masterAddress = await client.getAddress()
+        log.info(tag,"masterAddress: ",masterAddress)
+        assert(masterAddress)
+
+        /*
+            3 ways to express balance
+                Sdk (x-chain compatible object type)
+                native (satoshi/wei)
+                base (normal 0.001 ETH)
+         */
+
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
+        log.info(" balanceSdk: ",balanceSdk)
+        assert(balanceSdk[0])
+        assert(balanceSdk[0].amount)
+        assert(balanceSdk[0].amount.amount())
+        assert(balanceSdk[0].amount.amount().toString())
+
+
+        let balanceNative = balanceSdk[0].amount.amount().toString()
+        log.info(tag,"balanceNative: ",balanceNative)
+        assert(balanceNative)
+
+        let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
+        log.info(tag,"balanceBase: ",balanceBase)
+        assert(balanceBase)
+
+        //value USD
+        let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
+        log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        assert(valueBalanceUsd)
+
+        if(balanceBase < TEST_AMOUNT){
+            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        }
+
+        let asset = {
+            chain:"ETH",
+            symbol:"ETH",
+            ticker:"ETH",
+        }
+
+        //get estimate
+        let estimatePayload = {
+            asset,
+            amount:balanceBase,
+            recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
+        }
+        log.info(tag,"estimatePayload: ",estimatePayload)
+
+        let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
+        log.info(tag,"estimateCost: ",estimateCost)
+        assert(estimateCost)
+
+        //max cost - balance
+
+        //you have x max amount spendable
+
+        //you are attempting to spend x
+
+        //this is x percent of total available
 
         //get pool address
         // let poolInfo = await midgard.getPoolAddress()
@@ -188,51 +251,89 @@ const test_service = async function () {
             noBroadcast:true
         }
 
-        let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.info(tag,"responseSwap: ",responseSwap)
-        let invocationId = responseSwap.invocationId
+        //if monitor
+        let invocationId = "pioneer:invocation:v0.01:ETH:reL4imx36BTC8ZixU8Pmnu"
+
+        //if create new
+        // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+        // log.info(tag,"responseSwap: ",responseSwap)
+        // let invocationId = responseSwap.invocationId
+
+        //do not continue invocation
         assert(invocationId)
+
         let transaction = {
             invocationId,
             context:user.context
         }
         //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
-
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-
-        //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
-
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        // let unsignedTx = await buildTransaction(transaction)
+        // log.info(tag,"unsignedTx: ",unsignedTx)
+        // assert(unsignedTx)
+        //
+        // //get invocation
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.info(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // assert(signedTx.txid)
+        // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
 
         let isConfirmed = false
         //wait for confirmation
 
-        //wait for swap
+        /*
+            Status codes
+
+            -1: errored
+             0: unknown
+             1: built
+             2: broadcasted
+             3: confirmed
+             4: fullfilled (swap completed)
+         */
+
+        //monitor tx lifecycle
+        let currentStatus
+        let statusCode = 0
         while(!isConfirmed){
             //get invocationInfo
             let invocationInfo = await app.getInvocation(invocationId)
             log.info(tag,"invocationInfo: ",invocationInfo)
 
+            let txid = invocationInfo.signedTx.txid
+            assert(txid)
+            if(!currentStatus) currentStatus = 'transaction built!'
+            if(statusCode <= 0) statusCode = 1
+
+            //lookup txid
+            let txInfo = await client.getTransactionData(txid)
+            log.debug(tag,"txInfo: ",txInfo)
+
+            if(txInfo.blockNumber){
+                log.info(tag,"Confirmed!")
+
+            } else {
+                log.info(tag,"Not confirmed!")
+                //get gas price recomended
+
+                //get tx gas price
+            }
 
             //if
             // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
@@ -242,7 +343,7 @@ const test_service = async function () {
             //     isConfirmed = true
             // }
 
-            await sleep(3000)
+            await sleep(10000)
         }
 
 
