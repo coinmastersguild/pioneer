@@ -1,6 +1,6 @@
 {
   "name": "pioneer-platform",
-  "version": "6.2.6",
+  "version": "8.0.0",
   "private": true,
   "workspaces": {
     "packages": [
