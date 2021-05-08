@@ -151,7 +151,7 @@ interface RegisterBody {
     username:string
     data:RegisterBodyData,
     auth:string,
-    walletName: string,
+    walletId?: string,
     queryKey?:string,
     provider:AuthProviders
 }
@@ -335,6 +335,7 @@ export class pioneerPrivateController extends Controller {
         let tag = TAG + " | info | "
         try{
             log.info(tag,"queryKey: ",authorization)
+            if(!walletId) throw Error("103: walletId required!")
             log.info(tag,"walletId: ",walletId)
 
             let accountInfo = await redis.hgetall(authorization)
@@ -1121,7 +1122,7 @@ export class pioneerPrivateController extends Controller {
             let output:any = {}
             let newKey
             log.info(tag,"body: ",body)
-            if(!body.walletName) throw Error("walletName required on body!")
+            if(!body.walletId) throw Error("walletId required on body!")
             if(!body.blockchains) throw Error("blockchains required on body!")
 
             //if auth found in redis
@@ -1169,7 +1170,7 @@ export class pioneerPrivateController extends Controller {
                     username:body.username,
                     verified:true,
                     blockchains:body.blockchains,
-                    wallets:[body.walletName] // just one wallet for now
+                    wallets:[body.walletId] // just one wallet for now
                 }
 
                 if(!userInfoMongo){
@@ -1189,14 +1190,14 @@ export class pioneerPrivateController extends Controller {
                 userInfoMongo = userInfo
 
                 //Assume wallet new
-                output.result = await pioneer.register(body.username, body.data.pubkeys,body.walletName)
+                output.result = await pioneer.register(body.username, body.data.pubkeys,body.walletId)
                 log.info(tag,"resultPioneer: ",output.result)
 
                 //set user context to only wallet
-                await redis.hset(body.username,'context',body.walletName)
+                await redis.hset(body.username,'context',body.walletId)
 
                 //add to wallet set
-                await redis.sadd(username+':wallets',body.walletName)
+                await redis.sadd(username+':wallets',body.walletId)
             }
 
             //get wallets
@@ -1204,29 +1205,29 @@ export class pioneerPrivateController extends Controller {
             if(!userWallets) throw Error("No wallets found!")
 
             //add to wallet set
-            await redis.sadd(username+':wallets',body.walletName)
+            await redis.sadd(username+':wallets',body.walletId)
 
             //if current ! found
-            if(userWallets.indexOf(body.walletName) < 0){
-                log.info(tag,"Registering new walelt! walletName:",body.walletName)
+            if(userWallets.indexOf(body.walletId) < 0){
+                log.info(tag,"Registering new walelt! walletId:",body.walletId)
                 //Register wallet! (this ONLY hits when already registered
                 output.newWallet = true
                 let pubkeys = body.data.pubkeys
-                output.result = await pioneer.register(body.username, pubkeys, body.walletName)
+                output.result = await pioneer.register(body.username, pubkeys, body.walletId)
                 log.info(tag,"resultPioneer: ",output.result)
 
                 //set current context to newly registred wallet
                 //TODO flag to leave context? (silent register new wallet?)
-                //await redis.hset(body.username,'context',body.walletName)
+                //await redis.hset(body.username,'context',body.walletId)
 
                 //push new wallet to wallets
-                output.updateDBUser = await usersDB.update({},{ $addToSet: { "wallets": body.walletName } })
+                output.updateDBUser = await usersDB.update({},{ $addToSet: { "wallets": body.walletId } })
             } else {
                 //wallet already known!
-                log.info(tag,"Wallet already known! walletName: ",body.walletName)
+                log.info(tag,"Wallet already known! walletId: ",body.walletId)
 
                 //get pubkey array
-                output.result = await pioneer.update(body.username, body.data.pubkeys,body.walletName)
+                output.result = await pioneer.update(body.username, body.data.pubkeys,body.walletId)
             }
 
             log.info("checkpoint 3")
@@ -1236,8 +1237,8 @@ export class pioneerPrivateController extends Controller {
 
             //if no context, set
             if(!userInfoRedis.context){
-                userInfoRedis.context = body.walletName
-                redis.hset(username,'context',body.walletName)
+                userInfoRedis.context = body.walletId
+                redis.hset(username,'context',body.walletId)
             }
             output.context = userInfoRedis.context
             //verify user

@@ -5,10 +5,8 @@
   "workspaces": {
     "packages": [
       "modules/**/**/*",
-      "services/**/*",
       "apps/**/*",
-      "e2e/**/**/*",
-      "platform"
+      "e2e/**/**/**/*"
     ]
   },
   "scripts": {

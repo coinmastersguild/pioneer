@@ -1,5 +1,5 @@
 {
-  "name": "bitcoincash-e2e-sdk",
+  "name": "@pioneer-platform/bitcoincash-e2e-sdk-transfer",
   "private": true,
   "version": "0.0.1",
   "scripts": {

@@ -1,5 +1,5 @@
 {
-  "name": "eth-e2e-sdk-transfer",
+  "name": "@pioneer-platform/eth-e2e-sdk-transfer",
   "private": true,
   "version": "0.0.1",
   "scripts": {

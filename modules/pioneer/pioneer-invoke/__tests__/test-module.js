@@ -42,8 +42,8 @@ let run_test = async function(){
     try{
         let config = {
             queryKey,
-            signingPubkey,
-            signingPrivkey,
+            // signingPubkey,
+            // signingPrivkey,
             username:invoker,
             spec
         }

@@ -186,7 +186,7 @@ module.exports = /** @class */ (function () {
         this.isTestnet = false;
         this.offline = false; //TODO supportme
         this.mode = config.mode;
-        this.context = config.context;
+        this.walletId = config.walletId;
         this.queryKey = config.queryKey;
         this.username = config.username;
         this.pioneerApi = config.pioneerApi;
@@ -245,8 +245,8 @@ module.exports = /** @class */ (function () {
                             _j.sent();
                             isTestnet_1 = false;
                             log.debug(tag, "hdwallet isTestnet: ", isTestnet_1);
-                            log.info(tag, "paths: ", paths.length);
-                            log.info(tag, "blockchains: ", this.blockchains);
+                            log.debug(tag, "paths: ", paths.length);
+                            log.debug(tag, "blockchains: ", this.blockchains);
                             _loop_1 = function (i) {
                                 var blockchain = this_1.blockchains[i];
                                 log.debug(tag, "blockchain: ", blockchain);
@@ -390,7 +390,7 @@ module.exports = /** @class */ (function () {
                                 isTestnet: false,
                                 username: this.username,
                                 blockchains: this.blockchains,
-                                walletName: this.context,
+                                walletId: this.walletId,
                                 data: {
                                     pubkeys: this.pubkeys
                                 },
@@ -404,11 +404,11 @@ module.exports = /** @class */ (function () {
                         case 17:
                             regsiterResponse = _j.sent();
                             log.debug("regsiterResponse: ", regsiterResponse);
-                            log.info(tag, "getting info on context: ", this.context);
-                            return [4 /*yield*/, this.getInfo(this.context)];
+                            log.info(tag, "getting info on context: ", this.walletId);
+                            return [4 /*yield*/, this.getInfo(this.walletId)];
                         case 18:
                             walletInfo = _j.sent();
-                            log.info(tag, "walletInfo: ", walletInfo);
+                            log.debug(tag, "walletInfo: ", walletInfo);
                             //validate info
                             log.debug("walletInfo: ", walletInfo);
                             if (walletInfo && walletInfo.balances) {
@@ -1099,7 +1099,12 @@ module.exports = /** @class */ (function () {
                                     data: data,
                                 };
                                 log.debug("unsignedTxETH: ", ethTx);
-                                rawTx = ethTx;
+                                rawTx = {
+                                    coin: 'ETH',
+                                    swap: swap,
+                                    HDwalletPayload: ethTx,
+                                    verbal: "Ethereum transaction"
+                                };
                                 return [3 /*break*/, 9];
                             case 8:
                                 if (UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0) {
@@ -1485,8 +1490,8 @@ module.exports = /** @class */ (function () {
                         //FIO
                         throw Error("Coin not supported! " + coin);
                         case 12:
-                            //
-                            if (unsignedTx.transaction.noBroadcast)
+                            //carry over unsigned params to signed
+                            if (unsignedTx.transaction && unsignedTx.transaction.noBroadcast)
                                 signedTx.noBroadcast = true;
                             if (unsignedTx.invocationId)
                                 signedTx.invocationId = unsignedTx.invocationId;
@@ -1510,7 +1515,7 @@ module.exports = /** @class */ (function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 28, , 29]);
-                            log.info(tag, "transaction: ", transaction);
+                            log.debug(tag, "transaction: ", transaction);
                             isTestnet = false;
                             coin = transaction.coin.toUpperCase();
                             address = transaction.address;
@@ -1550,12 +1555,12 @@ module.exports = /** @class */ (function () {
                             else {
                                 input = { coin: coin, xpub: this.PUBLIC_WALLET[coin].pubkey };
                             }
-                            log.info(tag, "input: ", input);
+                            log.debug(tag, "input: ", input);
                             return [4 /*yield*/, this.pioneerClient.instance.ListUnspent(input)];
                         case 5:
                             unspentInputs = _a.sent();
                             unspentInputs = unspentInputs.data;
-                            log.info(tag, "unspentInputs: ", unspentInputs);
+                            log.debug(tag, "unspentInputs: ", unspentInputs);
                             utxos = [];
                             for (i = 0; i < unspentInputs.length; i++) {
                                 input_1 = unspentInputs[i];

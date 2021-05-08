@@ -131,7 +131,7 @@ module.exports = {
                 if(walletNames.length > 0){
                     WALLET_CONTEXT = walletNames[0]
                     let resultUpdateContextRemote = await network.instance.SetContext(null,{context:WALLET_CONTEXT})
-                    log.info("resultUpdateContextRemote: ",resultUpdateContextRemote)
+                    log.debug("resultUpdateContextRemote: ",resultUpdateContextRemote)
                 }
             }
         }
@@ -492,7 +492,7 @@ let set_context = async function (context:string) {
     let tag = " | unlock_wallet | ";
     try {
 
-        log.info("context: ",context)
+        log.debug("context: ",context)
         if(context && WALLETS_LOADED[context]){
             //does it match current
             if(context !== WALLET_CONTEXT){
@@ -669,11 +669,11 @@ let pair_keepkey = async function (keepkeyWallet:any,blockchains:any) {
         }
 
         //verify pubkeys
-        log.info(tag,"pubkeys: ",keepkeyWallet.pubkeys)
+        log.debug(tag,"pubkeys: ",keepkeyWallet.pubkeys)
         for(let i = 0; i < blockchains.length; i++){
             let blockchain = blockchains[i]
             let symbol = getNativeAssetForBlockchain(blockchain)
-            log.info(tag,"symbol: ",symbol)
+            log.debug(tag,"symbol: ",symbol)
             //find in pubkeys
             let isFound = keepkeyWallet.pubkeys.find((path: { blockchain: string; }) => {
                 return path.blockchain === blockchain
@@ -1254,7 +1254,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //get wallets
         let walletFiles = await getWallets()
-        log.info(tag,"walletFiles: ",walletFiles)
+        log.debug(tag,"walletFiles: ",walletFiles)
         let walletDescriptions:any = []
         //TODO if testnet flag only show testnet wallets!
 
@@ -1264,7 +1264,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote has more wallets
         let userInfoRemote = await network.instance.User()
         userInfoRemote = userInfoRemote.data
-        log.info(tag,"userInfoRemote: ",userInfoRemote)
+        log.debug(tag,"userInfoRemote: ",userInfoRemote)
         if(userInfoRemote.wallets){
             for(let i = 0; i < userInfoRemote.wallets; i++){
                 let walletRemote = userInfoRemote[i]
@@ -1333,7 +1333,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             let walletName = walletFiles[i]
             //if !offline aka, online!
             log.info(tag,"output.offline: ",output.offline)
-            log.info(tag,"output.offline: ",output.offline)
             if(output.offline.indexOf(walletName) < 0){
                 log.info(tag,"wallet is online! ",walletName)
 
@@ -1377,7 +1376,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         blockchains:config.blockchains,
                         pubkeys:walletFile.pubkeys,
                         wallet:walletFile,
-                        context:walletName,
+                        walletId:walletName,
                         username:config.username,
                         pioneerApi:true,
                         spec:URL_PIONEER_SPEC,
@@ -1456,7 +1455,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     let configPioneer:any = {
                         isTestnet,
                         mnemonic,
-                        context:walletName,
+                        walletId:walletName,
                         blockchains:config.blockchains,
                         username:config.username,
                         pioneerApi:true,
@@ -1477,7 +1476,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //info
                     let info = await wallet.getInfo(walletName)
-                    log.info(tag,"INFO: ",info)
+                    log.debug(tag,"INFO: ",info)
                     if(!info.pubkeys) throw Error(" invalid wallet info returned! missing pubkeys!")
                     if(!info.masters) throw Error(" invalid wallet info returned! missing masters!")
 
@@ -1543,7 +1542,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.info(tag,"Setting New Context newContext: ",walletFile)
                         let resultUpdateContext = await network.instance.SetContext(null,{context:walletFile})
                         resultUpdateContext = resultUpdateContext.data
-                        log.info(tag,"resultUpdateContext: ",resultUpdateContext)
+                        log.debug(tag,"resultUpdateContext: ",resultUpdateContext)
                         WALLET_CONTEXT = walletFile
                         output.context = WALLET_CONTEXT
                     }
@@ -1630,7 +1629,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
                     let invokeQueue = await app_to_queue(request.invocation)
-                    log.info(tag,"invokeQueue: ", invokeQueue)
+                    log.debug(tag,"invokeQueue: ", invokeQueue)
                     clientEvents.events.emit('invokeQueue',invokeQueue)
                     break;
                 case 'context':

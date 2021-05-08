@@ -42,10 +42,14 @@ interface Invocation {
     type?:string
     noBroadcast?:boolean
     invocationId?:string
-    address:string,
+    inboundAddress?:any
+    address?:string,
     addressTo?:string,
     memo?:string
-    coin:string
+    asset?:any
+    blockchain?:string
+    network?:string
+    coin?:string
     amount:string
     context?:string
     username:string

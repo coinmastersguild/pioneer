@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-xchain-client",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -11,6 +11,7 @@
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
     "build": "tsc -p .",
+    "build-watch": "tsc -w .",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "test-jest": "jest --coverage",

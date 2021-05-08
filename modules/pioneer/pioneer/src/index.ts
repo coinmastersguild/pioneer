@@ -122,6 +122,7 @@ export interface SendToAddress {
 
 export interface config {
     blockchains: string[];
+    walletId:string;
     isTestnet?: boolean;
     context: string
     spec:string,
@@ -309,7 +310,6 @@ module.exports = class wallet {
     private addLiquidity: (addLiquidity: any) => Promise<any>;
     private buildApproval: (swap: any) => Promise<any>;
     private sendApproval: (intent: Approval) => Promise<any>;
-    private context: string; //Wallet File name
     private signTransaction: (transaction: TransactionUnsigned) => Promise<any>;
     private getApproveQueue: () => any;
     private getPendingQueue: () => any;
@@ -318,6 +318,7 @@ module.exports = class wallet {
     private addBroadcasted: (signed: any) => any;
     private APPROVE_QUEUE: any[];
     private PENDING_QUEUE: any[];
+    private walletId: string;
     constructor(type:HDWALLETS,config:config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
         this.APPROVE_QUEUE = []
@@ -325,7 +326,7 @@ module.exports = class wallet {
         this.isTestnet = false
         this.offline = false //TODO supportme
         this.mode = config.mode
-        this.context = config.context
+        this.walletId = config.walletId
         this.queryKey = config.queryKey
         this.username = config.username
         this.pioneerApi = config.pioneerApi
@@ -363,8 +364,8 @@ module.exports = class wallet {
                         //verify testnet
                         const isTestnet = false
                         log.debug(tag,"hdwallet isTestnet: ",isTestnet)
-                        log.info(tag,"paths: ",paths.length)
-                        log.info(tag,"blockchains: ",this.blockchains)
+                        log.debug(tag,"paths: ",paths.length)
+                        log.debug(tag,"blockchains: ",this.blockchains)
                         //verify paths for each enabled blockchain
                         for(let i = 0; i < this.blockchains.length; i++){
                             let blockchain = this.blockchains[i]
@@ -478,7 +479,7 @@ module.exports = class wallet {
                         isTestnet:false,
                         username:this.username,
                         blockchains:this.blockchains,
-                        walletName:this.context,
+                        walletId:this.walletId,
                         data:{
                             pubkeys:this.pubkeys
                         },
@@ -491,9 +492,9 @@ module.exports = class wallet {
                     let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                     log.debug("regsiterResponse: ",regsiterResponse)
 
-                    log.info(tag,"getting info on context: ",this.context)
-                    let walletInfo = await this.getInfo(this.context)
-                    log.info(tag,"walletInfo: ",walletInfo)
+                    log.info(tag,"getting info on context: ",this.walletId)
+                    let walletInfo = await this.getInfo(this.walletId)
+                    log.debug(tag,"walletInfo: ",walletInfo)
 
                     //validate info
                     log.debug("walletInfo: ",walletInfo)
@@ -1070,7 +1071,15 @@ module.exports = class wallet {
                     }
 
                     log.debug("unsignedTxETH: ",ethTx)
-                    rawTx = ethTx
+
+
+
+                    rawTx = {
+                        coin:'ETH',
+                        swap,
+                        HDwalletPayload:ethTx,
+                        verbal:"Ethereum transaction"
+                    }
                     //send to hdwallet
                     // rawTx = await this.WALLET.ethSignTx(ethTx)
                     // rawTx.params = ethTx
@@ -1408,8 +1417,8 @@ module.exports = class wallet {
                     throw Error("Coin not supported! "+coin)
                 }
 
-                //
-                if(unsignedTx.transaction.noBroadcast) signedTx.noBroadcast = true
+                //carry over unsigned params to signed
+                if(unsignedTx.transaction && unsignedTx.transaction.noBroadcast) signedTx.noBroadcast = true
                 if(unsignedTx.invocationId) signedTx.invocationId = unsignedTx.invocationId
 
                 return signedTx
@@ -1421,7 +1430,7 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
-                log.info(tag,"transaction: ",transaction)
+                log.debug(tag,"transaction: ",transaction)
                 isTestnet = false
                 let coin = transaction.coin.toUpperCase()
                 let address = transaction.address
@@ -1459,10 +1468,10 @@ module.exports = class wallet {
                     }else{
                         input = {coin,xpub:this.PUBLIC_WALLET[coin].pubkey}
                     }
-                    log.info(tag,"input: ",input)
+                    log.debug(tag,"input: ",input)
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
                     unspentInputs = unspentInputs.data
-                    log.info(tag,"unspentInputs: ",unspentInputs)
+                    log.debug(tag,"unspentInputs: ",unspentInputs)
 
                     let utxos = []
                     for(let i = 0; i < unspentInputs.length; i++){

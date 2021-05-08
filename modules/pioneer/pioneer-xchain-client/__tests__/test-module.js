@@ -23,7 +23,9 @@ let run_test = async function(){
             'bitcoin',
             'ethereum',
             'thorchain',
-            'binance'
+            'binance',
+            'bitcoincash',
+            'litecoin'
         ]
 
         //bitcoin
@@ -56,7 +58,12 @@ let run_test = async function(){
         //     spec:urlSpec
         // }
 
+        let signingPubkey = process.env['DAPP_SIGNING_PUBKEY']
+        let signingPrivkey = process.env['DAPP_SIGNING_PRIVKEY']
+
         let config = {
+            // signingPubkey,
+            // signingPrivkey,
             network:'mainnet',
             blockchain:'ethereum',
             nativeAsset:'ETH',
@@ -78,33 +85,37 @@ let run_test = async function(){
         let app = new SDK(urlSpec,config)
         await app.init()
 
-        let swap = {
-            "inboundAddress":{
-                "chain":"ETH",
-                    "pub_key":"tthorpub1addwnpepqwjl47d8qqyptghwpa6scayg5cxt88nssgt8kygcn823qjgv6gavuqga32f",
-                    "address":"0x2345bf0273a6ae4d02a4b4389baef5409139c36a",
-                    "router":"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
-                    "gas_rate":"1"
-            },
-            "asset":{
-                "chain":"ETH",
-                    "symbol":"ETH",
-                    "ticker":"ETH",
-                    "iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"
-            },
-            "memo":"=:THOR.RUNE:tthor1mu7gez4wpkddlsldfc8trn94zqwqumcgeyy78e",
-            "amount":{
-                "type":"BASE",
-                "decimal":18,
-                amount: function(){
-                    return "0.0101"
-                }
-            }
-        }
+        let balanceSdk = await app.getBalance()
+        console.log(" balanceSdk: ",balanceSdk)
+        console.log(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
-
-        let txid = await app.buildSwap(swap)
-        console.log("txid",txid)
+        // let swap = {
+        //     "inboundAddress":{
+        //         "chain":"ETH",
+        //             "pub_key":"tthorpub1addwnpepqwjl47d8qqyptghwpa6scayg5cxt88nssgt8kygcn823qjgv6gavuqga32f",
+        //             "address":"0x2345bf0273a6ae4d02a4b4389baef5409139c36a",
+        //             "router":"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
+        //             "gas_rate":"1"
+        //     },
+        //     "asset":{
+        //         "chain":"ETH",
+        //             "symbol":"ETH",
+        //             "ticker":"ETH",
+        //             "iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"
+        //     },
+        //     "memo":"=:THOR.RUNE:tthor1mu7gez4wpkddlsldfc8trn94zqwqumcgeyy78e",
+        //     "amount":{
+        //         "type":"BASE",
+        //         "decimal":18,
+        //         amount: function(){
+        //             return "0.0101"
+        //         }
+        //     }
+        // }
+        //
+        //
+        // let txid = await app.buildSwap(swap)
+        // console.log("txid",txid)
 
 
         // //0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B

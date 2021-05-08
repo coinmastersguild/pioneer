@@ -34,16 +34,16 @@ module.exports = class wallet {
     private queryKey: any;
     private pioneerApi: any;
     private appName: string;
-    private signingPubkey: string;
-    private signingPrivkey: string;
+    // private signingPubkey: string;
+    // private signingPrivkey: string;
     private invoke: (type:string, invocation: Invocation) => Promise<void>;
     private online: () => Promise<any>;
     constructor(spec:string,config:any) {
         this.spec = spec
         this.appName = config.appName || 'notSet'
         this.queryKey = config.queryKey
-        this.signingPubkey = config.signingPubkey
-        this.signingPrivkey = config.signingPrivkey
+        // this.signingPubkey = config.signingPubkey
+        // this.signingPrivkey = config.signingPrivkey
         this.init = async function () {
             let tag = TAG + " | init_wallet | "
             try{
@@ -82,16 +82,16 @@ module.exports = class wallet {
 
                 //sign
                 let msg = JSON.stringify(invocation)
-                let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
+                //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
 
                 //Dapps sign all invocations
                 let request:any = {
-                    pubkey:this.signingPubkey,
+                    // pubkey:this.signingPubkey,
                     appName:this.appName,
                     username:invocation.username,
                     type,
                     invocation,
-                    invocationSig,
+                    // invocationSig,
                     invocationId
                 }
                 //

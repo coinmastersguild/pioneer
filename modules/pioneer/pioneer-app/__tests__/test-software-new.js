@@ -58,16 +58,17 @@ let run_test = async function(){
             console.log("resultInit: ",resultInit)
 
             //pair
-            let pairResult = await App.pair("DQW2FW")
-            console.log("pairResult: ",pairResult)
+            // let pairResult = await App.pair("DQW2FW")
+            // console.log("pairResult: ",pairResult)
 
             //get wallets
             let wallets = await App.getWallets()
             console.log("wallets: ",wallets)
 
-            //let contextName = App.context()
+            let contextName = await App.context()
+            console.log("contextName: ",contextName)
 
-            let context = wallets['0xc3affff54122658b89c31183cec4f15514f34624.wallet.json']
+            let context = wallets[contextName]
             if(!context) throw Error("No Wallets on startup!")
 
             //for each context

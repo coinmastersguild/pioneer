@@ -1,7 +1,6 @@
 {
-  "name": "eth-e2e-sdk",
+  "name": "@pioneer-platform/eth-e2e-sdk",
   "version": "0.0.1",
-  "private": true,
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",

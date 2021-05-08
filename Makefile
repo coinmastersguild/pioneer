@@ -1,21 +1,9 @@
-# Project Pioneer
-# multi-asset development platform
-
 SHELL=/bin/bash
 
-clean:
-    find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+env=skunkworks
 
-#Todo
-#make config
-#generate new seed and .env file usinging pioneer-cli
+clean::
+	git clean -d -f && find . -name "node_modules" -type d -prune -print | xargs du -chs && find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \;
 
-
-#make install
-install:
-    yarn
-
-
-test:
-	npm run --prefix ./e2e/sdk/bitcoin-e2e-sdk test
-
+install::
+	yarn && yarn build

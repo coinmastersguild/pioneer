@@ -121,7 +121,7 @@ module.exports = {
                     if (walletNames.length > 0) {
                         WALLET_CONTEXT = walletNames[0];
                         let resultUpdateContextRemote = yield network.instance.SetContext(null, { context: WALLET_CONTEXT });
-                        log.info("resultUpdateContextRemote: ", resultUpdateContextRemote);
+                        log.debug("resultUpdateContextRemote: ", resultUpdateContextRemote);
                     }
                 }
             }
@@ -462,7 +462,7 @@ let set_context = function (context) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | unlock_wallet | ";
         try {
-            log.info("context: ", context);
+            log.debug("context: ", context);
             if (context && WALLETS_LOADED[context]) {
                 //does it match current
                 if (context !== WALLET_CONTEXT) {
@@ -626,11 +626,11 @@ let pair_keepkey = function (keepkeyWallet, blockchains) {
                 pioneer_config_1.updateConfig({ paired });
             }
             //verify pubkeys
-            log.info(tag, "pubkeys: ", keepkeyWallet.pubkeys);
+            log.debug(tag, "pubkeys: ", keepkeyWallet.pubkeys);
             for (let i = 0; i < blockchains.length; i++) {
                 let blockchain = blockchains[i];
                 let symbol = getNativeAssetForBlockchain(blockchain);
-                log.info(tag, "symbol: ", symbol);
+                log.debug(tag, "symbol: ", symbol);
                 //find in pubkeys
                 let isFound = keepkeyWallet.pubkeys.find((path) => {
                     return path.blockchain === blockchain;
@@ -1192,7 +1192,7 @@ let init_wallet = function (config, isTestnet) {
             let output = {};
             //get wallets
             let walletFiles = yield pioneer_config_1.getWallets();
-            log.info(tag, "walletFiles: ", walletFiles);
+            log.debug(tag, "walletFiles: ", walletFiles);
             let walletDescriptions = [];
             //TODO if testnet flag only show testnet wallets!
             //TODO get public wallets from wallet_data dir
@@ -1200,7 +1200,7 @@ let init_wallet = function (config, isTestnet) {
             //get remote has more wallets
             let userInfoRemote = yield network.instance.User();
             userInfoRemote = userInfoRemote.data;
-            log.info(tag, "userInfoRemote: ", userInfoRemote);
+            log.debug(tag, "userInfoRemote: ", userInfoRemote);
             if (userInfoRemote.wallets) {
                 for (let i = 0; i < userInfoRemote.wallets; i++) {
                     let walletRemote = userInfoRemote[i];
@@ -1261,7 +1261,6 @@ let init_wallet = function (config, isTestnet) {
                 let walletName = walletFiles[i];
                 //if !offline aka, online!
                 log.info(tag, "output.offline: ", output.offline);
-                log.info(tag, "output.offline: ", output.offline);
                 if (output.offline.indexOf(walletName) < 0) {
                     log.info(tag, "wallet is online! ", walletName);
                     log.debug(tag, "walletName: ", walletName);
@@ -1307,7 +1306,7 @@ let init_wallet = function (config, isTestnet) {
                             blockchains: config.blockchains,
                             pubkeys: walletFile.pubkeys,
                             wallet: walletFile,
-                            context: walletName,
+                            walletId: walletName,
                             username: config.username,
                             pioneerApi: true,
                             spec: URL_PIONEER_SPEC,
@@ -1379,7 +1378,7 @@ let init_wallet = function (config, isTestnet) {
                         let configPioneer = {
                             isTestnet,
                             mnemonic,
-                            context: walletName,
+                            walletId: walletName,
                             blockchains: config.blockchains,
                             username: config.username,
                             pioneerApi: true,
@@ -1398,7 +1397,7 @@ let init_wallet = function (config, isTestnet) {
                         let walletClient = yield wallet.init();
                         //info
                         let info = yield wallet.getInfo(walletName);
-                        log.info(tag, "INFO: ", info);
+                        log.debug(tag, "INFO: ", info);
                         if (!info.pubkeys)
                             throw Error(" invalid wallet info returned! missing pubkeys!");
                         if (!info.masters)
@@ -1462,7 +1461,7 @@ let init_wallet = function (config, isTestnet) {
                             log.info(tag, "Setting New Context newContext: ", walletFile);
                             let resultUpdateContext = yield network.instance.SetContext(null, { context: walletFile });
                             resultUpdateContext = resultUpdateContext.data;
-                            log.info(tag, "resultUpdateContext: ", resultUpdateContext);
+                            log.debug(tag, "resultUpdateContext: ", resultUpdateContext);
                             WALLET_CONTEXT = walletFile;
                             output.context = WALLET_CONTEXT;
                         }
@@ -1540,7 +1539,7 @@ let init_wallet = function (config, isTestnet) {
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
                         let invokeQueue = yield app_to_queue(request.invocation);
-                        log.info(tag, "invokeQueue: ", invokeQueue);
+                        log.debug(tag, "invokeQueue: ", invokeQueue);
                         clientEvents.events.emit('invokeQueue', invokeQueue);
                         break;
                     case 'context':

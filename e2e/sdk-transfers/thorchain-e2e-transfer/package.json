@@ -1,5 +1,5 @@
 {
-  "name": "thorchain-e2e-sdk",
+  "name": "@pioneer-platform/thorchain-e2e-sdk-transfer",
   "private": true,
   "version": "0.0.1",
   "scripts": {

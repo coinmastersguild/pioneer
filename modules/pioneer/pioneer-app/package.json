@@ -4,7 +4,7 @@
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
-    "npm": "npm i",
+    "yarn": "yarn",
     "npm-rebuild": "npm rebuild",
     "npm-update": "npm update",
     "pair-multi": "npm run build && node __tests__/pair-multi.js.js",
@@ -15,6 +15,7 @@
     "lint": "prettier --write '**/**/*.ts'",
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
+    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },

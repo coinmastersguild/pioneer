@@ -58,8 +58,8 @@ const {
 
 let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
-let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || 0.0002
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || 0.0001
+let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
+let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
@@ -142,9 +142,21 @@ const test_service = async function () {
         log.info(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
         //get pool address
-        let poolInfo = await midgard.getPoolAddress()
+        // let poolInfo = await midgard.getPoolAddress()
+
         //filter by chain
-        let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
+        //let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
+
+        let ethVault:any = [
+            {
+                "chain": "ETH",
+                "pub_key": "thorpub1addwnpepqtthd089x6h3qg2tflq8ukhpplxg5s8v8zx3l00crvhsyg9xk43qgal9tnm",
+                "address": "0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e",
+                "router": "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B",
+                "gas_rate": "100"
+            }
+        ]
+
         log.info(tag,"ethVault: ",ethVault)
         assert(ethVault[0])
         ethVault = ethVault[0]
@@ -162,70 +174,76 @@ const test_service = async function () {
 
         let swap = {
             inboundAddress: ethVault,
-            asset: {
-                chain: 'ETH',
-                symbol: 'ETH',
-                ticker: 'ETH',
-                iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
+            coin: "ETH",
+            asset: "ETH",
+            memo: '=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5',
+            "amount":{
+                // "type":"BASE",
+                // "decimal":18,
+                //TODO bignum like asgardx?
+                amount: function(){
+                    return TEST_AMOUNT
+                }
             },
-            memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-            amount: TEST_AMOUNT,
             noBroadcast:true
         }
 
         let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
         log.info(tag,"responseSwap: ",responseSwap)
-        // let invocationId = responseSwap.invocationId
-        //
-        // let transaction = {
-        //     invocationId,
-        //     context:user.context
-        // }
-        // //build
-        // let unsignedTx = await buildTransaction(transaction)
-        // log.info(tag,"unsignedTx: ",unsignedTx)
-        //
-        // //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
-        //
-        // //sign transaction
-        // let signedTx = await buildTransaction(transaction)
-        // log.info(tag,"signedTx: ",signedTx)
-        //
-        // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await broadcastTransaction(transaction)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
-        //
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
-        //
-        // //get invocation info EToC
-        //
-        // let isConfirmed = false
-        // //wait for confirmation
-        //
-        // //wait for swap
-        // while(!isConfirmed){
-        //     //get invocationInfo
-        //     let invocationInfo = await app.getInvocation(invocationId)
-        //     log.info(tag,"invocationInfo: ",invocationInfo)
-        //
-        //
-        //     //if
-        //     // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-        //     // log.info(tag,"txInfo: ",txInfo)
-        //     //
-        //     // if(txInfo.confirmations > 0){
-        //     //     isConfirmed = true
-        //     // }
-        //
-        //     await sleep(3000)
-        // }
+        let invocationId = responseSwap.invocationId
+        assert(invocationId)
+        let transaction = {
+            invocationId,
+            context:user.context
+        }
+        //build
+        let unsignedTx = await buildTransaction(transaction)
+        log.info(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
+
+        //get invocation
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.info(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+
+        //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await broadcastTransaction(transaction)
+        log.info(tag,"broadcastResult: ",broadcastResult)
+
+        let invocationView3 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+
+        //get invocation info EToC
+
+        let isConfirmed = false
+        //wait for confirmation
+
+        //wait for swap
+        while(!isConfirmed){
+            //get invocationInfo
+            let invocationInfo = await app.getInvocation(invocationId)
+            log.info(tag,"invocationInfo: ",invocationInfo)
+
+
+            //if
+            // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+            // log.info(tag,"txInfo: ",txInfo)
+            //
+            // if(txInfo.confirmations > 0){
+            //     isConfirmed = true
+            // }
+
+            await sleep(3000)
+        }
 
 
         //process
