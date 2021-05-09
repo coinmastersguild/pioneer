@@ -1,7 +1,7 @@
 {
   "name": "@pioneer-platform/bitcoincash-e2e-sdk-transfer",
   "private": true,
-  "version": "3.0.0",
+  "version": "4.0.0",
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",
