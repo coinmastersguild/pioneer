@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/usdt-e2e-sdk",
-  "version": "4.0.0",
+  "version": "8.0.0",
   "scripts": {
     "npm": "npm i",
     "npm-update": "npm update",
