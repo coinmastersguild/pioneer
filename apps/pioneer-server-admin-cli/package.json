@@ -5,5 +5,5 @@
     "@pioneer-platform/default-redis": "^8.0.0",
     "@pioneer-platform/redis-queue": "^8.0.0"
   },
-  "gitHead": "f6a5d4c9b059cd0f1b0b26e51478bd6f1a39eb8e"
+  "gitHead": "871f5666a23b939d63c70cd6b744af1322fdcbb7"
 }
