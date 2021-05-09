@@ -24,7 +24,7 @@ let run_test = async function(){
         console.log("*** Running test module ***")
 
         let config = {
-            queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338",
+            queryKey,
             // username,
             spec,
             wss,

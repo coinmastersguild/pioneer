@@ -44,9 +44,11 @@ let run_test = async function(){
         //TODO sub to invocationId
 
         //get invocation
-        let invocation =  await app.getInvocation(invocationId)
-        console.log(invocation)
+        // let invocation =  await app.getInvocation(invocationId)
+        // console.log(invocation)
 
+        let info = await app.clients.bitcoin.info()
+        console.log(info)
 
     }catch(e){
         console.error(e)

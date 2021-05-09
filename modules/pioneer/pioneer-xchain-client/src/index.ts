@@ -699,7 +699,8 @@ module.exports = class wallet {
                 this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
 
                 //get info
-                this.info = await this.pioneerApi.Info(this.context)
+                const walletInfo = await this.pioneerApi.Info(this.context)
+                this.info = walletInfo.data
 
                 return userInfo
             } catch (e) {

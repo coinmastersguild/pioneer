@@ -67,7 +67,7 @@ let run_test = async function(){
             network:'mainnet',
             blockchain:'ethereum',
             nativeAsset:'ETH',
-            queryKey,
+            queryKey:'key:f6a5d874-6c35-4fe9-9cd7-921048b37f84',
             username,
             spec:urlSpec
         }
@@ -89,6 +89,8 @@ let run_test = async function(){
         console.log(" balanceSdk: ",balanceSdk)
         console.log(" balanceSdk: ",balanceSdk[0].amount.amount().toString())
 
+        let info = await app.info
+        console.log(" info: ",info)
         // let swap = {
         //     "inboundAddress":{
         //         "chain":"ETH",
