@@ -20,3 +20,6 @@ https://www.digitalocean.com/docs/container-registry/how-to/use-registry-docker-
 
 #dex
 https://docs.1inch.exchange/api/
+
+# lerna strats
+https://itnext.io/how-to-deploy-only-changed-pack
