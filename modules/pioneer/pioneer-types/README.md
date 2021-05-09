@@ -1,3 +1,0 @@
-# Pioneer Types module
-
-

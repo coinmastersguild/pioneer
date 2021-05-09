@@ -857,6 +857,9 @@ module.exports = class wallet {
         this.buildSwap = async function (swap:any,options:any) {
             let tag = TAG + " | buildSwap | "
             try {
+                log.info(tag,"swap: ",swap)
+                log.info(tag,"options: ",options)
+
                 //verbose
                 const verbose = options.verbose
                 const txidOnResp = options.txidOnResp
