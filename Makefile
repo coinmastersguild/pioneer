@@ -7,3 +7,6 @@ clean::
 
 install::
 	yarn && yarn build
+
+publish::
+	yarn publish:lerna
