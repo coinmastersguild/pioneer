@@ -4,6 +4,7 @@
 
 A simple CLI wallet for exploring new chains
 
+
 # install as dev
 
 ```
