@@ -7,7 +7,7 @@ orbs:
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi
+      - image: circleci/node
 
 jobs:
   make:
@@ -22,7 +22,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "apt update && apt install wget libudev-dev libusb-1.0-0 -y"
+          command: "apt update"
       - run:
           command: "make install"
       - run:
