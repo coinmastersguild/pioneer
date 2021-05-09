@@ -7,13 +7,12 @@ orbs:
 executors:
   pulumi:
     docker:
-      - image: circleci/node
+      - image: circleci/node:14
 
 jobs:
   make:
     resource_class: xlarge
-    macos:
-      xcode: 11.5.0
+    executor: pulumi
     parameters:
       env:
         description: stage or prod
