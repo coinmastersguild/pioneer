@@ -10,6 +10,20 @@ executors:
       - image: circleci/node:10
 
 jobs:
+  make:
+    resource_class: xlarge
+    executor: pulumi
+    parameters:
+      env:
+        description: stage or prod
+        type: string
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          command: "make install"
+
   build:
     resource_class: xlarge
     executor: pulumi
@@ -119,11 +133,14 @@ workflows:
   version: 2
   pioneer-native:
     jobs:
-      - build-native-mac
+#      - build-native-mac
 #      - build-native-windows
 #      - build-native-linux
   build-master:
     jobs:
+      - make:
+          name: make
+          env: prod
       - build:
           <<: *only_master
           name: push image
