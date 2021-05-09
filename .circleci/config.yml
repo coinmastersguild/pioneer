@@ -22,6 +22,8 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
+          command: "apt update && apt install wget libudev-dev libusb-1.0-0 -y"
+      - run:
           command: "make install"
       - run:
           command: "make publish"
