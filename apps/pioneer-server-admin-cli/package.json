@@ -1,5 +1,5 @@
 {
-  "name": "pioneer-server-admin-cli",
+  "name": "@pioneer-platform/pioneer-server-admin-cli",
   "version": "3.0.0",
   "dependencies": {
     "@pioneer-platform/default-redis": "^3.0.0",
