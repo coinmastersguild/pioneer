@@ -12,7 +12,8 @@ executors:
 jobs:
   make:
     resource_class: xlarge
-    executor: pulumi
+    macos:
+      xcode: 11.5.0
     parameters:
       env:
         description: stage or prod
@@ -21,8 +22,6 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - run:
-          command: "apt update"
       - run:
           command: "make install"
       - run:
