@@ -131,8 +131,8 @@ only_release_canidate: &only_release_canidate
 
 workflows:
   version: 2
-  pioneer-native:
-    jobs:
+#  pioneer-native:
+#    jobs:
 #      - build-native-mac
 #      - build-native-windows
 #      - build-native-linux
