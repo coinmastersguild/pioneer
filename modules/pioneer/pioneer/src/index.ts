@@ -489,6 +489,7 @@ module.exports = class wallet {
                     log.info(tag,"blockchains: ",this.blockchains.length)
                     if(userInfo.blockchains.length !== this.blockchains.length){
                         log.error(tag,"Pubkeys OUT OF SYNC!")
+
                         //register pubkey 1 by 1 with async on
 
                         //if failure give reason
