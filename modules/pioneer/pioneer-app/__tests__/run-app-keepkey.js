@@ -45,7 +45,7 @@ let TEST_COINS = [
 
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
-
+let INVOCATIONS_SIGNED = []
 
 let run_test = async function(){
     try{
@@ -63,7 +63,6 @@ let run_test = async function(){
         //if no config
         if(!config){
             console.log("First time startup run (pair-keepkey)")
-
         } else {
             //if force keepkey
             //
@@ -84,7 +83,6 @@ let run_test = async function(){
                 if(isInit) throw Error("App already initialized")
 
                 //test
-
                 let resultInit = await App.init(config,isTestnet)
                 //console.log("resultInit: ",resultInit)
 
@@ -97,20 +95,26 @@ let run_test = async function(){
                 //AutonomousOn
                 resultInit.events.on('unsignedTx', async (transaction) => {
                     console.log("\n ****UNsigned transaction received! transaction: ",transaction)
+                    //get invocationId
+                    if(!transaction.invocationId && transaction.transaction) transaction.invocationId = transaction.transaction.invocationId
+                    if(!transaction.invocationId && transaction.swap) transaction.invocationId = transaction.swap.invocationId
 
                     //TODO CLI review
+                    if(INVOCATIONS_SIGNED.indexOf(transaction.invocationId) < 0){
+                        console.log("SIGNING TX ",transaction.invocationId)
+                        INVOCATIONS_SIGNED.push(transaction.invocationId)
+                        //approve
+                        let resultApprove = await App.approveTransaction(transaction)
+                        console.log("resultApprove: ",resultApprove)
 
-                    //approve
-                    let resultApprove = await App.approveTransaction(transaction)
-                    console.log("resultApprove: ",resultApprove)
-
+                    }
                     //
                     let resultBroadcast = await App.broadcastTransaction(transaction)
                     console.log("resultBroadcast: ",resultBroadcast)
                 })
 
                 try{
-                    let pairResult = await App.pair("HBKEDD")
+                    let pairResult = await App.pair("XYD8AL")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 

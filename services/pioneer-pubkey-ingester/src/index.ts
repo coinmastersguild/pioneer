@@ -55,7 +55,7 @@ let push_balance_event = async function(work:any,balance:string){
             network:work.symbol,
             balance
         }
-        publisher.publish('',JSON.stringify(balanceEvent))
+        //publisher.publish('',JSON.stringify(balanceEvent))
     }catch(e){
         log.error(tag,e)
     }

@@ -339,7 +339,6 @@ let build_transaction = async function (transaction:any) {
                 console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
 
                 //TODO validate transfer object
-
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.info(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
 
@@ -489,8 +488,12 @@ let set_context = async function (context:string) {
 let approve_transaction = async function (transaction:any) {
     let tag = " | approve_transaction | ";
     try {
+        log.info(tag,"transaction: ",transaction)
         //get invocation
-        if(!transaction.invocationId)transaction.invocationId = transaction.transaction.invocationId
+        if(!transaction.invocationId && transaction.transaction) transaction.invocationId = transaction.transaction.invocationId
+        if(!transaction.invocationId && transaction.swap) transaction.invocationId = transaction.swap.invocationId
+        if(!transaction.invocationId) throw Error("102: transaction.invocationId required!")
+
         let invocation = await get_invocation(transaction.invocationId)
         log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
@@ -724,8 +727,8 @@ let app_to_queue = async function (invocation:any) {
     try {
         if(!invocation.invocationId) throw Error("102: invalid intent missing invocationId!")
         if(!invocation.type) throw Error("102: invalid intent missing type!")
-        if(!invocation.address) throw Error("102: invalid intent missing address!")
-        if(!invocation.coin) throw Error("102: invalid intent missing coin!")
+        //if(!invocation.address) throw Error("102: invalid intent missing address!")
+        //if(!invocation.coin) throw Error("102: invalid intent missing coin!")
         if(!invocation.amount) throw Error("102: invalid intent missing amount!")
         log.debug(tag,"invocation: ",invocation)
         invocation.addressTo = invocation.address

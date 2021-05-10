@@ -255,7 +255,7 @@ module.exports = class wallet {
                 userInfo = userInfo.data
                 log.info(tag,"userInfo: ",userInfo)
 
-                this.username = userInfo.context
+                this.username = userInfo.username
                 this.context = userInfo.context
                 this.wallets = userInfo.wallets
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
@@ -689,11 +689,10 @@ module.exports = class wallet {
                 let userInfo = await this.pioneerApi.User()
                 log.info(tag,"userInfo: ",userInfo)
 
-                this.username = userInfo.context
+                this.username = userInfo.username
                 this.context = userInfo.context
                 this.wallets = userInfo.wallets
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
-                this.context = userInfo.context
                 this.invocationContext = userInfo.invocationContext
                 this.assetContext = userInfo.assetContext
                 this.assetBalanceNativeContext = userInfo.assetBalanceNativeContext

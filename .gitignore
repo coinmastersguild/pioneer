@@ -1,7 +1,9 @@
 # Project exclude paths
 /deploy/node_modules/
 /modules/support/loggerdog/node_modules/
+lib/**
 */lib/*
+**/lib/**
 */.idea
 */*/.idea
 .yarnrc

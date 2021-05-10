@@ -248,41 +248,21 @@ function createBech32Address(publicKey:any,prefix:string) {
 
 module.exports = class wallet {
     private PUBLIC_WALLET:any = {};
-    private PRIVATE_WALLET:any = {};
     private paths: (format: string) => any;
-    // private normalizePubkeys: (format: string, pubkeys: any, paths: any) => Promise<any>;
-    // // private events: Promise<any>;
     private forget: () => any;
-    // private coins: () => any;
-    // private getBalanceAudit: (coin: string) => Promise<any>;
     private getBalance: (coin: string, address?:string) => any;
-    // private getInfo: (verbosity: string) => Promise<any>;
     private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
-    // private getEosPubkey: () => Promise<any>;
-    // private getEosAccountsByPubkey: (pubkey: string) => Promise<any>;
-    // private validateEosUsername: (username: string) => Promise<any>;
-    // private registerEosUsername: (pubkey: string, username: string) => Promise<any>;
     private getFioPubkey: () => Promise<any>;
     private getFioAccountsByPubkey: (pubkey: string) => Promise<void>;
     private getPaymentRequests: (pubkey: string) => Promise<void>;
     private fioEncryptRequestContent: (content: any) => Promise<void>;
     private fioDecryptRequestContent: (content: any) => Promise<void>;
     private getFioAccountInfo: (username: string) => Promise<void>;
-    // private validateFioUsername: (username: string) => Promise<void>;
-    // private registerFioUsername: (pubkey: string, username: string) => Promise<void>;
-    // private getStakes: (coin: string) => Promise<any>;
-    // private getBalances: (coin: string) => Promise<any>;
     private getMaster: (coin: string) => Promise<any>;
     private getMasterOfSeed: (seed: string) => Promise<any>;
     private getAddress: (coin: string, account: number, index: number, isChange: boolean) => Promise<any>;
-    // private getAddressByPath: (coin: string, path: string) => Promise<any>;
-    // private getNewAddress: (coin: string) => Promise<any>;
-    // private listSinceLastblock: (coin: string, block: string) => Promise<any>;
-    // private getTransaction: (coin: string, txid: string) => Promise<any>;
-    // private getTransactions: (coin: string, txid: string) => Promise<any>;
     private buildTx: (transaction: any) => Promise<any>;
     private bip32ToAddressNList: (path: string) => number[];
-    // private encrypt: (msg: FioActionParameters.FioRequestContent, payerPubkey: string) => Promise<any>;
     private sendToAddress: (intent: SendToAddress) => Promise<any>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
     private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
@@ -490,9 +470,9 @@ module.exports = class wallet {
                     log.info(tag,"blockchains: ",this.blockchains.length)
                     if(userInfo.blockchains.length !== this.blockchains.length){
                         log.error(tag,"Pubkeys OUT OF SYNC!")
-
-                        //register pubkey 1 by 1 with async on
-
+                        log.error(tag,"blockchains remote: ",userInfo.blockchains)
+                        log.error(tag,"blockchains configured: ",this.blockchains)
+                        //TODO register pubkey 1 by 1 with async on
                         //if failure give reason
                     }
 
@@ -580,15 +560,9 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        // this.normalizePubkeys = function (format:string,pubkeys:any,paths:any) {
-        //     return normalize_pubkeys(format,pubkeys,paths)
-        // }
         this.forget = function () {
             return this.pioneerClient.instance.Forget();
         }
-        // this.coins = function () {
-        //     return WALLET_COINS;
-        // }
         this.getInfo = async function (walletId) {
             let tag = TAG + " | getInfo | "
             try {
@@ -638,33 +612,6 @@ module.exports = class wallet {
                 throw e
             }
         }
-        // /*
-        //     Verify Balance locally
-        //     Dont trust remote
-        // */
-        // this.getBalanceAudit = function (coin:string) {
-        //     return get_balance_audit(coin);
-        // }
-        // /*
-        //     EOS commands
-        //  */
-        // this.getEosPubkey = function () {
-        //     return get_eos_pubkey();
-        // }
-        // this.getEosAccountsByPubkey = function (pubkey:string) {
-        //     return get_eos_account_by_pubkey(pubkey);
-        // }
-        // this.validateEosUsername = function (username:string) {
-        //     return validate_EOS_username(username);
-        // }
-        // this.registerEosUsername = function (pubkey:string,username:string) {
-        //     return register_eos_username(pubkey,username);
-        // }
-        /*
-            Queue
-                Unsigned tx's (ready to be reviewed approves)
-                Pending (broadcasted/unconfirmed, but available for replacement)
-         */
         this.getApproveQueue = function () {
             return this.APPROVE_QUEUE;
         }
@@ -708,22 +655,6 @@ module.exports = class wallet {
             let result = await this.WALLET.fioDecryptRequestContent(content)
             return result
         }
-        // this.validateFioUsername = async function (username:string) {
-        //     let result = await this.pioneerClient.instance.ValidateFioUsername(username)
-        //     return result
-        // }
-        // this.registerFioUsername = function (pubkey:string,username:string) {
-        //     return register_fio_username(pubkey,username);
-        // }
-        // /*
-        //     Staking assets
-        //  */
-        // this.getStakes = function (coin:string) {
-        //     return get_staking_positions(coin);
-        // }
-        // this.getBalances = function () {
-        //     return get_balances();
-        // }
         this.getMaster = async function (coin:string) {
             let tag = TAG + " | get_address_master | "
             try {
@@ -815,38 +746,6 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        // this.getAddressByPath = function (coin:string,path:string) {
-        //     return get_address_by_path(coin,path);
-        // }
-        // this.getNewAddress = function (coin:string) {
-        //     return get_new_address(coin);
-        // }
-        // this.listSinceLastblock = function (coin:string,block:string) {
-        //     return list_since_block(coin,block);
-        // }
-        // this.getTransaction = function (coin:string,txid:string) {
-        //     return get_transaction(coin,txid);
-        // }
-        // this.getTransactions = function (coin:string,params:any) {
-        //     return get_transactions(coin,params)
-        // }
-        // /*
-        //     Txs
-        //
-        //     3 type:
-        //         Transfers
-        //              optional memo's
-        //         Swaps
-        //              Dex trades
-        //              Thorchain contract (ETH/TOKEN) trades
-        //
-        //         non-transfers
-        //             Register address
-        //             Register Username
-        //             staking
-        //
-        //  */
-
         /*
         let swap = {
             inboundAddress: {
@@ -866,8 +765,6 @@ module.exports = class wallet {
             amount: "0.1"
         }
         */
-        // @ts-ignore
-        // @ts-ignore
         // @ts-ignore
         this.addLiquidity = async function (addLiquidity:any) {
             let tag = TAG + " | addLiquidity | "
@@ -1019,15 +916,8 @@ module.exports = class wallet {
                     data,
                     // chainId: 1,//TODO testnet
                 }
-
                 log.debug("unsignedTxETH: ",ethTx)
-                //send to hdwallet
-                // rawTx = await this.WALLET.ethSignTx(ethTx)
-                // rawTx.params = ethTx
-                //
-                // const txid = keccak256(rawTx.serialized).toString('hex')
-                // log.debug(tag,"txid: ",txid)
-                // rawTx.txid = txid
+
                 return ethTx
             }catch(e){
                 log.error(e)
@@ -1046,7 +936,7 @@ module.exports = class wallet {
                     'LTC'
                 ]
 
-                //supported tokens
+                //TODO supported tokens
                 //USDT SUSHI
 
                 if(swap.inboundAddress.chain === 'ETH'){
@@ -1084,7 +974,6 @@ module.exports = class wallet {
                     log.debug("nonce: ",nonce)
 
                     //TODO if token
-
                     let ethTx = {
                         // addressNList: support.bip32ToAddressNList(masterPathEth),
                         "addressNList":[
@@ -1100,26 +989,15 @@ module.exports = class wallet {
                         value: numberToHex(amountNative),
                         to: swap.inboundAddress.router,
                         data,
-                        // chainId: 1,//TODO testnet
+                        chainId: 1
                     }
-
                     log.debug("unsignedTxETH: ",ethTx)
-
-
-
                     rawTx = {
                         coin:'ETH',
                         swap,
                         HDwalletPayload:ethTx,
                         verbal:"Ethereum transaction"
                     }
-                    //send to hdwallet
-                    // rawTx = await this.WALLET.ethSignTx(ethTx)
-                    // rawTx.params = ethTx
-                    //
-                    // const txid = keccak256(rawTx.serialized).toString('hex')
-                    // log.debug(tag,"txid: ",txid)
-                    // rawTx.txid = txid
 
                 } else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
                     throw Error("NOT SUPPORTED! Use transfer with memo!")

@@ -490,9 +490,14 @@ let approve_transaction = function (transaction) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | approve_transaction | ";
         try {
+            log.info(tag, "transaction: ", transaction);
             //get invocation
-            if (!transaction.invocationId)
+            if (!transaction.invocationId && transaction.transaction)
                 transaction.invocationId = transaction.transaction.invocationId;
+            if (!transaction.invocationId && transaction.swap)
+                transaction.invocationId = transaction.swap.invocationId;
+            if (!transaction.invocationId)
+                throw Error("102: transaction.invocationId required!");
             let invocation = yield get_invocation(transaction.invocationId);
             log.info(tag, "invocation: ", invocation);
             if (!invocation.unsignedTx)
@@ -710,10 +715,8 @@ let app_to_queue = function (invocation) {
                 throw Error("102: invalid intent missing invocationId!");
             if (!invocation.type)
                 throw Error("102: invalid intent missing type!");
-            if (!invocation.address)
-                throw Error("102: invalid intent missing address!");
-            if (!invocation.coin)
-                throw Error("102: invalid intent missing coin!");
+            //if(!invocation.address) throw Error("102: invalid intent missing address!")
+            //if(!invocation.coin) throw Error("102: invalid intent missing coin!")
             if (!invocation.amount)
                 throw Error("102: invalid intent missing amount!");
             log.debug(tag, "invocation: ", invocation);
