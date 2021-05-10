@@ -336,7 +336,7 @@ let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParam
 		} else {
 			// ETH gas estimate
 			const transactionRequest = {
-				from: recipient,
+				from: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", //address with lots of eth
 				to: recipient,
 				value: txAmount,
 				data: memo ? toUtf8Bytes(memo) : undefined,
@@ -377,6 +377,13 @@ let get_fees = async function(params: any){
 				amount:function(){ return .98 }
 			}
 		}
+
+		log.info(tag,"get_gas_limit: ",{
+			asset: params.asset,
+			amount: params.amount,
+			recipient: params.recipient,
+			memo: params.memo,
+		})
 
 		const gasLimit = await get_gas_limit({
 			asset: params.asset,

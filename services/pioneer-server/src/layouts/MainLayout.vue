@@ -7,6 +7,72 @@
           Pioneer
         </q-toolbar-title>
 <!--        <div>total assets value (USD): {{totalValueUsd}}</div>-->
+
+        <div v-if="!paired">
+          <q-btn-dropdown
+            label="Pair a Wallet!"
+          >
+            <q-list>
+              <q-item clickable v-close-popup>
+                <q-item-section avatar>
+                  <q-img height=25px width=25px src="../assets/greenCompas.png"></q-img>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Pair Pioneer</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup>
+                <q-item-section avatar>
+<!--                  <q-img height=25px width=25px src="../assets/metamask.png"></q-img>-->
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Pair Metamask</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup>
+                <q-item-section avatar>
+                  <!--                  <q-img height=25px width=25px src="../assets/metamask.png"></q-img>-->
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Pair Keepkey</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
+
+        <div v-if="paired">
+          <q-btn-dropdown
+                  split
+                  to="/start/pick-quasar-flavour"
+                  color="teal"
+                  rounded
+                  label="Go to Docs Index"
+          >
+            <q-list>
+              <q-item clickable v-close-popup>
+                <q-item-section>
+                  <q-item-label>Photos</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup>
+                <q-item-section>
+                  <q-item-label>Videos</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup>
+                <q-item-section>
+                  <q-item-label>Articles</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
+
         <br/>
         <div>API v{{ $q.version }}</div>
 
@@ -34,6 +100,7 @@ export default {
   data() {
     return {
       isLoggedIn: false,
+      paired:false,
       totalValueUsd: 0
     }
   },

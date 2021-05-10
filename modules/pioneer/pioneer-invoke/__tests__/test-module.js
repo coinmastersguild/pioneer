@@ -116,7 +116,7 @@ let run_test = async function(){
 
         let invocation = {
             type:"transfer",
-            context:"0x33b35c665496ba8e71b22373843376740401f106.wallet.json",
+            context:"343733331147363327003800.watch.wallet.json",
             username:invoker,
             coin:txInput.asset.symbol,
             amount:txInput.amount.amount(),
@@ -157,7 +157,7 @@ let run_test = async function(){
         console.log("result: ",result.data)
 
         //open invoke page
-        open("http://localhost:8081/#/invocation/"+result.data.invocationId)
+        open("http://localhost:8080/#/invocation/"+result.data.invocationId)
 
         // open("http://localhost:9001/#/invocation/"+result.data.invocationId)
 

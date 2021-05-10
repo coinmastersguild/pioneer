@@ -346,7 +346,8 @@ module.exports = class wallet {
         this.init = async function (wallet?:any) {
             let tag = TAG + " | init_wallet | "
             try{
-                if(!this.blockchains && !wallet.blockchains) throw Error("Must Specify blockchain support! ")
+                if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
+                if(!this.walletId && !wallet.walletId) throw Error("103: Must Specify walletId")
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
@@ -520,6 +521,7 @@ module.exports = class wallet {
                     }
                     log.debug("registerBody: ",register)
                     log.debug("this.pioneerClient: ",this.pioneerClient)
+                    if(!register.walletId) throw Error("102: missing WalletID Can not register!")
                     let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                     log.debug("regsiterResponse: ",regsiterResponse)
 

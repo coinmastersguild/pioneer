@@ -117,9 +117,9 @@ module.exports = {
                 else {
                     //failed to get remote!
                     log.info("failed to get remote context!", output.data);
-                    let walletNames = yield Object.keys(WALLETS_LOADED);
-                    if (walletNames.length > 0) {
-                        WALLET_CONTEXT = walletNames[0];
+                    let walletIds = yield Object.keys(WALLETS_LOADED);
+                    if (walletIds.length > 0) {
+                        WALLET_CONTEXT = walletIds[0];
                         let resultUpdateContextRemote = yield network.instance.SetContext(null, { context: WALLET_CONTEXT });
                         log.debug("resultUpdateContextRemote: ", resultUpdateContextRemote);
                     }
@@ -163,26 +163,23 @@ module.exports = {
     hardwareEnterPin: function (pin) {
         return Hardware.enterPin(pin);
     },
-    // getPending: function () {
-    //     return pendingQueue;
-    // },
-    // getAproved: function () {
-    //     return approvedQueue;
-    // },
-    //await network.instance.Invocations()
-    /*
-
-     */
+    buildTransaction: function (transaction) {
+        return build_transaction(transaction);
+    },
+    approveTransaction: function (transaction) {
+        return approve_transaction(transaction);
+    },
+    broadcastTransaction: function (transaction) {
+        return broadcast_transaction(transaction);
+    },
     updateInvocation: function (updateBody) {
         return __awaiter(this, void 0, void 0, function* () {
-            let output = yield network.instance.UpdateInvocation(null, updateBody);
-            return output.data;
+            return update_invocation(updateBody);
         });
     },
     getInvocation: function (invocationId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let output = yield network.instance.Invocation(invocationId);
-            return output.data;
+            return get_invocation(invocationId);
         });
     },
     getInvocations: function (context) {
@@ -190,9 +187,6 @@ module.exports = {
             let output = yield network.instance.Invocations();
             return output.data;
         });
-    },
-    approveTransaction: function (context, invocationId) {
-        return approve_transaction(context, invocationId);
     },
     getConfig: function () {
         return pioneer_config_1.getConfig();
@@ -220,9 +214,6 @@ module.exports = {
             return set_context(context);
         });
     },
-    unlockWallet: function (wallet, password) {
-        return unlock_wallet(wallet, password);
-    },
     migrateWallet: function () {
         return true;
     },
@@ -240,18 +231,6 @@ module.exports = {
     pairKeepkey: function (wallet, blockchains) {
         return pair_keepkey(wallet, blockchains);
     },
-    // getAccountInfo: function (asset:string,account:string) {
-    //     return network.getAccountInfo(asset,account);
-    // },
-    // getBlockCount: function (coin:string) {
-    //     return network.getAccountInfo(coin);
-    // },
-    // login: function () {
-    //     return login_shapeshift();
-    // },
-    // loginStatus: function () {
-    //     return IS_LOGGED_IN;
-    // },
     getAuth: function () {
         return AUTH_TOKEN;
     },
@@ -261,14 +240,6 @@ module.exports = {
     pair: function (code) {
         return pair_sdk_user(code);
     },
-    // forget: function () {
-    //     return Pioneer.forget();
-    // },
-    /**
-     *    User Ecosystem
-     *
-     *
-     */
     getUserInfo: function () {
         return __awaiter(this, void 0, void 0, function* () {
             let output = yield network.instance.User();
@@ -295,96 +266,12 @@ module.exports = {
         //emit
         return SOCKET_CLIENT.emit('message', payment_request);
     },
-    /**
-     *    App Ecosystem
-     *
-     *
-     */
     listAppsRemote: function () {
         return list_apps_remote();
     },
     listAppsLocal: function () {
         return pioneer_config_1.getApps();
     },
-    downloadApp: function (name) {
-        return download_app(name);
-    },
-    installApp: function (name) {
-        return install_app(name);
-    },
-    /**
-     *    Keepkey
-     *
-     *
-     */
-    // unlockKeepkey: async function () {
-    //     return unlock_keepkey();
-    // },
-    // showPinHelper: async function () {
-    //     return show_pin_helper();
-    // },
-    // enterPin: async function (pin:string) {
-    //     return enter_keepkey_pin(pin);
-    // },
-    // getKeepkeyInfo: async function () {
-    //     return get_keepkey_info();
-    // },
-    // getLatestFirmware: async function () {
-    //     return getLatestFirmwareData();
-    // },
-    /**
-     *    Wallet
-     *
-     *
-     */
-    // getWalletPriv: async function () {
-    //     return WALLET_PRIVATE;
-    // },
-    // getWalletPub: async function () {
-    //     return WALLET_PUBLIC;
-    // },
-    // getWalletPubkeys: async function () {
-    //     return WALLET_PUBKEYS;
-    // },
-    // getInfo: async function (verbosity:any) {
-    //     return get_wallet_summary(verbosity);
-    // },
-    //TODO
-    // getNewAddress: async function (coin:string) {
-    //     return pioneer.getNewAddress(coin);
-    // },
-    /**
-     *    EOS
-     *
-     *
-     */
-    // getEosPubkey: async function (coin:string) {
-    //     return pioneer.getNewAddress(coin);
-    // },
-    // getEosAccountsByPubkey: async function (coin:string) {
-    //     return pioneer.getNewAddress(coin);
-    // },
-    // validateEosUsername: async function (coin:string) {
-    //     return pioneer.getNewAddress(coin);
-    // },
-    // registerEosUsername: async function (coin:string) {
-    //     return pioneer.getNewAddress(coin);
-    // },
-    /*
-        FIO commands
-    */
-    // getFioAccountInfo: function (username:string) {
-    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountInfo(username);
-    // },
-    // getFioPubkey: function () {
-    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioPubkey();
-    // },
-    // getFioAccountsByPubkey: function (pubkey:string) {
-    //     return WALLETS_LOADED[WALLET_CONTEXT].getFioAccountsByPubkey(pubkey);
-    // },
-    // validateFioUsername: function (username:string) {
-    //     return WALLETS_LOADED[WALLET_CONTEXT].validateFioUsername(username);
-    // },
     registerFioUsername: function () {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -398,69 +285,129 @@ module.exports = {
             }
         });
     },
-    //TODO send payment request
-    // sendFioRequest: function (walletId:string,format:string) {
-    //     return send_fio_request(walletId, format);
-    // },
-    //view all wallets
-    //view current wallet
-    //switch wallets
-    //create new (move old)
-    //list installed plugins
-    //list available plugins
-    //install plugin
-    //export wallet
     exportWallet: function (walletId, format) {
         return export_wallet(walletId, format);
     },
-    // playChingle: function () {
-    //   player.play('../assets/chaching.mp3', function(err:any){
-    //     if (err) throw err
-    //   })
-    //   return true;
-    // },
-    // getBalance: function (coin:string) {
-    //     return get_balance(coin);
-    // },
-    // getBalances: function () {
-    //     return get_balances();
-    // },
-    // getAddress: function (coin:string) {
-    //     return get_address(coin);
-    // },
-    // getMaster: function (coin:string) {
-    //     return Pioneer.getMaster(coin);
-    // },
-    //TODO
-    // listSinceLastblock: function (coin:string,block:string) {
-    //     return pioneer.listSinceLastblock(coin,block);
-    // },
-    // sendToAddress: async function (coin:string,address:string,amount:string,memo?:string) {
-    //     return send_to_address(coin,address,amount,memo);
-    // },
-    broadcastTransaction: function (coin, rawTx) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return broadcast_transaction(coin, rawTx);
-        });
-    },
-    //TODO
-    // getStakes: function (coin:string) {
-    //     return pioneer.getStakes(coin);
-    // },
     getCoins: function () {
         return ONLINE;
     },
-    //TODO
-    // viewSeed: function () {
-    //     return WALLET_SEED;
-    // },
     sendToAddress: function (intent) {
         return send_to_address(intent);
     },
 };
+let get_invocation = function (invocationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | get_invocation | ";
+        try {
+            let output = yield network.instance.Invocation(invocationId);
+            return output.data;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
+let build_transaction = function (transaction) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | build_transaction | ";
+        try {
+            log.info(tag, "transaction: ", transaction);
+            if (!transaction.invocationId)
+                throw Error("invocationId required!");
+            //get invocation
+            //TODO validate type and fields
+            let invocation = yield get_invocation(transaction.invocationId);
+            log.info(tag, "invocation: ", invocation);
+            if (!invocation.type)
+                invocation.type = invocation.invocation.type;
+            let context;
+            if (!transaction.context) {
+                context = WALLET_CONTEXT;
+            }
+            else {
+                context = transaction.context;
+            }
+            if (!context || !WALLETS_LOADED[context]) {
+                log.error("context: ", context);
+                log.error("Available: ", WALLETS_LOADED);
+                throw Error("103: could not find context in WALLETS_LOADED! " + context);
+            }
+            let walletContext = WALLETS_LOADED[context];
+            if (!walletContext.walletId) {
+                walletContext.walletId = walletContext.context;
+            }
+            if (!walletContext.walletId)
+                throw Error("Invalid wallet! missing walletId!");
+            log.info(tag, "walletContext: ", walletContext.walletId);
+            let unsignedTx;
+            switch (invocation.type) {
+                case 'transfer':
+                    console.log(" **** BUILD TRANSACTION ****  invocation: ", invocation.invocation);
+                    //TODO validate transfer object
+                    unsignedTx = yield walletContext.buildTransfer(invocation.invocation);
+                    log.info(" **** RESULT TRANSACTION ****  unsignedTx: ", unsignedTx);
+                    break;
+                case 'approve':
+                    console.log(" **** BUILD Approval ****  invocation: ", invocation.invocation);
+                    unsignedTx = yield walletContext.buildApproval(invocation.invocation);
+                    console.log(" **** RESULT TRANSACTION ****  approvalUnSigned: ", unsignedTx);
+                    break;
+                case 'swap':
+                    console.log(" **** BUILD SWAP ****  invocation: ", invocation.invocation);
+                    unsignedTx = yield walletContext.buildSwap(invocation.invocation);
+                    console.log(" **** RESULT TRANSACTION ****  swapUnSigned: ", unsignedTx);
+                    break;
+                default:
+                    console.error("Unhandled type: ", invocation.type);
+                    console.error("Unhandled: ", invocation);
+                    throw Error("Unhandled type: " + invocation.type);
+            }
+            //update invocation
+            let invocationId = invocation.invocationId;
+            let updateBody = {
+                invocationId,
+                invocation,
+                unsignedTx
+            };
+            //update invocation remote
+            let resultUpdate = yield update_invocation(updateBody);
+            log.info(tag, "resultUpdate: ", resultUpdate);
+            return unsignedTx;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
+let broadcast_transaction = function (transaction) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | broadcast_transaction | ";
+        try {
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
+let update_invocation = function (updateBody) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let tag = " | set_context | ";
+        try {
+            let output = yield network.instance.UpdateInvocation(null, updateBody);
+            return output.data;
+        }
+        catch (e) {
+            console.error(tag, "Error: ", e);
+            throw e;
+        }
+    });
+};
 let set_context = function (context) {
     return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | unlock_wallet | ";
+        let tag = " | set_context | ";
         try {
             log.debug("context: ", context);
             if (context && WALLETS_LOADED[context]) {
@@ -493,80 +440,55 @@ let set_context = function (context) {
         expected Fee in USD:
 
  */
-let approve_transaction = function (context, invocationId) {
+let approve_transaction = function (transaction) {
     return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | unlock_wallet | ";
+        let tag = " | approve_transaction | ";
         try {
-            let transactionViewFinal = {};
-            transactionViewFinal.success = false;
-            let allUnapproved = [];
-            //get all pending from all contexts
-            let wallets = Object.keys(WALLETS_LOADED);
-            for (let i = 0; i < wallets.length; i++) {
-                let wallet = wallets[i];
-                //
-                let unApproved = WALLETS_LOADED[wallet].getApproveQueue();
-                for (let j = 0; j < unApproved.length; j++) {
-                    let unsignedTransaction = unApproved[j];
-                    allUnapproved.push(unsignedTransaction);
-                }
+            //get invocation
+            let invocation = yield get_invocation(transaction.invocationId);
+            log.info(tag, "invocation: ", invocation);
+            if (!invocation.unsignedTx)
+                throw Error("invalid invocation! missing unsignedTx");
+            if (!invocation.unsignedTx.HDwalletPayload)
+                throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload");
+            let context;
+            if (!transaction.context) {
+                context = WALLET_CONTEXT;
             }
-            log.debug(tag, "*** allUnapproved: ", allUnapproved);
-            log.debug(tag, "*** WALLET_CONTEXT: ", WALLET_CONTEXT);
-            log.debug(tag, "*** context: ", context);
-            //get unApproved from remote
-            let remoteUnapproved = yield network.instance.Invocations();
-            remoteUnapproved = remoteUnapproved.data;
-            log.debug(tag, "*** remoteUnapproved: ", remoteUnapproved);
-            for (let i = 0; i < remoteUnapproved.length; i++) {
-                let remoteInovaction = remoteUnapproved[i];
-                allUnapproved.push(remoteInovaction);
+            else {
+                context = transaction.context;
             }
-            //if context dont match
-            if (WALLET_CONTEXT !== context) {
-                log.debug(tag, "Signing transaction for wallet out of context!");
-                transactionViewFinal.outOfContext = true;
+            if (!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
+                log.error("context: ", context);
+                log.error("Available: ", Object.keys(WALLETS_LOADED));
+                throw Error("103: could not find context in WALLETS_LOADED! " + context);
             }
-            //add warning to view
-            log.debug(tag, "allUnapproved: ", allUnapproved);
-            for (let i = 0; i < allUnapproved.length; i++) {
-                let unsignedTransaction = allUnapproved[i];
-                log.debug(tag, "unsignedTransaction: ", unsignedTransaction.invocationId);
-                log.debug(tag, "invocationId: ", invocationId);
-                if (unsignedTransaction.invocationId === invocationId) {
-                    transactionViewFinal.unsignedTransaction = unsignedTransaction;
-                    let unSignedTx;
-                    if (!unsignedTransaction.unSignedTx) {
-                        log.debug("ERROR: THIS SHOULD NOT HIT! FAILED TO UPDATE INVOCATION FIXME");
-                        //log.error(tag,"e: ",unsignedTransaction)
-                        //build anyway
-                        unSignedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendToAddress(unsignedTransaction.invocation.invocation);
-                        unSignedTx.invocationId = unsignedTransaction.invocationId;
-                    }
-                    else {
-                        unSignedTx = unsignedTransaction.unSignedTx;
-                    }
-                    log.debug(tag, "Signing transaction: ", unSignedTx);
-                    //approve transaction
-                    let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].signTransaction(unSignedTx);
-                    if (signedTx.txid)
-                        transactionViewFinal.success = true;
-                    transactionViewFinal.txid = signedTx.txid;
-                    transactionViewFinal.signedTx = signedTx;
-                    //validate
-                    log.debug(tag, "FINAL signedTx: ", signedTx);
-                    //broadcast
-                    let broadcast = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(unSignedTx.coin, signedTx);
-                    transactionViewFinal.broadcast = broadcast;
-                    //add to pending
-                    let walletPending = yield WALLETS_LOADED[WALLET_CONTEXT].addBroadcasted({ unsignedTransaction, signedTx, broadcast });
-                    for (let j = 0; j < walletPending.length; j++) {
-                        ALL_PENDING.push(walletPending[j]);
-                    }
-                    transactionViewFinal.pending = ALL_PENDING;
-                }
+            let walletContext = WALLETS_LOADED[context];
+            if (!walletContext.walletId) {
+                walletContext.walletId = walletContext.context;
             }
-            return transactionViewFinal;
+            if (!walletContext.walletId)
+                throw Error("Invalid wallet! missing walletId!");
+            log.info(tag, "walletContext: ", walletContext.walletId);
+            //TODO kill the coin! field
+            invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin;
+            //get
+            //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
+            //unsinged TX
+            log.info(tag, "invocation.unsignedTx: ", JSON.stringify(invocation.unsignedTx));
+            let signedTx = yield walletContext.signTransaction(invocation.unsignedTx);
+            //update invocation
+            let invocationId = invocation.invocationId;
+            let updateBody = {
+                invocationId,
+                invocation,
+                unsignedTx: invocation.unsignedTx,
+                signedTx
+            };
+            //update invocation remote
+            let resultUpdate = yield update_invocation(invocation);
+            log.info(tag, "resultUpdate: ", resultUpdate);
+            return signedTx;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -576,27 +498,13 @@ let approve_transaction = function (context, invocationId) {
 };
 let pair_sdk_user = function (code) {
     return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | unlock_wallet | ";
+        let tag = " | pair_sdk_user | ";
         try {
             //send code
             log.debug(tag, "network: ", network);
             log.debug(tag, "network: ", network.instance);
             let result = yield network.instance.Pair(null, { code });
             return result.data;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let unlock_wallet = function (wallet, password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | unlock_wallet | ";
-        try {
-            //verify config hash match's wallet
-            //verify password match's hash
-            //if new pw auto migrate
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -652,85 +560,12 @@ let pair_keepkey = function (keepkeyWallet, blockchains) {
         }
     });
 };
-let get_wallet_summary = function (verbosity) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | get_wallet_summary | ";
-        try {
-            let info = {
-                totalUsd: TOTAL_VALUE_USD_LOADED,
-                wallets: [],
-            };
-            // let info = await pioneer.getInfo()
-            //
-            // //console.log("info: ",info)
-            // if(info.totalValueUsd){
-            //     console.log("info: ",info.totalValueUsd)
-            // } else {
-            //     console.error("Failed to get info!")
-            // }
-            //
-            // // instantiate
-            // var table = new Table({
-            //     head: ['ASSET', 'amount','value']
-            //     , colWidths: [10, 20, 20]
-            // });
-            //
-            // let coins = Object.keys(info.balances)
-            // //if > 1$
-            // for(let i = 0; i < coins.length; i++){
-            //     let coin = coins[i]
-            //     log.debug(tag,"coin: ",coin)
-            //     log.debug(tag,"info.balances[coin]: ",info.balances[coin])
-            //     log.debug(tag,"info.valueUsds[coin]: ",info.valueUsds[coin])
-            //
-            //     if(parseFloat(info.valueUsds[coin]) > 1){
-            //         table.push([coin,info.balances[coin],info.valueUsds[coin]])
-            //     }
-            // }
-            //
-            // table = table.sort(function(a:any, b:any) {
-            //     return b[2] - a[2];
-            // });
-            //
-            // log.debug("\n \n \n Your Wallet info! \n "+chalk.yellowBright("( ₿ )")+ "\n \n Total Value (USD): " +chalk.blue(info.totalValueUsd)+" \n \n table: \n",table.toString().trim()+"\n \n \n \n \n")
-            return info;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
 let list_apps_remote = function () {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | list_apps | ";
         try {
             let appList = yield network.apps();
             return appList;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let install_app = function (name) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | install_app | ";
-        try {
-            return true;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let download_app = function (name) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | download_app | ";
-        try {
-            return true;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -811,70 +646,6 @@ let export_wallet = function (walletId, format) {
                 throw Error("format not supported " + format);
             }
             return output;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let get_balances = function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | get_address | ";
-        try {
-            //use apps
-            let output = yield Pioneer.getInfo();
-            return output.balances;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let get_balance = function (coin) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | get_address | ";
-        try {
-            coin = coin.toUpperCase();
-            //use apps
-            let output = yield Pioneer.getBalance(coin);
-            return output;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let broadcast_transaction = function (coin, rawTx) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | broadcast_transaction | ";
-        try {
-            coin = coin.toUpperCase();
-            let result;
-            //tier 1 apps
-            //if token, set network to ETH
-            log.debug("Broadcasting tx coin: ", coin, " rawTx: ", rawTx);
-            result = yield network.instance.Broadcast(null, { coin, rawTx });
-            log.debug(tag, "result: ", result);
-            return result.data;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let send_approval = function (intent) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | send_to_address | ";
-        try {
-            log.debug(tag, "params: ", intent);
-            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].sendApproval(intent);
-            log.debug(tag, "txid: ", signedTx.txid);
-            //
-            return signedTx;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -964,62 +735,6 @@ let send_to_address = function (intent) {
         }
     });
 };
-let build_swap = function (swap, invocationId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | send_to_address | ";
-        try {
-            let signedTx = yield WALLETS_LOADED[WALLET_CONTEXT].buildSwap(swap);
-            log.debug(tag, "txid: ", signedTx.txid);
-            if (invocationId)
-                signedTx.invocationId = invocationId;
-            //broadcast hook
-            let broadcast_hook = () => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    log.debug(tag, "checkpoint: broadcast_hook: ", signedTx);
-                    //TODO flag for async broadcast
-                    if (!swap.asset.chain) {
-                        log.error("Invalid Swap! swap: ", swap);
-                        throw Error("104: fucking type swaps gdamnit");
-                    }
-                    let broadcastResult = yield WALLETS_LOADED[WALLET_CONTEXT].broadcastTransaction(swap.asset.chain, signedTx);
-                    broadcastResult = broadcastResult.data;
-                    log.debug(tag, "broadcastResult: ", broadcastResult);
-                    //TODO push event to event emitter -> UI
-                }
-                catch (e) {
-                    log.error(tag, "Failed to broadcast transaction!");
-                }
-            });
-            //Notice NO asyc!
-            broadcast_hook();
-            return signedTx;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-let get_address = function (coin) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let tag = " | get_address | ";
-        try {
-            coin = coin.toUpperCase();
-            //use apps
-            let output = yield Pioneer.getMaster(coin);
-            return output;
-        }
-        catch (e) {
-            console.error(tag, "Error: ", e);
-            throw e;
-        }
-    });
-};
-//Build Seed
-function standardRandomBytesFunc(size) {
-    /* istanbul ignore if: not testable on node */
-    return CryptoJS.lib.WordArray.random(size).toString();
-}
 let backup_wallet = function () {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | backup_wallet | ";
@@ -1258,14 +973,14 @@ let init_wallet = function (config, isTestnet) {
             }
             //Load wallets if setup
             for (let i = 0; i < walletFiles.length; i++) {
-                let walletName = walletFiles[i];
+                let walletId = walletFiles[i];
                 //if !offline aka, online!
                 log.info(tag, "output.offline: ", output.offline);
-                if (output.offline.indexOf(walletName) < 0) {
-                    log.info(tag, "wallet is online! ", walletName);
-                    log.debug(tag, "walletName: ", walletName);
-                    let walletFile = pioneer_config_1.getWallet(walletName);
-                    log.debug(tag, "walletFile: ", walletFile);
+                if (output.offline.indexOf(walletId) < 0) {
+                    log.info(tag, "wallet is online! ", walletId);
+                    log.debug(tag, "walletId: ", walletId);
+                    let walletFile = pioneer_config_1.getWallet(walletId);
+                    log.info(tag, "walletFile: ", walletFile);
                     if (!walletFile.TYPE)
                         walletFile.TYPE = walletFile.type;
                     if (walletFile.TYPE === 'keepkey') {
@@ -1285,8 +1000,8 @@ let init_wallet = function (config, isTestnet) {
                             throw Error("102: invalid keepkey wallet!");
                         //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
                         //if wallet paths custom load
-                        log.debug(tag, "walletName: ", walletName);
-                        let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
+                        log.debug(tag, "walletId: ", walletId);
+                        let fileNameWatch = walletId.replace(".wallet.json", ".watch.wallet.json");
                         let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
                         let walletPaths;
                         if (watchWallet) {
@@ -1306,7 +1021,7 @@ let init_wallet = function (config, isTestnet) {
                             blockchains: config.blockchains,
                             pubkeys: walletFile.pubkeys,
                             wallet: walletFile,
-                            walletId: walletName,
+                            walletId,
                             username: config.username,
                             pioneerApi: true,
                             spec: URL_PIONEER_SPEC,
@@ -1321,9 +1036,9 @@ let init_wallet = function (config, isTestnet) {
                             throw Error("Can not start hardware wallet without global KEEPKEY");
                         let walletInfo = yield wallet.init(KEEPKEY);
                         log.debug(tag, "walletInfo: ", walletInfo);
-                        WALLETS_LOADED[walletName] = wallet;
+                        WALLETS_LOADED[walletId] = wallet;
                         //info
-                        let info = yield wallet.getInfo(walletName);
+                        let info = yield wallet.getInfo(walletId);
                         info.name = walletFile.username;
                         info.type = 'keepkey';
                         output.wallets.push(info);
@@ -1344,7 +1059,7 @@ let init_wallet = function (config, isTestnet) {
                         // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
                         //global total valueUSD
                         TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
-                        WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
+                        WALLET_VALUE_MAP[walletId] = info.totalValueUsd;
                     }
                     else if (walletFile.TYPE === 'seedwords') {
                         //decrypt
@@ -1363,8 +1078,8 @@ let init_wallet = function (config, isTestnet) {
                         let mnemonic = yield resultOut.decrypt();
                         //Load public wallet file
                         //Loads wallet state and custom pathing
-                        log.debug(tag, "walletName: ", walletName);
-                        let fileNameWatch = walletName.replace(".wallet.json", ".watch.wallet.json");
+                        log.debug(tag, "walletId: ", walletId);
+                        let fileNameWatch = walletId.replace(".wallet.json", ".watch.wallet.json");
                         let watchWallet = pioneer_config_1.getWalletPublic(fileNameWatch);
                         let walletPaths;
                         if (watchWallet) {
@@ -1378,7 +1093,7 @@ let init_wallet = function (config, isTestnet) {
                         let configPioneer = {
                             isTestnet,
                             mnemonic,
-                            walletId: walletName,
+                            walletId,
                             blockchains: config.blockchains,
                             username: config.username,
                             pioneerApi: true,
@@ -1392,11 +1107,11 @@ let init_wallet = function (config, isTestnet) {
                         log.debug(tag, "configPioneer: ", configPioneer);
                         log.debug(tag, "isTestnet: ", isTestnet);
                         let wallet = new Pioneer('pioneer', configPioneer, isTestnet);
-                        WALLETS_LOADED[walletName] = wallet;
+                        WALLETS_LOADED[walletId] = wallet;
                         //init
                         let walletClient = yield wallet.init();
                         //info
-                        let info = yield wallet.getInfo(walletName);
+                        let info = yield wallet.getInfo(walletId);
                         log.debug(tag, "INFO: ", info);
                         if (!info.pubkeys)
                             throw Error(" invalid wallet info returned! missing pubkeys!");
@@ -1428,7 +1143,7 @@ let init_wallet = function (config, isTestnet) {
                         log.debug(tag, "info: ", info);
                         //global total valueUSD
                         TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
-                        WALLET_VALUE_MAP[walletName] = info.totalValueUsd;
+                        WALLET_VALUE_MAP[walletId] = info.totalValueUsd;
                     }
                     else {
                         throw Error("unhandled wallet type! " + walletFile.TYPE);
@@ -1477,7 +1192,7 @@ let init_wallet = function (config, isTestnet) {
             else {
                 log.info(tag, "remote context NOT in loaded wallet");
                 //set remote context to position0 local
-                log.info(tag, "walletNames: ", walletFiles);
+                log.info(tag, "walletIds: ", walletFiles);
                 log.info(tag, "Position 0 context: ", walletFiles[0]);
                 //
                 set_context(walletFiles[0]);
@@ -1502,7 +1217,7 @@ let init_wallet = function (config, isTestnet) {
             //on payments update balances
             //on on invocations add to queue
             clientEvents.events.on('message', (request) => __awaiter(this, void 0, void 0, function* () {
-                log.debug(tag, "**** message: ", request);
+                log.info(tag, "**** message: ", request);
                 //TODO filter invocations by subscribers
                 //TODO autonomousOn/Off
                 //TODO verify auth to paired keys
@@ -1514,33 +1229,84 @@ let init_wallet = function (config, isTestnet) {
                 //if transfer
                 //if liquidity event
                 //add/withdrawal
-                let signedTx;
+                let unSignedTx;
+                let context;
+                let invokeQueue;
                 switch (request.type) {
                     case 'swap':
-                        //TODO make interactive!
-                        //Note this is ETH only
-                        //TODO validate inputs
-                        signedTx = yield build_swap(request.invocation, request.invocationId);
-                        log.debug(tag, "txid: ", signedTx.txid);
-                        clientEvents.events.emit('broadcast', signedTx);
-                        break;
-                    case 'approve':
-                        //TODO make interactive!
-                        //Note this is ETH only
+                        if (!request.invocation)
+                            throw Error("103: invalid invocation! missing invocation!");
                         if (!request.invocationId)
                             throw Error("102: invalid invocation! missing id!");
                         request.invocation.invocationId = request.invocationId;
-                        signedTx = yield send_approval(request.invocation);
-                        log.debug(tag, "txid: ", signedTx.txid);
-                        clientEvents.events.emit('broadcast', signedTx);
-                        break;
-                    case 'transfer':
-                        if (!request.invocationId)
-                            throw Error("102: invalid invocation! missing id!");
-                        request.invocation.invocationId = request.invocationId;
-                        let invokeQueue = yield app_to_queue(request.invocation);
+                        invokeQueue = yield app_to_queue(request.invocation);
                         log.debug(tag, "invokeQueue: ", invokeQueue);
                         clientEvents.events.emit('invokeQueue', invokeQueue);
+                        if (request.invocation.context)
+                            context = request.invocation.context;
+                        if (!context)
+                            context = WALLET_CONTEXT;
+                        if (!WALLETS_LOADED[context]) {
+                            log.error(tag, "WALLETS_LOADED: ", WALLETS_LOADED);
+                            log.error(tag, "context: ", context);
+                            throw Error("Unable to build transaction! context not found!");
+                        }
+                        log.info(tag, "Building transaction with context: ", context);
+                        log.info(tag, "invocation: ", request.invocation);
+                        unSignedTx = yield WALLETS_LOADED[context].buildSwap(request.invocation);
+                        log.info(tag, "txid: ", unSignedTx.txid);
+                        log.info(tag, "unSignedTx: ", unSignedTx);
+                        clientEvents.events.emit('unsignedTx', unSignedTx);
+                        break;
+                    case 'approve':
+                        if (!request.invocation)
+                            throw Error("103: invalid invocation! missing invocation!");
+                        if (!request.invocationId)
+                            throw Error("102: invalid invocation! missing id!");
+                        request.invocation.invocationId = request.invocationId;
+                        invokeQueue = yield app_to_queue(request.invocation);
+                        log.debug(tag, "invokeQueue: ", invokeQueue);
+                        clientEvents.events.emit('invokeQueue', invokeQueue);
+                        if (request.invocation.context)
+                            context = request.invocation.context;
+                        if (!context)
+                            context = WALLET_CONTEXT;
+                        if (!WALLETS_LOADED[context]) {
+                            log.error(tag, "WALLETS_LOADED: ", WALLETS_LOADED);
+                            log.error(tag, "context: ", context);
+                            throw Error("Unable to build transaction! context not found!");
+                        }
+                        log.info(tag, "Building transaction with context: ", context);
+                        log.info(tag, "invocation: ", request.invocation);
+                        unSignedTx = yield WALLETS_LOADED[context].buildApproval(request.invocation);
+                        log.info(tag, "txid: ", unSignedTx.txid);
+                        log.info(tag, "unSignedTx: ", unSignedTx);
+                        clientEvents.events.emit('unsignedTx', unSignedTx);
+                        //update invokation
+                        break;
+                    case 'transfer':
+                        if (!request.invocation)
+                            throw Error("103: invalid invocation! missing invocation!");
+                        if (!request.invocationId)
+                            throw Error("102: invalid invocation! missing id!");
+                        request.invocation.invocationId = request.invocationId;
+                        invokeQueue = yield app_to_queue(request.invocation);
+                        log.debug(tag, "invokeQueue: ", invokeQueue);
+                        clientEvents.events.emit('invokeQueue', invokeQueue);
+                        if (request.invocation.context)
+                            context = request.invocation.context;
+                        if (!context)
+                            context = WALLET_CONTEXT;
+                        if (!WALLETS_LOADED[context]) {
+                            log.error(tag, "WALLETS_LOADED: ", WALLETS_LOADED);
+                            log.error(tag, "context: ", context);
+                            throw Error("Unable to build transaction! context not found!");
+                        }
+                        log.info(tag, "Building transaction with context: ", context);
+                        log.info(tag, "invocation: ", request.invocation);
+                        unSignedTx = yield WALLETS_LOADED[context].buildTransfer(request.invocation);
+                        log.info(tag, "unSignedTx: ", unSignedTx);
+                        clientEvents.events.emit('unsignedTx', unSignedTx);
                         break;
                     case 'context':
                         //switch context
@@ -1563,8 +1329,6 @@ let init_wallet = function (config, isTestnet) {
                     //push error
                     // code block
                 }
-                //push signed tx to socket
-                clientEvents.events.emit('broadcast', signedTx);
                 //push txid to invocationId
                 //update status on server
                 //add to history

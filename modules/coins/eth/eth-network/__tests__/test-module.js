@@ -110,16 +110,16 @@ let tokenAddress = "DAC17F958D2EE523A2206206994597C13D831EC7"
 // let entry = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
 //
 
-// let entry = {
-//     asset: { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' },
-//     amount: 0.0641287519747189,
-//     recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e'
-// }
-//
-// network.getFees(entry)
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+let entry = {
+    asset: { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' },
+    amount: 0.0641287519747189,
+    recipient: '0x8b09ee8b5e96c6412e36BA02E98497eFe48A29BE'
+}
+
+network.getFees(entry)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 
 // network.sendToAddress(address,amount,asset,memo)

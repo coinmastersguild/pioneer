@@ -218,6 +218,7 @@ export class pioneerInvocationController extends Controller {
                 output.invocationId = invocationId
                 output.msg = "User is offline! username:"+body.invocation.username
             }
+
             return output
         }catch(e){
             let errorResp:Error = {

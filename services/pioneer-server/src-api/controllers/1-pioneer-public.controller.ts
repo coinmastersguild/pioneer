@@ -866,17 +866,10 @@ export class pioneerPublicController extends Controller {
             if(!body.amount) throw Error(" amount field required! ")
             if(!body.asset) throw Error(" asset field required! ")
             if(!body.asset.symbol) throw Error(" asset symbol field required! ")
-
-            if(body.asset.symbol !== 'ETH') throw Error("Unhandled asset!")
-
-
-
-            //TODO filter by body.asset.chain
-            //if()
+            if(body.asset.symbol !== 'ETH') throw Error("Unhandled asset! "+body.asset.symbol)
 
             //TODO handle mainnet/testnet switch
-
-            networks.ETH.init()
+            await networks.ETH.init()
 
             console.log("networks['ETH']: ",networks['ETH'])
             let feeResult = networks['ETH'].getFees(body)

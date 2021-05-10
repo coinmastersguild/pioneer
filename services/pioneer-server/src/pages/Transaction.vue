@@ -23,6 +23,18 @@
             >
                 Complete transaction in Pioneer App
 
+                <div>
+                    Launch App (app)
+                </div>
+
+                <div>
+                    context: {{context}}
+                </div>
+
+                <div>
+                    change context?
+                </div>
+
                 <q-spinner
                         color="primary"
                         size="5rem"
@@ -87,6 +99,7 @@
         data () {
             return {
                 invocationContext:"",
+                context:"",
                 invocation:"",
                 status:"online",
                 step: 1

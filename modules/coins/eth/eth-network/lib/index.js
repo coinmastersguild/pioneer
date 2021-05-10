@@ -388,7 +388,7 @@ var get_gas_limit = function (_a) {
                     return [3 /*break*/, 5];
                 case 3:
                     transactionRequest = {
-                        from: recipient,
+                        from: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                         to: recipient,
                         value: txAmount,
                         data: memo ? utils_2.toUtf8Bytes(memo) : undefined,
@@ -439,6 +439,12 @@ var get_fees = function (params) {
                             amount: function () { return .98; }
                         };
                     }
+                    log.info(tag, "get_gas_limit: ", {
+                        asset: params.asset,
+                        amount: params.amount,
+                        recipient: params.recipient,
+                        memo: params.memo,
+                    });
                     return [4 /*yield*/, get_gas_limit({
                             asset: params.asset,
                             amount: params.amount,

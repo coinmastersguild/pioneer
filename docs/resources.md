@@ -23,3 +23,7 @@ https://docs.1inch.exchange/api/
 
 # lerna strats
 https://itnext.io/how-to-deploy-only-changed-pack
+
+
+# launch electon from browser, 
+https://stackoverflow.com/questions/53530726/how-to-launch-my-electron-app-from-a-website

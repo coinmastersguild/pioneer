@@ -528,6 +528,7 @@ module.exports = class wallet {
             this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
                 let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
                 try {
+                    log.info(tag,"params: ",params)
                     let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(null,params)
                     response = response.data
                     let output = {
@@ -861,20 +862,27 @@ module.exports = class wallet {
                 log.info(tag,"options: ",options)
 
                 //verbose
-                const verbose = options.verbose
-                const txidOnResp = options.txidOnResp
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
 
                 //NOTE THIS IS ONLY ETH!
                 //ETH always the weird one
                 let coin = this.nativeAsset
                 if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                log.info(tag,"swap: ",swap)
-                log.info(tag,"swap.amount: ",swap.amount)
-                log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
-                log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
+                // log.info(tag,"swap: ",swap)
+                // log.info(tag,"swap.amount: ",swap.amount)
+                // log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
+                // log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
                 //TODO detect if native or base
-                let amount = swap.amount.amount()
+                // let amount = swap.amount.amount()
+
+                //if native
+                let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")

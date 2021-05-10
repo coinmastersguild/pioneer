@@ -214,7 +214,9 @@ module.exports = /** @class */ (function () {
                         case 1:
                             _j.trys.push([1, 22, , 23]);
                             if (!this.blockchains && !wallet.blockchains)
-                                throw Error("Must Specify blockchain support! ");
+                                throw Error("102: Must Specify blockchain support! ");
+                            if (!this.walletId && !wallet.walletId)
+                                throw Error("103: Must Specify walletId");
                             log.debug(tag, "checkpoint");
                             paths = getPaths(this.blockchains);
                             _a = +HDWALLETS[this.type];
@@ -418,6 +420,8 @@ module.exports = /** @class */ (function () {
                             };
                             log.debug("registerBody: ", register);
                             log.debug("this.pioneerClient: ", this.pioneerClient);
+                            if (!register.walletId)
+                                throw Error("102: missing WalletID Can not register!");
                             return [4 /*yield*/, this.pioneerClient.instance.Register(null, register)];
                         case 18:
                             regsiterResponse = _j.sent();

@@ -154,18 +154,6 @@ export async function buildTransaction(transaction:any) {
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.info(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
 
-                let invocationId = invocation.invocationId
-                let updateBody = {
-                    invocationId,
-                    invocation,
-                    unsignedTx
-                }
-                log.info(tag,"updateBody: ",updateBody)
-
-                //update invocation remote
-                let resultUpdate = await App.updateInvocation(updateBody)
-                log.info(tag,"resultUpdate: ",resultUpdate)
-
                 break
             case 'approve':
                 console.log(" **** BUILD Approval ****  invocation: ",invocation.invocation)
