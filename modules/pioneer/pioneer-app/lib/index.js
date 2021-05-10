@@ -385,6 +385,52 @@ let broadcast_transaction = function (transaction) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | broadcast_transaction | ";
         try {
+            //get invocation
+            let invocation = yield get_invocation(transaction.invocationId);
+            log.info(tag, "invocation: ", invocation);
+            //signedTx
+            if (!invocation.signedTx)
+                throw Error("102: Unable to broadcast transaction! signedTx not found!");
+            //context
+            let context;
+            if (!transaction.context) {
+                context = WALLET_CONTEXT;
+            }
+            else {
+                context = transaction.context;
+            }
+            if (!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
+                log.error("context: ", context);
+                log.error("Available: ", Object.keys(WALLETS_LOADED));
+                throw Error("103: could not find context in WALLETS_LOADED! " + context);
+            }
+            let walletContext = WALLETS_LOADED[context];
+            if (!walletContext.walletId) {
+                walletContext.walletId = walletContext.context;
+            }
+            if (!walletContext.walletId)
+                throw Error("Invalid wallet! missing walletId!");
+            log.info(tag, "walletContext: ", walletContext.walletId);
+            //TODO fix tech debt
+            //normalize
+            if (!invocation.invocation.invocationId)
+                invocation.invocation.invocationId = invocation.invocationId;
+            //override noBroadcast
+            if (invocation.signedTx && invocation.signedTx.noBroadcast)
+                invocation.signedTx.noBroadcast = false;
+            let broadcastResult = yield walletContext.broadcastTransaction(invocation.invocation.coin, invocation.signedTx);
+            let updateBody = {
+                invocationId: invocation.invocation.invocationId,
+                invocation: invocation.invocation,
+                unsignedTx: invocation.unsignedTx,
+                signedTx: invocation.signedTx,
+                broadcastResult
+            };
+            log.info(tag, "updateBody: ", updateBody);
+            //update invocation remote
+            let resultUpdate = yield update_invocation(updateBody);
+            log.info(tag, "resultUpdate: ", resultUpdate);
+            return broadcastResult;
         }
         catch (e) {
             console.error(tag, "Error: ", e);
@@ -445,6 +491,8 @@ let approve_transaction = function (transaction) {
         let tag = " | approve_transaction | ";
         try {
             //get invocation
+            if (!transaction.invocationId)
+                transaction.invocationId = transaction.transaction.invocationId;
             let invocation = yield get_invocation(transaction.invocationId);
             log.info(tag, "invocation: ", invocation);
             if (!invocation.unsignedTx)
@@ -477,6 +525,7 @@ let approve_transaction = function (transaction) {
             //unsinged TX
             log.info(tag, "invocation.unsignedTx: ", JSON.stringify(invocation.unsignedTx));
             let signedTx = yield walletContext.signTransaction(invocation.unsignedTx);
+            log.info(tag, "invocation.signedTx: ", JSON.stringify(signedTx));
             //update invocation
             let invocationId = invocation.invocationId;
             let updateBody = {
@@ -486,7 +535,7 @@ let approve_transaction = function (transaction) {
                 signedTx
             };
             //update invocation remote
-            let resultUpdate = yield update_invocation(invocation);
+            let resultUpdate = yield update_invocation(updateBody);
             log.info(tag, "resultUpdate: ", resultUpdate);
             return signedTx;
         }
@@ -1229,9 +1278,12 @@ let init_wallet = function (config, isTestnet) {
                 //if transfer
                 //if liquidity event
                 //add/withdrawal
-                let unSignedTx;
+                let unsignedTx;
                 let context;
                 let invokeQueue;
+                let invocationId;
+                let resultUpdate;
+                let updateBody;
                 switch (request.type) {
                     case 'swap':
                         if (!request.invocation)
@@ -1253,10 +1305,20 @@ let init_wallet = function (config, isTestnet) {
                         }
                         log.info(tag, "Building transaction with context: ", context);
                         log.info(tag, "invocation: ", request.invocation);
-                        unSignedTx = yield WALLETS_LOADED[context].buildSwap(request.invocation);
-                        log.info(tag, "txid: ", unSignedTx.txid);
-                        log.info(tag, "unSignedTx: ", unSignedTx);
-                        clientEvents.events.emit('unsignedTx', unSignedTx);
+                        unsignedTx = yield WALLETS_LOADED[context].buildSwap(request.invocation);
+                        log.info(tag, "txid: ", unsignedTx.txid);
+                        log.info(tag, "unsignedTx: ", unsignedTx);
+                        //update invocation
+                        invocationId = request.invocation.invocationId;
+                        updateBody = {
+                            invocationId,
+                            invocation: request.invocation,
+                            unsignedTx
+                        };
+                        //update invocation remote
+                        resultUpdate = yield update_invocation(updateBody);
+                        log.info(tag, "resultUpdate: ", resultUpdate);
+                        clientEvents.events.emit('unsignedTx', unsignedTx);
                         break;
                     case 'approve':
                         if (!request.invocation)
@@ -1278,11 +1340,20 @@ let init_wallet = function (config, isTestnet) {
                         }
                         log.info(tag, "Building transaction with context: ", context);
                         log.info(tag, "invocation: ", request.invocation);
-                        unSignedTx = yield WALLETS_LOADED[context].buildApproval(request.invocation);
-                        log.info(tag, "txid: ", unSignedTx.txid);
-                        log.info(tag, "unSignedTx: ", unSignedTx);
-                        clientEvents.events.emit('unsignedTx', unSignedTx);
-                        //update invokation
+                        unsignedTx = yield WALLETS_LOADED[context].buildApproval(request.invocation);
+                        log.info(tag, "txid: ", unsignedTx.txid);
+                        log.info(tag, "unsignedTx: ", unsignedTx);
+                        //update invocation
+                        invocationId = request.invocation.invocationId;
+                        updateBody = {
+                            invocationId,
+                            invocation: request.invocation,
+                            unsignedTx
+                        };
+                        //update invocation remote
+                        resultUpdate = yield update_invocation(updateBody);
+                        log.info(tag, "resultUpdate: ", resultUpdate);
+                        clientEvents.events.emit('unsignedTx', unsignedTx);
                         break;
                     case 'transfer':
                         if (!request.invocation)
@@ -1304,9 +1375,19 @@ let init_wallet = function (config, isTestnet) {
                         }
                         log.info(tag, "Building transaction with context: ", context);
                         log.info(tag, "invocation: ", request.invocation);
-                        unSignedTx = yield WALLETS_LOADED[context].buildTransfer(request.invocation);
-                        log.info(tag, "unSignedTx: ", unSignedTx);
-                        clientEvents.events.emit('unsignedTx', unSignedTx);
+                        unsignedTx = yield WALLETS_LOADED[context].buildTransfer(request.invocation);
+                        log.info(tag, "unsignedTx: ", unsignedTx);
+                        //update invocation
+                        invocationId = request.invocation.invocationId;
+                        updateBody = {
+                            invocationId,
+                            invocation: request.invocation,
+                            unsignedTx
+                        };
+                        //update invocation remote
+                        resultUpdate = yield update_invocation(updateBody);
+                        log.info(tag, "resultUpdate: ", resultUpdate);
+                        clientEvents.events.emit('unsignedTx', unsignedTx);
                         break;
                     case 'context':
                         //switch context

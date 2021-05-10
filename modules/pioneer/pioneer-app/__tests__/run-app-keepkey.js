@@ -95,34 +95,18 @@ let run_test = async function(){
 
 
                 //AutonomousOn
-                resultInit.events.on('message', async (request) => {
-                    let unSignedTx
-                    switch(request.type) {
-                        //TODO swap/approve
-                        case 'unsignedTx':
-                            console.log(" **** PROCESS EVENT unsignedTx ****  request: ",request)
+                resultInit.events.on('unsignedTx', async (transaction) => {
+                    console.log("\n ****UNsigned transaction received! transaction: ",transaction)
 
-                            break
-                        case 'approve':
-                            console.log(" **** PROCESS EVENT approve ****  request: ",request)
-
-                            break
-                        case 'swap':
-                            console.log(" **** PROCESS EVENT swap ****  request: ",request)
-
-                            break
-                        case 'transfer':
-                            console.log(" **** PROCESS EVENT transfer ****  request: ",request)
-
-                            break
-                        default:
-                            console.log("Unhandled type: ",request.type)
-                    }
-
-                    //CLI review
+                    //TODO CLI review
 
                     //approve
+                    let resultApprove = await App.approveTransaction(transaction)
+                    console.log("resultApprove: ",resultApprove)
 
+                    //
+                    let resultBroadcast = await App.broadcastTransaction(transaction)
+                    console.log("resultBroadcast: ",resultBroadcast)
                 })
 
                 try{
