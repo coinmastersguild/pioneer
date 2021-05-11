@@ -18,7 +18,7 @@
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
     "test": "yarn jest --verbose --config jest.config.js",
-    "test:nocoverage": "jest --coverage",
+    "coverage": "jest --coverage",
     "version:patch": "lerna version patch --yes",
     "version:minor": "lerna version minor --yes",
     "version:major": "lerna version major --yes",
