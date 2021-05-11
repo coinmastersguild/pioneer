@@ -8,6 +8,10 @@ clean::
 install::
 	yarn && yarn build
 
+test::
+	yarn test && yarn coverage &&\
+	npm install -g codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=${CODECLIMATE_REPO_TOKEN} codeclimate-test-reporter < coverage/lcov.info
+
 publish::
 	yarn publish:lerna
 

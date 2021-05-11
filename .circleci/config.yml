@@ -25,6 +25,8 @@ jobs:
       - run:
           command: "make install"
       - run:
+          command: "make test"
+      - run:
           command: "make publish"
   build:
     resource_class: xlarge

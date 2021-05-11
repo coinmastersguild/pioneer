@@ -17,12 +17,23 @@
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "test": "jest --coverage --passWithNoTests",
-    "test:nocoverage": "jest",
+    "test": "yarn jest --verbose --config jest.config.js",
+    "test:nocoverage": "jest --coverage",
     "version:patch": "lerna version patch --yes",
     "version:minor": "lerna version minor --yes",
     "version:major": "lerna version major --yes",
     "publish:lerna": "lerna publish from-package --no-private --yes"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.2",
+    "@types/jest": "^24.9.1",
+    "jest": "^24.9.0",
+    "jest-junit": "^6.4.0",
+    "prettier": "^2.0.5",
+    "pretty-quick": "^2.0.1",
+    "ts-jest": "^24.3.0",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "lerna": "^4.0.0",
