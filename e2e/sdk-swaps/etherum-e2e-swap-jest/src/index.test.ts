@@ -50,13 +50,13 @@ let {
     nativeToBaseAmount,
 } = require("@pioneer-platform/pioneer-coins")
 
-// const {
-//     startApp,
-//     sendPairingCode,
-//     buildTransaction,
-//     approveTransaction,
-//     broadcastTransaction
-// } = require('./app')
+const {
+    startApp,
+    sendPairingCode,
+    buildTransaction,
+    approveTransaction,
+    broadcastTransaction
+} = require('./app')
 
 let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
