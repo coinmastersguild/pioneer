@@ -16,7 +16,6 @@
     "@babel/runtime": "^7.14.0",
     "@pioneer-platform/loggerdog": "latest",
     "@pioneer-platform/midgard-client": "latest",
-    "@pioneer-platform/pioneer-app": "latest",
     "@pioneer-platform/pioneer-sdk": "latest",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
