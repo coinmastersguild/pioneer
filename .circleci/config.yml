@@ -84,9 +84,9 @@ jobs:
       - run: brew update && brew upgrade
       - run: brew install snapcraft
       - run: npm install -g @quasar/cli
-      - run: cd apps/pioneer-platform/platform && npm i
-      - run: cd apps/pioneer-platform/platform && npm run fix
-      - run: cd apps/pioneer-platform/platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
+      - run: cd platform && npm i
+      - run: cd platform && npm run fix
+      - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
   build-native-windows:
     executor:
       name: win/default # executor type
@@ -98,11 +98,11 @@ jobs:
           shell: bash.exe
           name: set env
       - run:
-          command: cd apps/pioneer-platform/platform && npm i
+          command: cd platform && npm i
           shell: bash.exe
           name: npm install
       - run:
-          command: cd apps/pioneer-platform/platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-windows
+          command: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-windows
           shell: bash.exe
           name: npm install
 
