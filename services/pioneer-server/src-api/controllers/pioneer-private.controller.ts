@@ -145,13 +145,19 @@ interface Pubkeys {
     index: string
 }
 
+interface WalletDescription {
+    walletId: string
+    type: string
+}
+
 interface RegisterBody {
     isTestnet?:boolean
     blockchains:any
     username:string
     data:RegisterBodyData,
     auth:string,
-    walletId?: string,
+    walletDescription:WalletDescription,
+    walletId: string,
     queryKey?:string,
     provider:AuthProviders
 }
@@ -292,14 +298,29 @@ export class pioneerPrivateController extends Controller {
                     //contextInvoke
                     //If context revoked, update redis, clear context
 
-                    //totalValueUsd
-                    if(!userInfo.totalValueUsd){
-                        //TODO get balances for all wallets
+                    //get value map
+                    userInfo.walletDescriptions = []
+                    let totalValueUsd = 0
+                    for(let i = 0; i < userInfoMongo.walletDescriptions.length; i++){
+                        let walletInfo = userInfoMongo.walletDescriptions[i]
+                        //get portfolio from cache
+                        //get asset balances
+                        let assetBalances = await redis.hgetall(username+":assets:"+walletInfo.walletId)
+                        log.info(tag,"assetBalances: ",assetBalances)
+                        let valuePortfolio = await coincap.valuePortfolio(assetBalances)
+                        log.info(tag,"valuePortfolio: ",valuePortfolio)
+
+                        let walletDescription = {
+                            walletId:walletInfo.walletId,
+                            type:walletInfo.type,
+                            values:valuePortfolio.values,
+                            valueUsdContext:valuePortfolio.total
+                        }
+                        totalValueUsd = totalValueUsd + valuePortfolio.total
+                        //walletDescription
+                        userInfo.walletDescriptions.push(walletDescription)
                     }
-                    //
-                    if(!userInfo.totalValueUsd){
-                        //TODO get balances for current context
-                    }
+                    userInfo.totalValueUsd = totalValueUsd
 
 
                     return userInfo
@@ -376,6 +397,8 @@ export class pioneerPrivateController extends Controller {
                 walletInfo.wallets = userInfoMongo.wallets
                 walletInfo.blockchains = userInfoMongo.blockchains
 
+                //filter current wallet
+
                 log.info(tag,"userInfoMongo: ",userInfoMongo)
                 if(!userInfoMongo) {
                     throw Error("102: unknown user! username: "+username)
@@ -394,9 +417,16 @@ export class pioneerPrivateController extends Controller {
                 //get value of portfolio
                 let valuePortfolio = await coincap.valuePortfolio(assetBalances)
                 log.info(tag,"valuePortfolio: ",valuePortfolio)
+                //TODO Do I actually need? no? deleteme
+                // let walletDescription = {
+                //     walletId:walletInfo.walletId,
+                //     type:walletInfo.type,
+                //     values:valuePortfolio.values,
+                //     totalValueUsd:valuePortfolio.total
+                // }
+                // walletInfo.walletDescription = walletDescription
                 walletInfo.valueUsds = valuePortfolio.values
                 walletInfo.totalValueUsd = valuePortfolio.total
-                redis.hset(username,'totalValueUsd',valuePortfolio.total)
                 walletInfo.username = username
                 walletInfo.walletId = walletId
                 walletInfo.apps = await redis.smembers(username+":apps")
@@ -776,50 +806,56 @@ export class pioneerPrivateController extends Controller {
 
             // get queryKey for code sdk user
             let sdkQueryKey = await redis.hget(body.code,"pairing")
-            if(!sdkQueryKey) throw Error("unknown code!")
-            log.info(tag,"sdkQueryKey: ",sdkQueryKey)
+            if(sdkQueryKey) {
+                log.info(tag,"sdkQueryKey: ",sdkQueryKey)
 
-            // get url
-            let url = await redis.hget(body.code,"url")
+                // get url
+                let url = await redis.hget(body.code,"url")
 
-            // if in whitelist
-            let isWhitelisted = await redis.sismember('serviceUrls',url)
+                // if in whitelist
+                let isWhitelisted = await redis.sismember('serviceUrls',url)
 
-            // let app = {
-            //     added:new Date().getTime(),
-            //     url
-            //     //More?
-            // }
+                // let app = {
+                //     added:new Date().getTime(),
+                //     url
+                //     //More?
+                // }
 
-            //push to username cache
-            redis.sadd(userInfo.username+":apps",url)
+                //push to username cache
+                redis.sadd(userInfo.username+":apps",url)
 
-            //add to userInfo
-            let pushAppMongo = await usersDB.update({ username: userInfo.username },
-                { $addToSet: { apps: url } })
-            log.info(tag,"pushAppMongo: ",pushAppMongo)
+                //add to userInfo
+                let pushAppMongo = await usersDB.update({ username: userInfo.username },
+                    { $addToSet: { apps: url } })
+                log.info(tag,"pushAppMongo: ",pushAppMongo)
 
-            // sdkUser
-            let sdkUser = {
-                username:userInfo.username,
-                paired: new Date().getTime(),
-                queryKey: sdkQueryKey,
-                url
+                // sdkUser
+                let sdkUser = {
+                    username:userInfo.username,
+                    paired: new Date().getTime(),
+                    queryKey: sdkQueryKey,
+                    url
+                }
+                publisher.publish('pairings',JSON.stringify(sdkUser))
+
+
+                //save queryKey code
+                let saveRedis = await redis.hmset(sdkQueryKey,sdkUser)
+
+                let output = {
+                    user:sdkUser,
+                    url,
+                    saveRedis,
+                    trusted:isWhitelisted
+                }
+
+                return(output);
+            } else {
+                return {
+                    success:false,
+                    error:"unknown code!"
+                }
             }
-            publisher.publish('pairings',JSON.stringify(sdkUser))
-
-
-            //save queryKey code
-            let saveRedis = await redis.hmset(sdkQueryKey,sdkUser)
-
-            let output = {
-                user:sdkUser,
-                url,
-                saveRedis,
-                trusted:isWhitelisted
-            }
-
-            return(output);
         }catch(e){
             let errorResp:Error = {
                 success:false,
@@ -1170,7 +1206,8 @@ export class pioneerPrivateController extends Controller {
                     username:body.username,
                     verified:true,
                     blockchains:body.blockchains,
-                    wallets:[body.walletId] // just one wallet for now
+                    wallets:[body.walletId], // just one wallet for now
+                    walletDescriptions:[body.walletDescription]
                 }
 
                 if(!userInfoMongo){
@@ -1222,6 +1259,7 @@ export class pioneerPrivateController extends Controller {
 
                 //push new wallet to wallets
                 output.updateDBUser = await usersDB.update({},{ $addToSet: { "wallets": body.walletId } })
+                output.updateDBUser = await usersDB.update({},{ $addToSet: { "walletDescriptions": body.walletDescription } })
             } else {
                 //wallet already known!
                 log.info(tag,"Wallet already known! walletId: ",body.walletId)

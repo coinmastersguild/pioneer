@@ -820,7 +820,7 @@ module.exports = class wallet {
             try {
                 if(!txid) throw Error("Txid is required!")
                 log.info("asset: ",this.nativeAsset)
-                let output = await this.pioneerApi.GetTransaction({coin:this.nativeAsset,txid})
+                let output = await this.pioneerApi.GetTransaction({coin:this.nativeAsset,txid,type:'thorchain'})
                 return output.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -931,6 +931,7 @@ module.exports = class wallet {
                 log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toFixed())
                 let amount = tx.amount.amount().toFixed()
                 amount = nativeToBaseAmount(this.nativeAsset,amount)
+                amount = amount.toString()
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 

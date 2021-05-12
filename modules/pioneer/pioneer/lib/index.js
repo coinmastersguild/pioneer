@@ -84,7 +84,7 @@ var ethCrypto = require("@pioneer-platform/eth-crypto");
 var coincap = require("@pioneer-platform/coincap");
 //All paths
 //TODO make paths adjustable!
-var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, nativeToBaseAmount = _a.nativeToBaseAmount, baseAmountToNative = _a.baseAmountToNative, UTXO_COINS = _a.UTXO_COINS, getNativeAssetForBlockchain = _a.getNativeAssetForBlockchain;
+var _a = require('@pioneer-platform/pioneer-coins'), getPaths = _a.getPaths, nativeToBaseAmount = _a.nativeToBaseAmount, baseAmountToNative = _a.baseAmountToNative, UTXO_COINS = _a.UTXO_COINS, COIN_MAP_KEEPKEY_LONG = _a.COIN_MAP_KEEPKEY_LONG, COIN_MAP_LONG = _a.COIN_MAP_LONG, getNativeAssetForBlockchain = _a.getNativeAssetForBlockchain;
 //support
 var support = __importStar(require("./support"));
 var web3_utils_1 = require("web3-utils");
@@ -204,28 +204,39 @@ module.exports = /** @class */ (function () {
         };
         this.init = function (wallet) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, paths, _a, pioneerAdapter, _b, isTestnet_1, _loop_1, this_1, i, _c, _loop_2, this_2, i, blockchainsEnabled, i, pubkey, nativeAsset, i, pubkey, _d, _e, _f, _g, _h, userInfo, register, regsiterResponse, walletInfo, coins, i, coin, balance, e_1;
+                var tag, paths, _a, walletEth, pioneerAdapter, _b, isTestnet_1, _loop_1, this_1, i, _c, _loop_2, this_2, i, blockchainsEnabled, i, pubkey, nativeAsset, i, pubkey, _d, _e, _f, _g, _h, userInfo, register, regsiterResponse, walletInfo, coins, i, coin, balance, e_1;
                 return __generator(this, function (_j) {
                     switch (_j.label) {
                         case 0:
                             tag = TAG + " | init_wallet | ";
                             _j.label = 1;
                         case 1:
-                            _j.trys.push([1, 22, , 23]);
+                            _j.trys.push([1, 26, , 27]);
                             if (!this.blockchains && !wallet.blockchains)
                                 throw Error("102: Must Specify blockchain support! ");
-                            if (!this.walletId && !wallet.walletId)
-                                throw Error("103: Must Specify walletId");
                             log.debug(tag, "checkpoint");
                             paths = getPaths(this.blockchains);
                             _a = +HDWALLETS[this.type];
                             switch (_a) {
                                 case HDWALLETS.pioneer: return [3 /*break*/, 2];
-                                case HDWALLETS.keepkey: return [3 /*break*/, 6];
-                                case HDWALLETS.metamask: return [3 /*break*/, 12];
+                                case HDWALLETS.keepkey: return [3 /*break*/, 8];
+                                case HDWALLETS.metamask: return [3 /*break*/, 14];
                             }
-                            return [3 /*break*/, 13];
+                            return [3 /*break*/, 15];
                         case 2:
+                            if (!(!this.walletId && config.mnemonic)) return [3 /*break*/, 4];
+                            return [4 /*yield*/, ethCrypto.generateWalletFromSeed(config.mnemonic)];
+                        case 3:
+                            walletEth = _j.sent();
+                            log.info(tag, "walletEth:", walletEth);
+                            log.info(tag, "walletEth:", walletEth.masterAddress);
+                            log.info(tag, "walletEth:", walletEth.masterAddress + ".wallet.json");
+                            this.walletId = walletEth.masterAddress + ".wallet.json";
+                            _j.label = 4;
+                        case 4:
+                            if (!this.walletId)
+                                throw Error("102: unable to determine correct walletId!");
+                            log.info(tag, "walletId: ", this.walletId);
                             pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring);
                             log.debug(tag, "checkpoint", " pioneer wallet detected! ");
                             if (!config.mnemonic && !wallet && !config.context)
@@ -236,13 +247,13 @@ module.exports = /** @class */ (function () {
                             //pair
                             _b = this;
                             return [4 /*yield*/, pioneerAdapter.pairDevice(config.username)];
-                        case 3:
+                        case 5:
                             //pair
                             _b.WALLET = _j.sent();
                             return [4 /*yield*/, this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet: this.isTestnet })
                                 //verify testnet
                             ];
-                        case 4:
+                        case 6:
                             _j.sent();
                             isTestnet_1 = false;
                             log.debug(tag, "hdwallet isTestnet: ", isTestnet_1);
@@ -267,7 +278,7 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "Checkpoint valid paths ** ");
                             _c = this;
                             return [4 /*yield*/, this.WALLET.getPublicKeys(paths)];
-                        case 5:
+                        case 7:
                             _c.pubkeys = _j.sent();
                             log.debug("pubkeys ", JSON.stringify(this.pubkeys));
                             _loop_2 = function (i) {
@@ -308,8 +319,8 @@ module.exports = /** @class */ (function () {
                                 // }
                                 this.PUBLIC_WALLET[pubkey.symbol] = pubkey;
                             }
-                            return [3 /*break*/, 14];
-                        case 6:
+                            return [3 /*break*/, 16];
+                        case 8:
                             log.info(tag, " Keepkey mode! ");
                             log.debug(tag, "**** wallet: ", wallet);
                             if (!config.wallet)
@@ -331,9 +342,9 @@ module.exports = /** @class */ (function () {
                             log.debug("pubkeys.length ", this.pubkeys.length);
                             log.debug("paths.length ", paths.length);
                             i = 0;
-                            _j.label = 7;
-                        case 7:
-                            if (!(i < this.pubkeys.length)) return [3 /*break*/, 11];
+                            _j.label = 9;
+                        case 9:
+                            if (!(i < this.pubkeys.length)) return [3 /*break*/, 13];
                             pubkey = this.pubkeys[i];
                             log.debug(tag, "pubkey: ", pubkey);
                             if (!pubkey)
@@ -342,22 +353,22 @@ module.exports = /** @class */ (function () {
                                 log.debug("pubkey: ", pubkey);
                                 throw Error("Invalid pubkey!");
                             }
-                            if (!(this.isTestnet && pubkey.xpub && !pubkey.tpub)) return [3 /*break*/, 9];
+                            if (!(this.isTestnet && pubkey.xpub && !pubkey.tpub)) return [3 /*break*/, 11];
                             _d = pubkey;
                             return [4 /*yield*/, crypto.xpubConvert(pubkey.xpub, 'tpub')];
-                        case 8:
-                            _d.tpub = _j.sent();
-                            _j.label = 9;
-                        case 9:
-                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey;
-                            _j.label = 10;
                         case 10:
-                            i++;
-                            return [3 /*break*/, 7];
+                            _d.tpub = _j.sent();
+                            _j.label = 11;
                         case 11:
-                            log.debug("this.PUBLIC_WALLET", this.PUBLIC_WALLET);
-                            return [3 /*break*/, 14];
+                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey;
+                            _j.label = 12;
                         case 12:
+                            i++;
+                            return [3 /*break*/, 9];
+                        case 13:
+                            log.debug("this.PUBLIC_WALLET", this.PUBLIC_WALLET);
+                            return [3 /*break*/, 16];
+                        case 14:
                             log.debug(tag, " metamask mode! ");
                             if (!config.wallet)
                                 throw Error("Config is missing watch wallet!");
@@ -367,12 +378,12 @@ module.exports = /** @class */ (function () {
                             if (!config.pubkeys)
                                 throw Error("Config watch wallet missing pubkeys!");
                             this.pubkeys = config.pubkeys;
-                            return [3 /*break*/, 14];
-                        case 13: throw Error("108: WALLET not yet supported! " + type + " valid: " + HDWALLETS);
-                        case 14:
+                            return [3 /*break*/, 16];
+                        case 15: throw Error("108: WALLET not yet supported! " + type + " valid: " + HDWALLETS);
+                        case 16:
                             if (!this.pubkeys)
                                 throw Error("103: failed to init wallet! missing pubkeys!");
-                            if (!this.pioneerApi) return [3 /*break*/, 20];
+                            if (!this.pioneerApi) return [3 /*break*/, 24];
                             if (!this.spec)
                                 throw Error("102:  Api spec required! ");
                             if (!this.queryKey)
@@ -384,34 +395,27 @@ module.exports = /** @class */ (function () {
                             return [4 /*yield*/, this.pioneer.init(config.spec, {
                                     queryKey: config.queryKey
                                 })];
-                        case 15:
+                        case 17:
                             _e.pioneerClient = _j.sent();
                             _g = (_f = log).debug;
                             _h = ["baseUrl: "];
                             return [4 /*yield*/, this.pioneerClient.getBaseURL()];
-                        case 16:
+                        case 18:
                             _g.apply(_f, _h.concat([_j.sent()]));
                             return [4 /*yield*/, this.pioneerClient.instance.User()];
-                        case 17:
+                        case 19:
                             userInfo = _j.sent();
                             userInfo = userInfo.data;
-                            log.info(tag, "userInfo: ", userInfo);
-                            log.info(tag, "userInfo: ", userInfo.blockchains);
-                            log.info(tag, "userInfo: ", userInfo.blockchains.length);
-                            log.info(tag, "blockchains: ", this.blockchains);
-                            log.info(tag, "blockchains: ", this.blockchains.length);
-                            if (userInfo.blockchains.length !== this.blockchains.length) {
-                                log.error(tag, "Pubkeys OUT OF SYNC!");
-                                log.error(tag, "blockchains remote: ", userInfo.blockchains);
-                                log.error(tag, "blockchains configured: ", this.blockchains);
-                                //TODO register pubkey 1 by 1 with async on
-                                //if failure give reason
-                            }
+                            if (!!userInfo.success) return [3 /*break*/, 21];
                             register = {
                                 isTestnet: false,
                                 username: this.username,
                                 blockchains: this.blockchains,
                                 walletId: this.walletId,
+                                walletDescription: {
+                                    walletId: this.walletId,
+                                    type: this.type
+                                },
                                 data: {
                                     pubkeys: this.pubkeys
                                 },
@@ -424,12 +428,34 @@ module.exports = /** @class */ (function () {
                             if (!register.walletId)
                                 throw Error("102: missing WalletID Can not register!");
                             return [4 /*yield*/, this.pioneerClient.instance.Register(null, register)];
-                        case 18:
+                        case 20:
                             regsiterResponse = _j.sent();
                             log.debug("regsiterResponse: ", regsiterResponse);
+                            return [3 /*break*/, 22];
+                        case 21:
+                            //user found! syncronize
+                            log.info(tag, "userInfo: ", userInfo);
+                            log.info(tag, "userInfo: ", userInfo.blockchains);
+                            log.info(tag, "userInfo: ", userInfo.blockchains.length);
+                            log.info(tag, "blockchains: ", this.blockchains);
+                            log.info(tag, "blockchains: ", this.blockchains.length);
+                            //count blockchains
+                            //count pubkeys
+                            //if missing register key
+                            //if incomplete
+                            //register missing pubkeys
+                            if (userInfo.blockchains.length !== this.blockchains.length) {
+                                log.error(tag, "Pubkeys OUT OF SYNC!");
+                                log.error(tag, "blockchains remote: ", userInfo.blockchains);
+                                log.error(tag, "blockchains configured: ", this.blockchains);
+                                //TODO register pubkey 1 by 1 with async on
+                                //if failure give reason
+                            }
+                            _j.label = 22;
+                        case 22:
                             log.info(tag, "getting info on context: ", this.walletId);
                             return [4 /*yield*/, this.getInfo(this.walletId)];
-                        case 19:
+                        case 23:
                             walletInfo = _j.sent();
                             log.debug(tag, "walletInfo: ", walletInfo);
                             //validate info
@@ -444,17 +470,16 @@ module.exports = /** @class */ (function () {
                             }
                             if (walletInfo && walletInfo.balances)
                                 this.WALLET_BALANCES = walletInfo.balances;
-                            //emitter.info = walletInfo
                             return [2 /*return*/, walletInfo];
-                        case 20:
+                        case 24:
                             log.debug(tag, "Offline mode!");
-                            _j.label = 21;
-                        case 21: return [3 /*break*/, 23];
-                        case 22:
+                            _j.label = 25;
+                        case 25: return [3 /*break*/, 27];
+                        case 26:
                             e_1 = _j.sent();
                             log.error(tag, e_1);
                             throw e_1;
-                        case 23: return [2 /*return*/];
+                        case 27: return [2 /*return*/];
                     }
                 });
             });
@@ -1310,7 +1335,7 @@ module.exports = /** @class */ (function () {
         };
         this.signTransaction = function (unsignedTx) {
             return __awaiter(this, void 0, void 0, function () {
-                var tag, signedTx, coin, UTXOcoins, res, txid, res, txFinal, broadcastString, buffer, hash, res, txFinal, broadcastString, signedTxResponse, pubkeySigHex, buffer, hash, e_11;
+                var tag, signedTx, coin, res, txid, res, txFinal, broadcastString, buffer, hash, res, txFinal, broadcastString, signedTxResponse, pubkeySigHex, buffer, hash, e_11;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -1320,12 +1345,12 @@ module.exports = /** @class */ (function () {
                             _a.trys.push([1, 13, , 14]);
                             signedTx = {};
                             coin = unsignedTx.coin;
-                            UTXOcoins = [
-                                'BTC',
-                                'BCH',
-                                'LTC'
-                            ];
-                            if (!(UTXOcoins.indexOf(coin) >= 0)) return [3 /*break*/, 3];
+                            if (!(UTXO_COINS.indexOf(coin) >= 0)) return [3 /*break*/, 3];
+                            log.info(tag, "HDwalletPayload: ", unsignedTx.HDwalletPayload);
+                            if (UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.coin) >= 0) {
+                                //opps convert
+                                unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG(unsignedTx.HDwalletPayload.coin);
+                            }
                             return [4 /*yield*/, this.WALLET.btcSignTx(unsignedTx.HDwalletPayload)];
                         case 2:
                             res = _a.sent();

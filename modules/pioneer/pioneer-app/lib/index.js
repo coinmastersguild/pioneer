@@ -76,6 +76,7 @@ let ALL_PENDING = [];
 //
 let SOCKET_CLIENT;
 //
+let WALLETS_VERBOSE = [];
 let TOTAL_VALUE_USD_LOADED = 0;
 let WALLETS_LOADED = {};
 let IS_SEALED = false;
@@ -208,6 +209,9 @@ module.exports = {
     },
     getWalletNames: function () {
         return pioneer_config_1.getWallets();
+    },
+    getWalletDescriptions: function () {
+        return WALLETS_VERBOSE;
     },
     setContext: function (context) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1104,11 +1108,18 @@ let init_wallet = function (config, isTestnet) {
                         log.debug(tag, "pubkeyNetworks: ", pubkeyNetworks);
                         //TODO iterate over blockchains config and verify
                         //else register individual pubkeys until complete
-                        //write pubkeys
+                        //TODO write pubkeys
                         // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
                         // log.debug(tag,"writePathPub: ",writePathPub)
                         // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
                         // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
+                        //add wallet info
+                        let walletInfoVerbose = {
+                            walletId,
+                            type: walletFile.TYPE,
+                            totalValueUsd: info.totalValueUsd
+                        };
+                        WALLETS_VERBOSE.push(walletInfoVerbose);
                         //global total valueUSD
                         TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd;
                         WALLET_VALUE_MAP[walletId] = info.totalValueUsd;
@@ -1191,6 +1202,13 @@ let init_wallet = function (config, isTestnet) {
                         log.debug(tag, "writePathPub: ", writePathPub);
                         let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
                         log.debug(tag, "writeSuccessPub: ", writeSuccessPub);
+                        //add wallet info
+                        let walletInfoVerbose = {
+                            walletId,
+                            type: walletFile.TYPE,
+                            totalValueUsd: info.totalValueUsd
+                        };
+                        WALLETS_VERBOSE.push(walletInfoVerbose);
                         //
                         log.debug(tag, "info: ", info);
                         //global total valueUSD
@@ -1420,6 +1438,7 @@ let init_wallet = function (config, isTestnet) {
             output.context = WALLET_CONTEXT;
             if (!output.context)
                 throw Error("");
+            output.walletsDescriptions = WALLETS_VERBOSE;
             //global init
             IS_INIT = true;
             output.events = clientEvents.events;

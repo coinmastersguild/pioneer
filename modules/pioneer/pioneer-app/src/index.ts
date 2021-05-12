@@ -76,6 +76,7 @@ let ALL_PENDING:any = []
 let SOCKET_CLIENT:any
 
 //
+let WALLETS_VERBOSE:any = []
 let TOTAL_VALUE_USD_LOADED:number = 0
 let WALLETS_LOADED: any = {}
 let IS_SEALED =false
@@ -211,6 +212,9 @@ module.exports = {
     },
     getWalletNames: function () {
         return getWallets();
+    },
+    getWalletDescriptions: function () {
+        return WALLETS_VERBOSE;
     },
     setContext: async function (context:string) {
         return set_context(context)
@@ -1042,6 +1046,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             throw Error("Must specify blockchain configuration!")
         }
 
+
         //Load wallets if setup
         for(let i = 0; i < walletFiles.length; i++){
             let walletId = walletFiles[i]
@@ -1091,6 +1096,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         pubkeys:walletFile.pubkeys,
                         wallet:walletFile,
                         walletId,
+                        walletDescription:{
+                            walletId,
+                            type:walletFile.TYPE
+                        },
                         username:config.username,
                         pioneerApi:true,
                         spec:URL_PIONEER_SPEC,
@@ -1125,12 +1134,19 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //else register individual pubkeys until complete
 
-
-                    //write pubkeys
+                    //TODO write pubkeys
                     // let writePathPub = pioneerPath+"/"+info.name+".watch.wallet.json"
                     // log.debug(tag,"writePathPub: ",writePathPub)
                     // let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(info.public));
                     // log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
+
+                    //add wallet info
+                    let walletInfoVerbose = {
+                        walletId,
+                        type:walletFile.TYPE,
+                        totalValueUsd:info.totalValueUsd
+                    }
+                    WALLETS_VERBOSE.push(walletInfoVerbose)
 
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
@@ -1170,6 +1186,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         isTestnet,
                         mnemonic,
                         walletId,
+                        walletDescription:{
+                            walletId,
+                            type:walletFile.TYPE
+                        },
                         blockchains:config.blockchains,
                         username:config.username,
                         pioneerApi:true,
@@ -1220,6 +1240,13 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
                     log.debug(tag,"writeSuccessPub: ",writeSuccessPub)
 
+                    //add wallet info
+                    let walletInfoVerbose = {
+                        walletId,
+                        type:walletFile.TYPE,
+                        totalValueUsd:info.totalValueUsd
+                    }
+                    WALLETS_VERBOSE.push(walletInfoVerbose)
                     //
                     log.debug(tag,"info: ",info)
 
@@ -1460,6 +1487,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         })
         output.context = WALLET_CONTEXT
         if(!output.context) throw Error("")
+
+        output.walletsDescriptions = WALLETS_VERBOSE
+
         //global init
         IS_INIT = true
         output.events = clientEvents.events

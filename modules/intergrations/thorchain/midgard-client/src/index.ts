@@ -60,6 +60,35 @@ module.exports = {
     },
     getNewAddress: function () {
         return get_new_addresses();
+    },
+    getTransaction: function (txid:string) {
+        return get_transaction(txid);
+    }
+}
+
+const get_transaction = async function (txid:string) {
+    let tag = TAG + " | get_transaction | "
+    try {
+        if(txid.substring(0,2) == '0x'){
+            txid = txid.replace('0x','')
+        }
+        txid = txid.toUpperCase()
+        log.info(tag,"txid formatted: ",txid)
+
+        //params
+        let params = {
+            txid,
+            offset:0,
+            limit:1
+        }
+
+        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
     }
 }
 

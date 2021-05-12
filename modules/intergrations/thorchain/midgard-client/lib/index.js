@@ -86,11 +86,48 @@ module.exports = {
     },
     getNewAddress: function () {
         return get_new_addresses();
+    },
+    getTransaction: function (txid) {
+        return get_transaction(txid);
     }
+};
+var get_transaction = function (txid) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tag, params, resp, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    tag = TAG + " | get_transaction | ";
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    log.info(tag, "prefix: ", txid.substring(0, 2));
+                    if (txid.substring(0, 2) == '0x') {
+                        txid = txid.replace('0x', '');
+                    }
+                    txid = txid.toUpperCase();
+                    console.log("txid formated: ", txid);
+                    params = {
+                        txid: txid,
+                        offset: 0,
+                        limit: 1
+                    };
+                    return [4 /*yield*/, axios.get(MIDGARD_API + "/actions", { params: params })];
+                case 2:
+                    resp = _a.sent();
+                    return [2 /*return*/, resp.data];
+                case 3:
+                    e_1 = _a.sent();
+                    log.error(tag, "e: ", e_1);
+                    throw e_1;
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
 };
 var get_new_addresses = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, params, body, resp, e_1;
+        var tag, output, params, body, resp, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -111,8 +148,8 @@ var get_new_addresses = function () {
                     resp = _a.sent();
                     return [2 /*return*/, resp.data];
                 case 3:
-                    e_1 = _a.sent();
-                    log.error(tag, "e: ", e_1);
+                    e_2 = _a.sent();
+                    log.error(tag, "e: ", e_2);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -121,7 +158,7 @@ var get_new_addresses = function () {
 };
 var get_price = function (asset) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, params, body, resp, e_2;
+        var tag, output, params, body, resp, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -145,8 +182,8 @@ var get_price = function (asset) {
                     resp = _a.sent();
                     return [2 /*return*/, resp.data];
                 case 3:
-                    e_2 = _a.sent();
-                    log.error(tag, "e: ", e_2);
+                    e_3 = _a.sent();
+                    log.error(tag, "e: ", e_3);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -156,7 +193,7 @@ var get_price = function (asset) {
 //https://testnet.thornode.thorchain.info/thorchain/inbound_addresses
 var get_pool_addresses = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, body, resp, e_3;
+        var tag, output, body, resp, e_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -176,8 +213,8 @@ var get_pool_addresses = function () {
                     resp = _a.sent();
                     return [2 /*return*/, resp.data];
                 case 3:
-                    e_3 = _a.sent();
-                    log.error(tag, "e: ", e_3);
+                    e_4 = _a.sent();
+                    log.error(tag, "e: ", e_4);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
@@ -186,7 +223,7 @@ var get_pool_addresses = function () {
 };
 var get_info = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, body, resp, bodyStats, respStats, e_4;
+        var tag, output, body, resp, bodyStats, respStats, e_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -218,8 +255,8 @@ var get_info = function () {
                     output.health = resp.data;
                     return [2 /*return*/, output];
                 case 4:
-                    e_4 = _a.sent();
-                    log.error(tag, "e: ", e_4);
+                    e_5 = _a.sent();
+                    log.error(tag, "e: ", e_5);
                     return [3 /*break*/, 5];
                 case 5: return [2 /*return*/];
             }
@@ -228,7 +265,7 @@ var get_info = function () {
 };
 var get_pools = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, body, resp, e_5;
+        var tag, body, resp, e_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -247,9 +284,9 @@ var get_pools = function () {
                     resp = _a.sent();
                     return [2 /*return*/, resp.data];
                 case 3:
-                    e_5 = _a.sent();
-                    log.error(tag, "e: ", e_5);
-                    throw e_5;
+                    e_6 = _a.sent();
+                    log.error(tag, "e: ", e_6);
+                    throw e_6;
                 case 4: return [2 /*return*/];
             }
         });
@@ -257,7 +294,7 @@ var get_pools = function () {
 };
 var get_pool = function (poolId) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, params, body, resp, e_6;
+        var tag, params, body, resp, e_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -281,9 +318,9 @@ var get_pool = function (poolId) {
                     resp = _a.sent();
                     return [2 /*return*/, resp.data];
                 case 3:
-                    e_6 = _a.sent();
-                    log.error(tag, "e: ", e_6);
-                    throw e_6;
+                    e_7 = _a.sent();
+                    log.error(tag, "e: ", e_7);
+                    throw e_7;
                 case 4: return [2 /*return*/];
             }
         });

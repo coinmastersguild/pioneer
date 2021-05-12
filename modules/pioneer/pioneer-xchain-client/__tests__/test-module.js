@@ -91,6 +91,10 @@ let run_test = async function(){
 
         let info = await app.info
         console.log(" info: ",info)
+
+        //get transaction
+
+
         // let swap = {
         //     "inboundAddress":{
         //         "chain":"ETH",

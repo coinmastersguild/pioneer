@@ -115,9 +115,9 @@ var Logger = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
         }
-        console.log('level: ', level);
-        console.log('this._level: ', this._level);
-        console.log('LOG_LEVELS[level].val: ', LOG_LEVELS[level].val);
+        //console.log('level: ',level)
+        //console.log('this._level: ',this._level)
+        //console.log('LOG_LEVELS[level].val: ',LOG_LEVELS[level].val)
         if (this._level >= LOG_LEVELS[level].val) {
             var dt = new Date().toISOString().replace('T', ' ');
             var ctx = _getContextString();

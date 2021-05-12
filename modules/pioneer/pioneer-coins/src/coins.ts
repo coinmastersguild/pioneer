@@ -71,7 +71,82 @@ export const COIN_MAP_LONG:any = {
     EOS: "eos",
     FIO: "fio",
 };
+
+export const COIN_MAP_KEEPKEY_LONG:any = {
+    BTC: "Bitcoin",
+    ATOM: "cosmos",
+    BTCT: "testnet",
+    BCH: "BitcoinCash",
+    LTC: "Litecoin",
+    DASH: "Dash",
+    DGB: "DigiByte",
+    DOGE: "Dogecoin",
+    RUNE: "Thorchain",
+    ETH: "Ethereum",
+    ADA: "Cardano",
+    BNB: "Binance",
+    EOS: "Eos",
+    FIO: "Fio",
+};
+
+export const SLIP_44_BY_LONG:any = {
+    bitcoin: 0,
+    testnet: 1,
+    bitcoincash: 145,
+    bitcoingold: 156,
+    litecoin: 2,
+    dash: 5,
+    digibyte: 20,
+    dogecoin: 3,
+    bitcoinsv: 236,
+    ethereum: 60,
+    cosmos: 118,
+    binance: 714,
+    ripple: 144,
+    eos: 194,
+    fio: 235,
+    thorchain: 931,
+    cardano: 1815,
+    secret: 529,
+    terra: 330,
+    kava: 459,
+};
+
+
 const HARDENED = 0x80000000;
+export function bip32Like(path: string): boolean {
+    if (path == "m/") return true;
+    return /^m(((\/[0-9]+h)+|(\/[0-9]+H)+|(\/[0-9]+')*)((\/[0-9]+)*))$/.test(path);
+}
+
+export function bip32ToAddressNList(path: string): number[] {
+    if (!bip32Like(path)) {
+        throw new Error(`Not a bip32 path: '${path}'`);
+    }
+    if (/^m\//i.test(path)) {
+        path = path.slice(2);
+    }
+    const segments = path.split("/");
+    if (segments.length === 1 && segments[0] === "") return [];
+    const ret = new Array(segments.length);
+    for (let i = 0; i < segments.length; i++) {
+        const tmp = /(\d+)([hH\']?)/.exec(segments[i]);
+        if (tmp === null) {
+            throw new Error("Invalid input");
+        }
+        ret[i] = parseInt(tmp[1], 10);
+        if (ret[i] >= HARDENED) {
+            throw new Error("Invalid child index");
+        }
+        if (tmp[2] === "h" || tmp[2] === "H" || tmp[2] === "'") {
+            ret[i] += HARDENED;
+        } else if (tmp[2].length !== 0) {
+            throw new Error("Invalid modifier");
+        }
+    }
+    return ret;
+}
+
 function addressNListToBIP32(address: number[]): string {
     return `m/${address.map((num) => (num >= HARDENED ? `${num - HARDENED}'` : num)).join("/")}`;
 }

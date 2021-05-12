@@ -17,8 +17,8 @@ let midgard = require("../lib")
 let run_test = async function(){
     try{
 
-        let info = await midgard.getInfo()
-        console.log("info: ",info)
+        // let info = await midgard.getInfo()
+        // console.log("info: ",info)
 
         // let pools = await midgard.getPools()
         // console.log("pools: ",pools)
@@ -31,8 +31,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        let addresses = await midgard.getPoolAddress()
-        console.log("addresses: ",addresses)
+        // let addresses = await midgard.getPoolAddress()
+        // console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)
@@ -40,6 +40,13 @@ let run_test = async function(){
         // let poolInfo = await midgard.getPool("BNB.BULL-BE4")
         // console.log("poolInfo: ",poolInfo)
 
+        //get transactions by address
+
+        //get transaction by txid
+        let txid = '0xa2bcc716691c2dd4c748456f9bf4c4e862f6a3e7e3d3e820658067b0fa2568de'
+        //let txid = 'A2BCC716691C2DD4C748456F9BF4C4E862F6A3E7E3D3E820658067B0FA2568DE'
+        let txInfo = await midgard.getTransaction(txid)
+        console.log("txInfo: ",txInfo)
 
     }catch(e){
         console.error(e)

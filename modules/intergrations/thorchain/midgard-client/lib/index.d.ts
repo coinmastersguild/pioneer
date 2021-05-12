@@ -6,6 +6,7 @@ declare const URL_THORNODE: string;
 declare const Axios: any;
 declare const https: any;
 declare const axios: any;
+declare const get_transaction: (txid: string) => Promise<any>;
 declare const get_new_addresses: () => Promise<any>;
 declare const get_price: (asset: string) => Promise<any>;
 declare const get_pool_addresses: () => Promise<any>;

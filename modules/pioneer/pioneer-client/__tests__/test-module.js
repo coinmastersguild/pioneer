@@ -40,8 +40,8 @@ let run_test = async function(){
         //     spec
         // }
         let config = {
-            queryKey:"e95b453a-e7e5-4ec1-a60b-6a3773167992",
-            username:'test-user-3',
+            queryKey:"key:2611ce1c-ddee-4185-99a4-98e727529197",
+            username:'test-user-2',
             spec
         }
         console.log("config: ",config)
@@ -70,7 +70,8 @@ let run_test = async function(){
         // if(!isOnline) throw Error("User not connected!")
 
         let user = await pioneer.instance.User()
-        console.log("info: ",user.data)
+        console.log("user: ",user.data)
+        console.log("user: ",JSON.stringify(user.data))
 
         let info = await pioneer.instance.Info(user.data.context)
         console.log("info: ",info.data)

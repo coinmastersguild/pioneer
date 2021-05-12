@@ -305,8 +305,7 @@ export class SDK {
                 log.debug(tag,"this.spec: ",this.spec)
                 log.debug(tag,"supportedBlockchains: ",supportedBlockchains)
                 if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
-
-
+                
                 if(this.blockchains.indexOf('binance') >= 0){
                     let binance = new XchainClass(this.spec,{
                         network:'mainnet',

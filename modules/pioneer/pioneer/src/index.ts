@@ -34,6 +34,8 @@ let {
     nativeToBaseAmount,
     baseAmountToNative,
     UTXO_COINS,
+    COIN_MAP_KEEPKEY_LONG,
+    COIN_MAP_LONG,
     getNativeAssetForBlockchain
 } = require('@pioneer-platform/pioneer-coins')
 
@@ -327,11 +329,20 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
-                if(!this.walletId && !wallet.walletId) throw Error("103: Must Specify walletId")
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
+                        if(!this.walletId && config.mnemonic){
+                            //calculate
+                            let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
+                            log.info(tag,"walletEth:",walletEth)
+                            log.info(tag,"walletEth:",walletEth.masterAddress)
+                            log.info(tag,"walletEth:",walletEth.masterAddress+".wallet.json")
+                            this.walletId = walletEth.masterAddress+".wallet.json"
+                        }
+                        if(!this.walletId) throw Error("102: unable to determine correct walletId!")
+                        log.info(tag,"walletId: ",this.walletId)
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
                         log.debug(tag,"checkpoint"," pioneer wallet detected! ")
                         if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
@@ -462,48 +473,59 @@ module.exports = class wallet {
                     //get user status
                     let userInfo = await this.pioneerClient.instance.User()
                     userInfo = userInfo.data
-                    log.info(tag,"userInfo: ",userInfo)
-                    log.info(tag,"userInfo: ",userInfo.blockchains)
-                    log.info(tag,"userInfo: ",userInfo.blockchains.length)
+                    if(!userInfo.success){
+                        //API
+                        let register = {
+                            isTestnet:false,
+                            username:this.username,
+                            blockchains:this.blockchains,
+                            walletId:this.walletId,
+                            walletDescription:{
+                                walletId:this.walletId,
+                                type:this.type
+                            },
+                            data:{
+                                pubkeys:this.pubkeys
+                            },
+                            queryKey:this.queryKey,
+                            auth:this.auth,
+                            provider:'bitcoin'
+                        }
+                        log.debug("registerBody: ",register)
+                        log.debug("this.pioneerClient: ",this.pioneerClient)
+                        if(!register.walletId) throw Error("102: missing WalletID Can not register!")
+                        let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
+                        log.debug("regsiterResponse: ",regsiterResponse)
 
-                    log.info(tag,"blockchains: ",this.blockchains)
-                    log.info(tag,"blockchains: ",this.blockchains.length)
-                    if(userInfo.blockchains.length !== this.blockchains.length){
-                        log.error(tag,"Pubkeys OUT OF SYNC!")
-                        log.error(tag,"blockchains remote: ",userInfo.blockchains)
-                        log.error(tag,"blockchains configured: ",this.blockchains)
-                        //TODO register pubkey 1 by 1 with async on
-                        //if failure give reason
+                        //emitter.info = walletInfo
+                    }else{
+                        //user found! syncronize
+                        log.info(tag,"userInfo: ",userInfo)
+                        log.info(tag,"userInfo: ",userInfo.blockchains)
+                        log.info(tag,"userInfo: ",userInfo.blockchains.length)
+
+                        log.info(tag,"blockchains: ",this.blockchains)
+                        log.info(tag,"blockchains: ",this.blockchains.length)
+
+                        //count blockchains
+
+                        //count pubkeys
+
+                        //if missing register key
+
+                        //if incomplete
+
+                        //register missing pubkeys
+
+                        if(userInfo.blockchains.length !== this.blockchains.length){
+                            log.error(tag,"Pubkeys OUT OF SYNC!")
+                            log.error(tag,"blockchains remote: ",userInfo.blockchains)
+                            log.error(tag,"blockchains configured: ",this.blockchains)
+                            //TODO register pubkey 1 by 1 with async on
+                            //if failure give reason
+                        }
                     }
 
-                    //count blockchains
-
-                    //count pubkeys
-
-                    //if missing register key
-
-                    //if incomplete
-
-                    //register missing pubkeys
-
-                    //API
-                    let register = {
-                        isTestnet:false,
-                        username:this.username,
-                        blockchains:this.blockchains,
-                        walletId:this.walletId,
-                        data:{
-                            pubkeys:this.pubkeys
-                        },
-                        queryKey:this.queryKey,
-                        auth:this.auth,
-                        provider:'bitcoin'
-                    }
-                    log.debug("registerBody: ",register)
-                    log.debug("this.pioneerClient: ",this.pioneerClient)
-                    if(!register.walletId) throw Error("102: missing WalletID Can not register!")
-                    let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
-                    log.debug("regsiterResponse: ",regsiterResponse)
 
                     log.info(tag,"getting info on context: ",this.walletId)
                     let walletInfo = await this.getInfo(this.walletId)
@@ -522,7 +544,6 @@ module.exports = class wallet {
                     }
 
                     if(walletInfo && walletInfo.balances) this.WALLET_BALANCES = walletInfo.balances
-                    //emitter.info = walletInfo
 
                     return walletInfo
                 } else {
@@ -1222,13 +1243,14 @@ module.exports = class wallet {
                 let coin = unsignedTx.coin
 
 
-                let UTXOcoins = [
-                    'BTC',
-                    'BCH',
-                    'LTC'
-                ]
 
-                if(UTXOcoins.indexOf(coin) >= 0){
+                if(UTXO_COINS.indexOf(coin) >= 0){
+
+                    log.info(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
+                    if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.coin) >= 0){
+                        //opps convert
+                        unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG(unsignedTx.HDwalletPayload.coin)
+                    }
                     const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
                     log.debug(tag,"res: ",res)
 

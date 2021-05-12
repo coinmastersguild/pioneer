@@ -11,6 +11,7 @@ const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
+const midgard = require("@pioneer-platform/midgard-client")
 
 let connection  = require("@pioneer-platform/default-mongo")
 
@@ -427,8 +428,8 @@ export class pioneerPublicController extends Controller {
     /**
      *  getTransaction
      */
-    @Get('{coin}/getTransaction/{txid}')
-    public async getTransaction(coin:string,txid:string) {
+    @Get('{coin}/getTransaction/{txid}/{type}')
+    public async getTransaction(coin:string,txid:string,type?:string) {
         let tag = TAG + " | getTransaction | "
         try{
             if(!txid) throw Error("102: txid required! ")
@@ -436,6 +437,9 @@ export class pioneerPublicController extends Controller {
             log.info(tag,"coin: ",coin)
             log.info(tag,"txid: ",txid)
             let output
+            output.coin = coin
+            output.txid = txid
+            if(type) output.type = type
             //if UXTO coin = any
             if(UTXO_COINS.indexOf(coin) >= 0){
                 output = await networks['ANY'].getTransaction(coin,txid)
@@ -443,6 +447,15 @@ export class pioneerPublicController extends Controller {
                 if(!networks[coin]) throw Error("102: coin not supported! coin: "+coin)
                 output = await networks[coin].getTransaction(txid)
             }
+
+            //get midgard info
+            if(type === 'thorchain'){
+                let midgardInfo = midgard.getTransaction(txid)
+                output.midgardInfo = midgardInfo
+            }
+
+            //TODO if dex?
+            //TODO if nft
 
             return(output)
         }catch(e){

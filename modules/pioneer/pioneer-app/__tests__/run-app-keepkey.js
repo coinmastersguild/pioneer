@@ -84,7 +84,7 @@ let run_test = async function(){
 
                 //test
                 let resultInit = await App.init(config,isTestnet)
-                //console.log("resultInit: ",resultInit)
+                console.log("resultInit: ",resultInit)
 
                 let isInit2 = App.isInitialized()
                 if(!isInit2) throw Error("App should be initialized")
@@ -114,7 +114,7 @@ let run_test = async function(){
                 })
 
                 try{
-                    let pairResult = await App.pair("XYD8AL")
+                    let pairResult = await App.pair("IITFXC")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 
@@ -127,6 +127,9 @@ let run_test = async function(){
                 //get wallets
                 let wallets = await App.getWallets()
                 console.log("wallets: ",wallets)
+
+                let walletDescriptions = await App.getWalletDescriptions()
+                console.log("walletDescriptions: ",walletDescriptions)
 
                 let contextName = await App.context()
                 console.log("contextName: ",contextName)

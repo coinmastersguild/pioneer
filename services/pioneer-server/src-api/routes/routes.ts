@@ -156,6 +156,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "WalletDescription": {
+        "dataType": "refObject",
+        "properties": {
+            "walletId": {"dataType":"string","required":true},
+            "type": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthProviders": {
         "dataType": "refEnum",
         "enums": ["shapeshift","bitcoin"],
@@ -169,7 +178,8 @@ const models: TsoaRoute.Models = {
             "username": {"dataType":"string","required":true},
             "data": {"ref":"RegisterBodyData","required":true},
             "auth": {"dataType":"string","required":true},
-            "walletId": {"dataType":"string"},
+            "walletDescription": {"ref":"WalletDescription","required":true},
+            "walletId": {"dataType":"string","required":true},
             "queryKey": {"dataType":"string"},
             "provider": {"ref":"AuthProviders","required":true},
         },
@@ -463,11 +473,12 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/:coin/getTransaction/:txid',
+        app.get('/api/v1/:coin/getTransaction/:txid/:type',
             function pioneerPublicController_getTransaction(request: any, response: any, next: any) {
             const args = {
                     coin: {"in":"path","name":"coin","required":true,"dataType":"string"},
                     txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
+                    type: {"in":"path","name":"type","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

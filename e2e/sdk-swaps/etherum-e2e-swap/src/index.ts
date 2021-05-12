@@ -252,7 +252,7 @@ const test_service = async function () {
         }
 
         //if monitor
-        let invocationId = "pioneer:invocation:v0.01:ETH:reL4imx36BTC8ZixU8Pmnu"
+        let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         //if create new
         // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
@@ -334,6 +334,10 @@ const test_service = async function () {
 
                 //get tx gas price
             }
+
+            //get midgard info
+            let txInfoMidgard =
+            //update invocation
 
             //if
             // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
