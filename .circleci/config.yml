@@ -79,9 +79,8 @@ jobs:
       - checkout
       - run:
           command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0
+      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0 snapcraft
       - run: node --version
-      - run: brew install snapcraft
       - run: cd platform && npm i
 #      - run: cd platform && npm run fix
       - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
