@@ -74,8 +74,7 @@ jobs:
       - run: cd platform && npm i
       - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-mac
   build-native-linux:
-    macos:
-      xcode: 11.5.0
+    executor: pulumi
     steps:
       - checkout
       - run:
@@ -83,9 +82,8 @@ jobs:
       - run: node --version
       - run: brew update && brew upgrade
       - run: brew install snapcraft
-      - run: npm install -g @quasar/cli
       - run: cd platform && npm i
-      - run: cd platform && npm run fix
+#      - run: cd platform && npm run fix
       - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
   build-native-windows:
     executor:
