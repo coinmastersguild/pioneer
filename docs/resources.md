@@ -22,7 +22,7 @@ https://www.digitalocean.com/docs/container-registry/how-to/use-registry-docker-
 https://docs.1inch.exchange/api/
 
 # lerna strats
-https://itnext.io/how-to-deploy-only-changed-pack
+https://itnext.io/how-to-deploy-only-changed-packages-in-a-lerna-monorepo-7e5fb234b32a
 
 
 # launch electon from browser, 

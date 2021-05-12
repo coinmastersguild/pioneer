@@ -140,11 +140,11 @@ workflows:
           name: make
           env: prod
       - build:
-          <<: *only_master
+          <<: *only_develop
           name: push image
           env: prod
       - deploy:
-          <<: *only_master
+          <<: *only_develop
           name: deploy image
           env: prod
           requires:
