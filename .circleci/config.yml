@@ -79,7 +79,7 @@ jobs:
       - checkout
       - run:
           command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0 snapcraft
+      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0 snapd
       - run: node --version
       - run: cd platform && npm i
 #      - run: cd platform && npm run fix
