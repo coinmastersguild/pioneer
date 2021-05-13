@@ -45,19 +45,7 @@ const keyring = new Keyring
 const FIRMWARE_BASE_URL = "https://static.shapeshift.com/firmware/"
 //globals
 let KEEPKEY_WALLET:any = {}
-let autoButton = true;
-let IS_CONNECTED = false
 
-//TODO for the love of god dont do this
-//coins? from device? anything
-let KEEPKEY_SUPPORT = [
-    'BTC',
-    'LTC',
-    'BCH',
-    'DOGE',
-    'RUNE',
-    'ETH'
-]
 
 /*
     Keepkey States

@@ -67,6 +67,8 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
+let noBroadcast = true
+
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
@@ -205,20 +207,11 @@ const test_service = async function () {
         //this is x percent of total available
 
         //get pool address
-        // let poolInfo = await midgard.getPoolAddress()
+        let poolInfo = await midgard.getPoolAddress()
 
         //filter by chain
-        //let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-
-        let ethVault:any = [
-            {
-                "chain": "ETH",
-                "pub_key": "thorpub1addwnpepqtthd089x6h3qg2tflq8ukhpplxg5s8v8zx3l00crvhsyg9xk43qgal9tnm",
-                "address": "0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e",
-                "router": "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B",
-                "gas_rate": "100"
-            }
-        ]
+        let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
+        log.info(tag,"ethVault: ",ethVault)
 
         log.info(tag,"ethVault: ",ethVault)
         assert(ethVault[0])
@@ -251,13 +244,13 @@ const test_service = async function () {
             noBroadcast:true
         }
 
-        //if monitor
-        let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
+        // //if monitor
+        // //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         //if create new
-        // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        // log.info(tag,"responseSwap: ",responseSwap)
-        // let invocationId = responseSwap.invocationId
+        let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+        log.info(tag,"responseSwap: ",responseSwap)
+        let invocationId = responseSwap.invocationId
 
         //do not continue invocation
         assert(invocationId)
@@ -266,91 +259,97 @@ const test_service = async function () {
             invocationId,
             context:user.context
         }
+
         //build
-        // let unsignedTx = await buildTransaction(transaction)
-        // log.info(tag,"unsignedTx: ",unsignedTx)
-        // assert(unsignedTx)
-        //
+        let unsignedTx = await buildTransaction(transaction)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
+
+        //get invocation
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.debug(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        assert(signedTx.txid)
+
         // //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        //
-        // //sign transaction
-        // let signedTx = await approveTransaction(transaction)
-        // log.info(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // assert(signedTx.txid)
-        // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await broadcastTransaction(transaction)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
-        //
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await broadcastTransaction(transaction)
+        log.info(tag,"broadcastResult: ",broadcastResult)
+
+        let invocationView3 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
 
         let isConfirmed = false
         //wait for confirmation
 
-        /*
-            Status codes
+        if(!noBroadcast){
+            //TODO
+            /*
+                Status codes
 
-            -1: errored
-             0: unknown
-             1: built
-             2: broadcasted
-             3: confirmed
-             4: fullfilled (swap completed)
-         */
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
 
-        //monitor tx lifecycle
-        let currentStatus
-        let statusCode = 0
-        while(!isConfirmed){
-            //get invocationInfo
-            let invocationInfo = await app.getInvocation(invocationId)
-            log.info(tag,"invocationInfo: ",invocationInfo)
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
 
-            let txid = invocationInfo.signedTx.txid
-            assert(txid)
-            if(!currentStatus) currentStatus = 'transaction built!'
-            if(statusCode <= 0) statusCode = 1
+                let txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
 
-            //lookup txid
-            let txInfo = await client.getTransactionData(txid)
-            log.debug(tag,"txInfo: ",txInfo)
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.debug(tag,"txInfo: ",txInfo)
 
-            if(txInfo.blockNumber){
-                log.info(tag,"Confirmed!")
+                if(txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
 
-            } else {
-                log.info(tag,"Not confirmed!")
-                //get gas price recomended
+                } else {
+                    log.info(tag,"Not confirmed!")
+                    //get gas price recomended
 
-                //get tx gas price
+                    //get tx gas price
+                }
+
+                //get midgard info
+                let txInfoMidgard =
+                //update invocation
+
+                //if
+                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+                // log.info(tag,"txInfo: ",txInfo)
+                //
+                // if(txInfo.confirmations > 0){
+                //     isConfirmed = true
+                // }
+
+                await sleep(10000)
             }
-
-            //get midgard info
-            let txInfoMidgard =
-            //update invocation
-
-            //if
-            // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-            // log.info(tag,"txInfo: ",txInfo)
-            //
-            // if(txInfo.confirmations > 0){
-            //     isConfirmed = true
-            // }
-
-            await sleep(10000)
         }
 
 
+        log.info("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

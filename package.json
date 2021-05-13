@@ -17,7 +17,7 @@
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "test": "yarn jest --verbose --config jest.config.js",
+    "test": "rm -Rf ~/.pioneer && yarn jest --verbose --config jest.config.js",
     "coverage": "jest --coverage",
     "dev:watch:all": "npm run dev:watch:pioneer && npm run dev:watch:pioneer-app && npm run dev:watch:pioneer-sdk && npm run dev:watch:pioneer-xchain-client",
     "dev:watch:pioneer": "cd modules/pioneer/pioneer && npm run build:watch",

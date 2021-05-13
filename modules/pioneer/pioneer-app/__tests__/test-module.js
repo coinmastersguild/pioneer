@@ -111,58 +111,8 @@ let run_test = async function(){
             console.log("invocations: ",invocations)
 
             // App.playChingle()
-
-            //update invocation
-            let updateBody = {
-                invocationId: 'pioneer:invocation:v0.01:ETH:dYotpM7KT3Nx1CK1vuT3Yx',
-                invocation: {
-                    _id: '608f5acf6ef6cec46fac33e9',
-                    state: 'created',
-                    type: 'transfer',
-                    invocationId: 'pioneer:invocation:v0.01:ETH:dYotpM7KT3Nx1CK1vuT3Yx',
-                    username: 'test-user-2',
-                    tags: [ 'test-user-2' ],
-                    invocation: {
-                        type: 'transfer',
-                        context: '0x33b35c665496ba8e71b22373843376740401f106.wallet.json',
-                        username: 'test-user-2',
-                        coin: 'ETH',
-                        amount: '0.000123',
-                        address: '0xc3affff54122658b89c31183cec4f15514f34624',
-                        memo: '',
-                        noBroadcast: true
-                    },
-                    notary: '1FyLxqKCvzZXUxQg3hfVZ9zDCv14q8iZnR',
-                    notarySig: {}
-                },
-                unsignedTx: {
-                    coin: 'ETH',
-                    transaction: {
-                        type: 'transfer',
-                        context: '0x33b35c665496ba8e71b22373843376740401f106.wallet.json',
-                        username: 'test-user-2',
-                        coin: 'ETH',
-                        amount: '0.000123',
-                        address: '0xc3affff54122658b89c31183cec4f15514f34624',
-                        memo: '',
-                        noBroadcast: true
-                    },
-                    HDwalletPayload: {
-                        addressNList: '[array]',
-                        nonce: '0x25',
-                        gasPrice: '0x60db88943',
-                        gasLimit: '0x13880',
-                        value: '0x6fde2b4eb000',
-                        to: '0xc3affff54122658b89c31183cec4f15514f34624',
-                        data: '',
-                        chainId: 1
-                    },
-                    verbal: 'Ethereum transaction'
-                }
-            }
-
-            let updateInvocation = await App.updateInvocation(updateBody)
-            console.log("updateInvocation: ",updateInvocation)
+            // let updateInvocation = await App.updateInvocation(updateBody)
+            // console.log("updateInvocation: ",updateInvocation)
 
             /*
                 FIO

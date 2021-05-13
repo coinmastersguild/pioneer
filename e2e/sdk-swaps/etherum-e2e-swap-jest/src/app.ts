@@ -8,7 +8,7 @@
     * verify creation
 
  */
-
+require("dotenv")
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
@@ -37,6 +37,7 @@ let WALLET_CONTEXT = ""
 export async function startApp() {
     let tag = " | app_assert_env_start | "
     try {
+
         //assert env correct
         assert(seed)
         assert(password)
@@ -48,7 +49,6 @@ export async function startApp() {
         assert(config === null)
 
         let wallet1:any = {
-            isTestnet:true,
             mnemonic:seed,
             username:username,
             password
@@ -62,7 +62,6 @@ export async function startApp() {
         assert(successCreate)
 
         await App.initConfig("english");
-        App.updateConfig({isTestnet:true});
         App.updateConfig({username});
         App.updateConfig({temp:password});
         App.updateConfig({created: new Date().getTime()});
@@ -74,8 +73,7 @@ export async function startApp() {
         config.pioneerSocket = wss
 
         //verify startup
-        let isTestnet = true
-        let resultInit = await App.init(config,isTestnet)
+        let resultInit = await App.init(config)
 
         config.password = password
         config.username = username
@@ -115,14 +113,14 @@ export async function sendPairingCode(code:string) {
 export async function buildTransaction(transaction:any) {
     let tag = " | buildTransaction | ";
     try {
-        log.info(tag,"transaction: ",transaction)
+        log.debug(tag,"transaction: ",transaction)
         if(!transaction.invocationId) throw Error("invocationId required!")
         //get invocation
 
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -130,7 +128,7 @@ export async function buildTransaction(transaction:any) {
         if(!transaction.context){
             context = WALLET_CONTEXT
         } else {
-           context = transaction.context
+            context = transaction.context
         }
         if(!context || !WALLETS_LOADED[context]) {
             log.error("context: ",context)
@@ -142,7 +140,7 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {
@@ -152,7 +150,7 @@ export async function buildTransaction(transaction:any) {
                 //TODO validate transfer object
 
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
 
                 break
             case 'approve':
@@ -181,7 +179,7 @@ export async function buildTransaction(transaction:any) {
 
         //update invocation remote
         let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
         return unsignedTx
     } catch (e) {
@@ -196,7 +194,7 @@ export async function approveTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
@@ -217,7 +215,7 @@ export async function approveTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //TODO kill the coin! field
         invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
@@ -225,7 +223,7 @@ export async function approveTransaction(transaction:any) {
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
-        log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
         //update invocation
@@ -239,7 +237,7 @@ export async function approveTransaction(transaction:any) {
 
         //update invocation remote
         let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
         return signedTx
     } catch (e) {
@@ -254,7 +252,7 @@ export async function broadcastTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         //
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
@@ -277,19 +275,20 @@ export async function broadcastTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //TODO fix tech debt
         //normalize
         if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
 
 
-        //override noBroadcast
-        if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = false
 
+        if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = true
+
+        //force noBroadcast
+        invocation.signedTx.noBroadcast = true
         let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
-
-
+        log.info(tag,"broadcastResult: ",broadcastResult)
 
         //update invocation
         let invocationId = invocation.invocationId
@@ -300,10 +299,10 @@ export async function broadcastTransaction(transaction:any) {
             signedTx:invocation.signedTx,
             broadcastResult
         }
-        log.info(tag,"updateBody: ",updateBody)
+        log.debug(tag,"updateBody: ",updateBody)
         //update invocation remote
         let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
 
         return broadcastResult

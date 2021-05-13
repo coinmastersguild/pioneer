@@ -85,6 +85,7 @@ export interface BroadcastBody {
     type?: string;
     txid?: string;
     broadcastBody?: any;
+    noBroadcast?: boolean;
     dscription?: any;
     invocationId?: string;
 }

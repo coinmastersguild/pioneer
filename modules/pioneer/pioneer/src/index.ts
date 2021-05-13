@@ -210,6 +210,7 @@ export interface BroadcastBody {
     type?:string
     txid?:string
     broadcastBody?:any
+    noBroadcast?:boolean
     dscription?:any
     invocationId?:string
 }
@@ -411,7 +412,7 @@ module.exports = class wallet {
                         break;
                     case HDWALLETS.keepkey:
                         log.info(tag," Keepkey mode! ")
-                        log.debug(tag,"**** wallet: ",wallet)
+                        log.info(tag,"**** wallet: ",wallet)
                         if(!config.wallet) throw Error("102: Config is missing watch wallet!")
                         if(!config.wallet.WALLET_PUBLIC) throw Error("103: Config watch wallet missing WALLET_PUBLIC!")
                         if(!config.wallet.pubkeys) throw Error("104: Config watch wallet missing pubkeys!")
@@ -1249,7 +1250,7 @@ module.exports = class wallet {
                     log.info(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
                     if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.coin) >= 0){
                         //opps convert
-                        unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG(unsignedTx.HDwalletPayload.coin)
+                        unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.coin]
                     }
                     const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
                     log.debug(tag,"res: ",res)

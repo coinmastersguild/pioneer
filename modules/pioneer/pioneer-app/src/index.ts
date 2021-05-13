@@ -176,7 +176,7 @@ module.exports = {
     buildTransaction: function (transaction:any) {
         return build_transaction(transaction);
     },
-    approveTransaction: function (transaction:any) {
+    approveTransaction: function (transaction:string) {
         return approve_transaction(transaction);
     },
     broadcastTransaction: function (transaction:any) {
@@ -489,26 +489,19 @@ let set_context = async function (context:string) {
 
  */
 
-let approve_transaction = async function (transaction:any) {
+let approve_transaction = async function (invocationId:string) {
     let tag = " | approve_transaction | ";
     try {
-        log.info(tag,"transaction: ",transaction)
+        log.info(tag,"invocationId: ",invocationId)
         //get invocation
-        if(!transaction.invocationId && transaction.transaction) transaction.invocationId = transaction.transaction.invocationId
-        if(!transaction.invocationId && transaction.swap) transaction.invocationId = transaction.swap.invocationId
-        if(!transaction.invocationId) throw Error("102: transaction.invocationId required!")
+        if(!invocationId) throw Error("101: invocationId required!")
 
-        let invocation = await get_invocation(transaction.invocationId)
+        let invocation = await get_invocation(invocationId)
         log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
-        let context
-        if(!transaction.context){
-            context = WALLET_CONTEXT
-        } else {
-            context = transaction.context
-        }
+        let context = WALLET_CONTEXT
 
         if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
             log.error("context: ",context)
@@ -533,7 +526,6 @@ let approve_transaction = async function (transaction:any) {
         log.info(tag,"invocation.signedTx: ",JSON.stringify(signedTx))
 
         //update invocation
-        let invocationId = invocation.invocationId
         let updateBody = {
             invocationId,
             invocation,
@@ -556,7 +548,7 @@ let approve_transaction = async function (transaction:any) {
 let pair_sdk_user = async function (code:string) {
     let tag = " | pair_sdk_user | ";
     try {
-
+        log.info(tag,"code: ",code)
         //send code
 
         log.debug(tag,"network: ",network)
@@ -920,7 +912,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                 walletFileNew.DEVICE_ID = wallet.deviceId
                 walletFileNew.LABEL = wallet.label
                 walletFileNew.deviceId = wallet.deviceId
-                walletFileNew.filename = wallet.deviceId + ".watch.wallet.json"
+                walletFileNew.filename = wallet.deviceId + ".wallet.json"
                 await initWallet(walletFileNew);
                 //TODO verify exists?
                 output = true
@@ -1068,6 +1060,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                             //events.emit('keepkey',{event})
                         });
                     }
+                    if(!KEEPKEY.features) throw Error("102: failed to pair keepkey! features")
+                    if(!KEEPKEY.features.deviceId) throw Error("103: failed to pair keepkey! deviceId")
                     if(!output.devices) output.devices = []
                     log.debug(tag,"Loading keepkey wallet! ")
 

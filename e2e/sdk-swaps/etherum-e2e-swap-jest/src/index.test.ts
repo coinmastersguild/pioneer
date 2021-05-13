@@ -36,7 +36,6 @@ require("dotenv").config({path:'../../../../.env'})
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
-let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
@@ -67,296 +66,314 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
-// @ts-ignore
-describe('calculate', function() {
+describe(' - e2e test ETH Swaps - ', function() {
     let tag = TAG + " | test_service | "
     try {
+        const log = console.log;
 
-        // @ts-ignore
-        it('add', function() {
-            // @ts-ignore
-            expect(1).toBe(1);
+        beforeEach(() => {
+            console.log = jest.fn(); // create a new mock function for each test
+        });
+        afterAll(() => {
+            console.log = log; // restore original console.log after all tests
         });
 
 
-    //     //start app and get wallet
-    //     let wallet = await startApp()
-    //     let username = wallet.username
-    //     assert(username)
-    //
-    //     let balance = wallet.WALLET_BALANCES[ASSET]
-    //     assert(balance)
-    //
-    //     //assert balance local
-    //     //log.info(tag,"wallet: ",wallet)
-    //     log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
-    //     if(balance < MIN_BALANCE){
-    //         log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
-    //         throw Error("101: Low funds!")
-    //     } else {
-    //         log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-    //     }
-    //
-    //     //generate new key
-    //     const queryKey = uuidv4();
-    //     assert(queryKey)
-    //
-    //     let config = {
-    //         queryKey,
-    //         //username,
-    //         spec,
-    //         wss
-    //     }
-    //
-    //     let app = new SDK.SDK(spec,config)
-    //     let events = await app.startSocket()
-    //     let eventPairReceived = false
-    //     events.on('message', async (request:any) => {
-    //         assert(request.queryKey)
-    //         assert(request.username)
-    //         assert(request.url)
-    //         eventPairReceived = true
-    //     })
-    //
-    //     let seedChains = ['ethereum','thorchain']
-    //     await app.init(seedChains)
-    //
-    //     //pair sdk
-    //     let code = await app.createPairingCode()
-    //     code = code.code
-    //     log.info("code: ",code)
-    //     assert(code)
-    //
-    //     //
-    //     let pairSuccess = await sendPairingCode(code)
-    //     log.info("pairSuccess: ",pairSuccess)
-    //     assert(pairSuccess)
-    //
-    //     //dont release till pair event
-    //     while(!eventPairReceived){
-    //         await sleep(300)
-    //     }
-    //
-    //     //assert sdk user
-    //     //get user
-    //     let user = await app.getUserParams()
-    //     log.info("user: ",user)
-    //     assert(user.context)
-    //
-    //     //intergration test asgard-exchange
-    //     let blockchains = Object.keys(user.clients)
-    //     log.info("blockchains: ",blockchains)
-    //
-    //     let client = user.clients['ethereum']
-    //
-    //     //get master
-    //     let masterAddress = await client.getAddress()
-    //     log.info(tag,"masterAddress: ",masterAddress)
-    //     assert(masterAddress)
-    //
-    //     /*
-    //         3 ways to express balance
-    //             Sdk (x-chain compatible object type)
-    //             native (satoshi/wei)
-    //             base (normal 0.001 ETH)
-    //      */
-    //
-    //     let balanceSdk = await client.getBalance()
-    //     log.info(" balanceSdk: ",balanceSdk)
-    //     assert(balanceSdk[0])
-    //     assert(balanceSdk[0].amount)
-    //     assert(balanceSdk[0].amount.amount())
-    //     assert(balanceSdk[0].amount.amount().toString())
-    //
-    //
-    //     let balanceNative = balanceSdk[0].amount.amount().toString()
-    //     log.info(tag,"balanceNative: ",balanceNative)
-    //     assert(balanceNative)
-    //
-    //     let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
-    //     log.info(tag,"balanceBase: ",balanceBase)
-    //     assert(balanceBase)
-    //
-    //     //value USD
-    //     let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
-    //     log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
-    //     assert(valueBalanceUsd)
-    //
-    //     if(balanceBase < TEST_AMOUNT){
-    //         throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-    //     }
-    //
-    //     let asset = {
-    //         chain:"ETH",
-    //         symbol:"ETH",
-    //         ticker:"ETH",
-    //     }
-    //
-    //     //get estimate
-    //     let estimatePayload = {
-    //         asset,
-    //         amount:balanceBase,
-    //         recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
-    //     }
-    //     log.info(tag,"estimatePayload: ",estimatePayload)
-    //
-    //     let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-    //     log.info(tag,"estimateCost: ",estimateCost)
-    //     assert(estimateCost)
-    //
-    //     //max cost - balance
-    //
-    //     //you have x max amount spendable
-    //
-    //     //you are attempting to spend x
-    //
-    //     //this is x percent of total available
-    //
-    //     //get pool address
-    //     // let poolInfo = await midgard.getPoolAddress()
-    //
-    //     //filter by chain
-    //     //let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-    //
-    //     let ethVault:any = [
-    //         {
-    //             "chain": "ETH",
-    //             "pub_key": "thorpub1addwnpepqtthd089x6h3qg2tflq8ukhpplxg5s8v8zx3l00crvhsyg9xk43qgal9tnm",
-    //             "address": "0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e",
-    //             "router": "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B",
-    //             "gas_rate": "100"
-    //         }
-    //     ]
-    //
-    //     log.info(tag,"ethVault: ",ethVault)
-    //     assert(ethVault[0])
-    //     ethVault = ethVault[0]
-    //     assert(ethVault.address)
-    //     assert(ethVault.router)
-    //     const vaultAddressEth = ethVault.address
-    //     const gasRate = ethVault.gas_rate
-    //     assert(vaultAddressEth)
-    //     assert(gasRate)
-    //
-    //     let options:any = {
-    //         verbose: true,
-    //         txidOnResp: false, // txidOnResp is the output format
-    //     }
-    //
-    //     let swap = {
-    //         inboundAddress: ethVault,
-    //         coin: "ETH",
-    //         asset: "ETH",
-    //         memo: '=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5',
-    //         "amount":{
-    //             // "type":"BASE",
-    //             // "decimal":18,
-    //             //TODO bignum like asgardx?
-    //             amount: function(){
-    //                 return TEST_AMOUNT
-    //             }
-    //         },
-    //         noBroadcast:true
-    //     }
-    //
-    //     //if monitor
-    //     let invocationId = "pioneer:invocation:v0.01:ETH:reL4imx36BTC8ZixU8Pmnu"
-    //
-    //     //if create new
-    //     // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-    //     // log.info(tag,"responseSwap: ",responseSwap)
-    //     // let invocationId = responseSwap.invocationId
-    //
-    //     //do not continue invocation
-    //     assert(invocationId)
-    //
-    //     let transaction = {
-    //         invocationId,
-    //         context:user.context
-    //     }
-    //     //build
-    //     // let unsignedTx = await buildTransaction(transaction)
-    //     // log.info(tag,"unsignedTx: ",unsignedTx)
-    //     // assert(unsignedTx)
-    //     //
-    //     // //get invocation
-    //     // let invocationView1 = await app.getInvocation(invocationId)
-    //     // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
-    //     // assert(invocationView1)
-    //     //
-    //     // //sign transaction
-    //     // let signedTx = await approveTransaction(transaction)
-    //     // log.info(tag,"signedTx: ",signedTx)
-    //     // assert(signedTx)
-    //     // assert(signedTx.txid)
-    //     // //get invocation
-    //     // let invocationView2 = await app.getInvocation(invocationId)
-    //     // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
-    //     //
-    //     // //broadcast transaction
-    //     // let broadcastResult = await broadcastTransaction(transaction)
-    //     // log.info(tag,"broadcastResult: ",broadcastResult)
-    //     //
-    //     // let invocationView3 = await app.getInvocation(invocationId)
-    //     // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
-    //
-    //     //get invocation info EToC
-    //
-    //     let isConfirmed = false
-    //     //wait for confirmation
-    //
-    //     /*
-    //         Status codes
-    //
-    //         -1: errored
-    //          0: unknown
-    //          1: built
-    //          2: broadcasted
-    //          3: confirmed
-    //          4: fullfilled (swap completed)
-    //      */
-    //
-    //     //monitor tx lifecycle
-    //     let currentStatus
-    //     let statusCode = 0
-    //     while(!isConfirmed){
-    //         //get invocationInfo
-    //         let invocationInfo = await app.getInvocation(invocationId)
-    //         log.info(tag,"invocationInfo: ",invocationInfo)
-    //
-    //         let txid = invocationInfo.signedTx.txid
-    //         assert(txid)
-    //         if(!currentStatus) currentStatus = 'transaction built!'
-    //         if(statusCode <= 0) statusCode = 1
-    //
-    //         //lookup txid
-    //         let txInfo = await client.getTransactionData(txid)
-    //         log.debug(tag,"txInfo: ",txInfo)
-    //
-    //         if(txInfo.blockNumber){
-    //             log.info(tag,"Confirmed!")
-    //
-    //         } else {
-    //             log.info(tag,"Not confirmed!")
-    //             //get gas price recomended
-    //
-    //             //get tx gas price
-    //         }
-    //
-    //         //if
-    //         // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-    //         // log.info(tag,"txInfo: ",txInfo)
-    //         //
-    //         // if(txInfo.confirmations > 0){
-    //         //     isConfirmed = true
-    //         // }
-    //
-    //         await sleep(10000)
-    //     }
-    //
-    //
-    //     //process
-    //     process.exit(0)
+        const queryKey = uuidv4();
+        let username
+        let balance
+        let wallet:any
+        let app:any
+        let eventPairReceived = false
+        let seedChains = ['ethereum','thorchain']
+        let code:any
+        let user:any
+        let client:any
+        let balanceSdk:any
+        let balanceNative:any
+        let balanceBase:any
+        let valueBalanceUsd:any
+        let estimateCost:any
+        let swap:any
+        let invocationId:string
+        let signedTx:any
+        let transaction:any
+        let broadcastResult:any
+
+        it('Starts Wallet', async function() {
+            //start app and get wallet
+            wallet = await startApp()
+            //log(tag,"wallet: ",wallet)
+            username = wallet.username
+            expect(username).toBeDefined();
+        });
+
+        it('gets balance', async function() {
+
+            //get balance
+            balance = wallet.WALLET_BALANCES[ASSET]
+            expect(balance).toBeDefined();
+        });
+
+        it('Balance is enough for test', async function() {
+
+            //get balance
+            balance = wallet.WALLET_BALANCES[ASSET]
+            expect(Number(balance)).toBeGreaterThan(Number(MIN_BALANCE));
+        });
+
+        it('SDK initialization', async function() {
+
+            let config = {
+                queryKey,
+                //username,
+                spec,
+                wss
+            }
+
+            app = new SDK.SDK(spec,config)
+            expect(app).toBeDefined();
+
+        });
+
+        it('SDK start events', async function() {
+            let events = await app.startSocket()
+            events.on('message', async (request:any) => {
+                expect(request.queryKey).toBeDefined();
+                expect(request.username).toBeDefined();
+                expect(request.url).toBeDefined();
+                eventPairReceived = true
+            })
+
+        });
+
+        it('App initialization', async function() {
+
+
+            let resultInit = await app.init(seedChains)
+            expect(resultInit).toBeDefined();
+
+        });
+
+        it('App pairing with sdk ', async function() {
+
+
+            //pair sdk
+            code = await app.createPairingCode()
+            code = code.code
+            log("code: ",code)
+            expect(code).toBeDefined();
+
+        });
+
+        it('Send Pairing Code ', async function() {
+
+            //pair sdk
+            let pairSuccess = await sendPairingCode(code)
+            log("pairSuccess: ",pairSuccess)
+            expect(pairSuccess).toBeDefined();
+
+        });
+
+        it('Wait for pairing ACK ', async function() {
+
+
+            //pair sdk
+            while(!eventPairReceived){
+                await sleep(300)
+            }
+
+        });
+
+
+        it('Get User from SDK ', async function() {
+
+
+            //get user
+            user = await app.getUserParams()
+            log("user: ",user)
+            expect(user.context).toBeDefined();
+
+        });
+
+        it('Validate user configuration ', async function() {
+
+
+            //get user
+            let blockchains = Object.keys(user.clients)
+            log("blockchains: ",blockchains)
+            expect(blockchains).toBeDefined();
+
+        });
+
+        it('Get ETH client ', async function() {
+
+
+            client = user.clients['ethereum']
+            expect(client).toBeDefined();
+
+        });
+
+        it('Assert master exists ', async function() {
+
+
+            let masterAddress = await client.getAddress()
+            log(tag,"masterAddress: ",masterAddress)
+            expect(masterAddress).toBeDefined();
+
+        });
+
+        it('get client balance SDK ', async function() {
+
+            //Match X-Chain syntax
+            balanceSdk = await client.getBalance()
+            log(" balanceSdk: ",balanceSdk)
+            expect(balanceSdk[0]).toBeDefined();
+            expect(balanceSdk[0].amount).toBeDefined();
+            expect(balanceSdk[0].amount.amount()).toBeDefined();
+            expect(balanceSdk[0].amount.amount().toString()).toBeDefined();
+
+        });
+
+        it('Convert balance to human readable format', async function() {
+
+            balanceNative = balanceSdk[0].amount.amount().toString()
+            log(tag,"balanceNative: ",balanceNative)
+            expect(balanceNative).toBeDefined();
+
+            balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
+            log(tag,"balanceBase: ",balanceBase)
+            expect(balanceBase).toBeDefined();
+
+            valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
+            log(tag,"valueBalanceUsd: ",valueBalanceUsd)
+            expect(valueBalanceUsd).toBeDefined();
+
+            expect(balanceBase).toBeGreaterThan(Number(TEST_AMOUNT));
+        });
+
+        it('Get Estimate Fees for swap ', async function() {
+            console.log = jest.fn();
+            //get estimate
+            let asset = {
+                chain:"ETH",
+                symbol:"ETH",
+                ticker:"ETH",
+            }
+
+            let estimatePayload = {
+                asset:asset,
+                amount:balanceBase.toString(),
+                recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
+            }
+            log(tag,"estimatePayload: ",estimatePayload)
+
+            estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
+            log(tag,"estimateCost: ",estimateCost)
+            expect(estimateCost).toBeDefined();
+
+        });
+
+        it('Get Swap Params from midgard ', async function() {
+
+            //get pool address
+            let poolInfo = await midgard.getPoolAddress()
+
+            //filter by chain
+            let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
+            log(tag,"ethVault: ",ethVault)
+            expect(ethVault).toBeDefined();
+
+            log(tag,"ethVault: ",ethVault)
+            expect(ethVault[0]).toBeDefined();
+            ethVault = ethVault[0]
+            expect(ethVault.address).toBeDefined();
+            expect(ethVault.router).toBeDefined();
+            const vaultAddressEth = ethVault.address
+            const gasRate = ethVault.gas_rate
+            expect(vaultAddressEth).toBeDefined();
+            expect(gasRate).toBeDefined();
+
+            swap = {
+                inboundAddress: ethVault,
+                coin: "ETH",
+                asset: "ETH",
+                memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
+                "amount":{
+                    // "type":"BASE",
+                    // "decimal":18,
+                    //TODO bignum like asgardx?
+                    amount: function(){
+                        return TEST_AMOUNT
+                    }
+                },
+                noBroadcast:true
+            }
+        });
+
+        it('Build Swap (init) ', async function() {
+            let options:any = {
+                verbose: true,
+                txidOnResp: false, // txidOnResp is the output format
+            }
+
+            let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+            log(tag,"responseSwap: ",responseSwap)
+            let invocationId = responseSwap.invocationId
+            expect(invocationId).toBeDefined();
+
+            transaction = {
+                invocationId,
+                context:user.context
+            }
+        });
+
+        it('Build Swap (with context)', async function() {
+            let options:any = {
+                verbose: true,
+                txidOnResp: false, // txidOnResp is the output format
+            }
+
+            let unsignedTx = await buildTransaction(transaction)
+            log(tag,"unsignedTx: ",unsignedTx)
+            expect(unsignedTx).toBeDefined();
+
+        });
+
+        it('Review Invocation ', async function() {
+            //get invocation
+            let invocationView1 = await app.getInvocation(invocationId)
+            log(tag,"invocationView1: (VIEW) ",invocationView1)
+            expect(invocationView1).toBeDefined();
+        });
+
+        it('Approve Invocation ', async function() {
+
+            //sign transaction
+            signedTx = await approveTransaction(transaction)
+            log(tag,"signedTx: ",signedTx)
+            expect(signedTx).toBeDefined();
+            expect(signedTx.txid).toBeDefined();
+
+        });
+
+        it('Broadcast Invocation ', async function() {
+
+            broadcastResult = await broadcastTransaction(transaction)
+            log(tag,"broadcastResult: ",broadcastResult)
+
+        });
+
+        it('Broadcast Invocation ', async function() {
+
+            broadcastResult = await broadcastTransaction(transaction)
+            log(tag,"broadcastResult: ",broadcastResult)
+
+        });
+
+        //TODO if !noBroadcast
+
+
     } catch (e) {
         log.error(e)
         //process

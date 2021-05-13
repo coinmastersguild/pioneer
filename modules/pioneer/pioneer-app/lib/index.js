@@ -490,31 +490,21 @@ let set_context = function (context) {
         expected Fee in USD:
 
  */
-let approve_transaction = function (transaction) {
+let approve_transaction = function (invocationId) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | approve_transaction | ";
         try {
-            log.info(tag, "transaction: ", transaction);
+            log.info(tag, "invocationId: ", invocationId);
             //get invocation
-            if (!transaction.invocationId && transaction.transaction)
-                transaction.invocationId = transaction.transaction.invocationId;
-            if (!transaction.invocationId && transaction.swap)
-                transaction.invocationId = transaction.swap.invocationId;
-            if (!transaction.invocationId)
-                throw Error("102: transaction.invocationId required!");
-            let invocation = yield get_invocation(transaction.invocationId);
+            if (!invocationId)
+                throw Error("101: invocationId required!");
+            let invocation = yield get_invocation(invocationId);
             log.info(tag, "invocation: ", invocation);
             if (!invocation.unsignedTx)
                 throw Error("invalid invocation! missing unsignedTx");
             if (!invocation.unsignedTx.HDwalletPayload)
                 throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload");
-            let context;
-            if (!transaction.context) {
-                context = WALLET_CONTEXT;
-            }
-            else {
-                context = transaction.context;
-            }
+            let context = WALLET_CONTEXT;
             if (!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
                 log.error("context: ", context);
                 log.error("Available: ", Object.keys(WALLETS_LOADED));
@@ -536,7 +526,6 @@ let approve_transaction = function (transaction) {
             let signedTx = yield walletContext.signTransaction(invocation.unsignedTx);
             log.info(tag, "invocation.signedTx: ", JSON.stringify(signedTx));
             //update invocation
-            let invocationId = invocation.invocationId;
             let updateBody = {
                 invocationId,
                 invocation,
@@ -558,6 +547,7 @@ let pair_sdk_user = function (code) {
     return __awaiter(this, void 0, void 0, function* () {
         let tag = " | pair_sdk_user | ";
         try {
+            log.info(tag, "code: ", code);
             //send code
             log.debug(tag, "network: ", network);
             log.debug(tag, "network: ", network.instance);
@@ -906,7 +896,7 @@ let create_wallet = function (type, wallet, isTestnet) {
                     walletFileNew.DEVICE_ID = wallet.deviceId;
                     walletFileNew.LABEL = wallet.label;
                     walletFileNew.deviceId = wallet.deviceId;
-                    walletFileNew.filename = wallet.deviceId + ".watch.wallet.json";
+                    walletFileNew.filename = wallet.deviceId + ".wallet.json";
                     yield pioneer_config_1.initWallet(walletFileNew);
                     //TODO verify exists?
                     output = true;
@@ -1049,6 +1039,10 @@ let init_wallet = function (config, isTestnet) {
                                 });
                             });
                         }
+                        if (!KEEPKEY.features)
+                            throw Error("102: failed to pair keepkey! features");
+                        if (!KEEPKEY.features.deviceId)
+                            throw Error("103: failed to pair keepkey! deviceId");
                         if (!output.devices)
                             output.devices = [];
                         log.debug(tag, "Loading keepkey wallet! ");
@@ -1078,6 +1072,10 @@ let init_wallet = function (config, isTestnet) {
                             pubkeys: walletFile.pubkeys,
                             wallet: walletFile,
                             walletId,
+                            walletDescription: {
+                                walletId,
+                                type: walletFile.TYPE
+                            },
                             username: config.username,
                             pioneerApi: true,
                             spec: URL_PIONEER_SPEC,
@@ -1157,6 +1155,10 @@ let init_wallet = function (config, isTestnet) {
                             isTestnet,
                             mnemonic,
                             walletId,
+                            walletDescription: {
+                                walletId,
+                                type: walletFile.TYPE
+                            },
                             blockchains: config.blockchains,
                             username: config.username,
                             pioneerApi: true,

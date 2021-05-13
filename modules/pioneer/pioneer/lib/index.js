@@ -322,7 +322,7 @@ module.exports = /** @class */ (function () {
                             return [3 /*break*/, 16];
                         case 8:
                             log.info(tag, " Keepkey mode! ");
-                            log.debug(tag, "**** wallet: ", wallet);
+                            log.info(tag, "**** wallet: ", wallet);
                             if (!config.wallet)
                                 throw Error("102: Config is missing watch wallet!");
                             if (!config.wallet.WALLET_PUBLIC)
@@ -1349,7 +1349,7 @@ module.exports = /** @class */ (function () {
                             log.info(tag, "HDwalletPayload: ", unsignedTx.HDwalletPayload);
                             if (UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.coin) >= 0) {
                                 //opps convert
-                                unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG(unsignedTx.HDwalletPayload.coin);
+                                unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.coin];
                             }
                             return [4 /*yield*/, this.WALLET.btcSignTx(unsignedTx.HDwalletPayload)];
                         case 2:

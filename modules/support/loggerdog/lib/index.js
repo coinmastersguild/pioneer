@@ -146,7 +146,7 @@ var Logger = /** @class */ (function () {
                 console.log(dt, color(label), ctx, message);
             }
             else {
-                console.log.apply(console, __spreadArrays([dt, color(label), ctx], args));
+                //console.log.apply(console, __spreadArrays([dt, color(label), ctx], args));
             }
             if (process.env['DATADOG_REST_INTAKE']) {
                 if (!process.env['DATADOG_API_KEY'])
