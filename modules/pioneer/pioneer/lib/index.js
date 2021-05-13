@@ -214,7 +214,7 @@ module.exports = /** @class */ (function () {
                             _j.trys.push([1, 26, , 27]);
                             if (!this.blockchains && !wallet.blockchains)
                                 throw Error("102: Must Specify blockchain support! ");
-                            log.debug(tag, "checkpoint");
+                            log.info(tag, "checkpoint");
                             paths = getPaths(this.blockchains);
                             _a = +HDWALLETS[this.type];
                             switch (_a) {
@@ -406,7 +406,7 @@ module.exports = /** @class */ (function () {
                         case 19:
                             userInfo = _j.sent();
                             userInfo = userInfo.data;
-                            if (!!userInfo.success) return [3 /*break*/, 21];
+                            if (!(!userInfo || !userInfo.success)) return [3 /*break*/, 21];
                             register = {
                                 isTestnet: false,
                                 username: this.username,
@@ -434,6 +434,8 @@ module.exports = /** @class */ (function () {
                             return [3 /*break*/, 22];
                         case 21:
                             //user found! syncronize
+                            if (!userInfo.blockchains)
+                                throw Error("104: invalid user!");
                             log.info(tag, "userInfo: ", userInfo);
                             log.info(tag, "userInfo: ", userInfo.blockchains);
                             log.info(tag, "userInfo: ", userInfo.blockchains.length);

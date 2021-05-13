@@ -330,7 +330,7 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
-                log.debug(tag,"checkpoint")
+                log.info(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
@@ -474,7 +474,7 @@ module.exports = class wallet {
                     //get user status
                     let userInfo = await this.pioneerClient.instance.User()
                     userInfo = userInfo.data
-                    if(!userInfo.success){
+                    if(!userInfo || !userInfo.success){
                         //API
                         let register = {
                             isTestnet:false,
@@ -501,6 +501,7 @@ module.exports = class wallet {
                         //emitter.info = walletInfo
                     }else{
                         //user found! syncronize
+                        if(!userInfo.blockchains) throw Error("104: invalid user!")
                         log.info(tag,"userInfo: ",userInfo)
                         log.info(tag,"userInfo: ",userInfo.blockchains)
                         log.info(tag,"userInfo: ",userInfo.blockchains.length)

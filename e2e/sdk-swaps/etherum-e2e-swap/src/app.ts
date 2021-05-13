@@ -8,7 +8,7 @@
     * verify creation
 
  */
-
+require("dotenv")
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
@@ -128,7 +128,7 @@ export async function buildTransaction(transaction:any) {
         if(!transaction.context){
             context = WALLET_CONTEXT
         } else {
-           context = transaction.context
+            context = transaction.context
         }
         if(!context || !WALLETS_LOADED[context]) {
             log.error("context: ",context)

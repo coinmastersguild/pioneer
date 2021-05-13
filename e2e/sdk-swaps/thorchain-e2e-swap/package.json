@@ -1,11 +1,12 @@
 {
-  "name": "@pioneer-platform/eth-e2e-sdk-jest",
+  "name": "@pioneer-platform/thorchain-e2e-sdk",
   "version": "8.0.0",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
     "build": "tsc -p .",
-    "test": "rm -Rf ~/.pioneer && jest --silent=true --verbose",
+    "run-dev": "rm -Rf ~/.pioneer && npm run build && npm run start",
+    "test": "rm -Rf ~/.pioneer && jest --silent=true --verbose --coverage",
     "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/eth-e2e-sdk:latest .",
     "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
     "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",

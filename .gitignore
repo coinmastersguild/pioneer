@@ -20,3 +20,4 @@ monerowallet
 monerowallet.keys
 .deploy-env
 .DS_Store
+coverage
