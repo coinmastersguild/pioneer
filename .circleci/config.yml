@@ -146,3 +146,10 @@ workflows:
           env: prod
           requires:
             - push image
+      - deploy:
+          <<: *only_develop
+          name: e2e test dev
+          env: prod
+          requires:
+            - push image
+            - deploy image

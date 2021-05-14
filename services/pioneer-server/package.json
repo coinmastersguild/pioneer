@@ -49,6 +49,7 @@
     "@pioneer-platform/fio-network": "latest",
     "@pioneer-platform/kava-network": "latest",
     "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/midgard-client": "latest",
     "@pioneer-platform/network": "latest",
     "@pioneer-platform/pioneer-client": "latest",
     "@pioneer-platform/pioneer-coins": "latest",
