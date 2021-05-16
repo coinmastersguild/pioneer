@@ -162,11 +162,14 @@ workflows:
           <<: *only_develop
           name: push image
           env: prod
+          requires:
+            - make
       - deploy:
           <<: *only_develop
           name: deploy image
           env: prod
           requires:
+            - make
             - push image
       - deploy:
           <<: *only_develop
