@@ -8,3 +8,4 @@ for dir in modules/intergrations/*; do (cd "$dir" && rm -rf dist .quasar node_mo
 for dir in modules/support/*; do (cd "$dir" && rm -rf dist .quasar node_modules package-lock.json); done
 
 cd "platform" && rm -rf dist .quasar node_modules
+find . -name "node_modules" -exec rm -rf '{}' +; find . -name "package-lock.json" -exec rm -rf '{}' +;

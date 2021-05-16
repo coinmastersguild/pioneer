@@ -7,13 +7,15 @@
       "modules/**/**/**/*",
       "apps/**/*",
       "e2e/**/**/**/*"
-    ]
+    ],
+    "version": "independent"
   },
   "scripts": {
-    "yarn": "yarn",
+    "yarn": "yarn --network-timeout 100000",
     "build": "make",
+    "build-lerna": "sh scripts/build-lerna.sh",
     "build-dev": "lerna run build --include-dependencies --scope @pioneer-platform/*",
-    "clean": "lerna run clean --scope @pioneer-platform/* && rm -rf coverage dist node_modules",
+    "clean": "lerna run clean --scope @pioneer-platform/* && rm -rf coverage dist node_modules && sh scripts/clean.sh",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
