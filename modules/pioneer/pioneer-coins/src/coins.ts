@@ -16,7 +16,7 @@ let {
 } = require('./paths')
 
 
-enum HDWALLETS {
+export enum HDWALLETS {
     'pioneer',
     'trezor',
     'keepkey',

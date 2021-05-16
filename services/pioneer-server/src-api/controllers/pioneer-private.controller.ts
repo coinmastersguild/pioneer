@@ -195,7 +195,6 @@ export class ApiError extends Error {
 @Tags('Private Endpoints')
 /**
  *  Test
-
  */
 @Route('')
 export class pioneerPrivateController extends Controller {
