@@ -3215,7 +3215,7 @@
     crypto-js "^4.0.0"
     ethereumjs-util "^7.0.10"
 
-"@pioneer-platform/pioneer-coins@^8.0.3", "@pioneer-platform/pioneer-coins@latest":
+"@pioneer-platform/pioneer-coins@latest":
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer-coins/-/pioneer-coins-8.0.3.tgz#4e4d052ccb334b885b5836a8c42c240364df3d95"
   integrity sha512-lcAALEX0v5xkBdXTSAsYBS2iuCbWA5CDKyMt5zRByLHrvm0VstM8HKgWRQN5vtwlTx1rJo7wEhXPKP0CxhThdA==

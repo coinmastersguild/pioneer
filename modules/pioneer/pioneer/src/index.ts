@@ -1236,7 +1236,8 @@ module.exports = class wallet {
                         coin,
                         serialized:res.serializedTx
                     }
-                }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+                }else if(false){
+                    //TODO fix tokens
                     log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
                     //debug https://flightwallet.github.io/decode-eth-tx/
@@ -1600,7 +1601,8 @@ module.exports = class wallet {
                     //     serialized:res.serializedTx
                     // }
 
-                }else if(coin === 'ETH' || tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+                }else if(coin === 'ETH' || false){
+                    //TODO fix tokens
                     log.debug(tag,"checkpoint")
                     let balanceEth = await this.getBalance('ETH')
                     log.debug(tag,"balanceEth: ",balanceEth)
@@ -1628,37 +1630,40 @@ module.exports = class wallet {
                             data:memo
                         }
                         log.debug(tag,"txParams: ",txParams)
-                    }else{
-                        let knownCoins = tokenData.tokens
-                        log.debug(tag,"knownCoins: ",knownCoins)
-                        if(knownCoins.indexOf(coin) === -1) throw Error("107: unknown token! "+coin)
-
-                        let balanceToken = await this.getBalance(coin)
-
-                        //verify token balance
-                        if(amount > balanceToken) throw Error("103: Insufficient balance! ")
-
-                        let abiInfo = tokenData.ABI[coin]
-                        let metaData = abiInfo.metaData
-
-                        let amountNative = parseFloat(amount) * metaData.BASE
-                        amountNative = Number(parseInt(String(amountNative)))
-
-                        log.debug({coin:coin,address, amountNative})
-                        let transfer_data = await this.pioneerClient.instance.GetTransferData({coin,address,amount:amountNative})
-                        transfer_data = transfer_data.data
-                        log.debug(tag,"transfer_data: ",transfer_data)
-
-                        txParams = {
-                            nonce: nonce,
-                            to: metaData.contractAddress,
-                            gasPrice: gas_price,
-                            data: transfer_data,
-                            gasLimit : gas_limit
-
-                        }
-                        log.debug(tag,"txParams: ",txParams)
                     }
+                    // else{
+                    //     //TODO tokens
+                    //     // let knownCoins = tokenData.tokens
+                    //     // log.debug(tag,"knownCoins: ",knownCoins)
+                    //     // if(knownCoins.indexOf(coin) === -1) throw Error("107: unknown token! "+coin)
+                    //     //
+                    //     let balanceToken = await this.getBalance(coin)
+                    //
+                    //     //verify token balance
+                    //     if(amount > balanceToken) throw Error("103: Insufficient balance! ")
+                    //
+                    //     let abiInfo = "NERF"
+                    //     let metaData = "NERF"
+                    //
+                    //     let amountNative = parseFloat(amount) * metaData.BASE
+                    //     amountNative = Number(parseInt(String(amountNative)))
+                    //
+                    //     log.debug({coin:coin,address, amountNative})
+                    //     let transfer_data = await this.pioneerClient.instance.GetTransferData({coin,address,amount:amountNative})
+                    //     transfer_data = transfer_data.data
+                    //     log.debug(tag,"transfer_data: ",transfer_data)
+                    //
+                    //     txParams = {
+                    //         nonce: nonce,
+                    //         to: "NERF",
+                    //         gasPrice: gas_price,
+                    //         data: transfer_data,
+                    //         gasLimit : gas_limit
+                    //
+                    //     }
+                    //     log.debug(tag,"txParams: ",txParams)
+                    // }
+                    if(!txParams) throw Error("tokens not supported")
 
                     //send FROM master
                     let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
