@@ -360,15 +360,11 @@ export class pioneerPrivateController extends Controller {
             log.info(tag,"walletId: ",walletId)
 
             let accountInfo = await redis.hgetall(authorization)
-            if(!accountInfo) throw Error("unknown token! token:"+authorization)
             log.info(tag,"accountInfo: ",accountInfo)
 
             let walletInfo:any = {}
             if(accountInfo){
                 log.info(tag,"accountInfo: ",accountInfo)
-                let isTestnet = accountInfo.isTestnet || false
-                //let isTestnet = false
-                //log.info(tag,"isTestnet: ",isTestnet)
                 let username = accountInfo.username
                 if(!username){
                     log.error(tag,"invalid accountInfo: ",accountInfo)
@@ -378,13 +374,6 @@ export class pioneerPrivateController extends Controller {
                 let isKnownWallet = await redis.sismember(username+':wallets',walletId)
                 log.info(tag,"isKnownWallet: ",isKnownWallet)
 
-                //get user context
-                if(!walletId){
-                    let userInfo = await redis.hgetall(username)
-                    log.info(tag,"userInfo: ",userInfo)
-                    walletId = userInfo.context
-                    if(!walletId) throw Error("No walletId on username! username: "+username)
-                }
                 let { pubkeys, masters } = await pioneer.getPubkeys(username,walletId)
                 //build wallet info
                 walletInfo.pubkeys = pubkeys
@@ -394,18 +383,17 @@ export class pioneerPrivateController extends Controller {
 
                 //wallets
                 let userInfoMongo = await usersDB.findOne({username})
+                log.info(tag,"userInfoMongo: ",userInfoMongo)
+                //migrations
+                if(!userInfoMongo) throw Error("102: unknown user! username: "+username)
+                if(!userInfoMongo.walletDescriptions) throw Error("Invalid user! missing walletDescriptions")
                 walletInfo.wallets = userInfoMongo.wallets
                 walletInfo.blockchains = userInfoMongo.blockchains
 
-                //filter current wallet
-
-                log.info(tag,"userInfoMongo: ",userInfoMongo)
-                if(!userInfoMongo) {
-                    throw Error("102: unknown user! username: "+username)
-                }
-
                 //get asset balances
                 let assetBalances = await redis.hgetall(username+":assets:"+walletId)
+                if(!assetBalances) throw Error("User Asset Balance Cache missing!")
+
                 //fill in 0's
                 let allAssets = Object.keys(walletInfo.masters)
                 for(let i = 0; i < allAssets.length; i++){
@@ -417,14 +405,6 @@ export class pioneerPrivateController extends Controller {
                 //get value of portfolio
                 let valuePortfolio = await coincap.valuePortfolio(assetBalances)
                 log.info(tag,"valuePortfolio: ",valuePortfolio)
-                //TODO Do I actually need? no? deleteme
-                // let walletDescription = {
-                //     walletId:walletInfo.walletId,
-                //     type:walletInfo.type,
-                //     values:valuePortfolio.values,
-                //     totalValueUsd:valuePortfolio.total
-                // }
-                // walletInfo.walletDescription = walletDescription
                 walletInfo.valueUsds = valuePortfolio.values
                 walletInfo.totalValueUsd = valuePortfolio.total
                 walletInfo.username = username
@@ -435,7 +415,8 @@ export class pioneerPrivateController extends Controller {
             }else{
                 return {
                     error:true,
-                    message:"101: Token not found! auth: "+authorization
+                    errorCode:1,
+                    message:"Token not Registered!"
                 }
             }
 
@@ -1158,8 +1139,9 @@ export class pioneerPrivateController extends Controller {
             let output:any = {}
             let newKey
             log.info(tag,"body: ",body)
-            if(!body.walletId) throw Error("walletId required on body!")
-            if(!body.blockchains) throw Error("blockchains required on body!")
+            if(!body.walletId) throw Error("102: walletId required on body!")
+            if(!body.blockchains) throw Error("103: blockchains required on body!")
+            if(typeof(body.walletDescription) === 'string') throw Error("104: Invalid Wallet Description!")
 
             //if auth found in redis
             const authInfo = await redis.hgetall(authorization)

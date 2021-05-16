@@ -108,7 +108,7 @@ export const SLIP_44_BY_LONG:any = {
     thorchain: 931,
     cardano: 1815,
     secret: 529,
-    terra: 330,
+    terra: 931,
     kava: 459,
 };
 

@@ -115,25 +115,25 @@ let run_test = async function(){
         let balanceRUNE = await Wallet.getBalance("RUNE")
         console.log("balanceRUNE: ",balanceRUNE)
 
-        let address = "thor1veu9u5h4mtdq34fjgu982s8pympp6w87el9h2j"
-        let amount = "100"
-        let memo = ""
-
-        let transfer = {
-            coin:"RUNE",
-            addressTo:address,
-            amount,
-            memo
-        }
-
-        let transferUnSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferUnSigned: ",transferUnSigned)
-
-        let transferSigned = await Wallet.signTransaction(transferUnSigned)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
+        // let amount = "100"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
+        //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let intent = {
         //     coin:"RUNE",
