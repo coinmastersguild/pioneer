@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/blocknative-client",
-  "version": "8.0.1",
+  "version": "8.1.0",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

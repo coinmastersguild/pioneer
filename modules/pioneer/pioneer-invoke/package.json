@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-invoke",
-  "version": "8.0.1",
+  "version": "8.1.0",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/signing": "^8.0.1",
+    "@pioneer-platform/signing": "^8.1.0",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",

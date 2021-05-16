@@ -1,6 +1,6 @@
 {
   "name": "pioneer-bex",
-  "version": "8.0.1",
+  "version": "8.1.0",
   "description": "A simple multi-chain explorer",
   "productName": "Pioneer Browser Extension",
   "author": "highlander <bithighlander@gmail.com>",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/pioneer": "^8.0.1",
+    "@pioneer-platform/pioneer": "^8.1.0",
     "@pioneer-platform/pioneer-hardware-web": "^6.3.5",
     "@quasar/extras": "^1.9.19",
     "@shapeshiftoss/hdwallet-core": "^1.11.1",
