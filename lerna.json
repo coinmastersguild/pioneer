@@ -12,7 +12,8 @@
   },
   "packages": [
     "modules/**/**/*",
-    "e2e/**/**/*"
+    "e2e/**/**/*",
+    "platform"
   ],
   "useWorkspaces": true
 }

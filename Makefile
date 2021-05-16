@@ -8,8 +8,10 @@ clean::
 	find . -name "node_modules" -type d -prune -print | xargs du -chs && find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \; &&\
 	sh scripts/clean.sh
 
+#TODO build tsoa server based on env
+#TODO build pubkey worker
 build::
-	yarn && && sh scripts/build.sh && cd services/pioneer-server && yarn
+	yarn && sh scripts/build.sh && cd services/pioneer-server && yarn && npm run build:all-local
 
 test::
 	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
@@ -18,6 +20,6 @@ test::
 publish::
 	yarn publish:lerna
 
-## deployment
+## TODO start application
 up::
 	echo "todo"
