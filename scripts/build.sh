@@ -7,6 +7,6 @@ git config user.name "cibot"
 
 git add -A && git commit -m "version bump"
 #yarn add lerna -g --ignore-workspace-root-check
-lerna version patch
+#lerna version patch
 
 lerna publish from-package --no-private --yes
