@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@kava-labs/javascript-sdk": "^4.0.1-beta.2",
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "@pioneer-platform/terra-network": "^8.0.0",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",

@@ -113,6 +113,29 @@ export const SLIP_44_BY_LONG:any = {
     kava: 459,
 };
 
+export const GET_NETWORK_NAME = function(network:string){
+    let networkName
+    switch (network) {
+        case "1":
+            networkName = "Main";
+            break;
+        case "2":
+            networkName = "Morden";
+            break;
+        case "3":
+            networkName = "Ropsten";
+            break;
+        case "4":
+            networkName = "Rinkeby";
+            break;
+        case "42":
+            networkName = "Kovan";
+            break;
+        default:
+            networkName = "Unknown";
+    }
+    return networkName
+}
 
 const HARDENED = 0x80000000;
 export function bip32Like(path: string): boolean {

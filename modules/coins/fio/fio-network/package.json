@@ -18,7 +18,7 @@
   "dependencies": {
     "@fioprotocol/fiojs": "^1.0.1",
     "@fioprotocol/fiosdk": "^1.0.2",
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "@scatterjs/core": "^2.7.54",
     "@scatterjs/fio": "^1.5.37",
     "@types/node": "^13.13.12",

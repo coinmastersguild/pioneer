@@ -13,7 +13,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "@pioneer-platform/utxo-crypto": "^6.2.7",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",

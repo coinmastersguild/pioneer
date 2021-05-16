@@ -14,7 +14,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "@pioneer-platform/signing": "^8.0.0",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",

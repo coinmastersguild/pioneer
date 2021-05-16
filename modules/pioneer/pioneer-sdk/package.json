@@ -20,9 +20,9 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-coins": "latest",
-    "@pioneer-platform/pioneer-events": "latest",
-    "@pioneer-platform/pioneer-xchain-client": "latest",
+    "@pioneer-platform/pioneer-coins": "^8.0.0",
+    "@pioneer-platform/pioneer-events": "^8.0.0",
+    "@pioneer-platform/pioneer-xchain-client": "^8.0.0",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
     "openapi-client-axios": "^3.13.1",

@@ -5,19 +5,19 @@ env=skunkworks
 .DEFAULT_GOAL := build
 
 clean::
-	git clean -d -f && find . -name "node_modules" -type d -prune -print | xargs du -chs && find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \;
+	find . -name "node_modules" -type d -prune -print | xargs du -chs && find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \; &&\
+	npm run clean
 
 build::
-	yarn && cd services/pioneer-server && yarn &&\
-
-
-install::
-	yarn && yarn build
+	yarn && cd services/pioneer-server && yarn && npx lerna run deploy \— since HEAD~1
 
 test::
-	yarn test && yarn coverage &&\
-	npm install -g codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=${CODECLIMATE_REPO_TOKEN} codeclimate-test-reporter < coverage/lcov.info
+	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
+	#npm install -g codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=${CODECLIMATE_REPO_TOKEN} codeclimate-test-reporter < coverage/lcov.info
 
 publish::
 	yarn publish:lerna
 
+## deployment
+up::
+	echo "todo"

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.0",
-    "@pioneer-platform/pioneer": "latest",
+    "@pioneer-platform/pioneer": "^8.0.0",
     "@pioneer-platform/pioneer-hardware-web": "^6.3.5",
     "@quasar/extras": "^1.9.19",
     "@shapeshiftoss/hdwallet-core": "^1.11.1",

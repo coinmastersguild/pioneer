@@ -2,7 +2,7 @@
   "name": "@pioneer-platform/coincap",
   "version": "8.0.0",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "graphql-request": "^1.8.2"

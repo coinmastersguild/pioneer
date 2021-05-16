@@ -13,7 +13,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
     "@types/node": "^13.13.12",
     "bitcoinjs-lib": "3.3.2",
     "bitcoinjs-message": "2.0.0",

@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@crypto-hex-decoder/bnb": "^2.1.0",
-    "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/nodes": "latest",
+    "@pioneer-platform/loggerdog": "^8.0.0",
+    "@pioneer-platform/nodes": "^8.0.0",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
