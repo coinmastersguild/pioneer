@@ -12,6 +12,7 @@
   },
   "scripts": {
     "clean": "make clean",
+    "refresh": "make clean && make",
     "up-dev": "make && make up=dev",
     "test-dev": "make test",
     "release": "make && make up=release",

@@ -15,9 +15,9 @@
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.0",
     "@pioneer-platform/pioneer-coins": "^8.0.0",
-    "@shapeshiftoss/hdwallet-core": "^8.0.0",
-    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "^1.13.9",
-    "@shapeshiftoss/hdwallet-keepkey-tcp": "^1.13.9",
+    "@shapeshiftoss/hdwallet-core": "latest",
+    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "latest",
+    "@shapeshiftoss/hdwallet-keepkey-tcp": "latest",
     "@types/bytebuffer": "^5.0.42",
     "@types/google-protobuf": "^3.7.4",
     "@types/node": "^13.13.48",

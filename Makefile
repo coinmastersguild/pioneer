@@ -6,7 +6,7 @@ env=skunkworks
 
 clean::
 	find . -name "node_modules" -type d -prune -print | xargs du -chs && find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \; &&\
-	npm run clean
+	sh scripts/clean.sh
 
 build::
 	yarn && cd services/pioneer-server && yarn && npx lerna run deploy \— since HEAD~1
