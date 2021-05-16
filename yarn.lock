@@ -1037,7 +1037,7 @@
     varuint-bitcoin "^1.0.4"
     wif "^2.0.1"
 
-"@bithighlander/hdwallet-core@^1.10.14", "@bithighlander/hdwallet-core@^1.10.15":
+"@bithighlander/hdwallet-core@^1.10.14", "@bithighlander/hdwallet-core@^1.10.15", "@bithighlander/hdwallet-core@latest":
   version "1.10.15"
   resolved "https://registry.yarnpkg.com/@bithighlander/hdwallet-core/-/hdwallet-core-1.10.15.tgz#32aac38ed2c499959081a5ae8388952ef43bbe6d"
   integrity sha512-pTcF/AilifzOU1RZLQo57FdhL2wOwyL3wzLXUzJZAxbY1FOd0WLL7Ai7cyK3R+Zd6rpYKfvfc6/cqkK92xWIvw==
@@ -1046,7 +1046,7 @@
     lodash "^4.17.15"
     rxjs "^6.4.0"
 
-"@bithighlander/hdwallet-native@^1.10.14", "@bithighlander/hdwallet-native@^1.10.15":
+"@bithighlander/hdwallet-native@^1.10.14", "@bithighlander/hdwallet-native@latest":
   version "1.10.15"
   resolved "https://registry.yarnpkg.com/@bithighlander/hdwallet-native/-/hdwallet-native-1.10.15.tgz#f38ba4f8ef4d8765d53c0896430e7fcd968ce335"
   integrity sha512-fphzwDorPePSRL0YVfsNjbRz2cmJKrIoShbLTDejHRTJMVfXvhAxbcyGOv8oS3y1Bz6hLLqC0A8QuhN7/YAPUA==
@@ -3125,7 +3125,7 @@
   dependencies:
     tslib "^2.0.0"
 
-"@peculiar/webcrypto@latest":
+"@peculiar/webcrypto@^8.0.0", "@peculiar/webcrypto@latest":
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/@peculiar/webcrypto/-/webcrypto-1.1.7.tgz#ff02008612e67ab7cc2a92fce04a7f0e2a04b71c"
   integrity sha512-aCNLYdHZkvGH+T8/YBOY33jrVGVuLIa3bpizeHXqwN+P4ZtixhA+kxEEWM1amZwUY2nY/iuj+5jdZn/zB7EPPQ==
@@ -3135,45 +3135,6 @@
     pvtsutils "^1.1.6"
     tslib "^2.2.0"
     webcrypto-core "^1.2.0"
-
-"@pioneer-platform/binance-network@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/binance-network/-/binance-network-8.0.0.tgz#a24c364e021f53f902339e2c8e52a04ed5020222"
-  integrity sha512-7qqohVZ2ngAHIXfTcR24sj/yg0Od46bbH+hxXea/hEfx8pDkvD6d8ob5J3PbJnu6gbBqAfK2g/iL/SvJzLqQFg==
-  dependencies:
-    "@crypto-hex-decoder/bnb" "^2.1.0"
-    "@pioneer-platform/loggerdog" latest
-    "@pioneer-platform/nodes" latest
-    axios "^0.19.2"
-    dotenv "^8.2.0"
-    https "^1.0.0"
-    moment "^2.29.1"
-    wait-promise "^0.4.1"
-
-"@pioneer-platform/blockbook@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/blockbook/-/blockbook-8.0.0.tgz#4b15ebce30fe49e5c82e43f74b30b8f0b78958d2"
-  integrity sha512-he5eefJ2p9qQZeYj2NhnV1U+l0r6fIJSzdLnbeq1HK1ybBHo+R8tbnwRmI2ckiBygD53RLBVG2BsmzFNI3GaAQ==
-  dependencies:
-    "@pioneer-platform/loggerdog" latest
-    "@types/request-promise-native" "^1.0.17"
-    "@types/ws" "^7.4.2"
-    axios "^0.21.1"
-    axios-retry "^3.1.9"
-    blockbook-client latest
-    fake-useragent "^1.0.1"
-
-"@pioneer-platform/cosmos-network@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/cosmos-network/-/cosmos-network-8.0.0.tgz#48ecf190905868151b91a0dd38aea405f26dc9ff"
-  integrity sha512-bCb8jhrVaMZ8Glm4EQD4hcBXM9VGPd7/HHtT7LR7XuQKxeCzCbWTJ7aClXDz2dIaV6off0aj/RWfwZHQlq/Xyw==
-  dependencies:
-    "@pioneer-platform/loggerdog" latest
-    "@pioneer-platform/nodes" latest
-    axios "^0.19.2"
-    dotenv "^8.2.0"
-    https "^1.0.0"
-    wait-promise "^0.4.1"
 
 "@pioneer-platform/eth-crypto@^6.2.3":
   version "6.2.3"
@@ -3213,22 +3174,6 @@
     ts-node "^8.10.2"
     typescript "^3.9.5"
 
-"@pioneer-platform/eth-network@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/eth-network/-/eth-network-8.0.0.tgz#c28674eaaf7799289dd3fb0b383d6be0259078ae"
-  integrity sha512-1PkqT2RRJx04+SL6VZcUAKKBH7dhEA2AolZWcETBN5rqW1rpoFhp/BAq5KYhdREZvomGiJ1HSuoZQFLspnXrIw==
-  dependencies:
-    "@ethersproject/providers" "^5.1.0"
-    "@pioneer-platform/blockbook" "^8.0.0"
-    "@pioneer-platform/loggerdog" "^8.0.0"
-    "@xchainjs/xchain-client" latest
-    "@xchainjs/xchain-util" "^0.2.6"
-    axios "^0.21.1"
-    dotenv "^8.2.0"
-    ethers "^5.1.0"
-    wait-promise "^0.4.1"
-    web3 "^1.3.5"
-
 "@pioneer-platform/loggerdog@latest":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/loggerdog/-/loggerdog-8.0.1.tgz#367e4ed64334c6a998f4cebf71e4cdab3126d78e"
@@ -3243,22 +3188,7 @@
     ts-node "^8.10.2"
     typescript "^3.9.5"
 
-"@pioneer-platform/midgard-client@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/midgard-client/-/midgard-client-8.0.0.tgz#82f7976be090d2e7775c7d0365abc8d9611350d9"
-  integrity sha512-UDEM707PdM5XF2ik73yvkt1nTvBPQ32+NHUf159pwn7n+KchzMrlhCBBy2Gvy0vBYYrB/bFCVhJVD4e6GnxbnQ==
-  dependencies:
-    "@pioneer-platform/loggerdog" "^8.0.0"
-    bech32 "^1.1.4"
-    bignumber.js "^9.0.0"
-    bitcoinjs-lib "^5.2.0"
-    crypto-js "^4.0.0"
-    dotenv "^8.2.0"
-    ethereumjs-util "^7.0.5"
-    openapi-client-axios "^3.6.2"
-    web3-utils "^1.3.0"
-
-"@pioneer-platform/nedb@latest":
+"@pioneer-platform/nedb@^8.0.0", "@pioneer-platform/nedb@latest":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/nedb/-/nedb-0.0.2.tgz#f531032378765818f2af2ffef270eec8a0161ee6"
   integrity sha512-krL6xB9Bl3ItOxx7Q4mUqVot8S9yuDdW9kjpSEO4jCI8SclrZC/PUPvVaYRRa3hsbx1I1vOFZdGt0B1m9l5I0g==
@@ -3271,14 +3201,6 @@
     nedb-promises "^4.1.1"
     ts-node "^8.10.2"
     typescript "^3.9.5"
-
-"@pioneer-platform/nodes@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/nodes/-/nodes-8.0.0.tgz#fe04baab193fc4bb5afdbcbed7905f357d420a13"
-  integrity sha512-/v0dvtIKFZMUX0RdgpqPpCmUwgf5mfdGuxjZfjEZ87PzLnYKy7MNT+j6DzO4FtBokxT4XYzp4vXaPiQwLEoeSw==
-  dependencies:
-    "@pioneer-platform/loggerdog" latest
-    dotenv "^8.2.0"
 
 "@pioneer-platform/pioneer-app@latest":
   version "8.0.0"
@@ -3337,7 +3259,7 @@
     typescript "^3.9.7"
     when "^3.7.8"
 
-"@pioneer-platform/pioneer-coincap@latest":
+"@pioneer-platform/pioneer-coincap@^8.0.0":
   version "6.2.5"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer-coincap/-/pioneer-coincap-6.2.5.tgz#da54d5e0e85c5bf1350f8b14c7fc48957ba52c14"
   integrity sha512-V/QeQj3mCF+nlHrEOIUTvSZOKbNKJN+IREQZTLhGndujNCVQTINqJC+ZHHRzbHFy4kpAot2lRs3kDYGRvJJD3g==
@@ -3395,7 +3317,7 @@
     mkdirp "^1.0.4"
     ts-node "^9.1.1"
 
-"@pioneer-platform/pioneer-eth-token-data@latest":
+"@pioneer-platform/pioneer-eth-token-data@^8.0.0", "@pioneer-platform/pioneer-eth-token-data@latest":
   version "6.2.7"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer-eth-token-data/-/pioneer-eth-token-data-6.2.7.tgz#f6ccb1269be1c0eb308f6909b90e69fe6165ac56"
   integrity sha512-2onkre7vyVTMrh17hLWNK7N1ll7aHw1xj3qOodVCQqueg+O2AXH9OxMr3oWKACfxmoHWSrvdz//UeMpaKksc2Q==
@@ -3503,36 +3425,6 @@
     usb "^1.7.0"
     wait-promise "^0.4.1"
 
-"@pioneer-platform/pioneer-sdk@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer-sdk/-/pioneer-sdk-8.0.0.tgz#eab33b558354f9ab944fa82c53df561e8cd1db28"
-  integrity sha512-RaLe/TsX4u6nsL+7jkYdE6Ct5z1F6xikubRY5bvHQQDqXoWyOze9LleXf+3JDofMzTI0Qk93KuDtSNLpNFdbYg==
-  dependencies:
-    "@pioneer-platform/pioneer-coins" latest
-    "@pioneer-platform/pioneer-events" latest
-    "@pioneer-platform/pioneer-xchain-client" latest
-    bignumber.js "^9.0.1"
-    dotenv "^8.2.0"
-    openapi-client-axios "^3.13.1"
-    prettyjson "^1.2.1"
-    ts-node "^9.1.1"
-
-"@pioneer-platform/pioneer-xchain-client@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer-xchain-client/-/pioneer-xchain-client-8.0.0.tgz#7c9fceaf3913e8187a0b8562667ada867e998657"
-  integrity sha512-fukAtUbptMvMy7eG7V7aeRsF0mnQQa1dlbXYCL+qEJjkuC4OHwjLVUqOvhCTxUr6d45DGiC4k6GB0reO4C9K4Q==
-  dependencies:
-    "@binance-chain/javascript-sdk" "^4.1.1"
-    "@pioneer-platform/pioneer-coins" "^8.0.0"
-    "@pioneer-platform/pioneer-invoke" "^8.0.0"
-    "@xchainjs/xchain-client" "^0.7.0"
-    "@xchainjs/xchain-util" "^0.2.6"
-    bignumber.js "^9.0.1"
-    dotenv "^8.2.0"
-    ethers "^5.1.4"
-    openapi-client-axios "^3.13.1"
-    prettyjson "^1.2.1"
-
 "@pioneer-platform/pioneer@latest":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/pioneer/-/pioneer-8.0.0.tgz#403ce55bf51c3ad8811a931671231684869be868"
@@ -3568,7 +3460,7 @@
     socket.io-client "^2.4.0"
     web3-utils "^1.3.5"
 
-"@pioneer-platform/platform@latest":
+"@pioneer-platform/platform@^8.0.0":
   version "7.2.4"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/platform/-/platform-7.2.4.tgz#d89357952680e8c5a5fcfd99cd73767acab4840c"
   integrity sha512-mIXK3fNhdPl3iwQafkYq9pJzaxl5nK2E3aEl0lzy+gySRYm0YOV3uuWqZo97hjvFBJgB/CitknD/Ubjqh7EBYg==
@@ -3605,27 +3497,7 @@
     vue-numerals "^4.0.5"
     vue2-transitions "^0.3.0"
 
-"@pioneer-platform/thor-network@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/thor-network/-/thor-network-8.0.0.tgz#3c6e457a1d30f28620fefecfa842e73d18594c92"
-  integrity sha512-8mqoxwKmCt+0FeExAtXkOcsrybYIIMqVbemDiJk8sYr5E2dOq22ch4CNbiFc4eJYxY/flXBpyepDJmey0rvQoA==
-  dependencies:
-    "@pioneer-platform/loggerdog" latest
-    bech32 "^1.1.4"
-    bip32 "^2.0.5"
-    bip39 "^3.0.2"
-    bitcoinjs-lib "^5.1.10"
-    coininfo "^5.1.0"
-    cosmos-client "^0.40.0-rc1"
-    crypto-js "^3.3.0"
-    dotenv "^8.2.0"
-    hdkey "^1.1.2"
-    prettyjson "^1.2.1"
-    secp256k1 "^3.8.0"
-    ts-node "^8.10.2"
-    typescript "^3.9.5"
-
-"@pioneer-platform/utxo-crypto@^6.2.2", "@pioneer-platform/utxo-crypto@^6.2.4", "@pioneer-platform/utxo-crypto@^6.2.7", "@pioneer-platform/utxo-crypto@latest":
+"@pioneer-platform/utxo-crypto@^6.2.2", "@pioneer-platform/utxo-crypto@^6.2.4", "@pioneer-platform/utxo-crypto@^6.2.7", "@pioneer-platform/utxo-crypto@^8.0.0":
   version "6.2.7"
   resolved "https://registry.yarnpkg.com/@pioneer-platform/utxo-crypto/-/utxo-crypto-6.2.7.tgz#bc9de84e201da34c87fedca6f871ddd1af2cdf91"
   integrity sha512-PKPHZTzjDAL96su+2k2Sn/+c/Ri9AAES2HXmpKJHYtwLLHIEQj8HTdy7dStaKnKCvw7+b3M81OizEejri/atJA==
@@ -3645,26 +3517,6 @@
     hdkey "^1.1.2"
     secp256k1 "^3.8.0"
     wif "^2.0.6"
-
-"@pioneer-platform/utxo-network@latest":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@pioneer-platform/utxo-network/-/utxo-network-8.0.0.tgz#31cd0e2636662ae9be3768b04f6c60bbd84a4ef9"
-  integrity sha512-qPWs/h4P4O/akeRjW1oS6n4QuNG3m53WWO3+d1LbeZC1K7palHwjXM/5dHuAHWFWoy/raPlaT6kaLVbgx8ZYCw==
-  dependencies:
-    "@pioneer-platform/blockbook" latest
-    "@pioneer-platform/loggerdog" latest
-    "@types/request-promise-native" "^1.0.17"
-    "@xchainjs/xchain-client" "^0.7.0"
-    "@xchainjs/xchain-util" "^0.2.6"
-    axiom "^0.1.6"
-    axios "^0.21.1"
-    bitcoin-promise "^1.3.1"
-    bitcoin-rpc-promise "^2.1.6"
-    bitcoinjs-lib "^5.2.0"
-    blockbook-client "^0.3.13"
-    moment "^2.29.1"
-    numbro "^2.3.2"
-    request-promise-native "^1.0.9"
 
 "@positron/stack-trace@1.0.0":
   version "1.0.0"
@@ -3889,6 +3741,20 @@
     "@babel/polyfill" "^7.4.3"
     "@shapeshiftoss/hdwallet-core" "^1.14.0"
     "@shapeshiftoss/hdwallet-keepkey" "^1.14.0"
+    bytebuffer "^5.0.1"
+    crypto "^1.0.1"
+    eventemitter2 "^5.0.1"
+  optionalDependencies:
+    webusb "^1.1.1"
+
+"@shapeshiftoss/hdwallet-keepkey-nodewebusb@latest":
+  version "1.14.1-alpha.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/hdwallet-keepkey-nodewebusb/-/hdwallet-keepkey-nodewebusb-1.14.1-alpha.0.tgz#1b5cd427611a0a779d147056a001d6927a895f33"
+  integrity sha512-VrDcdpKchHT9d/7dllyx+IvXOnP33mfbdPvQn/hXSmtPNfjt5E70VoHrLOfPDO33eC8poPorvj0VLxRYLh0dPA==
+  dependencies:
+    "@babel/polyfill" "^7.4.3"
+    "@shapeshiftoss/hdwallet-core" "^1.14.1-alpha.0"
+    "@shapeshiftoss/hdwallet-keepkey" "^1.14.1-alpha.0"
     bytebuffer "^5.0.1"
     crypto "^1.0.1"
     eventemitter2 "^5.0.1"
@@ -4808,7 +4674,7 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.7.0.tgz#c03419c63ea61f54af2b9f064159372aa538f4f8"
   integrity sha512-Z+/TSiKBp0IRib9udlhc7yB1atecTt7Z1AN706YLAgbMSvO1XDmLU//KLhZ7MF47Ajg3hK3slq06FJmsAgZ4FA==
 
-"@xchainjs/xchain-client@latest":
+"@xchainjs/xchain-client@^8.0.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.8.0.tgz#606e83abdccc6a80fa969901782128b0c8d83ec0"
   integrity sha512-cUPbfXXyhGusXWhcdmP8w/kYtsKJ2kvRemQIxBlcEuXyCNBCLJmkWJQTF4w6pfh3V19wZfOGuxwNcr1l4F8oNw==
@@ -6062,7 +5928,7 @@ blockbook-client@^0.3.13:
     request "^2.88.0"
     request-promise-native "^1.0.8"
 
-blockbook-client@latest:
+blockbook-client@^8.0.0:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/blockbook-client/-/blockbook-client-0.4.3.tgz#d651b5e32697c2f7163766164924df5ef057142a"
   integrity sha512-o8s9tt9dhAx37BGFJ/mJCSlDRpFiKXwdNSeqQNqUBzcstEHo4Dwnmu1TiwbcmXRHJgiv6yh7BaB92OWXlRcFhw==
@@ -8463,11 +8329,6 @@ dotenv@^8.0.0, dotenv@^8.2.0, dotenv@^8.6.0:
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.6.0.tgz#061af664d19f7f4d8fc6e4ff9b584ce237adcb8b"
   integrity sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==
-
-dotenv@latest:
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-9.0.2.tgz#dacc20160935a37dea6364aa1bef819fb9b6ab05"
-  integrity sha512-I9OvvrHp4pIARv4+x9iuewrWycX6CcZtoAu1XrzPxc5UygMJXJZYmBsynku8IkrJwgypE5DGNjDPmPRhDCptUg==
 
 drbg.js@^1.0.1:
   version "1.0.1"
@@ -17258,7 +17119,7 @@ secp256k1@^4.0.1, secp256k1@^4.0.2:
     node-addon-api "^2.0.0"
     node-gyp-build "^4.2.0"
 
-secretjs-offline@^0.11.2, secretjs-offline@latest:
+secretjs-offline@^0.11.2, secretjs-offline@^8.0.0:
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/secretjs-offline/-/secretjs-offline-0.11.2.tgz#4b731b9e7c3d09040ca70a91c950dc3856092728"
   integrity sha512-2heDl4lxHPhbL3Pk5+87RETMBAf09nt5z4XbsANAAOfULq9WVExFw55Xqa5bFuSZhrg0CKJO9Z0SiR05bZSDFA==
