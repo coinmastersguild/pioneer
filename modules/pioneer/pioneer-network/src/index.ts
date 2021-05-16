@@ -10,7 +10,6 @@ require('dotenv').config({path:"../../../../.env"});
 require('dotenv').config({path:"../../../.env"});
 require('dotenv').config({path:"../../../../.env"});
 
-// const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const bitcoin = require("bitcoinjs-lib");
 const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
@@ -33,7 +32,6 @@ let cloneCrypto = require("@pioneer-platform/utxo-crypto")
 let coincap = require('@pioneer-platform/pioneer-coincap')
 
 //networks
-const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const log = require("@pioneer-platform/loggerdog")()
 const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
@@ -387,12 +385,9 @@ const get_balance = async function (coin:string, isTestnet?:boolean) {
             // if(isTestnet)networks['ETH'].init({testnet:true})
             if(isTestnet)networks['ETH'].init()
             output = await networks['ETH'].getBalanceAddress(master)
-        }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-            log.debug("token detected ")
-            // if(isTestnet)networks['ETH'].init({testnet:true})
-            if(isTestnet)networks['ETH'].init()
-            let master = await get_address_master('ETH')
-            output = await networks['ETH'].getBalanceToken(master,coin)
+        }else if(false){
+            //TODO
+            output = await networks['ETH'].getBalanceToken(null,coin)
         } else if(coin === 'ATOM'){
             let master = await get_address_master('ATOM')
             output = await networks[coin].getBalance(master)
@@ -718,20 +713,21 @@ const get_wallet_info = async function () {
                     log.debug(tag,"ethInfo: ",ethInfo)
 
                     //for each token use eth master
-                    for(let i = 0; i < tokenData.tokens.length; i++){
-                        let token:string = tokenData.tokens[i]
-                        //only there if a balance
-                        if(ethInfo.balances[token]){
-                            balances[token] = await get_balance(token)
-                            masters[token] = await get_address_master('ETH')
-                            valueUsds[token] = ethInfo.valueUsds[token]
-                            coinInfo[token] = ethInfo.coinInfo[token]
-                        } else {
-                            //nerf dont show 0 balances
-                            //balances[token] = 0
-                        }
-
-                    }
+                    //TODO
+                    // for(let i = 0; i < tokenData.tokens.length; i++){
+                    //     let token:string = tokenData.tokens[i]
+                    //     //only there if a balance
+                    //     if(ethInfo.balances[token]){
+                    //         balances[token] = await get_balance(token)
+                    //         masters[token] = await get_address_master('ETH')
+                    //         valueUsds[token] = ethInfo.valueUsds[token]
+                    //         coinInfo[token] = ethInfo.coinInfo[token]
+                    //     } else {
+                    //         //nerf dont show 0 balances
+                    //         //balances[token] = 0
+                    //     }
+                    //
+                    // }
                 }
 
             }

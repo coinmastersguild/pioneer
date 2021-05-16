@@ -10,7 +10,6 @@ let TAG = ' | API | '
 const pjson = require('../../package.json');
 const log = require('@pioneer-platform/loggerdog')()
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
-const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const midgard = require("@pioneer-platform/midgard-client")
 
 let connection  = require("@pioneer-platform/default-mongo")
@@ -397,7 +396,8 @@ export class pioneerPublicController extends Controller {
             networks.ETH.init({testnet:true})
             if(!output || CACHE_OVERRIDE){
                 //if coin = token, network = ETH
-                if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+                if(false){
+                    //TODO
                     output = await networks['ETH'].getBalanceToken(pubkey,coin)
                 } else if(coin === 'ETH'){
                     output = await networks['ETH'].getBalanceAddress(pubkey)

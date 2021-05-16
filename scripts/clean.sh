@@ -10,3 +10,4 @@ for dir in modules/support/*; do (cd "$dir" && rm -rf dist .quasar node_modules 
 
 cd "platform" && rm -rf dist .quasar node_modules
 find . -name "node_modules" -exec rm -rf '{}' +; find . -name "package-lock.json" -exec rm -rf '{}' +;
+find . -name "lib" -exec rm -rf '{}' +; rm -rf lib; find . -name "yarn-error.log" -exec rm -rf '{}' +

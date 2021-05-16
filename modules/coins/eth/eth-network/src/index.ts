@@ -63,9 +63,6 @@ import {
 
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as etherscanAPI from './etherscan-api'
-
-//
-// const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
 

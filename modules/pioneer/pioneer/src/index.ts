@@ -12,7 +12,6 @@ const TAG = " | Pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 //TODO remove this dep
 const cryptoTools = require('crypto');
-const tokenData = require("@pioneer-platform/pioneer-eth-token-data")
 const crypto = require("@pioneer-platform/utxo-crypto")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
@@ -70,10 +69,7 @@ let WALLET_COINS:any = []
 //eth token info
 WALLET_COINS.push('ETH')
 //TODO support coinlist (coingecko)
-for(let i = 0; i < tokenData.tokens.length; i++){
-    let token = tokenData.tokens[i]
-    WALLET_COINS.push(token)
-}
+
 
 // COINS
 WALLET_COINS.push('RUNE')
@@ -612,24 +608,8 @@ module.exports = class wallet {
             let tag = TAG + " | getBalance | "
             try {
                 log.debug("coin detected: ",coin)
-                let output
-                let pubkey
-                if(coin === "ETH"){
-                    log.debug("ETH detected ")
-                    pubkey = await this.PUBLIC_WALLET[coin].master
-                }else if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-                    log.debug("token detected ")
-                    pubkey = await this.getMaster('ETH')
-                } else if(UTXO_COINS.indexOf(coin) >= 0){
-                    //get xpub/zpub
-                    pubkey = this.PUBLIC_WALLET[coin].pubkey
-                }else{
-                    pubkey = await this.PUBLIC_WALLET[coin].master
-                }
-                log.debug(tag,"pubkey: ",pubkey)
-                output = await this.pioneerClient.instance.GetPubkeyBalance({coin,pubkey})
-                output = output.data
-                return output
+
+                //TODO
             } catch (e) {
                 log.error(tag, "e: ", e)
                 throw e
