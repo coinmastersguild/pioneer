@@ -11,6 +11,7 @@
   },
   "packages": [
     "modules/**/**/*",
+    "services/**/*",
     "apps/**/*",
     "e2e/**/**/*",
     "platform"
