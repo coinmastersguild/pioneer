@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/thorchain-e2e-sdk",
-  "version": "8.1.0",
+  "version": "8.1.1",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/midgard-client": "^8.1.0",
-    "@pioneer-platform/pioneer-app": "^8.1.0",
-    "@pioneer-platform/pioneer-sdk": "^8.1.0",
+    "@pioneer-platform/midgard-client": "^8.1.1",
+    "@pioneer-platform/pioneer-app": "^8.1.1",
+    "@pioneer-platform/pioneer-sdk": "^8.1.1",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
