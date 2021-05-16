@@ -10,7 +10,8 @@
     "npm": "npm i",
     "build": "tsc -p .",
     "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "publish": "npm publish"
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
