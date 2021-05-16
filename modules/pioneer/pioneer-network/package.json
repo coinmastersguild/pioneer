@@ -25,7 +25,6 @@
     "@pioneer-platform/cosmos-network": "^8.0.1",
     "@pioneer-platform/eth-network": "^8.0.1",
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/pioneer-coincap": "^8.0.0",
     "@pioneer-platform/pioneer-coins": "^8.0.1",
     "@pioneer-platform/thor-network": "^8.0.1",
     "@pioneer-platform/utxo-network": "^8.0.1",

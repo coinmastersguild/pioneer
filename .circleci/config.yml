@@ -23,7 +23,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "make install"
+          command: "make"
 
   build:
     resource_class: xlarge

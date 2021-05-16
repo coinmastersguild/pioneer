@@ -28,7 +28,7 @@ let {
 } = require('@pioneer-platform/pioneer-coins')
 
 //crypto
-let coincap = require('@pioneer-platform/pioneer-coincap')
+let coincap = require('@pioneer-platform/coincap')
 
 //networks
 const log = require("@pioneer-platform/loggerdog")()

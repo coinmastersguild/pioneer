@@ -17,7 +17,7 @@
     "@types/ws": "^7.4.2",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
-    "blockbook-client": "^8.0.0",
+    "blockbook-client": "^0.4.3",
     "fake-useragent": "^1.0.1"
   },
   "devDependencies": {

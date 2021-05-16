@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.14.0",
-    "@peculiar/webcrypto": "^8.0.0",
+    "@peculiar/webcrypto": "^1.1.4",
     "@pioneer-platform/eth-crypto": "^8.0.1",
     "@pioneer-platform/loggerdog": "^8.0.1",
     "@pioneer-platform/pioneer": "^8.0.1",
