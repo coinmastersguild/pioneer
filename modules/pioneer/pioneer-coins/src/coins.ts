@@ -14,7 +14,6 @@ let {
     getPaths,
 } = require('./paths')
 
-
 export enum HDWALLETS {
     'pioneer',
     'trezor',

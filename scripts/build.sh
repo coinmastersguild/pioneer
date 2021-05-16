@@ -1,6 +1,5 @@
 #!/bin/bash
 
 set -e
-npm install lerna
-npx lerna bootstrap
-npx lerna run deploy --since HEAD~1
+yarn add lerna -g --ignore-workspace-root-check
+lerna run publish --since HEAD~1

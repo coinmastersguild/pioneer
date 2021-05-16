@@ -11,10 +11,14 @@ clean::
 #TODO build tsoa server based on env
 #TODO build pubkey worker
 build::
-	yarn && sh scripts/build.sh && cd services/pioneer-server && yarn && npm run build:all-local
+	yarn \
+	&& sh scripts/build.sh
+#	&&/
+#	cd services/pioneer-server &&/
+#	yarn && npm run build:all-local
 
 test::
-	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
+	cd e2e/sdk-swaps/etherum-e2e-swap && yarn && yarn build && npm run run-dev
 	#npm install -g codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=${CODECLIMATE_REPO_TOKEN} codeclimate-test-reporter < coverage/lcov.info
 
 publish::

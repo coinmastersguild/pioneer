@@ -4,9 +4,10 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "modules/**/**/**/*",
+      "modules/**/**/*",
       "apps/**/*",
-      "e2e/**/**/**/*"
+      "e2e/**/*",
+      "platform"
     ],
     "version": "independent"
   },
