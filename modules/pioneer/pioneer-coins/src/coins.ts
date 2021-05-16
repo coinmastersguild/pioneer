@@ -8,7 +8,7 @@ const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
 const bech32 = require(`bech32`)
-import BigNumber from 'bignumber.js'
+//import BigNumber from 'bignumber.js'
 const BIP84 = require('bip84')
 import { getNetwork } from "./networks";
 let {
@@ -31,6 +31,7 @@ enum HDWALLETS {
 export const UTXO_COINS = [
     'BTC',
     'BCH',
+    'DOGE',
     'LTC',
     'TEST'
 ]
