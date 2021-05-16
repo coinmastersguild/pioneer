@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/utxo-crypto": "^6.2.7",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",
     "bitcoinjs-lib": "^5.2.0",

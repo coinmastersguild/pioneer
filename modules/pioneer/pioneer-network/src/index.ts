@@ -28,7 +28,6 @@ let {
 } = require('@pioneer-platform/pioneer-coins')
 
 //crypto
-let cloneCrypto = require("@pioneer-platform/utxo-crypto")
 let coincap = require('@pioneer-platform/pioneer-coincap')
 
 //networks

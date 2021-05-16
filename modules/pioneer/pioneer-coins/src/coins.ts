@@ -1,7 +1,6 @@
 
 const TAG = " | coin tools | "
 const log = require("@pioneer-platform/loggerdog")()
-const cloneCrypto = require("@pioneer-platform/utxo-crypto")
 const bitcoin = require("bitcoinjs-lib");
 const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
@@ -607,6 +606,42 @@ function createBech32Address(publicKey:any,prefix:string) {
     return cosmosAddress
 }
 
+// All known xpub formats
+const prefixes:any = new Map(
+    [
+        ['xpub', '0488b21e'],
+        ['ypub', '049d7cb2'],
+        ['Ypub', '0295b43f'],
+        ['zpub', '04b24746'],
+        ['Zpub', '02aa7ed3'],
+        ['tpub', '043587cf'],
+        ['upub', '044a5262'],
+        ['Upub', '024289ef'],
+        ['vpub', '045f1cf6'],
+        ['Vpub', '02575483'],
+        ['Ltub', '02575483'],
+    ]
+);
+
+enum AddressTypes {
+    "bech32",
+    "legacy"
+}
+
+export function xpubConvert(xpub:string,target:string){
+    if (!prefixes.has(target)) {
+        return "Invalid target version";
+    }
+
+    // trim whitespace
+    xpub = xpub.trim();
+
+    var data = b58.decode(xpub);
+    data = data.slice(4);
+    data = Buffer.concat([Buffer.from(prefixes.get(target),'hex'), data]);
+    return b58.encode(data);
+}
+
 export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
     let tag = TAG + " | normalize_pubkeys | "
     try {
@@ -640,7 +675,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     normalized.type = 'zpub'
                     normalized.zpub = true
                     //convert to zpub
-                    let zpub = await cloneCrypto.xpubConvert(pubkeys[i].xpub,'zpub')
+                    let zpub = await xpubConvert(pubkeys[i].xpub,'zpub')
                     normalized.pubkey = zpub
                     pubkey.pubkey = zpub
                 }
@@ -666,7 +701,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                 }
                 if(isTestnet && pubkey.symbol === 'BTC'){
                     //tpub
-                    normalized.tpub = await cloneCrypto.xpubConvert(pubkey.xpub,'tpub')
+                    normalized.tpub = await xpubConvert(pubkey.xpub,'tpub')
                 }
                 normalized.master = address
                 normalized.address = address

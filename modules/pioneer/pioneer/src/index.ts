@@ -12,7 +12,6 @@ const TAG = " | Pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 //TODO remove this dep
 const cryptoTools = require('crypto');
-const crypto = require("@pioneer-platform/utxo-crypto")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
@@ -400,9 +399,6 @@ module.exports = class wallet {
                                 if(!nativeAsset) throw Error("102: blockchain not supported by coins module!  "+pubkey.blockchain)
                                 pubkey.symbol = nativeAsset
                             }
-                            // if(isTestnet && pubkey.xpub && !pubkey.tpub){
-                            //     pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
-                            // }
                             this.PUBLIC_WALLET[pubkey.symbol] = pubkey
                         }
                         break;
@@ -434,9 +430,6 @@ module.exports = class wallet {
                             if(!pubkey.symbol){
                                 log.debug("pubkey: ",pubkey)
                                 throw Error("Invalid pubkey!")
-                            }
-                            if(this.isTestnet && pubkey.xpub && !pubkey.tpub){
-                                pubkey.tpub = await crypto.xpubConvert(pubkey.xpub,'tpub')
                             }
                             this.PUBLIC_WALLET[pubkey.symbol] = pubkey
                         }
@@ -679,9 +672,10 @@ module.exports = class wallet {
                 let output
 
                 //if token use ETH pubkey
-                if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-                    coin = 'ETH'
-                }
+                //TODO
+                // if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
+                //     coin = 'ETH'
+                // }
 
 
                 //if xpub get next unused
@@ -1278,7 +1272,6 @@ module.exports = class wallet {
                     // @ts-ignore
                     const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
                     let hash = sha256(buffer).toString().toUpperCase()
-                    // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
 
 
                     signedTx = {

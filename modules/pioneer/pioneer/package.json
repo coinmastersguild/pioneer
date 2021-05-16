@@ -28,7 +28,6 @@
     "@pioneer-platform/loggerdog": "^8.0.1",
     "@pioneer-platform/pioneer-client": "^8.0.1",
     "@pioneer-platform/pioneer-coins": "^8.0.1",
-    "@pioneer-platform/utxo-crypto": "^6.2.4",
     "@types/google-protobuf": "^3.15.1",
     "bchaddrjs": "^0.5.2",
     "bech32": "^1.1.4",
