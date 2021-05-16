@@ -65,6 +65,7 @@
     "@types/node": "^12.20.11",
     "autoprefixer": "^9.8.6",
     "axios": "^0.18.1",
+    "core-js": "^3.12.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.4",
@@ -83,7 +84,6 @@
     "tsoa": "^3.7.0",
     "typescript": "^3.9.9",
     "url-parse": "^1.5.1",
-    "vue-grid-layout": "^2.3.12",
     "vue-i18n": "^8.24.4",
     "wait-promise": "^0.4.1"
   },

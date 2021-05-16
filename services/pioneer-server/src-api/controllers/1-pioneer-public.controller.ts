@@ -962,7 +962,7 @@ export class pioneerPublicController extends Controller {
         let tag = TAG + " | getFee | "
         try{
             //TODO handle mainnet
-            networks.ETH.init({testnet:true})
+            networks.ETH.init()
             log.info(tag,"body: ",body)
 
             let resp = await networks['ETH'].getMemoEncoded(body)
