@@ -35,7 +35,7 @@ const pendingQueue = queue({ pending: [] })
 const approvedQueue = queue({ approved: [] })
 
 //dbs
-let nedb = require("@pioneer-platform/nedb")
+// let nedb = require("@pioneer-platform/nedb")
 
 //@pioneer-platform/pioneer-events
 let Events = require("@pioneer-platform/pioneer-events")

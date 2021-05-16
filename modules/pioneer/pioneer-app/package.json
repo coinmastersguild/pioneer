@@ -24,7 +24,6 @@
     "@peculiar/webcrypto": "^8.0.0",
     "@pioneer-platform/eth-crypto": "^8.0.1",
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/nedb": "^8.0.0",
     "@pioneer-platform/pioneer": "^8.0.1",
     "@pioneer-platform/pioneer-coins": "^8.0.1",
     "@pioneer-platform/pioneer-config": "^8.0.1",
