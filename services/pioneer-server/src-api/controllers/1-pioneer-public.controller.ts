@@ -959,7 +959,7 @@ export class pioneerPublicController extends Controller {
      */
     @Post('/getThorchainMemoEncoded')
     public async getThorchainMemoEncoded(@Body() body: any): Promise<any> {
-        let tag = TAG + " | getFee | "
+        let tag = TAG + " | getThorchainMemoEncoded | "
         try{
             //TODO handle mainnet
             networks.ETH.init()
@@ -980,7 +980,7 @@ export class pioneerPublicController extends Controller {
 
     @Post('/getFeesWithMemo')
     public async getFeesWithMemo(@Body() body: GetFeesWithMemoBody): Promise<any> {
-        let tag = TAG + " | getFee | "
+        let tag = TAG + " | getFeesWithMemo | "
         try{
             let output:any = {}
             log.info(tag,"body: ",body)
