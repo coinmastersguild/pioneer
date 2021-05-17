@@ -88,7 +88,7 @@
     "wait-promise": "^0.4.1"
   },
   "devDependencies": {
-    "@quasar/app": "^1.9.6",
+    "@quasar/app": "^2.2.6",
     "tslint": "^5.20.0"
   },
   "engines": {
