@@ -8,7 +8,11 @@
     "test": "npm run build && node lib/index",
     "build": "tsc -p .",
     "dev": "npm run build && npm run start",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "docker:build": "docker build -t pioneer/pioneer-pubkey-ingester:latest .",
+    "docker:tag": "docker tag pioneer/pioneer-pubkey-ingester:latest registry.digitalocean.com/pioneer/pioneer/pioneer-pubkey-ingester:latest",
+    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/pioneer-pubkey-ingester:latest",
+    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
     "@pioneer-platform/bnb-network": "^6.2.2",
