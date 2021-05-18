@@ -21,7 +21,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_MAINNET_DEV_NEW']
+let seed = process.env['WALLET_MAINNET_DEV_OLD']
 let password = process.env['WALLET_PASSWORD']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
@@ -113,14 +113,14 @@ export async function sendPairingCode(code:string) {
 export async function buildTransaction(transaction:any) {
     let tag = " | buildTransaction | ";
     try {
-        log.info(tag,"transaction: ",transaction)
+        log.debug(tag,"transaction: ",transaction)
         if(!transaction.invocationId) throw Error("invocationId required!")
         //get invocation
 
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -140,7 +140,7 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {
@@ -223,8 +223,7 @@ export async function approveTransaction(transaction:any) {
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
-        log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
-        log.info(tag,"invocation.unsignedTx HDwalletPayload: ",JSON.stringify(invocation.unsignedTx.HDwalletPayload))
+        log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
         //update invocation

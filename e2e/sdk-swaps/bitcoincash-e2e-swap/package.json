@@ -1,16 +1,16 @@
 {
-  "name": "@pioneer-platform/thorchain-e2e-sdk",
+  "name": "@pioneer-platform/bitcoincash-e2e-sdk",
   "version": "8.1.1",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
     "build": "tsc -p .",
     "run-dev": "rm -Rf ~/.pioneer && npm run build && npm run start",
-    "test": "rm -Rf ~/.pioneer && jest --silent=true --verbose",
-    "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/eth-e2e-sdk:latest .",
-    "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
-    "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
-    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
+    "test": "rm -Rf ~/.pioneer && jest --silent=true --verbose --coverage",
+    "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/bitcoincash-e2e-sdk:latest .",
+    "docker:run": "docker run --env-file=../../.env pioneer/bitcoincash-e2e-sdk:latest",
+    "docker:tag": "docker tag pioneer/bitcoincash-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/bitcoincash-e2e-sdk:latest",
+    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/bitcoincash-e2e-sdk:latest",
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {

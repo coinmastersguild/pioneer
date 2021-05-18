@@ -873,19 +873,19 @@ module.exports = class wallet {
                 let coin = this.nativeAsset
                 if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                // log.info(tag,"swap: ",swap)
-                // log.info(tag,"swap.amount: ",swap.amount)
-                // log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
-                // log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
+                log.info(tag,"swap: ",swap)
+                log.info(tag,"swap.amount: ",swap.amount)
+                log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
+                log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
                 //TODO detect if native or base
-                // let amount = swap.amount.amount()
+                let amount = swap.amount.amount()
 
                 //if native
-                let amount = swap.amount.toString()
+                //let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
-
+                // if(typeof(amount) !== 'string')
                 //TODO min transfer size 10$??
                 //TODO validate addresses
                 //TODO validate midgard addresses not expired
@@ -928,10 +928,11 @@ module.exports = class wallet {
                 log.info(tag,"tx: ",tx)
                 log.info(tag,"tx.amount: ",tx.amount)
                 log.info(tag,"tx.amount.amount(): ",tx.amount.amount())
-                log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toFixed())
-                let amount = tx.amount.amount().toFixed()
+                log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                let amount = tx.amount.amount().toNumber()
                 amount = nativeToBaseAmount(this.nativeAsset,amount)
                 amount = amount.toString()
+
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 
@@ -941,7 +942,7 @@ module.exports = class wallet {
 
                 let to = tx.recipient
                 let memo = tx.memo || ''
-
+                if(!to) throw Error("invalid TX missing recipient")
                 let invocation:any = {
                     type:'transfer',
                     username:this.username,
@@ -956,7 +957,7 @@ module.exports = class wallet {
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)
 
-                return result.data.txid
+                return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

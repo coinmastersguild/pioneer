@@ -59,8 +59,8 @@ const {
     broadcastTransaction
 } = require('./app')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
+let BLOCKCHAIN = 'bitcoincash'
+let ASSET = 'BCH'
 let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
@@ -220,7 +220,7 @@ const test_service = async function () {
         assert(gasRate)
 
         //test amount in native
-        let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        let amountTestNative = baseAmountToNative(ASSET,TEST_AMOUNT)
 
         let options:any = {
             verbose: true,
@@ -229,24 +229,23 @@ const test_service = async function () {
 
         let transfer = {
             inboundAddress: thorVault,
-            recipient:vaultAddress,
             coin: ASSET,
             asset: ASSET,
-            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
+            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
             "amount":{
+                // "type":"BASE",
+                // "decimal":18,
                 amount: function(){
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
             },
-            feeRate:gasRate, // fee === gas (xcode inheritance)
-            noBroadcast:true
+            noBroadcast:true //TODO configurable
         }
         log.info(tag,"transfer: ",transfer)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
-        assert(responseTransfer)
         log.info(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer.invocationId
 
@@ -264,26 +263,26 @@ const test_service = async function () {
         assert(unsignedTx)
 
         //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        // assert(signedTx.txid)
-
-        //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.info(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // // assert(signedTx.txid)
+        //
+        // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
 

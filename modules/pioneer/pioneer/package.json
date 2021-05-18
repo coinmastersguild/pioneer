@@ -20,8 +20,8 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-core": "latest",
-    "@bithighlander/hdwallet-native": "latest",
+    "@bithighlander/hdwallet-core": "^1.10.17",
+    "@bithighlander/hdwallet-native": "^1.10.17",
     "@cosmostation/cosmosjs": "^0.9.5",
     "@pioneer-platform/coincap": "^8.1.1",
     "@pioneer-platform/eth-crypto": "^8.1.1",

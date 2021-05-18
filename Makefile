@@ -18,8 +18,12 @@ build::
 #	yarn && npm run build:all-local
 
 test::
-	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
-	#npm install -g codeclimate-test-reporter && CODECLIMATE_REPO_TOKEN=${CODECLIMATE_REPO_TOKEN} codeclimate-test-reporter < coverage/lcov.info
+	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
+#	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
+#	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
+#	cd e2e/sdk-swaps/etherum-e2e-swap && npm run test
+#	cd e2e/sdk-swaps/tokens-e2e-swap && npm run run-dev
+#	cd e2e/sdk-swaps/tokens-e2e-swap && npm run test
 
 publish::
 	yarn publish:lerna

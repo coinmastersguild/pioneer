@@ -73,11 +73,15 @@ let run_test = async function(){
             ETH
         */
 
-        // let masterETH = await Wallet.getMaster("ETH")
-        // console.log("masterETH: ",masterETH)
-        //
-        // let balanceETH = await Wallet.getBalance("ETH")
-        // console.log("balanceETH: ",balanceETH)
+        let masterETH = await Wallet.getMaster("ETH")
+        console.log("masterETH: ",masterETH)
+
+        let balanceETH = await Wallet.getBalance("ETH")
+        console.log("balanceETH: ",balanceETH)
+
+        let balanceSUSHI = await Wallet.getBalance("SUSHI")
+        console.log("balanceSUSHI: ",balanceSUSHI)
+
         //
         // let address = "0x33b35c665496bA8E71B22373843376740401F106"
         // let amount = "0.001"
@@ -109,11 +113,11 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
-
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
 
         // let address = "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
         // let amount = "100"

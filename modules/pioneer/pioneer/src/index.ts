@@ -1218,7 +1218,7 @@ module.exports = class wallet {
                 let signedTx:any = {}
                 let coin = unsignedTx.coin
 
-
+                //TODO is token?
 
                 if(UTXO_COINS.indexOf(coin) >= 0){
 
@@ -1236,7 +1236,7 @@ module.exports = class wallet {
                         coin,
                         serialized:res.serializedTx
                     }
-                }else if(false){
+                }else if(coin === 'ETH'){
                     //TODO fix tokens
                     log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
