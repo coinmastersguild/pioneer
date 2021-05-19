@@ -11,7 +11,7 @@ clean::
 #TODO build tsoa server based on env
 #TODO build pubkey worker
 build::
-	yarn && yarn build
+	yarn && lerna run build --include-dependencies
 #	&&/
 #	cd services/pioneer-server &&/
 #	yarn && npm run build:all-local
