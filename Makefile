@@ -11,7 +11,7 @@ clean::
 #TODO build tsoa server based on env
 #TODO build pubkey worker
 build::
-	yarn && yarn add lerna -G --ignore-workspace-root-check &&\
+	yarn && yarn global add lerna &&\
 	lerna run build --include-dependencies
 #	&&/
 #	cd services/pioneer-server &&/
