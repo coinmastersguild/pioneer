@@ -33,6 +33,7 @@ jobs:
         description: stage or prod
         type: string
     steps:
+      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
