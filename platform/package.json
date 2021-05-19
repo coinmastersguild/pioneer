@@ -1,6 +1,7 @@
 {
-  "name": "@pioneer-platform/platform",
+  "name": "platform",
   "version": "8.1.1",
+  "private": true,
   "description": "Pioneer Platform SDK",
   "productName": "pioneer-platform",
   "author": "highlander <bithighlander@gmail.com>",
@@ -15,6 +16,7 @@
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev --mode electron",
+    "publish:lerna": "lerna publish from-package --yes",
     "build": "quasar build",
     "build-electron-publish-mac": "quasar build -m electron --publish always --target mac --debug",
     "build-electron-publish-linux": "quasar build -m electron --publish always --target linux --debug",

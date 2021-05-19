@@ -13,8 +13,7 @@
     "modules/**/**/*",
     "services/**/*",
     "apps/**/*",
-    "e2e/**/**/*",
-    "platform"
+    "e2e/**/**/*"
   ],
   "version": "independent",
   "useWorkspaces": true

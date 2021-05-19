@@ -7,13 +7,9 @@
       "modules/**/**/*",
       "services/**/*",
       "apps/**/*",
-      "e2e/**/*",
-      "platform"
+      "e2e/**/*"
     ],
-    "version": "independent",
-    "nohoist": [
-      "electron"
-    ]
+    "version": "independent"
   },
   "scripts": {
     "clean": "make clean",
