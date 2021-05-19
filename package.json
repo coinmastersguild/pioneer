@@ -10,7 +10,10 @@
       "e2e/**/*",
       "platform"
     ],
-    "version": "independent"
+    "version": "independent",
+    "nohoist": [
+      "electron"
+    ]
   },
   "scripts": {
     "clean": "make clean",

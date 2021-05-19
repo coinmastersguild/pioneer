@@ -19,7 +19,7 @@
     "build-electron-publish-mac": "quasar build -m electron --publish always --target mac --debug",
     "build-electron-publish-linux": "quasar build -m electron --publish always --target linux --debug",
     "build-electron-publish-windows": "quasar build -m electron --publish always --target win --debug",
-    "fix": "./node_modules/.bin/electron-builder install-app-deps"
+    "fix": "../node_modules/.bin/electron-builder install-app-deps"
   },
   "dependencies": {
     "@bithighlander/hdwallet-keepkey": "^1.10.14",

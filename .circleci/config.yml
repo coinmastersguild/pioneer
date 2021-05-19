@@ -44,7 +44,7 @@ jobs:
           command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
       - run:
           name: build
-          command: "doctl auth init -t $DIGITALOCEAN_TOKEN && doctl registry login && npm run build:rest && npm run build:worker"
+          command: "doctl auth init -t $DIGITALOCEAN_TOKEN && doctl registry login && npm run build:rest"
   deploy:
     executor: pulumi
     parameters:
