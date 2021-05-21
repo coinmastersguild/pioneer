@@ -114,7 +114,7 @@ let run_test = async function(){
                 })
 
                 try{
-                    let pairResult = await App.pair("IITFXC")
+                    let pairResult = await App.pair("ELRSSY")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 

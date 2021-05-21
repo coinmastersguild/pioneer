@@ -84,10 +84,10 @@ let MASTER_MAP:any = {}
 let WALLET_VALUE_MAP:any = {}
 let CONTEXT_WALLET_SELECTED
 //urlSpec
-// let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-// let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001'
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+// let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
+// let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001'
 
 let urlSpec = URL_PIONEER_SPEC
 
@@ -551,8 +551,8 @@ let pair_sdk_user = async function (code:string) {
         log.info(tag,"code: ",code)
         //send code
 
-        log.debug(tag,"network: ",network)
-        log.debug(tag,"network: ",network.instance)
+        log.info(tag,"network: ",network)
+        log.info(tag,"network: ",network.instance)
         let result = await network.instance.Pair(null,{code})
 
         return result.data

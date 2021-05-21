@@ -97,7 +97,8 @@ export async function initConfig() {
     if(config){
       //
       if(!config.pioneerUrl){
-        let pioneerUrl = "http://127.0.0.1:9001/spec/swagger.json"
+        // let pioneerUrl = "http://127.0.0.1:9001/spec/swagger.json"
+        let pioneerUrl = "https://pioneers.dev/spec/swagger.json"
         App.updateConfig({pioneerUrl});
       }
       if(!config.queryKey){
@@ -115,7 +116,7 @@ export async function initConfig() {
       App.updateConfig({queryKey});
       //pioneer server
       //TODO get from ENV? always remote?
-      let pioneerUrl = "http://127.0.0.1:9001/spec/swagger.json"
+      let pioneerUrl = "https://pioneers.dev/spec/swagger.json"
       App.updateConfig({pioneerUrl});
       App.updateConfig({spec:pioneerUrl});
       App.updateConfig({blockchains});
@@ -468,11 +469,13 @@ export async function onStart(event,data) {
 
     //TODO get local env to work! (adding ""bs from quasar conf
     if(!config.spec || true){
-      // config.spec = "https://pioneers.dev/spec/swagger.json"
-      // config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
-      config.wss = "ws://127.0.0.1:9001"
-      config.spec = "http://127.0.0.1:9001/spec/swagger.json"
-      config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
+      config.spec = "https://pioneers.dev/spec/swagger.json"
+      config.urlSpec = "https://pioneers.dev/spec/swagger.json" // rabble
+      config.wss = "wss://pioneers.dev"
+
+      // config.wss = "ws://127.0.0.1:9001"
+      // config.spec = "http://127.0.0.1:9001/spec/swagger.json"
+      // config.urlSpec = "http://127.0.0.1:9001/spec/swagger.json" // rabble
       //config.spec = "https://pioneers.dev/spec/swagger.json"
     }
 

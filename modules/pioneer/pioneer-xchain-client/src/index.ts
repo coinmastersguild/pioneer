@@ -633,7 +633,7 @@ module.exports = class wallet {
                     //In theory we only use this for a few contract special things
 
                     let wallet:ethers.Wallet = ethers.Wallet.fromMnemonic("alcohol woman abuse must during monitor noble actual mixed trade anger aisle")
-                    let provider = getDefaultProvider('testnet')
+                    let provider = getDefaultProvider()
                     await wallet.connect(provider)
 
                     return wallet
@@ -873,15 +873,15 @@ module.exports = class wallet {
                 let coin = this.nativeAsset
                 if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                log.info(tag,"swap: ",swap)
-                log.info(tag,"swap.amount: ",swap.amount)
-                log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
-                log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
-                //TODO detect if native or base
-                let amount = swap.amount.amount()
+                // log.info(tag,"swap: ",swap)
+                // log.info(tag,"swap.amount: ",swap.amount)
+                // log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
+                // log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
+                // //TODO detect if native or base
+                // let amount = swap.amount.amount()
 
                 //if native
-                //let amount = swap.amount.toString()
+                let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
@@ -957,7 +957,7 @@ module.exports = class wallet {
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)
 
-                return result.data
+                return result.data.invocationId
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

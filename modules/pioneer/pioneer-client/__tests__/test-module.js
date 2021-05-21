@@ -13,7 +13,7 @@ let pioneerApi = require("../lib")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
 
@@ -40,7 +40,7 @@ let run_test = async function(){
         //     spec
         // }
         let config = {
-            queryKey:"key:2611ce1c-ddee-4185-99a4-98e727529197",
+            queryKey:"79d94b78-eb50-445d-b97f-e524dca80b58",
             username:'test-user-2',
             spec
         }
@@ -69,16 +69,22 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        let user = await pioneer.instance.User()
-        console.log("user: ",user.data)
-        console.log("user: ",JSON.stringify(user.data))
-
-        let info = await pioneer.instance.Info(user.data.context)
-        console.log("info: ",info.data)
+        // let user = await pioneer.instance.User()
+        // console.log("user: ",user.data)
+        // console.log("user: ",JSON.stringify(user.data))
+        //
+        // let info = await pioneer.instance.Info(user.data.context)
+        // console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data
         // console.log("txData: ",data)
+
+        let code = "GNF1RC"
+        let data = await pioneer.instance.Pair(null, {code})
+        data = data.data
+        console.log("txData: ",data)
+
 
         //broadcast
         // let broadcast = {
