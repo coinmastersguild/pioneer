@@ -185,6 +185,9 @@ module.exports = {
     updateInvocation: async function (updateBody:UpdateInvocationBody) {
         return update_invocation(updateBody)
     },
+    deleteInvocation: async function (invocationId:string) {
+        return delete_invocation(invocationId)
+    },
     getInvocation: async function (invocationId:string) {
         return get_invocation(invocationId)
     },
@@ -292,6 +295,17 @@ module.exports = {
     sendToAddress: function (intent:any) {
       return send_to_address(intent);
     },
+};
+
+let delete_invocation = async function (invocationId:any) {
+    let tag = " | delete_invocation | ";
+    try {
+        let output = await network.instance.DeleteInvocation(invocationId)
+        return output.data;
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
 };
 
 let get_invocation = async function (invocationId:any) {

@@ -42,6 +42,7 @@ let run_test = async function(){
     try{
         //get config
         let config = await App.getConfig()
+        console.log("config: ",config)
 
         //if no config
         if(!config){
@@ -108,7 +109,11 @@ let run_test = async function(){
 
             //get invocations
             let invocations = await App.getInvocations()
-            console.log("invocations: ",invocations)
+            console.log("invocations: ",invocations.length)
+
+            //delete invocation
+            let resultDelete = await App.deleteInvocation(invocations[0].invocationId)
+            console.log("resultDelete: ",resultDelete)
 
             // App.playChingle()
             // let updateInvocation = await App.updateInvocation(updateBody)
