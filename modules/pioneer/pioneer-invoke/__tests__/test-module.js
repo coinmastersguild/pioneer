@@ -11,8 +11,8 @@ require("dotenv").config({path:'../../../../.env'})
 let Invoke = require("../lib")
 
 //force
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 const open = require("open");
 let spec = process.env['URL_PIONEER_SPEC']
 let seed_1 = process.env['WALLET_MAINNET_DEV']
@@ -63,6 +63,48 @@ let run_test = async function(){
         if(onlineUsers.indexOf(invoker) >= 0) isOnline = true
         if(!isOnline) throw Error("User not connected!")
 
+        let txInput = {
+            "asset":
+                {
+                    "chain":"ETH",
+                    "symbol":"ETH",
+                    "ticker":"ETH"
+                },
+            "amount":
+                {
+                    "type":"BASE",
+                    "decimal":18,
+                    amount: function(){
+                        return "0.0123"
+                    }
+                },
+            "recipient":"0xb7d23e939d64156980055be472197698e6cf7ed2",
+            "memo":"=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F"
+        }
+
+        let inboundAddress = {
+            chain: 'ETH',
+            pub_key: 'thorpub1addwnpepqfflwuyaz7ca82uv5wjasd8zphrqvcstx7vle9mxv3nr8qf239z5zt9clnj',
+            address: '0xb7d23e939d64156980055be472197698e6cf7ed2',
+            router: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
+            halted: false,
+            gas_rate: '100'
+        }
+
+        let invocation = {
+            type:"swap",
+            username:invoker,
+            coin:txInput.asset.symbol,
+            asset:txInput.asset.symbol,
+            amount:txInput.amount.amount(),
+            inboundAddress,
+            memo:txInput.memo
+        }
+
+        let result = await invoke.invoke('swap',invocation)
+        console.log("result: ",result.data)
+
+
 
         // let txInput = {
         //     "asset":
@@ -95,35 +137,35 @@ let run_test = async function(){
         // console.log("result: ",result.data)
 
 
-        let txInput = {
-            "asset":
-                {
-                    "chain":"ETH",
-                    "symbol":"ETH",
-                    "ticker":"ETH"
-                },
-            "amount":
-                {
-                    "type":"BASE",
-                    "decimal":18,
-                    amount: function(){
-                        return "0.000123"
-                    }
-                },
-            "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
-            "memo":""
-        }
-
-        let invocation = {
-            type:"transfer",
-            context:"343733331147363327003800.watch.wallet.json",
-            username:invoker,
-            coin:txInput.asset.symbol,
-            amount:txInput.amount.amount(),
-            address:txInput.recipient,
-            memo:txInput.memo,
-            noBroadcast:true
-        }
+        // let txInput = {
+        //     "asset":
+        //         {
+        //             "chain":"ETH",
+        //             "symbol":"ETH",
+        //             "ticker":"ETH"
+        //         },
+        //     "amount":
+        //         {
+        //             "type":"BASE",
+        //             "decimal":18,
+        //             amount: function(){
+        //                 return "0.02"
+        //             }
+        //         },
+        //     "recipient":"0xc3affff54122658b89c31183cec4f15514f34624",
+        //     "memo":""
+        // }
+        //
+        // let invocation = {
+        //     type:"transfer",
+        //     context:"343733331147363327003800.wallet.json",
+        //     username:invoker,
+        //     coin:txInput.asset.symbol,
+        //     amount:txInput.amount.amount(),
+        //     address:txInput.recipient,
+        //     memo:txInput.memo,
+        //     noBroadcast:true
+        // }
 
         // let testSwap = {
         //     type: 'transfer',
@@ -153,11 +195,12 @@ let run_test = async function(){
         //     context: undefined
         // }
 
-        let result = await invoke.invoke('transfer',invocation)
-        console.log("result: ",result.data)
+        // let result = await invoke.invoke('swap',invocation)
+        // console.log("result: ",result.data)
 
         //open invoke page
-        open("http://localhost:8080/#/invocation/"+result.data.invocationId)
+        // open("http://localhost:8080/#/invocation/"+result.data.invocationId)
+        // open("https://pioneers.dev/#/invocation/"+result.data.invocationId)
 
         // open("http://localhost:9001/#/invocation/"+result.data.invocationId)
 

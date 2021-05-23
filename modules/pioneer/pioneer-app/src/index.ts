@@ -176,7 +176,7 @@ module.exports = {
     buildTransaction: function (transaction:any) {
         return build_transaction(transaction);
     },
-    approveTransaction: function (transaction:string) {
+    approveTransaction: function (transaction:any) {
         return approve_transaction(transaction);
     },
     broadcastTransaction: function (transaction:any) {
@@ -489,14 +489,15 @@ let set_context = async function (context:string) {
 
  */
 
-let approve_transaction = async function (invocationId:string) {
+let approve_transaction = async function (transaction:any) {
     let tag = " | approve_transaction | ";
     try {
-        log.info(tag,"invocationId: ",invocationId)
+        log.info(tag,"invocationId: ",transaction)
         //get invocation
-        if(!invocationId) throw Error("101: invocationId required!")
+        if(!transaction) throw Error("101: invocation required!")
+        if(!transaction.invocationId) throw Error("102: invocationId required!")
 
-        let invocation = await get_invocation(invocationId)
+        let invocation = await get_invocation(transaction.invocationId)
         log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
@@ -527,7 +528,7 @@ let approve_transaction = async function (invocationId:string) {
 
         //update invocation
         let updateBody = {
-            invocationId,
+            invocationId:transaction.invocationId,
             invocation,
             unsignedTx:invocation.unsignedTx,
             signedTx

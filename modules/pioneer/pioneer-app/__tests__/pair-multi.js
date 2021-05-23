@@ -48,7 +48,7 @@ let run_test = async function(){
         // software 1
         try{
             let wallet1 = {
-                mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
+                mnemonic:process.env['FOUND_KEY'],
                 password
             }
 

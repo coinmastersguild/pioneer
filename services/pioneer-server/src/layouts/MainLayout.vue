@@ -109,26 +109,26 @@ export default {
       //on mount
 
 
-      console.log("process.env",process.env)
-      const newAccounts = await ethereum.request({
-        method: 'eth_requestAccounts',
-      })
-
-      console.log("newAccounts: ",newAccounts)
-      let domain = location.toString()
-      let account = newAccounts[0]
-      console.log("Account Metamask: ",account)
-      console.log("domain: ",domain)
-
-      //pioneer SDK
-      // let resultInit = this.init()
+      // console.log("process.env",process.env)
+      // const newAccounts = await ethereum.request({
+      //   method: 'eth_requestAccounts',
+      // })
+      //
+      // console.log("newAccounts: ",newAccounts)
+      // let domain = location.toString()
+      // let account = newAccounts[0]
+      // console.log("Account Metamask: ",account)
+      // console.log("domain: ",domain)
+      //
+      // //pioneer SDK
+      // // let resultInit = this.init()
+      // // console.log("resultInit: ",resultInit)
+      //
+      // let resultInit = this.init('init')
       // console.log("resultInit: ",resultInit)
-
-      let resultInit = this.init('init')
-      console.log("resultInit: ",resultInit)
-
-      let resultStart = await this.onStart()
-      console.log("resultStart: ",resultStart)
+      //
+      // let resultStart = await this.onStart()
+      // console.log("resultStart: ",resultStart)
 
 
 

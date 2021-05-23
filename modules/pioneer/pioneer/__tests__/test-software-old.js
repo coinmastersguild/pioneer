@@ -39,7 +39,7 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['FOUND_KEY'],
             walletId:context,
             username,
             pioneerApi:true,
