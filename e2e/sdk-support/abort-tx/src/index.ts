@@ -56,7 +56,8 @@ const {
     sendPairingCode,
     buildTransaction,
     approveTransaction,
-    broadcastTransaction
+    broadcastTransaction,
+    cancelTransaction
 } = require('./app')
 
 let BLOCKCHAIN = 'thorchain'
@@ -258,93 +259,11 @@ const test_service = async function () {
             context:user.context
         }
 
-        //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
+        //cancel transaction
+        let cancelResult = await cancelTransaction(transaction)
+        log.info(tag,"cancelResult: ",cancelResult)
 
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        // assert(signedTx.txid)
-
-        //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-
-        //get invocation info EToC
-
-        let isConfirmed = false
-        //wait for confirmation
-
-        // if(!noBroadcast){
-        //     //TODO
-        //     /*
-        //         Status codes
         //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         let txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await client.getTransactionData(txid)
-        //         log.debug(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
-        //
-        //         } else {
-        //             log.info(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         //get midgard info
-        //         let txInfoMidgard =
-        //         //update invocation
-        //
-        //         //if
-        //         // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-        //         // log.info(tag,"txInfo: ",txInfo)
-        //         //
-        //         // if(txInfo.confirmations > 0){
-        //         //     isConfirmed = true
-        //         // }
-        //
-        //         await sleep(10000)
-        //     }
-        // }
 
 
         log.info("****** TEST PASS 2******")

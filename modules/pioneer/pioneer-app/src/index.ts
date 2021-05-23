@@ -297,10 +297,10 @@ module.exports = {
     },
 };
 
-let delete_invocation = async function (invocationId:any) {
+let delete_invocation = async function (invocationId:string) {
     let tag = " | delete_invocation | ";
     try {
-        let output = await network.instance.DeleteInvocation(invocationId)
+        let output = await network.instance.DeleteInvocation(null,{invocationId})
         return output.data;
     } catch (e) {
         console.error(tag, "Error: ", e);

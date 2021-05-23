@@ -52,9 +52,7 @@ let {
 const {
     startApp,
     sendPairingCode,
-    buildTransaction,
-    approveTransaction,
-    broadcastTransaction
+    cancelTransaction
 } = require('./app')
 
 let BLOCKCHAIN = 'thorchain'
@@ -309,42 +307,11 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             }
         });
 
-        it('Build transfer (with context)', async function() {
+        it('cancel transfer (with context)', async function() {
 
-            let unsignedTx = await buildTransaction(transaction)
-            log(tag,"unsignedTx: ",unsignedTx)
-            expect(unsignedTx).toBeDefined();
-
-        });
-
-        it('Review Invocation ', async function() {
-            //get invocation
-            let invocationView1 = await app.getInvocation(invocationId)
-            log(tag,"invocationView1: (VIEW) ",invocationView1)
-            expect(invocationView1).toBeDefined();
-        });
-
-        it('Approve Invocation ', async function() {
-
-            //sign transaction
-            signedTx = await approveTransaction(transaction)
-            log(tag,"signedTx: ",signedTx)
-            expect(signedTx).toBeDefined();
-            expect(signedTx.txid).toBeDefined();
-
-        });
-
-        it('Broadcast Invocation ', async function() {
-
-            broadcastResult = await broadcastTransaction(transaction)
-            log(tag,"broadcastResult: ",broadcastResult)
-
-        });
-
-        it('Broadcast Invocation ', async function() {
-
-            broadcastResult = await broadcastTransaction(transaction)
-            log(tag,"broadcastResult: ",broadcastResult)
+            let resultCancel = await cancelTransaction(transaction)
+            log(tag,"resultCancel: ",resultCancel)
+            expect(resultCancel).toBeDefined();
 
         });
 

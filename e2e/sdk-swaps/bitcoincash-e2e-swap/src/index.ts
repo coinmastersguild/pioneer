@@ -247,7 +247,7 @@ const test_service = async function () {
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
         log.info(tag,"responseTransfer: ",responseTransfer)
-        let invocationId = responseTransfer.invocationId
+        let invocationId = responseTransfer
 
         //do not continue without invocationId
         assert(invocationId)
