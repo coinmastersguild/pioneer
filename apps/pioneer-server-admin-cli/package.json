@@ -1,9 +1,9 @@
 {
   "name": "@pioneer-platform/pioneer-server-admin-cli",
-  "version": "8.1.1",
+  "version": "8.1.2",
   "dependencies": {
-    "@pioneer-platform/default-redis": "^8.1.1",
-    "@pioneer-platform/redis-queue": "^8.1.1"
+    "@pioneer-platform/default-redis": "^8.1.2",
+    "@pioneer-platform/redis-queue": "^8.1.2"
   },
   "gitHead": "58efecc036d2e67348239180fbef6dcbbc3f91b9"
 }

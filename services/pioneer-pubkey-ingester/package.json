@@ -1,6 +1,6 @@
 {
   "name": "pioneer-pubkey-ingester",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "yarn": "yarn",
@@ -17,12 +17,12 @@
   "dependencies": {
     "@pioneer-platform/bnb-network": "^6.2.2",
     "@pioneer-platform/cosmos-network": "^6.2.11",
-    "@pioneer-platform/default-mongo": "^8.0.0",
-    "@pioneer-platform/default-redis": "^8.0.0",
-    "@pioneer-platform/fio-network": "^8.0.0",
+    "@pioneer-platform/default-mongo": "^8.1.2",
+    "@pioneer-platform/default-redis": "^8.1.2",
+    "@pioneer-platform/fio-network": "^8.1.2",
     "@pioneer-platform/loggerdog": "^8.0.0",
     "@pioneer-platform/network": "^6.3.88",
-    "@pioneer-platform/redis-queue": "^8.0.0",
+    "@pioneer-platform/redis-queue": "^8.1.2",
     "@pioneer-platform/thor-network": "^6.2.5",
     "@pioneer-platform/utxo-network": "^6.2.18",
     "chai": "^4.3.4",
