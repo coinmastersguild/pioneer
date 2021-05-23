@@ -1,9 +1,5 @@
 version: 2.1
 
-
-orbs:
-  win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
-
 executors:
   pulumi:
     docker:
@@ -23,48 +19,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "yarn && yarn build"
-
-  build:
-    resource_class: xlarge
-    executor: pulumi
-    parameters:
-      env:
-        description: stage or prod
-        type: string
-    steps:
-      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          command: "curl -sL https://github.com/digitalocean/doctl/releases/download/v1.56.0/doctl-1.56.0-linux-amd64.tar.gz | tar -xzv"
-      - run:
-          command: "sudo mv doctl /usr/local/bin"
-      - run:
-          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-      - run:
-          name: build
-          command: "cd services/pioneer-server && npm i"
-      - run:
-          name: build
-          command: "cd services/pioneer-pubkey-ingester && npm i"
-      - run:
-          name: build
-          command: "doctl auth init -t $DIGITALOCEAN_TOKEN && doctl registry login && npm run build:rest && npm run build:worker"
-  deploy:
-    executor: pulumi
-    parameters:
-      env:
-        description: stage or prod
-        type: string
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: update
-          command: "cd deploy && npm i && node leeroy-sdk.js"
+          command: "make"
   test:
     executor: pulumi
     parameters:
@@ -76,112 +31,18 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: e2e-test-eth-dev
-          command: "cd e2e/sdk-swaps/ethereum-e2e-swap && npm run run-dev"
-      - run:
-          name: e2e-test-eth
-          command: "cd e2e/sdk-swaps/ethereum-e2e-swap && npm run test"
-#      - run:
-#          name: e2e-test-thorchain-dev
-#          command: "cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev"
-#      - run:
-#          name: e2e-test-thorchain
-#          command: "cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test"
-  build-native-mac:
-    macos:
-      xcode: 11.5.0
-    steps:
-      - checkout
-      - run:
-          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-      - run: npm install -g @quasar/cli
-      - run: node --version
-      - run: quasar --version
-      - run: cd platform && npm i
-      - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-mac
-  build-native-linux:
-    executor: pulumi
-    steps:
-      - checkout
-      - run:
-          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-      - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0 snapd
-      - run: node --version
-      - run: cd platform && npm i
-#      - run: cd platform && npm run fix
-      - run: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-linux
-  build-native-windows:
-    executor:
-      name: win/default # executor type
-      size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium"
-    steps:
-      - checkout
-      - run:
-          command: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-          shell: bash.exe
-          name: set env
-      - run:
-          command: cd platform && npm i
-          shell: bash.exe
-          name: npm install
-      - run:
-          command: cd platform && GH_TOKEN=$GH_TOKEN npm run build-electron-publish-windows
-          shell: bash.exe
-          name: npm install
-
-not_master: &not_master
-  filters:
-    branches:
-      ignore: master
-
-only_master: &only_master
-  filters:
-    branches:
-      only:
-        - master
-
-only_develop: &only_develop
-  filters:
-    branches:
-      only:
-        - develop
-
-# Blue* deployment
-only_release_canidate: &only_release_canidate
-  filters:
-    branches:
-      only:
-        - release-canidate
+          name: test
+          command: "make test"
 
 workflows:
   version: 2
-  pioneer-native:
-    jobs:
-      - build-native-mac
-      - build-native-windows
-      - build-native-linux
   build-master:
     jobs:
       - make:
           name: make
           env: prod
-      - build:
-          <<: *only_develop
-          name: push image
+      - test:
+          name: test
           env: prod
           requires:
             - make
-      - deploy:
-          <<: *only_develop
-          name: deploy image
-          env: prod
-          requires:
-            - make
-            - push image
-      - deploy:
-          <<: *only_develop
-          name: e2e test dev
-          env: prod
-          requires:
-            - push image
-            - deploy image
