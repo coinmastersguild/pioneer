@@ -10,8 +10,7 @@
     "npm": "npm i",
     "build": "tsc -p .",
     "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "npm run build",
-    "publish": "npm publish"
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
@@ -28,5 +27,5 @@
     "nodemon": "^2.0.3",
     "typescript": "^3.8.3"
   },
-  "gitHead": "58efecc036d2e67348239180fbef6dcbbc3f91b9"
+  "gitHead": "28be3f4d466e040f1016760dd9eeace0cb06b359"
 }

@@ -4,5 +4,6 @@
   "dependencies": {
     "redredisearch": "0.0.1",
     "reds": "^1.0.0"
-  }
+  },
+  "gitHead": "28be3f4d466e040f1016760dd9eeace0cb06b359"
 }

@@ -6,5 +6,5 @@
     "ioredis": "^4.17.3",
     "ioredis-mock": "^4.21.1"
   },
-  "gitHead": "58efecc036d2e67348239180fbef6dcbbc3f91b9"
+  "gitHead": "28be3f4d466e040f1016760dd9eeace0cb06b359"
 }
