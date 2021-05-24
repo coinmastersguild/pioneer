@@ -21,10 +21,11 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_MAINNET_DEV_OLD']
-let password = process.env['WALLET_PASSWORD']
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+let seed = process.env['WALLET_TEST']
+if(!seed) throw Error("Failed to find test seed!")
+let password = process.env['WALLET_PASSWORD'] || '123'
+let username = process.env['TEST_USERNAME_2'] || 'e2e-user-1'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey123'
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
