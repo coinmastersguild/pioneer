@@ -19,20 +19,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "make"
-  test:
-    executor: pulumi
-    parameters:
-      env:
-        description: stage or prod
-        type: string
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: test
-          command: "make test"
+          command: "make && make test"
 
 workflows:
   version: 2
@@ -41,8 +28,3 @@ workflows:
       - make:
           name: make
           env: prod
-      - test:
-          name: test
-          env: prod
-          requires:
-            - make
