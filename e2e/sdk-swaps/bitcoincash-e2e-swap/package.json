@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/bitcoincash-e2e-sdk",
-  "version": "8.1.3",
+  "version": "8.1.4",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.0.1",
-    "@pioneer-platform/midgard-client": "^8.1.3",
-    "@pioneer-platform/pioneer-app": "^8.1.3",
-    "@pioneer-platform/pioneer-sdk": "^8.1.3",
+    "@pioneer-platform/midgard-client": "^8.1.4",
+    "@pioneer-platform/pioneer-app": "^8.1.4",
+    "@pioneer-platform/pioneer-sdk": "^8.1.4",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
