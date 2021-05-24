@@ -25,8 +25,8 @@ let seed = process.env['WALLET_MAINNET_DEV_OLD']
 let password = process.env['WALLET_PASSWORD']
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
-let spec = process.env['URL_PIONEER_SPEC']
-let wss = process.env['URL_PIONEER_SOCKET']
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
 //Globals
 let WALLET_INIT = false
