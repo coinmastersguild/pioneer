@@ -306,6 +306,7 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
+                if(!this.spec) throw Error("103: Must init a pioneer server spec")
                 log.info(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
