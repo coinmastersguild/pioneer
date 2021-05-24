@@ -1,6 +1,7 @@
 SHELL=/bin/bash
 
-env=skunkworks
+env=prod
+debug=false
 
 .DEFAULT_GOAL := build
 
@@ -17,14 +18,7 @@ build::
 #	yarn && npm run build:all-local
 
 test::
-#	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
-	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test &&/
-#	cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
-#	cd e2e/sdk-swaps/etherum-e2e-swap && npm run test &&/
-#	cd e2e/sdk-swaps/tokens-e2e-swap && npm run run-dev
-#	cd e2e/sdk-swaps/tokens-e2e-swap && npm run test
-#	cd e2e/sdk-support/abort-tx && npm run run-dev
-#	cd e2e/sdk-support/abort-tx && npm run test
+	sh scripts/test.sh $(env) $(debug)
 
 publish::
 	yarn publish:lerna

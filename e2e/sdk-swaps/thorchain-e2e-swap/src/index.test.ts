@@ -74,6 +74,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         beforeEach(() => {
             console.log = jest.fn(); // create a new mock function for each test
+            jest.setTimeout(10000)
         });
         afterAll(() => {
             console.log = log; // restore original console.log after all tests
