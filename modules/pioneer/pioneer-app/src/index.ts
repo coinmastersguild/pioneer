@@ -953,6 +953,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         if(IS_INIT) throw Error("App already initialized!")
         if(!config.spec) throw Error("100: invalid config! missing pioneer server!")
         if(!config.wss) throw Error("100a: invalid config! missing pioneer wss!")
+        URL_PIONEER_SPEC = config.spec
+        URL_PIONEER_SOCKET = config.wss
         network = new Network(URL_PIONEER_SPEC,{
             queryKey:config.queryKey
         })
@@ -963,8 +965,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         if(!config.username) throw Error("102: username required!")
         if(!config.queryKey) throw Error("103: queryKey required!")
 
-        URL_PIONEER_SPEC = config.spec
-        URL_PIONEER_SOCKET = config.wss
+
         let output:any = {}
 
         //get wallets

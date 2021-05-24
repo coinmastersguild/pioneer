@@ -79,6 +79,7 @@ export async function startApp() {
         config.pioneerSocket = wss
 
         //verify startup
+        log.info(tag,"config: ",config)
         let resultInit = await App.init(config)
 
         config.password = password
