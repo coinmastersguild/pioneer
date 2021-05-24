@@ -5,7 +5,7 @@ echo "debug: $2";
 
 
 
-if [[ $1 = 'true' ]]
+if [[ $2 = 'true' ]]
 then
   cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
 else
