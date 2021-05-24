@@ -88,6 +88,7 @@ export class SDK {
     private assetBalanceUsdValueContext: string;
     private assetBalanceNativeContext: string;
     private getInvocation: (invocationId: string) => Promise<any>;
+    private stopSocket: () => any;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -166,6 +167,15 @@ export class SDK {
                 //sub to events
                 this.events = new Events.Events(configEvents.pioneerWs,config)
                 this.events.init()
+                return this.events.events
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.stopSocket = function () {
+            let tag = TAG + " | stopSocket | "
+            try {
+                this.events.disconnect()
                 return this.events.events
             } catch (e) {
                 log.error(tag, "e: ", e)

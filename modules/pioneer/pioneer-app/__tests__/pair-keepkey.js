@@ -23,7 +23,7 @@ if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
@@ -100,8 +100,12 @@ let run_test = async function(){
             let success = await App.pairKeepkey(wallet,blockchains)
             console.log("success: ",success)
 
+            if(!process.env['URL_PIONEER_SPEC']) throw Error("Must specify pioneer server!")
+            if(!process.env['URL_PIONEER_SOCKET']) throw Error("Must specify pioneer socket!")
+
             await App.initConfig("english");
-            App.updateConfig({isTestnet:true});
+            App.updateConfig({spec:process.env['URL_PIONEER_SPEC']});
+            App.updateConfig({wss:process.env['URL_PIONEER_SOCKET']});
             App.updateConfig({username});
             App.updateConfig({temp:password});
             App.updateConfig({blockchains})

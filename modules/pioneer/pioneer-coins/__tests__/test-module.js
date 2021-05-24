@@ -17,12 +17,13 @@ let {
 
 
 
-let amountNative = "1206615928659277"
-// console.log("base: ",baseAmountToNative("BTC",amountNative))
-console.log("base: ",nativeToBaseAmount("ETH",amountNative))
+// let amountNative = "1206615928659277"
+// // console.log("base: ",baseAmountToNative("BTC",amountNative))
+// console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 
-// let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
-// console.log("paths: ",paths)
+let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
+console.log("paths: ",paths)
+
 // //
 // // console.log("supportedAssets: ",supportedAssets)
 // //console.log("supportedBlockchains: ",supportedBlockchains)

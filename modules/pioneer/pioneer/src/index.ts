@@ -84,28 +84,9 @@ WALLET_COINS.push('FIO')
 const HD_RUNE_KEYPATH="m/44'/931'/0'/0/0"
 const RUNE_CHAIN="thorchain"
 const RUNE_BASE=100000000
-const RUNE_TX_FEE="100"
-const RUNE_MAX_GAS="100000"
-
 const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
 const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
-const ATOM_TX_FEE="100"
-const ATOM_MAX_GAS="100000"
-
-const HD_BNB_KEYPATH="44'/714'/0'/0/"
-const BNB_ASSET_SYMBOL="BNB"
-const BNB_CHAIN=""
-const BNB_MAX_GAS="100000"
-const BNB_TX_FEE="100"
-const BNB_BASE=100000000
-
-const HD_EOS_KEYPATH="44'/194'/0'/0/"
-const EOS_ASSET_SYMBOL="EOS"
-const EOS_CHAIN="aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
-const EOS_MAX_GAS="100000"
-const EOS_TX_FEE="100"
-const EOS_BASE=1000
 
 export interface SendToAddress {
     coin:string,

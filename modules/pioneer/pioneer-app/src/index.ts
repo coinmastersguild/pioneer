@@ -84,12 +84,11 @@ let MASTER_MAP:any = {}
 let WALLET_VALUE_MAP:any = {}
 let CONTEXT_WALLET_SELECTED
 //urlSpec
-let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC']
+let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET']
 // let URL_PIONEER_SPEC = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
 // let URL_PIONEER_SOCKET = process.env['URL_PIONEER_SOCKET'] || 'ws://127.0.0.1:9001'
 
-let urlSpec = URL_PIONEER_SPEC
 
 let KEEPKEY:any
 let network:any
@@ -952,29 +951,20 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
     let tag = TAG+" | init_wallet | ";
     try {
         if(IS_INIT) throw Error("App already initialized!")
+        if(!config.spec) throw Error("100: invalid config! missing pioneer server!")
+        if(!config.wss) throw Error("100a: invalid config! missing pioneer wss!")
         network = new Network(URL_PIONEER_SPEC,{
             queryKey:config.queryKey
         })
         network = await network.init()
-        // DATABASES = await nedb.init()
         //if no password
         if(!config.password) config.password = config.temp
         if(!config.password) throw Error("101: password required!")
         if(!config.username) throw Error("102: username required!")
         if(!config.queryKey) throw Error("103: queryKey required!")
 
-        if(config.urlSpec || config.spec){
-            URL_PIONEER_SPEC = config.urlSpec || config.spec
-        }
-        //if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "https://pioneers.dev/spec/swagger.json"
-        if(!URL_PIONEER_SPEC) URL_PIONEER_SPEC = "http://127.0.0.1:9001/spec/swagger.json"
-
-        if(config.pioneerSocket || config.wss){
-            URL_PIONEER_SOCKET = config.pioneerSocket || config.wss
-        }
-        // if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "wss://pioneers.dev"
-        if(!URL_PIONEER_SOCKET) URL_PIONEER_SOCKET = "ws://127.0.0.1:9001"
-
+        URL_PIONEER_SPEC = config.spec
+        URL_PIONEER_SOCKET = config.wss
         let output:any = {}
 
         //get wallets
@@ -989,7 +979,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote has more wallets
         let userInfoRemote = await network.instance.User()
         userInfoRemote = userInfoRemote.data
-        log.debug(tag,"userInfoRemote: ",userInfoRemote)
+        log.info(tag,"userInfoRemote: ",userInfoRemote)
+
         if(userInfoRemote.wallets){
             for(let i = 0; i < userInfoRemote.wallets; i++){
                 let walletRemote = userInfoRemote[i]
@@ -1014,7 +1005,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //else mark offline
                 }
             }
-
         }else{
             log.info(tag,'new user detected!')
         }
@@ -1038,10 +1028,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         if(config.hardware){
             log.debug(tag,"Hardware enabled!")
-
             //start
             KEEPKEY = await Hardware.start()
-
             KEEPKEY.events.on('event', async function(event:any) {
                 //events.emit('keepkey',{event})
             });
@@ -1072,6 +1060,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         KEEPKEY = await Hardware.start()
 
                         KEEPKEY.events.on('event', async function(event:any) {
+                            //TODO keepkey events?
                             //events.emit('keepkey',{event})
                         });
                     }
@@ -1277,6 +1266,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote user info
         let userInfo = await network.instance.User()
         userInfo = userInfo.data
+        log.info(tag,"userInfo: ",userInfo)
         if(!userInfo.context) {
             if(walletFiles.length === 0){
                 throw Error("You must first create/pair a wallet to use app!")

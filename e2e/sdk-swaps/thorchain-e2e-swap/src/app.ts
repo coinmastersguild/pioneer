@@ -33,6 +33,7 @@ let WALLET_INIT = false
 let WALLETS_LOADED:any = []
 let WALLETS_NAMES:any = []
 let WALLET_CONTEXT = ""
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
 export async function startApp() {
     let tag = " | app_assert_env_start | "
@@ -65,7 +66,11 @@ export async function startApp() {
         App.updateConfig({username});
         App.updateConfig({temp:password});
         App.updateConfig({created: new Date().getTime()});
-
+        assert(spec)
+        assert(wss)
+        App.updateConfig({blockchains})
+        App.updateConfig({spec});
+        App.updateConfig({wss});
         //get config
         config = await App.getConfig()
         config.blockchains = ['ethereum','thorchain']

@@ -341,16 +341,15 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         });
 
-        it('Broadcast Invocation ', async function() {
+        it('Closes Webscket ', async function() {
 
-            broadcastResult = await broadcastTransaction(transaction)
-            log(tag,"broadcastResult: ",broadcastResult)
+            let result = await app.stopSocket()
+            log(tag,"result: ",result)
 
         });
 
-        //TODO if !noBroadcast
-
-
+        //TODO if !noBroadcast monitor till end\
+        //process.exit(0)
     } catch (e) {
         log.error(e)
         //process

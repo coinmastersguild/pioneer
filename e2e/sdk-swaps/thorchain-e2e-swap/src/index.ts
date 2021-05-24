@@ -103,15 +103,31 @@ const test_service = async function () {
             spec,
             wss
         }
-
+        log.info(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
-        events.on('message', async (request:any) => {
-            assert(request.queryKey)
-            assert(request.username)
-            assert(request.url)
-            eventPairReceived = true
+        let eventInvokeTransferReceived = false
+        events.on('message', async (event:any) => {
+            log.info(tag,"event: ",event)
+            switch(event.type) {
+                case 'pairing':
+                    assert(event.queryKey)
+                    assert(event.username)
+                    assert(event.url)
+                    eventPairReceived = true
+                    break;
+                case 'transfer':
+                    //TODO assert valid transfer info
+
+                    //recevied continue below
+                    eventInvokeTransferReceived = true
+                    break;
+                default:
+                    log.error(tag,"unhandled event: ",event)
+                // code block
+            }
+
         })
 
         let seedChains = ['ethereum','thorchain']
@@ -131,6 +147,7 @@ const test_service = async function () {
         //dont release till pair event
         while(!eventPairReceived){
             await sleep(300)
+            //TODO timeout & fail?
         }
 
         //assert sdk user
@@ -346,6 +363,10 @@ const test_service = async function () {
         //     }
         // }
 
+
+
+        let result = await app.stopSocket()
+        log(tag,"result: ",result)
 
         log.info("****** TEST PASS 2******")
         //process

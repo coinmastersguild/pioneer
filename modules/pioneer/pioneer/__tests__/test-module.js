@@ -42,7 +42,6 @@ let run_test = async function(){
 
         //pioneer
         let config = {
-            isTestnet:false,
             blockchains,
             mnemonic: process.env['WALLET_MAIN'],
             username,

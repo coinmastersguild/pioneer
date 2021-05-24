@@ -140,7 +140,7 @@ export class Events {
         this.disconnect = async function () {
             let tag = TAG + " | disconnect | "
             try {
-
+                return this.socket.disconnect()
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
