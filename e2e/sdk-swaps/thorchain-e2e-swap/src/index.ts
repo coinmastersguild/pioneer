@@ -366,7 +366,7 @@ const test_service = async function () {
 
 
         let result = await app.stopSocket()
-        log(tag,"result: ",result)
+        log.info(tag,"result: ",result)
 
         log.info("****** TEST PASS 2******")
         //process
