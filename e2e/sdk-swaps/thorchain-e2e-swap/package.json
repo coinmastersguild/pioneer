@@ -14,7 +14,7 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.0.1",
+    "@pioneer-platform/loggerdog": "^8.1.4",
     "@pioneer-platform/midgard-client": "^8.1.4",
     "@pioneer-platform/pioneer-app": "^8.1.4",
     "@pioneer-platform/pioneer-sdk": "^8.1.4",
