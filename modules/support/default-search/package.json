@@ -1,6 +1,6 @@
 {
   "name": "default-search",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "dependencies": {
     "redredisearch": "0.0.1",
     "reds": "^1.0.0"

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/fio-network",
-  "version": "8.1.4",
+  "version": "8.1.5",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -18,7 +18,7 @@
   "dependencies": {
     "@fioprotocol/fiojs": "^1.0.1",
     "@fioprotocol/fiosdk": "^1.0.2",
-    "@pioneer-platform/loggerdog": "^8.0.1",
+    "@pioneer-platform/loggerdog": "^8.1.5",
     "@scatterjs/core": "^2.7.54",
     "@scatterjs/fio": "^1.5.37",
     "@types/node": "^13.13.12",
