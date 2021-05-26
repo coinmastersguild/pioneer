@@ -3,14 +3,12 @@
 echo "env: $1";
 echo "debug: $2";
 
-
-cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
-#if [[ $2 = 'true' ]]
-#then
-#  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
-#else
-#  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
-#fi
+if [[ $2 = 'true' ]]
+then
+  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
+else
+  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
+fi
 
 #	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
 #	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test &&/

@@ -249,6 +249,7 @@ const test_service = async function () {
             recipient:vaultAddress,
             coin: ASSET,
             asset: ASSET,
+            network: ASSET,
             memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
             "amount":{
                 amount: function(){

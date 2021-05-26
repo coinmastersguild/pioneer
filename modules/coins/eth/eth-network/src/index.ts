@@ -89,6 +89,7 @@ const TCRopstenAbi = [{"inputs":[],"stateMutability":"nonpayable","type":"constr
 module.exports = {
 	init:function (settings:any) {
 		blockbook.init()
+		log.info("node: ",process.env['PARITY_ARCHIVE_NODE'])
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -410,6 +411,7 @@ let get_fees = async function(params: any){
 let broadcast_transaction = async function(tx:any){
 	let tag = TAG + " | broadcast_transaction | "
 	try{
+		console.log(tag,"checkpoint")
 		if(!tx) throw Error("101: missing tx!")
 		let result = await web3.eth.sendSignedTransaction(tx)
 

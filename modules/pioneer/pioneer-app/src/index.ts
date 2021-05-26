@@ -127,9 +127,9 @@ module.exports = {
             } else {
                 //failed to get remote!
                 log.info("failed to get remote context!",output.data)
-                let walletIds = await Object.keys(WALLETS_LOADED)
-                if(walletIds.length > 0){
-                    WALLET_CONTEXT = walletIds[0]
+                let contexts = await Object.keys(WALLETS_LOADED)
+                if(contexts.length > 0){
+                    WALLET_CONTEXT = contexts[0]
                     let resultUpdateContextRemote = await network.instance.SetContext(null,{context:WALLET_CONTEXT})
                     log.debug("resultUpdateContextRemote: ",resultUpdateContextRemote)
                 }
@@ -285,8 +285,8 @@ module.exports = {
             log.error(e)
         }
     },
-    exportWallet: function (walletId:string,format:string) {
-        return export_wallet(walletId, format);
+    exportWallet: function (context:string,format:string) {
+        return export_wallet(context, format);
     },
     getCoins: function () {
         return ONLINE;
@@ -344,11 +344,11 @@ let build_transaction = async function (transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.info(tag,"walletContext: ",walletContext.context)
 
         let unsignedTx
         switch(invocation.type) {
@@ -420,11 +420,11 @@ let broadcast_transaction = async function (transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.info(tag,"walletContext: ",walletContext.context)
 
         //TODO fix tech debt
         //normalize
@@ -523,11 +523,11 @@ let approve_transaction = async function (transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.info(tag,"walletContext: ",walletContext.context)
 
         //TODO kill the coin! field
         invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
@@ -639,7 +639,7 @@ let list_apps_remote = async function () {
     }
 };
 
-let export_wallet = async function (walletId:string,format:string) {
+let export_wallet = async function (context:string,format:string) {
     let tag = " | export_wallet | ";
     try {
         let output
@@ -661,7 +661,7 @@ let export_wallet = async function (walletId:string,format:string) {
             if(Object.keys(WALLET_PUBLIC).length === 0) throw Error("103: Failed to find WALLET_PRIVATE")
 
             let walletInfo = {
-                WALLET_ID:walletId,
+                WALLET_ID:context,
                 TYPE:'full',
                 CREATED: new Date().getTime(),
                 VERSION:"0.1.3",
@@ -671,7 +671,7 @@ let export_wallet = async function (walletId:string,format:string) {
             }
 
             let walletInfoPub = {
-                WALLET_ID:walletId,
+                WALLET_ID:context,
                 TYPE:'watch',
                 CREATED: new Date().getTime(),
                 VERSION:"0.1.3",
@@ -679,8 +679,8 @@ let export_wallet = async function (walletId:string,format:string) {
                 WALLET_PUBKEYS
             }
 
-            //write to foxpath, name wallet walletId
-            let writePathPub = outDir+"/"+walletId+".watch.wallet.json"
+            //write to foxpath, name wallet context
+            let writePathPub = outDir+"/"+context+".watch.wallet.json"
             log.debug(tag,"writePathPub: ",writePathPub)
             let writeSuccessPub = fs.writeFileSync(writePathPub, JSON.stringify(walletInfoPub));
 
@@ -713,13 +713,13 @@ let export_wallet = async function (walletId:string,format:string) {
 
 
             log.debug(tag,"configFileEnv: ",configFileEnv)
-            //write to foxpath, name wallet walletId
-            let writePathEnv = outDir+"/"+walletId+".env"
+            //write to foxpath, name wallet context
+            let writePathEnv = outDir+"/"+context+".env"
             log.debug(tag,"writePath: ",writePathEnv)
             let writeSuccessEnv = fs.writeFileSync(writePathEnv, configFileEnv);
             log.debug(tag,"writeSuccessEnv: ",writeSuccessEnv)
 
-            //backupWallet(outDir,hash,seed_encrypted,walletId)
+            //backupWallet(outDir,hash,seed_encrypted,context)
         }else{
             //
             throw Error("format not supported "+format)
@@ -1045,14 +1045,14 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //Load wallets if setup
         for(let i = 0; i < walletFiles.length; i++){
-            let walletId = walletFiles[i]
+            let context = walletFiles[i]
             //if !offline aka, online!
             log.info(tag,"output.offline: ",output.offline)
-            if(output.offline.indexOf(walletId) < 0){
-                log.info(tag,"wallet is online! ",walletId)
+            if(output.offline.indexOf(context) < 0){
+                log.info(tag,"wallet is online! ",context)
 
-                log.debug(tag,"walletId: ",walletId)
-                let walletFile = getWallet(walletId)
+                log.debug(tag,"context: ",context)
+                let walletFile = getWallet(context)
                 log.info(tag,"walletFile: ",walletFile)
                 if(!walletFile.TYPE) walletFile.TYPE = walletFile.type
                 if(walletFile.TYPE === 'keepkey'){
@@ -1074,8 +1074,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //if(!walletFile.wallet) throw Error("103: invalid keepkey wallet!")
 
                     //if wallet paths custom load
-                    log.debug(tag,"walletId: ",walletId)
-                    let fileNameWatch = walletId.replace(".wallet.json",".watch.wallet.json")
+                    log.debug(tag,"context: ",context)
+                    let fileNameWatch = context.replace(".wallet.json",".watch.wallet.json")
                     let watchWallet = getWalletPublic(fileNameWatch)
                     let walletPaths
                     if(watchWallet){
@@ -1094,9 +1094,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         blockchains:config.blockchains,
                         pubkeys:walletFile.pubkeys,
                         wallet:walletFile,
-                        walletId,
+                        context,
                         walletDescription:{
-                            walletId,
+                            context:context,
                             type:walletFile.TYPE
                         },
                         username:config.username,
@@ -1112,10 +1112,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!KEEPKEY) throw Error("Can not start hardware wallet without global KEEPKEY")
                     let walletInfo = await wallet.init(KEEPKEY)
                     log.debug(tag,"walletInfo: ",walletInfo)
-                    WALLETS_LOADED[walletId] = wallet
+                    WALLETS_LOADED[context] = wallet
 
                     //info
-                    let info = await wallet.getInfo(walletId)
+                    let info = await wallet.getInfo(context)
                     info.name = walletFile.username
                     info.type = 'keepkey'
                     output.wallets.push(info)
@@ -1141,7 +1141,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //add wallet info
                     let walletInfoVerbose = {
-                        walletId,
+                        context:context,
                         type:walletFile.TYPE,
                         totalValueUsd:info.totalValueUsd
                     }
@@ -1149,7 +1149,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
-                    WALLET_VALUE_MAP[walletId] = info.totalValueUsd
+                    WALLET_VALUE_MAP[context] = info.totalValueUsd
                 }else if(walletFile.TYPE === 'seedwords'){
                     //decrypt
                     // @ts-ignore
@@ -1169,8 +1169,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //Load public wallet file
                     //Loads wallet state and custom pathing
-                    log.debug(tag,"walletId: ",walletId)
-                    let fileNameWatch = walletId.replace(".wallet.json",".watch.wallet.json")
+                    log.debug(tag,"context: ",context)
+                    let fileNameWatch = context.replace(".wallet.json",".watch.wallet.json")
                     let watchWallet = getWalletPublic(fileNameWatch)
                     let walletPaths
                     if(watchWallet){
@@ -1184,9 +1184,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     let configPioneer:any = {
                         isTestnet,
                         mnemonic,
-                        walletId,
+                        context,
                         walletDescription:{
-                            walletId,
+                            context,
                             type:walletFile.TYPE
                         },
                         blockchains:config.blockchains,
@@ -1202,13 +1202,13 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     log.debug(tag,"configPioneer: ",configPioneer)
                     log.debug(tag,"isTestnet: ",isTestnet)
                     let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
-                    WALLETS_LOADED[walletId] = wallet
+                    WALLETS_LOADED[context] = wallet
 
                     //init
                     let walletClient = await wallet.init()
 
                     //info
-                    let info = await wallet.getInfo(walletId)
+                    let info = await wallet.getInfo(context)
                     log.debug(tag,"INFO: ",info)
                     if(!info.pubkeys) throw Error(" invalid wallet info returned! missing pubkeys!")
                     if(!info.masters) throw Error(" invalid wallet info returned! missing masters!")
@@ -1241,7 +1241,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //add wallet info
                     let walletInfoVerbose = {
-                        walletId,
+                        context,
                         type:walletFile.TYPE,
                         totalValueUsd:info.totalValueUsd
                     }
@@ -1251,7 +1251,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //global total valueUSD
                     TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED + info.totalValueUsd
-                    WALLET_VALUE_MAP[walletId] = info.totalValueUsd
+                    WALLET_VALUE_MAP[context] = info.totalValueUsd
 
                 }else{
                     throw Error("unhandled wallet type! "+walletFile.TYPE)
@@ -1298,7 +1298,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         } else {
             log.info(tag,"remote context NOT in loaded wallet")
             //set remote context to position0 local
-            log.info(tag,"walletIds: ",walletFiles)
+            log.info(tag,"contexts: ",walletFiles)
             log.info(tag,"Position 0 context: ",walletFiles[0])
             //
             set_context(walletFiles[0])

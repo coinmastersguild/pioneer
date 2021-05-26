@@ -282,6 +282,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
                 recipient:vaultAddress,
                 coin: ASSET,
                 asset: ASSET,
+                network: ASSET,
                 memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
                 "amount":{
                     amount: function(){
