@@ -90,6 +90,7 @@ export interface Config {
     walletId?:string
     context:string
     blockchains:any
+    wss?:string,
     spec:string,
     env:string,
     mode:string,

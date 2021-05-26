@@ -17,50 +17,20 @@ let {
     supportedAssets,
 } = require('@pioneer-platform/pioneer-coins')
 
+import {
+    SendToAddress,
+    Config
+} from "@pioneer-platform/pioneer-types";
+
 //xchain adapter
 const XchainClass = require("@pioneer-platform/pioneer-xchain-client")
-
-export interface SendToAddress {
-    blockchain:string
-    asset:string
-    amount:number
-    address:string
-    memo?:string
-    noBroadcast?:boolean
-}
-
-export interface config {
-    spec:string,
-    env:string,
-    mode:string,
-    username:string,
-    addresses?:[]
-    wallet?:any,
-    pubkeys?:any,
-    auth?:string,
-    paths?:any,
-    privWallet?:any,
-    mnemonic?:string,
-    queryKey?:string
-    offline?:boolean
-    pioneerApi?:boolean
-}
-
-export interface Invocation {
-    coin: string;
-    addressFrom?: string;
-    addressTo: string;
-    amount: string;
-    memo: string;
-    nonce?:number
-}
 
 
 export class SDK {
     private spec: any;
     private pioneerApi: any;
     private init: (blockchains: []) => Promise<any>;
-    private config: config;
+    private config: Config;
     private clients: any;
     private createPairingCode: () => Promise<any>;
     private queryKey: string;

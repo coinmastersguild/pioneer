@@ -20,6 +20,7 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
+    "@pioneer-platform/pioneer-types": "^8.1.4"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",

@@ -32,15 +32,9 @@ import {
 
 import {
     Asset,
-    AssetETH,
-    baseAmount,
-    baseToAsset,
     BaseAmount,
-    assetFromString,
     assetAmount,
     assetToBase,
-    assetToString,
-    ETHChain,
 } from '@xchainjs/xchain-util'
 
 /*
@@ -947,6 +941,8 @@ module.exports = class wallet {
                     type:'transfer',
                     username:this.username,
                     coin,
+                    network:coin,
+                    asset:coin,
                     amount,
                     address:to,
                     memo
