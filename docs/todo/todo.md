@@ -1,26 +1,30 @@
 Pioneer TODO
+==========
 
+E2E test extensions
+==========
 
+verify app gets invocation event
+
+lifecycle hook in invocation
+    created
+    signed
+    confirmed
+    fullfilled    
+
+handle "transfers not supported on username"
+if error, throw away queryKey and try again
 
 update invocation for swap outgoing
 
+
+
+Features
+==========
+
 show swap failure
 
-
-
-re-add platform builds
-
 expand tests to all supported assets
-
-test in circleci
-
-
-
-
-
-
-
-
 
 invocation page instant
 	or just url? open tx pending model??
@@ -32,9 +36,7 @@ invocation page instant
 
 ASGARDX
 ========
-
-thorchain.deposit??? in swap
-
+debug context switching
 
 
 Desktop
@@ -53,18 +55,13 @@ offer public addresses to watch
 Confirm username
 	offer change
 
-
 Enable applications
 	just thorchain
-
-
 
 show assets/ balances like keepkey client
 	send/receive/tx history
 
 view LP/THOR positions
-
-
 
 
 Bugs
@@ -77,8 +74,6 @@ if pioneer server not running at start it can't reconnect
 if username has symbols it errors without UX
 
 "enter" doesnt "add" on seed recovery
-
-
 
 Give apps start ratings
 
@@ -114,7 +109,6 @@ Pioneer-sdk into axiom?
 	register wallet
 
 	sub to events
-
 
 	in pioneer bex
 		reconize its installed on pioneers.dev
@@ -170,7 +164,7 @@ fresh app in platform repo
 
 no sidebars
 
-just compas in center
+just compass in center
 
 maybe use settings popup over radial?
 

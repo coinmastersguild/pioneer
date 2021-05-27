@@ -890,7 +890,8 @@ module.exports = class wallet {
                     type:'swap',
                     username:this.username,
                     inboundAddress:swap.inboundAddress,
-                    asset:swap.asset,
+                    network:coin,
+                    asset:coin,
                     coin,
                     amount,
                     memo

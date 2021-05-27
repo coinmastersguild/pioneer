@@ -15,17 +15,14 @@ let sign = require('@pioneer-platform/signing')
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
 
+import {
+    Error,
+    Invocation
+} from "@pioneer-platform/pioneer-types";
+
 enum AuthProviders {
     shapeshift = 'shapeshift',
     bitcoin = 'bitcoin'
-}
-
-interface Invocation {
-    type:string
-    sender:string
-    recipient:string
-    asset:string
-    payload:any
 }
 
 module.exports = class wallet {
@@ -73,14 +70,14 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.invoke = async function (type,invocation:any) {
+        this.invoke = async function (type,invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
                 if(!type) throw Error("invocation Type required!")
                 //create invocationId
-                let invocationId = "pioneer:invocation:v0.01:"+invocation.coin+":"+short.generate()
+                let invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
 
-                //sign
+                //TODO sign
                 let msg = JSON.stringify(invocation)
                 //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
 
