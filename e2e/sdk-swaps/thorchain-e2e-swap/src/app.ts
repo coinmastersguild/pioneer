@@ -318,9 +318,6 @@ export async function broadcastTransaction(transaction:any) {
         //TODO fix tech debt
         //normalize
         if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
-
-
-
         if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = true
 
         //force noBroadcast

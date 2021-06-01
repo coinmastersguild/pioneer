@@ -21,7 +21,7 @@ test::
 	sh scripts/test.sh $(env) $(debug)
 
 publish::
-	yarn publish:lerna
+	lerna version patch --yes && lerna publish from-package --no-private --yes
 
 ## TODO start application
 up::

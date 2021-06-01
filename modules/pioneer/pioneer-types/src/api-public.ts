@@ -12,14 +12,15 @@ export interface ThorchainMemoEncodedBody {
 }
 export interface BroadcastBody {
     coin?:string
+    network:string,
+    asset?:string,
     isTestnet?:boolean,
     serialized:string
     signature?:string
     type?:string
     txid:string
-    broadcastBody?:any
     noBroadcast?:boolean
-    dscription?:any
+    description?:any
     invocationId?:string
 }
 export interface GetFeesWithMemoBody{

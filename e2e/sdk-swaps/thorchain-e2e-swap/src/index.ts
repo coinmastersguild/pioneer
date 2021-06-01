@@ -317,11 +317,11 @@ const test_service = async function () {
         let broadcastResult = await broadcastTransaction(transaction)
         log.info(tag,"broadcastResult: ",broadcastResult)
 
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // assert(invocationView3)
-        // assert(invocationView3.state)
-        // assert.equal(invocationView3.state,'broadcasted')
-        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        let invocationView3 = await app.getInvocation(invocationId)
+        assert(invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
         let isConfirmed = false
@@ -368,7 +368,7 @@ const test_service = async function () {
                 }
 
                 //get midgard info
-                let txInfoMidgard =
+                //let txInfoMidgard =
                 //update invocation
 
                 //if
