@@ -344,11 +344,12 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         });
 
-        it('Review Invocation ', async function() {
+        it('Review Invocation 1', async function() {
             //get invocation
-            let invocationView1 = await app.getInvocation(invocationId)
-            log(tag,"invocationView1: (VIEW) ",invocationView1)
-            expect(invocationView1).toBeDefined();
+            let invocationView = await app.getInvocation(invocationId)
+            log(tag,"invocationView1: (VIEW) ",invocationView)
+            expect(invocationView).toBeDefined();
+            expect(invocationView.state).toBe('builtTx');
         });
 
         it('Approve Invocation ', async function() {
@@ -361,11 +362,27 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         });
 
+        it('Review Invocation 2', async function() {
+            //get invocation
+            let invocationView = await app.getInvocation(invocationId)
+            log(tag,"invocationView2: (VIEW) ",invocationView)
+            expect(invocationView).toBeDefined();
+            expect(invocationView.state).toBe('signedTx');
+        });
+
         it('Broadcast Invocation ', async function() {
 
             broadcastResult = await broadcastTransaction(transaction)
             log(tag,"broadcastResult: ",broadcastResult)
 
+        });
+
+        it('Review Invocation 3', async function() {
+            //get invocation
+            let invocationView = await app.getInvocation(invocationId)
+            log(tag,"invocationView3: (VIEW) ",invocationView)
+            expect(invocationView).toBeDefined();
+            expect(invocationView.state).toBe('broadcasted');
         });
 
         it('Closes Websocket ', async function() {

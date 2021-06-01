@@ -290,7 +290,7 @@ export async function broadcastTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
 
         //
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
@@ -318,27 +318,14 @@ export async function broadcastTransaction(transaction:any) {
         //TODO fix tech debt
         //normalize
         if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
+        if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
         if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = true
+        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.signedTx.coin
 
         //force noBroadcast
-        invocation.signedTx.noBroadcast = true
-        let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
+        // invocation.signedTx.noBroadcast = true
+        let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
         log.info(tag,"broadcastResult: ",broadcastResult)
-
-        //update invocation
-        let invocationId = invocation.invocationId
-        let updateBody = {
-            invocationId:invocation.invocation.invocationId,
-            invocation:invocation.invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult
-        }
-        log.debug(tag,"updateBody: ",updateBody)
-        //update invocation remote
-        let resultUpdate = await App.updateInvocation(updateBody)
-        log.debug(tag,"resultUpdate: ",resultUpdate)
-
 
         return broadcastResult
     } catch (e) {

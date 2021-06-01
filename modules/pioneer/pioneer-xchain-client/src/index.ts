@@ -182,7 +182,7 @@ module.exports = class wallet {
     private setPhrase: (coin: string, phrase: string) => any;
     private getBalance: (address?: Address, asset?:any) => any;
     private getTransactions!: (address?: Address, asset?: any) => any;
-    private getTransactionData!: (txid: string) => Promise<any>;
+    private getTransactionData!: (txid: string, type?:string) => Promise<any>;
     private purgeClient!: (address?: Address, asset?: any) => any;
     private getFees!: (params?: FeesParams) => any;
     private transfer!: (tx: any) => any;
@@ -809,12 +809,13 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactionData = async function (txid:string) {
+        this.getTransactionData = async function (txid:string,type?:string) {
             let tag = TAG + " | getTransactionData | "
             try {
                 if(!txid) throw Error("Txid is required!")
                 log.info("asset: ",this.nativeAsset)
-                let output = await this.pioneerApi.GetTransaction({coin:this.nativeAsset,txid,type:'thorchain'})
+                //TODO tech debt, send network instead of asset
+                let output = await this.pioneerApi.GetTransaction({network:this.nativeAsset,txid,type:'thorchain'})
                 return output.data
             } catch (e) {
                 log.error(tag, "e: ", e)

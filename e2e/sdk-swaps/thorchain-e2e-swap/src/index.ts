@@ -70,7 +70,7 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-let noBroadcast = true
+let noBroadcast = false
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -254,7 +254,7 @@ const test_service = async function () {
                 }
             },
             feeRate:gasRate, // fee === gas (xcode inheritance)
-            noBroadcast:true
+            noBroadcast
         }
         log.info(tag,"transfer: ",transfer)
         //if monitor
@@ -343,23 +343,26 @@ const test_service = async function () {
             //monitor tx lifecycle
             let currentStatus
             let statusCode = 0
+            let txid
+
+            //wait till confirmed in block
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
                 log.info(tag,"invocationInfo: ",invocationInfo)
 
-                let txid = invocationInfo.signedTx.txid
+                txid = invocationInfo.signedTx.txid
                 assert(txid)
                 if(!currentStatus) currentStatus = 'transaction built!'
                 if(statusCode <= 0) statusCode = 1
 
                 //lookup txid
                 let txInfo = await client.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
+                log.info(tag,"txInfo: ",txInfo)
 
-                if(txInfo.blockNumber){
+                if(txInfo && txInfo.blockNumber){
                     log.info(tag,"Confirmed!")
-
+                    statusCode = 3
                 } else {
                     log.info(tag,"Not confirmed!")
                     //get gas price recomended
@@ -367,20 +370,35 @@ const test_service = async function () {
                     //get tx gas price
                 }
 
-                //get midgard info
-                //let txInfoMidgard =
-                //update invocation
-
-                //if
-                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-                // log.info(tag,"txInfo: ",txInfo)
-                //
-                // if(txInfo.confirmations > 0){
-                //     isConfirmed = true
-                // }
-
-                await sleep(10000)
+                await sleep(6000)
             }
+
+
+            let isFullfilled = false
+            //wait till swap is fullfilled
+            while(!isFullfilled){
+                //get midgard info
+                let txInfoMidgard = midgard.getTransaction(txid)
+                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+
+                //
+                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+                    let depositInfo = txInfoMidgard.actions[0].in
+                    log.info(tag,"deposit: ",depositInfo)
+
+                    let fullfillmentInfo = txInfoMidgard.actions[0].out
+                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+
+                    if(fullfillmentInfo.status === 'success'){
+                        statusCode = 4
+                        isFullfilled = true
+                    }
+                }
+
+                await sleep(6000)
+            }
+
+
         }
 
         let result = await app.stopSocket()

@@ -21,7 +21,7 @@ export interface BroadcastBody {
     txid:string
     noBroadcast?:boolean
     description?:any
-    invocationId?:string
+    invocationId:string
 }
 export interface GetFeesWithMemoBody{
     network:string
