@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-cli-v2",
-  "version": "8.1.5",
+  "version": "8.1.6",
   "main": "./lib/index.js",
   "bin": {
     "pioneer": "lib/index.js"
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@bithighlander/usb-detection": "^4.10.4",
-    "@pioneer-platform/pioneer-app": "^8.1.5",
+    "@pioneer-platform/pioneer-app": "^8.1.6",
     "@pioneer-platform/pioneer-client": "^8.1.5",
     "@pioneer-platform/pioneer-config": "^8.1.5",
     "@pioneer-platform/pioneer-hardware": "^8.1.5",
