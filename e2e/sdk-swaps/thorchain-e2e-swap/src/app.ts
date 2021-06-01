@@ -34,6 +34,8 @@ let WALLET_INIT = false
 let WALLETS_LOADED:any = []
 let WALLETS_NAMES:any = []
 let WALLET_CONTEXT = ""
+let INVOCATIONS:any = []
+let INVOCATIONS_SIGNED:any = []
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
 export async function startApp() {
@@ -81,6 +83,23 @@ export async function startApp() {
         //verify startup
         log.info(tag,"config: ",config)
         let resultInit = await App.init(config)
+        let isInit2 = App.isInitialized()
+        assert(isInit2)
+
+        //AutonomousOn
+        resultInit.events.on('unsignedTx', async (transaction:any) => {
+            console.log("\n ****UN-signed transaction received! transaction: ",transaction)
+            if(!transaction.invocationId) throw Error("102: invalid transaction invocationId")
+            if(!transaction.invocation) throw Error("103: invalid transaction invocation")
+            if(!transaction.unsignedTx) throw Error("104: invalid transaction unsignedTx")
+            //get invocationId
+
+            //only sign each once (if NOT in array)
+            if(INVOCATIONS_SIGNED.indexOf(transaction.invocationId) < 0){
+                INVOCATIONS_SIGNED.push(transaction.invocationId)
+                INVOCATIONS.push(transaction)
+            }
+        })
 
         config.password = password
         config.username = username
@@ -98,6 +117,18 @@ export async function startApp() {
         WALLET_CONTEXT = context
         assert(WALLETS_LOADED[WALLET_CONTEXT])
         return WALLETS_LOADED[WALLET_CONTEXT]
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export async function getInvocations() {
+    let tag = " | getInvocations | "
+    try {
+        //get remote?
+
+        return INVOCATIONS
     } catch (e) {
         log.error(e)
         throw e
@@ -122,6 +153,7 @@ export async function buildTransaction(transaction:any) {
     try {
         log.info(tag,"transaction: ",transaction)
         if(!transaction.invocationId) throw Error("invocationId required!")
+
         //get invocation
 
         //TODO validate type and fields
@@ -153,9 +185,7 @@ export async function buildTransaction(transaction:any) {
         switch(invocation.type) {
             case 'transfer':
                 console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
-
                 //TODO validate transfer object
-
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
 

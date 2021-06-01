@@ -353,22 +353,25 @@ let build_transaction = async function (transaction:any) {
         let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
+                log.info(" **** BUILD transfer ****  invocation: ",invocation.invocation)
 
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
+                unsignedTx.invocation = invocation.invocation
+                log.info(" **** RESULT buildTransfer ****  unsignedTx: ",unsignedTx)
 
                 break
             case 'approve':
-                console.log(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                unsignedTx.invocation = invocation.invocation
+                log.info(" **** RESULT buildApproval ****  approvalUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
+                unsignedTx.invocation = invocation.invocation
+                log.info(" **** RESULT buildSwap ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("Unhandled type: ",invocation.type)
@@ -1358,9 +1361,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    invokeQueue = await app_to_queue(request.invocation)
-                    log.debug(tag,"invokeQueue: ", invokeQueue)
-                    clientEvents.events.emit('invokeQueue',invokeQueue)
+                    // invokeQueue = await app_to_queue(request.invocation)
+                    // log.debug(tag,"invokeQueue: ", invokeQueue)
+                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1374,6 +1377,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     unsignedTx = await WALLETS_LOADED[context].buildSwap(request.invocation)
                     log.info(tag,"txid: ", unsignedTx.txid)
                     log.info(tag,"unsignedTx: ", unsignedTx)
+
                     //update invocation
                     invocationId = request.invocation.invocationId
                     updateBody = {
@@ -1392,9 +1396,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    invokeQueue = await app_to_queue(request.invocation)
-                    log.debug(tag,"invokeQueue: ", invokeQueue)
-                    clientEvents.events.emit('invokeQueue',invokeQueue)
+                    // invokeQueue = await app_to_queue(request.invocation)
+                    // log.debug(tag,"invokeQueue: ", invokeQueue)
+                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1429,9 +1433,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    invokeQueue = await app_to_queue(request.invocation)
-                    log.debug(tag,"invokeQueue: ", invokeQueue)
-                    clientEvents.events.emit('invokeQueue',invokeQueue)
+                    // invokeQueue = await app_to_queue(request.invocation)
+                    // log.debug(tag,"invokeQueue: ", invokeQueue)
+                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1441,7 +1445,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         throw Error("Unable to build transaction! context not found!")
                     }
                     log.info(tag,"Building transaction with context: ",context)
-                    log.info(tag,"invocation: ",request.invocation)
+                    //log.info(tag,"invocation: ",request.invocation)
 
                     unsignedTx = await WALLETS_LOADED[context].buildTransfer(request.invocation)
                     log.info(tag,"unsignedTx: ", unsignedTx)
@@ -1456,7 +1460,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //update invocation remote
                     resultUpdate = await update_invocation(updateBody)
                     log.info(tag,"resultUpdate: ",resultUpdate)
-                    clientEvents.events.emit('unsignedTx',unsignedTx)
+                    clientEvents.events.emit('unsignedTx',updateBody)
 
                     break;
                 case 'context':

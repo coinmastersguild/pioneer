@@ -9,14 +9,14 @@ Pioneer dev flow
 
 4. tests fail remote
 
-	4a. deploy server blue
+	4a. deploy server blue (dev branch)
 
 	4b. e2e test server from local (on blue env) verify version?
 
 	4c. if fail
-		repeat till pass locally
+		repeat till pass
 
-5. run local e2e pass against remote server
+5. local e2e pass against remote server
 
 	5a. if change is NOT in core
 		skip to step 7 

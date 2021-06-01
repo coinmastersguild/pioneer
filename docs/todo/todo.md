@@ -42,6 +42,8 @@ debug context switching
 Desktop
 ========
 
+debug stuck "startup" window (why need refresh?)
+
 startup
 	if first time
 		confirm total balance

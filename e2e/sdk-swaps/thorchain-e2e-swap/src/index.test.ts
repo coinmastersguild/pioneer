@@ -51,15 +51,16 @@ let {
 
 const {
     startApp,
+    getInvocations,
     sendPairingCode,
     buildTransaction,
     approveTransaction,
-    broadcastTransaction
+    broadcastTransaction,
 } = require('./app')
 
 let BLOCKCHAIN = 'thorchain'
 let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
+let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
@@ -74,7 +75,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         beforeEach(() => {
             console.log = jest.fn(); // create a new mock function for each test
-            jest.setTimeout(10000)
+            jest.setTimeout(90000)
         });
         afterAll(() => {
             console.log = log; // restore original console.log after all tests
@@ -87,6 +88,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
         let wallet:any
         let app:any
         let eventPairReceived = false
+        let eventInvokeTransferReceived = false
         let seedChains = ['ethereum','thorchain']
         let code:any
         let user:any
@@ -128,7 +130,6 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
             let config = {
                 queryKey,
-                //username,
                 spec,
                 wss
             }
@@ -140,13 +141,22 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         it('SDK start events', async function() {
             let events = await app.startSocket()
-            events.on('message', async (request:any) => {
-                expect(request.queryKey).toBeDefined();
-                expect(request.username).toBeDefined();
-                expect(request.url).toBeDefined();
-                eventPairReceived = true
+            eventPairReceived = false
+            eventInvokeTransferReceived = false
+            events.on('message', async (event:any) => {
+                switch(event.type) {
+                    case 'pairing':
+                        eventPairReceived = true
+                        break;
+                    case 'transfer':
+                        //TODO assert valid transfer info
+                        //received continue below
+                        eventInvokeTransferReceived = true
+                        break;
+                    default:
+                        console.error("ERROR: event: ",event)
+                }
             })
-
         });
 
         it('App initialization', async function() {
@@ -302,13 +312,28 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
             let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
             log(tag,"responseTransfer: ",responseTransfer)
-            let invocationId = responseTransfer
+            invocationId = responseTransfer
             expect(invocationId).toBeDefined();
 
             transaction = {
                 invocationId,
                 context:user.context
             }
+        });
+
+        it('App received invocation event', async function() {
+
+            let invocationReceived = false
+            while(!invocationReceived){
+                await sleep(300)
+                let invocations = await getInvocations()
+                log(tag,"invocations: ",invocations)
+                let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+                if(invocationEventValue){
+                    invocationReceived = true
+                }
+            }
+
         });
 
         it('Build transfer (with context)', async function() {
@@ -343,7 +368,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         });
 
-        it('Closes Webscket ', async function() {
+        it('Closes Websocket ', async function() {
 
             let result = await app.stopSocket()
             log(tag,"result: ",result)

@@ -53,6 +53,7 @@ let {
 
 const {
     startApp,
+    getInvocations,
     sendPairingCode,
     buildTransaction,
     approveTransaction,
@@ -99,7 +100,6 @@ const test_service = async function () {
 
         let config = {
             queryKey,
-            //username,
             spec,
             wss
         }
@@ -119,15 +119,13 @@ const test_service = async function () {
                     break;
                 case 'transfer':
                     //TODO assert valid transfer info
-
-                    //recevied continue below
+                    //received continue below
                     eventInvokeTransferReceived = true
                     break;
                 default:
                     log.error(tag,"unhandled event: ",event)
                 // code block
             }
-
         })
 
         let seedChains = ['ethereum','thorchain']
@@ -182,7 +180,6 @@ const test_service = async function () {
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
         assert(balanceSdk[0].amount.amount().toString())
-
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
         log.info(tag,"balanceNative: ",balanceNative)
@@ -267,9 +264,22 @@ const test_service = async function () {
         assert(responseTransfer)
         log.info(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
-
         //do not continue without invocationId
         assert(invocationId)
+
+        //wait until app get's invocation event
+        let invocationReceived = false
+        while(!invocationReceived){
+            await sleep(1000)
+            let invocations = await getInvocations()
+            log.info(tag,"invocations: ",invocations)
+            let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+            log.info(tag,"invocationEventValue: ",invocationEventValue)
+            if(invocationEventValue){
+                assert(invocationEventValue.invocationId)
+                invocationReceived = true
+            }
+        }
 
         let transaction = {
             invocationId,
@@ -283,8 +293,12 @@ const test_service = async function () {
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
+        assert(invocationView1.state)
+        assert.equal(invocationView1.state,'builtTx')
+
+        //todo assert state
 
         //sign transaction
         let signedTx = await approveTransaction(transaction)
@@ -294,77 +308,80 @@ const test_service = async function () {
 
         //get invocation
         let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        assert(invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
         log.info(tag,"broadcastResult: ",broadcastResult)
 
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // assert(invocationView3)
+        // assert(invocationView3.state)
+        // assert.equal(invocationView3.state,'broadcasted')
+        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
-
         let isConfirmed = false
         //wait for confirmation
 
-        // if(!noBroadcast){
-        //     //TODO
-        //     /*
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         let txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await client.getTransactionData(txid)
-        //         log.debug(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
-        //
-        //         } else {
-        //             log.info(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         //get midgard info
-        //         let txInfoMidgard =
-        //         //update invocation
-        //
-        //         //if
-        //         // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-        //         // log.info(tag,"txInfo: ",txInfo)
-        //         //
-        //         // if(txInfo.confirmations > 0){
-        //         //     isConfirmed = true
-        //         // }
-        //
-        //         await sleep(10000)
-        //     }
-        // }
+        if(!noBroadcast){
+            //TODO
+            /*
+                Status codes
 
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
 
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
+
+                let txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.debug(tag,"txInfo: ",txInfo)
+
+                if(txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
+
+                } else {
+                    log.info(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                //get midgard info
+                let txInfoMidgard =
+                //update invocation
+
+                //if
+                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+                // log.info(tag,"txInfo: ",txInfo)
+                //
+                // if(txInfo.confirmations > 0){
+                //     isConfirmed = true
+                // }
+
+                await sleep(10000)
+            }
+        }
 
         let result = await app.stopSocket()
         log.info(tag,"result: ",result)
