@@ -818,7 +818,7 @@ module.exports = class wallet {
                                     "value": {
                                         "amount": [
                                             {
-                                                "amount": amountNative.toString(),
+                                                "amount": "50994000",
                                                 "asset": "THOR.RUNE"
                                             }
                                         ],
@@ -1344,6 +1344,7 @@ module.exports = class wallet {
                     signedTx.txid = txid
                     signedTx.params = unsignedTx.transaction //input
                 } else if(network === 'RUNE'){
+
                     let res = await this.WALLET.thorchainSignTx(unsignedTx.HDwalletPayload);
 
                     log.debug("res: ",prettyjson.render(res))

@@ -260,10 +260,10 @@ export async function approveTransaction(transaction:any) {
         log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //TODO kill the coin! field
-        invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin || invocation.invocation.network
-        if(!invocation.unsignedTx.HDwalletPayload.coin){
-            invocation.unsignedTx.HDwalletPayload.coin = invocation.deposit.network
-        }
+        // invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin || invocation.invocation.network
+        // if(!invocation.unsignedTx.HDwalletPayload.coin){
+        //     invocation.unsignedTx.HDwalletPayload.coin = invocation.deposit.network
+        // }
 
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'

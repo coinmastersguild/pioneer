@@ -533,7 +533,7 @@ let approve_transaction = async function (transaction:any) {
         log.info(tag,"walletContext: ",walletContext.context)
 
         //TODO kill the coin! field
-        invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
+        //invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
