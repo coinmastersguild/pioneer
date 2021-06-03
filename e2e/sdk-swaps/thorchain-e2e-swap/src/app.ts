@@ -195,6 +195,11 @@ export async function buildTransaction(transaction:any) {
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
                 console.log(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
                 break
+            case 'deposit':
+                console.log(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.deposit(invocation.invocation)
+                console.log(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
+                break
             case 'swap':
                 console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
@@ -231,7 +236,7 @@ export async function approveTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
@@ -255,12 +260,17 @@ export async function approveTransaction(transaction:any) {
         log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //TODO kill the coin! field
-        invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
+        invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin || invocation.invocation.network
+        if(!invocation.unsignedTx.HDwalletPayload.coin){
+            invocation.unsignedTx.HDwalletPayload.coin = invocation.deposit.network
+        }
+
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
         log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.info(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
         log.info(tag,"invocation.unsignedTx HDwalletPayload: ",JSON.stringify(invocation.unsignedTx.HDwalletPayload))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 

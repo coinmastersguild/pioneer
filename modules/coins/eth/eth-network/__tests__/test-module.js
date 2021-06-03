@@ -4,15 +4,27 @@ require("dotenv").config({path:'../../../../.env'})
 require("dotenv").config({path:'../../../../../.env'})
 require("dotenv").config({path:'../../../../../../.env'})
 
+//ETC
+//BSC
+
 let network = require("../lib/index")
 network.init()
 
 
-let rawTx = "0xf8aa808508f6c7610083015f9094dac17f958d2ee523a2206206994597c13d831ec780b844a9059cbb0000000000000000000000003aef01db231c3c9ff844f7e611c63b8c36bc6a02000000000000000000000000000000000000000000000000000000003b9aca0025a0b68242ca43996b4518a948c56a41f1c27fc6b4112cacf1e89e491068b40af34ea06bac55ab44cf039da95f4d09e7fa525125bcea32eee19994d59637c7878f9251"
-network.broadcast(rawTx)
+let addresses = [
+    "0x662ac3362623d72de57668dbf34ed7df913032c5",
+    "0x93F6382804d21f48EB289feB5091F07e5e71454E"
+    ]
+network.getBalances(addresses)
     .then(function(resp){
         console.log(resp)
     })
+
+// let rawTx = "0xf8aa808508f6c7610083015f9094dac17f958d2ee523a2206206994597c13d831ec780b844a9059cbb0000000000000000000000003aef01db231c3c9ff844f7e611c63b8c36bc6a02000000000000000000000000000000000000000000000000000000003b9aca0025a0b68242ca43996b4518a948c56a41f1c27fc6b4112cacf1e89e491068b40af34ea06bac55ab44cf039da95f4d09e7fa525125bcea32eee19994d59637c7878f9251"
+// network.broadcast(rawTx)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //basic
 // network.getTransaction("0x06d3de5c93e87f1541d97773efa93b3afaa99b464c4aa6ef606df9234f1afaf7")

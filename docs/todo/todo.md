@@ -1,6 +1,8 @@
 Pioneer TODO
 ==========
 
+launch app from web
+
 E2E test extensions
 ==========
 

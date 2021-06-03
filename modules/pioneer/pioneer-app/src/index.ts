@@ -1357,6 +1357,42 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             let resultUpdate
             let updateBody
             switch(request.type) {
+                case 'deposit':
+                    if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                    if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                    request.invocation.invocationId = request.invocationId
+                    // invokeQueue = await app_to_queue(request.invocation)
+                    // log.debug(tag,"invokeQueue: ", invokeQueue)
+                    // clientEvents.events.emit('invokeQueue',invokeQueue)
+
+                    if(request.invocation.context) context = request.invocation.context
+                    if(!context) context = WALLET_CONTEXT
+                    if(!WALLETS_LOADED[context]) {
+                        log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                        log.error(tag,"context: ",context)
+                        throw Error("Unable to build transaction! context not found!")
+                    }
+                    log.info(tag,"Building transaction with context: ",context)
+                    log.info(tag,"invocation: ",request.invocation)
+                    unsignedTx = await WALLETS_LOADED[context].deposit(request.invocation)
+                    log.info(tag,"txid: ", unsignedTx.txid)
+                    log.info(tag,"unsignedTx: ", unsignedTx)
+
+                    //update invocation
+                    invocationId = request.invocation.invocationId
+                    unsignedTx.invocationId = invocationId
+                    updateBody = {
+                        invocationId,
+                        invocation:request.invocation,
+                        unsignedTx
+                    }
+
+                    //update invocation remote
+                    resultUpdate = await update_invocation(updateBody)
+                    log.info(tag,"resultUpdate: ",resultUpdate)
+                    clientEvents.events.emit('unsignedTx',updateBody)
+
+                    break;
                 case 'swap':
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")

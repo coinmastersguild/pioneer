@@ -215,6 +215,7 @@ module.exports = class wallet {
     private updateContext: () => Promise<void>;
     private signingPubkey: string;
     private signingPrivkey: string;
+    private deposit: (deposit: any, options: any) => Promise<any>;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -826,6 +827,70 @@ module.exports = class wallet {
             try {
                 let output = await this.pioneerApi.getFees(params)
                 return output
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        /*
+        let deposit = {
+        }
+        */
+        this.deposit = async function (deposit:any,options:any) {
+            let tag = TAG + " | deposit | "
+            try {
+                log.info(tag,"deposit: ",deposit)
+                log.info(tag,"options: ",options)
+
+                //verbose
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
+
+                //NOTE THIS IS ONLY Thorchain!
+                let coin = this.nativeAsset
+                if(this.network !== 'thorchain') throw Error("102: not supported!")
+
+                //if native
+                let amount = deposit.amount.toString()
+                //amount = nativeToBaseAmount(this.nativeAsset,amount)
+                log.info(tag,"amount (final): ",amount)
+                if(!amount) throw Error("Failed to get amount!")
+                // if(typeof(amount) !== 'string')
+                //TODO min transfer size 10$??
+                //TODO validate addresses
+                //TODO validate midgard addresses not expired
+
+                let memo = deposit.memo || ''
+
+                let invocation:any = {
+                    type:'deposit',
+                    username:this.username,
+                    inboundAddress:deposit.inboundAddress,
+                    network:coin,
+                    asset:coin,
+                    coin,
+                    amount,
+                    memo
+                }
+                if(deposit.noBroadcast) invocation.noBroadcast = true
+
+                log.info(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke('deposit',invocation)
+                console.log("result: ",result.data)
+
+                if(!verbose && !txidOnResp){
+                    return result.data.invocationId
+                } else if(!verbose && txidOnResp){
+                    return result.data.txid
+                }else if(verbose){
+                    return result.data
+                } else {
+                    throw Error("102: Unhandled configs!")
+                }
+
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

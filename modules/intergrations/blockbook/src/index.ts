@@ -33,15 +33,11 @@ axiosRetry(axios, {
 
 import { getBlockBooks } from "./blockbooks";
 
-let BLOCKBOOKS:any = {}
 let BLOCKBOOK_URLS:any = {}
-let RUNTIME:string
-
-let ETH_BLOCKBOOK_URL = ""
 
 module.exports = {
-    init:function (runtime:string,servers:any) {
-        return init_network(runtime,servers);
+    init:function (servers:any,runtime?:string) {
+        return init_network(servers,runtime);
     },
     getInfo:function () {
         return get_node_info();
@@ -49,8 +45,8 @@ module.exports = {
     getTransaction:function (coin:string,txid:string) {
         return get_transaction(coin,txid);
     },
-    getEthInfo:function (address:string,filter?:string) {
-        return get_eth_info_by_address(address,filter);
+    getAddressInfo:function (coin:string,address:string,filter?:string) {
+        return get_info_by_address(coin,address,filter);
     },
     txsByXpub: function (coin:string,addresses:any) {
         return get_txs_by_xpub(coin,addresses);
@@ -66,37 +62,12 @@ module.exports = {
     },
 }
 
-let get_txs_by_xpub = async function(coin:string,xpub:string){
-    let tag = TAG + " | FA get_txs_by_xpub | "
-    try{
-
-        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
-        console.log("url: ",url)
-        let body = {
-            method: 'GET',
-            url,
-            headers: {
-                'content-type': 'application/json',
-                'User-Agent': fakeUa()
-            },
-        };
-        let resp = await axios(body)
-
-        // let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
-        // log.debug(tag,"output: ",output)
-
-        return resp.data
-    }catch(e){
-        console.error(tag,e)
-    }
-}
-
-let get_eth_info_by_address = async function(address:string,filter?:string){
-    let tag = TAG + " | get_eth_info_by_address | "
+let get_info_by_address = async function(coin:string,address:string,filter?:string){
+    let tag = TAG + " | get_info_by_address | "
     try{
         if(!filter) filter = "all"
-        let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
-
+        //let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?details=all"
         let body = {
             method: 'GET',
             url,
@@ -115,6 +86,28 @@ let get_eth_info_by_address = async function(address:string,filter?:string){
     }
 }
 
+
+let get_txs_by_xpub = async function(coin:string,xpub:string){
+    let tag = TAG + " | FA get_txs_by_xpub | "
+    try{
+
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
+        console.log("url: ",url)
+        let body = {
+            method: 'GET',
+            url,
+            headers: {
+                'content-type': 'application/json',
+                'User-Agent': fakeUa()
+            },
+        };
+        let resp = await axios(body)
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+    }
+}
 
 let broadcast_transaction = async function(coin:string,hex:string){
     let tag = TAG + " | broadcast_transaction | "
@@ -135,9 +128,6 @@ let broadcast_transaction = async function(coin:string,hex:string){
             data,
         }
         let resp = await axios(body)
-
-        // let output = await BLOCKBOOKS[coin].sendTx(hex)
-        // log.debug(tag,"output: ",output)
 
         return resp.data
     }catch(e){
@@ -162,9 +152,6 @@ let get_transaction = async function(coin:string,txid:string){
 
         let resp = await axios(body)
 
-        // let output = await BLOCKBOOKS[coin].getTx(txid)
-        // log.debug(tag,"output: ",output)
-
         return resp.data
     }catch(e){
         console.error(tag,e)
@@ -187,9 +174,6 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         };
         let resp = await axios(body)
 
-        // let output = await BLOCKBOOKS[coin].getUtxosForXpub(xpub, { confirmed: false })
-        // log.debug(tag,"output: ",output)
-
         return resp.data
     }catch(e){
         console.error(tag,e)
@@ -201,7 +185,6 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
     try{
         log.debug(tag,"coin: ",coin)
         log.debug(tag,"xpub: ",xpub)
-        log.debug(tag,"BLOCKBOOKS: ",BLOCKBOOKS)
         let output = await get_utxos_by_xpub(coin,xpub)
         log.info(tag,"output: ",output)
 
@@ -221,29 +204,33 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
 }
 
 
-let init_network = function (runtime:string,servers:any) {
+let init_network = function (servers:any,runtime?:string) {
     let tag = ' | get_txs_by_address | '
     try {
         log.debug(tag,"checkpoint: ")
         let output:any = []
 
-        RUNTIME = runtime
 
         let blockbooks = getBlockBooks()
         for(let i = 0; i < blockbooks.length; i++){
             let coinInfo = blockbooks[i]
+            coinInfo.symbol = coinInfo.symbol.toUpperCase()
             log.debug("coinInfo: ",coinInfo)
-
-            //
-
             let blockbookurl = coinInfo.explorer.tx
             blockbookurl = blockbookurl.replace("/tx/","")
-            if(coinInfo.symbol.toUpperCase() === 'ETH') ETH_BLOCKBOOK_URL = blockbookurl
-            BLOCKBOOK_URLS[coinInfo.symbol.toUpperCase()] = blockbookurl
-            log.debug("blockbookurl: ",blockbookurl)
-            BLOCKBOOKS[coinInfo.symbol.toUpperCase()] = new Blockbook({
-                nodes: [blockbookurl],
-            })
+
+            if(servers[coinInfo.symbol]){
+                //use configured
+                BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
+                log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
+            }else{
+                if(!runtime || runtime === 'public'){
+                    //use public
+                    BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
+                    log.info(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
+                }
+                //TODO use pioneer's
+            }
         }
 
 

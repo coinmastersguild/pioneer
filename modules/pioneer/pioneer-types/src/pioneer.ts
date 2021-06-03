@@ -40,8 +40,10 @@ export interface Transaction {
 
 //TransactionUnsigned
 export interface TransactionUnsigned {
-    coin: string;
+    coin?: string;
+    network: string;
     invocationId?:string,
+    deposit?:any,
     transaction:Transaction,
     HDwalletPayload:any, // this has specific types per blockchain?
     verbal:any

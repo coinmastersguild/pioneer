@@ -241,9 +241,7 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let transfer = {
-            inboundAddress: thorVault,
-            recipient:vaultAddress,
+        let deposit = {
             coin: ASSET,
             asset: ASSET,
             network: ASSET,
@@ -256,14 +254,15 @@ const test_service = async function () {
             feeRate:gasRate, // fee === gas (xcode inheritance)
             noBroadcast
         }
-        log.info(tag,"transfer: ",transfer)
+        log.info(tag,"deposit: ",deposit)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        let responseTransfer = await user.clients[BLOCKCHAIN].deposit(deposit,options)
         assert(responseTransfer)
         log.info(tag,"responseTransfer: ",responseTransfer)
-        let invocationId = responseTransfer
+        //TODO move to invocationId on response
+        let invocationId = responseTransfer.invocationId
         //do not continue without invocationId
         assert(invocationId)
 

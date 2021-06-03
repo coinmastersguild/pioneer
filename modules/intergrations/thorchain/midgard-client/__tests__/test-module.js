@@ -45,10 +45,10 @@ let run_test = async function(){
         //get transaction by txid
         // let txid = '2873A1AF23427931F40BFC0B09D0587B00E7A58E3669B84782F0F24988776D06'
         // //let txid = 'A2BCC716691C2DD4C748456F9BF4C4E862F6A3E7E3D3E820658067B0FA2568DE'
-        let txid = "e932b905e2d19f2a5cce24041cab9d6930faa789a25da391b05b5e51058f3bdb"
-        txid = txid.toUpperCase()
-        let txInfo = await midgard.getTransaction(txid)
-        console.log("txInfo: ",JSON.stringify(txInfo))
+        // let txid = "e932b905e2d19f2a5cce24041cab9d6930faa789a25da391b05b5e51058f3bdb"
+        // txid = txid.toUpperCase()
+        // let txInfo = await midgard.getTransaction(txid)
+        // console.log("txInfo: ",JSON.stringify(txInfo))
 
     }catch(e){
         console.error(e)

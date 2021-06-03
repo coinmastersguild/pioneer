@@ -137,6 +137,7 @@ module.exports = class wallet {
     private APPROVE_QUEUE: any[];
     private PENDING_QUEUE: any[];
     private context: string
+    private deposit: (swap: any) => Promise<any>;
     constructor(type:HDWALLETS,config:Config,isTestnet?:boolean) {
         //if(config.isTestnet) isTestnet = true
         this.APPROVE_QUEUE = []
@@ -763,11 +764,143 @@ module.exports = class wallet {
                 throw e
             }
         },
+        this.deposit = async function (deposit:any) {
+                let tag = TAG + " | deposit | "
+                try{
+                    let rawTx
+                    log.info(tag,"deposit: ",deposit)
+
+                    if(deposit.network === 'RUNE') {
+                        //use msgDeposit
+                        //get amount native
+                        let amountNative = RUNE_BASE * parseFloat(deposit.amount)
+                        amountNative = parseInt(amountNative.toString())
+
+                        let addressFrom
+                        if(deposit.addressFrom){
+                            addressFrom = deposit.addressFrom
+                        } else {
+                            addressFrom = await this.getMaster('RUNE')
+                        }
+
+                        //get account number
+                        log.debug(tag,"addressFrom: ",addressFrom)
+                        let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                        masterInfo = masterInfo.data
+                        log.debug(tag,"masterInfo: ",masterInfo.data)
+
+                        let sequence = masterInfo.result.value.sequence || 0
+                        let account_number = masterInfo.result.value.account_number
+                        sequence = parseInt(sequence)
+                        sequence = sequence.toString()
+
+                        let txType = "thorchain/MsgDeposit"
+                        let gas = "250000"
+                        let fee = "2000000"
+                        if(!deposit.memo) throw Error("103: invalid swap! missing memo")
+                        let memo = deposit.memo
+
+                        //sign tx
+                        let unsigned = {
+                            "fee": {
+                                "amount": [
+                                    {
+                                        "amount": fee,
+                                        "denom": "rune"
+                                    }
+                                ],
+                                "gas": gas
+                            },
+                            "memo": memo,
+                            "msg": [
+                                {
+                                    "type": txType,
+                                    "value": {
+                                        "amount": [
+                                            {
+                                                "amount": amountNative.toString(),
+                                                "asset": "THOR.RUNE"
+                                            }
+                                        ],
+                                        "memo": memo,
+                                        "signer": addressFrom
+                                    }
+                                }
+                            ],
+                            "signatures": null
+                        }
+
+                        let	chain_id = RUNE_CHAIN
+
+                        if(!sequence) throw Error("112: Failed to get sequence")
+                        if(!account_number) account_number = 0
+
+                        //verify from address
+                        let fromAddress = await this.WALLET.thorchainGetAddress({
+                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                            showDisplay: false,
+                        });
+                        log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                        log.debug(tag,"fromAddress: ",addressFrom)
+
+                        log.debug("res: ",prettyjson.render({
+                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                            chain_id,
+                            account_number: account_number,
+                            sequence:sequence,
+                            tx: unsigned,
+                        }))
+
+                        if(fromAddress !== addressFrom) {
+                            log.error(tag,"fromAddress: ",fromAddress)
+                            log.error(tag,"addressFrom: ",addressFrom)
+                            throw Error("Can not sign, address mismatch")
+                        }
+
+                        log.debug(tag,"******* signTx: ",JSON.stringify({
+                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                            chain_id,
+                            account_number: account_number,
+                            sequence:sequence,
+                            tx: unsigned,
+                        }))
+
+                        let runeTx = {
+                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                            chain_id,
+                            account_number: account_number,
+                            sequence:sequence,
+                            tx: unsigned,
+                        }
+
+                        //
+                        let unsignedTx = {
+                            invocationId:deposit.invocationId,
+                            coin:network,
+                            network,
+                            deposit,
+                            HDwalletPayload:runeTx,
+                            verbal:"Thorchain transaction"
+                        }
+
+                        rawTx = unsignedTx
+
+                    } else {
+                        throw Error("Chain not supported! "+deposit.inboundAddress.chain)
+                    }
+
+                    return rawTx
+                }catch(e){
+                    log.error(e)
+                    throw e
+                }
+            },
         //@ts-ignore
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
                 let rawTx
+                log.info(tag,"swap: ",swap)
 
                 let UTXOcoins = [
                     'BTC',
@@ -838,7 +971,121 @@ module.exports = class wallet {
                         verbal:"Ethereum transaction"
                     }
 
-                } else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
+                } else if(swap.inboundAddress.chain === 'RUNE') {
+                    //use msgDeposit
+                    //get amount native
+                    let amountNative = RUNE_BASE * parseFloat(swap.amount)
+                    amountNative = parseInt(amountNative.toString())
+
+                    let addressFrom
+                    if(swap.addressFrom){
+                        addressFrom = swap.addressFrom
+                    } else {
+                        addressFrom = await this.getMaster('ETH')
+                    }
+
+                    //get account number
+                    log.debug(tag,"addressFrom: ",addressFrom)
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence || 0
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+
+                    let txType = "thorchain/MsgSend"
+                    let gas = "250000"
+                    let fee = "2000000"
+                    if(!swap.memo) throw Error("103: invalid swap! missing memo")
+                    let memo = swap.memo
+
+                    if(!swap.inboundAddress.address) throw Error("104: invalid inboundAddress on swap")
+                    //sign tx
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "rune"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            {
+                                "type": txType,
+                                "value": {
+                                    "amount": [
+                                        {
+                                            "amount": amountNative.toString(),
+                                            "denom": "rune"
+                                        }
+                                    ],
+                                    "from_address": addressFrom,
+                                    "to_address": swap.inboundAddress.address
+                                }
+                            }
+                        ],
+                        "signatures": null
+                    }
+
+                    let	chain_id = RUNE_CHAIN
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) account_number = 0
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.thorchainGetAddress({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
+
+                    log.debug("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    if(fromAddress !== addressFrom) {
+                        log.error(tag,"fromAddress: ",fromAddress)
+                        log.error(tag,"addressFrom: ",addressFrom)
+                        throw Error("Can not sign, address mismatch")
+                    }
+
+                    log.debug(tag,"******* signTx: ",JSON.stringify({
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    let runeTx = {
+                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }
+
+                    //
+                    let unsignedTx = {
+                        coin:network,
+                        swap,
+                        HDwalletPayload:runeTx,
+                        verbal:"Thorchain transaction"
+                    }
+
+                    rawTx = unsignedTx
+
+                }else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
                     throw Error("NOT SUPPORTED! Use transfer with memo!")
 
                 } else {
@@ -1054,20 +1301,22 @@ module.exports = class wallet {
                 throw Error(e)
             }
         }
-        this.signTransaction = async function (unsignedTx:TransactionUnsigned) {
+        this.signTransaction = async function (unsignedTx:any) {
             let tag = TAG + " | signTransaction | "
             try {
                 let signedTx:any = {}
-                let coin = unsignedTx.coin
-
+                let network = unsignedTx.network
+                if(!network && unsignedTx.deposit){
+                    network = unsignedTx.deposit.network
+                }
                 //TODO is token?
 
-                if(UTXO_COINS.indexOf(coin) >= 0){
+                if(UTXO_COINS.indexOf(network) >= 0){
 
                     log.info(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
-                    if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.coin) >= 0){
+                    if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.network) >= 0){
                         //opps convert
-                        unsignedTx.HDwalletPayload.coin = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.coin]
+                        unsignedTx.HDwalletPayload.network = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.network]
                     }
                     const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
                     log.debug(tag,"res: ",res)
@@ -1075,10 +1324,10 @@ module.exports = class wallet {
                     //
                     signedTx = {
                         txid:res.txid,
-                        coin,
+                        network,
                         serialized:res.serializedTx
                     }
-                }else if(coin === 'ETH'){
+                }else if(network === 'ETH'){
                     //TODO fix tokens
                     log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
@@ -1094,7 +1343,7 @@ module.exports = class wallet {
 
                     signedTx.txid = txid
                     signedTx.params = unsignedTx.transaction //input
-                } else if(coin === 'RUNE'){
+                } else if(network === 'RUNE'){
                     let res = await this.WALLET.thorchainSignTx(unsignedTx.HDwalletPayload);
 
                     log.debug("res: ",prettyjson.render(res))
@@ -1119,10 +1368,10 @@ module.exports = class wallet {
 
                     signedTx = {
                         txid:hash,
-                        coin,
+                        network,
                         serialized:JSON.stringify(broadcastString)
                     }
-                }else if(coin === 'ATOM'){
+                }else if(network === 'ATOM'){
                     let res = await this.WALLET.cosmosSignTx(unsignedTx.HDwalletPayload);
 
                     log.debug("res: ",prettyjson.render(res))
@@ -1141,10 +1390,10 @@ module.exports = class wallet {
                     }
                     signedTx = {
                         txid:"",
-                        coin,
+                        network,
                         serialized:JSON.stringify(broadcastString)
                     }
-                } else if(coin === 'BNB'){
+                } else if(network === 'BNB'){
                     const signedTxResponse = await this.WALLET.binanceSignTx(unsignedTx.HDwalletPayload)
                     log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
                     log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
@@ -1166,7 +1415,7 @@ module.exports = class wallet {
                 }else{
                     //TODO EOS
                     //FIO
-                    throw Error("Coin not supported! "+coin)
+                    throw Error("network not supported! "+network)
                 }
 
                 //carry over unsigned params to signed
@@ -1659,40 +1908,6 @@ module.exports = class wallet {
 
                     rawTx = unsignedTx
 
-                    // let res = await this.WALLET.thorchainSignTx({
-                    //     addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                    //     chain_id,
-                    //     account_number: account_number,
-                    //     sequence:sequence,
-                    //     tx: unsigned,
-                    // });
-                    //
-                    // log.debug("res: ",prettyjson.render(res))
-                    // log.debug("res*****: ",res)
-                    //
-                    // let txFinal:any
-                    // txFinal = res
-                    // txFinal.signatures = res.signatures
-                    //
-                    // log.debug("FINAL: ****** ",txFinal)
-                    //
-                    // let broadcastString = {
-                    //     tx:txFinal,
-                    //     type:"cosmos-sdk/StdTx",
-                    //     mode:"sync"
-                    // }
-                    //
-                    // // @ts-ignore
-                    // const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
-                    // let hash = sha256(buffer).toString().toUpperCase()
-                    // // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-                    //
-                    //
-                    // rawTx = {
-                    //     txid:hash,
-                    //     coin,
-                    //     serialized:JSON.stringify(broadcastString)
-                    // }
                 }else if(network === 'ATOM'){
                     //get amount native
                     let amountNative = ATOM_BASE * parseFloat(amount)

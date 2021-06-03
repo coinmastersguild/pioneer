@@ -4,9 +4,23 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let network = require("../lib/index")
-network.init()
+
+let servers = {
+    'BTC':process.env['BTC_BLOCKBOOK_URL'],
+    'ETH':process.env['ETH_BLOCKBOOK_URL']
+}
+
+console.log("servers: ",servers)
+network.init(servers)
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
+
+let address = ""
+network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")
+    .then(function(resp){
+        console.log(resp)
+        console.log(JSON.stringify(resp))
+    })
 
 // network.getTransaction('BCH',"")
 //     .then(function(resp){
