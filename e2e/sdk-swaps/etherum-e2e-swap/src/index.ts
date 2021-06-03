@@ -33,6 +33,7 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
+let BigNumber = require('@ethersproject/bignumber')
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
@@ -52,6 +53,7 @@ let {
 
 const {
     startApp,
+    getInvocations,
     sendPairingCode,
     buildTransaction,
     approveTransaction,
@@ -62,9 +64,9 @@ let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
-let spec = process.env['URL_PIONEER_SPEC']
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
 let noBroadcast = true
@@ -97,7 +99,6 @@ const test_service = async function () {
 
         let config = {
             queryKey,
-            //username,
             spec,
             wss
         }
@@ -105,11 +106,25 @@ const test_service = async function () {
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
-        events.on('message', async (request:any) => {
-            assert(request.queryKey)
-            assert(request.username)
-            assert(request.url)
-            eventPairReceived = true
+        let eventInvokeTransferReceived = false
+        events.on('message', async (event:any) => {
+            log.info(tag,"event: ",event)
+            switch(event.type) {
+                case 'pairing':
+                    assert(event.queryKey)
+                    assert(event.username)
+                    assert(event.url)
+                    eventPairReceived = true
+                    break;
+                case 'transfer':
+                    //TODO assert valid transfer info
+                    //received continue below
+                    eventInvokeTransferReceived = true
+                    break;
+                default:
+                    log.error(tag,"unhandled event: ",event)
+                // code block
+            }
         })
 
         let seedChains = ['ethereum','thorchain']
@@ -136,6 +151,7 @@ const test_service = async function () {
         let user = await app.getUserParams()
         log.info("user: ",user)
         assert(user.context)
+        assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
@@ -238,7 +254,7 @@ const test_service = async function () {
                 // "decimal":18,
                 //TODO bignum like asgardx?
                 amount: function(){
-                    return TEST_AMOUNT
+                    return BigNumber.BigNumber.from(TEST_AMOUNT)
                 }
             },
             noBroadcast:true
@@ -269,6 +285,8 @@ const test_service = async function () {
         let invocationView1 = await app.getInvocation(invocationId)
         log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
+        assert(invocationView1.state)
+        assert.equal(invocationView1.state,'builtTx')
 
         //sign transaction
         let signedTx = await approveTransaction(transaction)
@@ -279,6 +297,10 @@ const test_service = async function () {
         // //get invocation
         let invocationView2 = await app.getInvocation(invocationId)
         log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
@@ -286,6 +308,9 @@ const test_service = async function () {
 
         let invocationView3 = await app.getInvocation(invocationId)
         log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        assert(invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
 
         //get invocation info EToC
 
@@ -308,23 +333,25 @@ const test_service = async function () {
             //monitor tx lifecycle
             let currentStatus
             let statusCode = 0
+            let txid
+            //wait till confirmed in block
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
                 log.info(tag,"invocationInfo: ",invocationInfo)
 
-                let txid = invocationInfo.signedTx.txid
+                txid = invocationInfo.signedTx.txid
                 assert(txid)
                 if(!currentStatus) currentStatus = 'transaction built!'
                 if(statusCode <= 0) statusCode = 1
 
                 //lookup txid
                 let txInfo = await client.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
+                log.info(tag,"txInfo: ",txInfo)
 
-                if(txInfo.blockNumber){
+                if(txInfo && txInfo.blockNumber){
                     log.info(tag,"Confirmed!")
-
+                    statusCode = 3
                 } else {
                     log.info(tag,"Not confirmed!")
                     //get gas price recomended
@@ -332,22 +359,36 @@ const test_service = async function () {
                     //get tx gas price
                 }
 
+                await sleep(6000)
+            }
+
+
+            let isFullfilled = false
+            //wait till swap is fullfilled
+            while(!isFullfilled){
                 //get midgard info
-                let txInfoMidgard =
-                //update invocation
+                let txInfoMidgard = midgard.getTransaction(txid)
+                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
 
-                //if
-                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-                // log.info(tag,"txInfo: ",txInfo)
                 //
-                // if(txInfo.confirmations > 0){
-                //     isConfirmed = true
-                // }
+                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+                    let depositInfo = txInfoMidgard.actions[0].in
+                    log.info(tag,"deposit: ",depositInfo)
 
-                await sleep(10000)
+                    let fullfillmentInfo = txInfoMidgard.actions[0].out
+                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+
+                    if(fullfillmentInfo.status === 'success'){
+                        statusCode = 4
+                        isFullfilled = true
+                    }
+                }
+
+                await sleep(6000)
             }
         }
-
+        let result = await app.stopSocket()
+        log.info(tag,"result: ",result)
 
         log.info("****** TEST PASS ******")
         //process

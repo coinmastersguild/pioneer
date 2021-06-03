@@ -6,8 +6,8 @@ require("dotenv").config({path:'../../../../../.env'})
 const prettyjson = require('prettyjson');
 let WalletClass = require('../lib/index.js')
 
-//let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-let urlSpec = process.env['URL_PIONEER_SPEC']
+let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+//let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let walletName = "local_new_2"
 
@@ -33,7 +33,6 @@ let run_test = async function(){
 
         //pioneer
         let config = {
-            isTestnet:false,
             // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
             mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
@@ -72,7 +71,6 @@ let run_test = async function(){
         /*
                THOR
          */
-        console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
         let masterRUNE = await Wallet.getMaster("RUNE")
@@ -85,18 +83,42 @@ let run_test = async function(){
         let amount = "100"
         let memo = ""
 
-        let transfer = {
-            coin:"RUNE",
-            addressTo:address,
-            amount,
-            memo
+        let deposit = {
+            type: 'deposit',
+            username: 'test-user-2',
+            network: 'RUNE',
+            asset: 'RUNE',
+            coin: 'RUNE',
+            amount: '50994000',
+            memo: '=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj',
+            invocationId: 'pioneer:invocation:v0.01:RUNE:6fvPkFk7SkQTgBrBwQUQEH'
         }
 
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
+        let transferUnSigned = await Wallet.deposit(deposit)
+        console.log("transferUnSigned: ",transferUnSigned)
 
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        let signedTx = await Wallet.signTransaction(transferUnSigned)
+        console.log("signedTx: ",signedTx)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',signedTx)
         console.log("resultBroadcast: ",resultBroadcast)
+
+        // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
+        // let amount = "100"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)

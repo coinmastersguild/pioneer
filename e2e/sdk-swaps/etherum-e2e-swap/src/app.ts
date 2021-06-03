@@ -21,18 +21,22 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_MAINNET_DEV_NEW']
-let password = process.env['WALLET_PASSWORD']
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
-let spec = process.env['URL_PIONEER_SPEC']
-let wss = process.env['URL_PIONEER_SOCKET']
+let seed = process.env['WALLET_TEST']
+if(!seed) throw Error("Failed to find test seed!")
+let password = process.env['WALLET_PASSWORD'] || '123'
+let username = process.env['TEST_USERNAME_2'] || 'e2e-user-1'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey123'
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
 //Globals
 let WALLET_INIT = false
 let WALLETS_LOADED:any = []
 let WALLETS_NAMES:any = []
 let WALLET_CONTEXT = ""
+let INVOCATIONS:any = []
+let INVOCATIONS_SIGNED:any = []
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
 export async function startApp() {
     let tag = " | app_assert_env_start | "
@@ -65,7 +69,11 @@ export async function startApp() {
         App.updateConfig({username});
         App.updateConfig({temp:password});
         App.updateConfig({created: new Date().getTime()});
-
+        assert(spec)
+        assert(wss)
+        App.updateConfig({blockchains})
+        App.updateConfig({spec});
+        App.updateConfig({wss});
         //get config
         config = await App.getConfig()
         config.blockchains = ['ethereum','thorchain']
@@ -73,7 +81,25 @@ export async function startApp() {
         config.pioneerSocket = wss
 
         //verify startup
+        log.info(tag,"config: ",config)
         let resultInit = await App.init(config)
+        let isInit2 = App.isInitialized()
+        assert(isInit2)
+
+        //AutonomousOn
+        resultInit.events.on('unsignedTx', async (transaction:any) => {
+            console.log("\n ****UN-signed transaction received! transaction: ",transaction)
+            if(!transaction.invocationId) throw Error("102: invalid transaction invocationId")
+            if(!transaction.invocation) throw Error("103: invalid transaction invocation")
+            if(!transaction.unsignedTx) throw Error("104: invalid transaction unsignedTx")
+            //get invocationId
+
+            //only sign each once (if NOT in array)
+            if(INVOCATIONS_SIGNED.indexOf(transaction.invocationId) < 0){
+                INVOCATIONS_SIGNED.push(transaction.invocationId)
+                INVOCATIONS.push(transaction)
+            }
+        })
 
         config.password = password
         config.username = username
@@ -97,6 +123,18 @@ export async function startApp() {
     }
 }
 
+export async function getInvocations() {
+    let tag = " | getInvocations | "
+    try {
+        //get remote?
+
+        return INVOCATIONS
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
 export async function sendPairingCode(code:string) {
     let tag = " | sendPairingCode | "
     try {
@@ -113,14 +151,15 @@ export async function sendPairingCode(code:string) {
 export async function buildTransaction(transaction:any) {
     let tag = " | buildTransaction | ";
     try {
-        log.debug(tag,"transaction: ",transaction)
+        log.info(tag,"transaction: ",transaction)
         if(!transaction.invocationId) throw Error("invocationId required!")
+
         //get invocation
 
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -140,15 +179,13 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        log.info(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {
             case 'transfer':
                 console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
-
                 //TODO validate transfer object
-
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
 
@@ -157,6 +194,11 @@ export async function buildTransaction(transaction:any) {
                 console.log(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
                 console.log(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                break
+            case 'deposit':
+                console.log(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.deposit(invocation.invocation)
+                console.log(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
                 console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
@@ -194,7 +236,7 @@ export async function approveTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
@@ -218,12 +260,18 @@ export async function approveTransaction(transaction:any) {
         log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //TODO kill the coin! field
-        invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
+        // invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin || invocation.invocation.network
+        // if(!invocation.unsignedTx.HDwalletPayload.coin){
+        //     invocation.unsignedTx.HDwalletPayload.coin = invocation.deposit.network
+        // }
+
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
-        log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.info(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
+        log.info(tag,"invocation.unsignedTx HDwalletPayload: ",JSON.stringify(invocation.unsignedTx.HDwalletPayload))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
         //update invocation
@@ -252,7 +300,7 @@ export async function broadcastTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
 
         //
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
@@ -280,30 +328,14 @@ export async function broadcastTransaction(transaction:any) {
         //TODO fix tech debt
         //normalize
         if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
-
-
-
+        if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
         if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = true
+        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.signedTx.coin
 
         //force noBroadcast
-        invocation.signedTx.noBroadcast = true
-        let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
+        // invocation.signedTx.noBroadcast = true
+        let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
         log.info(tag,"broadcastResult: ",broadcastResult)
-
-        //update invocation
-        let invocationId = invocation.invocationId
-        let updateBody = {
-            invocationId:invocation.invocation.invocationId,
-            invocation:invocation.invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult
-        }
-        log.debug(tag,"updateBody: ",updateBody)
-        //update invocation remote
-        let resultUpdate = await App.updateInvocation(updateBody)
-        log.debug(tag,"resultUpdate: ",resultUpdate)
-
 
         return broadcastResult
     } catch (e) {

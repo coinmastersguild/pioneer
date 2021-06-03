@@ -491,6 +491,18 @@ let broadcast_transaction = async function(tx:any){
 		if(!tx) throw Error("101: missing tx!")
 		let result = await web3.eth.sendSignedTransaction(tx)
 
+		// web3.eth.sendSignedTransaction(tx)
+		// 	.on('transactionHash', function(hash:any){
+		// 		console.log("hash: ",hash)
+		// 	})
+		// 	.on('receipt', function(receipt:any){
+		// 		console.log("receipt: ",receipt)
+		// 	})
+		// 	.on('confirmation', function(confirmationNumber:any, receipt:any){
+		// 		console.log(confirmationNumber,receipt)
+		// 	})
+		// 	.on('error', console.error);
+
 		let output = {
 			success:true,
 			blockIncluded:result.result,

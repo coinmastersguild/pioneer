@@ -876,8 +876,8 @@ module.exports = class wallet {
                         //
                         let unsignedTx = {
                             invocationId:deposit.invocationId,
-                            coin:network,
-                            network,
+                            coin:deposit.network,
+                            network:deposit.network,
                             deposit,
                             HDwalletPayload:runeTx,
                             verbal:"Thorchain transaction"
