@@ -933,15 +933,16 @@ module.exports = class wallet {
                 let coin = this.nativeAsset
                 if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                // log.info(tag,"swap: ",swap)
-                // log.info(tag,"swap.amount: ",swap.amount)
-                // log.info(tag,"swap.amount.amount(): ",swap.amount.amount())
-                // log.info(tag,"swap.amount.amount().toFixed(): ",swap.amount.amount())
-                // //TODO detect if native or base
-                // let amount = swap.amount.amount()
+                log.info(tag,"swap: ",swap)
+                log.info(tag,"swap.amount: ",swap.amount)
+                log.info(tag,"tx.amount.amount(): ",swap.amount.amount())
+                // log.info(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
+                let amount = swap.amount.amount()
+                amount = nativeToBaseAmount(this.nativeAsset,amount)
+                amount = amount.toString()
 
                 //if native
-                let amount = swap.amount.toString()
+                // let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
                 log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")

@@ -214,6 +214,7 @@ export async function buildTransaction(transaction:any) {
         //update invocation
         let invocationId = invocation.invocationId
         let updateBody = {
+            network:invocation.network,
             invocationId,
             invocation,
             unsignedTx
@@ -259,15 +260,6 @@ export async function approveTransaction(transaction:any) {
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
         log.debug(tag,"walletContext: ",walletContext.walletId)
 
-        //TODO kill the coin! field
-        // invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin || invocation.invocation.network
-        // if(!invocation.unsignedTx.HDwalletPayload.coin){
-        //     invocation.unsignedTx.HDwalletPayload.coin = invocation.deposit.network
-        // }
-
-        //get
-        //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
-
         //unsinged TX
         log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         log.info(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
@@ -277,6 +269,7 @@ export async function approveTransaction(transaction:any) {
         //update invocation
         let invocationId = invocation.invocationId
         let updateBody = {
+            network:invocation.network,
             invocationId,
             invocation,
             unsignedTx:invocation.unsignedTx,
@@ -325,12 +318,14 @@ export async function broadcastTransaction(transaction:any) {
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
         log.debug(tag,"walletContext: ",walletContext.walletId)
 
-        //TODO fix tech debt
+        //TODO fix this tech debt
         //normalize
-        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
+        if(!invocation.network) invocation.network = invocation.invocation.network
+        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocation.invocationId
+        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.network
         if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
         if(invocation.signedTx && invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = true
-        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.signedTx.coin
+
 
         //force noBroadcast
         // invocation.signedTx.noBroadcast = true

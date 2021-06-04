@@ -17,7 +17,8 @@ const Pioneer = require('openapi-client-axios').default;
 
 import {
     Error,
-    Invocation
+    Invocation,
+    InvocationBody
 } from "@pioneer-platform/pioneer-types";
 
 enum AuthProviders {
@@ -82,7 +83,8 @@ module.exports = class wallet {
                 //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
 
                 //Dapps sign all invocations
-                let request:any = {
+                let request:InvocationBody = {
+                    network:invocation.network,
                     // pubkey:this.signingPubkey,
                     appName:this.appName,
                     username:invocation.username,

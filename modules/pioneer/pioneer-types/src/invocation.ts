@@ -8,9 +8,9 @@ export interface Invocation {
     address?:string,
     addressTo?:string,
     memo?:string
-    asset?:any
+    asset:any
     blockchain?:string
-    network?:string
+    network:string
     coin?:string
     amount:string
     context?:string
@@ -21,6 +21,7 @@ export interface Invocation {
 export interface InvocationBody {
     msg?: string;
     context?: string;
+    network:string;
     type:string
     username:string,
     invocation:Invocation
@@ -29,6 +30,7 @@ export interface InvocationBody {
     service?:string
     servicePubkey?:string
     serviceHash?:string
+    appName?:string
     mode?:'sync' | 'async'
 }
 

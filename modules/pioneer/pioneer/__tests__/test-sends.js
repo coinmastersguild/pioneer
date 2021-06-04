@@ -34,7 +34,7 @@ let run_test = async function(){
         //pioneer
         let config = {
             // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_MAIN'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,
             blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
@@ -49,6 +49,27 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,isTestnet);
         let info = await Wallet.init()
         console.log("total Value: ",info)
+
+        /*
+            ETH build transfer
+         */
+
+        let transaction = {
+            coin: 'ETH',
+            asset: 'ETH',
+            network: 'ETH',
+            amount: '0.00101',
+            addressTo: '0x33b35c665496bA8E71B22373843376740401F106',
+        }
+
+        let unSignedTx = await Wallet.buildTransfer(transaction)
+        console.log("unSignedTx: ",unSignedTx)
+
+        let signedTx = await Wallet.signTransaction(unSignedTx)
+        console.log("signedTx: ",signedTx)
+
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',result)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
             ETH approve Token
@@ -73,35 +94,35 @@ let run_test = async function(){
          */
 
         //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
-
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
-
-        let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
-        let amount = "100"
-        let memo = ""
-
-        let deposit = {
-            type: 'deposit',
-            username: 'test-user-2',
-            network: 'RUNE',
-            asset: 'RUNE',
-            coin: 'RUNE',
-            amount: '50994000',
-            memo: '=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj',
-            invocationId: 'pioneer:invocation:v0.01:RUNE:6fvPkFk7SkQTgBrBwQUQEH'
-        }
-
-        let transferUnSigned = await Wallet.deposit(deposit)
-        console.log("transferUnSigned: ",transferUnSigned)
-
-        let signedTx = await Wallet.signTransaction(transferUnSigned)
-        console.log("signedTx: ",signedTx)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',signedTx)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
+        //
+        // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
+        // let amount = "100"
+        // let memo = ""
+        //
+        // let deposit = {
+        //     type: 'deposit',
+        //     username: 'test-user-2',
+        //     network: 'RUNE',
+        //     asset: 'RUNE',
+        //     coin: 'RUNE',
+        //     amount: '50994000',
+        //     memo: '=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj',
+        //     invocationId: 'pioneer:invocation:v0.01:RUNE:6fvPkFk7SkQTgBrBwQUQEH'
+        // }
+        //
+        // let transferUnSigned = await Wallet.deposit(deposit)
+        // console.log("transferUnSigned: ",transferUnSigned)
+        //
+        // let signedTx = await Wallet.signTransaction(transferUnSigned)
+        // console.log("signedTx: ",signedTx)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',signedTx)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
         // let amount = "100"

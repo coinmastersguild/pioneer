@@ -38,10 +38,10 @@ import * as support from './support'
 import { numberToHex } from 'web3-utils'
 import { FioActionParameters } from "fiosdk-offline";
 import {
+    UnsignedTransaction,
     Transaction,
     SendToAddress,
     Config,
-    TransactionUnsigned,
     BroadcastBody,
     Approval,
     Invocation,
@@ -128,7 +128,7 @@ module.exports = class wallet {
     private addLiquidity: (addLiquidity: any) => Promise<any>;
     private buildApproval: (swap: any) => Promise<any>;
     private sendApproval: (intent: Approval) => Promise<any>;
-    private signTransaction: (transaction: TransactionUnsigned) => Promise<any>;
+    private signTransaction: (transaction: UnsignedTransaction) => Promise<any>;
     private getApproveQueue: () => any;
     private getPendingQueue: () => any;
     private getNextReview: () => any;
@@ -876,8 +876,8 @@ module.exports = class wallet {
                         //
                         let unsignedTx = {
                             invocationId:deposit.invocationId,
-                            coin:deposit.network,
                             network:deposit.network,
+                            asset:deposit.network,
                             deposit,
                             HDwalletPayload:runeTx,
                             verbal:"Thorchain transaction"
@@ -965,7 +965,8 @@ module.exports = class wallet {
                     }
                     log.debug("unsignedTxETH: ",ethTx)
                     rawTx = {
-                        coin:'ETH',
+                        network:'ETH',
+                        asset:'ETH',
                         swap,
                         HDwalletPayload:ethTx,
                         verbal:"Ethereum transaction"
@@ -1077,7 +1078,8 @@ module.exports = class wallet {
 
                     //
                     let unsignedTx = {
-                        coin:network,
+                        network:'ETH',
+                        asset:'ETH',
                         swap,
                         HDwalletPayload:runeTx,
                         verbal:"Thorchain transaction"
@@ -1301,14 +1303,14 @@ module.exports = class wallet {
                 throw Error(e)
             }
         }
-        this.signTransaction = async function (unsignedTx:any) {
+        this.signTransaction = async function (unsignedTx:UnsignedTransaction) {
             let tag = TAG + " | signTransaction | "
             try {
+                log.info(tag,"unsignedTx: ",unsignedTx)
                 let signedTx:any = {}
+                if(!unsignedTx.network) throw Error("102: invalid unsinged tx! missing network!")
                 let network = unsignedTx.network
-                if(!network && unsignedTx.deposit){
-                    network = unsignedTx.deposit.network
-                }
+
                 //TODO is token?
 
                 if(UTXO_COINS.indexOf(network) >= 0){
@@ -1432,8 +1434,7 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
-                log.debug(tag,"transaction: ",transaction)
-                isTestnet = false
+                log.info(tag,"transaction: ",transaction)
                 let network = transaction.network.toUpperCase()
                 let asset = transaction.asset.toUpperCase()
                 let address = transaction.address
@@ -1678,22 +1679,13 @@ module.exports = class wallet {
 
                     let unsignedTx = {
                         network,
+                        asset:network,
                         transaction,
                         HDwalletPayload:hdwalletTxDescription,
                         verbal:"UTXO transaction"
                     }
 
                     rawTx = unsignedTx
-
-                    // const res = await this.WALLET.btcSignTx(hdwalletTxDescription);
-                    // log.debug(tag,"res: ",res)
-                    //
-                    // //
-                    // rawTx = {
-                    //     txid:res.txid,
-                    //     coin,
-                    //     serialized:res.serializedTx
-                    // }
 
                 }else if(network === 'ETH'){
 
@@ -1782,9 +1774,10 @@ module.exports = class wallet {
                         data:txParams.data,
                         chainId
                     }
-
+                    log.debug("TX: ",JSON.stringify(ethTx))
                     let unsignedTx = {
-                        coin:network,
+                        network:network,
+                        asset:network,
                         transaction,
                         HDwalletPayload:ethTx,
                         verbal:"Ethereum transaction"
@@ -1792,19 +1785,6 @@ module.exports = class wallet {
 
                     rawTx = unsignedTx
 
-                    // log.debug("unsignedTxETH: ",ethTx)
-                    // rawTx = await this.WALLET.ethSignTx(ethTx)
-                    // //debug https://flightwallet.github.io/decode-eth-tx/
-                    //
-                    // //txid
-                    // //const txHash = await web3.utils.sha3(signed.rawTransaction);
-                    // if(!rawTx.serialized) throw Error("Failed to sign!")
-                    //
-                    // const txid = keccak256(rawTx.serialized).toString('hex')
-                    // log.debug(tag,"txid: ",txid)
-                    //
-                    // rawTx.txid = txid
-                    // rawTx.params = txParams
                 } else if(network === 'RUNE'){
                     //get amount native
                     let amountNative = RUNE_BASE * parseFloat(amount)
@@ -1901,7 +1881,8 @@ module.exports = class wallet {
 
                     //
                     let unsignedTx = {
-                        coin:network,
+                        network:network,
+                        asset:network,
                         transaction,
                         HDwalletPayload:runeTx,
                         verbal:"Thorchain transaction"
@@ -1991,7 +1972,8 @@ module.exports = class wallet {
                     }
 
                     let unsignedTx = {
-                        coin:network,
+                        network:network,
+                        asset:network,
                         transaction,
                         HDwalletPayload:atomTx,
                         verbal:"Thorchain transaction"
@@ -2099,7 +2081,8 @@ module.exports = class wallet {
                      }
 
                     let unsignedTx = {
-                        coin:network,
+                        network:network,
+                        asset:network,
                         transaction,
                         HDwalletPayload:binanceTx,
                         verbal:"Thorchain transaction"
@@ -2241,12 +2224,12 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.broadcastTransaction = async function (coin:string, signedTx:BroadcastBody) {
+        this.broadcastTransaction = async function (network:string, signedTx:BroadcastBody) {
             let tag = TAG + " | broadcastTransaction | "
-            if(this.isTestnet && coin === 'BTC'){
-                signedTx.coin = "TEST"
+            if(this.isTestnet && network === 'BTC'){
+                signedTx.network = "TEST"
             }else{
-                signedTx.coin = coin
+                signedTx.network = network
             }
             log.debug(tag,"signedTx: ",signedTx)
             let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)

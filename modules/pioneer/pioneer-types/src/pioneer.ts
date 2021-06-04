@@ -28,7 +28,7 @@ export interface Transaction {
     network: string;
     asset: string;
     symbol?: string;
-    addressFrom: string;
+    addressFrom?: string;
     addressTo: string;
     address?: string;
     amount: string;
@@ -39,7 +39,7 @@ export interface Transaction {
 }
 
 //TransactionUnsigned
-export interface TransactionUnsigned {
+export interface UnsignedTransaction {
     coin?: string;
     network: string;
     invocationId?:string,

@@ -254,7 +254,7 @@ const test_service = async function () {
                 // "decimal":18,
                 //TODO bignum like asgardx?
                 amount: function(){
-                    return BigNumber.BigNumber.from(TEST_AMOUNT)
+                    return BigNumber.BigNumber.from(baseAmountToNative("ETH",TEST_AMOUNT))
                 }
             },
             noBroadcast:true

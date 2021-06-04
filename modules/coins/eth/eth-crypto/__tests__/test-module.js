@@ -15,8 +15,9 @@ console.log("seed: ",seed)
 
 //let test_seed = process.env['WALLET_MOBILE_DEV']
 // let test_seed = process.env['WALLET_TESTNET_DEV']
-let test_seed = process.env['WALLET_MAINNET_DEV_OLD']
+// let test_seed = process.env['WALLET_MAINNET_DEV_OLD']
 // let test_seed = process.env['WALLET_TEST_SEED']
+let test_seed = process.env['WALLET_MAIN']
 //console.log("test_seed: ",test_seed)
 
 // let xpub = process.env['REFERENCE_ETH_XPUB_KEEPKEY']
