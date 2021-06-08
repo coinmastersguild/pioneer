@@ -63,7 +63,7 @@ const {
 let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
+let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.003"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
@@ -84,13 +84,13 @@ const test_service = async function () {
         assert(balance)
 
         //assert balance local
-        //log.info(tag,"wallet: ",wallet)
+        //log.debug(tag,"wallet: ",wallet)
         log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
             throw Error("101: Low funds!")
         } else {
-            log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
         //generate new key
@@ -108,7 +108,7 @@ const test_service = async function () {
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         events.on('message', async (event:any) => {
-            log.info(tag,"event: ",event)
+            log.debug(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -133,12 +133,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
         //
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -149,19 +149,19 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
+        log.debug("user: ",user)
         assert(user.context)
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients['ethereum']
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
         /*
@@ -172,7 +172,7 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
@@ -180,16 +180,16 @@ const test_service = async function () {
 
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
+        log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
-        log.info(tag,"balanceBase: ",balanceBase)
+        log.debug(tag,"balanceBase: ",balanceBase)
         assert(balanceBase)
 
         //value USD
         let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
-        log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
@@ -205,13 +205,13 @@ const test_service = async function () {
         //get estimate
         let estimatePayload = {
             asset,
-            amount:balanceBase,
+            amount:balanceBase.toString(),
             recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
         }
-        log.info(tag,"estimatePayload: ",estimatePayload)
+        log.debug(tag,"estimatePayload: ",estimatePayload)
 
         let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.info(tag,"estimateCost: ",estimateCost)
+        log.debug(tag,"estimateCost: ",estimateCost)
         assert(estimateCost)
 
         //max cost - balance
@@ -227,9 +227,8 @@ const test_service = async function () {
 
         //filter by chain
         let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-        log.info(tag,"ethVault: ",ethVault)
+        log.debug(tag,"ethVault: ",ethVault)
 
-        log.info(tag,"ethVault: ",ethVault)
         assert(ethVault[0])
         ethVault = ethVault[0]
         assert(ethVault.address)
@@ -248,7 +247,7 @@ const test_service = async function () {
             inboundAddress: ethVault,
             coin: "ETH",
             asset: "ETH",
-            memo: '=:THOR.RUNE:thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5',
+            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
             "amount":{
                 // "type":"BASE",
                 // "decimal":18,
@@ -265,7 +264,7 @@ const test_service = async function () {
 
         //if create new
         let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.info(tag,"responseSwap: ",responseSwap)
+        log.debug(tag,"responseSwap: ",responseSwap)
         let invocationId = responseSwap.invocationId
 
         //do not continue invocation
@@ -299,18 +298,12 @@ const test_service = async function () {
         log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-        assert(invocationView3)
-        assert(invocationView3.state)
-        assert.equal(invocationView3.state,'broadcasted')
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -318,8 +311,14 @@ const test_service = async function () {
         //wait for confirmation
 
         if(!noBroadcast){
-            //TODO
+            let invocationView3 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+            assert(invocationView3)
+            assert(invocationView3.state)
+            assert.equal(invocationView3.state,'broadcasted')
+
             /*
+
                 Status codes
 
                 -1: errored
@@ -328,6 +327,7 @@ const test_service = async function () {
                  2: broadcasted
                  3: confirmed
                  4: fullfilled (swap completed)
+
              */
 
             //monitor tx lifecycle
@@ -338,7 +338,7 @@ const test_service = async function () {
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -347,13 +347,13 @@ const test_service = async function () {
 
                 //lookup txid
                 let txInfo = await client.getTransactionData(txid)
-                log.info(tag,"txInfo: ",txInfo)
+                log.debug(tag,"txInfo: ",txInfo)
 
                 if(txInfo && txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     //get gas price recomended
 
                     //get tx gas price
@@ -368,15 +368,15 @@ const test_service = async function () {
             while(!isFullfilled){
                 //get midgard info
                 let txInfoMidgard = midgard.getTransaction(txid)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
 
                 //
                 if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
                     let depositInfo = txInfoMidgard.actions[0].in
-                    log.info(tag,"deposit: ",depositInfo)
+                    log.debug(tag,"deposit: ",depositInfo)
 
                     let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
 
                     if(fullfillmentInfo.status === 'success'){
                         statusCode = 4
@@ -388,7 +388,7 @@ const test_service = async function () {
             }
         }
         let result = await app.stopSocket()
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
         log.info("****** TEST PASS ******")
         //process

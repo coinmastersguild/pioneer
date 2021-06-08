@@ -34,6 +34,7 @@ const {
 } = require('@pioneer-platform/pioneer-coins')
 
 //support
+import { ethers } from 'ethers'
 import * as support from './support'
 import { numberToHex } from 'web3-utils'
 import { FioActionParameters } from "fiosdk-offline";
@@ -166,20 +167,20 @@ module.exports = class wallet {
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
                 if(!this.spec) throw Error("103: Must init a pioneer server spec")
-                log.info(tag,"checkpoint")
+                log.debug(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
                         if(!this.context && config.mnemonic){
                             //calculate
                             let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
-                            log.info(tag,"walletEth:",walletEth)
-                            log.info(tag,"walletEth:",walletEth.masterAddress)
-                            log.info(tag,"walletEth:",walletEth.masterAddress+".wallet.json")
+                            log.debug(tag,"walletEth:",walletEth)
+                            log.debug(tag,"walletEth:",walletEth.masterAddress)
+                            log.debug(tag,"walletEth:",walletEth.masterAddress+".wallet.json")
                             this.context = walletEth.masterAddress+".wallet.json"
                         }
                         if(!this.context) throw Error("102: unable to determine correct context!")
-                        log.info(tag,"context: ",this.context)
+                        log.debug(tag,"context: ",this.context)
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
                         log.debug(tag,"checkpoint"," pioneer wallet detected! ")
                         if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
@@ -207,7 +208,7 @@ module.exports = class wallet {
                                 throw Error("Failed to find path for blockchain: "+blockchain)
                             }
                         }
-                        log.info(tag,"Checkpoint valid paths ** ")
+                        log.debug(tag,"Checkpoint valid paths ** ")
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
                         log.debug("pubkeys ",JSON.stringify(this.pubkeys))
 
@@ -222,7 +223,7 @@ module.exports = class wallet {
                                 throw Error("Failed to find path for blockchain: "+blockchain)
                             }
                         }
-                        log.info(tag,"Checkpoint valid pubkeys ** ")
+                        log.debug(tag,"Checkpoint valid pubkeys ** ")
                         //TODO verify hdwallet init successfull
 
                         log.debug("pubkeys ",this.pubkeys)
@@ -244,8 +245,8 @@ module.exports = class wallet {
                         }
                         break;
                     case HDWALLETS.keepkey:
-                        log.info(tag," Keepkey mode! ")
-                        log.info(tag,"**** wallet: ",wallet)
+                        log.debug(tag," Keepkey mode! ")
+                        log.debug(tag,"**** wallet: ",wallet)
                         if(!config.wallet) throw Error("102: Config is missing watch wallet!")
                         if(!config.wallet.WALLET_PUBLIC) throw Error("103: Config watch wallet missing WALLET_PUBLIC!")
                         if(!config.wallet.pubkeys) throw Error("104: Config watch wallet missing pubkeys!")
@@ -332,12 +333,12 @@ module.exports = class wallet {
                     }else{
                         //user found! syncronize
                         if(!userInfo.blockchains) throw Error("104: invalid user!")
-                        log.info(tag,"userInfo: ",userInfo)
-                        log.info(tag,"userInfo: ",userInfo.blockchains)
-                        log.info(tag,"userInfo: ",userInfo.blockchains.length)
+                        log.debug(tag,"userInfo: ",userInfo)
+                        log.debug(tag,"userInfo: ",userInfo.blockchains)
+                        log.debug(tag,"userInfo: ",userInfo.blockchains.length)
 
-                        log.info(tag,"blockchains: ",this.blockchains)
-                        log.info(tag,"blockchains: ",this.blockchains.length)
+                        log.debug(tag,"blockchains: ",this.blockchains)
+                        log.debug(tag,"blockchains: ",this.blockchains.length)
 
                         //count blockchains
 
@@ -359,7 +360,7 @@ module.exports = class wallet {
                     }
 
 
-                    log.info(tag,"getting info on context: ",this.context)
+                    log.debug(tag,"getting info on context: ",this.context)
                     let walletInfo = await this.getInfo(this.context)
                     log.debug(tag,"walletInfo: ",walletInfo)
 
@@ -768,7 +769,7 @@ module.exports = class wallet {
                 let tag = TAG + " | deposit | "
                 try{
                     let rawTx
-                    log.info(tag,"deposit: ",deposit)
+                    log.debug(tag,"deposit: ",deposit)
 
                     if(deposit.network === 'RUNE') {
                         //use msgDeposit
@@ -877,7 +878,6 @@ module.exports = class wallet {
                         let unsignedTx = {
                             invocationId:deposit.invocationId,
                             network:deposit.network,
-                            asset:deposit.network,
                             deposit,
                             HDwalletPayload:runeTx,
                             verbal:"Thorchain transaction"
@@ -900,7 +900,7 @@ module.exports = class wallet {
             let tag = TAG + " | buildSwap | "
             try{
                 let rawTx
-                log.info(tag,"swap: ",swap)
+                log.debug(tag,"swap: ",swap)
 
                 let UTXOcoins = [
                     'BTC',
@@ -1306,7 +1306,7 @@ module.exports = class wallet {
         this.signTransaction = async function (unsignedTx:UnsignedTransaction) {
             let tag = TAG + " | signTransaction | "
             try {
-                log.info(tag,"unsignedTx: ",unsignedTx)
+                log.debug(tag,"unsignedTx: ",unsignedTx)
                 let signedTx:any = {}
                 if(!unsignedTx.network) throw Error("102: invalid unsinged tx! missing network!")
                 let network = unsignedTx.network
@@ -1315,7 +1315,7 @@ module.exports = class wallet {
 
                 if(UTXO_COINS.indexOf(network) >= 0){
 
-                    log.info(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
+                    log.debug(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
                     if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.network) >= 0){
                         //opps convert
                         unsignedTx.HDwalletPayload.network = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.network]
@@ -1330,10 +1330,19 @@ module.exports = class wallet {
                         serialized:res.serializedTx
                     }
                 }else if(network === 'ETH'){
+
                     //TODO fix tokens
                     log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
                     //debug https://flightwallet.github.io/decode-eth-tx/
+
+                    //verify from address correct
+                    const decoded = ethers.utils.parseTransaction(signedTx.serialized)
+                    signedTx.decoded = decoded
+
+                    //TODO verify more
+                    //expect from to be master
+                    //verify amounts sane
 
                     //txid
                     //const txHash = await web3.utils.sha3(signed.rawTransaction);
@@ -1434,7 +1443,7 @@ module.exports = class wallet {
         this.buildTransfer = async function (transaction:Transaction) {
             let tag = TAG + " | build_transfer | "
             try {
-                log.info(tag,"transaction: ",transaction)
+                log.debug(tag,"transaction: ",transaction)
                 let network = transaction.network.toUpperCase()
                 let asset = transaction.asset.toUpperCase()
                 let address = transaction.address
@@ -1560,9 +1569,9 @@ module.exports = class wallet {
 
                     if(valueOut < 1){
                         if(network === 'BCH'){
-                            log.info(tag," God bless you sir's :BCH:")
+                            log.debug(tag," God bless you sir's :BCH:")
                         } else {
-                            log.info("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
+                            log.debug("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
                         }
                         //Expensive networks
                         if(["BTC","ETH","RUNE"].indexOf(network) >= 0){
@@ -1696,7 +1705,10 @@ module.exports = class wallet {
 
                     let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                     nonceRemote = nonceRemote.data
-                    let nonce = transaction.nonce || nonceRemote
+                    // let nonce = transaction.nonce || nonceRemote
+                    // log.debug(tag,"nonce: ",nonce)
+                    //
+                    let nonce = 0
                     let gas_limit = 80000 //TODO dynamic gas limit?
                     let gas_price = await this.pioneerClient.instance.GetGasPrice()
                     gas_price = gas_price.data
@@ -1765,7 +1777,14 @@ module.exports = class wallet {
                     }
 
                     let ethTx = {
-                        addressNList: support.bip32ToAddressNList(masterPathEth),
+                        //addressNList: support.bip32ToAddressNList(masterPathEth),
+                        "addressNList":[
+                            2147483692,
+                            2147483708,
+                            2147483648,
+                            0,
+                            0
+                        ],
                         nonce: numberToHex(txParams.nonce),
                         gasPrice: numberToHex(txParams.gasPrice),
                         gasLimit: numberToHex(txParams.gasLimit),
@@ -1775,6 +1794,10 @@ module.exports = class wallet {
                         chainId
                     }
                     log.debug("TX: ",JSON.stringify(ethTx))
+
+                    //import Broke
+
+
                     let unsignedTx = {
                         network:network,
                         asset:network,

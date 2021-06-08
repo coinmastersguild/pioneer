@@ -11,6 +11,9 @@ let Hardware = require("@pioneer-platform/pioneer-hardware")
 //CLI tools
 const prompt = require('prompt');
 const Table = require('cli-table');
+
+const ethers = require('ethers')
+
 prompt.start();
 
 //let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
@@ -269,132 +272,82 @@ let run_test = async function(){
             let transfer = {
                 network:"ETH",
                 asset:"ETH",
-                address:"0x33b35c665496bA8E71B22373843376740401F106"
+                address:"0x33b35c665496bA8E71B22373843376740401F106",
+                addresFrom:"0x2356a15042f98f0a53784f42237bd4b2873aadcf"
             }
 
             let amount = 0.001
             transfer.amount = amount
 
 
-            let transactionBuilt = await Wallet.buildTransfer(transfer)
-            console.log("transactionBuilt: ",transactionBuilt)
+            // let unsignedTx = await Wallet.buildTransfer(transfer)
+            // console.log("unsignedTx: ",unsignedTx)
 
-            // let transactionBuilt = {
-            //     coin: 'BCH',
-            //         transaction: {
-            //     username: 'test-user-2',
-            //         coin: 'BCH',
-            //         amount: '0.1',
-            //         address: 'qqj0r365td73dme85yzeqzpuruuxh03c8ckzmyv2f6',
-            //         memo: '=:THOR.RUNE:thor1dc7h3fz4cgs59q6d0d39h6nwk067s0mp9805zz:568336444',
-            //         type: 'transfer'
-            // },
+            //txGood
+            // let unsignedTx = {
+            //     network:"ETH",
             //     HDwalletPayload: {
-            //         opReturnData: '=:THOR.RUNE:thor1dc7h3fz4cgs59q6d0d39h6nwk067s0mp9805zz:568336444',
-            //             coin: 'BitcoinCash',
-            //             inputs: [ '[object]' ],
-            //             outputs: [ '[object]', '[object]' ],
-            //             version: 1,
-            //             locktime: 0
-            //     },
-            //     verbal: 'UTXO transaction'
+            //         addressNList: [ 2147483692, 2147483708, 2147483648, 0, 0 ],
+            //         nonce: '0xb7',
+            //         gasPrice: '0x37e11d600',
+            //         gasLimit: '0x13880',
+            //         value: '0x38d7ea4c68000',
+            //         to: '0x33b35c665496bA8E71B22373843376740401F106',
+            //         data: undefined,
+            //         chainId: 1
+            //     }
             // }
 
-            // let transactionBuilt = {
-            //     "coin":"BCH",
-            //     "transaction":{
-            //         "username":"test-user-2",
-            //         "coin":"BCH",
-            //         "amount":"0.1",
-            //         "address":"qqj0r365td73dme85yzeqzpuruuxh03c8ckzmyv2f6",
-            //         "memo":"=:THOR.RUNE:thor1dc7h3fz4cgs59q6d0d39h6nwk067s0mp9805zz:568336444",
-            //         "type":"transfer"
-            //     },
-            //     "HDwalletPayload":{
-            //         "opReturnData":"=:THOR.RUNE:thor1dc7h3fz4cgs59q6d0d39h6nwk067s0mp9805zz:568336444",
-            //         "coin":"BitcoinCash",
-            //         "inputs":[
-            //             {
-            //                 "addressNList":[
-            //                     2147483692,
-            //                     2147483793,
-            //                     2147483648,
-            //                     1,
-            //                     4
-            //                 ],
-            //                 "scriptType":"p2pkh",
-            //                 "amount":"320778283",
-            //                 "vout":1,
-            //                 "txid":"d8dc86e50bcb2628d53a909099651c01c739d112974cd7092b313c56c520d1c2",
-            //                 "segwit":false,
-            //                 "hex":"0100000002a4fe4e5f5117bb8359007d164c2f4cf429dcc71b22d88476422f93f5b194847e000000006a473044022076b723e4ebea6e3f3825fff3832118620bf0499e5ed82c61bf6d04bd176e41fa02207c591b65562641afe418cb1eb0f6140778dea6b02a43f4be8154908a19195035412103e5b6c4e2b2239cc571aa671c1d23462543711a67d61e658a753f4e3fd35bd9fbffffffffcd83926b6e327a9c0fccd688bfb7f3e85f6dc41738a11f652213f516f27e6774000000006b48304502210080a3fe6be137657050bf94bb028709f08d3106da748f028d21523a2c3914cf52022036352b3730b58888d3e636c7d595120158643c6d027e6c1395bc4109c6e9c1604121023261f4cef888bf214c4ec7328b60e7c31ad3cace74d84a82c9f5a9374bccad65ffffffff0254250300000000001976a91437dc3a1dae7a4792dfbe996e8b392a86a38561b388ac2bb01e13000000001976a9145d33bfd8b7dafc137137c9fde2fa5d0b270571fb88ac00000000",
-            //                 "tx":{
-            //                     "txid":"d8dc86e50bcb2628d53a909099651c01c739d112974cd7092b313c56c520d1c2",
-            //                     "hash":"d8dc86e50bcb2628d53a909099651c01c739d112974cd7092b313c56c520d1c2",
-            //                     "version":1,
-            //                     "vin":[
-            //                         {
-            //                             "txid":"7e8494b1f5932f427684d8221bc7dc29f44c2f4c167d005983bb17515f4efea4",
-            //                             "addr":"bitcoincash:qqmacwsa4eay0yklh6vkazee92r28ptpkvm682xr2m",
-            //                             "scriptSig":{
-            //                                 "hex":"0014459a4d8600bfdaa52708eaae5be1dcf959069efc"
-            //                             },
-            //                             "valueSat":206112,
-            //                             "value":0.00206112
-            //                         },
-            //                         {
-            //                             "txid":"74677ef216f51322651fa13817c46d5fe8f3b7bf88d6cc0f9c7a326e6b9283cd",
-            //                             "addr":"bitcoincash:qr7uyrqt6auk9g3sm2sdfev6ccuv2a2rnupn5eh8c2",
-            //                             "scriptSig":{
-            //                                 "hex":"0014459a4d8600bfdaa52708eaae5be1dcf959069efc"
-            //                             },
-            //                             "valueSat":320780249,
-            //                             "value":3.20780249
-            //                         }
-            //                     ],
-            //                     "vout":[
-            //                         {
-            //                             "value":"206164",
-            //                             "scriptPubKey":{
-            //                                 "hex":"76a91437dc3a1dae7a4792dfbe996e8b392a86a38561b388ac"
-            //                             }
-            //                         },
-            //                         {
-            //                             "value":"320778283",
-            //                             "scriptPubKey":{
-            //                                 "hex":"76a9145d33bfd8b7dafc137137c9fde2fa5d0b270571fb88ac"
-            //                             }
-            //                         }
-            //                     ],
-            //                     "hex":"0100000002a4fe4e5f5117bb8359007d164c2f4cf429dcc71b22d88476422f93f5b194847e000000006a473044022076b723e4ebea6e3f3825fff3832118620bf0499e5ed82c61bf6d04bd176e41fa02207c591b65562641afe418cb1eb0f6140778dea6b02a43f4be8154908a19195035412103e5b6c4e2b2239cc571aa671c1d23462543711a67d61e658a753f4e3fd35bd9fbffffffffcd83926b6e327a9c0fccd688bfb7f3e85f6dc41738a11f652213f516f27e6774000000006b48304502210080a3fe6be137657050bf94bb028709f08d3106da748f028d21523a2c3914cf52022036352b3730b58888d3e636c7d595120158643c6d027e6c1395bc4109c6e9c1604121023261f4cef888bf214c4ec7328b60e7c31ad3cace74d84a82c9f5a9374bccad65ffffffff0254250300000000001976a91437dc3a1dae7a4792dfbe996e8b392a86a38561b388ac2bb01e13000000001976a9145d33bfd8b7dafc137137c9fde2fa5d0b270571fb88ac00000000"
-            //                 }
-            //             }
-            //         ],
-            //         "outputs":[
-            //             {
-            //                 "address":"qqj0r365td73dme85yzeqzpuruuxh03c8ckzmyv2f6",
-            //                 "addressType":"spend",
-            //                 "scriptType":"p2wpkh",
-            //                 "amount":"10000000",
-            //                 "isChange":false
-            //             },
-            //             {
-            //                 "address":"1D9Zuv9YPDuvuAztBs5AThNYaj9mZpW6K8",
-            //                 "addressType":"spend",
-            //                 "scriptType":"p2pkh",
-            //                 "amount":"310777831",
-            //                 "isChange":true
-            //             }
-            //         ],
-            //         "version":1,
-            //         "locktime":0
-            //     },
-            //     "verbal":"UTXO transaction"
+            //txGood 0 nonce
+            let unsignedTx = {
+                network:"ETH",
+                HDwalletPayload: {
+                    addressNList: [ 2147483692, 2147483708, 2147483648, 0, 0 ],
+                    nonce: '0x',
+                    gasPrice: '0x499311580',
+                    gasLimit: '0x13880',
+                    value: '0x38d7ea4c68000',
+                    to: '0x33b35c665496bA8E71B22373843376740401F106',
+                    data: undefined,
+                    chainId: 1
+                }
+            }
+
+            // let unsignedTx = {
+            //     network:"ETH",
+            //     HDwalletPayload: {
+            //         "addressNList":[2147483692,2147483708,2147483648,0,0],
+            //         "nonce":"0x0",
+            //         "gasPrice":"0x306dc4200",
+            //         "gasLimit":"0x5208",
+            //         "to":"0x33b35c665496ba8e71b22373843376740401f106",
+            //         "value":"0x38d7ea4c68000",
+            //         "data":"",
+            //         "chainId":1
+            //     }
             // }
 
-            let signedTx = await Wallet.signTransaction(transactionBuilt)
+            //BROKE! BAD! EWW
+            // let unsignedTx = {
+            //     network:"ETH",
+            //     HDwalletPayload: {
+            //         "addressNList":[2147483692,2147483708,2147483648,0,0],
+            //         "nonce":"0x0",
+            //         "gasPrice":"0x306dc4200",
+            //         "gasLimit":"0x5208",
+            //         "to":"0x33b35c665496ba8e71b22373843376740401f106",
+            //         "value":"0x38d7ea4c68000",
+            //         "data":"",
+            //         "chainId":1
+            //     }
+            // }
+
+            let signedTx = await Wallet.signTransaction(unsignedTx)
             console.log("signedTx: ",signedTx)
 
+            console.log("RECEIVED: FROM:",signedTx.decoded.from)
+            console.log("expected: FROM:","0x2356a15042f98f0a53784f42237bd4b2873aadcf")
+            console.log("wrong tx: FROM:",'0x70ce552f77aec9e8b84e1f8e0e9ad3a0946d4dd7')
             // let resultBroadcast = await Wallet.broadcastTransaction('ETH',signedTx)
             // console.log("resultBroadcast: ",resultBroadcast)
         }

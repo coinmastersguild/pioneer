@@ -35,8 +35,8 @@ let run_test = async function(){
 
         await Hardware.wipe()
 
-        console.log("loading seed: ",process.env['WALLET_MAIN'])
-        Hardware.load(process.env['WALLET_MAIN'])
+        console.log("loading seed: ",process.env['FOUND_KEY'])
+        Hardware.load(process.env['FRESH_TEST_SEED2'])
 
 
     }catch(e){

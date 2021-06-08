@@ -248,7 +248,7 @@ module.exports = class wallet {
                 //get info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context
@@ -523,7 +523,7 @@ module.exports = class wallet {
             this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
                 let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
                 try {
-                    log.info(tag,"params: ",params)
+                    log.debug(tag,"params: ",params)
                     let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(null,params)
                     response = response.data
                     let output = {
@@ -566,7 +566,7 @@ module.exports = class wallet {
                         amount:amount.amount().toNumber()
                     }
                     if(noBroadcast) invocation.noBroadcast = true
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke('approve',invocation)
                     console.log("result: ",result.data)
 
@@ -652,8 +652,8 @@ module.exports = class wallet {
                     let allowance = await this.pioneerApi.GetAllowance(null,body)
                     allowance = allowance.data
 
-                    log.info(tag,"allowance: ",allowance)
-                    log.info(tag,"amount: ",amount)
+                    log.debug(tag,"allowance: ",allowance)
+                    log.debug(tag,"amount: ",amount)
                     if(allowance > amount){
                         return true
                     } else {
@@ -682,7 +682,7 @@ module.exports = class wallet {
             try {
                 //get info
                 let userInfo = await this.pioneerApi.User()
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context
@@ -784,7 +784,7 @@ module.exports = class wallet {
                         ticker:this.nativeAsset
                     }
 
-                    log.info(tag,"returnAssetAmount",returnAssetAmount())
+                    log.debug(tag,"returnAssetAmount",returnAssetAmount())
 
                     balances.push({
                         asset: assetDescription,
@@ -814,7 +814,7 @@ module.exports = class wallet {
             let tag = TAG + " | getTransactionData | "
             try {
                 if(!txid) throw Error("Txid is required!")
-                log.info("asset: ",this.nativeAsset)
+                log.debug("asset: ",this.nativeAsset)
                 //TODO tech debt, send network instead of asset
                 let output = await this.pioneerApi.GetTransaction({network:this.nativeAsset,txid,type:'thorchain'})
                 return output.data
@@ -838,8 +838,8 @@ module.exports = class wallet {
         this.deposit = async function (deposit:any,options:any) {
             let tag = TAG + " | deposit | "
             try {
-                log.info(tag,"deposit: ",deposit)
-                log.info(tag,"options: ",options)
+                log.debug(tag,"deposit: ",deposit)
+                log.debug(tag,"options: ",options)
 
                 //verbose
                 let verbose
@@ -856,7 +856,7 @@ module.exports = class wallet {
                 //if native
                 let amount = deposit.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
-                log.info(tag,"amount (final): ",amount)
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
                 // if(typeof(amount) !== 'string')
                 //TODO min transfer size 10$??
@@ -877,7 +877,7 @@ module.exports = class wallet {
                 }
                 if(deposit.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke('deposit',invocation)
                 console.log("result: ",result.data)
 
@@ -917,8 +917,8 @@ module.exports = class wallet {
         this.buildSwap = async function (swap:any,options:any) {
             let tag = TAG + " | buildSwap | "
             try {
-                log.info(tag,"swap: ",swap)
-                log.info(tag,"options: ",options)
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"options: ",options)
 
                 //verbose
                 let verbose
@@ -933,10 +933,10 @@ module.exports = class wallet {
                 let coin = this.nativeAsset
                 if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                log.info(tag,"swap: ",swap)
-                log.info(tag,"swap.amount: ",swap.amount)
-                log.info(tag,"tx.amount.amount(): ",swap.amount.amount())
-                // log.info(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"swap.amount: ",swap.amount)
+                log.debug(tag,"tx.amount.amount(): ",swap.amount.amount())
+                // log.debug(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
                 let amount = swap.amount.amount()
                 amount = nativeToBaseAmount(this.nativeAsset,amount)
                 amount = amount.toString()
@@ -944,7 +944,7 @@ module.exports = class wallet {
                 //if native
                 // let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(this.nativeAsset,amount)
-                log.info(tag,"amount (final): ",amount)
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
                 // if(typeof(amount) !== 'string')
                 //TODO min transfer size 10$??
@@ -965,7 +965,7 @@ module.exports = class wallet {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke('swap',invocation)
                 console.log("result: ",result.data)
 
@@ -987,15 +987,15 @@ module.exports = class wallet {
             let tag = TAG + " | transfer | "
             try {
                 let coin = this.nativeAsset
-                log.info(tag,"tx: ",tx)
-                log.info(tag,"tx.amount: ",tx.amount)
-                log.info(tag,"tx.amount.amount(): ",tx.amount.amount())
-                log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                log.debug(tag,"tx: ",tx)
+                log.debug(tag,"tx.amount: ",tx.amount)
+                log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
+                log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
                 let amount = tx.amount.amount().toNumber()
                 amount = nativeToBaseAmount(this.nativeAsset,amount)
                 amount = amount.toString()
 
-                log.info(tag,"amount (final): ",amount)
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 
                 //TODO min transfer size 10$
@@ -1017,7 +1017,7 @@ module.exports = class wallet {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke('transfer',invocation)
                 console.log("result: ",result.data)
 

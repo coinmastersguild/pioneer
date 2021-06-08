@@ -122,11 +122,11 @@ module.exports = {
             //get from remote
             let output = await network.instance.User()
             if(output.data.context){
-                log.info("Found remote context! context: ",output.data.context)
+                log.debug("Found remote context! context: ",output.data.context)
                 WALLET_CONTEXT = output.data.context
             } else {
                 //failed to get remote!
-                log.info("failed to get remote context!",output.data)
+                log.debug("failed to get remote context!",output.data)
                 let contexts = await Object.keys(WALLETS_LOADED)
                 if(contexts.length > 0){
                     WALLET_CONTEXT = contexts[0]
@@ -321,14 +321,14 @@ let get_invocation = async function (invocationId:any) {
 let build_transaction = async function (transaction:any) {
     let tag = " | build_transaction | ";
     try {
-        log.info(tag,"transaction: ",transaction)
+        log.debug(tag,"transaction: ",transaction)
         if(!transaction.invocationId) throw Error("invocationId required!")
         //get invocation
 
         //TODO validate type and fields
 
         let invocation = await get_invocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -348,30 +348,30 @@ let build_transaction = async function (transaction:any) {
             walletContext.context = walletContext.context
         }
         if(!walletContext.context) throw Error("Invalid wallet! missing context!")
-        log.info(tag,"walletContext: ",walletContext.context)
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                log.info(" **** BUILD transfer ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD transfer ****  invocation: ",invocation.invocation)
 
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 unsignedTx.invocation = invocation.invocation
-                log.info(" **** RESULT buildTransfer ****  unsignedTx: ",unsignedTx)
+                log.debug(" **** RESULT buildTransfer ****  unsignedTx: ",unsignedTx)
 
                 break
             case 'approve':
-                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
                 unsignedTx.invocation = invocation.invocation
-                log.info(" **** RESULT buildApproval ****  approvalUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT buildApproval ****  approvalUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
                 unsignedTx.invocation = invocation.invocation
-                log.info(" **** RESULT buildSwap ****  swapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT buildSwap ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("Unhandled type: ",invocation.type)
@@ -389,7 +389,7 @@ let build_transaction = async function (transaction:any) {
 
         //update invocation remote
         let resultUpdate = await update_invocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
         return unsignedTx
     } catch (e) {
@@ -404,7 +404,7 @@ let broadcast_transaction = async function (transaction:any) {
         //get invocation
 
         let invocation = await get_invocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         //signedTx
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
@@ -427,7 +427,7 @@ let broadcast_transaction = async function (transaction:any) {
             walletContext.context = walletContext.context
         }
         if(!walletContext.context) throw Error("Invalid wallet! missing context!")
-        log.info(tag,"walletContext: ",walletContext.context)
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //TODO fix tech debt
         //normalize
@@ -445,10 +445,10 @@ let broadcast_transaction = async function (transaction:any) {
             signedTx:invocation.signedTx,
             broadcastResult
         }
-        log.info(tag,"updateBody: ",updateBody)
+        log.debug(tag,"updateBody: ",updateBody)
         //update invocation remote
         let resultUpdate = await update_invocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
 
         return broadcastResult
@@ -508,13 +508,13 @@ let set_context = async function (context:string) {
 let approve_transaction = async function (transaction:any) {
     let tag = " | approve_transaction | ";
     try {
-        log.info(tag,"invocationId: ",transaction)
+        log.debug(tag,"invocationId: ",transaction)
         //get invocation
         if(!transaction) throw Error("101: invocation required!")
         if(!transaction.invocationId) throw Error("102: invocationId required!")
 
         let invocation = await get_invocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
@@ -530,7 +530,7 @@ let approve_transaction = async function (transaction:any) {
             walletContext.context = walletContext.context
         }
         if(!walletContext.context) throw Error("Invalid wallet! missing context!")
-        log.info(tag,"walletContext: ",walletContext.context)
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //TODO kill the coin! field
         //invocation.unsignedTx.HDwalletPayload.coin = invocation.invocation.coin
@@ -538,9 +538,9 @@ let approve_transaction = async function (transaction:any) {
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
-        log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
-        log.info(tag,"invocation.signedTx: ",JSON.stringify(signedTx))
+        log.debug(tag,"invocation.signedTx: ",JSON.stringify(signedTx))
 
         //update invocation
         let updateBody = {
@@ -552,7 +552,7 @@ let approve_transaction = async function (transaction:any) {
 
         //update invocation remote
         let resultUpdate = await update_invocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
         return signedTx
     } catch (e) {
@@ -565,11 +565,11 @@ let approve_transaction = async function (transaction:any) {
 let pair_sdk_user = async function (code:string) {
     let tag = " | pair_sdk_user | ";
     try {
-        log.info(tag,"code: ",code)
+        log.debug(tag,"code: ",code)
         //send code
 
-        log.info(tag,"network: ",network)
-        log.info(tag,"network: ",network.instance)
+        log.debug(tag,"network: ",network)
+        log.debug(tag,"network: ",network.instance)
         let result = await network.instance.Pair(null,{code})
 
         return result.data
@@ -983,7 +983,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote has more wallets
         let userInfoRemote = await network.instance.User()
         userInfoRemote = userInfoRemote.data
-        log.info(tag,"userInfoRemote: ",userInfoRemote)
+        log.debug(tag,"userInfoRemote: ",userInfoRemote)
 
         if(userInfoRemote.wallets){
             for(let i = 0; i < userInfoRemote.wallets; i++){
@@ -991,7 +991,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 //if found in local
                 let match = walletFiles.filter((e: any) => e === walletRemote)
                 if(match[0]){
-                   log.info(tag,"Found remote wallet locally! wallet: ",walletRemote)
+                   log.debug(tag,"Found remote wallet locally! wallet: ",walletRemote)
                     let walletDescription = {
                        name:walletRemote,
                        remote:true,
@@ -1000,7 +1000,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     }
                     walletDescriptions.push(walletDescription)
                 } else {
-                    log.info(tag,"Remote wallet NOT found localy: ",walletRemote)
+                    log.debug(tag,"Remote wallet NOT found localy: ",walletRemote)
                     //push it anyway
                     walletFiles.push(walletRemote)
                     //mark it offline
@@ -1010,9 +1010,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 }
             }
         }else{
-            log.info(tag,'new user detected!')
+            log.debug(tag,'new user detected!')
         }
-        log.info(tag,"Checkpoint0: status remote wallets: output: ",output)
+        log.debug(tag,"Checkpoint0: status remote wallets: output: ",output)
         //note, if local has more wallets then remote, its ok, we register them below!
 
         //if missing, mark "offline" add
@@ -1050,13 +1050,13 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         for(let i = 0; i < walletFiles.length; i++){
             let context = walletFiles[i]
             //if !offline aka, online!
-            log.info(tag,"output.offline: ",output.offline)
+            log.debug(tag,"output.offline: ",output.offline)
             if(output.offline.indexOf(context) < 0){
-                log.info(tag,"wallet is online! ",context)
+                log.debug(tag,"wallet is online! ",context)
 
                 log.debug(tag,"context: ",context)
                 let walletFile = getWallet(context)
-                log.info(tag,"walletFile: ",walletFile)
+                log.debug(tag,"walletFile: ",walletFile)
                 if(!walletFile.TYPE) walletFile.TYPE = walletFile.type
                 if(walletFile.TYPE === 'keepkey'){
                     if(!KEEPKEY){
@@ -1260,7 +1260,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     throw Error("unhandled wallet type! "+walletFile.TYPE)
                 }
             } else {
-                log.info(tag,"wallet is offline!")
+                log.debug(tag,"wallet is offline!")
             }
         }
         output.TOTAL_VALUE_USD_LOADED = TOTAL_VALUE_USD_LOADED
@@ -1270,20 +1270,20 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote user info
         let userInfo = await network.instance.User()
         userInfo = userInfo.data
-        log.info(tag,"userInfo: ",userInfo)
+        log.debug(tag,"userInfo: ",userInfo)
         if(!userInfo.context) {
             if(walletFiles.length === 0){
                 throw Error("You must first create/pair a wallet to use app!")
             } else {
                 //no context found remote
                 //setting a context from 0
-                log.info(tag,"offline: ",output.offline)
+                log.debug(tag,"offline: ",output.offline)
                 for(let i = 0; i < walletFiles.length; i++){
                     let walletFile = walletFiles[i]
                     if(output.offline.indexOf(walletFile) >= 0){
-                        log.info(tag,"wallet is offline: ",walletFile)
+                        log.debug(tag,"wallet is offline: ",walletFile)
                     } else {
-                        log.info(tag,"Setting New Context newContext: ",walletFile)
+                        log.debug(tag,"Setting New Context newContext: ",walletFile)
                         let resultUpdateContext = await network.instance.SetContext(null,{context:walletFile})
                         resultUpdateContext = resultUpdateContext.data
                         log.debug(tag,"resultUpdateContext: ",resultUpdateContext)
@@ -1299,10 +1299,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             WALLET_CONTEXT = userInfo.context
             output.context = WALLET_CONTEXT
         } else {
-            log.info(tag,"remote context NOT in loaded wallet")
+            log.debug(tag,"remote context NOT in loaded wallet")
             //set remote context to position0 local
-            log.info(tag,"contexts: ",walletFiles)
-            log.info(tag,"Position 0 context: ",walletFiles[0])
+            log.debug(tag,"contexts: ",walletFiles)
+            log.debug(tag,"Position 0 context: ",walletFiles[0])
             //
             set_context(walletFiles[0])
         }
@@ -1330,7 +1330,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
         //on on invocations add to queue
         clientEvents.events.on('message', async (request: any) => {
-            log.info(tag,"**** message: ", request)
+            log.debug(tag,"**** message: ", request)
             //TODO filter invocations by subscribers
 
             //TODO autonomousOn/Off
@@ -1372,11 +1372,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.error(tag,"context: ",context)
                         throw Error("Unable to build transaction! context not found!")
                     }
-                    log.info(tag,"Building transaction with context: ",context)
-                    log.info(tag,"invocation: ",request.invocation)
+                    log.debug(tag,"Building transaction with context: ",context)
+                    log.debug(tag,"invocation: ",request.invocation)
                     unsignedTx = await WALLETS_LOADED[context].deposit(request.invocation)
-                    log.info(tag,"txid: ", unsignedTx.txid)
-                    log.info(tag,"unsignedTx: ", unsignedTx)
+                    log.debug(tag,"txid: ", unsignedTx.txid)
+                    log.debug(tag,"unsignedTx: ", unsignedTx)
 
                     //update invocation
                     invocationId = request.invocation.invocationId
@@ -1389,7 +1389,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //update invocation remote
                     resultUpdate = await update_invocation(updateBody)
-                    log.info(tag,"resultUpdate: ",resultUpdate)
+                    log.debug(tag,"resultUpdate: ",resultUpdate)
                     clientEvents.events.emit('unsignedTx',updateBody)
 
                     break;
@@ -1408,11 +1408,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.error(tag,"context: ",context)
                         throw Error("Unable to build transaction! context not found!")
                     }
-                    log.info(tag,"Building transaction with context: ",context)
-                    log.info(tag,"invocation: ",request.invocation)
+                    log.debug(tag,"Building transaction with context: ",context)
+                    log.debug(tag,"invocation: ",request.invocation)
                     unsignedTx = await WALLETS_LOADED[context].buildSwap(request.invocation)
-                    log.info(tag,"txid: ", unsignedTx.txid)
-                    log.info(tag,"unsignedTx: ", unsignedTx)
+                    log.debug(tag,"txid: ", unsignedTx.txid)
+                    log.debug(tag,"unsignedTx: ", unsignedTx)
 
                     //update invocation
                     invocationId = request.invocation.invocationId
@@ -1424,8 +1424,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //update invocation remote
                     resultUpdate = await update_invocation(updateBody)
-                    log.info(tag,"resultUpdate: ",resultUpdate)
-                    clientEvents.events.emit('unsignedTx',unsignedTx)
+                    log.debug(tag,"resultUpdate: ",resultUpdate)
+                    clientEvents.events.emit('unsignedTx',updateBody)
 
                     break;
                 case 'approve':
@@ -1443,12 +1443,12 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.error(tag,"context: ",context)
                         throw Error("Unable to build transaction! context not found!")
                     }
-                    log.info(tag,"Building transaction with context: ",context)
-                    log.info(tag,"invocation: ",request.invocation)
+                    log.debug(tag,"Building transaction with context: ",context)
+                    log.debug(tag,"invocation: ",request.invocation)
 
                     unsignedTx = await WALLETS_LOADED[context].buildApproval(request.invocation)
-                    log.info(tag,"txid: ", unsignedTx.txid)
-                    log.info(tag,"unsignedTx: ", unsignedTx)
+                    log.debug(tag,"txid: ", unsignedTx.txid)
+                    log.debug(tag,"unsignedTx: ", unsignedTx)
 
                     //update invocation
                     invocationId = request.invocation.invocationId
@@ -1460,8 +1460,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //update invocation remote
                     resultUpdate = await update_invocation(updateBody)
-                    log.info(tag,"resultUpdate: ",resultUpdate)
-                    clientEvents.events.emit('unsignedTx',unsignedTx)
+                    log.debug(tag,"resultUpdate: ",resultUpdate)
+                    clientEvents.events.emit('unsignedTx',updateBody)
 
 
                     break;
@@ -1480,11 +1480,11 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         log.error(tag,"context: ",context)
                         throw Error("Unable to build transaction! context not found!")
                     }
-                    log.info(tag,"Building transaction with context: ",context)
-                    //log.info(tag,"invocation: ",request.invocation)
+                    log.debug(tag,"Building transaction with context: ",context)
+                    //log.debug(tag,"invocation: ",request.invocation)
 
                     unsignedTx = await WALLETS_LOADED[context].buildTransfer(request.invocation)
-                    log.info(tag,"unsignedTx: ", unsignedTx)
+                    log.debug(tag,"unsignedTx: ", unsignedTx)
                     //update invocation
                     invocationId = request.invocation.invocationId
                     updateBody = {
@@ -1495,7 +1495,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
 
                     //update invocation remote
                     resultUpdate = await update_invocation(updateBody)
-                    log.info(tag,"resultUpdate: ",resultUpdate)
+                    log.debug(tag,"resultUpdate: ",resultUpdate)
                     clientEvents.events.emit('unsignedTx',updateBody)
 
                     break;

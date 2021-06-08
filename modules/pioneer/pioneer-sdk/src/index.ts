@@ -269,16 +269,16 @@ export class SDK {
                 if(!this.context){
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
-                    log.info(tag,"userInfo: ",userInfo)
+                    log.debug(tag,"userInfo: ",userInfo)
                     this.context = userInfo.context
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
-                log.info(tag,"context: ",this.context)
-                log.info(tag,"blockchains: ",this.blockchains)
+                log.debug(tag,"context: ",this.context)
+                log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                log.info(tag,"result: ",result)
+                log.debug(tag,"result: ",result)
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 
