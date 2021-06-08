@@ -2,6 +2,7 @@ SHELL=/bin/bash
 
 env=prod
 debug=false
+coin=false
 
 .DEFAULT_GOAL := build
 
@@ -18,7 +19,7 @@ build::
 #	yarn && npm run build:all-local
 
 test::
-	sh scripts/test.sh $(env) $(debug)
+	sh scripts/test.sh $(env) $(debug) $(coin)
 
 publish::
 	lerna version patch --yes && lerna publish from-package --no-private --yes
