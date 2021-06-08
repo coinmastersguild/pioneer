@@ -244,7 +244,7 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let swap = {
+        let swap:any = {
             inboundAddress: ethVault,
             coin: "ETH",
             asset: "ETH",
@@ -257,8 +257,8 @@ const test_service = async function () {
                     return BigNumber.BigNumber.from(baseAmountToNative("ETH",TEST_AMOUNT))
                 }
             },
-            noBroadcast:true
         }
+        if(noBroadcast) swap.noBroadcast = true
 
         // //if monitor
         // //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"

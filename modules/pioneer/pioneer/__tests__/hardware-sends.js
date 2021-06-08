@@ -279,6 +279,9 @@ let run_test = async function(){
             let transactionBuilt = await Wallet.buildTransfer(transfer)
             console.log("transactionBuilt: ",transactionBuilt)
 
+            let signedTx = await Wallet.signTransaction(transactionBuilt)
+            console.log("signedTx: ",signedTx)
+
             // let transactionBuilt = {
             //     coin: 'BCH',
             //         transaction: {
@@ -392,8 +395,8 @@ let run_test = async function(){
             //     "verbal":"UTXO transaction"
             // }
 
-            let signedTx = await Wallet.signTransaction(transactionBuilt)
-            console.log("signedTx: ",signedTx)
+            // let signedTx = await Wallet.signTransaction(transactionBuilt)
+            // console.log("signedTx: ",signedTx)
 
             // let resultBroadcast = await Wallet.broadcastTransaction('ETH',signedTx)
             // console.log("resultBroadcast: ",resultBroadcast)
