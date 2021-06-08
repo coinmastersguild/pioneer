@@ -68,8 +68,18 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
+let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-let noBroadcast = true
+let noBroadcast = false
+
+
+//force monitor
+// let FORCE_MONITOR = false
+// if(FORCE_MONITOR){
+let txid = "0x75dcac2dfc67086cfeae0c406b47e5c56c15607d9b22f3526ce86a92a4eaab7c"
+let invocationId = "pioneer:invocation:v0.01:ETH:4755MHZN6gqma6PkrmVtsF"
+// }
+
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -247,7 +257,7 @@ const test_service = async function () {
             inboundAddress: ethVault,
             coin: "ETH",
             asset: "ETH",
-            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
+            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
             "amount":{
                 // "type":"BASE",
                 // "decimal":18,
@@ -263,47 +273,47 @@ const test_service = async function () {
         // //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         //if create new
-        let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.debug(tag,"responseSwap: ",responseSwap)
-        let invocationId = responseSwap.invocationId
-
-        //do not continue invocation
-        assert(invocationId)
-
+        // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+        // log.debug(tag,"responseSwap: ",responseSwap)
+        // let invocationId = responseSwap.invocationId
+        //
+        // //do not continue invocation
+        // assert(invocationId)
+        //
         let transaction = {
             invocationId,
             context:user.context
         }
-
-        //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
-
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-        assert(invocationView1.state)
-        assert.equal(invocationView1.state,'builtTx')
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.debug(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        assert(signedTx.txid)
-
+        //
+        // //build
+        // let unsignedTx = await buildTransaction(transaction)
+        // log.debug(tag,"unsignedTx: ",unsignedTx)
+        // assert(unsignedTx)
+        //
         // //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        assert(invocationView2.state)
-        assert.equal(invocationView2.state,'signedTx')
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
-
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.debug(tag,"broadcastResult: ",broadcastResult)
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        // assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'builtTx')
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.debug(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // assert(signedTx.txid)
+        //
+        // // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        // assert(invocationView2.state)
+        // assert.equal(invocationView2.state,'signedTx')
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        //
+        // //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -311,11 +321,11 @@ const test_service = async function () {
         //wait for confirmation
 
         if(!noBroadcast){
-            let invocationView3 = await app.getInvocation(invocationId)
-            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-            assert(invocationView3)
-            assert(invocationView3.state)
-            assert.equal(invocationView3.state,'broadcasted')
+            // let invocationView3 = await app.getInvocation(invocationId)
+            // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+            // assert(invocationView3)
+            // assert(invocationView3.state)
+            // assert.equal(invocationView3.state,'broadcasted')
 
             /*
 
@@ -333,12 +343,12 @@ const test_service = async function () {
             //monitor tx lifecycle
             let currentStatus
             let statusCode = 0
-            let txid
+            // let txid
             //wait till confirmed in block
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
+                log.info(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -346,49 +356,62 @@ const test_service = async function () {
                 if(statusCode <= 0) statusCode = 1
 
                 //lookup txid
-                let txInfo = await client.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
+                let response = await client.getTransactionData(txid)
+                log.info(tag,"response: ",response)
 
-                if(txInfo && txInfo.blockNumber){
-                    log.debug(tag,"Confirmed!")
+                if(response && response.txInfo && response.txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
                     statusCode = 3
+                    isConfirmed = true
                 } else {
-                    log.debug(tag,"Not confirmed!")
+                    log.info(tag,"Not confirmed!")
                     //get gas price recomended
 
                     //get tx gas price
+                    await sleep(6000)
                 }
-
-                await sleep(6000)
             }
 
 
             let isFullfilled = false
+            let fullfillmentTxid
             //wait till swap is fullfilled
             while(!isFullfilled){
                 //get midgard info
-                let txInfoMidgard = midgard.getTransaction(txid)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
+                let txInfoMidgard = await midgard.getTransaction(txid)
+                log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions)
+                log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
+                log.info(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
 
-                //
+                //TODO handle multiple actions?
                 if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
                     let depositInfo = txInfoMidgard.actions[0].in
-                    log.debug(tag,"deposit: ",depositInfo)
+                    log.info(tag,"deposit: ",depositInfo)
 
-                    let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                    let fullfillmentInfo = txInfoMidgard.actions[0]
+                    log.info(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
 
                     if(fullfillmentInfo.status === 'success'){
+                        log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                        log.info(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
+
                         statusCode = 4
                         isFullfilled = true
+                        fullfillmentTxid = fullfillmentInfo.out[0].txID
+                    } else {
+                        await sleep(6000)
                     }
                 }
 
-                await sleep(6000)
+
             }
+
+
+            log.info("****** TEST Report: "+fullfillmentTxid+" ******")
         }
         let result = await app.stopSocket()
         log.debug(tag,"result: ",result)
+
 
         log.info("****** TEST PASS ******")
         //process

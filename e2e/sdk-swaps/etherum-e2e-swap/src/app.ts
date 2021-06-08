@@ -88,7 +88,7 @@ export async function startApp() {
 
         //AutonomousOn
         resultInit.events.on('unsignedTx', async (transaction:any) => {
-            log.info("\n ****UN-signed transaction received! transaction: ",transaction)
+            log.info("unsigned transaction received! transaction: ",transaction)
             if(!transaction.invocationId) throw Error("102: invalid transaction invocationId")
             if(!transaction.invocation) throw Error("103: invalid transaction invocation")
             if(!transaction.unsignedTx) throw Error("104: invalid transaction unsignedTx")

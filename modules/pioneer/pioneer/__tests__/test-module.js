@@ -303,7 +303,7 @@ let run_test = async function(){
                 network:"ETH",
                 HDwalletPayload: {
                     addressNList: [ 2147483692, 2147483708, 2147483648, 0, 0 ],
-                    nonce: '0x',
+                    nonce: '0x00',
                     gasPrice: '0x499311580',
                     gasLimit: '0x13880',
                     value: '0x38d7ea4c68000',
@@ -346,7 +346,7 @@ let run_test = async function(){
             console.log("signedTx: ",signedTx)
 
             console.log("RECEIVED: FROM:",signedTx.decoded.from)
-            console.log("expected: FROM:","0x2356a15042f98f0a53784f42237bd4b2873aadcf")
+            console.log("expected: FROM:","0x141D9959cAe3853b035000490C03991eB70Fc4aC")
             console.log("wrong tx: FROM:",'0x70ce552f77aec9e8b84e1f8e0e9ad3a0946d4dd7')
             // let resultBroadcast = await Wallet.broadcastTransaction('ETH',signedTx)
             // console.log("resultBroadcast: ",resultBroadcast)
