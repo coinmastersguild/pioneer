@@ -21,7 +21,7 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_MAIN']
+let seed = process.env['WALLET_TEST']
 if(!seed) throw Error("Failed to find test seed!")
 let password = process.env['WALLET_PASSWORD'] || '123'
 let username = process.env['TEST_USERNAME_2'] || 'e2e-user-1'
