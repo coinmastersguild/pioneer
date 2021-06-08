@@ -293,7 +293,7 @@ export async function broadcastTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
 
         //
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")

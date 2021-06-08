@@ -397,14 +397,6 @@ const test_service = async function () {
                         statusCode = 4
                         isFullfilled = true
                         fullfillmentTxid = fullfillmentInfo.out[0].txID
-
-                        //TODO get transaction info output
-
-                        //verify address
-                        //verify amount
-                        //verify confirmed
-                        //check outgoing fee?
-
                     } else {
                         await sleep(6000)
                     }
