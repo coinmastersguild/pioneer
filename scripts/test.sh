@@ -5,9 +5,12 @@ echo "debug: $2";
 
 if [[ $2 = 'true' ]]
 then
-  cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev
+  cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev && cd ../../../ &&/
+  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev && cd ../../../
+
 else
-  cd e2e/sdk-swaps/etherum-e2e-swap && npm run test
+  cd e2e/sdk-swaps/etherum-e2e-swap && npm run test && cd ../../../ &&/
+  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
 fi
 
 #	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev
