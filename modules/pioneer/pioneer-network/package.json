@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/network",
-  "version": "8.1.5",
+  "version": "8.1.6",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,13 +21,13 @@
   },
   "dependencies": {
     "@pioneer-platform/binance-network": "^8.1.5",
-    "@pioneer-platform/blockbook": "^8.1.5",
+    "@pioneer-platform/blockbook": "^8.1.7",
     "@pioneer-platform/cosmos-network": "^8.1.5",
-    "@pioneer-platform/eth-network": "^8.1.5",
+    "@pioneer-platform/eth-network": "^8.1.7",
     "@pioneer-platform/loggerdog": "^8.1.5",
     "@pioneer-platform/pioneer-coins": "^8.1.6",
-    "@pioneer-platform/thor-network": "^8.1.5",
-    "@pioneer-platform/utxo-network": "^8.1.5",
+    "@pioneer-platform/thor-network": "^8.1.6",
+    "@pioneer-platform/utxo-network": "^8.1.6",
     "@types/google-protobuf": "^3.7.4",
     "bech32": "^1.1.4",
     "bitcoinjs-lib": "^5.2.0",
