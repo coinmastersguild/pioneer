@@ -43,7 +43,7 @@ let run_test = async function(){
         //get transactions by address
 
         //get transaction by txid
-        let txid = "0x75dcac2dfc67086cfeae0c406b47e5c56c15607d9b22f3526ce86a92a4eaab7c"
+        let txid = "8D38F8EA8C4BDD70D604F369E580F9F7818AF701405C9A8DFEB75AEB55F3234F"
         // let txid = '2873A1AF23427931F40BFC0B09D0587B00E7A58E3669B84782F0F24988776D06'
         // //let txid = 'A2BCC716691C2DD4C748456F9BF4C4E862F6A3E7E3D3E820658067B0FA2568DE'
         // let txid = "e932b905e2d19f2a5cce24041cab9d6930faa789a25da391b05b5e51058f3bdb"

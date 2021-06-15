@@ -1,7 +1,7 @@
 Pioneer TODO
 ==========
 
-launch app from web
+handle claim errors
 
 E2E test extensions
 ==========
@@ -67,6 +67,11 @@ show assets/ balances like keepkey client
 
 view LP/THOR positions
 
+Keepkey update firmware version
+
+Keepkey enable policy
+
+Keepkey Setup wizzard
 
 Bugs
 ==========
