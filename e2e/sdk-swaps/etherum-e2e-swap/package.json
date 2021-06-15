@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/midgard-client": "^8.1.6",
+    "@pioneer-platform/midgard-client": "^8.1.7",
     "@pioneer-platform/pioneer-app": "^8.1.7",
     "@pioneer-platform/pioneer-sdk": "^8.1.7",
     "assert": "^2.0.0",

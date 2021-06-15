@@ -363,7 +363,7 @@ describe(' - e2e test ETH Swaps - ', function() {
         });
 
         it('Broadcast Invocation ', async function() {
-            transaction.toBroadcast = true
+            transaction.noBroadcast = true
             broadcastResult = await broadcastTransaction(transaction)
             log(tag,"broadcastResult: ",broadcastResult)
 
