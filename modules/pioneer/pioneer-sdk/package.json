@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-sdk",
-  "version": "8.1.7",
+  "version": "8.1.8",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@pioneer-platform/pioneer-coins": "^8.1.6",
-    "@pioneer-platform/pioneer-events": "^8.1.6",
-    "@pioneer-platform/pioneer-xchain-client": "^8.1.7",
+    "@pioneer-platform/pioneer-events": "^8.1.7",
+    "@pioneer-platform/pioneer-xchain-client": "^8.1.8",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
     "openapi-client-axios": "^3.13.1",

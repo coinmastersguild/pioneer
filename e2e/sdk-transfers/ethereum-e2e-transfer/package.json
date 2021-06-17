@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/ethereum-e2e-tranfer",
-  "version": "8.1.7",
+  "version": "8.1.8",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/midgard-client": "^8.1.6",
-    "@pioneer-platform/pioneer-app": "^8.1.7",
-    "@pioneer-platform/pioneer-app-e2e": "^8.1.7",
-    "@pioneer-platform/pioneer-sdk": "^8.1.7",
+    "@pioneer-platform/midgard-client": "^8.1.7",
+    "@pioneer-platform/pioneer-app": "^8.1.8",
+    "@pioneer-platform/pioneer-app-e2e": "^8.1.8",
+    "@pioneer-platform/pioneer-sdk": "^8.1.8",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
