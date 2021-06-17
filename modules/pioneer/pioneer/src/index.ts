@@ -6,8 +6,6 @@
 
  */
 
-
-
 const TAG = " | Pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 const cryptoTools = require('crypto');
