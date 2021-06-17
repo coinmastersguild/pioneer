@@ -240,21 +240,19 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let swap:any = {
-            recepient: ethVault,
+        let transfer:any = {
+            recepient: FAUCET_ETH_ADDRESS,
             coin: "ETH",
             asset: "ETH",
-            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
+            memo: '',
             "amount":{
-                // "type":"BASE",
-                // "decimal":18,
                 //TODO bignum like asgardx?
                 amount: function(){
                     return BigNumber.BigNumber.from(baseAmountToNative("ETH",TEST_AMOUNT))
                 }
             },
         }
-        if(noBroadcast) swap.noBroadcast = true
+        if(noBroadcast) transfer.noBroadcast = true
 
         //if create new
         let responseSwap = await user.clients.ethereum.transfer(transfer,options)
