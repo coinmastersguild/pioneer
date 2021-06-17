@@ -74,8 +74,9 @@ test_rune () {
 if [[ $2 = 'true' ]]
 then
 #  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run run-dev && cd ../../../ &&/
-  cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev && cd ../../../ &&/
-  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev && cd ../../../
+  cd e2e/sdk-transfers/ethereum-e2e-transfer && npm run run-dev && cd ../../../ &&/
+#  cd e2e/sdk-swaps/etherum-e2e-swap && npm run run-dev && cd ../../../ &&/
+#  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run run-dev && cd ../../../
 
 else
 #  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../ &&/

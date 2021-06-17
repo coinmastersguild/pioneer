@@ -114,21 +114,9 @@ const axios = Axios.create({
     })
 });
 const log = require('@pioneer-platform/loggerdog')()
-// const ElectrumClient = require('@pioneer-platform/electrum-client')
-const bitcoin = require("bitcoinjs-lib");
 
 import {
-    TxHistoryParams,
-    TxsPage,
-    Address,
-    XChainClient,
-    Tx,
-    TxParams,
-    TxHash,
-    Balance,
-    Network,
     Fees,
-    XChainClientParams,
 } from '@xchainjs/xchain-client'
 
 const BitcoinRpc = require('bitcoin-rpc-promise');
@@ -136,11 +124,8 @@ const BitcoinRpc = require('bitcoin-rpc-promise');
 
 const blockbook = require('@pioneer-platform/blockbook')
 import * as sochain from './sochain-api'
-import { FeesWithRates, FeeRate, FeeRates } from './types/client-types'
+import { FeeRates } from './types/client-types'
 import * as Utils from './utils'
-
-let BLOCKBOOK:any
-//if(!process.env['BTC_RPC_HOST'])
 
 let coins = [
     'TBTC',
@@ -153,42 +138,13 @@ let nodeMap:any = {}
 for(let i = 0; i < coins.length; i++){
     let coin = coins[i]
     let connString = 'https://user:hunter2@'+process.env[coin+'_RPC_HOST']
-    //console.log("connString: ",connString)
-
     nodeMap[coin] = new BitcoinRpc(connString);
 }
-//log.info("nodeMap: ",nodeMap)
-
-const URL_SOCHAIN = "https://sochain.com/api/v2"
 
 const URL_BLOCKCHAIN_INFO = "http://blockchain.info"
 
 const URL_BLOCKBOOK_BTC = ""
 
-//let remote nodes
-const URL_BTC_TIER_1 = "https://blockchain.info"
-
-const URL_LTC_TIER_1 = "https://blockchain.info"
-
-const URL_ETH_TIER_1 = "https://blockchain.info"
-
-//const URL_BTC_INSIGHT_1 = "https://insight.bitpay.com/api"
-const URL_BTC_SMART_1 = "https://api.smartbit.com.au/v1/blockchain/"
-
-// let default
-let DEFAULT_SERVERS:any = {
-    "BTC":{
-        host:"127.0.0.1",
-        port:50001
-    }
-}
-
-
-let ANYCOIN_COINS = ['BTC','LTC','BCH','DASH','DOGE']
-
-let ELECTRUM_SERVERS:any = {}
-
-const ASSET = "ANY"
 
 let RUNTIME = 'pioneer'
 
@@ -644,8 +600,6 @@ let get_block = async function(coin:string,height:number){
 //         console.error(tag,e)
 //     }
 // }
-
-
 
 let get_node_info = async function(coin:string){
     let tag = TAG + " | get_node_info | "

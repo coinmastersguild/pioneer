@@ -11,7 +11,9 @@ let servers = {
 }
 
 console.log("servers: ",servers)
-network.init(servers)
+// network.init(servers)
+// network.init(servers)
+network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
 

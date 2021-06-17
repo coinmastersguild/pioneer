@@ -219,7 +219,7 @@ let init_network = function (servers:any,runtime?:string) {
             let blockbookurl = coinInfo.explorer.tx
             blockbookurl = blockbookurl.replace("/tx/","")
 
-            if(servers[coinInfo.symbol]){
+            if(servers && servers[coinInfo.symbol]){
                 //use configured
                 BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
                 log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
