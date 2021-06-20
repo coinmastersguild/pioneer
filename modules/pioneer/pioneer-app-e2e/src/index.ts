@@ -148,6 +148,19 @@ export async function sendPairingCode(code:string) {
     }
 }
 
+export async function cancelTransaction(tranaction:any) {
+    let tag = " | cancelTransaction | "
+    try {
+        let cancelResult = await App.deleteInvocation(tranaction.invocationId)
+        console.log("cancelResult: ",cancelResult)
+
+        return cancelResult
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
 export async function buildTransaction(transaction:any) {
     let tag = " | buildTransaction | ";
     try {

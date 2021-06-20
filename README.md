@@ -5,7 +5,8 @@
 # pioneer
 A simple multi-asset development platform
 
-
+## docs
+https://www.notion.so/Pioneer-Desktop-8a3a3d195557495caa72e8fbd13b2455
 
 ### Adding new assets
 Guide to adding a new asset [here](./docs/coin-addition/coin-addition-guide.md).

@@ -1,18 +1,19 @@
 Pioneer TODO
 ==========
 
+
+Bugs
+===========
+
 handle claim errors
+
+prod pairing code "worked" on local server (need to fail)
+
+invocation tab empty
 
 E2E test extensions
 ==========
 
-verify app gets invocation event
-
-lifecycle hook in invocation
-    created
-    signed
-    confirmed
-    fullfilled    
 
 handle "transfers not supported on username"
 if error, throw away queryKey and try again
