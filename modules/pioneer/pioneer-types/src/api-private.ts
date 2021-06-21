@@ -79,7 +79,6 @@ export interface RegisterBody {
     blockchains:any
     username:string
     data:RegisterBodyData,
-    auth:string,
     walletDescription:WalletDescription,
     context: string,
     queryKey?:string

@@ -15,7 +15,7 @@
     "lint": "prettier --write '**/**/*.ts'",
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
-    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
+    "build:watch": "tsc -p . && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },

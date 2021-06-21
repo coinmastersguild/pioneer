@@ -303,10 +303,11 @@ module.exports = class wallet {
                     //get user status
                     let userInfo = await this.pioneerClient.instance.User()
                     userInfo = userInfo.data
+                    log.info(tag,"userInfo: ",userInfo)
+
                     if(!userInfo || !userInfo.success){
                         //API
                         let register = {
-                            isTestnet:false,
                             username:this.username,
                             blockchains:this.blockchains,
                             context:this.context,
@@ -325,7 +326,11 @@ module.exports = class wallet {
                         log.debug("this.pioneerClient: ",this.pioneerClient)
                         if(!register.context) throw Error("102: missing context Can not register!")
                         let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
-                        log.debug("regsiterResponse: ",regsiterResponse)
+                        if(regsiterResponse.code === 104){
+                            //request change of queryKey
+
+                        }
+                        log.debug("registerResponse: ",regsiterResponse)
 
                         //emitter.info = walletInfo
                     }else{
@@ -356,7 +361,7 @@ module.exports = class wallet {
                             //if failure give reason
                         }
                     }
-
+                    let output:any = {}
 
                     log.debug(tag,"getting info on context: ",this.context)
                     let walletInfo = await this.getInfo(this.context)
@@ -412,8 +417,9 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.forget = function () {
-            return this.pioneerClient.instance.Forget();
+        this.forget = async function () {
+            let resp = await this.pioneerClient.instance.Forget()
+            return resp.data;
         }
         this.getInfo = async function (context) {
             let tag = TAG + " | getInfo | "

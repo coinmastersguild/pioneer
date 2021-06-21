@@ -24,7 +24,7 @@ const ethCrypto = require("@pioneer-platform/eth-crypto")
 let seed = process.env['WALLET_TEST']
 if(!seed) throw Error("Failed to find test seed!")
 let password = process.env['WALLET_PASSWORD'] || '123'
-let username = process.env['TEST_USERNAME_2'] || 'e2e-user-1'
+let username = process.env['TEST_USERNAME_2'] || 'e2e-user-13'
 let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey123'
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
@@ -79,6 +79,7 @@ export async function startApp() {
         config.blockchains = ['ethereum','thorchain']
         config.spec = spec
         config.pioneerSocket = wss
+        config.queryKey = queryKey
 
         //verify startup
         log.debug(tag,"config: ",config)
@@ -123,6 +124,18 @@ export async function startApp() {
     }
 }
 
+export async function setUsername(usernameNew:string) {
+    let tag = " | getInvocations | "
+    try {
+        username = usernameNew
+        return username
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+
 export async function getInvocations() {
     let tag = " | getInvocations | "
     try {
@@ -138,10 +151,23 @@ export async function getInvocations() {
 export async function sendPairingCode(code:string) {
     let tag = " | sendPairingCode | "
     try {
-        let pairResult = await App.pair(code)
-        log.info(tag,"pairResult: ",pairResult)
+        let result = await App.pair(code)
+        log.debug(tag,"result: ",result)
 
-        return true
+        return result
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export async function forgetUser() {
+    let tag = " | sendPairingCode | "
+    try {
+        let result = await App.forget()
+        log.debug(tag,"result: ",result)
+
+        return result
     } catch (e) {
         log.error(e)
         throw e

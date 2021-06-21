@@ -24,7 +24,8 @@ let run_test = async function(){
         console.log("*** Running test module ***")
 
         let config = {
-            queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338aa",
+            // queryKey:"key:31ce8537-12f0-4c52-9e68-49ea2783f338aa",
+            queryKey,
             // username,
             spec,
             wss,
@@ -47,8 +48,11 @@ let run_test = async function(){
         // let invocation =  await app.getInvocation(invocationId)
         // console.log(invocation)
 
-        let info = await app.clients.bitcoin.info()
-        console.log(info)
+        let user = await app.getUserParams()
+        log.debug("user: ",user)
+
+        // let info = await app.clients.bitcoin.info()
+        // console.log(info)
 
     }catch(e){
         console.error(e)

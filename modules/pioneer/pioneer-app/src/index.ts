@@ -137,6 +137,9 @@ module.exports = {
         }
         return WALLET_CONTEXT;
     },
+    forget: function () {
+        return forget_user();
+    },
     getAutonomousStatus: function () {
         return AUTONOMOUS;
     },
@@ -221,10 +224,8 @@ module.exports = {
     setContext: async function (context:string) {
         return set_context(context)
     },
-    migrateWallet: function () {
-        return true;
-    },
     importKey: function () {
+        //TODO sweep funds into HD wallet
         return true;
     },
     setPassword: function (pw: string) {
@@ -294,6 +295,24 @@ module.exports = {
     sendToAddress: function (intent:any) {
       return send_to_address(intent);
     },
+};
+
+let forget_user = async function () {
+    let tag = " | forget_user | ";
+    try {
+        let output = []
+        //for each wallet
+        let contexts = await Object.keys(WALLETS_LOADED)
+        for(let i = 0; i < contexts.length; i++){
+            let context = contexts[i]
+            let result = await WALLETS_LOADED[context].forget()
+            output.push(result)
+        }
+        return output
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
 };
 
 let delete_invocation = async function (invocationId:string) {
@@ -1114,6 +1133,13 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //init
                     if(!KEEPKEY) throw Error("Can not start hardware wallet without global KEEPKEY")
                     let walletInfo = await wallet.init(KEEPKEY)
+
+                    //TODO handle errors
+                    //username already taken?
+                        //kick back to user
+                    //querykey already registered
+                        //rotate queryKey
+
                     log.debug(tag,"walletInfo: ",walletInfo)
                     WALLETS_LOADED[context] = wallet
 
