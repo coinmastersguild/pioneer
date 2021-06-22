@@ -1829,8 +1829,8 @@ module.exports = class wallet {
                     sequence = sequence.toString()
 
                     let txType = "thorchain/MsgSend"
-                    let gas = "250000"
-                    let fee = "2000000"
+                    let gas = "650000"
+                    let fee = "0"
                     let memo = transaction.memo || ""
 
                     //sign tx

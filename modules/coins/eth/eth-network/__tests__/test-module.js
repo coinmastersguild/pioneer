@@ -10,11 +10,11 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
-// let rawTx = "0xf86d8085037e11d60082520894da1e5d4cc9873963f788562354b55a772253b92f880e1ec17c32851a0080819da0a734dae768422188270a8f7eca9c9b1beaba2cf42f45f2a28c5f010b0eeaf427a052b4d53b1176a2e49e6a17c66058d686e986a4d6b4f2659bc55b8bd7e0834ed9"
-// network.broadcast(rawTx)
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+let rawTx = "0xf86d0285037e11d600825208943aef01db231c3c9ff844f7e611c63b8c36bc6a02890882a498069f7400008025a0538b29d686ea787a483bcfdf0cd31c6bbca520f0c2073edcf43fe9d3e6fb2fb3a04b506074a43988f1d023cc7bf2f716c955cafd38c0c1df76fe9fe846160501d5"
+network.broadcast(rawTx)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 
 // let addresses = [
@@ -175,10 +175,10 @@ network.init()
 //         console.log(resp)
 //     })
 //
-network.getGasPrice()
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getGasPrice()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //
 // //getBalanceAddress

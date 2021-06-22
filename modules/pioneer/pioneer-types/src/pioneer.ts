@@ -3,17 +3,17 @@
 
  */
 
-export interface Asset {
-    chain:string,
-    symbol:string,
-    ticker:string,
-}
-
-export interface Balance {
-    total:number
-    pending:number
-    confirmed:number
-}
+// export interface Asset {
+//     chain:string,
+//     symbol:string,
+//     ticker:string,
+// }
+//
+// export interface Balance {
+//     total:number
+//     pending:number
+//     confirmed:number
+// }
 
 export enum HDWALLETS {
     'pioneer',
@@ -21,6 +21,17 @@ export enum HDWALLETS {
     'keepkey',
     'ledger',
     'metamask'
+}
+
+export interface Transfer {
+    network: string;
+    asset: string;
+    symbol?: string;
+    feeRate: any
+    recipient: string
+    amount:any
+    memo:string
+    noBroadcast:boolean
 }
 
 export interface Transaction {

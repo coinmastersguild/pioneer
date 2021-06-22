@@ -27,17 +27,23 @@ let network = require("../lib/index")
 // //let tx = '{"tx":{"fee":{"amount":[{"amount":"2000000","denom":"rune"}],"gas":"250000"},"memo":"=:THOR.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"10000","denom":"rune"}],"from_address":"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp","to_address":"qrwv88rtkccsdxujsmpjkgw7qtjjs84etg8fs0fegy"}}],"signatures":[{"signature":"HwagjfhKbjOHhAYJhR+4dsVAAZUDQ+G7Hj++XyGwPgx2hnWv534UuotRWX5KfYLw4JNxkPSupBjeXVi6Ig3iEg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
 //
 // //let tx = '{"tx":{"fee":{"amount":[{"amount":"2000000","denom":"rune"}],"gas":"250000"},"memo":"=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"10000","denom":"rune"}],"from_address":"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp","to_address":"qrjm5um9ft3kg4tt534uhcg5zuk7kg62wclfuu3y9t"}}],"signatures":[{"signature":"qgCPdDG0Bd3/EO1oM72owVCtYjBkyl3szlu4bnCJ5fR8D8FuF9Z75ZRWw6UbLoyPoNng88HjVoYh2oeqoCFv6g==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
 
-let tx = "7D5539E51F09C9E17153C62DCBE46AA0A1982F32675CF2BE503E7DEE875C2CAB"
-//let tx = "49A5B22089B1EC7D3F84E19EAC3F701574CE3618DC37E1C7BC5B4CDECEE784E3"
-// let tx = "0BD2675500E0258B319A9FED86BC8E03006E264DFED0BD6D39FB5D63C9D9911B"
-// // tx
-// // let tx = "7734844A08E7A545E9A9311A1D473B2472AFBB2685F6291076B013C8950349F9"
-network.getTransaction(tx)
+//let tx = "{\"tx\":{\"fee\":{\"amount\":[{\"amount\":\"2000000\",\"denom\":\"rune\"}],\"gas\":\"250000\"},\"memo\":\"=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj\",\"msg\":[{\"type\":\"thorchain/MsgDeposit\",\"value\":{\"amount\":[{\"amount\":\"50994000\",\"asset\":\"THOR.RUNE\"}],\"memo\":\"=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj\",\"signer\":\"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp\"}}],\"signatures\":[{\"signature\":\"NrUdtbQcfNumZ8LVM6aGej+sIwvAMjv2zhVBJivI8uwxTdxNX33zZfZSnYMGcimUOwERO/QcKDxffBQ+a1Sw8g==\",\"pub_key\":{\"type\":\"tendermint/PubKeySecp256k1\",\"value\":\"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc\"}}]},\"type\":\"cosmos-sdk/StdTx\",\"mode\":\"sync\"}"
+// let tx = "{\"tx\":{\"fee\":{\"amount\":[{\"amount\":\"2000000\",\"denom\":\"rune\"}],\"gas\":\"250000\"},\"memo\":\"\",\"msg\":[{\"type\":\"thorchain/MsgSend\",\"value\":{\"amount\":[{\"amount\":\"10000\",\"denom\":\"rune\"}],\"from_address\":\"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp\",\"to_address\":\"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5\"}}],\"signatures\":[{\"signature\":\"3aYnRyakFZBMOQRM109TYFWPVbpCiDAVOHWbNTTuxS1OXo2MoI2+JNDgjRCzEIxA3wUEiM7Fj+K+HGX9m4JI4w==\",\"pub_key\":{\"type\":\"tendermint/PubKeySecp256k1\",\"value\":\"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc\"}}]},\"type\":\"cosmos-sdk/StdTx\",\"mode\":\"sync\"}"
+
+// let tx = '{"tx":{"fee":{"amount":[{"amount":"2000000","denom":"rune"}],"gas":"250000"},"memo":"","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"10000","denom":"rune"}],"from_address":"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp","to_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"}}],"signatures":[{"signature":"3aYnRyakFZBMOQRM109TYFWPVbpCiDAVOHWbNTTuxS1OXo2MoI2+JNDgjRCzEIxA3wUEiM7Fj+K+HGX9m4JI4w==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+let tx = '{"tx":{"fee":{"amount":[{"amount":"0","denom":"rune"}],"gas":"650000"},"memo":"","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"10000","denom":"rune"}],"from_address":"thor1vvehrsz8rwzaws4j94ak3a4zj7myjerx9xn9yp","to_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"}}],"signatures":[{"signature":"ffDMLZL3mY6uQcDYtpVMnw2kn4GdN7Eham8IDoldpnsJeQy2qt2XxiGazbo5nmTN3t27kG7EFq+pNf2xylXm/Q==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AiuXsiJnUQl/00hULvyEdIXx2Q64TnY+ssyfVU+PCkcc"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
+
+let txid = "0E25B52AAA700D538931BD7D14A4A2B1F6B601BBD648FE488609BF4C5274C956"
+// //let tx = "49A5B22089B1EC7D3F84E19EAC3F701574CE3618DC37E1C7BC5B4CDECEE784E3"
+// // let tx = "0BD2675500E0258B319A9FED86BC8E03006E264DFED0BD6D39FB5D63C9D9911B"
+// // // tx
+// // // let tx = "7734844A08E7A545E9A9311A1D473B2472AFBB2685F6291076B013C8950349F9"
+network.getTransaction(txid)
     .then(function(resp){
         console.log("resp: ",JSON.stringify(resp))
         console.log("resp: ",resp)

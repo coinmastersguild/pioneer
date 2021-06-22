@@ -24,10 +24,13 @@ const ethCrypto = require("@pioneer-platform/eth-crypto")
 let seed = process.env['WALLET_TEST']
 if(!seed) throw Error("Failed to find test seed!")
 let password = process.env['WALLET_PASSWORD'] || '123'
-let username = process.env['TEST_USERNAME_2'] || 'e2e-user-13'
-let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey123'
+let username = process.env['TEST_USERNAME_2'] || 'e2e-user-134'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey1234'
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+
+console.log("spec: ",spec)
+console.log("wss: ",wss)
 
 //Globals
 let WALLET_INIT = false
