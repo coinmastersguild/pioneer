@@ -23,6 +23,36 @@ export enum HDWALLETS {
     'metamask'
 }
 
+//User
+export interface User {
+    type: string;
+    wallet: string;
+    keystore: any;
+    clients: any
+    context: string;
+    valueUsdContext: string
+    assetContext: string
+    assetBalanceNativeContext: string
+    assetBalanceUsdValueContext: string
+
+}
+
+export interface Wallet {
+    mnemonic: string;
+    password: string;
+    masterAddress: string;
+}
+
+export interface CitadelWallet {
+    isTestnet?: boolean;
+    temp?:string
+    masterAddress: string;
+    TYPE: string;
+    seed_encrypted:string
+    hash:string
+    filename:string
+}
+
 export interface Transfer {
     network: string;
     asset: string;

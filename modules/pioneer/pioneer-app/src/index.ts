@@ -100,12 +100,13 @@ let AUTONOMOUS = false
 let IS_INIT = false
 
 
-export interface UpdateInvocationBody {
-    invocationId:string,
-    invocation:any,
-    unsignedTx:any
-}
 
+
+import {
+    UpdateInvocationBody,
+    Wallet,
+    CitadelWallet
+} from "@pioneer-platform/pioneer-types";
 
 module.exports = {
     isInitialized: function () {
@@ -203,7 +204,7 @@ module.exports = {
     updateConfig: function (language:string) {
         return updateConfig(language);
     },
-    createWallet: function (type:string,wallet:any) {
+    createWallet: function (type:string,wallet:Wallet) {
         return create_wallet(type,wallet);
     },
     backupWallet: function () {
@@ -879,7 +880,6 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                 if(!wallet.mnemonic) throw Error("101: mnemonic required!")
                 if(!wallet.password) throw Error("102: password required!")
                 if(!wallet.masterAddress) throw Error("103: masterAddress required!")
-                if(!wallet.username) wallet.username = "defaultUser:"+uuidv4()
 
                 //filename
                 let filename = wallet.masterAddress+".wallet.json"
@@ -907,13 +907,12 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                     log.debug(tag, "seed_encrypted: ", seed_encrypted);
                     log.debug(tag, "hash: ", hash);
 
-                    let walletNew:any = {
+                    let walletNew:CitadelWallet = {
                         isTestnet,
                         masterAddress:wallet.masterAddress,
                         TYPE:"citadel",
                         seed_encrypted,
                         hash,
-                        username:wallet.username,
                         filename
                     }
                     if(wallet.temp) walletNew.temp = wallet.temp
@@ -1002,7 +1001,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         //get remote has more wallets
         let userInfoRemote = await network.instance.User()
         userInfoRemote = userInfoRemote.data
-        log.debug(tag,"userInfoRemote: ",userInfoRemote)
+        log.info(tag,"userInfoRemote: ",userInfoRemote)
 
         if(userInfoRemote.wallets){
             for(let i = 0; i < userInfoRemote.wallets; i++){

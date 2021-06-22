@@ -22,10 +22,15 @@ const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
 let seed = process.env['WALLET_TEST']
+let seed2 = process.env['WALLET_TEST_2']
 if(!seed) throw Error("Failed to find test seed!")
+if(seed === seed2) throw Error("bravo seed MUST be eunique!")
 let password = process.env['WALLET_PASSWORD'] || '123'
 let username = process.env['TEST_USERNAME_2'] || 'e2e-user-134'
-let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey1234'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey12346'
+// let username2 = process.env['TEST_USERNAME_2'] || 'e2e-user-134'
+// let queryKey2 = process.env['TEST_QUERY_KEY_2'] || 'testkey1234'
+
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
@@ -57,7 +62,11 @@ export async function startApp() {
 
         let wallet1:any = {
             mnemonic:seed,
-            username:username,
+            password
+        }
+
+        let wallet2:any = {
+            mnemonic:seed2,
             password
         }
         //get master for seed
@@ -65,8 +74,19 @@ export async function startApp() {
         wallet1.masterAddress = walletEth.masterAddress
 
         //create wallet files
+        log.info(tag,"wallet1: ",wallet1)
         let successCreate = await App.createWallet('software',wallet1)
         assert(successCreate)
+
+        //create bravo
+        //get master for seed
+        let walletEth2 = await ethCrypto.generateWalletFromSeed(wallet2.mnemonic)
+        wallet2.masterAddress = walletEth2.masterAddress
+
+        //create wallet files
+        log.info(tag,"wallet2: ",wallet2)
+        let successCreate2 = await App.createWallet('software',wallet2)
+        assert(successCreate2)
 
         await App.initConfig("english");
         App.updateConfig({username});

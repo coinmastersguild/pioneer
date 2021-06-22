@@ -19,7 +19,8 @@ let {
 
 import {
     SendToAddress,
-    Config
+    Config,
+    User
 } from "@pioneer-platform/pioneer-types";
 
 //xchain adapter
@@ -36,7 +37,7 @@ export class SDK {
     private queryKey: string;
     private service: string;
     private isTestnet: boolean;
-    private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
+    private getUserParams: () => Promise<User>;
     private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
     private url: string;
     private events: any;
@@ -59,6 +60,8 @@ export class SDK {
     private assetBalanceNativeContext: string;
     private getInvocation: (invocationId: string) => Promise<any>;
     private stopSocket: () => any;
+    private contextWalletInfo: any;
+    private valueUsdContext: any;
     constructor(spec:string,config:any,isTestnet?:boolean) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -263,6 +266,7 @@ export class SDK {
             }
         }
         //X-chain
+        // @ts-ignore
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
@@ -271,6 +275,11 @@ export class SDK {
                     userInfo = userInfo.data
                     log.debug(tag,"userInfo: ",userInfo)
                     this.context = userInfo.context
+                    this.assetContext = userInfo.assetContext
+                    this.contextWalletInfo = userInfo.walletDescription.filter((e:any) => e.context === this.context)[0]
+                    this.valueUsdContext = this.contextWalletInfo.valueUsdContext
+                    this.assetBalanceNativeContext = this.contextWalletInfo.balances[userInfo.assetContext]
+                    this.assetBalanceUsdValueContext = this.contextWalletInfo.values[userInfo.assetContext]
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
@@ -352,7 +361,11 @@ export class SDK {
                     this.clients['litecoin'] = bitcoin
                 }
 
-                let output:any = {
+                let output:User = {
+                    assetBalanceNativeContext: "",
+                    assetBalanceUsdValueContext: "",
+                    assetContext: "",
+                    valueUsdContext: "",
                     type: 'pioneer',
                     context:this.context,
                     wallet: thorAddress,
