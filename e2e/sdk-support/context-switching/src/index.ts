@@ -46,18 +46,12 @@ let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
 let {
-    supportedBlockchains,
-    baseAmountToNative,
-    nativeToBaseAmount,
 } = require("@pioneer-platform/pioneer-coins")
 
 const {
     startApp,
     sendPairingCode,
-    buildTransaction,
-    approveTransaction,
-    broadcastTransaction,
-    cancelTransaction
+    getWallets,
 } = require('@pioneer-platform/pioneer-app-e2e')
 
 let BLOCKCHAIN = 'thorchain'
@@ -110,6 +104,7 @@ const test_service = async function () {
         let events = await app.startSocket()
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
+        let eventContextReceived = false
         events.on('message', async (event:any) => {
             log.info(tag,"event: ",event)
             switch(event.type) {
@@ -121,6 +116,7 @@ const test_service = async function () {
                     break;
                 case 'context':
                     log.info(tag,"context event!")
+                    eventContextReceived = true
                     break;
                 case 'transfer':
                     //TODO assert valid transfer info
@@ -169,18 +165,50 @@ const test_service = async function () {
         //get user
         let user = await app.getUserParams()
         log.info("user: ",user)
-
-
-
-
-        //should only be 2 contexts?
-
-
         assert(user.context)
+        assert(user.assetContext)
+        assert(user.valueUsdContext)
+        assert(user.assetBalanceNativeContext)
+        assert(user.assetBalanceUsdValueContext)
+        assert(user.wallet)
+        //should only be 2 contexts?
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
-        //switch asset context
+        let availableWallets = await getWallets()
+        log.info(tag,"availableWallets: ",availableWallets)
+        log.info(tag,"availableWallets.indexOf(user.context): ",availableWallets.indexOf(user.context))
+        if(availableWallets.indexOf(user.context) === 1){
+            log.info(tag,"setting to 0: ",availableWallets[0])
+            let success = await app.setContext(availableWallets[0])
+            log.info(tag,"success: ",success)
+        }else if(availableWallets.indexOf(user.context) === 0){
+            log.info(tag,"setting to 1: ",availableWallets[1])
+            let success = await app.setContext(availableWallets[1])
+            log.info(tag,"success: ",success)
+        }
+
+        //context should be in available
+        // if(availableWallets.indexOf(user.context) === -1) {
+        //     throw Error("Missing context!")
+        // } else if(availableWallets.indexOf(user.context) === 0){
+        //     //change to 1
+        //     //switch asset context
+        //     let success = await app.setContext(availableWallets[1])
+        //     log.info(tag,"success: ",success)
+        // } else if(availableWallets.indexOf(user.context) === 1){
+        //     //change to 0
+        //     //switch asset context
+        //     let success = await app.setContext(availableWallets[0])
+        //     log.info(tag,"success: ",success)
+        // }
+
+        //dont release till context event
+        while(!eventContextReceived){
+            await sleep(300)
+        }
+
+        //asset switch event received
 
         //switch context
 

@@ -46,6 +46,37 @@ let INVOCATIONS:any = []
 let INVOCATIONS_SIGNED:any = []
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
+
+export function getContext() {
+    let tag = " | getContext | "
+    try {
+        return WALLET_CONTEXT
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getWallets() {
+    let tag = " | getWallets | "
+    try {
+        return WALLETS_NAMES
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getInvocations() {
+    let tag = " | getInvocations | "
+    try {
+        return INVOCATIONS
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
 export async function startApp() {
     let tag = " | app_assert_env_start | "
     try {
@@ -152,19 +183,6 @@ export async function setUsername(usernameNew:string) {
     try {
         username = usernameNew
         return username
-    } catch (e) {
-        log.error(e)
-        throw e
-    }
-}
-
-
-export async function getInvocations() {
-    let tag = " | getInvocations | "
-    try {
-        //get remote?
-
-        return INVOCATIONS
     } catch (e) {
         log.error(e)
         throw e

@@ -1330,6 +1330,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             log.debug(tag,"Position 0 context: ",walletFiles[0])
             //
             set_context(walletFiles[0])
+            WALLET_CONTEXT = walletFiles[0]
         }
 
 
@@ -1527,13 +1528,16 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                 case 'context':
                     //switch context
                     if(WALLETS_LOADED[request.context]){
-                        log.debug(tag,"wallet context is now: ",request.context)
-                        if(request.context !== WALLET_CONTEXT){
-                            WALLET_CONTEXT = request.context
-                            clientEvents.events.emit('context',request)
-                        }else{
-                            log.error("context already: ",request.context)
-                        }
+                        WALLET_CONTEXT = request.context
+                        clientEvents.events.emit('context',request)
+
+                        // log.debug(tag,"wallet context is now: ",request.context)
+                        // if(request.context !== WALLET_CONTEXT){
+                        //     WALLET_CONTEXT = request.context
+                        //     clientEvents.events.emit('context',request)
+                        // }else{
+                        //     log.error("context already: ",request.context)
+                        // }
                     } else {
                         log.error(tag,"Failed to switch! invalid context: ",request.context)
                     }

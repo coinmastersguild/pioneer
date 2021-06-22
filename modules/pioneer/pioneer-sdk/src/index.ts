@@ -183,7 +183,7 @@ export class SDK {
         this.setContext = async function (context:string) {
             let tag = TAG + " | setContext | "
             try {
-                if(this.wallets.indexOf(context) >= 0){
+                if(this.wallets && this.wallets.indexOf(context) >= 0){
                     this.context = context
                     let result = await this.pioneerApi.SetContext(null,{context:this.context})
                     return result.data
@@ -273,13 +273,19 @@ export class SDK {
                 if(!this.context){
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
-                    log.debug(tag,"userInfo: ",userInfo)
+                    log.info(tag,"userInfo: ",userInfo)
+                    this.wallets = userInfo.wallets
                     this.context = userInfo.context
                     this.assetContext = userInfo.assetContext
-                    this.contextWalletInfo = userInfo.walletDescription.filter((e:any) => e.context === this.context)[0]
+                    log.info(tag,"userInfo.walletDescriptions: ",userInfo.walletDescriptions)
+                    this.contextWalletInfo = userInfo.walletDescriptions.filter((e:any) => e.context === this.context)[0]
+                    log.info(tag,"this.contextWalletInfo: ",this.contextWalletInfo)
+                    log.info(tag,"assetContext: ",this.assetContext)
                     this.valueUsdContext = this.contextWalletInfo.valueUsdContext
-                    this.assetBalanceNativeContext = this.contextWalletInfo.balances[userInfo.assetContext]
-                    this.assetBalanceUsdValueContext = this.contextWalletInfo.values[userInfo.assetContext]
+                    this.assetBalanceNativeContext = this.contextWalletInfo.balances[userInfo.assetContext] || '0'
+                    this.assetBalanceUsdValueContext = this.contextWalletInfo.values[userInfo.assetContext] || '0'
+                    log.info(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
+                    log.info(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
@@ -362,12 +368,12 @@ export class SDK {
                 }
 
                 let output:User = {
-                    assetBalanceNativeContext: "",
-                    assetBalanceUsdValueContext: "",
-                    assetContext: "",
-                    valueUsdContext: "",
                     type: 'pioneer',
                     context:this.context,
+                    assetContext: this.assetContext,
+                    valueUsdContext: this.valueUsdContext,
+                    assetBalanceNativeContext: this.assetBalanceNativeContext,
+                    assetBalanceUsdValueContext: this.assetBalanceUsdValueContext,
                     wallet: thorAddress,
                     keystore:{},
                     clients:this.clients
