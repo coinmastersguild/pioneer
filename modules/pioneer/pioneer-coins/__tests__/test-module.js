@@ -10,6 +10,7 @@ let {
     baseAmountToNative,
     nativeToBaseAmount,
     getPaths,
+    classifyPubkey,
     get_address_from_xpub,
     normalize_pubkeys,
     getNativeAssetForBlockchain
@@ -21,8 +22,12 @@ let {
 // // console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 
-let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
-console.log("paths: ",paths)
+// let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
+// console.log("paths: ",paths)
+
+let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
+console.log(classifyPubkey(address))
+
 
 // //
 // // console.log("supportedAssets: ",supportedAssets)
