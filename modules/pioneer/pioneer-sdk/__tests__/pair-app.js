@@ -17,7 +17,8 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagge
 // let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
 let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
-let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
+// let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
+let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsaasda'
 
 let run_test = async function(){
     try{

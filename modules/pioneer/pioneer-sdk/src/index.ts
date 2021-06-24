@@ -134,11 +134,11 @@ export class SDK {
             try {
                 let configEvents:any = {
                     queryKey:this.queryKey,
-                    pioneerWs:this.wss
+                    wss:this.wss
                 }
                 if(this.username) configEvents.username = this.username
                 //sub to events
-                this.events = new Events.Events(configEvents.pioneerWs,config)
+                this.events = new Events.Events(config)
                 this.events.init()
                 return this.events.events
             } catch (e) {
