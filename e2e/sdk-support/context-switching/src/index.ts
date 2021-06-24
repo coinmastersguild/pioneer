@@ -93,7 +93,7 @@ const test_service = async function () {
         const queryKey = uuidv4();
         assert(queryKey)
 
-        let config = {
+        let config:any = {
             queryKey,
             //username,
             spec,
@@ -128,6 +128,8 @@ const test_service = async function () {
                 // code block
             }
         })
+
+
 
         let seedChains = ['ethereum','thorchain']
         await app.init(seedChains)
@@ -174,6 +176,14 @@ const test_service = async function () {
         //should only be 2 contexts?
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
+
+        //debug hack
+        // config.username = userInfo.username
+        // app = new SDK.SDK(spec,config)
+        // events = await app.startSocket()
+        // events.on('message', async (event:any) => {
+        //     log.info(tag,"**** event: ",event)
+        // })
 
         let availableWallets = await getWallets()
         log.info(tag,"availableWallets: ",availableWallets)

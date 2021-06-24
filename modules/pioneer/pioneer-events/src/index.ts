@@ -53,9 +53,10 @@ export class Events {
                     }
                 });
 
-                this.socket.on('subscribedToUsername', () => {
-                    log.debug(tag,'subscribed to '+this.username);
+                this.socket.on('subscribedToUsername', (event:any) => {
+                    log.info(tag,'subscribed to '+event.username," id: "+event.socketId);
                     this.isPaired = true
+                    this.username = event.username
                 });
 
                 this.socket.on('message', (message: any) => {
@@ -135,6 +136,8 @@ export class Events {
                     username:this.username,
                     queryKey:config.queryKey
                 })
+
+                //TODO validate paired?
                 return true
             } catch (e) {
                 log.error(tag, "e: ", e)

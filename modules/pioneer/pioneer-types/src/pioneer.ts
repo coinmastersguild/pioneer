@@ -23,6 +23,19 @@ export enum HDWALLETS {
     'metamask'
 }
 
+export interface SDKConfig {
+    service?: string;
+    url?:string
+    username?:string
+    queryKey:string
+    spec:string,
+    wss: string;
+    context?:string
+    blockchains?:string
+    env?:string
+    mode?:string
+}
+
 export interface EventsConfig {
     wss: string;
     username?:string

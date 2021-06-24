@@ -20,7 +20,8 @@ let {
 import {
     SendToAddress,
     Config,
-    User
+    User,
+    SDKConfig
 } from "@pioneer-platform/pioneer-types";
 
 //xchain adapter
@@ -31,7 +32,7 @@ export class SDK {
     private spec: any;
     private pioneerApi: any;
     private init: (blockchains: []) => Promise<any>;
-    private config: Config;
+    private config: SDKConfig;
     private clients: any;
     private createPairingCode: () => Promise<any>;
     private queryKey: string;
@@ -62,14 +63,10 @@ export class SDK {
     private stopSocket: () => any;
     private contextWalletInfo: any;
     private valueUsdContext: any;
-    constructor(spec:string,config:any,isTestnet?:boolean) {
+    constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
-        if(isTestnet){
-            this.isTestnet = true
-        } else {
-            this.isTestnet = false
-        }
+        this.isTestnet = false
         this.isPaired = false
         this.config = config
         this.username = config.username
@@ -140,6 +137,15 @@ export class SDK {
                 //sub to events
                 this.events = new Events.Events(config)
                 this.events.init()
+
+                this.events.events.on('subscribedToUsername', (event:any) => {
+                    log.ingo(tag,'paired to '+this.username);
+                    this.isPaired = true
+                    this.username = event.username
+                    this.events.emit('subscribedToUsername',event)
+                    Events.setUsername(this.username)
+                });
+
                 return this.events.events
             } catch (e) {
                 log.error(tag, "e: ", e)
