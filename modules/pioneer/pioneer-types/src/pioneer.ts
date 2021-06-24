@@ -23,6 +23,51 @@ export enum HDWALLETS {
     'metamask'
 }
 
+export interface EventsConfig {
+    wss: string;
+    username?:string
+    queryKey?:string
+}
+
+export interface AppConfig {
+    wss: string;
+    password?:string | undefined
+    spec: string;
+    username:string
+    queryKey:string
+    hardware?:string
+    locale?:string
+    localeSelected?:boolean
+    isCli?:boolean
+    temp?:string
+    blockchains:any
+    created?:string
+}
+
+export interface PioneerConfig {
+    isTestnet?:boolean
+    mnemonic?:string
+    pioneerApi:boolean
+    paths?:any
+    context:string
+    wss: string;
+    spec: string;
+    username:string
+    queryKey:string
+    hardware?:boolean
+    wallet?:string
+    pubkeys?:string
+    vendor?:string
+    locale?:string
+    localeSelected?:boolean
+    isCli?:boolean
+    temp?:string
+    blockchains:any
+    created?:string
+    walletDescription?:any
+}
+
+
 //User
 export interface User {
     type: string;
@@ -41,6 +86,7 @@ export interface Wallet {
     mnemonic: string;
     password: string;
     masterAddress: string;
+    temp?:string
 }
 
 export interface CitadelWallet {

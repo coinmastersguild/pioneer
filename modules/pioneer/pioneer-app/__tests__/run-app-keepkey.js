@@ -196,7 +196,7 @@ let run_test = async function(){
                 //
                 // let resultBroadcast = await context.broadcastTransaction('ETH',result)
                 // console.log("resultBroadcast: ",resultBroadcast)
-
+                console.log("subscribed user: ",userInfo.username)
                 console.log("system ready....")
             } else if(keepkeyStatus.state === 3){
                 //prompt pin

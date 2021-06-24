@@ -188,21 +188,6 @@ const test_service = async function () {
             log.info(tag,"success: ",success)
         }
 
-        //context should be in available
-        // if(availableWallets.indexOf(user.context) === -1) {
-        //     throw Error("Missing context!")
-        // } else if(availableWallets.indexOf(user.context) === 0){
-        //     //change to 1
-        //     //switch asset context
-        //     let success = await app.setContext(availableWallets[1])
-        //     log.info(tag,"success: ",success)
-        // } else if(availableWallets.indexOf(user.context) === 1){
-        //     //change to 0
-        //     //switch asset context
-        //     let success = await app.setContext(availableWallets[0])
-        //     log.info(tag,"success: ",success)
-        // }
-
         //dont release till context event
         while(!eventContextReceived){
             await sleep(300)

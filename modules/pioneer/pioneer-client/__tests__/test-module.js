@@ -80,10 +80,10 @@ let run_test = async function(){
         // data = data.data
         // console.log("txData: ",data)
 
-        let code = "GNF1RC"
-        let data = await pioneer.instance.Pair(null, {code})
-        data = data.data
-        console.log("txData: ",data)
+        // let code = "GNF1RC"
+        // let data = await pioneer.instance.Pair(null, {code})
+        // data = data.data
+        // console.log("txData: ",data)
 
 
         //broadcast

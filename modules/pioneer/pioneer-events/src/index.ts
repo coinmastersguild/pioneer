@@ -5,10 +5,14 @@ const io = require('socket.io-client');
 const wait = require('wait-promise');
 const sleep = wait.sleep;
 
+import {
+    EventsConfig
+} from "@pioneer-platform/pioneer-types";
+
 export class Events {
     private wss: string;
-    private username: string
-    private queryKey: string
+    private username: string | undefined
+    private queryKey: string | undefined
     private socket: any
     private events: any
     private isConnected: boolean
@@ -21,8 +25,8 @@ export class Events {
     private disconnect: () => Promise<void>;
     private subscribeToKey: () => Promise<boolean>;
     private subscribeToInvocation: (invocationId: string) => Promise<boolean>;
-    constructor(wss:string,config:any,isTestnet?:boolean) {
-        this.wss = config.wss || 'wss://pioneers.dev'
+    constructor(config:EventsConfig) {
+        this.wss = config.wss
         this.isConnected = false
         this.isTestnet = false
         this.username = config.username
@@ -39,7 +43,7 @@ export class Events {
 
                 //sub
                 this.socket.on('connect', () => {
-                    log.debug(tag,'Connected to '+this.wss);
+                    log.info(tag,'Connected to '+this.wss);
                     this.isConnected = true
                     //rejoin
                     if(this.username){

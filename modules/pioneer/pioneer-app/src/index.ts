@@ -99,13 +99,13 @@ let network:any
 let AUTONOMOUS = false
 let IS_INIT = false
 
-
-
-
 import {
     UpdateInvocationBody,
     Wallet,
-    CitadelWallet
+    CitadelWallet,
+    AppConfig,
+    EventsConfig,
+    PioneerConfig
 } from "@pioneer-platform/pioneer-types";
 
 module.exports = {
@@ -899,7 +899,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
                     const engine = new native.crypto.engines.WebCryptoEngine();
                     // @ts-ignore
                     const walletCrypto = new native.crypto.EncryptedWallet(engine);
-                    const result = await walletCrypto.init(wallet.username, wallet.password);
+                    const result = await walletCrypto.init('placeholder', wallet.password);
                     await walletCrypto.createWallet(wallet.mnemonic);
                     let seed_encrypted = result.encryptedWallet
 
@@ -968,7 +968,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
     }
 };
 
-let init_wallet = async function (config:any,isTestnet?:boolean) {
+let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
     let tag = TAG+" | init_wallet | ";
     try {
         if(IS_INIT) throw Error("App already initialized!")
@@ -980,9 +980,6 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
             queryKey:config.queryKey
         })
         network = await network.init()
-        //if no password
-        if(!config.password) config.password = config.temp
-        if(!config.password) throw Error("101: password required!")
         if(!config.username) throw Error("102: username required!")
         if(!config.queryKey) throw Error("103: queryKey required!")
 
@@ -1109,7 +1106,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     output.devices.push(walletFile.features)
 
                     //load
-                    let configPioneer = {
+                    let configPioneer:PioneerConfig = {
                         hardware:true,
                         vendor:"keepkey",
                         blockchains:config.blockchains,
@@ -1122,10 +1119,9 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         },
                         username:config.username,
                         pioneerApi:true,
-                        spec:URL_PIONEER_SPEC,
-                        queryKey:config.queryKey,
-                        auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
-                        authProvider:'bitcoin'
+                        spec:config.spec,
+                        wss:config.wss,
+                        queryKey:config.queryKey
                     }
                     log.debug(tag,"KEEPKEY init config: ",configPioneer)
                     let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
@@ -1190,7 +1186,10 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     //if wallet has pw, use it
                     if(walletFile.password) config.password = walletFile.password
 
-                    const resultOut = await walletCrypto.init(walletFile.username, config.password, walletFile.vault);
+                    //TODO get rid of email bs in hdwallet
+                    let password = config.password || config.temp
+                    if(!password) throw Error("Missing Password!")
+                    const resultOut = await walletCrypto.init('placeholder', password, walletFile.vault);
                     if(!walletFile.vault) throw Error("Wallet vault not found! ")
 
                     let mnemonic = await resultOut.decrypt()
@@ -1209,7 +1208,7 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                     if(!mnemonic) throw Error("unable to start wallet! invalid seed!")
                     // log.debug(tag,"mnemonic: ",mnemonic)
                     //load wallet to global
-                    let configPioneer:any = {
+                    let configPioneer:PioneerConfig = {
                         isTestnet,
                         mnemonic,
                         context,
@@ -1220,9 +1219,8 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
                         blockchains:config.blockchains,
                         username:config.username,
                         pioneerApi:true,
-                        auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
-                        authProvider:'shapeshift',
-                        spec:URL_PIONEER_SPEC,
+                        spec:config.spec,
+                        wss:config.wss,
                         queryKey:config.queryKey
                     }
                     if(walletPaths) configPioneer.paths = walletPaths
@@ -1339,14 +1337,14 @@ let init_wallet = async function (config:any,isTestnet?:boolean) {
         if(!config.username) throw Error("102: config.username not set!")
         if(!config.queryKey) throw Error("103: config.queryKey not set!")
 
-        let configEvents = {
+        let configEvents:EventsConfig = {
             username:config.username,
             queryKey:config.queryKey,
-            wss:URL_PIONEER_SOCKET
+            wss:config.wss
         }
 
         //sub ALL events
-        let clientEvents = new Events.Events(configEvents.wss,configEvents)
+        let clientEvents = new Events.Events(configEvents)
         await clientEvents.init()
         await clientEvents.subscribeToKey()
         await clientEvents.pair()
