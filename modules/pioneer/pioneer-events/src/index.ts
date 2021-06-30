@@ -65,6 +65,12 @@ export class Events {
                     this.events.emit('message',message)
                 })
 
+                this.socket.on('blocks', (message: any) => {
+                    //TODO only emit expected messages?
+                    //if(message.type === "payment_request"){}
+                    this.events.emit('message',message)
+                })
+
                 //sub to errors
                 this.socket.on('errorMessage', function (message:any) {
                     log.error(tag,"error: ",message)

@@ -114,7 +114,7 @@ let run_test = async function(){
                 })
 
                 try{
-                    let pairResult = await App.pair("G55ZWH")
+                    let pairResult = await App.pair("MWQYPE")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 

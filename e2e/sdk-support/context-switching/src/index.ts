@@ -123,6 +123,11 @@ const test_service = async function () {
                     //received continue below
                     eventInvokeTransferReceived = true
                     break;
+                case 'transfer':
+                    //TODO assert valid transfer info
+                    //received continue below
+                    eventInvokeTransferReceived = true
+                    break;
                 default:
                     log.error(tag,"unhandled event: ",event)
                 // code block

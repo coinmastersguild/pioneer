@@ -26,7 +26,8 @@ let run_test = async function(){
     try{
 
         let config = {
-            queryKey:TEST_QUERY_KEY_2,
+            // queryKey:TEST_QUERY_KEY_2,
+            queryKey:"12312312ssdasas",
             wss:"ws://127.0.0.1:9001"
         }
 

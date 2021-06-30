@@ -41,7 +41,7 @@ ASGARDX
 ========
 debug context switching
 
-
+copy pairing to clipboard
 Desktop
 ========
 
