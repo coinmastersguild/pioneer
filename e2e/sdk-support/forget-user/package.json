@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/support-e2e-forget-user",
-  "version": "8.1.10",
+  "version": "8.1.11",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/midgard-client": "^8.1.9",
-    "@pioneer-platform/pioneer-app": "^8.1.10",
-    "@pioneer-platform/pioneer-app-e2e": "^8.1.10",
-    "@pioneer-platform/pioneer-sdk": "^8.1.10",
+    "@pioneer-platform/midgard-client": "^8.1.10",
+    "@pioneer-platform/pioneer-app": "^8.1.11",
+    "@pioneer-platform/pioneer-app-e2e": "^8.1.11",
+    "@pioneer-platform/pioneer-sdk": "^8.1.11",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
