@@ -13,7 +13,7 @@ const rippleRegex      = require('ripple-regex');
 const neoRegex         = require('neo-regex');
 
 export function classifyPubkey(address:string) {
-    if (bitcoinRegex({exact: true}).test(address)) return 'BTC/BCH';
+    if (bitcoinRegex({exact: true}).test(address)) return 'BTC';
     else if (ethereumRegex({exact: true}).test(address)) return 'ETH';
     else if (litecoinRegex({exact: true}).test(address)) return 'LTC';
     else if (dogecoinRegex({exact: true}).test(address)) return 'DOGE';

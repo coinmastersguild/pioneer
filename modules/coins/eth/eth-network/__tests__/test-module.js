@@ -10,11 +10,17 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
-let rawTx = "0xf86d0285037e11d600825208943aef01db231c3c9ff844f7e611c63b8c36bc6a02890882a498069f7400008025a0538b29d686ea787a483bcfdf0cd31c6bbca520f0c2073edcf43fe9d3e6fb2fb3a04b506074a43988f1d023cc7bf2f716c955cafd38c0c1df76fe9fe846160501d5"
-network.broadcast(rawTx)
+//
+network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
     .then(function(resp){
         console.log(resp)
     })
+
+// let rawTx = "0xf86d0285037e11d600825208943aef01db231c3c9ff844f7e611c63b8c36bc6a02890882a498069f7400008025a0538b29d686ea787a483bcfdf0cd31c6bbca520f0c2073edcf43fe9d3e6fb2fb3a04b506074a43988f1d023cc7bf2f716c955cafd38c0c1df76fe9fe846160501d5"
+// network.broadcast(rawTx)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 
 // let addresses = [

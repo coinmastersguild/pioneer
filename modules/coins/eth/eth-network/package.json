@@ -11,7 +11,7 @@
     "start": "npm run build:live",
     "build": "tsc -p .",
     "prepublish": "npm run build",
-    "build:live": "nodemon --watch '**/*.ts' --exec 'ts-node' __tests__/test-module.js"
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.1.0",

@@ -24,8 +24,8 @@ let {
 
 // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'])
 // console.log("paths: ",paths)
-
-let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
+let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
+// let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
 console.log(classifyPubkey(address))
 
 

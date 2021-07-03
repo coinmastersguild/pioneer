@@ -306,6 +306,7 @@ module.exports = class wallet {
                     log.info(tag,"userInfo: ",userInfo)
 
                     if(!userInfo || !userInfo.success){
+                        log.info(tag,"registering new user! ")
                         //API
                         let register = {
                             username:this.username,
@@ -328,9 +329,10 @@ module.exports = class wallet {
                         let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                         if(regsiterResponse.code === 104){
                             //request change of queryKey
-
                         }
                         log.debug("registerResponse: ",regsiterResponse)
+
+                        //if register success
 
                         //emitter.info = walletInfo
                     }else{
@@ -361,6 +363,11 @@ module.exports = class wallet {
                             //if failure give reason
                         }
                     }
+
+                    //if success get info
+
+                    //else return failed to init
+
                     let output:any = {}
 
                     log.debug(tag,"getting info on context: ",this.context)

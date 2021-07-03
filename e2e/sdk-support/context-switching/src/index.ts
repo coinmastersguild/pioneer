@@ -63,7 +63,6 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
-
 let noBroadcast = true
 
 const test_service = async function () {
@@ -203,10 +202,17 @@ const test_service = async function () {
             log.info(tag,"success: ",success)
         }
 
+        //fail test after 30 seconds
+        let failTest = function(){
+            log.error("Failed to get context event!")
+            process.exit(4)
+        }
+        let timeout = setTimeout(failTest,30 * 1000)
         //dont release till context event
         while(!eventContextReceived){
             await sleep(300)
         }
+        clearTimeout(timeout)
 
         //asset switch event received
 

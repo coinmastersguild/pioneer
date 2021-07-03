@@ -65,7 +65,7 @@ let pioneerApi = require("@pioneer-platform/pioneer-client")
 
 let password = process.env['WALLET_PASSWORD'] || '123'
 let username = process.env['TEST_USERNAME_2'] || 'e2e-user-1'
-let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey123'
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let BLOCKCHAIN = 'thorchain'
 let ASSET = 'RUNE'
@@ -80,10 +80,10 @@ let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjau
 let noBroadcast = true
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
-const test_service = async function () {
-    let tag = TAG + " | test_service | "
+//pre-register username on key
+const pre_register = async function () {
+    let tag = TAG + " | pre_register | "
     try {
-
         //register wrong username
         let wrongUsername = 'wrongUsername'
 
@@ -118,14 +118,33 @@ const test_service = async function () {
         let registerResp = await pioneer.instance.Register(null,register)
         log.info("registerResp: ",registerResp.body)
 
+        return true
+    } catch (e) {
+        log.error(e)
+        //process
+        process.exit(666)
+    }
+}
+
+const test_service = async function () {
+    let tag = TAG + " | test_service | "
+    try {
+
+        let success = await pre_register()
+        assert(success)
+        log.info(tag,"success: ",success)
+
+
         //start app and get wallet
         let wallet = await startApp()
-        let username = wallet.username
-        assert(username)
-        log.info("username: ",username)
+        let usernameRemote = wallet.username
+        assert(usernameRemote)
+        log.info("usernameRemote: ",usernameRemote)
+        log.info("usernameLocal:  ",username)
 
         let balance = wallet.WALLET_BALANCES[ASSET]
         assert(balance)
+
         //
         // //assert balance local
         // //log.info(tag,"wallet: ",wallet)

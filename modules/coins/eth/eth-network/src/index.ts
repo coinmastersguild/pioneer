@@ -78,7 +78,14 @@ let NODE_URL:any
 let BASE = 1000000000000000000;
 
 
+const UNISWAP_V2_WETH_FOX_POOL_ADDRESS = '0x470e8de2ebaef52014a47cb5e6af86884947f08c'
+const UNISWAP_V2_USDC_ETH_POOL_ADDRESS = '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc'
+const UNISWAP_V2_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+const FOX_TOKEN_CONTRACT_ADDRESS = '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d'
+const WETH_TOKEN_CONTRACT_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
+const FOX_ETH_TEST_FARMING_ADDRESS = '0x1F2BBC14BCEc7f06b996B6Ee920AB5cA5A56b77F'
+const FOX_ETH_FARMING_ADDRESS = '0x1F2BBC14BCEc7f06b996B6Ee920AB5cA5A56b77F'
 
 //TODO move thorchain/eth stuff to its own module?
 
@@ -140,6 +147,9 @@ module.exports = {
 	getAllTokensEth:function (address:string) {
 		return get_all_tokens_blockbook(address);
 	},
+	getPercentPool:function (amountFox:number,amountEth:string,poolAddress:string) {
+		return get_pool_percent(amountFox, amountEth, poolAddress);
+	},
 	// getFees: function (params: XFeesParams & FeesParams): Promise<Fees> {
 	// 	return get_fees()
 	// },
@@ -174,6 +184,52 @@ module.exports = {
 		return broadcast_transaction(tx);
 	}
 }
+
+const get_pool_percent = async function(amountFox:number,amountEth:string,poolAddress:string){
+	let tag = TAG + " | get_pool_percent | "
+	try{
+		//get total LP tokens
+
+		//LP token
+		const lpContract = new web3.eth.Contract(ERC20ABI, UNISWAP_V2_WETH_FOX_POOL_ADDRESS)
+		const foxContract = new web3.eth.Contract(ERC20ABI, FOX_TOKEN_CONTRACT_ADDRESS)
+		const wethContract = new web3.eth.Contract(ERC20ABI, WETH_TOKEN_CONTRACT_ADDRESS)
+
+		//log.info("lpContract: ",lpContract)
+
+		let totalSupply = await lpContract.methods.totalSupply().call()
+		totalSupply = totalSupply / BASE
+		log.info("LP totalSupply: ",totalSupply)
+
+		//get total fox in pool
+		let totalFox = await foxContract.methods.balanceOf(UNISWAP_V2_WETH_FOX_POOL_ADDRESS).call()
+		totalFox = totalFox / BASE
+		log.info("totalFox: ",totalFox / BASE)
+
+		//get total eth in pool
+		let totalEth = await wethContract.methods.balanceOf(UNISWAP_V2_WETH_FOX_POOL_ADDRESS).call()
+		totalEth = totalEth / BASE
+		log.info("totalEth: ",totalEth)
+
+		//token math
+		let result = totalFox / totalEth
+		log.info("result: ",result)
+
+		//balance
+		let lpTokens = (amountFox * totalSupply)/totalFox
+		log.info("lpTokens: ",lpTokens)
+		//total LP tokens
+		//liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
+
+		let percent = (lpTokens / totalSupply) * 100
+		log.info("percent: ",percent)
+
+		return percent
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
 
 const get_balances = async function(addresses:string){
 	let tag = TAG + " | get_balances | "

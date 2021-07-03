@@ -88,7 +88,7 @@ const test_service = async function () {
         //log.info(tag,"wallet: ",wallet)
         log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send monies to "+ASSET+": "+await wallet.getMaster(ASSET))
             throw Error("101: Low funds!")
         } else {
             log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)

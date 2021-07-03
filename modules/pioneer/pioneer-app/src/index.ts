@@ -246,6 +246,9 @@ module.exports = {
     getAccount: function () {
         return ACCOUNT;
     },
+    migrateQueryKey: function () {
+        return migrate_query_key();
+    },
     pair: function (code:string) {
         return pair_sdk_user(code);
     },
@@ -296,6 +299,29 @@ module.exports = {
     sendToAddress: function (intent:any) {
       return send_to_address(intent);
     },
+};
+
+let migrate_query_key = function () {
+    let tag = " | migrate_query_key | ";
+    try {
+        //save current key into /old
+        let currentConfig = getConfig();
+        let oldKeys = currentConfig.old || []
+        oldKeys.push(currentConfig.queryKey)
+        updateConfig({old:oldKeys})
+
+        //generate new key
+        let newKey = uuidv4();
+        //save to config
+        updateConfig({queryKey:newKey})
+
+        let newConfig = getConfig()
+
+        return newConfig
+    } catch (e) {
+        console.error(tag, "Error: ", e);
+        throw e;
+    }
 };
 
 let forget_user = async function () {
@@ -999,7 +1025,22 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
         let userInfoRemote = await network.instance.User()
         userInfoRemote = userInfoRemote.data
         log.info(tag,"userInfoRemote: ",userInfoRemote)
+        //check if username matches config
 
+        //if doesnt, create new apiKey
+        if(userInfoRemote.username !== config.username){
+            //migrate
+            config = migrate_query_key()
+            // throw Error("103: queryKey migration! restart application")
+
+            //migrate
+            network = new Network(URL_PIONEER_SPEC,{
+                queryKey:config.queryKey
+            })
+            network = await network.init()
+        }
+
+        //sync wallets
         if(userInfoRemote.wallets){
             for(let i = 0; i < userInfoRemote.wallets; i++){
                 let walletRemote = userInfoRemote[i]
