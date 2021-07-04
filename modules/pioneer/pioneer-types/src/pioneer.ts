@@ -124,6 +124,22 @@ export interface Transfer {
     noBroadcast:boolean
 }
 
+export interface Deposit {
+    network: string;
+    asset: string;
+    inboundAddress?:any
+    invocationId: string;
+    symbol?: string;
+    addressFrom?: string;
+    addressTo: string;
+    address?: string;
+    amount: string;
+    memo?: string | undefined;
+    nonce?:number
+    feeLevel?:string,
+    noBroadcast?:boolean
+}
+
 export interface Transaction {
     coin?: string;
     network: string;
@@ -145,7 +161,7 @@ export interface UnsignedTransaction {
     network: string;
     invocationId?:string,
     deposit?:any,
-    transaction:Transaction,
+    transaction?:Transaction,
     HDwalletPayload:any, // this has specific types per blockchain?
     verbal:any
 }

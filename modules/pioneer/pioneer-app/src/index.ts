@@ -1423,6 +1423,7 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
             let updateBody
             switch(request.type) {
                 case 'deposit':
+                    //thorchain deposit (native RUNE inputs to swaps)
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
@@ -1439,6 +1440,7 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     }
                     log.debug(tag,"Building transaction with context: ",context)
                     log.debug(tag,"invocation: ",request.invocation)
+                    //TODO validate object to type Deposit
                     unsignedTx = await WALLETS_LOADED[context].deposit(request.invocation)
                     log.debug(tag,"txid: ", unsignedTx.txid)
                     log.debug(tag,"unsignedTx: ", unsignedTx)

@@ -115,12 +115,9 @@ const test_service = async function () {
                     break;
                 case 'context':
                     log.info(tag,"context event!")
+                    //get new params
+                    await app.getUserParams()
                     eventContextReceived = true
-                    break;
-                case 'transfer':
-                    //TODO assert valid transfer info
-                    //received continue below
-                    eventInvokeTransferReceived = true
                     break;
                 case 'transfer':
                     //TODO assert valid transfer info
@@ -181,13 +178,30 @@ const test_service = async function () {
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
-        //debug hack
-        // config.username = userInfo.username
-        // app = new SDK.SDK(spec,config)
-        // events = await app.startSocket()
-        // events.on('message', async (event:any) => {
-        //     log.info(tag,"**** event: ",event)
-        // })
+        //intergration test asgard-exchange
+        let blockchains = Object.keys(user.clients)
+        log.info("blockchains: ",blockchains)
+
+        let client = user.clients[BLOCKCHAIN]
+
+        //get master
+        let masterAddress = await client.getAddress()
+        log.info(tag,"masterAddress: ",masterAddress)
+        assert(masterAddress)
+
+        /*
+            3 ways to express balance
+                Sdk (x-chain compatible object type)
+                native (satoshi/wei)
+                base (normal 0.001 ETH)
+         */
+
+        let balanceSdk = await client.getBalance()
+        log.info(" balanceSdk: ",balanceSdk)
+        assert(balanceSdk[0])
+        assert(balanceSdk[0].amount)
+        assert(balanceSdk[0].amount.amount())
+        assert(balanceSdk[0].amount.amount().toString())
 
         let availableWallets = await getWallets()
         log.info(tag,"availableWallets: ",availableWallets)
@@ -213,10 +227,56 @@ const test_service = async function () {
             await sleep(300)
         }
         clearTimeout(timeout)
-
         //asset switch event received
-
         //switch context
+
+        //get context from remote
+        let userInfoPOST = await app.getUserInfo()
+        log.info("userInfoPOST: ",userInfoPOST)
+
+        log.info(tag,"userInfo.context: ",userInfo.context)
+        log.info(tag,"userInfoPOST.context: ",userInfoPOST.context)
+        if(userInfoPOST.context === userInfo.context){
+            log.info(tag,"userInfo.context: ",userInfo.context)
+            log.info(tag,"userInfoPOST.context: ",userInfoPOST.context)
+            throw Error("CONTEXT Context Switched and client did NOT switch context! 1")
+        }
+
+        user = await app.getUserParams()
+        client = user.clients[BLOCKCHAIN]
+        log.info("user: ",user)
+        assert(user.context)
+        assert(user.assetContext)
+        assert(user.valueUsdContext)
+        assert(user.assetBalanceNativeContext)
+        assert(user.assetBalanceUsdValueContext)
+        assert(user.wallet)
+
+        //verify clients changed context
+        //get master
+        let masterAddressPOST = await client.getAddress()
+        log.info(tag,"masterAddressPOST: ",masterAddressPOST)
+        assert(masterAddressPOST)
+
+        /*
+            3 ways to express balance
+                Sdk (x-chain compatible object type)
+                native (satoshi/wei)
+                base (normal 0.001 ETH)
+         */
+
+        let balanceSdkPOST = await client.getBalance()
+        log.info(" balanceSdkPOST: ",balanceSdkPOST)
+        assert(balanceSdkPOST[0])
+        assert(balanceSdkPOST[0].amount)
+        assert(balanceSdkPOST[0].amount.amount())
+        assert(balanceSdkPOST[0].amount.amount().toString())
+
+        if(masterAddressPOST === masterAddress){
+            log.info(tag,"masterAddress: ",masterAddress)
+            log.info(tag,"balanceSdkPOST: ",balanceSdkPOST)
+            throw Error("ADDRESS Context Switched and client did NOT switch context! 2")
+        }
 
 
         log.info("****** TEST PASS 2******")

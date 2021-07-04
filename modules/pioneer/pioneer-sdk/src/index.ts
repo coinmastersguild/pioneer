@@ -148,6 +148,12 @@ export class SDK {
                     Events.setUsername(this.username)
                 });
 
+                this.events.events.on('context', (event:any) => {
+                    log.info(tag,'context set to '+event.context);
+                    this.context = event.context
+                    this.getUserParams()
+                });
+
                 return this.events.events
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -298,7 +304,7 @@ export class SDK {
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
-                log.debug(tag,"context: ",this.context)
+                log.info(tag,"context: ",this.context)
                 log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data

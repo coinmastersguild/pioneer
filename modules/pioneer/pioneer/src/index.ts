@@ -45,6 +45,7 @@ import {
     Approval,
     Invocation,
     Balance,
+    Deposit,
     HDWALLETS
 } from "@pioneer-platform/pioneer-types";
 //Pioneer follows OpenAPI spec
@@ -776,7 +777,7 @@ module.exports = class wallet {
                 throw e
             }
         },
-        this.deposit = async function (deposit:any) {
+        this.deposit = async function (deposit:Deposit) {
                 let tag = TAG + " | deposit | "
                 try{
                     let rawTx
@@ -796,7 +797,7 @@ module.exports = class wallet {
                         }
 
                         //get account number
-                        log.debug(tag,"addressFrom: ",addressFrom)
+                        log.info(tag,"addressFrom: ",addressFrom)
                         let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
                         masterInfo = masterInfo.data
                         log.debug(tag,"masterInfo: ",masterInfo.data)
@@ -847,13 +848,15 @@ module.exports = class wallet {
                         if(!sequence) throw Error("112: Failed to get sequence")
                         if(!account_number) account_number = 0
 
-                        //verify from address
-                        let fromAddress = await this.WALLET.thorchainGetAddress({
-                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                            showDisplay: false,
-                        });
-                        log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                        log.debug(tag,"fromAddress: ",addressFrom)
+                        //TODO double check? this broke?
+                        // //verify from address
+                        // let fromAddress = await this.WALLET.thorchainGetAddress({
+                        //     addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
+                        //     showDisplay: false,
+                        // });
+                        // log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                        // log.debug(tag,"fromAddress: ",addressFrom)
+                        let fromAddress = addressFrom
 
                         log.debug("res: ",prettyjson.render({
                             addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
@@ -864,8 +867,8 @@ module.exports = class wallet {
                         }))
 
                         if(fromAddress !== addressFrom) {
-                            log.error(tag,"fromAddress: ",fromAddress)
-                            log.error(tag,"addressFrom: ",addressFrom)
+                            log.error(tag,"fromAddress context WALLET: ",fromAddress)
+                            log.error(tag,"fromAddress DEPOSIT: ",addressFrom)
                             throw Error("Can not sign, address mismatch")
                         }
 
@@ -886,7 +889,7 @@ module.exports = class wallet {
                         }
 
                         //
-                        let unsignedTx = {
+                        let unsignedTx:UnsignedTransaction = {
                             invocationId:deposit.invocationId,
                             network:deposit.network,
                             deposit,

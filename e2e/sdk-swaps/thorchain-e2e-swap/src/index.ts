@@ -58,7 +58,7 @@ const {
     buildTransaction,
     approveTransaction,
     broadcastTransaction
-} = require('./app')
+} = require('@pioneer-platform/pioneer-app-e2e')
 
 let BLOCKCHAIN = 'thorchain'
 let ASSET = 'RUNE'
