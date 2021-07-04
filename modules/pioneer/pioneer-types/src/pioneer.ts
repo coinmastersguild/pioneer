@@ -88,6 +88,7 @@ export interface User {
     keystore: any;
     clients: any
     context: string;
+    availableContexts: any
     valueUsdContext: string
     assetContext: string
     assetBalanceNativeContext: string

@@ -19,7 +19,7 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagge
 let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
 // let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
 // let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsaasda'
-let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsa'
+let queryKey = 'fobarbaasdsa'
 
 let run_test = async function(){
     try{
@@ -69,38 +69,28 @@ let run_test = async function(){
                 if(request.type === 'pairing'){
                     //when paired, start
 
-                    // //get user wallets
-                    // let wallets = await app.wallets
-                    // console.log("wallets: ",wallets)
-                    //
-                    // //get current context
-                    // let context = app.context
-                    // console.log("context: ",context)
-                    //
-                    // //start socket
-                    // let events = await app.startSocket()
-                    // console.log("events: ",events)
-                    // events.on('message', async (request) => {
-                    //     console.log("**** message: ", request)
-                    // })
-                    //
-                    // //get user
-                    // let user = await app.getUserParams()
-                    // console.log("user: ",user)
-                    // if(!user.clients) throw Error("Failed to create user!")
-                    //
-                    // //intergration test asgard-exchange
-                    // let blockchains = Object.keys(user.clients)
-                    // console.log("blockchains: ",blockchains)
-                    //
-                    // for(let i = 0; i < blockchains.length; i++){
-                    //     let blockchain = blockchains[i]
-                    //     let client = user.clients[blockchain]
-                    //
-                    //     let balance = await client.getBalance()
-                    //     //console.log(blockchain+ " balance: ",balance)
-                    //     console.log(blockchain+ " balance: ",balance[0].amount.amount().toString())
-                    // }
+                    //get user wallets
+                    let wallets = await app.wallets
+                    console.log("wallets: ",wallets)
+
+                    //get current context
+                    let context = app.context
+                    console.log("context: ",context)
+
+                    //get user
+                    let user = await app.getUserParams()
+                    console.log("user: ",user)
+                    let availableContexts = user.availableContexts
+                    //switch context
+                    if(availableContexts.indexOf(user.context) === 1){
+                        console.log("setting to 0: ",availableContexts[0])
+                        let success = await app.setContext(availableContexts[0])
+                        console.log("success: ",success)
+                    }else if(availableContexts.indexOf(user.context) === 0){
+                        console.log("setting to 1: ",availableContexts[1])
+                        let success = await app.setContext(availableContexts[1])
+                        console.log("success: ",success)
+                    }
                 }
             })
 

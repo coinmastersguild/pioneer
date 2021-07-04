@@ -48,6 +48,7 @@ export class SDK {
     private startSocket: () => Promise<any>;
     private isPaired: boolean
     private context: string;
+    private contexts: any;
     private info: any;
     private wallets: any[];
     private totalValueUsd: number;
@@ -75,6 +76,7 @@ export class SDK {
         this.queryKey = config.queryKey
         this.spec = config.spec
         this.clients = {}
+        this.contexts = []
         this.context = ""
         this.invocationContext = ""
         this.assetContext = ""
@@ -299,6 +301,7 @@ export class SDK {
                 log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
+                this.contexts = result.wallets
                 log.debug(tag,"result: ",result)
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
@@ -376,6 +379,7 @@ export class SDK {
                 let output:User = {
                     type: 'pioneer',
                     context:this.context,
+                    availableContexts:this.contexts,
                     assetContext: this.assetContext,
                     valueUsdContext: this.valueUsdContext,
                     assetBalanceNativeContext: this.assetBalanceNativeContext,

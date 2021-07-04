@@ -90,6 +90,8 @@ let run_test = async function(){
         //create
         //init config
         await App.initConfig("english");
+        App.updateConfig({spec:process.env['URL_PIONEER_SPEC']});
+        App.updateConfig({wss:process.env['URL_PIONEER_SOCKET']});
         // App.updateConfig({isTestnet:true});
         App.updateConfig({username});
         App.updateConfig({temp:password});
