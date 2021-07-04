@@ -285,6 +285,7 @@ export class SDK {
                     this.wallets = userInfo.wallets
                     this.context = userInfo.context
                     this.assetContext = userInfo.assetContext
+                    log.info(tag,"this.context: ",this.context)
                     log.info(tag,"userInfo.walletDescriptions: ",userInfo.walletDescriptions)
                     this.contextWalletInfo = userInfo.walletDescriptions.filter((e:any) => e.context === this.context)[0]
                     log.info(tag,"this.contextWalletInfo: ",this.contextWalletInfo)
@@ -301,8 +302,10 @@ export class SDK {
                 log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                this.contexts = result.wallets
-                log.debug(tag,"result: ",result)
+                if(result.wallets){
+                    this.contexts = result.wallets
+                    log.debug(tag,"result: ",result)
+                }
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 
