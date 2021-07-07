@@ -543,10 +543,18 @@ let get_fees = async function(params: any){
 let broadcast_transaction = async function(tx:any){
 	let tag = TAG + " | broadcast_transaction | "
 	try{
-		console.log(tag,"checkpoint")
+		log.info(tag,"tx: ",tx)
 		if(!tx) throw Error("101: missing tx!")
+
+		//push node
 		let result = await web3.eth.sendSignedTransaction(tx)
 
+		//push etherscan
+
+		//push blockbook
+
+
+		//TODO lifecycle hook?
 		// web3.eth.sendSignedTransaction(tx)
 		// 	.on('transactionHash', function(hash:any){
 		// 		console.log("hash: ",hash)

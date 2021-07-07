@@ -895,11 +895,26 @@ module.exports = class wallet {
                 //TODO validate addresses
                 //TODO validate midgard addresses not expired
 
+                //context
+                log.info(tag,"currentContext: ",this.context)
+                log.info(tag,"txContext: ",tx.context)
+                if(tx.context){
+                    if(this.context !== tx.context){
+                        //TODO validate context is valid
+                        this.context = tx.context
+                    }
+                } else {
+                    log.info(tag,"using default context:",this.context)
+                    tx.context = this.context
+                }
+                if(!tx.context) throw Error("102: context is required on invocations!")
+
                 let to = tx.recipient
                 let memo = tx.memo || ''
                 if(!to) throw Error("invalid TX missing recipient")
                 let invocation:Invocation = {
                     type:'transfer',
+                    context:tx.context,
                     username:this.username,
                     coin,
                     network:coin,
@@ -910,11 +925,12 @@ module.exports = class wallet {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
-                log.debug(tag,"invocation: ",invocation)
-                let result = await this.invoke.invoke('transfer',invocation)
-                console.log("result: ",result.data)
+                log.info(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke(invocation)
+                if(!result) throw Error("Failed to create invocation!")
+                log.info("result: ",result)
 
-                return result.data.invocationId
+                return result.invocationId
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

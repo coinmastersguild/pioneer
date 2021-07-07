@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/ethereum-e2e-tranfer",
+  "name": "@pioneer-platform/rbf-ethereum-e2e",
   "version": "8.1.15",
   "scripts": {
     "yarn": "yarn",
@@ -20,7 +20,9 @@
     "@pioneer-platform/pioneer-app-e2e": "^8.1.15",
     "@pioneer-platform/pioneer-sdk": "^8.1.15",
     "assert": "^2.0.0",
+    "cli-table": "^0.3.6",
     "dotenv": "^6.2.0",
+    "prompt": "^1.1.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "typescript": "^4.2.4",

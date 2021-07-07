@@ -44,6 +44,10 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
+//CLI tools
+const prompt = require('prompt');
+const Table = require('cli-table');
+prompt.start();
 
 import {
     Transfer
@@ -57,6 +61,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     getInvocations,
     sendPairingCode,
     buildTransaction,
@@ -74,9 +80,9 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 let FAUCET_ETH_ADDRESS = process.env['FAUCET_ETH_ADDRESS'] || '0x33b35c665496bA8E71B22373843376740401F106'
-
+let TEST_CONTEXT = process.env['TEST_CONTEXT'] || '0x36fd52f9e57e1b028e2c62f5e297f3872fd4bb9f.wallet.json' //WALLET_MAIN
 let noBroadcast = false
-
+let ttrbf = 20 //time till replace by fee (in seconds)
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -87,24 +93,34 @@ let noBroadcast = false
 
 let txid:string
 let invocationId:string
+let contextAlpha
+let contextBravo
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
         assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -168,7 +184,17 @@ const test_service = async function () {
         let user = await app.getUserParams()
         log.debug("user: ",user)
         assert(user.context)
-        assert(user.clients[BLOCKCHAIN])
+
+        if(user.context !== TEST_CONTEXT){
+            //set context to correct context
+            let resultContextSwitch = await app.setContext(TEST_CONTEXT)
+            log.info("resultContextSwitch: ",resultContextSwitch)
+        }
+
+        let user2 = await app.getUserParams()
+        log.debug("user2: ",user2)
+        assert(user2.context, TEST_CONTEXT)
+        assert(user2.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
@@ -195,7 +221,6 @@ const test_service = async function () {
         assert(balanceSdk[0].amount.amount())
         assert(balanceSdk[0].amount.amount().toString())
 
-
         let balanceNative = balanceSdk[0].amount.amount().toString()
         log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
@@ -210,7 +235,9 @@ const test_service = async function () {
         assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+            log.info(tag,"balanceBase: ",balanceBase)
+            log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: "+masterAddress)
         }
 
         let asset = {
@@ -219,7 +246,9 @@ const test_service = async function () {
             ticker:"ETH",
         }
 
-        //get estimate
+        //TODO get estimate (transfer)
+
+        //get estimate (erc20)
         let estimatePayload = {
             asset,
             amount:balanceBase.toString(),
@@ -228,7 +257,7 @@ const test_service = async function () {
         log.debug(tag,"estimatePayload: ",estimatePayload)
 
         let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.debug(tag,"estimateCost: ",estimateCost)
+        log.info(tag,"estimateCost: ",estimateCost)
         assert(estimateCost)
 
         //max cost - balance
@@ -246,6 +275,11 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
+            feeRate:{
+                priority:"low",
+                units:'gwei',
+                value:2
+            }, // Intentionally low! (in gwei)
             symbol: "ETH",
             recipient: FAUCET_ETH_ADDRESS,
             network: "ETH",
@@ -298,21 +332,33 @@ const test_service = async function () {
         assert.equal(invocationView2.state,'signedTx')
         log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
         //get invocation info EToC
 
         let isConfirmed = false
         //wait for confirmation
-
+        let isAccepted = false
         if(!noBroadcast){
-            // let invocationView3 = await app.getInvocation(invocationId)
-            // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-            // assert(invocationView3)
-            // assert(invocationView3.state)
-            // assert.equal(invocationView3.state,'broadcasted')
+            prompt.get(['accept'], async function (err:any, result:any) {
+                if (err) { throw Error(err) }
+                console.log('Command-line input received:');
+                console.log('  result: ' + result.accept);
+
+                //if yes broadcast
+                isAccepted = true
+
+                //broadcast transaction
+                let broadcastResult = await broadcastTransaction(transaction)
+                log.info(tag,"broadcastResult: ",broadcastResult)
+
+            });
+            while(!isAccepted){
+                await sleep(2000)
+            }
+            let invocationView3 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+            assert(invocationView3)
+            assert(invocationView3.state)
+            assert.equal(invocationView3.state,'broadcasted')
 
             /*
 
@@ -326,13 +372,14 @@ const test_service = async function () {
                  4: fullfilled (swap completed)
 
              */
-
+            let timeBroadcast = new Date().getTime()
             //monitor tx lifecycle
             let currentStatus
             let statusCode = 0
             // let txid
             //wait till confirmed in block
             while(!isConfirmed){
+
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
                 log.info(tag,"invocationInfo: ",invocationInfo)
@@ -356,6 +403,28 @@ const test_service = async function () {
 
                     //get tx gas price
                     await sleep(6000)
+                }
+            }
+
+            //if not confirmed
+            if(!isConfirmed){
+                //time unconfirmed
+                let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
+                log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
+                //if timeUnconfirmed > x
+                if(timeUnconfirmed > ttrbf){
+                    log.info(" *** BEGIN RBF procedure *** ")
+                    //get current fee level for high
+
+                    //get invocation
+
+                    //bump fee "high"
+
+                    //build rbf tx
+
+                    //broadcast
+
+                    //update invocation
                 }
             }
         }

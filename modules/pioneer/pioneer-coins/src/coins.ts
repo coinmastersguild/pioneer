@@ -170,7 +170,7 @@ export function bip32ToAddressNList(path: string): number[] {
     return ret;
 }
 
-function addressNListToBIP32(address: number[]): string {
+export function addressNListToBIP32(address: number[]): string {
     return `m/${address.map((num) => (num >= HARDENED ? `${num - HARDENED}'` : num)).join("/")}`;
 }
 

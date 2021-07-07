@@ -11,13 +11,7 @@ let network = require("../lib/index")
 network.init()
 
 //
-network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
-    .then(function(resp){
-        console.log(resp)
-    })
-
-// let rawTx = "0xf86d0285037e11d600825208943aef01db231c3c9ff844f7e611c63b8c36bc6a02890882a498069f7400008025a0538b29d686ea787a483bcfdf0cd31c6bbca520f0c2073edcf43fe9d3e6fb2fb3a04b506074a43988f1d023cc7bf2f716c955cafd38c0c1df76fe9fe846160501d5"
-// network.broadcast(rawTx)
+// network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
 //     .then(function(resp){
 //         console.log(resp)
 //     })
@@ -32,17 +26,17 @@ network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
 //         console.log(resp)
 //     })
 
-// let rawTx = "0xf8aa808508f6c7610083015f9094dac17f958d2ee523a2206206994597c13d831ec780b844a9059cbb0000000000000000000000003aef01db231c3c9ff844f7e611c63b8c36bc6a02000000000000000000000000000000000000000000000000000000003b9aca0025a0b68242ca43996b4518a948c56a41f1c27fc6b4112cacf1e89e491068b40af34ea06bac55ab44cf039da95f4d09e7fa525125bcea32eee19994d59637c7878f9251"
-// network.broadcast(rawTx)
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+let rawTx = "0xf86c3c8506e44c2800830138809433b35c665496ba8e71b22373843376740401f106870aa87bee5380008025a03a90ca4a262624725e05da416293b7aa6e1faa611b064f30561123d005db9ec9a020ad66b84f4f3ad6354182cc14030d60f05ff8bc80286b33e9c3ed8af8176db7"
+network.broadcast(rawTx)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 //basic
-// network.getTransaction("0x06d3de5c93e87f1541d97773efa93b3afaa99b464c4aa6ef606df9234f1afaf7")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getTransaction("0x1d25efc5bfe99e02ab99c003ecc78dcd3452c4bc2d457fc3ba2b50fba782e643")
+    .then(function(resp){
+        console.log(resp)
+    })
 
 //thorchain is approved
 // let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"

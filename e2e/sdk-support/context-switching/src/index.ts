@@ -50,6 +50,7 @@ let {
 
 const {
     startApp,
+    getContext,
     sendPairingCode,
     getWallets,
 } = require('@pioneer-platform/pioneer-app-e2e')
@@ -64,29 +65,74 @@ let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 let noBroadcast = true
+let contextAlpha
+let contextBravo
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let App = await startApp()
+        log.info(tag,"App: ",App)
+        let username = App.username
         assert(username)
-        log.info("username: ",username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+
+        //multi-wallet
+        assert(appWallets.length,2)
+        log.info(tag,"appWallets: ",appWallets)
+
+        //TODO bounce funds between and test max amounts
+        //set highest balance to main
+        log.info(tag,"appWallets[0]: ",appWallets[0])
+        log.info(tag,"appWallets[1]: ",appWallets[1])
+
+        let balance1 = App.wallets[appWallets[0]].WALLET_BALANCES[ASSET]
+        let balance2 = App.wallets[appWallets[1]].WALLET_BALANCES[ASSET]
+        log.info(tag,"balance1: ",balance1)
+        log.info(tag,"balance2: ",balance2)
+
+        if(balance1 > balance2){
+            contextAlpha = App.wallets[appWallets[0]].context
+            contextBravo = App.wallets[appWallets[1]].context
+        } else {
+            contextAlpha = App.wallets[appWallets[1]].context
+            contextBravo = App.wallets[appWallets[0]].context
+        }
+        log.info(tag,"contextAlpha: ",contextAlpha)
+        log.info(tag,"contextBravo: ",contextBravo)
+
+        //set context to main
+        //set faucet addresses to secondary
+        //send MAX to secondary (next time test runs it will switch)
+
+        let balance = App.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
+        let masterBravo = await App.wallets[contextBravo].getMaster(ASSET)
+        log.info(tag,"masterBravo: ",masterBravo)
+
+        let masterAlpha = await App.wallets[contextAlpha].getMaster(ASSET)
+        log.info(tag,"masterAlpha: ",masterAlpha)
+
+
+
         //assert balance local
-        //log.info(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
+        //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
-            log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
+
 
         //generate new key
         const queryKey = uuidv4();

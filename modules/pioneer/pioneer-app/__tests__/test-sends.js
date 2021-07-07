@@ -30,8 +30,8 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 let TEST_COINS = [
     // 'BTC',
     // 'BCH',
-    'LTC',
-    // 'ETH',
+    // 'LTC',
+    'ETH',
     // 'ATOM'
     // 'RUNE'
     // 'BNB'

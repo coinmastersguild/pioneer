@@ -8,7 +8,7 @@
     15$ can borrow 3,500 ETH, and this was enable to make a couple transactions
 
  */
-const TAG = " | Pioneer-client-ts | "
+const TAG = " | Pioneer-invoke | "
 const log = require("@pioneer-platform/loggerdog")()
 const short = require('short-uuid');
 let sign = require('@pioneer-platform/signing')
@@ -34,7 +34,7 @@ module.exports = class wallet {
     private appName: string;
     // private signingPubkey: string;
     // private signingPrivkey: string;
-    private invoke: (type:string, invocation: Invocation) => Promise<void>;
+    private invoke: (invocation: Invocation) => Promise<any>;
     private online: () => Promise<any>;
     constructor(spec:string,config:any) {
         this.spec = spec
@@ -71,10 +71,11 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.invoke = async function (type,invocation:Invocation) {
+        this.invoke = async function (invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
-                if(!type) throw Error("invocation Type required!")
+                if(!invocation.type) throw Error("invocation Type required!")
+                if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
                 let invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
 
@@ -85,17 +86,19 @@ module.exports = class wallet {
                 //Dapps sign all invocations
                 let request:InvocationBody = {
                     network:invocation.network,
+                    context:invocation.context,
                     // pubkey:this.signingPubkey,
                     appName:this.appName,
                     username:invocation.username,
-                    type,
+                    type:invocation.type,
                     invocation,
                     // invocationSig,
                     invocationId
                 }
                 //
-                let result = this.pioneerApi.instance.Invoke(null, request)
-                return result
+                let result = await this.pioneerApi.instance.Invoke(null, request)
+                log.info(tag,"result: ",result)
+                return result.data
             }catch(e){
                 log.error(tag,e)
                 throw e

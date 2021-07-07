@@ -21,8 +21,8 @@ const log = require("@pioneer-platform/loggerdog")()
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
-let seed = process.env['WALLET_TEST']
-let seed2 = process.env['WALLET_TEST_2']
+let seed = process.env['WALLET_MAIN']
+let seed2 = process.env['WALLET_TEST']
 if(!seed) throw Error("Failed to find test seed!")
 if(seed === seed2) throw Error("bravo seed MUST be eunique!")
 let password = process.env['WALLET_PASSWORD'] || '123'
@@ -115,9 +115,9 @@ export async function startApp() {
         wallet2.masterAddress = walletEth2.masterAddress
 
         //create wallet files
-        log.info(tag,"wallet2: ",wallet2)
-        let successCreate2 = await App.createWallet('software',wallet2)
-        assert(successCreate2)
+        // log.info(tag,"wallet2: ",wallet2)
+        // let successCreate2 = await App.createWallet('software',wallet2)
+        // assert(successCreate2)
 
         await App.initConfig("english");
         App.updateConfig({username});
@@ -171,7 +171,12 @@ export async function startApp() {
         assert(context)
         WALLET_CONTEXT = context
         assert(WALLETS_LOADED[WALLET_CONTEXT])
-        return WALLETS_LOADED[WALLET_CONTEXT]
+        return {
+            context:WALLET_CONTEXT,
+            wallets:WALLETS_LOADED,
+            user:userInfo,
+            username:userInfo.username
+        }
     } catch (e) {
         log.error(e)
         throw e
@@ -248,6 +253,7 @@ export async function buildTransaction(transaction:any) {
             context = WALLET_CONTEXT
         } else {
             context = transaction.context
+            WALLET_CONTEXT = context
         }
         if(!context || !WALLETS_LOADED[context]) {
             log.error("context: ",context)
@@ -259,7 +265,7 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        log.info(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {

@@ -229,8 +229,6 @@ const test_service = async function () {
         //filter by chain
         let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
         log.info(tag,"thorVault: ",thorVault)
-
-        log.info(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
         assert(thorVault.address)
@@ -249,8 +247,8 @@ const test_service = async function () {
         }
 
         let transfer:Transfer = {
+            context:user.context,
             recipient: FAUCET_RUNE_ADDRESS,
-            //coin: ASSET,
             asset: ASSET,
             network: ASSET,
             memo: '',

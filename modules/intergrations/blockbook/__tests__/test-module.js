@@ -17,12 +17,17 @@ network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
 
-let address = ""
-network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")
+network.broadcast("ETH","0xf86e8202ab85028fa6ae008301388094c3affff54122658b89c31183cec4f15514f34624870aa87bee5380008025a04cbf2dc700925319439ae86413eb50a82a7250eff94a2e6e82b223ff8873ca16a04f2745e71c811889ca6a1fdb36ff33486c0f7b7796638d757a3af1adb3ce1afa")
     .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
+        console.log("txid: ",resp)
     })
+
+// let address = ""
+// network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.getTransaction('BCH',"")
 //     .then(function(resp){

@@ -20,7 +20,7 @@ export interface Invocation {
 
 export interface InvocationBody {
     msg?: string;
-    context?: string;
+    context: string;
     network:string;
     type:string
     username:string,

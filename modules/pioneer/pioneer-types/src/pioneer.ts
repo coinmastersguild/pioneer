@@ -114,14 +114,15 @@ export interface CitadelWallet {
 }
 
 export interface Transfer {
+    context?:string
     network: string;
     asset: string;
     symbol?: string;
-    feeRate: any
+    feeRate?: any
     recipient: string
     amount:any
-    memo:string
-    noBroadcast:boolean
+    memo?:string
+    noBroadcast?:boolean
 }
 
 export interface Deposit {
@@ -152,6 +153,7 @@ export interface Transaction {
     memo?: string | undefined;
     nonce?:number
     feeLevel?:string,
+    fee?:any
     noBroadcast?:boolean
 }
 

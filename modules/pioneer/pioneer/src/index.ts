@@ -28,7 +28,9 @@ const {
     UTXO_COINS,
     COIN_MAP_KEEPKEY_LONG,
     COIN_MAP_LONG,
-    getNativeAssetForBlockchain
+    getNativeAssetForBlockchain,
+    addressNListToBIP32,
+    bip32ToAddressNList
 } = require('@pioneer-platform/pioneer-coins')
 
 //support
@@ -50,10 +52,6 @@ import {
 } from "@pioneer-platform/pioneer-types";
 //Pioneer follows OpenAPI spec
 let network = require("@pioneer-platform/pioneer-client")
-//pioneer
-import {
-    bip32ToAddressNList,
-} from "@bithighlander/hdwallet-core";
 
 //Highlander fork
 const hdwallet = require("@bithighlander/hdwallet-core")
@@ -87,7 +85,7 @@ function createBech32Address(publicKey:any,prefix:string) {
 
 module.exports = class wallet {
     private PUBLIC_WALLET:any = {};
-    private paths: (format: string) => any;
+    private paths: (format?: string) => any;
     private forget: () => any;
     private getBalance: (coin: string, address?:string) => any;
     private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
@@ -188,7 +186,7 @@ module.exports = class wallet {
                         log.debug(tag,"isTestnet: ",this.isTestnet)
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
-                        await this.WALLET.loadDevice({ mnemonic: config.mnemonic, isTestnet:this.isTestnet })
+                        await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
 
                         //verify testnet
                         const isTestnet = false
@@ -398,7 +396,7 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.paths = function (format:string) {
+        this.paths = function (format?:string) {
             let tag = TAG + " | get_paths | "
             try {
                 let output:any = []
@@ -505,12 +503,55 @@ module.exports = class wallet {
             let result = await this.WALLET.fioDecryptRequestContent(content)
             return result
         }
-        this.getMaster = async function (coin:string) {
+        this.getMaster = async function (network:string) {
             let tag = TAG + " | get_address_master | "
             try {
-                if(!coin) throw Error("101: must pass coin!")
-                if(this.PUBLIC_WALLET[coin]){
-                    let output = this.PUBLIC_WALLET[coin].address
+                if(!network) throw Error("101: must pass network!")
+                if(this.PUBLIC_WALLET[network]){
+                    let output = this.PUBLIC_WALLET[network].address
+
+                    //verify
+                    let address
+                    let paths = this.paths()
+                    let pathInfo = paths.filter((e:any) => e.network === network)
+                    log.info(tag,"pathInfo: ",pathInfo)
+                    if(!pathInfo[0]) throw Error("103: unable to get path info! ")
+                    let masterPath = addressNListToBIP32(pathInfo[0].addressNListMaster)
+
+                    switch(network) {
+                        case 'ETH':
+                            address = await this.WALLET.ethGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                showDisplay: false,
+                            });
+                            break;
+                        case 'RUNE':
+                            address = await this.WALLET.thorchainGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                showDisplay: false,
+                            });
+                            break;
+                        case 'ATOM':
+                            address = await this.WALLET.cosmosGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                showDisplay: false,
+                            });
+                            break;
+                        case 'BNB':
+                            address = await this.WALLET.binanceGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                showDisplay: false,
+                            });
+                            break;
+                        default:
+                            throw Error("coin not yet implemented ! ")
+                        // code block
+                    }
+                    log.info(tag,"address (HDwallet): ",address)
+                    log.info(tag,"address (private): ",output)
+                    if(address !== output) {
+                        throw Error("unable to verify address in HDwallet!")
+                    }
                     return output
                 }else{
                     return "Not found!"
@@ -1346,7 +1387,7 @@ module.exports = class wallet {
                 }else if(network === 'ETH'){
 
                     //TODO fix tokens
-                    log.debug("unsignedTxETH: ",unsignedTx.HDwalletPayload)
+                    log.info("unsignedTxETH: ",unsignedTx)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
                     //debug https://flightwallet.github.io/decode-eth-tx/
 
@@ -1354,8 +1395,15 @@ module.exports = class wallet {
                     const decoded = ethers.utils.parseTransaction(signedTx.serialized)
                     signedTx.decoded = decoded
 
+                    log.info(tag,"decoded: ",decoded)
+                    log.info(tag,"decoded.from: ",decoded.from)
+                    log.info(tag,"addressFrom: ",unsignedTx?.transaction?.addressFrom)
+
+                    if(unsignedTx?.transaction?.addressFrom !== decoded.from){
+                        throw Error("Invalid transaction! from address mismatch!")
+                    }
+
                     //TODO verify more
-                    //expect from to be master
                     //verify amounts sane
 
                     //txid
@@ -1464,6 +1512,10 @@ module.exports = class wallet {
                 if(!address) address = transaction.addressTo
                 let amount = transaction.amount
 
+                //get paths
+                let paths = this.paths()
+                log.info(tag,"paths: ",paths)
+                if(!paths) throw Error("101: unable to get paths!")
                 if(!network) throw Error("102: Invalid transaction missing address!")
                 if(!address) throw Error("103: Invalid transaction missing address!")
                 if(!amount) throw Error("104: Invalid transaction missing amount!")
@@ -1477,7 +1529,7 @@ module.exports = class wallet {
                 }
                 if(!addressFrom) throw Error("102: unable to get master address! ")
                 log.debug(tag,"addressFrom: ",addressFrom)
-
+                transaction.addressFrom = addressFrom
                 let rawTx
 
                 if(UTXO_COINS.indexOf(network) >= 0){
@@ -1686,7 +1738,6 @@ module.exports = class wallet {
                         throw Error("UTXO coin: "+network+" Not supported yet! ")
                     }
 
-
                     //hdwallet input
                     //TODO type this
 
@@ -1698,7 +1749,6 @@ module.exports = class wallet {
                         version: 1,
                         locktime: 0,
                     }
-
 
                     let unsignedTx = {
                         network,
@@ -1719,10 +1769,9 @@ module.exports = class wallet {
 
                     let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
                     nonceRemote = nonceRemote.data
-                    // let nonce = transaction.nonce || nonceRemote
-                    // log.debug(tag,"nonce: ",nonce)
-                    //
-                    let nonce = 0
+                    let nonce = transaction.nonce || nonceRemote
+                    log.debug(tag,"nonce: ",nonce)
+
                     let gas_limit = 80000 //TODO dynamic gas limit?
                     let gas_price = await this.pioneerClient.instance.GetGasPrice()
                     gas_price = gas_price.data
@@ -1744,7 +1793,8 @@ module.exports = class wallet {
                         }
                         log.debug(tag,"txParams: ",txParams)
                     } else {
-
+                        throw Error("103: tokens incomplete!")
+                        //TODO tokens
                     }
                     // else{
                     //     //TODO tokens
@@ -1781,9 +1831,26 @@ module.exports = class wallet {
                     if(!txParams) throw Error("tokens not supported")
 
                     //send FROM master
-                    let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
-
+                    let ethPathInfo = paths.filter((e:any) => e.network === 'ETH')
+                    log.info(tag,"ethPathInfo: ",ethPathInfo)
+                    if(!ethPathInfo[0]) throw Error("103: unable to get eth path info! ")
+                    let masterPathEth = addressNListToBIP32(ethPathInfo[0].addressNListMaster)
+                    log.info(tag,"masterPathEth: ",masterPathEth)
+                    log.info(tag,"masterPathEth: ","m/44'/60'/0'/0/0")
+                    //let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
                     log.debug(tag,"txParams: ",txParams)
+
+                    //verify from address
+                    let fromAddressHDwallet = await this.WALLET.ethGetAddress({
+                        addressNList: bip32ToAddressNList(masterPathEth),
+                        showDisplay: false,
+                    });
+                    log.info(tag,"fromAddressHDwallet: ",fromAddressHDwallet)
+                    log.info(tag,"fromAddress: ",addressFrom)
+
+                    if(addressFrom !== fromAddressHDwallet){
+                        throw Error("666: Address mismatch! refusing to sign!")
+                    }
 
                     let chainId = 1
                     if(this.isTestnet){
@@ -1791,14 +1858,7 @@ module.exports = class wallet {
                     }
 
                     let ethTx = {
-                        //addressNList: support.bip32ToAddressNList(masterPathEth),
-                        "addressNList":[
-                            2147483692,
-                            2147483708,
-                            2147483648,
-                            0,
-                            0
-                        ],
+                        addressNList: bip32ToAddressNList(masterPathEth),
                         nonce: numberToHex(txParams.nonce),
                         gasPrice: numberToHex(txParams.gasPrice),
                         gasLimit: numberToHex(txParams.gasLimit),
@@ -1808,9 +1868,6 @@ module.exports = class wallet {
                         chainId
                     }
                     log.debug("TX: ",JSON.stringify(ethTx))
-
-                    //import Broke
-
 
                     let unsignedTx = {
                         network:network,
@@ -1899,14 +1956,6 @@ module.exports = class wallet {
                         log.error(tag,"addressFrom: ",addressFrom)
                         throw Error("Can not sign, address mismatch")
                     }
-
-                    log.debug(tag,"******* signTx: ",JSON.stringify({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
 
                     let runeTx = {
                             addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),

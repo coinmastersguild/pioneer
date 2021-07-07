@@ -30,7 +30,7 @@ const mkdirp = require("mkdirp");
 const log = require("@pioneer-platform/loggerdog")()
 const prettyjson = require('prettyjson');
 const queue = require('queue')
-
+const ethCrypto = require("@pioneer-platform/eth-crypto")
 const pendingQueue = queue({ pending: [] })
 const approvedQueue = queue({ approved: [] })
 
@@ -1250,7 +1250,6 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     // log.debug(tag,"mnemonic: ",mnemonic)
                     //load wallet to global
                     let configPioneer:PioneerConfig = {
-                        isTestnet,
                         mnemonic,
                         context,
                         walletDescription:{
@@ -1266,13 +1265,22 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     }
                     if(walletPaths) configPioneer.paths = walletPaths
 
-                    log.debug(tag,"configPioneer: ",configPioneer)
-                    log.debug(tag,"isTestnet: ",isTestnet)
-                    let wallet = new Pioneer('pioneer',configPioneer,isTestnet);
-                    WALLETS_LOADED[context] = wallet
-
+                    log.info(tag,"creating wallet with config (pioneer): ",configPioneer)
+                    let wallet = new Pioneer('pioneer',configPioneer);
                     //init
                     let walletClient = await wallet.init()
+
+                    //get address, verify it is correct in hdwallet
+                    let walletEthVerify = await ethCrypto.generateWalletFromSeed(mnemonic)
+                    let masterEthMenomic = walletEthVerify.masterAddress
+                    let masterEthHdWallet = await wallet.getMaster('ETH')
+                    masterEthHdWallet = masterEthHdWallet.toLowerCase()
+                    log.info(tag,"masterEthMenomic: ",masterEthMenomic)
+                    log.info(tag,"masterEthHdWallet: ",masterEthHdWallet)
+                    if(masterEthMenomic !== masterEthHdWallet) throw Error("HDwallet wallet loaded invalid!")
+
+                    //load
+                    WALLETS_LOADED[context] = wallet
 
                     //info
                     let info = await wallet.getInfo(context)
@@ -1427,9 +1435,6 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    // invokeQueue = await app_to_queue(request.invocation)
-                    // log.debug(tag,"invokeQueue: ", invokeQueue)
-                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1464,9 +1469,6 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    // invokeQueue = await app_to_queue(request.invocation)
-                    // log.debug(tag,"invokeQueue: ", invokeQueue)
-                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1499,9 +1501,6 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    // invokeQueue = await app_to_queue(request.invocation)
-                    // log.debug(tag,"invokeQueue: ", invokeQueue)
-                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
                     if(request.invocation.context) context = request.invocation.context
                     if(!context) context = WALLET_CONTEXT
@@ -1530,17 +1529,19 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     log.debug(tag,"resultUpdate: ",resultUpdate)
                     clientEvents.events.emit('unsignedTx',updateBody)
 
-
                     break;
                 case 'transfer':
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
                     if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
                     request.invocation.invocationId = request.invocationId
-                    // invokeQueue = await app_to_queue(request.invocation)
-                    // log.debug(tag,"invokeQueue: ", invokeQueue)
-                    // clientEvents.events.emit('invokeQueue',invokeQueue)
 
-                    if(request.invocation.context) context = request.invocation.context
+                    if(request.invocation.context) {
+                        context = request.invocation.context
+                        //context specified
+                        log.info(tag,"Context Specified: ",context)
+                        log.info(tag,"Current Context: ",WALLET_CONTEXT)
+                        WALLET_CONTEXT = context
+                    }
                     if(!context) context = WALLET_CONTEXT
                     if(!WALLETS_LOADED[context]) {
                         log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
