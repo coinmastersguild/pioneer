@@ -109,6 +109,7 @@ module.exports = class wallet {
     private signingPubkey: string;
     private signingPrivkey: string;
     private deposit: (deposit: any, options: any) => Promise<any>;
+    private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -452,6 +453,7 @@ module.exports = class wallet {
                 try {
                     //
                     let invocation:any = {
+                        type:'approve',
                         username:this.username,
                         coin:this.nativeAsset,
                         contract:spender,
@@ -460,11 +462,31 @@ module.exports = class wallet {
                     }
                     if(noBroadcast) invocation.noBroadcast = true
                     log.debug(tag,"invocation: ",invocation)
-                    let result = await this.invoke.invoke('approve',invocation)
-                    console.log("result: ",result.data)
+                    let result = await this.invoke.invoke(invocation)
+                    console.log("result: ",result)
 
 
-                    return result.data.txid
+                    return result.txid
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.replace = async function (invocationId:string,fee:any) {
+                let tag = TAG + " | replace | "
+                try {
+                    //
+                    let invocation:Invocation = {
+                        type:'replace',
+                        asset:'ETH',
+                        network:'ETH',
+                        fee
+                    }
+                    let result = await this.invoke.invoke(invocation)
+                    log.info("result: ",result)
+
+
+                    return result.invocationId
                 } catch (e) {
                     log.error(tag, "e: ", e)
                 }
@@ -499,6 +521,7 @@ module.exports = class wallet {
 
                     let params = {
                         coin:"ETH",
+                        network:"ETH",
                         amount:assetToBase(assetAmount(inputAmount, 18)).amount().toFixed(),
                         contract:"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
                         recipient:ethInbound.address,
@@ -718,7 +741,7 @@ module.exports = class wallet {
         this.getFees = async function (params?: FeesParams) {
             let tag = TAG + " | getFees | "
             try {
-                let output = await this.pioneerApi.getFees(params)
+                let output = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
                 return output
             } catch (e) {
                 log.error(tag, "e: ", e)

@@ -64,6 +64,7 @@ export class SDK {
     private stopSocket: () => any;
     private contextWalletInfo: any;
     private valueUsdContext: any;
+    private replaceInvocation: (invocationId: string, fee: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -232,6 +233,16 @@ export class SDK {
             try {
                 let result = await this.pioneerApi.Info(this.context)
                 return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.replaceInvocation = async function (invocationId:string,fee:any) {
+            let tag = TAG + " | replaceInvocation | "
+            try {
+                //
+
+                return true
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

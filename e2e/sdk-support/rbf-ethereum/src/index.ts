@@ -276,10 +276,11 @@ const test_service = async function () {
         let transfer:Transfer = {
             context:user.context,
             feeRate:{
-                priority:"low",
-                units:'gwei',
-                value:2
-            }, // Intentionally low! (in gwei)
+                gasLimit: 20000,
+                priority:2, //1-5 5 = highest
+                // units:'gwei',
+                // value:200000000 // Intentionally low! (in gwei)
+            },
             symbol: "ETH",
             recipient: FAUCET_ETH_ADDRESS,
             network: "ETH",
@@ -399,7 +400,7 @@ const test_service = async function () {
                     isConfirmed = true
                 } else {
                     log.info(tag,"Not confirmed!")
-                    //get gas price recomended
+                    //get gas price recommended
 
                     //get tx gas price
                     await sleep(6000)
@@ -417,14 +418,26 @@ const test_service = async function () {
                     //get current fee level for high
 
                     //get invocation
+                    let invocationInfo = await app.getInvocation(invocationId)
+                    log.info(tag,"invocationInfo: ",invocationInfo)
 
                     //bump fee "high"
+                    let responseFees = await user.clients.ethereum.getFees()
+                    log.info(tag,"responseFees: ",responseFees)
 
-                    //build rbf tx
+                    //rebuild rbf tx
+                    let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
+                    log.info(tag,"responseReplace: ",responseReplace)
 
-                    //broadcast
+                    //re-sign
+                    let signedTx = await approveTransaction(transaction)
+                    log.debug(tag,"signedTx: ",signedTx)
+                    assert(signedTx)
+                    assert(signedTx.txid)
 
-                    //update invocation
+                    //re-broadcast
+                    let broadcastResult = await broadcastTransaction(transaction)
+                    log.info(tag,"broadcastResult: ",broadcastResult)
                 }
             }
         }

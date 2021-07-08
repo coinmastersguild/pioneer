@@ -1772,8 +1772,28 @@ module.exports = class wallet {
                     let nonce = transaction.nonce || nonceRemote
                     log.debug(tag,"nonce: ",nonce)
 
-                    let gas_limit = 80000 //TODO dynamic gas limit?
+                    let gas_limit = 80000
                     let gas_price = await this.pioneerClient.instance.GetGasPrice()
+
+                    //override
+                    if(transaction.fee){
+                        if(transaction.fee.priority){
+                            log.info(tag,"gas_price: ",gas_price)
+                            if(transaction.fee.priority === 2){
+                                gas_price = gas_price * 0.5
+                                gas_price = parseInt(gas_price)
+                            }
+                        } else {
+                            //TODO other units?
+                            if(transaction.fee.value && transaction.fee.units === 'gwei'){
+                                gas_price = transaction.fee.value
+                            }
+                            if(transaction.fee.gasLimit){
+                                gas_limit = 20000
+                            }
+                        }
+                    }
+
                     gas_price = gas_price.data
                     log.debug(tag,"gas_price: ",gas_price)
                     gas_price = parseInt(gas_price)
@@ -1837,7 +1857,6 @@ module.exports = class wallet {
                     let masterPathEth = addressNListToBIP32(ethPathInfo[0].addressNListMaster)
                     log.info(tag,"masterPathEth: ",masterPathEth)
                     log.info(tag,"masterPathEth: ","m/44'/60'/0'/0/0")
-                    //let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
                     log.debug(tag,"txParams: ",txParams)
 
                     //verify from address

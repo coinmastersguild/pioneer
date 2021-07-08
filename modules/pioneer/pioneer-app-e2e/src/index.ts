@@ -350,6 +350,11 @@ export async function approveTransaction(transaction:any) {
         log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         log.debug(tag,"invocation.unsignedTx: ",invocation.unsignedTx)
         log.debug(tag,"invocation.unsignedTx HDwalletPayload: ",JSON.stringify(invocation.unsignedTx.HDwalletPayload))
+
+        //TODO verify app?
+        //verify amounts
+        //verify intent
+
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
         //update invocation

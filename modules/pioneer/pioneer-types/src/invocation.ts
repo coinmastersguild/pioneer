@@ -8,6 +8,7 @@ export interface Invocation {
     address?:string,
     addressTo?:string,
     memo?:string
+    fee?:any
     asset:any
     blockchain?:string
     network:string
