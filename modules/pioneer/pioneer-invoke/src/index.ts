@@ -21,11 +21,6 @@ import {
     InvocationBody
 } from "@pioneer-platform/pioneer-types";
 
-enum AuthProviders {
-    shapeshift = 'shapeshift',
-    bitcoin = 'bitcoin'
-}
-
 module.exports = class wallet {
     private init: (type: string, config: any) => Promise<any>;
     private spec: string;
@@ -78,7 +73,7 @@ module.exports = class wallet {
                 if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
                 let invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
-
+                invocation.invocationId = invocationId
                 //TODO sign
                 let msg = JSON.stringify(invocation)
                 //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
@@ -96,8 +91,9 @@ module.exports = class wallet {
                     invocationId
                 }
                 //
+                log.info(tag,"invocation BODY: ",request)
                 let result = await this.pioneerApi.instance.Invoke(null, request)
-                log.info(tag,"result: ",result)
+                //log.info(tag,"result: ",result)
                 return result.data
             }catch(e){
                 log.error(tag,e)

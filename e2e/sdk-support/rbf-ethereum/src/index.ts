@@ -299,8 +299,8 @@ const test_service = async function () {
 
         //if create new
         let responseTransfer = await user.clients.ethereum.transfer(transfer,options)
-        log.debug(tag,"responseTransfer: ",responseTransfer)
-        //optional (configurable with options above) .invocationId response
+        log.info(tag,"responseTransfer: ",responseTransfer)
+        // //optional (configurable with options above) .invocationId response
         invocationId = responseTransfer
 
         //do not continue invocation
@@ -314,150 +314,151 @@ const test_service = async function () {
         //build
         let unsignedTx = await buildTransaction(transaction)
         log.info(tag,"unsignedTx: ",unsignedTx)
-        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
-        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
-        assert(unsignedTx)
-        let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
-        txFeeGwei = parseInt(String(txFeeGwei))
-        //verify fee level
-        if(txFeeGwei !== LOW_FEE_LEVEL){
-            log.info(tag,"FEE LEVEL created: ",txFeeGwei)
-            log.info(tag,"FEE LEVEL expected: ",LOW_FEE_LEVEL)
-            throw Error("Failed to use correct fee on txbuilding!")
-        }
-
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-        assert(invocationView1.state)
-        assert.equal(invocationView1.state,'builtTx')
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.debug(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        assert(signedTx.txid)
+        // log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
+        // log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
+        // assert(unsignedTx)
+        // let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
+        // txFeeGwei = parseInt(String(txFeeGwei))
+        // //verify fee level
+        // if(txFeeGwei !== LOW_FEE_LEVEL){
+        //     log.info(tag,"FEE LEVEL created: ",txFeeGwei)
+        //     log.info(tag,"FEE LEVEL expected: ",LOW_FEE_LEVEL)
+        //     throw Error("Failed to use correct fee on txbuilding!")
+        // }
 
         // //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        assert(invocationView2.state)
-        assert.equal(invocationView2.state,'signedTx')
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
-        //get invocation info EToC
-
-        let isConfirmed = false
-        //wait for confirmation
-        let isAccepted = false
-        if(!noBroadcast){
-            prompt.get(['accept'], async function (err:any, result:any) {
-                if (err) { throw Error(err) }
-                console.log('Command-line input received:');
-                console.log('  result: ' + result.accept);
-
-                //if yes broadcast
-                isAccepted = true
-
-                //broadcast transaction
-                let broadcastResult = await broadcastTransaction(transaction)
-                log.info(tag,"broadcastResult: ",broadcastResult)
-
-            });
-            while(!isAccepted){
-                await sleep(2000)
-            }
-            let invocationView3 = await app.getInvocation(invocationId)
-            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-            assert(invocationView3)
-            assert(invocationView3.state)
-            assert.equal(invocationView3.state,'broadcasted')
-
-            /*
-
-                Status codes
-
-                -1: errored
-                 0: unknown
-                 1: built
-                 2: broadcasted
-                 3: confirmed
-                 4: fullfilled (swap completed)
-
-             */
-            let timeBroadcast = new Date().getTime()
-            //monitor tx lifecycle
-            let currentStatus
-            let statusCode = 0
-            // let txid
-            //wait till confirmed in block
-            while(!isConfirmed){
-
-                //get invocationInfo
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
-
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let response = await client.getTransactionData(txid)
-                log.info(tag,"response: ",response)
-
-                if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
-                    statusCode = 3
-                    isConfirmed = true
-                } else {
-                    log.info(tag,"Not confirmed!")
-                    //get gas price recommended
-
-                    //get tx gas price
-                    await sleep(6000)
-                }
-            }
-
-            //if not confirmed
-            if(!isConfirmed){
-                //time unconfirmed
-                let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
-                log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
-                //if timeUnconfirmed > x
-                if(timeUnconfirmed > ttrbf){
-                    log.info(" *** BEGIN RBF procedure *** ")
-                    //get current fee level for high
-
-                    //get invocation
-                    let invocationInfo = await app.getInvocation(invocationId)
-                    log.info(tag,"invocationInfo: ",invocationInfo)
-
-                    //bump fee "high"
-                    let responseFees = await user.clients.ethereum.getFees()
-                    log.info(tag,"responseFees: ",responseFees)
-
-                    //rebuild rbf tx
-                    let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
-                    log.info(tag,"responseReplace: ",responseReplace)
-
-                    //re-sign
-                    let signedTx = await approveTransaction(transaction)
-                    log.debug(tag,"signedTx: ",signedTx)
-                    assert(signedTx)
-                    assert(signedTx.txid)
-
-                    //re-broadcast
-                    let broadcastResult = await broadcastTransaction(transaction)
-                    log.info(tag,"broadcastResult: ",broadcastResult)
-                }
-            }
-        }
-
-        //close socket
-        let result = await app.stopSocket()
-        log.debug(tag,"result: ",result)
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        // //assert(invocationView1.fee)
+        // assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'builtTx')
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.debug(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // assert(signedTx.txid)
+        //
+        // // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        // assert(invocationView2.state)
+        // assert.equal(invocationView2.state,'signedTx')
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //get invocation info EToC
+        //
+        // let isConfirmed = false
+        // //wait for confirmation
+        // let isAccepted = false
+        // if(!noBroadcast){
+        //     prompt.get(['accept'], async function (err:any, result:any) {
+        //         if (err) { throw Error(err) }
+        //         console.log('Command-line input received:');
+        //         console.log('  result: ' + result.accept);
+        //
+        //         //if yes broadcast
+        //         isAccepted = true
+        //
+        //         //broadcast transaction
+        //         let broadcastResult = await broadcastTransaction(transaction)
+        //         log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        //     });
+        //     while(!isAccepted){
+        //         await sleep(2000)
+        //     }
+        //     let invocationView3 = await app.getInvocation(invocationId)
+        //     log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        //     assert(invocationView3)
+        //     assert(invocationView3.state)
+        //     assert.equal(invocationView3.state,'broadcasted')
+        //
+        //     /*
+        //
+        //         Status codes
+        //
+        //         -1: errored
+        //          0: unknown
+        //          1: built
+        //          2: broadcasted
+        //          3: confirmed
+        //          4: fullfilled (swap completed)
+        //
+        //      */
+        //     let timeBroadcast = new Date().getTime()
+        //     //monitor tx lifecycle
+        //     let currentStatus
+        //     let statusCode = 0
+        //     // let txid
+        //     //wait till confirmed in block
+        //     while(!isConfirmed){
+        //
+        //         //get invocationInfo
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.info(tag,"invocationInfo: ",invocationInfo)
+        //
+        //         txid = invocationInfo.signedTx.txid
+        //         assert(txid)
+        //         if(!currentStatus) currentStatus = 'transaction built!'
+        //         if(statusCode <= 0) statusCode = 1
+        //
+        //         //lookup txid
+        //         let response = await client.getTransactionData(txid)
+        //         log.info(tag,"response: ",response)
+        //
+        //         if(response && response.txInfo && response.txInfo.blockNumber){
+        //             log.info(tag,"Confirmed!")
+        //             statusCode = 3
+        //             isConfirmed = true
+        //         } else {
+        //             log.info(tag,"Not confirmed!")
+        //             //get gas price recommended
+        //
+        //             //get tx gas price
+        //             await sleep(6000)
+        //         }
+        //     }
+        //
+        //     //if not confirmed
+        //     if(!isConfirmed){
+        //         //time unconfirmed
+        //         let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
+        //         log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
+        //         //if timeUnconfirmed > x
+        //         if(timeUnconfirmed > ttrbf){
+        //             log.info(" *** BEGIN RBF procedure *** ")
+        //             //get current fee level for high
+        //
+        //             //get invocation
+        //             let invocationInfo = await app.getInvocation(invocationId)
+        //             log.info(tag,"invocationInfo: ",invocationInfo)
+        //
+        //             //bump fee "high"
+        //             let responseFees = await user.clients.ethereum.getFees()
+        //             log.info(tag,"responseFees: ",responseFees)
+        //
+        //             //rebuild rbf tx
+        //             let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
+        //             log.info(tag,"responseReplace: ",responseReplace)
+        //
+        //             //re-sign
+        //             let signedTx = await approveTransaction(transaction)
+        //             log.debug(tag,"signedTx: ",signedTx)
+        //             assert(signedTx)
+        //             assert(signedTx.txid)
+        //
+        //             //re-broadcast
+        //             let broadcastResult = await broadcastTransaction(transaction)
+        //             log.info(tag,"broadcastResult: ",broadcastResult)
+        //         }
+        //     }
+        // }
+        //
+        // //close socket
+        // let result = await app.stopSocket()
+        // log.debug(tag,"result: ",result)
 
 
         log.info("****** TEST PASS ******")

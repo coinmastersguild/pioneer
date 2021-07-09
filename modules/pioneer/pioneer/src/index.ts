@@ -1521,7 +1521,7 @@ module.exports = class wallet {
                 if(!network) throw Error("102: Invalid transaction missing address!")
                 if(!address) throw Error("103: Invalid transaction missing address!")
                 if(!amount) throw Error("104: Invalid transaction missing amount!")
-                if(!fee) throw Error("104: Invalid transaction missing fee!")
+                if(!fee) throw Error("105: Invalid transaction missing fee!")
                 let memo = transaction.memo
                 let addressFrom
                 if(transaction.addressFrom){

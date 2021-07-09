@@ -244,7 +244,7 @@ export async function buildTransaction(transaction:any) {
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 

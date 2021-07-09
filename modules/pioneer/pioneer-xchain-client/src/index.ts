@@ -904,7 +904,7 @@ module.exports = class wallet {
             let tag = TAG + " | transfer | "
             try {
                 let coin = this.nativeAsset
-                log.debug(tag,"tx: ",tx)
+                log.info(tag,"tx: ",tx)
                 log.debug(tag,"tx.amount: ",tx.amount)
                 log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                 log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
