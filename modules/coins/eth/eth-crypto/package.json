@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-crypto",
-  "version": "8.1.14",
+  "version": "8.1.15",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {

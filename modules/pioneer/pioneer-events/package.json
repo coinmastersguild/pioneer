@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "8.1.14",
+  "version": "8.1.15",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/pioneer-types": "^8.1.15",
+    "@pioneer-platform/pioneer-types": "^8.1.16",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",

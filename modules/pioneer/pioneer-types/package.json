@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-types",
-  "version": "8.1.15",
+  "version": "8.1.16",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,7 +20,7 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-types": "^8.1.15"
+    "@pioneer-platform/pioneer-types": "^8.1.16"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
