@@ -69,6 +69,7 @@ const RUNE_BASE=100000000
 const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
 const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
+let GIG =  1000000000
 
 function bech32ify(address:any, prefix:string) {
     const words = bech32.toWords(address)
@@ -1511,6 +1512,7 @@ module.exports = class wallet {
                 let address = transaction.address
                 if(!address) address = transaction.addressTo
                 let amount = transaction.amount
+                let fee = transaction.fee
 
                 //get paths
                 let paths = this.paths()
@@ -1519,7 +1521,7 @@ module.exports = class wallet {
                 if(!network) throw Error("102: Invalid transaction missing address!")
                 if(!address) throw Error("103: Invalid transaction missing address!")
                 if(!amount) throw Error("104: Invalid transaction missing amount!")
-
+                if(!fee) throw Error("104: Invalid transaction missing fee!")
                 let memo = transaction.memo
                 let addressFrom
                 if(transaction.addressFrom){
@@ -1773,31 +1775,44 @@ module.exports = class wallet {
                     log.debug(tag,"nonce: ",nonce)
 
                     let gas_limit = 80000
-                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
+                    let gas_price
 
-                    //override
+                    //overrides
+                    log.info(tag,"transaction.fee: ",transaction.fee)
                     if(transaction.fee){
                         if(transaction.fee.priority){
+                            log.info(tag,"Selecting fee based on priority")
+                            //get gas recomendations
+                            gas_price = await this.pioneerClient.instance.GetGasPrice()
+                            gas_price = gas_price.data
+
                             log.info(tag,"gas_price: ",gas_price)
                             if(transaction.fee.priority === 2){
+                                log.info(tag,"setting priority 2 ")
                                 gas_price = gas_price * 0.5
-                                gas_price = parseInt(gas_price)
+                                gas_price = parseInt(String(gas_price))
+                                log.info(tag,"gas_price: ",gas_price)
                             }
                         } else {
+                            log.info(tag,"Selecting fee based on hard coded value")
                             //TODO other units?
                             if(transaction.fee.value && transaction.fee.units === 'gwei'){
-                                gas_price = transaction.fee.value
+                                log.info(tag,"setting fee value: ",transaction.fee.value)
+                                gas_price = transaction.fee.value * GIG
                             }
                             if(transaction.fee.gasLimit){
-                                gas_limit = 20000
+                                gas_limit = transaction.fee.gasLimit
                             }
                         }
                     }
+                    if(!gas_price) {
+                        log.info(tag,"Getting Fee Level from remote!")
+                        gas_price = await this.pioneerClient.instance.GetGasPrice()
+                        gas_price = gas_price.data
+                    }
 
-                    gas_price = gas_price.data
                     log.debug(tag,"gas_price: ",gas_price)
-                    gas_price = parseInt(gas_price)
-                    gas_price = gas_price + 1000000000
+                    gas_price = parseInt(String(gas_price))
 
                     let txParams
                     if(asset === "ETH"){

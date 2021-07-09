@@ -91,6 +91,9 @@ let ttrbf = 20 //time till replace by fee (in seconds)
 // let invocationId = "pioneer:invocation:v0.01:ETH:4755MHZN6gqma6PkrmVtsF"
 // }
 
+//low fee
+let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 15
+let GIG =  1000000000
 let txid:string
 let invocationId:string
 let contextAlpha
@@ -275,11 +278,11 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
-            feeRate:{
+            fee:{
                 gasLimit: 20000,
                 priority:2, //1-5 5 = highest
                 // units:'gwei',
-                // value:200000000 // Intentionally low! (in gwei)
+                // value:LOW_FEE_LEVEL // Intentionally low!
             },
             symbol: "ETH",
             recipient: FAUCET_ETH_ADDRESS,
@@ -310,8 +313,18 @@ const test_service = async function () {
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
+        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
+        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
         assert(unsignedTx)
+        let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
+        txFeeGwei = parseInt(String(txFeeGwei))
+        //verify fee level
+        if(txFeeGwei !== LOW_FEE_LEVEL){
+            log.info(tag,"FEE LEVEL created: ",txFeeGwei)
+            log.info(tag,"FEE LEVEL expected: ",LOW_FEE_LEVEL)
+            throw Error("Failed to use correct fee on txbuilding!")
+        }
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)

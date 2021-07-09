@@ -251,7 +251,7 @@ const test_service = async function () {
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
             },
-            feeRate:gasRate, // fee === gas (xcode inheritance)
+            fee:gasRate, // fee === gas (xcode inheritance)
             noBroadcast
         }
         log.info(tag,"deposit: ",deposit)

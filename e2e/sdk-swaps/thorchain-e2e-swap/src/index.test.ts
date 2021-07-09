@@ -299,7 +299,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
                         return BigNumber.BigNumber.from(amountTestNative)
                     }
                 },
-                feeRate:gasRate, // fee === gas (xcode inheritance)
+                fee:gasRate, // fee === gas (xcode inheritance)
                 noBroadcast:true
             }
         });

@@ -118,7 +118,7 @@ export interface Transfer {
     network: string;
     asset: string;
     symbol?: string;
-    feeRate?: any
+    fee?: any
     recipient: string
     amount:any
     memo?:string

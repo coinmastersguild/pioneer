@@ -480,6 +480,7 @@ module.exports = class wallet {
                         type:'replace',
                         asset:'ETH',
                         network:'ETH',
+                        username:this.username,
                         fee
                     }
                     let result = await this.invoke.invoke(invocation)
@@ -918,6 +919,8 @@ module.exports = class wallet {
                 //TODO validate addresses
                 //TODO validate midgard addresses not expired
 
+                if(!tx.fee) throw Error("103: fee required!")
+
                 //context
                 log.info(tag,"currentContext: ",this.context)
                 log.info(tag,"txContext: ",tx.context)
@@ -940,6 +943,7 @@ module.exports = class wallet {
                     context:tx.context,
                     username:this.username,
                     coin,
+                    fee:tx.fee,
                     network:coin,
                     asset:coin,
                     amount,
