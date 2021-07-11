@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/network",
-  "version": "8.1.17",
+  "version": "8.1.18",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -23,7 +23,7 @@
     "@pioneer-platform/binance-network": "^8.1.5",
     "@pioneer-platform/blockbook": "^8.1.19",
     "@pioneer-platform/cosmos-network": "^8.1.5",
-    "@pioneer-platform/eth-network": "^8.1.18",
+    "@pioneer-platform/eth-network": "^8.1.19",
     "@pioneer-platform/loggerdog": "^8.1.5",
     "@pioneer-platform/pioneer-coins": "^8.1.16",
     "@pioneer-platform/thor-network": "^8.1.17",
