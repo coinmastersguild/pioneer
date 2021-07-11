@@ -274,7 +274,6 @@ export async function buildTransaction(transaction:any) {
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
-
                 break
             case 'approve':
                 log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
@@ -418,7 +417,7 @@ export async function broadcastTransaction(transaction:any) {
         if(invocation.signedTx && invocation.noBroadcast) invocation.signedTx.noBroadcast = true
 
         //force noBroadcast
-        invocation.signedTx.noBroadcast = true
+        //invocation.signedTx.noBroadcast = true
         let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
         log.debug(tag,"broadcastResult: ",broadcastResult)
 

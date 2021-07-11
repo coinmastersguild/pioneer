@@ -92,7 +92,7 @@ let ttrbf = 20 //time till replace by fee (in seconds)
 // }
 
 //low fee
-let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 15
+let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 7
 let GIG =  1000000000
 let txid:string
 let invocationId:string
@@ -397,7 +397,7 @@ const test_service = async function () {
 
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -423,32 +423,33 @@ const test_service = async function () {
                 //time unconfirmed
                 let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
                 log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
+                log.info(tag,"ttrbf: ",ttrbf)
                 //if timeUnconfirmed > x
                 if(timeUnconfirmed > ttrbf){
                     log.info(" *** BEGIN RBF procedure *** ")
                     //get current fee level for high
 
-                    //get invocation
-                    let invocationInfo = await app.getInvocation(invocationId)
-                    log.info(tag,"invocationInfo: ",invocationInfo)
-
-                    //bump fee "high"
-                    let responseFees = await user.clients.ethereum.getFees()
-                    log.info(tag,"responseFees: ",responseFees)
-
-                    //rebuild rbf tx
-                    let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
-                    log.info(tag,"responseReplace: ",responseReplace)
-
-                    //re-sign
-                    let signedTx = await approveTransaction(transaction)
-                    log.debug(tag,"signedTx: ",signedTx)
-                    assert(signedTx)
-                    assert(signedTx.txid)
-
-                    //re-broadcast
-                    let broadcastResult = await broadcastTransaction(transaction)
-                    log.info(tag,"broadcastResult: ",broadcastResult)
+                    // //get invocation
+                    // let invocationInfo = await app.getInvocation(invocationId)
+                    // log.info(tag,"invocationInfo: ",invocationInfo)
+                    //
+                    // //bump fee "high"
+                    // let responseFees = await user.clients.ethereum.getFees()
+                    // log.info(tag,"responseFees: ",responseFees)
+                    //
+                    // //rebuild rbf tx
+                    // let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
+                    // log.info(tag,"responseReplace: ",responseReplace)
+                    //
+                    // //re-sign
+                    // let signedTx = await approveTransaction(transaction)
+                    // log.debug(tag,"signedTx: ",signedTx)
+                    // assert(signedTx)
+                    // assert(signedTx.txid)
+                    //
+                    // //re-broadcast
+                    // let broadcastResult = await broadcastTransaction(transaction)
+                    // log.info(tag,"broadcastResult: ",broadcastResult)
                 }
             }
         }

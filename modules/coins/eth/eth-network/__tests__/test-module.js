@@ -33,10 +33,10 @@ network.broadcast(rawTx)
     })
 
 //basic
-network.getTransaction("0x1d25efc5bfe99e02ab99c003ecc78dcd3452c4bc2d457fc3ba2b50fba782e643")
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getTransaction("0x1d25efc5bfe99e02ab99c003ecc78dcd3452c4bc2d457fc3ba2b50fba782e643")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //thorchain is approved
 // let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"

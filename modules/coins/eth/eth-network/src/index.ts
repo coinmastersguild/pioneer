@@ -547,10 +547,14 @@ let broadcast_transaction = async function(tx:any){
 		if(!tx) throw Error("101: missing tx!")
 
 		//push node
-		let result = await web3.eth.sendSignedTransaction(tx)
+		web3.eth.sendSignedTransaction(tx)
 
 		//push etherscan
-
+		//https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
+		let resp = await axios({
+			method:'GET',
+			url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
+		})
 		//push blockbook
 
 
@@ -569,10 +573,10 @@ let broadcast_transaction = async function(tx:any){
 
 		let output = {
 			success:true,
-			blockIncluded:result.result,
-			block:result.blockNumber,
-			txid:result.transactionHash,
-			gas:result.cumulativeGasUsed
+			// blockIncluded:result.result,
+			// block:result.blockNumber,
+			// txid:result.transactionHash,
+			// gas:result.cumulativeGasUsed
 		}
 
 		return output
