@@ -118,6 +118,7 @@ export interface Transfer {
     network: string;
     asset: string;
     symbol?: string;
+    nonce?:number
     fee?: any
     recipient: string
     amount:any

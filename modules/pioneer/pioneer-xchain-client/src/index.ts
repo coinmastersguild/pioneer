@@ -74,7 +74,7 @@ module.exports = class wallet {
     private validateAddress: (coin: string, address: string) => any;
     private setPhrase: (coin: string, phrase: string) => any;
     private getBalance: (address?: Address, asset?:any) => any;
-    private getTransactions!: (address?: Address, asset?: any) => any;
+    private getTransactions: (address: string) => any;
     private getTransactionData!: (txid: string, type?:string) => Promise<any>;
     private purgeClient!: (address?: Address, asset?: any) => any;
     private getFees!: (params?: FeesParams) => any;
@@ -110,6 +110,7 @@ module.exports = class wallet {
     private signingPrivkey: string;
     private deposit: (deposit: any, options: any) => Promise<any>;
     private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
+    private getTxCount: (address: string) => Promise<any>;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -413,6 +414,19 @@ module.exports = class wallet {
             Ethereum:
          */
         if(this.network === 'ethereum'){
+            //nonce
+            this.getTxCount = async function (address:string) {
+                let tag = TAG + " | getTxCount | "
+                try {
+
+                    //output
+                    let output = await this.pioneerApi.GetTxCount(address)
+                    return output.data
+
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
 
             this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
                 let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
@@ -718,11 +732,12 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactions = function (address?: Address, asset?: Asset) {
+        this.getTransactions = async function (address: string) {
             let tag = TAG + " | getTransactions | "
             try {
                 //TODO
-                return [{"foo":"bar"}]
+                //if xpub
+                //if eth
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

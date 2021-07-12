@@ -273,6 +273,18 @@ const test_service = async function () {
         //this is x percent of total available
 
         //get unconfirmed
+        let txCount = await client.getTxCount();
+        log.info(tag,"txCount: ",txCount)
+        assert(txCount)
+        assert(txCount.pending)
+        assert(txCount.confirmed)
+
+        //replace pending (Do NOT do this is prod) it orphans invocationId's, because of nonce release
+        let nonce
+        if(txCount.pending > 1){
+            //replace
+            nonce = txCount.confirmed
+        }
 
         //if unconfirmed force replace with nonce
 
@@ -300,6 +312,7 @@ const test_service = async function () {
                 }
             }
         }
+        if(nonce) transfer.nonce = nonce
         if(noBroadcast) transfer.noBroadcast = true
 
         //if create new
