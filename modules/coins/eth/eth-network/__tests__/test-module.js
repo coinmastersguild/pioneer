@@ -26,11 +26,11 @@ network.init()
 //         console.log(resp)
 //     })
 
-let rawTx = "0xf86c3c8506e44c2800830138809433b35c665496ba8e71b22373843376740401f106870aa87bee5380008025a03a90ca4a262624725e05da416293b7aa6e1faa611b064f30561123d005db9ec9a020ad66b84f4f3ad6354182cc14030d60f05ff8bc80286b33e9c3ed8af8176db7"
-network.broadcast(rawTx)
-    .then(function(resp){
-        console.log(resp)
-    })
+// let rawTx = "0xf86c3c8506e44c2800830138809433b35c665496ba8e71b22373843376740401f106870aa87bee5380008025a03a90ca4a262624725e05da416293b7aa6e1faa611b064f30561123d005db9ec9a020ad66b84f4f3ad6354182cc14030d60f05ff8bc80286b33e9c3ed8af8176db7"
+// network.broadcast(rawTx)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //basic
 // network.getTransaction("0x1d25efc5bfe99e02ab99c003ecc78dcd3452c4bc2d457fc3ba2b50fba782e643")

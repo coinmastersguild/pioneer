@@ -92,7 +92,8 @@ let ttrbf = 20 //time till replace by fee (in seconds)
 // }
 
 //low fee
-let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 7
+let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 3
+let HIGH_FEE_LEVEL =  process.env['HIGH_FEE_LEVEL'] || 17
 let GIG =  1000000000
 let txid:string
 let invocationId:string
@@ -271,6 +272,10 @@ const test_service = async function () {
 
         //this is x percent of total available
 
+        //get unconfirmed
+
+        //if unconfirmed force replace with nonce
+
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
@@ -391,6 +396,7 @@ const test_service = async function () {
             //monitor tx lifecycle
             let currentStatus
             let statusCode = 0
+            let isReplaced = false
             // let txid
             //wait till confirmed in block
             while(!isConfirmed){
@@ -426,30 +432,34 @@ const test_service = async function () {
                 log.info(tag,"ttrbf: ",ttrbf)
                 //if timeUnconfirmed > x
                 if(timeUnconfirmed > ttrbf){
-                    log.info(" *** BEGIN RBF procedure *** ")
-                    //get current fee level for high
+                    if(!isReplaced){
+                        log.info(" *** BEGIN RBF procedure *** ")
+                        isReplaced = true
+                        //get invocation
+                        let invocationInfo = await app.getInvocation(invocationId)
+                        log.info(tag,"invocationInfo: ",invocationInfo)
 
-                    // //get invocation
-                    // let invocationInfo = await app.getInvocation(invocationId)
-                    // log.info(tag,"invocationInfo: ",invocationInfo)
-                    //
-                    // //bump fee "high"
-                    // let responseFees = await user.clients.ethereum.getFees()
-                    // log.info(tag,"responseFees: ",responseFees)
-                    //
-                    // //rebuild rbf tx
-                    // let responseReplace = await user.clients.ethereum.replace(invocationId,{value:400000})
-                    // log.info(tag,"responseReplace: ",responseReplace)
-                    //
-                    // //re-sign
-                    // let signedTx = await approveTransaction(transaction)
-                    // log.debug(tag,"signedTx: ",signedTx)
-                    // assert(signedTx)
-                    // assert(signedTx.txid)
-                    //
-                    // //re-broadcast
-                    // let broadcastResult = await broadcastTransaction(transaction)
-                    // log.info(tag,"broadcastResult: ",broadcastResult)
+                        //bump fee "high"
+                        let responseFees = await user.clients.ethereum.getFees()
+                        log.info(tag,"responseFees: ",responseFees)
+
+                        //rebuild rbf tx
+                        let responseReplace = await user.clients.ethereum.replace(invocationId,{unit:'gwei',value:HIGH_FEE_LEVEL})
+                        log.info(tag,"responseReplace: ",responseReplace)
+
+                        //re-sign
+                        let signedTx = await approveTransaction(transaction)
+                        log.debug(tag,"signedTx: ",signedTx)
+                        assert(signedTx)
+                        assert(signedTx.txid)
+                        if(signedTx.txid === txid) throw Error("failed to create replace tx! tx's the same!")
+                        txid = signedTx.txid
+                        //re-broadcast
+                        let broadcastResult = await broadcastTransaction(transaction)
+                        log.info(tag,"broadcastResult: ",broadcastResult)
+                    }
+                } else {
+                    log.info(tag,"already replaced!")
                 }
             }
         }

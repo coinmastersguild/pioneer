@@ -132,6 +132,9 @@ module.exports = {
 	getNonce: function (address:string) {
 		return web3.eth.getTransactionCount(address,'pending')
 	},
+	getTxCount: function (address:string,options:any) {
+		return get_tx_count(address,options)
+	},
 	getFees: function (params:any): Promise<any> {
 		return get_fees(params)
 	},
@@ -165,6 +168,9 @@ module.exports = {
 	getTransaction: function (txid:string) {
 		return get_transaction(txid)
 	},
+	getTransactions: function (address:string,options:any) {
+		return get_transactions(address,options)
+	},
 	getBalance: function (address:string) {
 		return get_balance(address)
 	},
@@ -182,6 +188,29 @@ module.exports = {
 	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
+	}
+}
+
+
+const get_tx_count = async function(address:string,options:any){
+	let tag = TAG + " | get_tx_count | "
+	try{
+
+		//confirmed
+		let txsConfirmed = await web3.eth.getTransactionCount(address)
+		//pending
+		let txsWithPending = await web3.eth.getTransactionCount(address,'pending')
+
+		//count pending
+		let pending = txsConfirmed - txsWithPending
+
+		return {
+			confirmed:txsConfirmed,
+			total:txsWithPending,
+			pending
+		}
+	}catch(e){
+		console.error(tag,e)
 	}
 }
 
@@ -331,12 +360,12 @@ const get_pool_positions = async function(address:string){
 	let tag = TAG + " | get_pool_positions | "
 	try{
 		//
-		let ethInto = await blockbook.getEthInfo(address)
+		let ethInfo = await blockbook.getAddressInfo('ETH',address)
 
 		//TODO filter by LP contracts
-		log.info(tag,"ethInto: ",ethInto)
+		log.info(tag,"ethInfo: ",ethInfo)
 
-		return true
+		return ethInfo
 	}catch(e){
 		console.error(tag,e)
 	}
@@ -680,6 +709,19 @@ const get_balance = async function(address:string){
 		output = (await web3.eth.getBalance(address))/BASE
 
 		return output
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+const get_transactions = async function(address:string,options:any){
+	let tag = TAG + " | get_transactions | "
+	try{
+		let output:any = {}
+
+		let ethInfo = await blockbook.getAddressInfo('ETH',address)
+
+		return ethInfo
 	}catch(e){
 		console.error(tag,e)
 	}
