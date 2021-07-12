@@ -72,8 +72,11 @@ module.exports = class wallet {
                 if(!invocation.type) throw Error("invocation Type required!")
                 if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
-                let invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
-                invocation.invocationId = invocationId
+                if(!invocation.invocationId){
+                    invocation.invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
+                }
+                let invocationId = invocation.invocationId
+
                 //TODO sign
                 let msg = JSON.stringify(invocation)
                 //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)

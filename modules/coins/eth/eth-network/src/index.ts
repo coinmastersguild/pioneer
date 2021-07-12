@@ -192,10 +192,11 @@ module.exports = {
 }
 
 
-const get_tx_count = async function(address:string,options:any){
+const get_tx_count = async function(address:string,options?:any){
 	let tag = TAG + " | get_tx_count | "
 	try{
-
+		log.info(tag,"address: ",address)
+		if(!address) throw Error("102: address required!")
 		//confirmed
 		let txsConfirmed = await web3.eth.getTransactionCount(address)
 		//pending
@@ -616,7 +617,7 @@ let broadcast_transaction = async function(tx:any){
 }
 
 const get_balance_tokens = async function(address:string){
-	let tag = TAG + " | get_balance | "
+	let tag = TAG + " | get_balance_tokens | "
 	try{
 		let balances:any = {}
 		let valueUsds:any = {}
@@ -648,7 +649,6 @@ const get_balance_tokens = async function(address:string){
 					//let symbol
 					let symbol  = info.tokenInfo.symbol
 					log.debug(tag,"symbol: ",symbol)
-
 
 					//rate
 					let rate = 0

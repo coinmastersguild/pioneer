@@ -415,12 +415,12 @@ module.exports = class wallet {
          */
         if(this.network === 'ethereum'){
             //nonce
-            this.getTxCount = async function (address:string) {
+            this.getTxCount = async function () {
                 let tag = TAG + " | getTxCount | "
                 try {
 
                     //output
-                    let output = await this.pioneerApi.GetTxCount(address)
+                    let output = await this.pioneerApi.GetTxCount(this.getAddress())
                     return output.data
 
                 } catch (e) {
@@ -492,6 +492,8 @@ module.exports = class wallet {
                     //
                     let invocation:Invocation = {
                         type:'replace',
+                        invocationId,
+                        context:this.context,
                         asset:'ETH',
                         network:'ETH',
                         username:this.username,

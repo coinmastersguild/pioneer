@@ -82,7 +82,7 @@ let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjau
 let FAUCET_ETH_ADDRESS = process.env['FAUCET_ETH_ADDRESS'] || '0x33b35c665496bA8E71B22373843376740401F106'
 let TEST_CONTEXT = process.env['TEST_CONTEXT'] || '0x36fd52f9e57e1b028e2c62f5e297f3872fd4bb9f.wallet.json' //WALLET_MAIN
 let noBroadcast = false
-let ttrbf = 20 //time till replace by fee (in seconds)
+let ttrbf = 19 //time till replace by fee (in seconds)
 
 //force monitor
 // let FORCE_MONITOR = true
@@ -92,8 +92,9 @@ let ttrbf = 20 //time till replace by fee (in seconds)
 // }
 
 //low fee
-let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 3
-let HIGH_FEE_LEVEL =  process.env['HIGH_FEE_LEVEL'] || 17
+let LOW_FEE_LEVEL =  process.env['LOW_FEE_LEVEL'] || 4
+
+let HIGH_FEE_LEVEL =  process.env['HIGH_FEE_LEVEL'] || 32
 let GIG =  1000000000
 let txid:string
 let invocationId:string
@@ -276,10 +277,9 @@ const test_service = async function () {
         let txCount = await client.getTxCount();
         log.info(tag,"txCount: ",txCount)
         assert(txCount)
-        assert(txCount.pending)
         assert(txCount.confirmed)
 
-        //replace pending (Do NOT do this is prod) it orphans invocationId's, because of nonce release
+        //replace pending (Do NOT do this is prod) it orphans invocationId's, because of nonce release/overwrite
         let nonce
         if(txCount.pending > 1){
             //replace
@@ -432,7 +432,7 @@ const test_service = async function () {
                     statusCode = 3
                     isConfirmed = true
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.info(tag,"Not confirmed! txid: ",txid)
                     //get gas price recommended
 
                     //get tx gas price
@@ -443,33 +443,125 @@ const test_service = async function () {
                 let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
                 log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
                 log.info(tag,"ttrbf: ",ttrbf)
+
                 //if timeUnconfirmed > x
                 if(timeUnconfirmed > ttrbf){
                     if(!isReplaced){
-                        log.info(" *** BEGIN RBF procedure *** ")
                         isReplaced = true
-                        //get invocation
+                        log.info(" *** BEGIN RBF procedure *** ")
+
+                        //manual create new invocation with same nonce
+                        //get unconfirmed
+                        let txCount = await client.getTxCount();
+                        log.info(tag,"txCount: ",txCount)
+                        assert(txCount)
+                        assert(txCount.confirmed)
+
+                        //replace pending (Do NOT do this is prod) it orphans invocationId's, because of nonce release/overwrite
+                        let nonce
+                        if(txCount.pending > 1){
+                            //replace
+                            nonce = txCount.confirmed
+                        }
+
+                        //if unconfirmed force replace with nonce
+
+                        let options:any = {
+                            verbose: true,
+                            txidOnResp: false, // txidOnResp is the output format
+                        }
+
+                        let transfer:Transfer = {
+                            context:user.context,
+                            fee:{
+                                // gasLimit: 20000,
+                                // priority:2, //1-5 5 = highest
+                                units:'gwei',
+                                value:HIGH_FEE_LEVEL // Intentionally low!
+                            },
+                            symbol: "ETH",
+                            recipient: FAUCET_ETH_ADDRESS,
+                            network: "ETH",
+                            asset: "ETH",
+                            memo: '',
+                            "amount":{
+                                amount: function(){
+                                    return BigNumber.BigNumber.from(baseAmountToNative("ETH",TEST_AMOUNT))
+                                }
+                            }
+                        }
+                        if(nonce) transfer.nonce = nonce
+                        if(noBroadcast) transfer.noBroadcast = true
+
+                        //if create new
+                        let responseTransfer = await user.clients.ethereum.transfer(transfer,options)
+                        log.info(tag,"responseTransfer: ",responseTransfer)
+
+                        invocationId = responseTransfer
+
+                        //get invocationInfo
                         let invocationInfo = await app.getInvocation(invocationId)
+                        assert(invocationId)
                         log.info(tag,"invocationInfo: ",invocationInfo)
 
-                        //bump fee "high"
-                        let responseFees = await user.clients.ethereum.getFees()
-                        log.info(tag,"responseFees: ",responseFees)
+                        //do not continue invocation
+                        assert(invocationId)
 
-                        //rebuild rbf tx
-                        let responseReplace = await user.clients.ethereum.replace(invocationId,{unit:'gwei',value:HIGH_FEE_LEVEL})
-                        log.info(tag,"responseReplace: ",responseReplace)
+                        let transactionReplace = {
+                            invocationId,
+                            context:user.context
+                        }
 
-                        //re-sign
-                        let signedTx = await approveTransaction(transaction)
-                        log.debug(tag,"signedTx: ",signedTx)
+                        //build
+                        let unsignedTx = await buildTransaction(transactionReplace)
+                        log.info(tag,"unsignedTx: ",unsignedTx)
+                        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
+                        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
+                        assert(unsignedTx)
+                        let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
+                        txFeeGwei = parseInt(String(txFeeGwei))
+                        //verify fee level
+                        if(txFeeGwei !== HIGH_FEE_LEVEL){
+                            log.info(tag,"FEE LEVEL created: ",txFeeGwei)
+                            log.info(tag,"FEE LEVEL expected: ",HIGH_FEE_LEVEL)
+                            throw Error("Failed to use correct fee on txbuilding!")
+                        }
+
+                        //sign transaction
+                        let signedTx = await approveTransaction(transactionReplace)
+                        log.info(tag,"transactionReplace signedTx: ",signedTx)
                         assert(signedTx)
                         assert(signedTx.txid)
-                        if(signedTx.txid === txid) throw Error("failed to create replace tx! tx's the same!")
                         txid = signedTx.txid
-                        //re-broadcast
-                        let broadcastResult = await broadcastTransaction(transaction)
+
+                        //broadcast transaction
+                        let broadcastResult = await broadcastTransaction(transactionReplace)
                         log.info(tag,"broadcastResult: ",broadcastResult)
+
+
+                        //TODO
+                        //interactive rbf flow (update and track rbfs in the same invocationId)
+                        // isReplaced = true
+                        // //get invocation
+                        // let invocationInfo = await app.getInvocation(invocationId)
+                        // log.info(tag,"invocationInfo: ",invocationInfo)
+                        //
+                        // //rebuild rbf tx
+                        // let responseReplace = await user.clients.ethereum.replace(invocationId,{unit:'gwei',value:HIGH_FEE_LEVEL})
+                        // assert(responseReplace)
+                        // log.info(tag,"responseReplace: ",responseReplace)
+                        //
+                        // //re-sign
+                        // let signedTx = await approveTransaction(transaction)
+                        // log.info(tag,"signedTx: ",signedTx)
+                        // assert(signedTx)
+                        // assert(signedTx.txid)
+                        //
+                        // if(signedTx.txid === txid) throw Error("failed to create replace tx! tx's the same!")
+                        // txid = signedTx.txid
+                        // //re-broadcast
+                        // let broadcastResult = await broadcastTransaction(transaction)
+                        // log.info(tag,"broadcastResult: ",broadcastResult)
                     }
                 } else {
                     log.info(tag,"already replaced!")
