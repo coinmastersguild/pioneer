@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/rbf-ethereum-e2e",
-  "version": "8.1.19",
+  "version": "8.1.20",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
