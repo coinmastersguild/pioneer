@@ -110,7 +110,7 @@ module.exports = class wallet {
     private signingPrivkey: string;
     private deposit: (deposit: any, options: any) => Promise<any>;
     private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
-    private getTxCount: (address: string) => Promise<any>;
+    private getTxCount: ((address: string) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
