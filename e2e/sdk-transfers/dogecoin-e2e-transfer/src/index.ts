@@ -66,15 +66,14 @@ const {
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
+let BLOCKCHAIN = 'dogecoin'
+let ASSET = 'DOGE'
+let MIN_BALANCE = process.env['MIN_BALANCE_DOGE'] || "0.001"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+let FAUCET_DOGE_ADDRESS = process.env['FAUCET_DOGE_ADDRESS'] || 'DRe5QWQkUcE7m9tsZNgo5Dp7TD7aDqMrBo'
 
 let noBroadcast = true
 
@@ -98,10 +97,12 @@ const test_service = async function () {
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
+
+        log.info(tag,"WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
+        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){
@@ -145,7 +146,7 @@ const test_service = async function () {
             }
         })
 
-        let seedChains = ['ethereum','thorchain','bitcoin']
+        let seedChains = ['ethereum','thorchain','bitcoin','dogecoin']
         await app.init(seedChains)
 
         //pair sdk
@@ -168,8 +169,6 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
-
         log.info("user: ",user.context)
         assert(user.context)
         //assert user clients
@@ -251,7 +250,7 @@ const test_service = async function () {
         assert(gasRate)
 
         //test amount in native
-        let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        let amountTestNative = baseAmountToNative("DOGE",TEST_AMOUNT)
 
         let options:any = {
             verbose: true,
@@ -260,7 +259,7 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
-            recipient: FAUCET_RUNE_ADDRESS,
+            recipient: FAUCET_DOGE_ADDRESS,
             asset: ASSET,
             network: ASSET,
             memo: '',
@@ -270,9 +269,8 @@ const test_service = async function () {
                 }
             },
             fee:{
-                unit:'gwei',
-                value:gasRate
-            }, // fee === gas (xcode inheritance)
+                priority:3, //1-5 5 = highest
+            },
             noBroadcast
         }
         log.info(tag,"transfer: ",transfer)
@@ -392,7 +390,6 @@ const test_service = async function () {
                 await sleep(6000)
             }
 
-
             let isFullfilled = false
             //wait till swap is fullfilled
             while(!isFullfilled){
@@ -413,11 +410,8 @@ const test_service = async function () {
                         isFullfilled = true
                     }
                 }
-
                 await sleep(6000)
             }
-
-
         }
 
         let result = await app.stopSocket()

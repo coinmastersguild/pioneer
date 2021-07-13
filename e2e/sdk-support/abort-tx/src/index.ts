@@ -54,6 +54,8 @@ let {
 const {
     startApp,
     sendPairingCode,
+    getContext,
+    getWallets,
     buildTransaction,
     approveTransaction,
     broadcastTransaction,
@@ -77,21 +79,29 @@ const test_service = async function () {
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
         assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
-        //log.info(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
+        //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send monies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
-            log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
         //generate new key

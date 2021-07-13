@@ -53,6 +53,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     sendPairingCode,
     forget_user,
     buildTransaction,
@@ -136,91 +138,30 @@ const test_service = async function () {
 
 
         //start app and get wallet
-        let wallet = await startApp()
-        let usernameRemote = wallet.username
-        assert(usernameRemote)
-        log.info("usernameRemote: ",usernameRemote)
-        log.info("usernameLocal:  ",username)
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
+        assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
-        //
-        // //assert balance local
-        // //log.info(tag,"wallet: ",wallet)
-        // log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
-        // if(balance < MIN_BALANCE){
-        //     log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
-        //     throw Error("101: Low funds!")
-        // } else {
-        //     log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-        // }
-        //
-        // //generate new key
-        // const queryKey = uuidv4();
-        // assert(queryKey)
-        //
-        // let config = {
-        //     queryKey,
-        //     //username,
-        //     spec,
-        //     wss
-        // }
-        //
-        // let app = new SDK.SDK(spec,config)
-        // let events = await app.startSocket()
-        // let eventPairReceived = false
-        // events.on('message', async (request:any) => {
-        //     assert(request.queryKey)
-        //     assert(request.username)
-        //     assert(request.url)
-        //     eventPairReceived = true
-        // })
-        //
-        // let seedChains = ['ethereum','thorchain']
-        // await app.init(seedChains)
-        //
-        // //pair sdk
-        // let code = await app.createPairingCode()
-        // code = code.code
-        // log.info("code: ",code)
-        // assert(code)
-        //
-        //
-        // let pairSuccess = await sendPairingCode(code)
-        // assert(pairSuccess.user.username,username)
-        // log.info("pairSuccess: ",pairSuccess)
-        // assert(pairSuccess)
-        //
-        // //dont release till pair event
-        // while(!eventPairReceived){
-        //     await sleep(300)
-        // }
-
-        /*
-            Stop App
-         */
-
-        /*
-            Change username
-         */
-        //username = 'newUserTest'
-
-        /*
-            Start App with new config
-         */
-
-        /*
-            Catch error (queryKey already registerd to x username)
-         */
-
-        /*
-            Create new queryKey
-         */
-
-        /*
-            Start app with new config successfully
-         */
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
+        //assert balance local
+        //log.debug(tag,"wallet: ",wallet)
+        if(balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+            throw Error("101: Low funds!")
+        } else {
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+        }
 
         log.info("****** TEST PASS 2******")
         //process

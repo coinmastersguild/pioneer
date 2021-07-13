@@ -57,6 +57,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     getInvocations,
     sendPairingCode,
     buildTransaction,
@@ -75,7 +77,7 @@ let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wag
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 let FAUCET_ETH_ADDRESS = process.env['FAUCET_ETH_ADDRESS'] || '0x33b35c665496bA8E71B22373843376740401F106'
 
-let noBroadcast = false
+let noBroadcast = true
 
 
 //force monitor
@@ -93,18 +95,26 @@ const test_service = async function () {
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
         assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -228,7 +238,7 @@ const test_service = async function () {
         log.debug(tag,"estimatePayload: ",estimatePayload)
 
         let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.debug(tag,"estimateCost: ",estimateCost)
+        log.info(tag,"estimateCost: ",estimateCost)
         assert(estimateCost)
 
         //max cost - balance
@@ -246,6 +256,10 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
+            fee:{
+                // gasLimit: 20000,
+                priority:3, //1-5 5 = highest
+            },
             symbol: "ETH",
             recipient: FAUCET_ETH_ADDRESS,
             network: "ETH",

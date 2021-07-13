@@ -66,15 +66,15 @@ const {
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
+let BLOCKCHAIN = 'cosmos'
+let ASSET = 'ATOM'
+let MIN_BALANCE = process.env['MIN_BALANCE_ATOM'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+let FAUCET_ATOM_ADDRESS = process.env['FAUCET_ATOM_ADDRESS'] || 'cosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3'
+
 
 let noBroadcast = true
 
@@ -98,6 +98,8 @@ const test_service = async function () {
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
+
+        log.info(tag,"WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
@@ -145,7 +147,7 @@ const test_service = async function () {
             }
         })
 
-        let seedChains = ['ethereum','thorchain','bitcoin']
+        let seedChains = ['ethereum','thorchain','bitcoin','cosmos']
         await app.init(seedChains)
 
         //pair sdk
@@ -251,7 +253,7 @@ const test_service = async function () {
         assert(gasRate)
 
         //test amount in native
-        let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        let amountTestNative = baseAmountToNative("ATOM",TEST_AMOUNT)
 
         let options:any = {
             verbose: true,
@@ -260,7 +262,7 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
-            recipient: FAUCET_RUNE_ADDRESS,
+            recipient: FAUCET_ATOM_ADDRESS,
             asset: ASSET,
             network: ASSET,
             memo: '',

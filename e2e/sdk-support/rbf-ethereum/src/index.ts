@@ -82,7 +82,7 @@ let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjau
 let FAUCET_ETH_ADDRESS = process.env['FAUCET_ETH_ADDRESS'] || '0x33b35c665496bA8E71B22373843376740401F106'
 let TEST_CONTEXT = process.env['TEST_CONTEXT'] || '0x36fd52f9e57e1b028e2c62f5e297f3872fd4bb9f.wallet.json' //WALLET_MAIN
 let noBroadcast = false
-let ttrbf = 19 //time till replace by fee (in seconds)
+let ttrbf = 10 //time till replace by fee (in seconds)
 
 //force monitor
 // let FORCE_MONITOR = true

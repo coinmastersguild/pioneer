@@ -520,6 +520,28 @@ module.exports = class wallet {
                     let masterPath = addressNListToBIP32(pathInfo[0].addressNListMaster)
 
                     switch(network) {
+                        case 'BCH':
+                            address = await this.WALLET.btcGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                coin: "BitcoinCash",
+                                //script types
+                                //p2pkh/cashaddr
+                                scriptType:'p2pkh',
+                                showDisplay: false,
+                            });
+                            address = bchaddr.toCashAddress(address)
+                            //convert
+                            break;
+                        case 'BTC':
+                            address = await this.WALLET.btcGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                coin: "Bitcoin",
+                                //script types
+                                //p2wpkh/p2pkh/cashaddr
+                                scriptType:'p2wpkh', //bech32
+                                showDisplay: false,
+                            });
+                            break;
                         case 'ETH':
                             address = await this.WALLET.ethGetAddress({
                                 addressNList: bip32ToAddressNList(masterPath),
@@ -1535,22 +1557,18 @@ module.exports = class wallet {
                 let rawTx
 
                 if(UTXO_COINS.indexOf(network) >= 0){
-                    log.debug(tag,"Build UTXO tx! ",network)
+                    log.info(tag,"Build UTXO tx! ",network)
 
                     //list unspent
-                    log.debug(tag,"network: ",network)
-                    log.debug(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
+                    log.info(tag,"network: ",network)
+                    log.info(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
+                    log.info(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
+                    log.info(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
 
                     // let unspentInputs = await this.pioneerClient.instance.GetUtxos({network})
 
-                    let input
-                    log.debug(tag,"isTestnet: ",isTestnet)
-                    if(this.isTestnet && false){ //Seriously fuck testnet flagging!
-                        // input = {network:"TEST",xpub:this.PUBLIC_WALLET[network].pubkey}
-                    }else{
-                        input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    }
-                    log.debug(tag,"input: ",input)
+                    let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
+                    log.info(tag,"input: ",input)
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
                     unspentInputs = unspentInputs.data
                     log.debug(tag,"unspentInputs: ",unspentInputs)
@@ -1630,10 +1648,10 @@ module.exports = class wallet {
                     log.debug(tag,"totalInValue: ",valueIn)
 
                     //amount out
-                    log.debug(tag,"amountOutSat: ",amountSat)
-                    log.debug(tag,"amountOutBase: ",amount)
+                    log.info(tag,"amountOutSat: ",amountSat)
+                    log.info(tag,"amountOutBase: ",amount)
                     let valueOut = await coincap.getValue(network,nativeToBaseAmount(network,amountSat))
-                    log.debug(tag,"valueOut: ",valueOut)
+                    log.info(tag,"valueOut: ",valueOut)
 
                     if(valueOut < 1){
                         if(network === 'BCH'){
@@ -1643,7 +1661,7 @@ module.exports = class wallet {
                         }
                         //Expensive networks
                         if(["BTC","ETH","RUNE"].indexOf(network) >= 0){
-                            throw Error("You dont want to do this!")
+                            throw Error("You dont want to do this! sending < 1usd on expensive network")
                         }
                     }
 
