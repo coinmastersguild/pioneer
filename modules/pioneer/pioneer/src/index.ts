@@ -532,6 +532,26 @@ module.exports = class wallet {
                             address = bchaddr.toCashAddress(address)
                             //convert
                             break;
+                        case 'LTC':
+                            address = await this.WALLET.btcGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                coin: "Litecoin",
+                                //script types
+                                //p2wpkh/p2pkh/cashaddr
+                                scriptType:'p2pkh', //bech32
+                                showDisplay: false,
+                            });
+                            break;
+                        case 'DOGE':
+                            address = await this.WALLET.btcGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                coin: "Dogecoin",
+                                //script types
+                                //p2wpkh/p2pkh/cashaddr
+                                scriptType:'p2pkh', //bech32
+                                showDisplay: false,
+                            });
+                            break;
                         case 'BTC':
                             address = await this.WALLET.btcGetAddress({
                                 addressNList: bip32ToAddressNList(masterPath),

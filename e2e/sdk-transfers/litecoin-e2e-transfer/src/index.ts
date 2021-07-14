@@ -66,14 +66,14 @@ const {
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'bitcoinCash'
-let ASSET = 'BCH'
-let MIN_BALANCE = process.env['MIN_BALANCE_BCH'] || "0.001"
+let BLOCKCHAIN = 'litecoin'
+let ASSET = 'LTC'
+let MIN_BALANCE = process.env['MIN_BALANCE_LTC'] || "0.001"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_BCH_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+let FAUCET_LTC_ADDRESS = process.env['FAUCET_LTC_ADDRESS'] || 'LLe4PciAJgMMJSAtQQ5nkC13t6SSMmERJ3'
 
 let noBroadcast = true
 
@@ -216,7 +216,7 @@ const test_service = async function () {
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
         }
 
-        //estimate BCH fee? lol
+        //estimate LTC fee? lol
         let asset = {
             chain:ASSET,
             symbol:ASSET,
@@ -238,7 +238,7 @@ const test_service = async function () {
         let poolInfo = await midgard.getPoolAddress()
 
         //filter by chain
-        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
+        let thorVault = poolInfo.filter((e:any) => e.chain === 'LTC')
         log.info(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
@@ -250,7 +250,7 @@ const test_service = async function () {
         assert(gasRate)
 
         //test amount in native
-        let amountTestNative = baseAmountToNative("BCH",TEST_AMOUNT)
+        let amountTestNative = baseAmountToNative("LTC",TEST_AMOUNT)
 
         let options:any = {
             verbose: true,
@@ -259,7 +259,7 @@ const test_service = async function () {
 
         let transfer:Transfer = {
             context:user.context,
-            recipient: FAUCET_BCH_ADDRESS,
+            recipient: FAUCET_LTC_ADDRESS,
             asset: ASSET,
             network: ASSET,
             memo: '',

@@ -11,9 +11,9 @@ let servers = {
 }
 
 console.log("servers: ",servers)
+network.init(servers)
 // network.init(servers)
-// network.init(servers)
-network.init()
+// network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
 
@@ -69,7 +69,8 @@ network.init()
 //         console.log(resp)
 //     })
 
-network.getAddressInfo('ETH',"0x33b35c665496ba8e71b22373843376740401f106")
+
+network.txidsByAddress('ETH',"0xbd6a40bb904aea5a49c59050b5395f7484a4203d",2)
     .then(function(resp){
         console.log(resp)
         console.log(JSON.stringify(resp))

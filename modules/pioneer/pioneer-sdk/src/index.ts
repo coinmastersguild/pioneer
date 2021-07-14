@@ -18,6 +18,7 @@ let {
 } = require('@pioneer-platform/pioneer-coins')
 
 import {
+    Chart,
     SendToAddress,
     Config,
     User,
@@ -64,7 +65,7 @@ export class SDK {
     private stopSocket: () => any;
     private contextWalletInfo: any;
     private valueUsdContext: any;
-    private replaceInvocation: (invocationId: string, fee: any) => Promise<any>;
+    private chart: (chart: Chart) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -237,16 +238,28 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.replaceInvocation = async function (invocationId:string,fee:any) {
-            let tag = TAG + " | replaceInvocation | "
+        this.chart = async function (chart:Chart) {
+            let tag = TAG + " | chart | "
             try {
                 //
+                let result = await this.pioneerApi.Chart(null,chart)
+                return result.data
 
                 return true
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
+        // this.replaceInvocation = async function (invocationId:string,fee:any) {
+        //     let tag = TAG + " | replaceInvocation | "
+        //     try {
+        //         //
+        //
+        //         return true
+        //     } catch (e) {
+        //         log.error(tag, "e: ", e)
+        //     }
+        // }
         // @ts-ignore
         this.sendToAddress = async function (intent:SendToAddress) {
             let tag = TAG + " | sendToAddress | "

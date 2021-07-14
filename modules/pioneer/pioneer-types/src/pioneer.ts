@@ -3,18 +3,6 @@
 
  */
 
-// export interface Asset {
-//     chain:string,
-//     symbol:string,
-//     ticker:string,
-// }
-//
-// export interface Balance {
-//     total:number
-//     pending:number
-//     confirmed:number
-// }
-
 export enum HDWALLETS {
     'pioneer',
     'trezor',

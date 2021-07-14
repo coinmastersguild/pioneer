@@ -10,6 +10,23 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
+//get symbol from contract
+network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
+    .then(function(resp){
+        console.log(resp)
+    })
+
+// network.getStreamInfo('')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//getPoolPositions
+// network.getPoolPositions('0x33b35c665496ba8e71b22373843376740401f106')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
 //
 // network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
 //     .then(function(resp){
