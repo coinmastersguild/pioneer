@@ -174,17 +174,17 @@ const test_service = async function () {
         assert(masterAddress)
 
         //create chart
-        // let chart:Chart = {
-        //     type:'contract',
-        //     network: ASSET,
-        //     pubkey: SABLIER_PROXY,
-        //     tags: ['sablier','streams'],
-        //     contractName: "sablier (proxy)"
-        // }
-        // //pair sdk
-        // let successChart = await app.chart(chart)
-        // log.info(tag,"successChart: ",successChart)
-        // assert(successChart)
+        let chart:Chart = {
+            type:'contract',
+            network: ASSET,
+            pubkey: SABLIER_PROXY,
+            tags: ['sablier','streams'],
+            contractName: "sablier (proxy)"
+        }
+        //pair sdk
+        let successChart = await app.chart(chart)
+        log.info(tag,"successChart: ",successChart)
+        assert(successChart)
 
 
         log.info("****** TEST PASS 2******")

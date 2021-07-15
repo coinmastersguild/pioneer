@@ -33,104 +33,130 @@ module.exports = {
     TODO gneratic import from atlas
  */
 
+const audit_sablier_create = function(contract:string,receipt:any){
+    let tag = TAG + " | audit_sablier_create | ";
+    try {
+
+
+
+
+        return true;
+    } catch (e) {
+        throw tag + e
+    }
+}
+
+
 const audit_receipt = function(contract:string,receipt:any){
     let tag = TAG + " | audit_receipt | ";
     try {
 
-        //log.info(tag,"receipt: ",receipt)
-        log.info(tag,"receipt.logs: ",receipt.logs)
-        log.info(tag,"receipt.logs: ",receipt.logs.length)
-        log.info(tag,"receipt last : ",receipt.logs[6])
+        log.debug(tag,"contract: ",contract)
+        log.debug(tag,"receipt.logs: ",receipt.logs)
 
-        // let streamStart = receipt.logs[5].address
+        log.debug(tag,"receipt last : ",receipt.logs[6])
 
-        //token
-        let streamAsset = receipt.logs[0].address
-        log.info(tag,"streamAsset: ",streamAsset)
+        if(contract === 'sablier (proxy)' && receipt.logs.length === 7){
+            log.info(tag,"receipt.logs: ",receipt.logs.length)
+            // let streamStart = receipt.logs[5].address
 
-        let streamAmount = receipt.logs[0].data
-        log.info(tag,"streamAmount: ",streamAmount)
+            log.debug(tag,"receipt.receipt: ",receipt)
 
-        streamAmount = util.unpadHexString(streamAmount)
-        log.info(tag,"streamAmount: ",streamAmount)
+            //token
+            let streamAsset = receipt.logs[0].address
+            log.debug(tag,"streamAsset: ",streamAsset)
 
-        streamAmount = parseInt(streamAmount,16)
-        log.info(tag,"streamAmount: ",streamAmount)
+            let streamAmount = receipt.logs[0].data
+            log.debug(tag,"streamAmount: ",streamAmount)
 
-        //get address
-        let recipient = receipt.logs[5].topics[3]
-        log.info(tag,"recipient: ",recipient)
+            streamAmount = util.unpadHexString(streamAmount)
+            log.debug(tag,"streamAmount: ",streamAmount)
 
-        recipient = util.unpadHexString(recipient)
-        log.info(tag,"recipient: ",recipient)
+            streamAmount = parseInt(streamAmount,16)
+            log.debug(tag,"streamAmount: ",streamAmount)
 
-        //repad
-        recipient = "0x"+recipient
+            //get address
+            let recipient = receipt.logs[5]?.topics[3]
+            log.debug(tag,"recipient: ",recipient)
+
+            recipient = util.unpadHexString(recipient)
+            log.debug(tag,"recipient: ",recipient)
+
+            //repad
+            recipient = "0x"+recipient
 
 
-        let saleryId = receipt.logs[6].topics[1]
-        log.info(tag,"saleryId: ",saleryId)
+            let saleryId = receipt.logs[6]?.topics[1]
+            log.debug(tag,"saleryId: ",saleryId)
 
-        saleryId = util.unpadHexString(saleryId)
-        log.info(tag,"saleryId: ",saleryId)
+            saleryId = util.unpadHexString(saleryId)
+            log.debug(tag,"saleryId: ",saleryId)
 
-        saleryId = parseInt(saleryId,16)
-        log.info(tag,"saleryId: ",saleryId)
+            saleryId = parseInt(saleryId,16)
+            log.debug(tag,"saleryId: ",saleryId)
 
-        let txid = receipt.logs[0].transactionHash
-        let logId = receipt.logs[0].id
-        let blockNumber = receipt.logs[0].blockNumber
+            let txid = receipt.logs[0].transactionHash
+            let logId = receipt.logs[0].id
+            let blockNumber = receipt.logs[0].blockNumber
 
-        let txFinal:any = {}
-        //indexs for search
-        txFinal.asset = "saleryId:"+saleryId
-        txFinal.Type = 'stream'
-        txFinal.logId = logId
-        txFinal.ecr20 = false
-        txFinal.ecr721 = false
-        txFinal.txid = txid
-        if(!txFinal.txid) throw Error("Invalid tx! missing txid! ")
-        txFinal.addresses = []
-        txFinal.events = []
+            let txFinal:any = {}
+            //indexs for search
+            txFinal.asset = "saleryId:"+saleryId
+            txFinal.Type = 'streamCreate'
+            txFinal.logId = logId
+            txFinal.ecr20 = false
+            txFinal.ecr721 = false
+            txFinal.txid = txid
+            if(!txFinal.txid) throw Error("Invalid tx! missing txid! ")
+            txFinal.addresses = []
+            txFinal.events = []
 
-        txFinal.type = "transfer"
-        txFinal.height = blockNumber
+            txFinal.type = "transfer"
+            txFinal.height = blockNumber
 
-        txFinal.addresses.push(recipient)
-        txFinal.tags = [
-            recipient,
-            'streamCreate',
-            'stream',
-            'credit',
-            logId
-        ]
+            txFinal.addresses.push(recipient)
+            txFinal.tags = [
+                recipient,
+                'streamCreate',
+                'stream',
+                'credit',
+                logId
+            ]
 
-        //event, create asset class stream
-        let eventCredit = {
-            type:"credit",
-            address:recipient,
-            amount:1,
-            asset:'stream',
-            stream:{
-                saleryId,
-                streamAsset,
-                streamAmount,
-                // streamStart,
-                // streamStop
-            },
-            txid:txid
+            //event, create asset class stream
+            let eventCredit = {
+                type:"credit",
+                address:recipient,
+                amount:1,
+                asset:'stream',
+                stream:{
+                    saleryId,
+                    streamAsset,
+                    streamAmount,
+                    // streamStart,
+                    // streamStop
+                },
+                txid:txid
+            }
+
+            //TODO debit erc20 from sender
+
+            txFinal.events.push(eventCredit)
+            // txFinal.events.push(eventDebit)
+            //txFinal.events.push(eventFee)
+
+
+            return txFinal;
+        } else {
+            //unknown
+            return {
+                type:'unknown',
+                contract,
+            }
         }
 
-        //TODO debit erc20 from sender
-
-        txFinal.events.push(eventCredit)
-        // txFinal.events.push(eventDebit)
-        //txFinal.events.push(eventFee)
-
-
-        return txFinal;
     } catch (e) {
-        throw tag + e
+        throw e
     }
 }
 
