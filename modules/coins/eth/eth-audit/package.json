@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-audit",
-  "version": "8.1.17",
+  "version": "8.1.18",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
