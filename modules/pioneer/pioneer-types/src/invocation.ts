@@ -14,7 +14,7 @@ export interface Invocation {
     network:string
     coin?:string
     amount?:string
-    context?:string
+    context:string
     username:string
 
 }

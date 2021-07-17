@@ -18,7 +18,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let FAUCET_ADDRESSES = {
 

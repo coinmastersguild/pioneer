@@ -98,13 +98,15 @@ const test_service = async function () {
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
 
+        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
+        //assert balance local
+        log.info(tag,"masterAlpha: ",masterAlpha)
+
         log.info(tag,"WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
-        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
-        //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
+
         if(balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")

@@ -38,7 +38,7 @@ let TEST_COINS = [
     'LTC'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let run_test = async function(){
     try{

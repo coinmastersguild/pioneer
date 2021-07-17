@@ -233,21 +233,6 @@ const test_service = async function () {
 
         //this is x percent of total available
 
-        //get pool address
-        let poolInfo = await midgard.getPoolAddress()
-
-        //filter by chain
-        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.info(tag,"thorVault: ",thorVault)
-        assert(thorVault[0])
-        thorVault = thorVault[0]
-        assert(thorVault.address)
-
-        const vaultAddress = thorVault.address
-        const gasRate = thorVault.gas_rate
-        assert(vaultAddress)
-        assert(gasRate)
-
         //test amount in native
         let amountTestNative = baseAmountToNative("BTC",TEST_AMOUNT)
 

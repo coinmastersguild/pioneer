@@ -887,7 +887,11 @@ module.exports = class wallet {
 
                 let memo = swap.memo || ''
 
-                let invocation:any = {
+                let invocation:Invocation = {
+                    fee: {
+                        priority:3
+                    },
+                    context:this.context,
                     type:'swap',
                     username:this.username,
                     inboundAddress:swap.inboundAddress,
@@ -899,16 +903,16 @@ module.exports = class wallet {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.debug(tag,"invocation: ",invocation)
-                let result = await this.invoke.invoke('swap',invocation)
-                console.log("result: ",result.data)
+                log.info(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke(invocation)
+                console.log("result: ",result)
 
                 if(!verbose && !txidOnResp){
-                    return result.data.invocationId
+                    return result.invocationId
                 } else if(!verbose && txidOnResp){
-                    return result.data.txid
+                    return result.txid
                 }else if(verbose){
-                    return result.data
+                    return result
                 } else {
                     throw Error("102: Unhandled configs!")
                 }

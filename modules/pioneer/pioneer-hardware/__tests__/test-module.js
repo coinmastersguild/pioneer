@@ -17,7 +17,7 @@ const prettyjson = require('prettyjson');
 prompt.start();
 
 let blockchains = [
-    'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'
+    'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'
 ]
 
 let run_test = async function(){

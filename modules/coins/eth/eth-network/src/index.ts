@@ -100,7 +100,7 @@ const ERC20ABI = [{"inputs": [], "stateMutability": "nonpayable", "type": "const
 module.exports = {
 	init:function (settings:any) {
 		//blockbook.init()
-		log.info("node: ",process.env['PARITY_ARCHIVE_NODE'])
+		//log.info("node: ",process.env['PARITY_ARCHIVE_NODE'])
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);

@@ -31,8 +31,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        // let addresses = await midgard.getPoolAddress()
-        // console.log("addresses: ",addresses)
+        let addresses = await midgard.getPoolAddress()
+        console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)
@@ -43,7 +43,7 @@ let run_test = async function(){
         //get transactions by address
 
         //get transaction by txid
-        let txid = "8D38F8EA8C4BDD70D604F369E580F9F7818AF701405C9A8DFEB75AEB55F3234F"
+        let txid = "A98CABC4E4471B7464C1E35A2C640A7A00014EE516F36C0A1BC7421663B4D119"
         // let txid = '2873A1AF23427931F40BFC0B09D0587B00E7A58E3669B84782F0F24988776D06'
         // //let txid = 'A2BCC716691C2DD4C748456F9BF4C4E862F6A3E7E3D3E820658067B0FA2568DE'
         // let txid = "e932b905e2d19f2a5cce24041cab9d6930faa789a25da391b05b5e51058f3bdb"

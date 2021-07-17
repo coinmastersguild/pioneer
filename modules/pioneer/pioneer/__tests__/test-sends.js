@@ -37,7 +37,7 @@ let run_test = async function(){
             mnemonic: process.env['WALLET_MAIN'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,
-            blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
+            blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'],
             pioneerApi:true,
             spec:urlSpec,
             queryKey,

@@ -80,7 +80,7 @@ let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wag
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
 let noBroadcast = true
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 //pre-register username on key
 const pre_register = async function () {

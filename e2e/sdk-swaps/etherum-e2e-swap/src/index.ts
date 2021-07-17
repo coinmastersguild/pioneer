@@ -45,6 +45,10 @@ let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
+import {
+    Transfer
+} from "@pioneer-platform/pioneer-types";
+
 let {
     supportedBlockchains,
     baseAmountToNative,
@@ -53,6 +57,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     getInvocations,
     sendPairingCode,
     buildTransaction,
@@ -70,8 +76,10 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-let noBroadcast = false
+let CURRENCY_IN=ASSET
+let CURRENCY_OUT='BCH'
 
+let noBroadcast = false
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -88,18 +96,26 @@ const test_service = async function () {
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
         assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -239,7 +255,14 @@ const test_service = async function () {
 
         //filter by chain
         let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-        log.debug(tag,"ethVault: ",ethVault)
+        log.info(tag,"ethVault: ",ethVault)
+
+        if(ethVault.halted) {
+            log.info(tag,"ethVault: ",ethVault)
+            throw Error("Unable to swap! network halted!")
+        } else {
+            throw Error("wtf")
+        }
 
         assert(ethVault[0])
         ethVault = ethVault[0]
@@ -273,8 +296,8 @@ const test_service = async function () {
 
         //if create new
         let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.debug(tag,"responseSwap: ",responseSwap)
-        invocationId = responseSwap.invocationId
+        log.info(tag,"responseSwap: ",responseSwap)
+        invocationId = responseSwap
 
         //do not continue invocation
         assert(invocationId)
@@ -308,7 +331,6 @@ const test_service = async function () {
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
         log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)

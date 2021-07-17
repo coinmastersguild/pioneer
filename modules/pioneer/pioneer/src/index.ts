@@ -1441,10 +1441,14 @@ module.exports = class wallet {
                     log.info(tag,"decoded: ",decoded)
                     log.info(tag,"decoded.from: ",decoded.from)
                     log.info(tag,"addressFrom: ",unsignedTx?.transaction?.addressFrom)
-
-                    if(unsignedTx?.transaction?.addressFrom !== decoded.from){
-                        throw Error("Invalid transaction! from address mismatch!")
-                    }
+                    // let addressFromUnsignedTx
+                    // if(unsignedTx?.swap){
+                    //     //TODO fixme (add from address to swap payload)
+                    //     addressFromUnsignedTx =
+                    // }
+                    // if(unsignedTx?.transaction?.addressFrom !== decoded.from){
+                    //     throw Error("Invalid transaction! from address mismatch!")
+                    // }
 
                     //TODO verify more
                     //verify amounts sane

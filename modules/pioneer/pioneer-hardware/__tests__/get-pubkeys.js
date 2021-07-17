@@ -17,8 +17,12 @@ const prettyjson = require('prettyjson');
 prompt.start();
 
 let blockchains = [
-    'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'
+    'dogecoin','cosmos'
 ]
+
+// let blockchains = [
+//     'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'
+// ]
 
 let run_test = async function(){
     try{
@@ -74,7 +78,7 @@ let run_test = async function(){
 
             //get pubkeys
             let pubkeys = await Hardware.getPubkeys(blockchains)
-            console.log("pubkeys: ",pubkeys)
+            console.log("pubkeys: ",JSON.stringify(pubkeys))
             console.log("pubkeys: ",prettyjson.render(pubkeys))
         } else if(state.state < 0){
             console.log("Failed to claim!")

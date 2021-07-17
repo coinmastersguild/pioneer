@@ -16,7 +16,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "test-jest": "jest --coverage",
     "test:watch": "jest --coverage --watchAll",
-    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "view:coverage": "serve coverage/lcov-report",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },

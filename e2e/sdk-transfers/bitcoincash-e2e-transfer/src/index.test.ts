@@ -37,11 +37,16 @@ const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
 import {v4 as uuidv4} from 'uuid';
+let BigNumber = require('@ethersproject/bignumber')
 let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
+
+import {
+    Transfer
+} from "@pioneer-platform/pioneer-types";
 
 let {
     supportedBlockchains,
@@ -51,28 +56,34 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     sendPairingCode,
     buildTransaction,
     approveTransaction,
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'ethereum'
-let ASSET = 'ETH'
+let BLOCKCHAIN = 'bitcoinCash'
+let ASSET = 'BCH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
+let FAUCET_BTC_ADDRESS = process.env['FAUCET_BTC_ADDRESS'] || 'bc1q0dt53aa0v366zdpsf2ant3pw4maugf50y2ywqy'
+let FAUCET_BCH_ADDRESS = process.env['FAUCET_BCH_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-describe(' - e2e test ETH Swaps - ', function() {
+let noBroadcast = true
+describe(' - e2e test BTC transfer - ', function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;
 
         beforeEach(() => {
             console.log = jest.fn(); // create a new mock function for each test
+            jest.setTimeout(90000)
         });
         afterAll(() => {
             console.log = log; // restore original console.log after all tests
@@ -82,10 +93,11 @@ describe(' - e2e test ETH Swaps - ', function() {
         const queryKey = uuidv4();
         let username
         let balance
-        let wallet:any
+        let contextAlpha:string
+        let wallets:any
         let app:any
         let eventPairReceived = false
-        let seedChains = ['ethereum','thorchain']
+        let seedChains = ['ethereum','thorchain','bitcoin','bitcoinCash']
         let code:any
         let user:any
         let client:any
@@ -94,7 +106,7 @@ describe(' - e2e test ETH Swaps - ', function() {
         let balanceBase:any
         let valueBalanceUsd:any
         let estimateCost:any
-        let swap:any
+        let transfer:Transfer
         let invocationId:string
         let signedTx:any
         let transaction:any
@@ -102,23 +114,28 @@ describe(' - e2e test ETH Swaps - ', function() {
 
         it('Starts Wallet', async function() {
             //start app and get wallet
-            wallet = await startApp()
-            //log(tag,"wallet: ",wallet)
-            username = wallet.username
+            wallets = await startApp()
+            log(tag,"wallets: ",wallets)
+            username = wallets.username
             expect(username).toBeDefined();
         });
 
         it('gets balance', async function() {
 
-            //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
+            let appContext = getContext()
+            expect(appContext).toBeDefined();
+
+            //get wallets
+            let appWallets = getWallets()
+            contextAlpha = appWallets[0]
+            balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
             expect(balance).toBeDefined();
         });
 
         it('Balance is enough for test', async function() {
 
             //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
+            balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
             expect(Number(balance)).toBeGreaterThan(Number(MIN_BALANCE));
         });
 
@@ -284,42 +301,36 @@ describe(' - e2e test ETH Swaps - ', function() {
             log(tag,"ethVault: ",ethVault)
             expect(ethVault).toBeDefined();
 
-            log(tag,"ethVault: ",ethVault)
-            expect(ethVault[0]).toBeDefined();
-            ethVault = ethVault[0]
-            expect(ethVault.address).toBeDefined();
-            expect(ethVault.router).toBeDefined();
-            const vaultAddressEth = ethVault.address
-            const gasRate = ethVault.gas_rate
-            expect(vaultAddressEth).toBeDefined();
-            expect(gasRate).toBeDefined();
+            //test amount in native
+            let amountTestNative = baseAmountToNative("BTC",TEST_AMOUNT)
 
-            swap = {
-                inboundAddress: ethVault,
-                coin: "ETH",
-                asset: "ETH",
-                memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
+            transfer = {
+                context:user.context,
+                recipient: FAUCET_BCH_ADDRESS,
+                asset: ASSET,
+                network: ASSET,
+                memo: '',
                 "amount":{
-                    // "type":"BASE",
-                    // "decimal":18,
-                    //TODO bignum like asgardx?
                     amount: function(){
-                        return TEST_AMOUNT
+                        return BigNumber.BigNumber.from(amountTestNative)
                     }
                 },
-                noBroadcast:true
+                fee:{
+                    priority:3, //1-5 5 = highest
+                },
+                noBroadcast
             }
         });
 
-        it('Build Swap (init) ', async function() {
+        it('Build transfer (init) ', async function() {
             let options:any = {
                 verbose: true,
                 txidOnResp: false, // txidOnResp is the output format
             }
 
-            let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-            log(tag,"responseSwap: ",responseSwap)
-            let invocationId = responseSwap.invocationId
+            let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+            log(tag,"responseTransfer: ",responseTransfer)
+            let invocationId = responseTransfer
             expect(invocationId).toBeDefined();
 
             transaction = {
@@ -328,11 +339,7 @@ describe(' - e2e test ETH Swaps - ', function() {
             }
         });
 
-        it('Build Swap (with context)', async function() {
-            let options:any = {
-                verbose: true,
-                txidOnResp: false, // txidOnResp is the output format
-            }
+        it('Build transaction (with context)', async function() {
 
             let unsignedTx = await buildTransaction(transaction)
             log(tag,"unsignedTx: ",unsignedTx)

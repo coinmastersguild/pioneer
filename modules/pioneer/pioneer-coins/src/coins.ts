@@ -679,7 +679,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     normalized.pubkey = zpub
                     pubkey.pubkey = zpub
                 }
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB'){
+                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM'){
                     pubkey.pubkey = pubkeys[i].xpub
                 }
                 normalized.note = pubkey.note
