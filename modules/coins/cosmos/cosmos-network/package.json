@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cosmos-network",
-  "version": "8.1.5",
+  "version": "8.1.6",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
