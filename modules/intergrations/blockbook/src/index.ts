@@ -191,6 +191,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
+        console.log("url: ",url)
 
         let body = {
             method: 'GET',

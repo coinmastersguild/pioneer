@@ -1589,11 +1589,10 @@ module.exports = class wallet {
                     log.info(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
                     log.info(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
 
-                    // let unspentInputs = await this.pioneerClient.instance.GetUtxos({network})
-
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
                     log.info(tag,"input: ",input)
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent(input)
+
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input})
                     unspentInputs = unspentInputs.data
                     log.debug(tag,"unspentInputs: ",unspentInputs)
 
@@ -1621,7 +1620,6 @@ module.exports = class wallet {
                     if (utxos.length === 0){
                         throw Error("101 YOUR BROKE! no UTXO's found! ")
                     }
-
 
                     //TODO get fee level in sat/byte
                     // let feeRate = 1
@@ -1716,7 +1714,7 @@ module.exports = class wallet {
                         log.debug(tag,"inputInfo: ",inputInfo)
                         let input = {
                             addressNList:support.bip32ToAddressNList(inputInfo.path),
-                            scriptType:"p2pkh",
+                            scriptType:"p2sh-p2wpkh",
                             amount:String(inputInfo.value),
                             vout:inputInfo.vout,
                             txid:inputInfo.txId,
@@ -1729,7 +1727,8 @@ module.exports = class wallet {
 
                     //TODO get new change address
                     //hack send all change to master (address reuse bad, stop dis)
-                    let changeAddress = await this.getMaster(network)
+                    //let changeAddress = await this.getMaster(network)
+                    let changeAddress = 'bc1qxzsgclsnyerfn2why242em5zd5pjy9yx6qy20n'
 
                     //if bch convert format
                     if(network === 'BCH'){

@@ -22,8 +22,8 @@ let FAUCET_ADDRESSES = {
 
 }
 
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+let username = process.env['TEST_USERNAME_3']
+let queryKey = process.env['TEST_QUERY_KEY_3']
 
 let run_test = async function(){
     try{
@@ -34,7 +34,8 @@ let run_test = async function(){
         //pioneer
         let config = {
             // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
-            mnemonic: process.env['WALLET_MAIN'],
+            mnemonic: process.env['WALLET_TEST_BROKE'],
+            // mnemonic: process.env['WALLET_MAIN'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,
             blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'],
@@ -54,19 +55,19 @@ let run_test = async function(){
             ETH build transfer
          */
 
-        let transaction = {
-            coin: 'ETH',
-            asset: 'ETH',
-            network: 'ETH',
-            amount: '0.00101',
-            addressTo: '0x33b35c665496bA8E71B22373843376740401F106',
-        }
-
-        let unSignedTx = await Wallet.buildTransfer(transaction)
-        console.log("unSignedTx: ",unSignedTx)
-
-        let signedTx = await Wallet.signTransaction(unSignedTx)
-        console.log("signedTx: ",signedTx)
+        // let transaction = {
+        //     coin: 'ETH',
+        //     asset: 'ETH',
+        //     network: 'ETH',
+        //     amount: '0.00101',
+        //     addressTo: '0x33b35c665496bA8E71B22373843376740401F106',
+        // }
+        //
+        // let unSignedTx = await Wallet.buildTransfer(transaction)
+        // console.log("unSignedTx: ",unSignedTx)
+        //
+        // let signedTx = await Wallet.signTransaction(unSignedTx)
+        // console.log("signedTx: ",signedTx)
 
         // let resultBroadcast = await Wallet.broadcastTransaction('BTC',result)
         // console.log("resultBroadcast: ",resultBroadcast)
@@ -269,26 +270,32 @@ let run_test = async function(){
         /*
                BTC
          */
-        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-        //
-        // let masterBTC = await Wallet.getMaster("BTC")
-        // console.log("masterBTC: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BTC")
-        // console.log("balanceBTC: ",balanceBTC)
-        //
-        // let amount = "0.00001"
-        // let feeLevel = 5
-        //
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
-        //     amount,
-        //     feeLevel
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+
+        let amount = "0.0001"
+        let feeLevel = 5
+
+        let transfer = {
+            network:"BTC",
+            asset:"BTC",
+            coin:"BTC",
+            fee:10,
+            addressTo:"bc1qxzsgclsnyerfn2why242em5zd5pjy9yx6qy20n",
+            amount,
+            feeLevel
+        }
+
+        let transferUnSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferUnSigned: ",transferUnSigned)
+        console.log("transferUnSigned: ",JSON.stringify(transferUnSigned))
+
+        let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        console.log("transferSigned: ",transferSigned)
 
         // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)

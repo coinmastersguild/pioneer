@@ -59,22 +59,6 @@ network.init(servers)
 //         console.log("txid: ",resp)
 //     })
 
-// network.utxosByXpub("BCH","zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-
-// network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-
-
-network.txidsByAddress('ETH',"0xbd6a40bb904aea5a49c59050b5395f7484a4203d",2)
-    .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
-    })
 
 // network.init()
 //     .then(function(resp){
