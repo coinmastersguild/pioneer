@@ -1,5 +1,5 @@
 /*
-     KAVA Network
+     OSMO Network
 
 
 */
@@ -18,8 +18,9 @@ const axios = Axios.create({
 const log = require('@pioneer-platform/loggerdog')()
 
 
-let URL_KAVA_LCD = process.env['URL_KAVA_LCD'] || 'https://lcd-kava.keplr.app'
-let BASE_KAVA = 100000000
+let URL_OSMO_LCD = process.env['URL_OSMO_LCD']
+if(!URL_OSMO_LCD) throw Error('missing env URL_OSMO_LCD')
+let BASE_OSMO = 100000000
 
 /**********************************
  // Module
@@ -63,7 +64,7 @@ module.exports = {
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "
     try{
-        let txInfo = await axios({method:'GET',url:  URL_KAVA_LCD+'/txs/'+txid})
+        let txInfo = await axios({method:'GET',url:  URL_OSMO_LCD+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){
@@ -82,7 +83,7 @@ let broadcast_transaction = async function(tx:string){
 
         try{
             //push to seed
-            let urlRemote = URL_KAVA_LCD+ '/txs'
+            let urlRemote = URL_OSMO_LCD+ '/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
@@ -132,11 +133,11 @@ let get_account_info = async function(address:string){
     let tag = TAG + " | get_account_info | "
     try{
         //
-        console.log("URL ",URL_KAVA_LCD+'/auth/accounts/'+address)
-        let txInfo = await axios({method:'GET',url: URL_KAVA_LCD+'/auth/accounts/'+address})
+        console.log("URL ",URL_OSMO_LCD+'/auth/accounts/'+address)
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/auth/accounts/'+address})
         log.info(tag,"txInfo: ",txInfo.data)
 
-        return txInfo.data
+        return JSON.parse(txInfo.data)
     }catch(e){
         log.error(tag,"e: ",e)
         throw e
@@ -155,7 +156,15 @@ let normalize_tx = function(tx:any,address?:string){
 
         let rawlog = JSON.parse(tx.raw_log)
         rawlog = rawlog
-        //log.info("rawlog: ",rawlog)
+        log.info("rawlog: ",rawlog)
+
+        output.txid = tx.txhash
+        output.height = tx.height
+
+        output.gas = {
+            gas_wanted:tx.gas_wanted,
+            gas_used:tx.gas_used
+        }
 
         //txTypes
         let txTypes = [
@@ -201,7 +210,7 @@ let normalize_tx = function(tx:any,address?:string){
                             }
                             if(attribute.key === 'amount'){
                                 amount = attribute.value
-                                amount = amount.replace('rune','')
+                                amount = amount.replace('uosmo','')
                                 output.amount = amount / 100000000
                             }
                         }
@@ -227,47 +236,40 @@ let get_txs_by_address = async function(address:string){
         let output:any = []
 
         //sends
-        let url = URL_KAVA_LCD+ '/txs?message.sender='+address
-        log.debug(tag,"url: ",url)
+        let url = URL_OSMO_LCD+ '/txs?message.sender='+address
+        log.info(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        //log.info('sends: ', sends)
+        log.info('sends: ', sends)
 
-        // TODO//pagnation
-        // let pagesSends = sends.page_number
-        // for(let i = 0; i < pagesSends; i++){
-        //
-        // }
-        for(let i = 0; i < sends.txs.length; i++ ){
-            let tx = sends.txs[i]
-
-            //pretty json
-
-            //normalize
-            tx = normalize_tx(tx,address)
-            output.push(tx)
+        if(sends.txs){
+            for(let i = 0; i < sends.txs.length; i++ ){
+                let tx = sends.txs[i]
+                tx = normalize_tx(tx,address)
+                output.push(tx)
+            }
         }
 
         //receives
-        url = URL_KAVA_LCD+ '/txs?transfer.recipient='+address
-        console.log("URL_KAVA_LCD: ",url)
+        url = URL_OSMO_LCD+ '/txs?transfer.recipient='+address
+        console.log("URL_OSMO_LCD: ",url)
         let resultRecieves = await axios({
             url: url,
             method: 'GET'
         })
         let receives = resultRecieves.data
         log.info('receives: ', receives)
-
-        for(let i = 0; i < receives.txs.length; i++ ){
-            let tx = receives.txs[i]
-            //normalize
-            tx = normalize_tx(tx,address)
-            output.push(tx)
+        if(receives.txs){
+            for(let i = 0; i < receives.txs.length; i++ ){
+                let tx = receives.txs[i]
+                //normalize
+                tx = normalize_tx(tx,address)
+                output.push(tx)
+            }
         }
-
 
         return output
     }catch(e){
@@ -282,20 +284,20 @@ let get_balance = async function(address:string){
         let output = 0
 
         try{
-            let accountInfo = await axios({method:'GET',url: URL_KAVA_LCD+'/bank/balances/'+address})
+            let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
             log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
                 for(let i = 0; i < accountInfo.data.result.length; i++){
                     let entry = accountInfo.data.result[i]
-                    if(entry.denom === 'ukava'){
+                    if(entry.denom === 'uosmo'){
                         output = entry.amount
                     }
                 }
             }
 
-            output = output / BASE_KAVA
+            output = output / BASE_OSMO
         }catch(e){
             //TODO stupid node 404's on new addresses!
             //if !404
@@ -316,18 +318,18 @@ let get_node_info_verbose = async function(){
         let output:any = {}
 
         //get syncing status
-        let syncInfo = await axios({method:'GET',url: URL_KAVA_LCD+'/syncing'})
+        let syncInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/syncing'})
         log.info(tag,"syncInfo: ",syncInfo.data)
 
         output.isSyncing = syncInfo.data
 
         //gaiad abci_info
-        let nodeInfo = await axios({method:'GET',url: URL_KAVA_LCD+'/node_info'})
+        let nodeInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/node_info'})
         log.debug(tag,"nodeInfo: ",nodeInfo.data)
         output = nodeInfo.data
 
 
-        // let lastBlock = await axios({method:'GET',url: URL_KAVA_LCD+'/blocks/latest'})
+        // let lastBlock = await axios({method:'GET',url: URL_OSMO_LCD+'/blocks/latest'})
         // log.info(tag,"lastBlock: ",lastBlock.data)
 
         //let height
@@ -341,3 +343,4 @@ let get_node_info_verbose = async function(){
         throw e
     }
 }
+
