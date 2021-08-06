@@ -1,21 +1,21 @@
 {
   "name": "@pioneer-platform/pioneer-invoke",
-  "version": "6.2.30",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
     "npm": "npm i",
     "test": "npm run build && node __tests__/test-module.js",
     "lint": "prettier --write '**/**/*.ts'",
-    "run-bridge": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts --auth",
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/signing": "0.0.3",
+    "@pioneer-platform/loggerdog": "^8.1.5",
+    "@pioneer-platform/signing": "^8.1.5",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
@@ -28,5 +28,6 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
     "when": "^3.7.8"
-  }
+  },
+  "gitHead": "547ca079865ded4e3faa121794f068bc923212a5"
 }

@@ -18,7 +18,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let FAUCET_ADDRESSES = {
 
@@ -34,14 +34,14 @@ let run_test = async function(){
 
         let isTestnet = null
 
-        let context = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+        let context = "0xc3affasdasff54122658b89c31183cec4f15514f34624.wallet.json"
 
         //pioneer
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
-            context,
+            mnemonic: process.env['FOUND_KEY'],
+            walletId:context,
             username,
             pioneerApi:true,
             spec:urlSpec,

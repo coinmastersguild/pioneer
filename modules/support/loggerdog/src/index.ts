@@ -118,9 +118,9 @@ class Logger {
     }
 
     _log(level:any, ...args:any) {
-        console.log('level: ',level)
-        console.log('this._level: ',this._level)
-        console.log('LOG_LEVELS[level].val: ',LOG_LEVELS[level].val)
+        //console.log('level: ',level)
+        //console.log('this._level: ',this._level)
+        //console.log('LOG_LEVELS[level].val: ',LOG_LEVELS[level].val)
         if ( this._level >= LOG_LEVELS[level].val ) {
             let dt = new Date().toISOString().replace('T', ' ')
             let ctx = _getContextString()

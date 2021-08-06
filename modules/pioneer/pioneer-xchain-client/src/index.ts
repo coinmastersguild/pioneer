@@ -26,21 +26,24 @@ let {
 let Invoke = require("@pioneer-platform/pioneer-invoke")
 
 import {
+    Transfer,
+    Invocation,
+    Address,
+    FeesParams,
+    EstimateFeeParams,
+    CallDepositParams,
+} from "@pioneer-platform/pioneer-types";
+
+import {
     Balances
 } from '@xchainjs/xchain-client'
 
 
 import {
     Asset,
-    AssetETH,
-    baseAmount,
-    baseToAsset,
     BaseAmount,
-    assetFromString,
     assetAmount,
     assetToBase,
-    assetToString,
-    ETHChain,
 } from '@xchainjs/xchain-util'
 
 /*
@@ -53,122 +56,6 @@ type Amount<T> = {
     decimal: number
 }
 
-export type Address = string
-
-export type Network = 'testnet' | 'mainnet'
-
-export type Balance = {
-    asset: Asset
-    amount: BaseAmount
-}
-
-export type TxType = 'transfer' | 'unknown'
-
-export type TxHash = string
-
-export type TxTo = {
-    to: Address // address
-    amount: BaseAmount // amount
-}
-
-export type TxFrom = {
-    from: Address | TxHash // address or tx id
-    amount: BaseAmount // amount
-}
-
-export type Tx = {
-    asset: Asset // asset
-    from: TxFrom[] // list of "to" txs. BNC will have one `TxFrom` only, `BTC` might have many transactions going "in" (based on UTXO)
-    to: TxTo[] // list of "to" transactions. BNC will have one `TxTo` only, `BTC` might have many transactions going "out" (based on UTXO)
-    date: Date // timestamp of tx
-    type: TxType // type
-    hash: string // Tx hash
-}
-
-export type Txs = Tx[]
-
-export type TxsPage = {
-    total: number
-    txs: Txs
-}
-
-export type TxHistoryParams = {
-    address: Address // Address to get history for
-    offset?: number // Optional Offset
-    limit?: number // Optional Limit of transactions
-    startTime?: Date // Optional start time
-    asset?: string // Optional asset. Result transactions will be filtered by this asset
-}
-
-export type TxParams = {
-    asset?: Asset
-    amount: BaseAmount
-    recipient: Address
-    memo?: string // optional memo to pass
-}
-
-export type EstimateFeeParams = {
-    sourceAsset: Asset,
-    ethClient: any,
-    ethInbound: any,
-    inputAmount: number,
-    memo: string
-};
-
-// In most cases, clients don't expect any paramter in `getFees`
-// but in some cases, they do (e.g. in xchain-ethereum).
-// To workaround this, we just define an "empty" (optional) param for now.
-// If needed, any client can extend `FeeParams` to add more  (Check `xchain-ethereum` as an example)
-// Let me know if we can do it better ... :)
-export type FeesParams = { readonly empty?: '' }
-
-export type FeeOptionKey = 'average' | 'fast' | 'fastest'
-export type FeeOption = Record<FeeOptionKey, BaseAmount>
-
-export type FeeType =
-    | 'byte' // fee will be measured as `BaseAmount` per `byte`
-    | 'base' // fee will be "flat" measured in `BaseAmount`
-
-export type Fees = FeeOption & {
-    type: FeeType
-}
-
-export type XChainClientParams = {
-    network?: Network
-    phrase?: string
-}
-
-export type CallDepositParams = {
-    inboundAddress: any,
-    asset: Asset,
-    memo: string,
-    ethClient: any,
-    amount: number
-};
-
-export type Swap = {
-    asset: Asset,
-    amount: string,
-    vaultAddress?:string,
-    toAddress:string,
-};
-
-export interface config {
-    spec:string,
-    env:string,
-    mode:string,
-    username:string,
-    addresses?:[]
-    wallet?:any,
-    pubkeys?:any,
-    auth?:string,
-    paths?:any,
-    privWallet?:any,
-    mnemonic?:string,
-    queryKey?:string
-    offline?:boolean
-    pioneerApi?:boolean
-}
 
 
 module.exports = class wallet {
@@ -187,8 +74,8 @@ module.exports = class wallet {
     private validateAddress: (coin: string, address: string) => any;
     private setPhrase: (coin: string, phrase: string) => any;
     private getBalance: (address?: Address, asset?:any) => any;
-    private getTransactions!: (address?: Address, asset?: any) => any;
-    private getTransactionData!: (txid: string) => Promise<any>;
+    private getTransactions: (address: string) => any;
+    private getTransactionData!: (txid: string, type?:string) => Promise<any>;
     private purgeClient!: (address?: Address, asset?: any) => any;
     private getFees!: (params?: FeesParams) => any;
     private transfer!: (tx: any) => any;
@@ -205,17 +92,31 @@ module.exports = class wallet {
     private getFeeRates: (() => { fees: { average: { amount: () => BigNumber; }; fast: { amount: () => BigNumber; }; fastest: { amount: () => BigNumber; }; type: string; }; rates: any; }) | undefined;
     private estimateFee: (({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) => Promise<any>) | undefined;
     private callDeposit: (({inboundAddress, asset, memo, ethClient, amount}: CallDepositParams) => Promise<any>) | undefined;
-    private buildSwap: (swap: Swap) => Promise<any>;
+    private buildSwap: (swap: any, options: any) => Promise<any>;
     private invoke: any;
     private isApproved: ((routerAddress: string, address: string, amount: number) => Promise<any>) | undefined;
     private call: (<T>(address: Address, abi: any, func: string, params: Array<any>) => Promise<T>) | undefined;
     private estimateApproveFee: ((contractAddress: string, asset: any) => Promise<BigNumber>) | undefined;
     private approve: ((spender: string, sender: string, amount: BaseAmount) => Promise<any>) | undefined;
     private context: string;
+    private wallets: any;
+    private totalValueUsd: number | undefined;
+    private invocationContext: any;
+    private assetContext: any;
+    private assetBalanceNativeContext: any;
+    private assetBalanceUsdValueContext: any;
+    private updateContext: () => Promise<void>;
+    private signingPubkey: string;
+    private signingPrivkey: string;
+    private deposit: (deposit: any, options: any) => Promise<any>;
+    private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
+    private getTxCount: ((address: string) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
         this.network = config.blockchain
+        this.signingPubkey = config.signingPubkey
+        this.signingPrivkey = config.signingPrivkey
         this.nativeAsset = config.nativeAsset
         this.service = config.service || 'unknown'
         if(config.network === 'mainnet'){
@@ -240,15 +141,32 @@ module.exports = class wallet {
                 this.pioneerApi = await this.pioneerApi.init()
 
                 //get info
-                // @ts-ignore
-                let info = await this.pioneerApi.Info(context)
-                //TODO error handling
-                this.info = info.data
-                this.username = this.info.username
+                let userInfo = await this.pioneerApi.User()
+                userInfo = userInfo.data
+                log.debug(tag,"userInfo: ",userInfo)
 
+                this.username = userInfo.username
+                this.context = userInfo.context
+                this.wallets = userInfo.wallets
+                this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
+                this.context = userInfo.context
+                this.invocationContext = userInfo.invocationContext
+                this.assetContext = userInfo.assetContext
+                this.assetBalanceNativeContext = userInfo.assetBalanceNativeContext
+                this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
+
+                //get info
+                let walletInfo = await this.pioneerApi.Info(this.context)
+                this.info = walletInfo.data
 
                 //invoke
+                if(!this.signingPrivkey){
+                    //generate keypair
+
+                }
                 let config = {
+                    signingPubkey:this.signingPubkey,
+                    signingPrivkey:this.signingPrivkey,
                     queryKey:this.queryKey,
                     username:this.username,
                     spec
@@ -496,10 +414,24 @@ module.exports = class wallet {
             Ethereum:
          */
         if(this.network === 'ethereum'){
+            //nonce
+            this.getTxCount = async function () {
+                let tag = TAG + " | getTxCount | "
+                try {
+
+                    //output
+                    let output = await this.pioneerApi.GetTxCount(this.getAddress())
+                    return output.data
+
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
 
             this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
                 let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
                 try {
+                    log.debug(tag,"params: ",params)
                     let response = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(null,params)
                     response = response.data
                     let output = {
@@ -535,6 +467,7 @@ module.exports = class wallet {
                 try {
                     //
                     let invocation:any = {
+                        type:'approve',
                         username:this.username,
                         coin:this.nativeAsset,
                         contract:spender,
@@ -542,12 +475,35 @@ module.exports = class wallet {
                         amount:amount.amount().toNumber()
                     }
                     if(noBroadcast) invocation.noBroadcast = true
-                    log.info(tag,"invocation: ",invocation)
-                    let result = await this.invoke.invoke('approve',invocation)
-                    console.log("result: ",result.data)
+                    log.debug(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    console.log("result: ",result)
 
 
-                    return result.data.txid
+                    return result.txid
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            this.replace = async function (invocationId:string,fee:any) {
+                let tag = TAG + " | replace | "
+                try {
+                    //
+                    let invocation:Invocation = {
+                        type:'replace',
+                        invocationId,
+                        context:this.context,
+                        asset:'ETH',
+                        network:'ETH',
+                        username:this.username,
+                        fee
+                    }
+                    let result = await this.invoke.invoke(invocation)
+                    log.info("result: ",result)
+
+
+                    return result.invocationId
                 } catch (e) {
                     log.error(tag, "e: ", e)
                 }
@@ -582,6 +538,7 @@ module.exports = class wallet {
 
                     let params = {
                         coin:"ETH",
+                        network:"ETH",
                         amount:assetToBase(assetAmount(inputAmount, 18)).amount().toFixed(),
                         contract:"0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a",
                         recipient:ethInbound.address,
@@ -604,7 +561,7 @@ module.exports = class wallet {
                     //In theory we only use this for a few contract special things
 
                     let wallet:ethers.Wallet = ethers.Wallet.fromMnemonic("alcohol woman abuse must during monitor noble actual mixed trade anger aisle")
-                    let provider = getDefaultProvider('testnet')
+                    let provider = getDefaultProvider()
                     await wallet.connect(provider)
 
                     return wallet
@@ -628,8 +585,8 @@ module.exports = class wallet {
                     let allowance = await this.pioneerApi.GetAllowance(null,body)
                     allowance = allowance.data
 
-                    log.info(tag,"allowance: ",allowance)
-                    log.info(tag,"amount: ",amount)
+                    log.debug(tag,"allowance: ",allowance)
+                    log.debug(tag,"amount: ",amount)
                     if(allowance > amount){
                         return true
                     } else {
@@ -653,6 +610,31 @@ module.exports = class wallet {
         /*
              Commonn API
          */
+        this.updateContext = async function () {
+            let tag = TAG + " | updateContext | "
+            try {
+                //get info
+                let userInfo = await this.pioneerApi.User()
+                log.debug(tag,"userInfo: ",userInfo)
+
+                this.username = userInfo.username
+                this.context = userInfo.context
+                this.wallets = userInfo.wallets
+                this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
+                this.invocationContext = userInfo.invocationContext
+                this.assetContext = userInfo.assetContext
+                this.assetBalanceNativeContext = userInfo.assetBalanceNativeContext
+                this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
+
+                //get info
+                const walletInfo = await this.pioneerApi.Info(this.context)
+                this.info = walletInfo.data
+
+                return userInfo
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
         this.getNetwork = function () {
             let tag = TAG + " | getNetwork | "
             try {
@@ -735,7 +717,7 @@ module.exports = class wallet {
                         ticker:this.nativeAsset
                     }
 
-                    log.info(tag,"returnAssetAmount",returnAssetAmount())
+                    log.debug(tag,"returnAssetAmount",returnAssetAmount())
 
                     balances.push({
                         asset: assetDescription,
@@ -752,21 +734,23 @@ module.exports = class wallet {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactions = function (address?: Address, asset?: Asset) {
+        this.getTransactions = async function (address: string) {
             let tag = TAG + " | getTransactions | "
             try {
                 //TODO
-                return [{"foo":"bar"}]
+                //if xpub
+                //if eth
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactionData = async function (txid:string) {
+        this.getTransactionData = async function (txid:string,type?:string) {
             let tag = TAG + " | getTransactionData | "
             try {
                 if(!txid) throw Error("Txid is required!")
-                log.info("asset: ",this.nativeAsset)
-                let output = await this.pioneerApi.GetTransaction({coin:this.nativeAsset,txid})
+                log.debug("asset: ",this.nativeAsset)
+                //TODO tech debt, send network instead of asset
+                let output = await this.pioneerApi.GetTransaction({network:this.nativeAsset,txid,type:'thorchain'})
                 return output.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -775,8 +759,72 @@ module.exports = class wallet {
         this.getFees = async function (params?: FeesParams) {
             let tag = TAG + " | getFees | "
             try {
-                let output = await this.pioneerApi.getFees(params)
+                let output = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
                 return output
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        /*
+        let deposit = {
+        }
+        */
+        this.deposit = async function (deposit:any,options:any) {
+            let tag = TAG + " | deposit | "
+            try {
+                log.debug(tag,"deposit: ",deposit)
+                log.debug(tag,"options: ",options)
+
+                //verbose
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
+
+                //NOTE THIS IS ONLY Thorchain!
+                let coin = this.nativeAsset
+                if(this.network !== 'thorchain') throw Error("102: not supported!")
+
+                //if native
+                let amount = deposit.amount.toString()
+                //amount = nativeToBaseAmount(this.nativeAsset,amount)
+                log.debug(tag,"amount (final): ",amount)
+                if(!amount) throw Error("Failed to get amount!")
+                // if(typeof(amount) !== 'string')
+                //TODO min transfer size 10$??
+                //TODO validate addresses
+                //TODO validate midgard addresses not expired
+
+                let memo = deposit.memo || ''
+
+                let invocation:any = {
+                    type:'deposit',
+                    username:this.username,
+                    inboundAddress:deposit.inboundAddress,
+                    network:coin,
+                    asset:coin,
+                    coin,
+                    amount,
+                    memo
+                }
+                if(deposit.noBroadcast) invocation.noBroadcast = true
+
+                log.debug(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke('deposit',invocation)
+                console.log("result: ",result.data)
+
+                if(!verbose && !txidOnResp){
+                    return result.data.invocationId
+                } else if(!verbose && txidOnResp){
+                    return result.data.txid
+                }else if(verbose){
+                    return result.data
+                } else {
+                    throw Error("102: Unhandled configs!")
+                }
+
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -800,53 +848,125 @@ module.exports = class wallet {
             amount: { type: 'BASE', decimal: 18 }
         }
         */
-        this.buildSwap = async function (swap:any) {
+        this.buildSwap = async function (swap:any,options:any) {
             let tag = TAG + " | buildSwap | "
             try {
-                //NOTE THIS IS ONLY ETH!
-                //ETH always a weird one
-                let request:any = {
-                    type:"swap",
-                    username:this.username,
-                    //TODO source
-                    //TODO auth
-                    //TODO sig
-                    invocation:swap
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"options: ",options)
+
+                //verbose
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
                 }
-                //invocation
-                log.info(tag,"request: ",request)
-                let result = await this.pioneerApi.Invocation('',request)
 
-                //
+                //NOTE THIS IS ONLY ETH!
+                //ETH always the weird one
+                let coin = this.nativeAsset
+                if(this.network !== 'ethereum') throw Error("102: not supported!")
 
-                return result.data.txid
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"swap.amount: ",swap.amount)
+                log.debug(tag,"tx.amount.amount(): ",swap.amount.amount())
+                // log.debug(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
+                let amount = swap.amount.amount()
+                amount = nativeToBaseAmount(this.nativeAsset,amount)
+                amount = amount.toString()
+
+                //if native
+                // let amount = swap.amount.toString()
+                //amount = nativeToBaseAmount(this.nativeAsset,amount)
+                log.debug(tag,"amount (final): ",amount)
+                if(!amount) throw Error("Failed to get amount!")
+                // if(typeof(amount) !== 'string')
+                //TODO min transfer size 10$??
+                //TODO validate addresses
+                //TODO validate midgard addresses not expired
+
+                let memo = swap.memo || ''
+
+                let invocation:Invocation = {
+                    fee: {
+                        priority:3
+                    },
+                    context:this.context,
+                    type:'swap',
+                    username:this.username,
+                    inboundAddress:swap.inboundAddress,
+                    network:coin,
+                    asset:coin,
+                    coin,
+                    amount,
+                    memo
+                }
+                if(swap.noBroadcast) invocation.noBroadcast = true
+
+                log.info(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke(invocation)
+                console.log("result: ",result)
+
+                if(!verbose && !txidOnResp){
+                    return result.invocationId
+                } else if(!verbose && txidOnResp){
+                    return result.txid
+                }else if(verbose){
+                    return result
+                } else {
+                    throw Error("102: Unhandled configs!")
+                }
+
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
-        this.transfer = async function (tx:any) {
+        this.transfer = async function (tx:Transfer) {
             let tag = TAG + " | transfer | "
             try {
                 let coin = this.nativeAsset
                 log.info(tag,"tx: ",tx)
-                log.info(tag,"tx.amount: ",tx.amount)
-                log.info(tag,"tx.amount.amount(): ",tx.amount.amount())
-                log.info(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toFixed())
-                let amount = tx.amount.amount().toFixed()
+                log.debug(tag,"tx.amount: ",tx.amount)
+                log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
+                log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                let amount = tx.amount.amount().toNumber()
                 amount = nativeToBaseAmount(this.nativeAsset,amount)
-                log.info(tag,"amount (final): ",amount)
+                amount = amount.toString()
+
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 
                 //TODO min transfer size 10$
                 //TODO validate addresses
                 //TODO validate midgard addresses not expired
 
+                if(!tx.fee) throw Error("103: fee required!")
+
+                //context
+                log.info(tag,"currentContext: ",this.context)
+                log.info(tag,"txContext: ",tx.context)
+                if(tx.context){
+                    if(this.context !== tx.context){
+                        //TODO validate context is valid
+                        this.context = tx.context
+                    }
+                } else {
+                    log.info(tag,"using default context:",this.context)
+                    tx.context = this.context
+                }
+                if(!tx.context) throw Error("102: context is required on invocations!")
+
                 let to = tx.recipient
                 let memo = tx.memo || ''
-
-                let invocation:any = {
+                if(!to) throw Error("invalid TX missing recipient")
+                let invocation:Invocation = {
+                    type:'transfer',
+                    context:tx.context,
                     username:this.username,
                     coin,
+                    fee:tx.fee,
+                    network:coin,
+                    asset:coin,
                     amount,
                     address:to,
                     memo
@@ -854,10 +974,11 @@ module.exports = class wallet {
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
                 log.info(tag,"invocation: ",invocation)
-                let result = await this.invoke.invoke('transfer',invocation)
-                console.log("result: ",result.data)
+                let result = await this.invoke.invoke(invocation)
+                if(!result) throw Error("Failed to create invocation!")
+                log.info("result: ",result)
 
-                return result.data.txid
+                return result.invocationId
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

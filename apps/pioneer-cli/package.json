@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-cli-v2",
-  "version": "0.0.1",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "bin": {
     "pioneer": "lib/index.js"
@@ -30,11 +30,10 @@
   },
   "dependencies": {
     "@bithighlander/usb-detection": "^4.10.4",
-    "@pioneer-platform/pioneer-app": "latest",
-    "@pioneer-platform/pioneer-client": "latest",
-    "@pioneer-platform/pioneer-config": "latest",
-    "@pioneer-platform/pioneer-hardware": "latest",
-    "@pioneer-platform/platform": "latest",
+    "@pioneer-platform/pioneer-app": "^8.1.21",
+    "@pioneer-platform/pioneer-client": "^8.1.10",
+    "@pioneer-platform/pioneer-config": "^8.1.11",
+    "@pioneer-platform/pioneer-hardware": "^8.1.21",
     "@types/google-protobuf": "^3.7.4",
     "@types/uuid": "^8.3.0",
     "axios": "^0.19.2",
@@ -87,5 +86,5 @@
   },
   "author": "",
   "license": "ISC",
-  "gitHead": "7ea21514dbfab5ce27c3cc3f927bd0e24168ade4"
+  "gitHead": "547ca079865ded4e3faa121794f068bc923212a5"
 }

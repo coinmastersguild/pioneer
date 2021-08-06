@@ -5,10 +5,14 @@ const io = require('socket.io-client');
 const wait = require('wait-promise');
 const sleep = wait.sleep;
 
+import {
+    EventsConfig
+} from "@pioneer-platform/pioneer-types";
+
 export class Events {
     private wss: string;
-    private username: string
-    private queryKey: string
+    private username: string | undefined
+    private queryKey: string | undefined
     private socket: any
     private events: any
     private isConnected: boolean
@@ -21,8 +25,8 @@ export class Events {
     private disconnect: () => Promise<void>;
     private subscribeToKey: () => Promise<boolean>;
     private subscribeToInvocation: (invocationId: string) => Promise<boolean>;
-    constructor(wss:string,config:any,isTestnet?:boolean) {
-        this.wss = config.wss || 'wss://pioneers.dev'
+    constructor(config:EventsConfig) {
+        this.wss = config.wss
         this.isConnected = false
         this.isTestnet = false
         this.username = config.username
@@ -49,12 +53,19 @@ export class Events {
                     }
                 });
 
-                this.socket.on('subscribedToUsername', () => {
-                    log.info(tag,'subscribed to '+this.username);
+                this.socket.on('subscribedToUsername', (event:any) => {
+                    log.info(tag,'subscribed to '+event.username," id: "+event.socketId);
                     this.isPaired = true
+                    this.username = event.username
                 });
 
                 this.socket.on('message', (message: any) => {
+                    //TODO only emit expected messages?
+                    //if(message.type === "payment_request"){}
+                    this.events.emit('message',message)
+                })
+
+                this.socket.on('blocks', (message: any) => {
                     //TODO only emit expected messages?
                     //if(message.type === "payment_request"){}
                     this.events.emit('message',message)
@@ -67,7 +78,7 @@ export class Events {
                 });
 
                 this.socket.on('invocation', (message: any) => {
-                    log.info('invocation: ',message);
+                    log.debug('invocation: ',message);
                     this.events.emit('message',message)
                 });
 
@@ -131,6 +142,8 @@ export class Events {
                     username:this.username,
                     queryKey:config.queryKey
                 })
+
+                //TODO validate paired?
                 return true
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -140,7 +153,7 @@ export class Events {
         this.disconnect = async function () {
             let tag = TAG + " | disconnect | "
             try {
-
+                return this.socket.disconnect()
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

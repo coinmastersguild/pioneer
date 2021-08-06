@@ -1,9 +1,10 @@
 {
   "name": "@pioneer-platform/default-redis",
-  "version": "0.0.2",
+  "version": "8.1.5",
   "dependencies": {
     "dotenv": "^8.2.0",
     "ioredis": "^4.17.3",
     "ioredis-mock": "^4.21.1"
-  }
+  },
+  "gitHead": "bd6db6ae5baf74242d698b0b30f25b3dcfdaf414"
 }

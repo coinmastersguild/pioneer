@@ -115,7 +115,6 @@ export async function initWallet(wallet: any) {
             if(!wallet.filename) wallet.filename = wallet.masterAddress+".wallet.json"
             //if passwordless
             if(wallet.temp) walletWrite.password = wallet.temp
-            walletWrite.username = wallet.username;
             walletWrite.hash = wallet.hash;
             walletWrite.version = 1;
             walletWrite.type = "seedwords";

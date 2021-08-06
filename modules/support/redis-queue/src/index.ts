@@ -45,8 +45,7 @@ module.exports = {
     },
     getWork:async function(name:string,interval:number){
         if(!interval) interval = QUEUE_INTERVAL_TIME
-        //TODO calculate work completed per second
-
+        //calculate work completed per second
         if(!WORK_REMOVED[name]) WORK_REMOVED[name] = 0
         WORK_REMOVED[name] = WORK_REMOVED[name] + 1
         //clean out

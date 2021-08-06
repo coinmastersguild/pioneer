@@ -23,8 +23,8 @@ let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
 if(!WALLET_PASSWORD) throw Error(".env not found!")
 
 //force
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 
 let seed_1 = process.env['WALLET_MAINNET_DEV']
@@ -43,9 +43,9 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
-
+let INVOCATIONS_SIGNED = []
 
 let run_test = async function(){
     try{
@@ -63,7 +63,6 @@ let run_test = async function(){
         //if no config
         if(!config){
             console.log("First time startup run (pair-keepkey)")
-
         } else {
             //if force keepkey
             //
@@ -84,9 +83,8 @@ let run_test = async function(){
                 if(isInit) throw Error("App already initialized")
 
                 //test
-
                 let resultInit = await App.init(config,isTestnet)
-                //console.log("resultInit: ",resultInit)
+                console.log("resultInit: ",resultInit)
 
                 let isInit2 = App.isInitialized()
                 if(!isInit2) throw Error("App should be initialized")
@@ -95,23 +93,28 @@ let run_test = async function(){
 
 
                 //AutonomousOn
-                resultInit.events.on('message', async (request) => {
-                    switch(request.type) {
-                        //TODO swap/approve
-                        case 'transfer':
-                            console.log(" **** PROCESS EVENT ****  request: ",request)
-                            //approve
-                            console.log(" Approving transaction! ")
-                            let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
-                            console.log(" ***  signedTx: ",signedTx)
-                            break
-                        default:
-                            console.log("Unhandled type: ",request.type)
+                resultInit.events.on('unsignedTx', async (transaction) => {
+                    console.log("\n ****UNsigned transaction received! transaction: ",transaction)
+                    //get invocationId
+                    if(!transaction.invocationId && transaction.transaction) transaction.invocationId = transaction.transaction.invocationId
+                    if(!transaction.invocationId && transaction.swap) transaction.invocationId = transaction.swap.invocationId
+
+                    //TODO CLI review
+                    if(INVOCATIONS_SIGNED.indexOf(transaction.invocationId) < 0){
+                        console.log("SIGNING TX ",transaction.invocationId)
+                        INVOCATIONS_SIGNED.push(transaction.invocationId)
+                        //approve
+                        let resultApprove = await App.approveTransaction(transaction)
+                        console.log("resultApprove: ",resultApprove)
+
                     }
+                    //
+                    let resultBroadcast = await App.broadcastTransaction(transaction)
+                    console.log("resultBroadcast: ",resultBroadcast)
                 })
 
                 try{
-                    let pairResult = await App.pair("F6DY9H")
+                    let pairResult = await App.pair("4QZ8D4")
                     console.log("pairResult: ",pairResult)
                 }catch(e){
 
@@ -124,6 +127,9 @@ let run_test = async function(){
                 //get wallets
                 let wallets = await App.getWallets()
                 console.log("wallets: ",wallets)
+
+                let walletDescriptions = await App.getWalletDescriptions()
+                console.log("walletDescriptions: ",walletDescriptions)
 
                 let contextName = await App.context()
                 console.log("contextName: ",contextName)
@@ -190,7 +196,7 @@ let run_test = async function(){
                 //
                 // let resultBroadcast = await context.broadcastTransaction('ETH',result)
                 // console.log("resultBroadcast: ",resultBroadcast)
-
+                console.log("subscribed user: ",userInfo.username)
                 console.log("system ready....")
             } else if(keepkeyStatus.state === 3){
                 //prompt pin

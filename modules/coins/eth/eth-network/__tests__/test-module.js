@@ -2,21 +2,70 @@
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 require("dotenv").config({path:'../../../../../.env'})
+require("dotenv").config({path:'../../../../../../.env'})
+
+//ETC
+//BSC
 
 let network = require("../lib/index")
-network.init({testnet:true})
+network.init()
 
-//thorchain is approved
-let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
-let masterAddy = "0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
-let tokenAddress = "DAC17F958D2EE523A2206206994597C13D831EC7"
-
-console.log({routerAddy,masterAddy})
-
-network.getAllowance(tokenAddress,routerAddy,masterAddy)
+//get symbol from contract
+network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
     .then(function(resp){
         console.log(resp)
     })
+
+// network.getStreamInfo('')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//getPoolPositions
+// network.getPoolPositions('0x33b35c665496ba8e71b22373843376740401f106')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//
+// network.getPercentPool(1000,0.1,'0x470e8de2ebaef52014a47cb5e6af86884947f08c')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+
+// let addresses = [
+//     "0x662ac3362623d72de57668dbf34ed7df913032c5",
+//     "0x93F6382804d21f48EB289feB5091F07e5e71454E"
+//     ]
+// network.getBalances(addresses)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+// let rawTx = "0xf86c3c8506e44c2800830138809433b35c665496ba8e71b22373843376740401f106870aa87bee5380008025a03a90ca4a262624725e05da416293b7aa6e1faa611b064f30561123d005db9ec9a020ad66b84f4f3ad6354182cc14030d60f05ff8bc80286b33e9c3ed8af8176db7"
+// network.broadcast(rawTx)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//basic
+// network.getTransaction("0x1d25efc5bfe99e02ab99c003ecc78dcd3452c4bc2d457fc3ba2b50fba782e643")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//thorchain is approved
+// let routerAddy = "0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B"
+// let masterAddy = "0x3e485e2c7df712ec170c087ecf5c15016a03f93f"
+// let tokenAddress = "DAC17F958D2EE523A2206206994597C13D831EC7"
+
+// console.log({routerAddy,masterAddy})
+//
+// network.getAllowance(tokenAddress,routerAddy,masterAddy)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 
 //DEX
@@ -103,6 +152,13 @@ network.getAllowance(tokenAddress,routerAddy,masterAddy)
 // let entry = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8,amount:function(){return .98}},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
 // let entry = {"asset":{"chain":"ETH","symbol":"ETH","ticker":"ETH","iconPath":"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png"},"amount":{"type":"BASE","decimal":8},"recipient":"0x8b09ee8b5e96c6412e36ba02e98497efe48a29be"}
 //
+
+// let entry = {
+//     asset: { chain: 'ETH', symbol: 'ETH', ticker: 'ETH' },
+//     amount: 0.0641287519747189,
+//     recipient: '0x8b09ee8b5e96c6412e36BA02E98497eFe48A29BE'
+// }
+//
 // network.getFees(entry)
 //     .then(function(resp){
 //         console.log(resp)
@@ -136,7 +192,7 @@ network.getAllowance(tokenAddress,routerAddy,masterAddy)
 //         console.log(resp)
 //     })
 //
-// network.getGasPrice(address)
+// network.getGasPrice()
 //     .then(function(resp){
 //         console.log(resp)
 //     })

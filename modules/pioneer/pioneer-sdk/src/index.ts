@@ -17,56 +17,29 @@ let {
     supportedAssets,
 } = require('@pioneer-platform/pioneer-coins')
 
+import {
+    Chart,
+    SendToAddress,
+    Config,
+    User,
+    SDKConfig
+} from "@pioneer-platform/pioneer-types";
+
 //xchain adapter
 const XchainClass = require("@pioneer-platform/pioneer-xchain-client")
-
-export interface SendToAddress {
-    blockchain:string
-    asset:string
-    amount:number
-    address:string
-    memo?:string
-    noBroadcast?:boolean
-}
-
-export interface config {
-    spec:string,
-    env:string,
-    mode:string,
-    username:string,
-    addresses?:[]
-    wallet?:any,
-    pubkeys?:any,
-    auth?:string,
-    paths?:any,
-    privWallet?:any,
-    mnemonic?:string,
-    queryKey?:string
-    offline?:boolean
-    pioneerApi?:boolean
-}
-
-export interface Invocation {
-    coin: string;
-    addressFrom?: string;
-    addressTo: string;
-    amount: string;
-    memo: string;
-    nonce?:number
-}
 
 
 export class SDK {
     private spec: any;
     private pioneerApi: any;
     private init: (blockchains: []) => Promise<any>;
-    private config: config;
+    private config: SDKConfig;
     private clients: any;
     private createPairingCode: () => Promise<any>;
     private queryKey: string;
     private service: string;
     private isTestnet: boolean;
-    private getUserParams: () => Promise<{ wallet: string; clients: { ethereum: any; thorchain: any; binance: any; bitcoin: any }; keystore: {}; type: string }>;
+    private getUserParams: () => Promise<User>;
     private sendToAddress: (blockchain: string, asset: string, amount: string, memo?: string) => Promise<any>;
     private url: string;
     private events: any;
@@ -76,6 +49,7 @@ export class SDK {
     private startSocket: () => Promise<any>;
     private isPaired: boolean
     private context: string;
+    private contexts: any;
     private info: any;
     private wallets: any[];
     private totalValueUsd: number;
@@ -88,14 +62,14 @@ export class SDK {
     private assetBalanceUsdValueContext: string;
     private assetBalanceNativeContext: string;
     private getInvocation: (invocationId: string) => Promise<any>;
-    constructor(spec:string,config:any,isTestnet?:boolean) {
+    private stopSocket: () => any;
+    private contextWalletInfo: any;
+    private valueUsdContext: any;
+    private chart: (chart: Chart) => Promise<any>;
+    constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
-        if(isTestnet){
-            this.isTestnet = true
-        } else {
-            this.isTestnet = false
-        }
+        this.isTestnet = false
         this.isPaired = false
         this.config = config
         this.username = config.username
@@ -104,6 +78,7 @@ export class SDK {
         this.queryKey = config.queryKey
         this.spec = config.spec
         this.clients = {}
+        this.contexts = []
         this.context = ""
         this.invocationContext = ""
         this.assetContext = ""
@@ -160,12 +135,36 @@ export class SDK {
             try {
                 let configEvents:any = {
                     queryKey:this.queryKey,
-                    pioneerWs:this.wss
+                    wss:this.wss
                 }
                 if(this.username) configEvents.username = this.username
                 //sub to events
-                this.events = new Events.Events(configEvents.pioneerWs,config)
+                this.events = new Events.Events(config)
                 this.events.init()
+
+                this.events.events.on('subscribedToUsername', (event:any) => {
+                    log.ingo(tag,'paired to '+this.username);
+                    this.isPaired = true
+                    this.username = event.username
+                    this.events.emit('subscribedToUsername',event)
+                    Events.setUsername(this.username)
+                });
+
+                this.events.events.on('context', (event:any) => {
+                    log.info(tag,'context set to '+event.context);
+                    this.context = event.context
+                    this.getUserParams()
+                });
+
+                return this.events.events
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.stopSocket = function () {
+            let tag = TAG + " | stopSocket | "
+            try {
+                this.events.disconnect()
                 return this.events.events
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -200,7 +199,7 @@ export class SDK {
         this.setContext = async function (context:string) {
             let tag = TAG + " | setContext | "
             try {
-                if(this.wallets.indexOf(context) >= 0){
+                if(this.wallets && this.wallets.indexOf(context) >= 0){
                     this.context = context
                     let result = await this.pioneerApi.SetContext(null,{context:this.context})
                     return result.data
@@ -239,6 +238,28 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
+        this.chart = async function (chart:Chart) {
+            let tag = TAG + " | chart | "
+            try {
+                //
+                let result = await this.pioneerApi.Chart(null,chart)
+                return result.data
+
+                return true
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        // this.replaceInvocation = async function (invocationId:string,fee:any) {
+        //     let tag = TAG + " | replaceInvocation | "
+        //     try {
+        //         //
+        //
+        //         return true
+        //     } catch (e) {
+        //         log.error(tag, "e: ", e)
+        //     }
+        // }
         // @ts-ignore
         this.sendToAddress = async function (intent:SendToAddress) {
             let tag = TAG + " | sendToAddress | "
@@ -283,6 +304,7 @@ export class SDK {
             }
         }
         //X-chain
+        // @ts-ignore
         this.getUserParams = async function () {
             let tag = TAG + " | getUserParams | "
             try {
@@ -290,22 +312,36 @@ export class SDK {
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
                     log.info(tag,"userInfo: ",userInfo)
+                    this.wallets = userInfo.wallets
                     this.context = userInfo.context
+                    this.assetContext = userInfo.assetContext
+                    log.info(tag,"this.context: ",this.context)
+                    log.info(tag,"userInfo.walletDescriptions: ",userInfo.walletDescriptions)
+                    this.contextWalletInfo = userInfo.walletDescriptions.filter((e:any) => e.context === this.context)[0]
+                    log.info(tag,"this.contextWalletInfo: ",this.contextWalletInfo)
+                    log.info(tag,"assetContext: ",this.assetContext)
+                    this.valueUsdContext = this.contextWalletInfo.valueUsdContext
+                    this.assetBalanceNativeContext = this.contextWalletInfo.balances[userInfo.assetContext] || '0'
+                    this.assetBalanceUsdValueContext = this.contextWalletInfo.values[userInfo.assetContext] || '0'
+                    log.info(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
+                    log.info(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
                 log.info(tag,"context: ",this.context)
-                log.info(tag,"blockchains: ",this.blockchains)
+                log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                log.info(tag,"result: ",result)
+                if(result.wallets){
+                    this.contexts = result.wallets
+                    log.debug(tag,"result: ",result)
+                }
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
 
                 log.debug(tag,"this.spec: ",this.spec)
                 log.debug(tag,"supportedBlockchains: ",supportedBlockchains)
                 if(!this.spec) throw Error("103: Pioneer Service required for sdk! ")
-
 
                 if(this.blockchains.indexOf('binance') >= 0){
                     let binance = new XchainClass(this.spec,{
@@ -373,9 +409,14 @@ export class SDK {
                     this.clients['litecoin'] = bitcoin
                 }
 
-                let output:any = {
+                let output:User = {
                     type: 'pioneer',
                     context:this.context,
+                    availableContexts:this.contexts,
+                    assetContext: this.assetContext,
+                    valueUsdContext: this.valueUsdContext,
+                    assetBalanceNativeContext: this.assetBalanceNativeContext,
+                    assetBalanceUsdValueContext: this.assetBalanceUsdValueContext,
                     wallet: thorAddress,
                     keystore:{},
                     clients:this.clients

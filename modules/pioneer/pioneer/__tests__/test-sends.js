@@ -6,8 +6,8 @@ require("dotenv").config({path:'../../../../../.env'})
 const prettyjson = require('prettyjson');
 let WalletClass = require('../lib/index.js')
 
-//let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-let urlSpec = process.env['URL_PIONEER_SPEC']
+let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+//let urlSpec = process.env['URL_PIONEER_SPEC']
 
 let walletName = "local_new_2"
 
@@ -22,8 +22,8 @@ let FAUCET_ADDRESSES = {
 
 }
 
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+let username = process.env['TEST_USERNAME_3']
+let queryKey = process.env['TEST_QUERY_KEY_3']
 
 let run_test = async function(){
     try{
@@ -33,12 +33,12 @@ let run_test = async function(){
 
         //pioneer
         let config = {
-            isTestnet:false,
             // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
+            mnemonic: process.env['WALLET_TEST_BROKE'],
+            // mnemonic: process.env['WALLET_MAIN'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,
-            blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance'],
+            blockchains: ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'],
             pioneerApi:true,
             spec:urlSpec,
             queryKey,
@@ -50,6 +50,27 @@ let run_test = async function(){
         let Wallet = new WalletClass('pioneer',config,isTestnet);
         let info = await Wallet.init()
         console.log("total Value: ",info)
+
+        /*
+            ETH build transfer
+         */
+
+        // let transaction = {
+        //     coin: 'ETH',
+        //     asset: 'ETH',
+        //     network: 'ETH',
+        //     amount: '0.00101',
+        //     addressTo: '0x33b35c665496bA8E71B22373843376740401F106',
+        // }
+        //
+        // let unSignedTx = await Wallet.buildTransfer(transaction)
+        // console.log("unSignedTx: ",unSignedTx)
+        //
+        // let signedTx = await Wallet.signTransaction(unSignedTx)
+        // console.log("signedTx: ",signedTx)
+
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',result)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         /*
             ETH approve Token
@@ -72,31 +93,54 @@ let run_test = async function(){
         /*
                THOR
          */
-        console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
+        //
+        // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
+        // let amount = "100"
+        // let memo = ""
+        //
+        // let deposit = {
+        //     type: 'deposit',
+        //     username: 'test-user-2',
+        //     network: 'RUNE',
+        //     asset: 'RUNE',
+        //     coin: 'RUNE',
+        //     amount: '50994000',
+        //     memo: '=:BCH.BCH:qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj',
+        //     invocationId: 'pioneer:invocation:v0.01:RUNE:6fvPkFk7SkQTgBrBwQUQEH'
+        // }
+        //
+        // let transferUnSigned = await Wallet.deposit(deposit)
+        // console.log("transferUnSigned: ",transferUnSigned)
+        //
+        // let signedTx = await Wallet.signTransaction(transferUnSigned)
+        // console.log("signedTx: ",signedTx)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',signedTx)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
-
-        let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
-        let amount = "100"
-        let memo = ""
-
-        let transfer = {
-            coin:"RUNE",
-            addressTo:address,
-            amount,
-            memo
-        }
-
-        let transferSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
+        // let amount = "100"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"RUNE",
+        //     addressTo:address,
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
@@ -226,26 +270,32 @@ let run_test = async function(){
         /*
                BTC
          */
-        // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-        //
-        // let masterBTC = await Wallet.getMaster("BTC")
-        // console.log("masterBTC: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BTC")
-        // console.log("balanceBTC: ",balanceBTC)
-        //
-        // let amount = "0.00001"
-        // let feeLevel = 5
-        //
-        // let transfer = {
-        //     coin:"BTC",
-        //     addressTo:"bc1qtpkkzr8t4v4sqpcvczmu9mesm2hqgrg82unsr3",
-        //     amount,
-        //     feeLevel
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+
+        let amount = "0.0001"
+        let feeLevel = 5
+
+        let transfer = {
+            network:"BTC",
+            asset:"BTC",
+            coin:"BTC",
+            fee:10,
+            addressTo:"bc1qxzsgclsnyerfn2why242em5zd5pjy9yx6qy20n",
+            amount,
+            feeLevel
+        }
+
+        let transferUnSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferUnSigned: ",transferUnSigned)
+        console.log("transferUnSigned: ",JSON.stringify(transferUnSigned))
+
+        let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        console.log("transferSigned: ",transferSigned)
 
         // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)

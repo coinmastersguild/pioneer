@@ -8,25 +8,18 @@
     15$ can borrow 3,500 ETH, and this was enable to make a couple transactions
 
  */
-const TAG = " | Pioneer-client-ts | "
+const TAG = " | Pioneer-invoke | "
 const log = require("@pioneer-platform/loggerdog")()
 const short = require('short-uuid');
 let sign = require('@pioneer-platform/signing')
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
 
-enum AuthProviders {
-    shapeshift = 'shapeshift',
-    bitcoin = 'bitcoin'
-}
-
-interface Invocation {
-    type:string
-    sender:string
-    recipient:string
-    asset:string
-    payload:any
-}
+import {
+    Error,
+    Invocation,
+    InvocationBody
+} from "@pioneer-platform/pioneer-types";
 
 module.exports = class wallet {
     private init: (type: string, config: any) => Promise<any>;
@@ -34,16 +27,16 @@ module.exports = class wallet {
     private queryKey: any;
     private pioneerApi: any;
     private appName: string;
-    private signingPubkey: string;
-    private signingPrivkey: string;
-    private invoke: (type:string, invocation: Invocation) => Promise<void>;
+    // private signingPubkey: string;
+    // private signingPrivkey: string;
+    private invoke: (invocation: Invocation) => Promise<any>;
     private online: () => Promise<any>;
     constructor(spec:string,config:any) {
         this.spec = spec
         this.appName = config.appName || 'notSet'
         this.queryKey = config.queryKey
-        this.signingPubkey = config.signingPubkey
-        this.signingPrivkey = config.signingPrivkey
+        // this.signingPubkey = config.signingPubkey
+        // this.signingPrivkey = config.signingPrivkey
         this.init = async function () {
             let tag = TAG + " | init_wallet | "
             try{
@@ -73,30 +66,39 @@ module.exports = class wallet {
                 throw e
             }
         }
-        this.invoke = async function (type,invocation:any) {
+        this.invoke = async function (invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
-                if(!type) throw Error("invocation Type required!")
+                log.info(tag,"invocation: ",invocation)
+                if(!invocation.type) throw Error("invocation Type required!")
+                if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
-                let invocationId = "pioneer:invocation:v0.01:"+invocation.coin+":"+short.generate()
+                if(!invocation.invocationId){
+                    invocation.invocationId = "pioneer:invocation:v0.01:"+invocation.network+":"+short.generate()
+                }
+                let invocationId = invocation.invocationId
 
-                //sign
+                //TODO sign
                 let msg = JSON.stringify(invocation)
-                let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
+                //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
 
                 //Dapps sign all invocations
-                let request:any = {
-                    pubkey:this.signingPubkey,
+                let request:InvocationBody = {
+                    network:invocation.network,
+                    context:invocation.context,
+                    // pubkey:this.signingPubkey,
                     appName:this.appName,
                     username:invocation.username,
-                    type,
+                    type:invocation.type,
                     invocation,
-                    invocationSig,
+                    // invocationSig,
                     invocationId
                 }
                 //
-                let result = this.pioneerApi.instance.Invoke(null, request)
-                return result
+                log.info(tag,"invocation BODY: ",request)
+                let result = await this.pioneerApi.instance.Invoke(null, request)
+                //log.info(tag,"result: ",result)
+                return result.data
             }catch(e){
                 log.error(tag,e)
                 throw e

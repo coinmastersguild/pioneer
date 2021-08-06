@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/pioneer-app",
-  "version": "7.1.54",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
-    "npm": "npm i",
+    "yarn": "yarn",
     "npm-rebuild": "npm rebuild",
     "npm-update": "npm update",
     "pair-multi": "npm run build && node __tests__/pair-multi.js.js",
@@ -15,20 +15,20 @@
     "lint": "prettier --write '**/**/*.ts'",
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
     "@babel/runtime": "^7.14.0",
-    "@peculiar/webcrypto": "latest",
-    "@pioneer-platform/eth-crypto": "^6.2.3",
-    "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/nedb": "latest",
-    "@pioneer-platform/pioneer": "latest",
-    "@pioneer-platform/pioneer-coins": "latest",
-    "@pioneer-platform/pioneer-config": "latest",
-    "@pioneer-platform/pioneer-events": "latest",
-    "@pioneer-platform/pioneer-hardware": "latest",
+    "@peculiar/webcrypto": "^1.1.4",
+    "@pioneer-platform/eth-crypto": "^8.1.17",
+    "@pioneer-platform/loggerdog": "^8.1.5",
+    "@pioneer-platform/pioneer": "^8.1.20",
+    "@pioneer-platform/pioneer-coins": "^8.1.18",
+    "@pioneer-platform/pioneer-config": "^8.1.11",
+    "@pioneer-platform/pioneer-events": "^8.1.17",
+    "@pioneer-platform/pioneer-hardware": "^8.1.21",
     "@types/node": "^13.13.51",
     "@types/uuid": "^8.3.0",
     "assert": "^2.0.0",
@@ -53,5 +53,6 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.9",
     "when": "^3.7.8"
-  }
+  },
+  "gitHead": "547ca079865ded4e3faa121794f068bc923212a5"
 }

@@ -38,6 +38,9 @@ let TEST_COINS = [
     'LTC'
 ]
 
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+
+
 let run_test = async function(){
     try{
         //get config
@@ -49,8 +52,7 @@ let run_test = async function(){
 
             // software
             let wallet1 = {
-                isTestnet:true,
-                mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
+                mnemonic:process.env['WALLET_MAIN'],
                 username:username,
                 password
             }
@@ -69,9 +71,11 @@ let run_test = async function(){
             //create
             //init config
             await App.initConfig("english");
-            // App.updateConfig({isTestnet:true});
+            App.updateConfig({spec:process.env['URL_PIONEER_SPEC']});
+            App.updateConfig({wss:process.env['URL_PIONEER_SOCKET']});
             App.updateConfig({username});
             App.updateConfig({temp:password});
+            App.updateConfig({blockchains})
             App.updateConfig({created: new Date().getTime()});
 
         } else {

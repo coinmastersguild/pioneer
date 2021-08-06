@@ -4,9 +4,30 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let network = require("../lib/index")
-network.init()
+
+let servers = {
+    'BTC':process.env['BTC_BLOCKBOOK_URL'],
+    'ETH':process.env['ETH_BLOCKBOOK_URL']
+}
+
+console.log("servers: ",servers)
+network.init(servers)
+// network.init(servers)
+// network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
+
+// network.broadcast("ETH","0xf86e8202ab85028fa6ae008301388094c3affff54122658b89c31183cec4f15514f34624870aa87bee5380008025a04cbf2dc700925319439ae86413eb50a82a7250eff94a2e6e82b223ff8873ca16a04f2745e71c811889ca6a1fdb36ff33486c0f7b7796638d757a3af1adb3ce1afa")
+//     .then(function(resp){
+//         console.log("txid: ",resp)
+//     })
+
+// let address = ""
+// network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.getTransaction('BCH',"")
 //     .then(function(resp){
@@ -15,10 +36,10 @@ network.init()
 //     })
 
 //xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K
-network.utxosByXpub("BCH","xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K")
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.utxosByXpub("BCH","xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYiQZWHchbWY7edcXwj4Un9cF1qMuA8tkEpkkcDc5WKgenPD5ZfXvpErPNx2K
 
@@ -38,21 +59,6 @@ network.utxosByXpub("BCH","xpub6BtH1WStaVrzUC3mfoxy1F7MkJ9Tx5fjmMAn2RKaHSeYRNFYi
 //         console.log("txid: ",resp)
 //     })
 
-// network.utxosByXpub("BCH","zpub6rFpW5bMm7Aq1UpW7RJJYqEprm8XtmWdd5HrUfDq4CqGPeNGHzTAU9g35Xv2ZZfLAarZcGGH88LfEyVy6D6zgiy6otmGXsQ1pxjaZbQuMpR")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-
-// network.txsByXpub("BTC","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-
-// network.getEthInfo("0x33b35c665496ba8e71b22373843376740401f106")
-//     .then(function(resp){
-//         console.log(resp)
-//         console.log(JSON.stringify(resp))
-//     })
 
 // network.init()
 //     .then(function(resp){

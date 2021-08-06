@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-xchain-client",
-  "version": "0.0.42",
+  "version": "8.1.23",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -11,18 +11,19 @@
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
     "build": "tsc -p .",
+    "build-watch": "tsc -w .",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
     "test-jest": "jest --coverage",
     "test:watch": "jest --coverage --watchAll",
-    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "view:coverage": "serve coverage/lcov-report",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@pioneer-platform/pioneer-coins": "^6.3.0",
-    "@pioneer-platform/pioneer-invoke": "^6.2.30",
+    "@pioneer-platform/pioneer-coins": "^8.1.18",
+    "@pioneer-platform/pioneer-invoke": "^8.1.21",
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-util": "^0.2.6",
     "bignumber.js": "^9.0.1",
@@ -41,5 +42,6 @@
     "source-map-support": "^0.5.19",
     "ts-jest": "^25.4.0",
     "typescript": "^3.9.9"
-  }
+  },
+  "gitHead": "547ca079865ded4e3faa121794f068bc923212a5"
 }

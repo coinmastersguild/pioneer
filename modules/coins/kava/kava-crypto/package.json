@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/kava-crypto",
-  "version": "6.2.2",
+  "version": "8.1.5",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.1.5",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
@@ -25,5 +25,5 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
   },
-  "gitHead": "7ea21514dbfab5ce27c3cc3f927bd0e24168ade4"
+  "gitHead": "bd6db6ae5baf74242d698b0b30f25b3dcfdaf414"
 }

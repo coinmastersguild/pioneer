@@ -13,7 +13,7 @@ let pioneerApi = require("../lib")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
 
@@ -40,7 +40,7 @@ let run_test = async function(){
         //     spec
         // }
         let config = {
-            queryKey:"key:b36de6c2-671f-4ac2-9602-deb26fd6d627",
+            queryKey:"79d94b78-eb50-445d-b97f-e524dca80b58",
             username:'test-user-2',
             spec
         }
@@ -50,7 +50,12 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
-        console.log("pioneer: ",pioneer)
+        // console.log("pioneer: ",pioneer)
+
+        let xpub = "ypub6Wev4wL7q61rBeyLc7GpHF3z3nsSz2LXCga32o5ChbEQSaiSGvg7dQqRWv6Md2FzhefZhHP7NpTz4sYUeCsqxs6brzqoeRb81t7YQpVsy5H"
+        let data = await pioneer.instance.ListUnspent({network:'BTC',xpub})
+        data = data.data
+        console.log("txData: ",data)
 
         //get online
 
@@ -69,15 +74,22 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        let user = await pioneer.instance.User()
-        console.log("info: ",user.data)
-
+        // let user = await pioneer.instance.User()
+        // console.log("user: ",user.data)
+        // console.log("user: ",JSON.stringify(user.data))
+        //
         // let info = await pioneer.instance.Info(user.data.context)
         // console.log("info: ",info.data)
 
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data
         // console.log("txData: ",data)
+
+        // let code = "GNF1RC"
+        // let data = await pioneer.instance.Pair(null, {code})
+        // data = data.data
+        // console.log("txData: ",data)
+
 
         //broadcast
         // let broadcast = {

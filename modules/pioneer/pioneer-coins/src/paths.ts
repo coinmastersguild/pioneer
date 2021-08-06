@@ -114,8 +114,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         let entry:any = {
             note:" Default ATOM path ",
             type:"address",
-            script_type:"cosmos",
-            available_scripts_types:['cosmos'],
+            script_type:"bech32",
+            available_scripts_types:['bech32'],
             addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
@@ -183,6 +183,26 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             blockchain: 'litecoin',
             symbol: 'LTC',
             network: 'LTC',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
+
+    if(blockchains.indexOf('dogecoin') >= 0){
+        let entry:any = {
+            note:"Dogecoin Default path",
+            type:"xpub",
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 3, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 3, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            blockchain: 'dogecoin',
+            symbol: 'DOGE',
+            network: 'DOGE',
         }
         if(isTestnet) {
             entry.testnet = true

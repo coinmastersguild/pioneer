@@ -18,7 +18,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let FAUCET_ADDRESSES = {
 
@@ -39,8 +39,8 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAINNET_DEV_OLD'],
-            context,
+            mnemonic: process.env['FOUND_KEY'],
+            walletId:context,
             username,
             pioneerApi:true,
             spec:urlSpec,

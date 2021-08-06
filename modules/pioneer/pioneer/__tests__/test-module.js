@@ -1,13 +1,16 @@
-// require("dotenv").config({path:'./../../.env'})
-// require("dotenv").config({path:'../../../.env'})
-// require("dotenv").config({path:'../../../../.env'})
-// require("dotenv").config({path:'../../../../../.env'})
+require("dotenv").config({path:'./../../.env'})
+require("dotenv").config({path:'../../../.env'})
+require("dotenv").config({path:'../../../../.env'})
+require("dotenv").config({path:'../../../../../.env'})
 
 const prettyjson = require('prettyjson');
 let WalletClass = require('../lib/index.js')
 
-let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
-//let urlSpec = process.env['URL_PIONEER_SPEC']
+//let urlSpec = "http://127.0.0.1:9001/spec/swagger.json"
+let urlSpec = process.env['URL_PIONEER_SPEC']
+
+//coin crypto modules
+const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 let walletName = "local_new_2"
 
@@ -18,17 +21,16 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let FAUCET_ADDRESSES = {
 
 }
 
 // let username = process.env['TEST_USERNAME_2']
-// let queryKey = process.env['TEST_QUERY_KEY_2']
+let username = "change_username_bro"
+let queryKey = process.env['TEST_QUERY_KEY_2']
 
-
-let walletKeepkeyWatch = require('./data/keepkey.watch.wallet.json')
 
 let run_test = async function(){
     try{
@@ -36,41 +38,29 @@ let run_test = async function(){
 
         let isTestnet = null
 
-        //keepkey
-        //let context = "635BA1FA4FE083194A88B259.watch.wallet.json"
-
-        // //wallet old
-        let context = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+        //let context = "0xc3affff54122658b89c31183cec4f15514f34624.wallet.json"
+        //figure out context
 
         //pioneer
         let config = {
             isTestnet:false,
             blockchains,
-
-            type:'pioneer',
-            mnemonic: process.env['WALLET_MAINNET_DEV_NEW'] || 'alcohol woman abuse must during monitor noble actual mixed trade anger aisle',
-
-            // type:'keepkey',
-            // hardware:true,
-            // wallet:walletKeepkeyWatch,
-
-
-            context,
-            username:'test-user-2',
+            mnemonic: process.env['WALLET_MAIN'],
+            username,
             pioneerApi:true,
             spec:urlSpec,
-            queryKey:'6ee250b2-2442-4760-b696-a72ccd664ac3',
-            auth:process.env['SHAPESHIFT_AUTH'] || 'lol',
-            authProvider:'shapeshift'
+            queryKey:"asasdfgadsfgdsfg"
         }
 
         //init wallet offline
-        let Wallet = new WalletClass(config.type,config);
+        let Wallet = new WalletClass('pioneer',config,isTestnet);
 
         let info = await Wallet.init()
         console.log("INFO: ",info)
 
         console.log("total Value: ",info.totalValueUsd)
+
+        //expect masters
 
         // let resultForget = await Wallet.forget()
         // console.log("resultForget: ",resultForget.data)
@@ -81,45 +71,34 @@ let run_test = async function(){
         /*
             ETH
         */
+
         // let masterETH = await Wallet.getMaster("ETH")
         // console.log("masterETH: ",masterETH)
         //
         // let balanceETH = await Wallet.getBalance("ETH")
         // console.log("balanceETH: ",balanceETH)
         //
-        // let invocationId = "pioneer:invocation:v0.01:ETH:98tzeFAHevjZC5C5pXBbxN"
         // let address = "0x33b35c665496bA8E71B22373843376740401F106"
-        // let amount = "0.00123"
+        // let amount = "0.001"
         // let memo = ""
         //
         // let transfer = {
-        //     noBroadcast:true,
-        //     invocationId,
         //     coin:"ETH",
-        //     address:address,
+        //     addressTo:address,
         //     amount,
         //     memo
         // }
-        //
-        // let transferUnSigned = await Wallet.sendToAddress(transfer)
+
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferUnSigned: ",transferUnSigned)
         //
-        // //add to queue
-        // Wallet.addUnsigned(transferUnSigned)
-        //
-        // //approve
-        // let unsignedTx = Wallet.getNextReview()
-        // console.log("unsignedTx: ",unsignedTx)
-        // // let transferUnSigned = await Wallet.buildTransfer(transfer)
-        // // console.log("transferUnSigned: ",transferUnSigned)
-        //
-        // let transferSigned = await Wallet.signTransaction(unsignedTx)
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
         // console.log("transferSigned: ",transferSigned)
-        //
-        // transferSigned.noBroadcast = true
-        // let resultBroadcast = await Wallet.broadcastTransaction(unsignedTx.coin,transferSigned)
+
+        // let resultBroadcast = await Wallet.broadcastTransaction('ETH',transferSigned)
         // console.log("resultBroadcast: ",resultBroadcast)
 
+        //
         // let txid = await Wallet.sendToAddress("RUNE",address,amount,memo)
         // console.log("txid: ",txid)
 
@@ -129,14 +108,14 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
-        //
-        // let address = "thor1x8mqqpsd9u00ny7gccuezcddmjf7hs9cau5650"
-        // let amount = "1"
+        let masterRUNE = await Wallet.getMaster("RUNE")
+        console.log("masterRUNE: ",masterRUNE)
+
+        let balanceRUNE = await Wallet.getBalance("RUNE")
+        console.log("balanceRUNE: ",balanceRUNE)
+
+        // let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
+        // let amount = "100"
         // let memo = ""
         //
         // let transfer = {
@@ -235,34 +214,92 @@ let run_test = async function(){
                BTC
          */
         // console.log("info: ",prettyjson.render(info.public.BTC),"\n")
-
-
+        //
+        //
         // let masterBTC = await Wallet.getMaster("BTC")
         // console.log("masterBTC: ",masterBTC)
         //
         // let balanceBTC = await Wallet.getBalance("BTC")
         // console.log("balanceBTC: ",balanceBTC)
+        // //
+        // let amount = "0.00001"
+        // // let memo = "=:ETH.ETH:0x3e485e2C7df712Ec170C087ecf5C15016A03F93F" //Uses OP_RETURN outputs
+        // let feeLevel = 5
+        //
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"bc1qs7ek0m3ah0xhn9a2txxrgvcw50clnvuhymx87h",
+        //     amount,
+        //     feeLevel
+        // }
 
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"tb1q5pjumcpe5tewh9nqfvffy5lgcjwmvf54mxvx88",
+        //     amount,
+        //     memo,
+        //     feeLevel
+        // }
+        //
+
+        // let transferSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let transferSigned = {
+        //
+        // }
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('BTC',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
+        /*
+            BTC
+         */
+
+        let masterBTC = await Wallet.getMaster("BTC")
+        console.log("masterBTC: ",masterBTC)
+
+        let balanceBTC = await Wallet.getBalance("BTC")
+        console.log("balanceBTC: ",balanceBTC)
+        //
+        let amount = "0.0001"
+        let memo = null //Uses OP_RETURN outputs
+        let feeLevel = 5
+
+        //TODO offer input override
+        let transfer = {
+            coin:"BTC",
+            addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
+            amount,
+            memo,
+            feeLevel
+        }
+
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",JSON.stringify(transferUnSigned))
+        //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
 
         /*
                BCH
          */
 
-        //
-        // let masterBTC = await Wallet.getMaster("BCH")
-        // console.log("masterBCH: ",masterBTC)
-        //
-        // let balanceBTC = await Wallet.getBalance("BCH")
-        // console.log("balanceBCH: ",balanceBTC)
-        //
-        // let amount = "0.02"
+
+        let masterBCH = await Wallet.getMaster("BCH")
+        console.log("masterBCH: ",masterBCH)
+
+        let balanceBCH = await Wallet.getBalance("BCH")
+        console.log("balanceBCH: ",balanceBCH)
+        // //
+        // let amount = "0.0001"
         // let memo = null //Uses OP_RETURN outputs
         // let feeLevel = 5
         //
         // //TODO offer input override
         // let transfer = {
         //     coin:"BCH",
-        //     addressTo:"1Dmjt2DWjNpVWRPXRNuhwfDnSqPmfxGLLG",
+        //     addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
         //     amount,
         //     memo,
         //     feeLevel

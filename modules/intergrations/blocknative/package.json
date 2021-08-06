@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/blocknative-client",
-  "version": "0.0.1",
+  "version": "8.1.5",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "0.0.1",
+    "@pioneer-platform/loggerdog": "^8.1.5",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0"
   },
@@ -25,5 +25,6 @@
     "source-map-support": "^0.5.19",
     "ts-jest": "^25.4.0",
     "typescript": "^3.9.7"
-  }
+  },
+  "gitHead": "bd6db6ae5baf74242d698b0b30f25b3dcfdaf414"
 }

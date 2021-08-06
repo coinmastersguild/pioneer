@@ -1,10 +1,11 @@
 {
   "name": "@pioneer-platform/coincap",
-  "version": "6.2.6",
+  "version": "8.1.5",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
+    "@pioneer-platform/loggerdog": "^8.1.5",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "graphql-request": "^1.8.2"
-  }
+  },
+  "gitHead": "bd6db6ae5baf74242d698b0b30f25b3dcfdaf414"
 }

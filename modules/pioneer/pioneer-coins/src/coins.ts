@@ -1,22 +1,21 @@
 
 const TAG = " | coin tools | "
 const log = require("@pioneer-platform/loggerdog")()
-const cloneCrypto = require("@pioneer-platform/utxo-crypto")
 const bitcoin = require("bitcoinjs-lib");
 const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
 const bech32 = require(`bech32`)
-import BigNumber from 'bignumber.js'
+//import BigNumber from 'bignumber.js'
+const b58 = require('bs58check');
 const BIP84 = require('bip84')
 import { getNetwork } from "./networks";
 let {
     getPaths,
 } = require('./paths')
 
-
-enum HDWALLETS {
+export enum HDWALLETS {
     'pioneer',
     'trezor',
     'keepkey',
@@ -31,6 +30,7 @@ enum HDWALLETS {
 export const UTXO_COINS = [
     'BTC',
     'BCH',
+    'DOGE',
     'LTC',
     'TEST'
 ]
@@ -71,8 +71,106 @@ export const COIN_MAP_LONG:any = {
     EOS: "eos",
     FIO: "fio",
 };
+
+export const COIN_MAP_KEEPKEY_LONG:any = {
+    BTC: "Bitcoin",
+    ATOM: "cosmos",
+    BTCT: "testnet",
+    BCH: "BitcoinCash",
+    LTC: "Litecoin",
+    DASH: "Dash",
+    DGB: "DigiByte",
+    DOGE: "Dogecoin",
+    RUNE: "Thorchain",
+    ETH: "Ethereum",
+    ADA: "Cardano",
+    BNB: "Binance",
+    EOS: "Eos",
+    FIO: "Fio",
+};
+
+export const SLIP_44_BY_LONG:any = {
+    bitcoin: 0,
+    testnet: 1,
+    bitcoincash: 145,
+    bitcoingold: 156,
+    litecoin: 2,
+    dash: 5,
+    digibyte: 20,
+    dogecoin: 3,
+    bitcoinsv: 236,
+    ethereum: 60,
+    cosmos: 118,
+    binance: 714,
+    ripple: 144,
+    eos: 194,
+    fio: 235,
+    thorchain: 931,
+    cardano: 1815,
+    secret: 529,
+    terra: 931,
+    kava: 459,
+};
+
+export const GET_NETWORK_NAME = function(network:string){
+    let networkName
+    switch (network) {
+        case "1":
+            networkName = "Main";
+            break;
+        case "2":
+            networkName = "Morden";
+            break;
+        case "3":
+            networkName = "Ropsten";
+            break;
+        case "4":
+            networkName = "Rinkeby";
+            break;
+        case "42":
+            networkName = "Kovan";
+            break;
+        default:
+            networkName = "Unknown";
+    }
+    return networkName
+}
+
 const HARDENED = 0x80000000;
-function addressNListToBIP32(address: number[]): string {
+export function bip32Like(path: string): boolean {
+    if (path == "m/") return true;
+    return /^m(((\/[0-9]+h)+|(\/[0-9]+H)+|(\/[0-9]+')*)((\/[0-9]+)*))$/.test(path);
+}
+
+export function bip32ToAddressNList(path: string): number[] {
+    if (!bip32Like(path)) {
+        throw new Error(`Not a bip32 path: '${path}'`);
+    }
+    if (/^m\//i.test(path)) {
+        path = path.slice(2);
+    }
+    const segments = path.split("/");
+    if (segments.length === 1 && segments[0] === "") return [];
+    const ret = new Array(segments.length);
+    for (let i = 0; i < segments.length; i++) {
+        const tmp = /(\d+)([hH\']?)/.exec(segments[i]);
+        if (tmp === null) {
+            throw new Error("Invalid input");
+        }
+        ret[i] = parseInt(tmp[1], 10);
+        if (ret[i] >= HARDENED) {
+            throw new Error("Invalid child index");
+        }
+        if (tmp[2] === "h" || tmp[2] === "H" || tmp[2] === "'") {
+            ret[i] += HARDENED;
+        } else if (tmp[2].length !== 0) {
+            throw new Error("Invalid modifier");
+        }
+    }
+    return ret;
+}
+
+export function addressNListToBIP32(address: number[]): string {
     return `m/${address.map((num) => (num >= HARDENED ? `${num - HARDENED}'` : num)).join("/")}`;
 }
 
@@ -508,6 +606,42 @@ function createBech32Address(publicKey:any,prefix:string) {
     return cosmosAddress
 }
 
+// All known xpub formats
+const prefixes:any = new Map(
+    [
+        ['xpub', '0488b21e'],
+        ['ypub', '049d7cb2'],
+        ['Ypub', '0295b43f'],
+        ['zpub', '04b24746'],
+        ['Zpub', '02aa7ed3'],
+        ['tpub', '043587cf'],
+        ['upub', '044a5262'],
+        ['Upub', '024289ef'],
+        ['vpub', '045f1cf6'],
+        ['Vpub', '02575483'],
+        ['Ltub', '02575483'],
+    ]
+);
+
+enum AddressTypes {
+    "bech32",
+    "legacy"
+}
+
+export function xpubConvert(xpub:string,target:string){
+    if (!prefixes.has(target)) {
+        return "Invalid target version";
+    }
+
+    // trim whitespace
+    xpub = xpub.trim();
+
+    var data = b58.decode(xpub);
+    data = data.slice(4);
+    data = Buffer.concat([Buffer.from(prefixes.get(target),'hex'), data]);
+    return b58.encode(data);
+}
+
 export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
     let tag = TAG + " | normalize_pubkeys | "
     try {
@@ -541,11 +675,11 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     normalized.type = 'zpub'
                     normalized.zpub = true
                     //convert to zpub
-                    let zpub = await cloneCrypto.xpubConvert(pubkeys[i].xpub,'zpub')
+                    let zpub = await xpubConvert(pubkeys[i].xpub,'zpub')
                     normalized.pubkey = zpub
                     pubkey.pubkey = zpub
                 }
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB'){
+                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM'){
                     pubkey.pubkey = pubkeys[i].xpub
                 }
                 normalized.note = pubkey.note
@@ -567,7 +701,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                 }
                 if(isTestnet && pubkey.symbol === 'BTC'){
                     //tpub
-                    normalized.tpub = await cloneCrypto.xpubConvert(pubkey.xpub,'tpub')
+                    normalized.tpub = await xpubConvert(pubkey.xpub,'tpub')
                 }
                 normalized.master = address
                 normalized.address = address

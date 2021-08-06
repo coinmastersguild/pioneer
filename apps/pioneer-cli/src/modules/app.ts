@@ -41,17 +41,12 @@ let help: any = {
     info: "",
 };
 
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+
 function standardRandomBytesFunc(size:any) {
     /* istanbul ignore if: not testable on node */
     return CryptoJS.lib.WordArray.random(size).toString()
 }
-
-let apps = [
-    {
-        service:"AsgardDex (WEB)",
-        url:"https://swaps.pro",
-    }
-]
 
 export async function onStart() {
     let tag = TAG + " | onStart | ";
@@ -235,20 +230,27 @@ export async function onStart() {
                     log.debug("result creating wallet: ",resultCreate)
                 } else if (type === "pair hardware wallet") {
                     log.info("pair hardware wallet!")
+                    log.info("keepkeyStatus: ",keepkeyStatus)
+                    let isDeviceLocked = await App.hardwareLocked(blockchains)
+                    log.info("isDeviceLocked: ",isDeviceLocked)
 
-                    if(info.features){
-                        //is locked?
-                        let pubkeysKeepkey = await Hardware.getPubkeys()
+                    let wallet = await Hardware.getPubkeys(blockchains)
 
-                        //
-                        let resultPair = await App.pairKeepkey(info.features.deviceId,pubkeysKeepkey)
-                        log.info("resultPair: ",resultPair)
-                    } else {
-                        //try to reconnect
-                        log.error(tag,"Device Connected to other host!")
-                    }
+                    //init
+                    wallet.hardware = true
+                    wallet.type = 'keepkey'
+                    wallet.features = KEEPKEY.features
+                    console.log("wallet: ",wallet)
 
-                    //
+                    let success = await App.pairKeepkey(wallet,blockchains)
+                    console.log("success: ",success)
+
+                    await App.initConfig("english");
+                    App.updateConfig({username});
+                    App.updateConfig({temp:password});
+                    App.updateConfig({blockchains})
+                    App.updateConfig({created: new Date().getTime()});
+
                 }
             }
 
@@ -260,29 +262,28 @@ export async function onStart() {
 
             //hardware
             config.hardware = true
-
+            config.blockchains = blockchains
             let keepkeyStatus2 = await App.hardwareState()
             log.info(tag,"keepkeyStatus2: ",keepkeyStatus2)
 
-            let isTestnet = true
-            let resultInit = await App.init(config,isTestnet)
+            let resultInit = await App.init(config)
             log.debug("resultInit: ",resultInit)
 
             //if username is temp
             if(config.FIO_ACCEPT && config.username.indexOf("temp:") >= 0){
-                //FIO name enable
-                let fioPubkey = await App.getFioPubkey()
-                log.debug(tag,"fioPubkey: ",fioPubkey)
-
-                let usernames = await App.getFioAccountsByPubkey(fioPubkey)
-                if(usernames.length === 0){
-                    //open fio signup
-                    open("https://reg.fioprotocol.io/ref/shapeshift?publicKey=" + fioPubkey);
-                } else {
-                    username = usernames.fio_addresses[0].fio_address
-                    if(!username) throw Error("failed to find fio username!")
-                    App.updateConfig({username});
-                }
+                //TODO FIO name enable
+                // let fioPubkey = await App.getFioPubkey()
+                // log.debug(tag,"fioPubkey: ",fioPubkey)
+                //
+                // let usernames = await App.getFioAccountsByPubkey(fioPubkey)
+                // if(usernames.length === 0){
+                //     //open fio signup
+                //     open("https://reg.fioprotocol.io/ref/shapeshift?publicKey=" + fioPubkey);
+                // } else {
+                //     username = usernames.fio_addresses[0].fio_address
+                //     if(!username) throw Error("failed to find fio username!")
+                //     App.updateConfig({username});
+                // }
             }
             return resultInit
         }else if(keepkeyStatus.state === 2){
@@ -369,10 +370,10 @@ export async function loadModule(moduleView:any,module:any) {
                         log.debug(tag, "parameters: ", parameters);
                         try {
 
-                            log.debug("key: ",key)
-                            log.debug("parameters: ",parameters)
+                            log.info("key: ",key)
+                            log.info("parameters: ",parameters)
 
-                            const result = await module[key](parameters)
+                            const result = await module[key](parameters[0])
                             log.info("result: ", prettyjson.render(result));
 
                             cb()
@@ -397,15 +398,24 @@ export async function loadModule(moduleView:any,module:any) {
 export async function onRun() {
     let tag = TAG + " | onRun | ";
     try {
+        let userInfo = await App.getUserInfo()
+        log.info("userInfo: ",userInfo)
+        if(!userInfo.context) throw Error("Invalid user! missing context!")
 
         //get context
         let wallets = await App.getWallets()
-        log.debug("wallets: ",wallets)
+        log.info("wallets: ",wallets)
 
-        let context = wallets[0]
+        if(!wallets[userInfo.context]) {
+            log.error("Missing context!")
+            log.error("context: ",userInfo.context)
+            log.error("wallets: ",Object.keys(wallets))
+        }
+        let context = wallets[userInfo.context]
+        log.info("context: ",context)
 
-        // let info = await context.getInfo()
-        // log.debug("info: ",info)
+        let info = await context.getInfo()
+        log.info("info: ",info)
 
         // let contextView:any = JSON.parse(JSON.stringify(context))
         let contextView:any = {}

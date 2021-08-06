@@ -26,12 +26,13 @@ let run_test = async function(){
     try{
 
         let config = {
-            // queryKey:"adsfgdfgds3sdfsd",
+            // queryKey:TEST_QUERY_KEY_2,
+            queryKey:"12312312ssdasas",
             wss:"ws://127.0.0.1:9001"
         }
 
         //sub ALL events
-        let clientEvents = new Events.Events(config.pioneerWs,config)
+        let clientEvents = new Events.Events(config)
         clientEvents.init()
 
         //let invocation = ""

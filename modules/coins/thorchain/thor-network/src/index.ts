@@ -59,6 +59,9 @@ module.exports = {
     txs: function (address:string) {
         return get_txs_by_address(address);
     },
+    getTransaction: function (txid:string) {
+        return get_transaction(txid);
+    },
     transaction: function (txid:string) {
         return get_transaction(txid);
     },
@@ -79,7 +82,17 @@ let get_transaction = async function(txid:string){
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){
-        throw Error(e)
+        // log.error(tag,e.response.data)
+        // log.error(tag,e.response.data.error)
+
+        if(e.response.status === 404){
+            let output:any = {}
+            output.success = false
+            output.error = e.response.data.error
+            return output
+        } else {
+            throw Error(e)
+        }
     }
 }
 

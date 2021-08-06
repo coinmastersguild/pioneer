@@ -1,4 +1,4 @@
-FROM node:10.18
+FROM node:14.15.3
 ARG NPM_TOKEN
 ARG NODE_ENV
 RUN mkdir -p /usr/src/app

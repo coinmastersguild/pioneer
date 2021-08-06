@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/loggerdog",
-  "version": "0.0.1",
+  "version": "8.1.5",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -9,13 +9,14 @@
     "prepublish": "tsc"
   },
   "dependencies": {
+    "@types/node": "^13.13.12",
     "cli-color": "^1.4.0",
+    "dotenv": "^8.2.0",
     "os": "^0.1.1",
     "request": "^2.88.2",
-    "@types/node": "^13.13.12",
-    "dotenv": "^8.2.0",
     "request-promise": "^4.2.6",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
-  }
+  },
+  "gitHead": "871f5666a23b939d63c70cd6b744af1322fdcbb7"
 }

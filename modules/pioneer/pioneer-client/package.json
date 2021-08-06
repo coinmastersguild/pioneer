@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-client",
-  "version": "6.2.29",
+  "version": "8.1.10",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "0.0.1",
+    "@pioneer-platform/loggerdog": "^8.1.5",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
@@ -25,5 +25,6 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
     "when": "^3.7.8"
-  }
+  },
+  "gitHead": "89ecf9cfa5353b8bf3e29fc5f8575cdfe496df4a"
 }

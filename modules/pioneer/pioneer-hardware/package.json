@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-hardware",
-  "version": "6.3.30",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -13,11 +13,11 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "latest",
-    "@pioneer-platform/pioneer-coins": "^6.3.0",
+    "@pioneer-platform/loggerdog": "^8.1.5",
+    "@pioneer-platform/pioneer-coins": "^8.1.18",
     "@shapeshiftoss/hdwallet-core": "latest",
-    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "^1.13.9",
-    "@shapeshiftoss/hdwallet-keepkey-tcp": "^1.13.9",
+    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "latest",
+    "@shapeshiftoss/hdwallet-keepkey-tcp": "latest",
     "@types/bytebuffer": "^5.0.42",
     "@types/google-protobuf": "^3.7.4",
     "@types/node": "^13.13.48",
@@ -31,7 +31,9 @@
     "request": "^2.88.2",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
-    "usb": "^1.7.0",
-    "wait-promise": "^0.4.1"
-  }
+    "usb": "1.6.5",
+    "wait-promise": "^0.4.1",
+    "webusb": "^2.2.0"
+  },
+  "gitHead": "547ca079865ded4e3faa121794f068bc923212a5"
 }

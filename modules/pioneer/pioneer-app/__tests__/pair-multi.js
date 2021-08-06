@@ -38,7 +38,7 @@ let TEST_COINS = [
     'LTC'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
 
 let run_test = async function(){
     try{
@@ -48,7 +48,7 @@ let run_test = async function(){
         // software 1
         try{
             let wallet1 = {
-                mnemonic:process.env['WALLET_MAINNET_DEV_OLD'],
+                mnemonic:process.env['FOUND_KEY'],
                 password
             }
 
@@ -90,6 +90,8 @@ let run_test = async function(){
         //create
         //init config
         await App.initConfig("english");
+        App.updateConfig({spec:process.env['URL_PIONEER_SPEC']});
+        App.updateConfig({wss:process.env['URL_PIONEER_SOCKET']});
         // App.updateConfig({isTestnet:true});
         App.updateConfig({username});
         App.updateConfig({temp:password});
