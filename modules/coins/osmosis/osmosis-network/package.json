@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/kava-network",
+  "name": "@pioneer-platform/osmosis-network",
   "version": "8.1.5",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
