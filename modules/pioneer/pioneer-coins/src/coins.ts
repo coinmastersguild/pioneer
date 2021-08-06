@@ -41,6 +41,7 @@ export const UTXO_COINS = [
 export const COIN_MAP = {
     bitcoin: "BTC",
     cosmos: "ATOM",
+    osmosis: "OSMO",
     testnet: "TEST",
     bitcoincash: "BCH",
     litecoin: "LTC",
@@ -58,6 +59,7 @@ export const COIN_MAP = {
 export const COIN_MAP_LONG:any = {
     BTC: "bitcoin",
     ATOM: "cosmos",
+    OSMO: "osmosis",
     BTCT: "testnet",
     BCH: "bitcoincash",
     LTC: "litecoin",
@@ -75,6 +77,7 @@ export const COIN_MAP_LONG:any = {
 export const COIN_MAP_KEEPKEY_LONG:any = {
     BTC: "Bitcoin",
     ATOM: "cosmos",
+    OSMO: "osmosis",
     BTCT: "testnet",
     BCH: "BitcoinCash",
     LTC: "Litecoin",
@@ -101,6 +104,7 @@ export const SLIP_44_BY_LONG:any = {
     bitcoinsv: 236,
     ethereum: 60,
     cosmos: 118,
+    osmosis: 118,
     binance: 714,
     ripple: 144,
     eos: 194,
@@ -250,6 +254,11 @@ if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
     supportedAssets.push("ATOM")
 }
 
+if(process.env['FEATURE_OSMOSIS_BLOCKCHAIN']){
+    supportedBlockchains.push("Osmosis")
+    supportedAssets.push("OSMO")
+}
+
 if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
     supportedBlockchains.push("Binance")
     supportedAssets.push("BNB")
@@ -387,6 +396,7 @@ const NETWORKS:any = {
 export enum PoSchains {
     'Eos',
     'Cosmos',
+    'Osmosis',
     'Binance',
     'Fio',
     'Terra',
@@ -399,6 +409,7 @@ const CURRENCY_DECIMALS:any = {
     'rune': 8,
     'dash': 8,
     'atom': 6,
+    'osmo': 6,
     'ltc': 8,
     'bch': 8,
     'doge': 8,
@@ -500,6 +511,9 @@ export function getExplorerUrl(network:string,token:string, testnet:boolean){
                 href = 'https://explorer.binance.org'
                 break
             case 'cosmos':
+                href = 'https://www.mintscan.io'
+                break
+            case 'osmosis':
                 href = 'https://www.mintscan.io'
                 break
             case 'dash':
@@ -798,6 +812,9 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
                 break;
             case 'ATOM':
                 output = createBech32Address(publicKey,'cosmos')
+                break;
+            case 'OSMO':
+                output = createBech32Address(publicKey,'osmo')
                 break;
             case 'BNB':
                 log.debug("pubkey: ",publicKey)
