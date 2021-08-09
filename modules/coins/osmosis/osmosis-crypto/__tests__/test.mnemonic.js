@@ -1,5 +1,5 @@
 /*
-    Thorchain
+    osmosis
  */
 
 require("dotenv").config({path:'../../../.env'})

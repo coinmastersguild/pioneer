@@ -137,7 +137,7 @@ let get_account_info = async function(address:string){
         let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/auth/accounts/'+address})
         log.info(tag,"txInfo: ",txInfo.data)
 
-        return JSON.parse(txInfo.data)
+        return txInfo.data
     }catch(e){
         log.error(tag,"e: ",e)
         throw e

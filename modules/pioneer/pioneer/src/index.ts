@@ -574,6 +574,12 @@ module.exports = class wallet {
                                 showDisplay: false,
                             });
                             break;
+                        case 'OSMO':
+                            address = await this.WALLET.osmosisGetAddress({
+                                addressNList: bip32ToAddressNList(masterPath),
+                                showDisplay: false,
+                            });
+                            break;
                         case 'ATOM':
                             address = await this.WALLET.cosmosGetAddress({
                                 addressNList: bip32ToAddressNList(masterPath),
@@ -608,6 +614,8 @@ module.exports = class wallet {
             let tag = TAG + " | get_address | "
             try {
                 let output
+                //TODO do this with coin.js?
+                //from xpub?
 
                 //if token use ETH pubkey
                 //TODO
@@ -639,7 +647,10 @@ module.exports = class wallet {
                             } else {
                                 output = createBech32Address(publicKey,'thor')
                             }
-
+                            break;
+                        case 'OSMO':
+                            // code block
+                            output = createBech32Address(publicKey,'osmosis')
                             break;
                         case 'ATOM':
                             // code block

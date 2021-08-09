@@ -33,8 +33,6 @@ let run_test = async function(){
 
         //pioneer
         let config = {
-            // mnemonic: process.env['WALLET_CITADEL_LEGACY'],
-            mnemonic: process.env['WALLET_TEST_BROKE'],
             // mnemonic: process.env['WALLET_MAIN'],
             // mnemonic: process.env['WALLET_MAINNET_DEV_NEW'],
             username,

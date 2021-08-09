@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/thorchain-e2e-transfer",
+  "name": "@pioneer-platform/osmosis-e2e-transfer",
   "version": "8.1.21",
   "scripts": {
     "yarn": "yarn",
@@ -7,10 +7,10 @@
     "build": "tsc -p .",
     "dev": "rm -Rf ~/.pioneer && npm run build && npm run start",
     "test": "rm -Rf ~/.pioneer && jest --verbose --silent=true  --forceExit",
-    "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/eth-e2e-sdk:latest .",
-    "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
-    "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
-    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
+    "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/osmosis-e2e-sdk:latest .",
+    "docker:run": "docker run --env-file=../../.env pioneer/osmosis-e2e-sdk:latest",
+    "docker:tag": "docker tag pioneer/osmosis-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/osmosis-e2e-sdk:latest",
+    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/osmosis-e2e-sdk:latest",
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {

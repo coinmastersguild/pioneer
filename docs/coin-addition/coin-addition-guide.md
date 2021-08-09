@@ -1,5 +1,7 @@
 # adding an asset to pioneer platform
 
+docs: https://www.notion.so/Add-An-Asset-Checklist-54dc53735b9849c68a4dcdcbfe4d7ccb
+
 ## token
 
 ## HDwallet notes:
