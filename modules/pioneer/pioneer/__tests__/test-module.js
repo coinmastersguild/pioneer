@@ -45,7 +45,7 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAIN'],
+            mnemonic: process.env['WALLET_STAGE_ATOM'],
             username,
             pioneerApi:true,
             spec:urlSpec,
@@ -71,31 +71,41 @@ let run_test = async function(){
         /*
               OSMO
         */
-        console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //OSMO
-        // let masterOSMO = await Wallet.getMaster("OSMO")
-        // console.log("masterOSMO: ",masterOSMO)
-        //
-        // let balanceRUNE = await Wallet.getBalance("OSMO")
-        // console.log("balanceRUNE: ",balanceRUNE)
+        let masterOSMO = await Wallet.getMaster("OSMO")
+        console.log("masterOSMO: ",masterOSMO)
 
-        // let address = ""
-        // let amount = "100"
-        // let memo = ""
-        //
-        // let transfer = {
-        //     coin:"RUNE",
-        //     addressTo:address,
-        //     amount,
-        //     memo
-        // }
-        //
-        // let transferSigned = await Wallet.buildTransfer(transfer)
-        // console.log("transferSigned: ",transferSigned)
-        //
-        // let resultBroadcast = await Wallet.broadcastTransaction('RUNE',transferSigned)
-        // console.log("resultBroadcast: ",resultBroadcast)
+        let balanceOSMO = await Wallet.getBalance("OSMO")
+        console.log("balanceOSMO: ",balanceOSMO)
+
+        //console.log("correct OSMO: ","osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r")
+        //if(masterOSMO !== "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r") throw Error("Incorect master!")
+
+        let address = "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r"
+        let amount = "0.0001"
+        let memo = ""
+
+        let transfer = {
+            coin:"OSMO",
+            network:"OSMO",
+            asset:"OSMO",
+            addressTo:address,
+            fee:{
+                priority:5,
+            },
+            amount,
+            memo
+        }
+
+        let transferUnSigned = await Wallet.buildTransfer(transfer)
+        console.log("transferUnSigned: ",transferUnSigned)
+
+        let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        console.log("transferSigned: ",transferSigned)
+
+        let resultBroadcast = await Wallet.broadcastTransaction('OSMO',transferSigned)
+        console.log("resultBroadcast: ",resultBroadcast)
 
         // let intent = {
         //     coin:"OSMO",

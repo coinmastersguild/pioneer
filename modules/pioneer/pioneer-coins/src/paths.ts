@@ -130,6 +130,26 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
+    if(blockchains.indexOf('osmosis') >= 0){
+        let entry:any = {
+            note:" Default OSMO path ",
+            type:"address",
+            script_type:"bech32",
+            available_scripts_types:['bech32'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            blockchain: 'osmosis',
+            symbol: 'OSMO',
+            network: 'OSMO',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
+
     if(blockchains.indexOf('binance') >= 0){
         let entry:any = {
             note:"Binance default path",

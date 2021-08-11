@@ -71,6 +71,8 @@ const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
 let GIG =  1000000000
 
+const OSMO_CHAIN="osmosis-1"
+
 function bech32ify(address:any, prefix:string) {
     const words = bech32.toWords(address)
     return bech32.encode(prefix, words)
@@ -893,7 +895,7 @@ module.exports = class wallet {
 
                         //get account number
                         log.info(tag,"addressFrom: ",addressFrom)
-                        let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                        let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
                         masterInfo = masterInfo.data
                         log.debug(tag,"masterInfo: ",masterInfo.data)
 
@@ -1096,7 +1098,7 @@ module.exports = class wallet {
 
                     //get account number
                     log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
                     masterInfo = masterInfo.data
                     log.debug(tag,"masterInfo: ",masterInfo.data)
 
@@ -1525,6 +1527,28 @@ module.exports = class wallet {
                         network,
                         serialized:JSON.stringify(broadcastString)
                     }
+                }else if(network === 'OSMO'){
+                    let res = await this.WALLET.osmosisSignTx(unsignedTx.HDwalletPayload);
+
+                    log.debug("res: ",prettyjson.render(res))
+                    log.debug("res*****: ",res)
+
+                    let txFinal:any
+                    txFinal = res
+                    txFinal.signatures = res.signatures
+
+                    log.debug("FINAL: ****** ",txFinal)
+
+                    let broadcastString = {
+                        tx:txFinal,
+                        type:"cosmos-sdk/StdTx",
+                        mode:"sync"
+                    }
+                    signedTx = {
+                        txid:"",
+                        network,
+                        serialized:JSON.stringify(broadcastString)
+                    }
                 } else if(network === 'BNB'){
                     const signedTxResponse = await this.WALLET.binanceSignTx(unsignedTx.HDwalletPayload)
                     log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
@@ -1883,38 +1907,6 @@ module.exports = class wallet {
                         throw Error("103: tokens incomplete!")
                         //TODO tokens
                     }
-                    // else{
-                    //     //TODO tokens
-                    //     // let knownCoins = tokenData.tokens
-                    //     // log.debug(tag,"knownCoins: ",knownCoins)
-                    //     // if(knownCoins.indexOf(coin) === -1) throw Error("107: unknown token! "+coin)
-                    //     //
-                    //     let balanceToken = await this.getBalance(coin)
-                    //
-                    //     //verify token balance
-                    //     if(amount > balanceToken) throw Error("103: Insufficient balance! ")
-                    //
-                    //     let abiInfo = "NERF"
-                    //     let metaData = "NERF"
-                    //
-                    //     let amountNative = parseFloat(amount) * metaData.BASE
-                    //     amountNative = Number(parseInt(String(amountNative)))
-                    //
-                    //     log.debug({coin:coin,address, amountNative})
-                    //     let transfer_data = await this.pioneerClient.instance.GetTransferData({coin,address,amount:amountNative})
-                    //     transfer_data = transfer_data.data
-                    //     log.debug(tag,"transfer_data: ",transfer_data)
-                    //
-                    //     txParams = {
-                    //         nonce: nonce,
-                    //         to: "NERF",
-                    //         gasPrice: gas_price,
-                    //         data: transfer_data,
-                    //         gasLimit : gas_limit
-                    //
-                    //     }
-                    //     log.debug(tag,"txParams: ",txParams)
-                    // }
                     if(!txParams) throw Error("tokens not supported")
 
                     //send FROM master
@@ -1972,7 +1964,7 @@ module.exports = class wallet {
 
                     //get account number
                     log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'RUNE',address:addressFrom})
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
                     masterInfo = masterInfo.data
                     log.debug(tag,"masterInfo: ",masterInfo.data)
 
@@ -2069,7 +2061,7 @@ module.exports = class wallet {
 
                     //get account number
                     log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({coin:'ATOM',address:addressFrom})
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
                     masterInfo = masterInfo.data
                     log.debug(tag,"masterInfo: ",masterInfo.data)
 
@@ -2105,7 +2097,7 @@ module.exports = class wallet {
                                             "denom": "uatom"
                                         }
                                     ],
-                                    "from_address": "thor1jhv0vuygfazfvfu5ws6m80puw0f80kk660s9qj",
+                                    "from_address": addressFrom,
                                     "to_address": address
                                 }
                             }
@@ -2153,38 +2145,102 @@ module.exports = class wallet {
 
                     rawTx = unsignedTx
 
-                    // let res = await this.WALLET.cosmosSignTx({
-                    //     addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                    //     chain_id,
-                    //     account_number: account_number,
-                    //     sequence:sequence,
-                    //     tx: unsigned,
-                    // });
-                    //
-                    // log.debug("res: ",prettyjson.render(res))
-                    // log.debug("res*****: ",res)
-                    //
-                    // let txFinal:any
-                    // txFinal = res
-                    // txFinal.signatures = res.signatures
-                    //
-                    // log.debug("FINAL: ****** ",txFinal)
-                    //
-                    // let broadcastString = {
-                    //     tx:txFinal,
-                    //     type:"cosmos-sdk/StdTx",
-                    //     mode:"sync"
-                    // }
-                    // rawTx = {
-                    //     txid:"",
-                    //     coin,
-                    //     serialized:JSON.stringify(broadcastString)
-                    // }
+                }else if(network === 'OSMO'){
+                    //get amount native
+                    let amountNative = ATOM_BASE * parseFloat(amount)
+                    amountNative = parseInt(amountNative.toString())
+
+                    //get account number
+                    log.debug(tag,"addressFrom: ",addressFrom)
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+
+                    let txType = "cosmos-sdk/MsgSend"
+                    let gas = "80000"
+                    let fee = "2800"
+                    let memo = transaction.memo || ""
+
+                    //sign tx
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "uosmo"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            {
+                                "type": txType,
+                                "value": {
+                                    "amount": [
+                                        {
+                                            "amount": amountNative.toString(),
+                                            "denom": "uosmo"
+                                        }
+                                    ],
+                                    "from_address": addressFrom,
+                                    "to_address": address
+                                }
+                            }
+                        ],
+                        "signatures": null
+                    }
+
+                    let	chain_id = OSMO_CHAIN
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) throw Error("113: Failed to get account_number")
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.osmosisGetAddress({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
+
+                    log.debug("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+                    let atomTx = {
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id:'osmosis-1',
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }
+
+                    let unsignedTx = {
+                        network:network,
+                        asset:network,
+                        transaction,
+                        HDwalletPayload:atomTx,
+                        verbal:"osmosis transaction"
+                    }
+
+                    rawTx = unsignedTx
+
                 }else if(network === "BNB"){
                     //TODO move to tx builder module
                     //get account info
                     log.debug("addressFrom: ",addressFrom)
-                    let accountInfo = await this.pioneerClient.instance.GetAccountInfo({coin:network,address:addressFrom})
+                    let accountInfo = await this.pioneerClient.instance.GetAccountInfo({network,address:addressFrom})
                     accountInfo = accountInfo.data
                     log.debug("accountInfo: ",prettyjson.render(accountInfo))
                     let sequence

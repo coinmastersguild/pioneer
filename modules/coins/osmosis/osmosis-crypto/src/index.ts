@@ -48,6 +48,8 @@ module.exports = {
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //log.debug(mk.publicExtendedKey)
 
+            mk = mk.derive(hdPath)
+
             //get correct address with xpub
             let xpub = mk.publicExtendedKey
             let xpriv = mk.privateExtendedKey
@@ -57,8 +59,9 @@ module.exports = {
             let privateKey = bitcoin.bip32.fromBase58(xpriv).privateKey
             log.debug("publicKey: ",publicKey)
 
-            //
+            //mkAccount
             let mkAccount = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
+
             //get master key
             console.log("hdPath: ",hdPath)
             mkAccount = mkAccount.derive(hdPath)

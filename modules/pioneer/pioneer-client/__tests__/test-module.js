@@ -52,8 +52,12 @@ let run_test = async function(){
 
         // console.log("pioneer: ",pioneer)
 
-        let xpub = "ypub6Wev4wL7q61rBeyLc7GpHF3z3nsSz2LXCga32o5ChbEQSaiSGvg7dQqRWv6Md2FzhefZhHP7NpTz4sYUeCsqxs6brzqoeRb81t7YQpVsy5H"
-        let data = await pioneer.instance.ListUnspent({network:'BTC',xpub})
+        // let xpub = ""
+        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub})
+        // data = data.data
+        // console.log("txData: ",data)
+
+        let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         data = data.data
         console.log("txData: ",data)
 

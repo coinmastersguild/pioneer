@@ -192,10 +192,10 @@ let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
 //         console.log(resp)
 //     })
 
-// network.getInfo()
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getInfo()
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getInfo()
 //     .then(function(resp){

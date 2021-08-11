@@ -1,7 +1,6 @@
 /*
 
-    Terra Crypto
-
+    Osmosis Crypto
 
  */
 
@@ -14,8 +13,10 @@ const sha256 = require("crypto-js/sha256")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const HDKey = require('hdkey')
-const hdPath = `m/44'/529'/0'/0/0` //TODO get from coins
+const hdPath = `m/44'/118'/0'/0/0` //TODO get from coins
 let bitcoin = require("bitcoinjs-lib");
+
+//bech32 prefix
 
 const log = require('@pioneer-platform/loggerdog')()
 /**********************************
@@ -46,6 +47,7 @@ module.exports = {
 
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //log.debug(mk.publicExtendedKey)
+
             mk = mk.derive(hdPath)
 
             //get correct address with xpub
@@ -60,7 +62,7 @@ module.exports = {
             //
             let mkAccount = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //get master key
-            //console.log("hdPathAtom: ",hdPathAtom)
+            console.log("hdPath: ",hdPath)
             mkAccount = mkAccount.derive(hdPath)
             log.debug(mkAccount.publicExtendedKey)
 
@@ -68,7 +70,7 @@ module.exports = {
             let xpubAccount = mkAccount.publicExtendedKey
 
             //
-            let address = createAddress(publicKey,'secret')
+            let address = createAddress(publicKey,'cosmos')
             log.debug("address: ",address)
 
             return {

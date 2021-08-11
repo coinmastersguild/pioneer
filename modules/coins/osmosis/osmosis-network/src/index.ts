@@ -3,7 +3,8 @@
 
 
 */
-const TAG = " | thorchain-api | "
+const pjson = require("../package.json")
+const TAG = " | "+pjson.name.replace("@pioneer-platform/","")+" | "
 
 require("dotenv").config({path:'../../../.env'})
 
@@ -77,10 +78,7 @@ let broadcast_transaction = async function(tx:string){
     let output:any = {}
     try{
         log.debug(tag,"CHECKPOINT 1")
-
         output.success = false
-
-
         try{
             //push to seed
             let urlRemote = URL_OSMO_LCD+ '/txs'
