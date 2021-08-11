@@ -82,8 +82,8 @@ let run_test = async function(){
         //console.log("correct OSMO: ","osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r")
         //if(masterOSMO !== "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r") throw Error("Incorect master!")
 
-        let address = "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r"
-        let amount = "0.0001"
+        let address = "osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn"
+        let amount = "0.1"
         let memo = ""
 
         let transfer = {

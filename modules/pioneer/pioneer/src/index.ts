@@ -1522,8 +1522,11 @@ module.exports = class wallet {
                         type:"cosmos-sdk/StdTx",
                         mode:"sync"
                     }
+                    const buffer = Buffer.from(JSON.stringify(broadcastString), 'base64');
+                    let txid = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
                     signedTx = {
-                        txid:"",
+                        txid,
                         network,
                         serialized:JSON.stringify(broadcastString)
                     }
@@ -1544,8 +1547,11 @@ module.exports = class wallet {
                         type:"cosmos-sdk/StdTx",
                         mode:"sync"
                     }
+                    const buffer = Buffer.from(JSON.stringify(broadcastString), 'base64');
+                    let txid = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
                     signedTx = {
-                        txid:"",
+                        txid,
                         network,
                         serialized:JSON.stringify(broadcastString)
                     }

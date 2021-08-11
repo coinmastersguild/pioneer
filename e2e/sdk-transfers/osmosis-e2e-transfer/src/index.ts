@@ -97,7 +97,10 @@ const test_service = async function () {
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
+        log.info(tag,"wallets.wallets[contextAlpha].WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
+
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
+        log.info(tag,"balance: ",balance)
         assert(balance)
 
         let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)

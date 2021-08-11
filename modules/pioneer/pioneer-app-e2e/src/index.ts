@@ -44,7 +44,7 @@ let WALLETS_NAMES:any = []
 let WALLET_CONTEXT = ""
 let INVOCATIONS:any = []
 let INVOCATIONS_SIGNED:any = []
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 
 export function getContext() {
