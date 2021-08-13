@@ -36,7 +36,7 @@ let run_test = async function(){
         console.log(config)
         let app = new SDK.SDK(spec,config,true)
         //console.log(app)
-        let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
+        let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash','osmosis']
         await app.init(seedChains)
 
         //
@@ -49,10 +49,10 @@ let run_test = async function(){
         // console.log(invocation)
 
         let user = await app.getUserParams()
-        log.debug("user: ",user)
+        console.log("user: ",user)
 
-        // let info = await app.clients.bitcoin.info()
-        // console.log(info)
+        let info = await app.clients.osmosis
+        console.log(info)
 
     }catch(e){
         console.error(e)

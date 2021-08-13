@@ -32,6 +32,7 @@ import {
     FeesParams,
     EstimateFeeParams,
     CallDepositParams,
+    Delegate
 } from "@pioneer-platform/pioneer-types";
 
 import {
@@ -111,6 +112,8 @@ module.exports = class wallet {
     private deposit: (deposit: any, options: any) => Promise<any>;
     private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
     private getTxCount: ((address: string) => Promise<any>) | undefined;
+    private getValidators: (() => any) | undefined;
+    private delegate: ((tx: Delegate) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -181,6 +184,100 @@ module.exports = class wallet {
                 throw e
             }
         }
+        /*
+            Network specific functions
+
+            osmosis:
+
+            getValidators
+            getStaking Positions
+
+            custom tx's
+            delegate
+            redelegate
+            undelegate
+
+         */
+        if(this.network === 'osmosis'){
+            this.getValidators = async function () {
+                let tag = TAG + " | getValidators | "
+                try {
+                    let validators = await this.pioneerApi.GetValidators('osmosis')
+                    return validators.data
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //TODO getStaking Positions
+
+            //delegate
+            this.delegate = async function (tx:Delegate) {
+                let tag = TAG + " | delegate | "
+                try {
+                    let coin = this.nativeAsset
+                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx.amount: ",tx.amount)
+                    log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
+                    log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                    let amount = tx.amount.amount().toNumber()
+                    amount = nativeToBaseAmount(this.nativeAsset,amount)
+                    amount = amount.toString()
+
+                    log.debug(tag,"amount (final): ",amount)
+                    if(!amount) throw Error("Failed to get amount!")
+
+                    //TODO min transfer size 10$
+                    //TODO validate addresses
+                    //TODO validate midgard addresses not expired
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    let validator = tx.validator
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'delegate',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        amount,
+                        validator,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+
+
+        }
+
         /*
             Network specific functions
 

@@ -605,7 +605,9 @@ module.exports = class wallet {
                     }
                     return output
                 }else{
-                    return "Not found!"
+                    log.error(tag,"PUBLIC_WALLET: ",this.PUBLIC_WALLET)
+                    log.error(tag,"network: ",network)
+                    throw Error("master Not Found!")
                 }
 
             } catch (e) {
@@ -1217,7 +1219,7 @@ module.exports = class wallet {
                 let rawTx = {}
 
                 //
-                if(transaction.coin === 'FIO'){
+                if(transaction.network === 'FIO'){
 
                     //types
                     let tx:any
@@ -1272,8 +1274,132 @@ module.exports = class wallet {
                     }
 
 
+                } else if(transaction.network === 'osmosis' || transaction.network === 'OSMO'){
+                    log.info(tag,"transaction: ",transaction)
+
+                    //types
+                    let tx:any
+                    let signTx:any
+                    let res:any
+
+                    //common
+                    //get amount native
+
+                    let amountNative = ATOM_BASE * parseFloat(transaction.amount)
+                    amountNative = parseInt(amountNative.toString())
+                    log.info(tag,"amountNative: ",amountNative)
+
+                    //get account number
+                    let addressFrom
+                    if(transaction.addressFrom){
+                        addressFrom = transaction.addressFrom
+                    } else {
+                        addressFrom = await this.getMaster('OSMO')
+                    }
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.info(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+                    let	chain_id = OSMO_CHAIN
+
+                    let msg:any
+                    switch(transaction.type) {
+                        case "delegate":
+                            if(!transaction.validator) throw Error("Missing validator address!")
+
+                            msg = {
+                                "type":"cosmos-sdk/MsgDelegate",
+                                "value":{
+                                    "delegator_address":addressFrom,
+                                    "validator_address":transaction.validator,
+                                    "amount":{
+                                        "denom":"uosmo",
+                                        "amount":amountNative
+                                    }
+                                }
+                            }
+
+                            break;
+                        case "redelegate":
+                            //TODO
+                            throw Error("TODO")
+                            break;
+                        case "ibcWithdrawal":
+                            //TODO
+                            throw Error("TODO")
+                            break;
+                        default:
+                            throw Error("unsupported osmosis tx type: "+transaction.type)
+                            //code block
+                    }
+                    let txType = "cosmos-sdk/MsgSend"
+                    let gas = "80000"
+                    let fee = "2800"
+                    let memo = transaction.memo || ""
+
+                    if(!msg) throw Error('failed to make tx msg')
+
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "uosmo"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            msg
+                        ],
+                        "signatures": null
+                    }
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) throw Error("113: Failed to get account_number")
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.osmosisGetAddress({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
+
+                    log.debug("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+                    let atomTx = {
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id:'osmosis-1',
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }
+
+                    let unsignedTx = {
+                        network:network,
+                        asset:network,
+                        transaction,
+                        HDwalletPayload:atomTx,
+                        verbal:"osmosis transaction"
+                    }
+
+                    rawTx = unsignedTx
+
                 } else {
-                    log.error(tag,"coin not supported! ",transaction.coin)
+                    log.error(tag,"network not supported! ",transaction.network)
                 }
 
 
@@ -1417,11 +1543,11 @@ module.exports = class wallet {
         this.signTransaction = async function (unsignedTx:UnsignedTransaction) {
             let tag = TAG + " | signTransaction | "
             try {
-                log.debug(tag,"unsignedTx: ",unsignedTx)
+                log.info(tag,"unsignedTx: ",unsignedTx)
                 let signedTx:any = {}
-                if(!unsignedTx.network) throw Error("102: invalid unsinged tx! missing network!")
+                if(!unsignedTx.network && unsignedTx.transaction) unsignedTx.network = unsignedTx.transaction.network
                 let network = unsignedTx.network
-
+                if(!network) throw Error("102: invalid unsinged tx! missing network!")
                 //TODO is token?
 
                 if(UTXO_COINS.indexOf(network) >= 0){

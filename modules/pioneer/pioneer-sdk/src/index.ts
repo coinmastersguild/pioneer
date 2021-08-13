@@ -295,7 +295,6 @@ export class SDK {
                 }
 
                 let txid = await this.clients[intent.blockchain].transfer(txInput)
-
                 log.debug("txid",txid)
 
                 return txid
@@ -374,6 +373,28 @@ export class SDK {
                     })
                     await thorchain.init(this.context)
                     this.clients['thorchain'] = thorchain
+                }
+
+                if(this.blockchains.indexOf('cosmos') >= 0){
+                    let cosmos = new XchainClass(this.spec,{
+                        network:'mainnet',
+                        blockchain:'cosmos',
+                        nativeAsset:'ATOM',
+                        queryKey:this.queryKey
+                    })
+                    await cosmos.init(this.context)
+                    this.clients['cosmos'] = cosmos
+                }
+
+                if(this.blockchains.indexOf('osmosis') >= 0){
+                    let osmosis = new XchainClass(this.spec,{
+                        network:'mainnet',
+                        blockchain:'osmosis',
+                        nativeAsset:'OSMO',
+                        queryKey:this.queryKey
+                    })
+                    await osmosis.init(this.context)
+                    this.clients['osmosis'] = osmosis
                 }
 
                 if(this.blockchains.indexOf('ethereum') >= 0){

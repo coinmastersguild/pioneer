@@ -57,9 +57,9 @@ let run_test = async function(){
         // data = data.data
         // console.log("txData: ",data)
 
-        let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
-        data = data.data
-        console.log("txData: ",data)
+        // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
+        // data = data.data
+        // console.log("txData: ",data)
 
         //get online
 
@@ -73,6 +73,10 @@ let run_test = async function(){
         // let onlineUsers = await pioneer.instance.Online()
         // onlineUsers = onlineUsers.data
         // console.log("onlineUsers: ",onlineUsers)
+
+        let validators = await pioneer.instance.GetValidators('osmosis')
+        validators = validators.data
+        console.log("validators: ",validators)
 
         // let isOnline = false
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true

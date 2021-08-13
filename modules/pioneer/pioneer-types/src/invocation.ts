@@ -7,6 +7,7 @@ export interface Invocation {
     inboundAddress?:any
     address?:string,
     addressTo?:string,
+    validator?:string,
     memo?:string
     fee:any
     asset:any

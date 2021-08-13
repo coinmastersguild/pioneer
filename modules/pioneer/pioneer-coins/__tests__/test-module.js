@@ -14,22 +14,28 @@ let {
     classifyPubkey,
     get_address_from_xpub,
     normalize_pubkeys,
+    PoSchains,
     getNativeAssetForBlockchain
 } = require('../lib/index.js')
 
+//
+let network = 'osmosis'
+
+console.log(PoSchains['Osmosis'])
+
 //convert
-console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
-
-let amountNative = "1206615928659277"
-// console.log("base: ",baseAmountToNative("BTC",amountNative))
-console.log("base: ",nativeToBaseAmount("ETH",amountNative))
-
-let paths = getPaths(['cosmos'])
-// let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'])
-// console.log("paths: ",paths)
-let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
-// let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
-console.log(classifyPubkey(address))
+// console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
+//
+// let amountNative = "1206615928659277"
+// // console.log("base: ",baseAmountToNative("BTC",amountNative))
+// console.log("base: ",nativeToBaseAmount("ETH",amountNative))
+//
+// let paths = getPaths(['cosmos'])
+// // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'])
+// // console.log("paths: ",paths)
+// let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
+// // let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
+// console.log(classifyPubkey(address))
 
 
 // //
@@ -60,34 +66,34 @@ console.log(classifyPubkey(address))
 //     }
 // ]
 //
-let result = [
-    {
-        xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
-    }
-]
-
-let run_test = async function(){
-    try{
-        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-
-        console.log("pubkeys: ",pubkeys)
-    }catch(e){
-        console.error(e)
-    }
-}
-run_test()
-
-
-let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
-let scriptType = "p2pkh"
-let coin = "BTC"
-let account = 0
-let index = 0
-let isTestnet = true
-
-get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
-    .then(function(address){
-        console.log("address: ",address)
-    })
+// let result = [
+//     {
+//         xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
+//     }
+// ]
+//
+// let run_test = async function(){
+//     try{
+//         let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+//
+//         console.log("pubkeys: ",pubkeys)
+//     }catch(e){
+//         console.error(e)
+//     }
+// }
+// run_test()
+//
+//
+// let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
+// let scriptType = "p2pkh"
+// let coin = "BTC"
+// let account = 0
+// let index = 0
+// let isTestnet = true
+//
+// get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
+//     .then(function(address){
+//         console.log("address: ",address)
+//     })
 
 

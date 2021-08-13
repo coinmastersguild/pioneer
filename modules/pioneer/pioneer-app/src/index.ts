@@ -398,6 +398,15 @@ let build_transaction = async function (transaction:any) {
 
         let unsignedTx
         switch(invocation.type) {
+            case 'delegate':
+                log.debug(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+
+                //TODO validate transfer object
+                unsignedTx = await walletContext.buildTransfer(invocation.invocation)
+                unsignedTx.invocation = invocation.invocation
+                log.debug(" **** RESULT buildTransfer ****  unsignedTx: ",unsignedTx)
+
+                break
             case 'transfer':
                 log.debug(" **** BUILD transfer ****  invocation: ",invocation.invocation)
 

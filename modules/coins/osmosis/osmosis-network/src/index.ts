@@ -43,6 +43,9 @@ module.exports = {
     getAccount:function (address:string) {
         return get_account_info(address);
     },
+    getValidators:function () {
+        return get_validators();
+    },
     getAccountInfo:function (address:string) {
         return get_account_info(address);
     },
@@ -61,6 +64,30 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+let get_validators = async function(){
+    let tag = TAG + " | get_validators | "
+    let output:any = {}
+    try{
+        let txInfo
+        txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/staking/validators'})
+        log.debug(tag,"txInfo: ",txInfo.data)
+
+        if(!txInfo.data.result) throw Error("103: failed to get validators! ")
+        //result
+        let validators = txInfo.data.result
+
+        //sort by tokens
+        validators.sort(function(a:any, b:any){
+            return parseInt(a.tokens)-parseInt(b.tokens)
+        })
+        validators.reverse()
+
+        return validators
+    }catch(e){
+        throw e
+    }
+}
 
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "

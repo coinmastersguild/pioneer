@@ -46,7 +46,8 @@ let midgard = require("@pioneer-platform/midgard-client")
 // let coincap = require("@pioneer-platform/coincap")
 
 import {
-    Transfer
+    Transfer,
+    Delegate
 } from "@pioneer-platform/pioneer-types";
 
 let {
@@ -237,18 +238,29 @@ const test_service = async function () {
         //test amount in native
         let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
 
+        //get validators
+        let validators = await user.clients[BLOCKCHAIN].getValidators()
+        log.info(tag,"validators: ",validators)
+        assert(validators[0])
+        let selected = validators[0]
+        log.info(tag,"selected: ",selected)
+        assert(selected.operator_address)
+        let validator = selected.operator_address
+        //select first
+
+
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let transfer:Transfer = {
+        let delegate:Delegate = {
             context:user.context,
-            recipient: FAUCET_OSMO_ADDRESS,
+            validator,
             asset: ASSET,
             network: ASSET,
             memo: '',
-            "amount":{
+            amount:{
                 amount: function(){
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
@@ -258,9 +270,9 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"transfer: ",transfer)
+        log.info(tag,"delegate: ",delegate)
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        let responseTransfer = await user.clients[BLOCKCHAIN].delegate(delegate,options)
         assert(responseTransfer)
         log.info(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer

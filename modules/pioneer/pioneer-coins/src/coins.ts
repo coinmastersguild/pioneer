@@ -394,17 +394,17 @@ const NETWORKS:any = {
 }
 
 export enum PoSchains {
-    'Eos',
-    'Cosmos',
-    'Osmosis',
-    'Binance',
-    'Fio',
-    'Terra',
-    'Kava',
+    'eos',
+    'cosmos',
+    'osmosis',
+    'binance',
+    'fio',
+    'terra',
+    'kava',
     'secret'
 }
 
-const CURRENCY_DECIMALS:any = {
+export const CURRENCY_DECIMALS:any = {
     'btc': 8,
     'rune': 8,
     'dash': 8,

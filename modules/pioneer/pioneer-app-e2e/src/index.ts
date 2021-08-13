@@ -130,7 +130,7 @@ export async function startApp() {
         App.updateConfig({wss});
         //get config
         config = await App.getConfig()
-        config.blockchains = ['ethereum','thorchain']
+        config.blockchains = blockchains
         config.spec = spec
         config.pioneerSocket = wss
         config.queryKey = queryKey
@@ -184,7 +184,7 @@ export async function startApp() {
 }
 
 export async function setUsername(usernameNew:string) {
-    let tag = " | getInvocations | "
+    let tag = " | setUsername | "
     try {
         username = usernameNew
         return username
@@ -274,6 +274,11 @@ export async function buildTransaction(transaction:any) {
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
+                break
+            case 'delegate':
+                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  approvalUnSigned: ",unsignedTx)
                 break
             case 'approve':
                 log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)

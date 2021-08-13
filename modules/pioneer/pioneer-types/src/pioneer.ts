@@ -114,6 +114,20 @@ export interface Transfer {
     noBroadcast?:boolean
 }
 
+export interface Delegate {
+    context?:string
+    network: string;
+    asset: string;
+    symbol?: string;
+    nonce?:number
+    fee?: any
+    validator: string
+    amount:any
+    memo?:string
+    noBroadcast?:boolean
+}
+
+
 export interface Deposit {
     network: string;
     asset: string;

@@ -35,7 +35,7 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 //keepkey wallet file (from pairing)
 let walletKeepkeyWatch = require('./data/keepkey.watch.wallet.json')
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 let context = "343733331147363327003800.watch.wallet.json"
 
