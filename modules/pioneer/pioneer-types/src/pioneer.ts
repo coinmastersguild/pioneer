@@ -127,6 +127,18 @@ export interface Delegate {
     noBroadcast?:boolean
 }
 
+export interface Redelegate {
+    context?:string
+    network: string;
+    asset: string;
+    symbol?: string;
+    nonce?:number
+    fee?: any
+    validator: string
+    amount:any
+    memo?:string
+    noBroadcast?:boolean
+}
 
 export interface Deposit {
     network: string;

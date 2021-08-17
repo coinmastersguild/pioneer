@@ -305,10 +305,10 @@ module.exports = class wallet {
                     //get user status
                     let userInfo = await this.pioneerClient.instance.User()
                     userInfo = userInfo.data
-                    log.info(tag,"userInfo: ",userInfo)
+                    log.debug(tag,"userInfo: ",userInfo)
 
                     if(!userInfo || !userInfo.success){
-                        log.info(tag,"registering new user! ")
+                        log.debug(tag,"registering new user! ")
                         //API
                         let register = {
                             username:this.username,
@@ -517,7 +517,7 @@ module.exports = class wallet {
                     let address
                     let paths = this.paths()
                     let pathInfo = paths.filter((e:any) => e.network === network)
-                    log.info(tag,"pathInfo: ",pathInfo)
+                    log.debug(tag,"pathInfo: ",pathInfo)
                     if(!pathInfo[0]) throw Error("103: unable to get path info! ")
                     let masterPath = addressNListToBIP32(pathInfo[0].addressNListMaster)
 
@@ -598,8 +598,8 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.info(tag,"address (HDwallet): ",address)
-                    log.info(tag,"address (private): ",output)
+                    log.debug(tag,"address (HDwallet): ",address)
+                    log.debug(tag,"address (private): ",output)
                     if(address !== output) {
                         throw Error("unable to verify address in HDwallet!")
                     }
@@ -896,7 +896,7 @@ module.exports = class wallet {
                         }
 
                         //get account number
-                        log.info(tag,"addressFrom: ",addressFrom)
+                        log.debug(tag,"addressFrom: ",addressFrom)
                         let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
                         masterInfo = masterInfo.data
                         log.debug(tag,"masterInfo: ",masterInfo.data)
@@ -1275,7 +1275,7 @@ module.exports = class wallet {
 
 
                 } else if(transaction.network === 'osmosis' || transaction.network === 'OSMO'){
-                    log.info(tag,"transaction: ",transaction)
+                    log.debug(tag,"transaction: ",transaction)
 
                     //types
                     let tx:any
@@ -1287,7 +1287,7 @@ module.exports = class wallet {
 
                     let amountNative = ATOM_BASE * parseFloat(transaction.amount)
                     amountNative = parseInt(amountNative.toString())
-                    log.info(tag,"amountNative: ",amountNative)
+                    log.debug(tag,"amountNative: ",amountNative)
 
                     //get account number
                     let addressFrom
@@ -1298,7 +1298,7 @@ module.exports = class wallet {
                     }
                     let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
                     masterInfo = masterInfo.data
-                    log.info(tag,"masterInfo: ",masterInfo.data)
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
 
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
@@ -1316,10 +1316,12 @@ module.exports = class wallet {
                                 "value":{
                                     "delegator_address":addressFrom,
                                     "validator_address":transaction.validator,
-                                    "amount":{
-                                        "denom":"uosmo",
-                                        "amount":amountNative
-                                    }
+                                    "amount":
+                                        {
+                                            "denom":"uosmo",
+                                            "amount":amountNative.toString()
+                                        }
+
                                 }
                             }
 
@@ -1337,7 +1339,7 @@ module.exports = class wallet {
                             //code block
                     }
                     let txType = "cosmos-sdk/MsgSend"
-                    let gas = "80000"
+                    let gas = "190000"
                     let fee = "2800"
                     let memo = transaction.memo || ""
 
@@ -1543,7 +1545,7 @@ module.exports = class wallet {
         this.signTransaction = async function (unsignedTx:UnsignedTransaction) {
             let tag = TAG + " | signTransaction | "
             try {
-                log.info(tag,"unsignedTx: ",unsignedTx)
+                log.debug(tag,"unsignedTx: ",unsignedTx)
                 let signedTx:any = {}
                 if(!unsignedTx.network && unsignedTx.transaction) unsignedTx.network = unsignedTx.transaction.network
                 let network = unsignedTx.network
@@ -1569,7 +1571,7 @@ module.exports = class wallet {
                 }else if(network === 'ETH'){
 
                     //TODO fix tokens
-                    log.info("unsignedTxETH: ",unsignedTx)
+                    log.debug("unsignedTxETH: ",unsignedTx)
                     signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
                     //debug https://flightwallet.github.io/decode-eth-tx/
 
@@ -1577,9 +1579,9 @@ module.exports = class wallet {
                     const decoded = ethers.utils.parseTransaction(signedTx.serialized)
                     signedTx.decoded = decoded
 
-                    log.info(tag,"decoded: ",decoded)
-                    log.info(tag,"decoded.from: ",decoded.from)
-                    log.info(tag,"addressFrom: ",unsignedTx?.transaction?.addressFrom)
+                    log.debug(tag,"decoded: ",decoded)
+                    log.debug(tag,"decoded.from: ",decoded.from)
+                    log.debug(tag,"addressFrom: ",unsignedTx?.transaction?.addressFrom)
                     // let addressFromUnsignedTx
                     // if(unsignedTx?.swap){
                     //     //TODO fixme (add from address to swap payload)
@@ -1729,7 +1731,7 @@ module.exports = class wallet {
 
                 //get paths
                 let paths = this.paths()
-                log.info(tag,"paths: ",paths)
+                log.debug(tag,"paths: ",paths)
                 if(!paths) throw Error("101: unable to get paths!")
                 if(!network) throw Error("102: Invalid transaction missing address!")
                 if(!address) throw Error("103: Invalid transaction missing address!")
@@ -1748,16 +1750,16 @@ module.exports = class wallet {
                 let rawTx
 
                 if(UTXO_COINS.indexOf(network) >= 0){
-                    log.info(tag,"Build UTXO tx! ",network)
+                    log.debug(tag,"Build UTXO tx! ",network)
 
                     //list unspent
-                    log.info(tag,"network: ",network)
-                    log.info(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
-                    log.info(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
-                    log.info(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
+                    log.debug(tag,"network: ",network)
+                    log.debug(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
+                    log.debug(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
+                    log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
 
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    log.info(tag,"input: ",input)
+                    log.debug(tag,"input: ",input)
 
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input})
                     unspentInputs = unspentInputs.data
@@ -1837,10 +1839,10 @@ module.exports = class wallet {
                     log.debug(tag,"totalInValue: ",valueIn)
 
                     //amount out
-                    log.info(tag,"amountOutSat: ",amountSat)
-                    log.info(tag,"amountOutBase: ",amount)
+                    log.debug(tag,"amountOutSat: ",amountSat)
+                    log.debug(tag,"amountOutBase: ",amount)
                     let valueOut = await coincap.getValue(network,nativeToBaseAmount(network,amountSat))
-                    log.info(tag,"valueOut: ",valueOut)
+                    log.debug(tag,"valueOut: ",valueOut)
 
                     if(valueOut < 1){
                         if(network === 'BCH'){
@@ -1986,26 +1988,26 @@ module.exports = class wallet {
                     let gas_price
 
                     //overrides
-                    log.info(tag,"transaction.fee: ",transaction.fee)
+                    log.debug(tag,"transaction.fee: ",transaction.fee)
                     if(transaction.fee){
                         if(transaction.fee.priority){
-                            log.info(tag,"Selecting fee based on priority")
+                            log.debug(tag,"Selecting fee based on priority")
                             //get gas recomendations
                             gas_price = await this.pioneerClient.instance.GetGasPrice()
                             gas_price = gas_price.data
 
-                            log.info(tag,"gas_price: ",gas_price)
+                            log.debug(tag,"gas_price: ",gas_price)
                             if(transaction.fee.priority === 2){
-                                log.info(tag,"setting priority 2 ")
+                                log.debug(tag,"setting priority 2 ")
                                 gas_price = gas_price * 0.5
                                 gas_price = parseInt(String(gas_price))
-                                log.info(tag,"gas_price: ",gas_price)
+                                log.debug(tag,"gas_price: ",gas_price)
                             }
                         } else {
-                            log.info(tag,"Selecting fee based on hard coded value")
+                            log.debug(tag,"Selecting fee based on hard coded value")
                             //TODO other units?
                             if(transaction.fee.value && transaction.fee.units === 'gwei'){
-                                log.info(tag,"setting fee value: ",transaction.fee.value)
+                                log.debug(tag,"setting fee value: ",transaction.fee.value)
                                 gas_price = transaction.fee.value * GIG
                             }
                             if(transaction.fee.gasLimit){
@@ -2014,7 +2016,7 @@ module.exports = class wallet {
                         }
                     }
                     if(!gas_price) {
-                        log.info(tag,"Getting Fee Level from remote!")
+                        log.debug(tag,"Getting Fee Level from remote!")
                         gas_price = await this.pioneerClient.instance.GetGasPrice()
                         gas_price = gas_price.data
                     }
@@ -2043,11 +2045,11 @@ module.exports = class wallet {
 
                     //send FROM master
                     let ethPathInfo = paths.filter((e:any) => e.network === 'ETH')
-                    log.info(tag,"ethPathInfo: ",ethPathInfo)
+                    log.debug(tag,"ethPathInfo: ",ethPathInfo)
                     if(!ethPathInfo[0]) throw Error("103: unable to get eth path info! ")
                     let masterPathEth = addressNListToBIP32(ethPathInfo[0].addressNListMaster)
-                    log.info(tag,"masterPathEth: ",masterPathEth)
-                    log.info(tag,"masterPathEth: ","m/44'/60'/0'/0/0")
+                    log.debug(tag,"masterPathEth: ",masterPathEth)
+                    log.debug(tag,"masterPathEth: ","m/44'/60'/0'/0/0")
                     log.debug(tag,"txParams: ",txParams)
 
                     //verify from address
@@ -2055,8 +2057,8 @@ module.exports = class wallet {
                         addressNList: bip32ToAddressNList(masterPathEth),
                         showDisplay: false,
                     });
-                    log.info(tag,"fromAddressHDwallet: ",fromAddressHDwallet)
-                    log.info(tag,"fromAddress: ",addressFrom)
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddressHDwallet)
+                    log.debug(tag,"fromAddress: ",addressFrom)
 
                     if(addressFrom !== fromAddressHDwallet){
                         throw Error("666: Address mismatch! refusing to sign!")

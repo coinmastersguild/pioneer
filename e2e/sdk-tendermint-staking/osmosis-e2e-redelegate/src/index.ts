@@ -25,7 +25,7 @@
 
         * check balances
         * check tx history
-        * verify payment
+        * verify tx
 
  */
 
@@ -47,7 +47,8 @@ let midgard = require("@pioneer-platform/midgard-client")
 
 import {
     Transfer,
-    Delegate
+    Delegate,
+    //Redelegate TODO
 } from "@pioneer-platform/pioneer-types";
 
 let {
@@ -76,7 +77,7 @@ let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
 
-let noBroadcast = false
+let noBroadcast = true
 
 console.log("spec: ",spec)
 console.log("wss: ",wss)
@@ -238,25 +239,37 @@ const test_service = async function () {
         //test amount in native
         let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
 
+        //assume delegation is on sentinel
+        let delegator_main = "osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n"
+
+        //get balance current delegation
+        let balanceDelegated = await user.clients[BLOCKCHAIN].getDelegations(delegator_main)
+        log.info(tag,"balanceDelegated: ",balanceDelegated)
+        balanceDelegated = balanceDelegated.result.balance.amount
+        log.info(tag,"balanceDelegated: ",balanceDelegated)
+
+        //get new delegator
         //get validators
         let validators = await user.clients[BLOCKCHAIN].getValidators()
         log.info(tag,"validators: ",validators)
-        assert(validators[0])
-        let selected = validators[0]
+        assert(validators[1])
+        let selected = validators[1]
         log.info(tag,"selected: ",selected)
-        assert(selected.operator_address)
-        let validator = selected.operator_address
-        //select first
 
+        //get balance delegated
+
+        //verify > test_amount
+
+        //perform redelgate
 
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let delegate:Delegate = {
+        let delegate:any = {
             context:user.context,
-            validator,
+            validator:selected,
             asset: ASSET,
             network: ASSET,
             memo: '',
@@ -340,79 +353,79 @@ const test_service = async function () {
         let isConfirmed = false
         //wait for confirmation
 
-        if(!noBroadcast && false){
-            //TODO
-            /*
-                Status codes
-
-                -1: errored
-                 0: unknown
-                 1: built
-                 2: broadcasted
-                 3: confirmed
-                 4: fullfilled (swap completed)
-             */
-
-            //monitor tx lifecycle
-            let currentStatus
-            let statusCode = 0
-            let txid
-
-            //wait till confirmed in block
-            while(!isConfirmed){
-                //get invocationInfo
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
-
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let txInfo = await client.getTransactionData(txid)
-                log.info(tag,"txInfo: ",txInfo)
-
-                if(txInfo && txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
-                    statusCode = 3
-                } else {
-                    log.info(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
-                }
-
-                await sleep(6000)
-            }
-
-
-            let isFullfilled = false
-            //wait till swap is fullfilled
-            while(!isFullfilled){
-                //get midgard info
-                let txInfoMidgard = midgard.getTransaction(txid)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
-
-                //
-                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-                    let depositInfo = txInfoMidgard.actions[0].in
-                    log.info(tag,"deposit: ",depositInfo)
-
-                    let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
-
-                    if(fullfillmentInfo.status === 'success'){
-                        statusCode = 4
-                        isFullfilled = true
-                    }
-                }
-
-                await sleep(6000)
-            }
-
-
-        }
+        // if(!noBroadcast){
+        //     //TODO
+        //     /*
+        //         Status codes
+        //
+        //         -1: errored
+        //          0: unknown
+        //          1: built
+        //          2: broadcasted
+        //          3: confirmed
+        //          4: fullfilled (swap completed)
+        //      */
+        //
+        //     //monitor tx lifecycle
+        //     let currentStatus
+        //     let statusCode = 0
+        //     let txid
+        //
+        //     //wait till confirmed in block
+        //     while(!isConfirmed){
+        //         //get invocationInfo
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.info(tag,"invocationInfo: ",invocationInfo)
+        //
+        //         txid = invocationInfo.signedTx.txid
+        //         assert(txid)
+        //         if(!currentStatus) currentStatus = 'transaction built!'
+        //         if(statusCode <= 0) statusCode = 1
+        //
+        //         //lookup txid
+        //         let txInfo = await client.getTransactionData(txid)
+        //         log.info(tag,"txInfo: ",txInfo)
+        //
+        //         if(txInfo && txInfo.blockNumber){
+        //             log.info(tag,"Confirmed!")
+        //             statusCode = 3
+        //         } else {
+        //             log.info(tag,"Not confirmed!")
+        //             //get gas price recomended
+        //
+        //             //get tx gas price
+        //         }
+        //
+        //         await sleep(6000)
+        //     }
+        //
+        //
+        //     let isFullfilled = false
+        //     //wait till swap is fullfilled
+        //     while(!isFullfilled){
+        //         //get midgard info
+        //         let txInfoMidgard = midgard.getTransaction(txid)
+        //         log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+        //
+        //         //
+        //         if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+        //             let depositInfo = txInfoMidgard.actions[0].in
+        //             log.info(tag,"deposit: ",depositInfo)
+        //
+        //             let fullfillmentInfo = txInfoMidgard.actions[0].out
+        //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+        //
+        //             if(fullfillmentInfo.status === 'success'){
+        //                 statusCode = 4
+        //                 isFullfilled = true
+        //             }
+        //         }
+        //
+        //         await sleep(6000)
+        //     }
+        //
+        //
+        // }
 
         let result = await app.stopSocket()
         log.info(tag,"result: ",result)

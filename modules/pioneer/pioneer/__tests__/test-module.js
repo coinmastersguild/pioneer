@@ -79,33 +79,36 @@ let run_test = async function(){
         let balanceOSMO = await Wallet.getBalance("OSMO")
         console.log("balanceOSMO: ",balanceOSMO)
 
+        //get all tokens/ibc balances
+        let tokens = await Wallet.getBalance("OSMO")
+
         //console.log("correct OSMO: ","osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r")
         //if(masterOSMO !== "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r") throw Error("Incorect master!")
 
-        let address = "osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn"
-        let amount = "0.1"
-        let memo = ""
-
-        let transfer = {
-            coin:"OSMO",
-            network:"OSMO",
-            asset:"OSMO",
-            addressTo:address,
-            fee:{
-                priority:5,
-            },
-            amount,
-            memo
-        }
-
-        let transferUnSigned = await Wallet.buildTransfer(transfer)
-        console.log("transferUnSigned: ",transferUnSigned)
-
-        let transferSigned = await Wallet.signTransaction(transferUnSigned)
-        console.log("transferSigned: ",transferSigned)
-
-        let resultBroadcast = await Wallet.broadcastTransaction('OSMO',transferSigned)
-        console.log("resultBroadcast: ",resultBroadcast)
+        // let address = "osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn"
+        // let amount = "0.1"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"OSMO",
+        //     network:"OSMO",
+        //     asset:"OSMO",
+        //     addressTo:address,
+        //     fee:{
+        //         priority:5,
+        //     },
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
+        //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('OSMO',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
 
         // let intent = {
         //     coin:"OSMO",

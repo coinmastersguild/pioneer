@@ -114,6 +114,7 @@ module.exports = class wallet {
     private getTxCount: ((address: string) => Promise<any>) | undefined;
     private getValidators: (() => any) | undefined;
     private delegate: ((tx: Delegate) => Promise<any>) | undefined;
+    private getDelegations: ((validator: string) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -209,6 +210,17 @@ module.exports = class wallet {
                 }
             }
 
+            //get Delegation balance
+            this.getDelegations = async function (validator:string) {
+                let tag = TAG + " | getValidators | "
+                try {
+                    let validators = await this.pioneerApi.GetDelegations({network:this.network,address:this.getAddress(),validator:validator})
+                    return validators.data
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
             //TODO getStaking Positions
 
             //delegate
@@ -258,6 +270,7 @@ module.exports = class wallet {
                         network:coin,
                         asset:coin,
                         amount,
+                        // @ts-ignore
                         validator,
                         memo
                     }
