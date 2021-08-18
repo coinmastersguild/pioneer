@@ -40,14 +40,14 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
-network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 
 //osmosis swap
-// network.transaction("0D6E9AEE0911F31257E92F4D65AE7840570E86F76552467AAF1B16A4B6B040D9")
+// network.transaction("1B28ABF5D2864B8316640684F654B1CBE47D2EAA0531BC0A42486526A890DDCC")
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
 //         //console.log("resp: ",JSON.stringify(resp))
@@ -69,9 +69,9 @@ network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a
 // tx = JSON.stringify(tx)
 
 //good
-//let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100","denom":"uosmo"}],"from_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn","to_address":"osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k"}}],"signatures":[{"signature":"wARkJ09v4smZTOXgeNFOi3N03m7Iyy8v5tzeC5CG2gFiyg/V/FjHsZ/BGqIH2LQBonObTzJqUVb04flptoHAQA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvDuqURiCj8S0tQDxSmNL4fUzfAJez6Vy2e3DLQNpmcl"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"190000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgBeginRedelegate","value":{"delegator_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn","validator_dst_address":"osmovaloper1n3mhyp9fvcmuu8l0q8qvjy07x0rql8q4d3kvts","amount":{"denom":"uosmo","amount":"100"}}}],"signatures":[{"signature":"3d25z15KIUI7FVw0TSipv9ojAurJ3hS1o1fPBIo9wyEp8SF0ta4e30WiggfUaFPNfzxLppNE5uFQ4wva6JWDEA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvDuqURiCj8S0tQDxSmNL4fUzfAJez6Vy2e3DLQNpmcl"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })

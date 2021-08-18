@@ -278,7 +278,12 @@ export async function buildTransaction(transaction:any) {
             case 'delegate':
                 log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT delegate ****  approvalUnSigned: ",unsignedTx)
+                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                break
+            case 'redelegate':
+                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
                 break
             case 'approve':
                 log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)

@@ -1327,8 +1327,24 @@ module.exports = class wallet {
 
                             break;
                         case "redelegate":
-                            //TODO
-                            throw Error("TODO")
+                            if(!transaction.validatorOld) throw Error("102: Missing validatorOld!")
+                            if(!transaction.validator) throw Error("103: Missing validator!")
+
+                            msg = {
+                                "type":"cosmos-sdk/MsgBeginRedelegate",
+                                "value":{
+                                    "delegator_address":addressFrom,
+                                    "validator_src_address":transaction.validatorOld,
+                                    "validator_dst_address":transaction.validator,
+                                    "amount":
+                                        {
+                                            "denom":"uosmo",
+                                            "amount":amountNative.toString()
+                                        }
+
+                                }
+                            }
+
                             break;
                         case "ibcWithdrawal":
                             //TODO
@@ -1339,7 +1355,7 @@ module.exports = class wallet {
                             //code block
                     }
                     let txType = "cosmos-sdk/MsgSend"
-                    let gas = "190000"
+                    let gas = "290000"
                     let fee = "2800"
                     let memo = transaction.memo || ""
 

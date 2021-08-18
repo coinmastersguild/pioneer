@@ -135,6 +135,7 @@ export interface Redelegate {
     nonce?:number
     fee?: any
     validator: string
+    validatorOld: string
     amount:any
     memo?:string
     noBroadcast?:boolean
