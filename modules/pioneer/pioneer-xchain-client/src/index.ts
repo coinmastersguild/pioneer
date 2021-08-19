@@ -470,18 +470,15 @@ module.exports = class wallet {
 
                     let memo = tx.memo || ''
                     let invocation:Invocation = {
-                        type:'joinPool',
+                        type:'osmosislpadd',
                         context:tx.context,
                         username:this.username,
                         coin,
                         fee:tx.fee,
                         network:coin,
                         asset:coin,
-                        // @ts-ignore
                         poolId,
-                        // @ts-ignore
                         shareOutAmount,
-                        // @ts-ignore
                         tokenInMaxs,
                         memo
                     }

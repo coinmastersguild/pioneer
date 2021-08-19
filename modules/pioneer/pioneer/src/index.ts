@@ -1341,13 +1341,24 @@ module.exports = class wallet {
                                             "denom":"uosmo",
                                             "amount":amountNative.toString()
                                         }
-
                                 }
                             }
 
                             break;
                         case "osmosislpadd":
-                            //TODO
+                            if(!transaction.poolId) throw Error("102: Missing poolId!")
+                            if(!transaction.shareOutAmount) throw Error("103: Missing shareOutAmount!")
+                            if(!transaction.tokenInMaxs) throw Error("104: Missing tokenInMaxs!")
+
+                            msg = {
+                                "type":"osmosis/gamm/join-pool",
+                                "value":{
+                                    "sender":addressFrom,
+                                    "poolId":transaction.poolId,
+                                    "shareOutAmount":transaction.shareOutAmount,
+                                    "tokenInMaxs":transaction.tokenInMaxs
+                                }
+                            }
 
                             break;
                         case "osmosisswap":

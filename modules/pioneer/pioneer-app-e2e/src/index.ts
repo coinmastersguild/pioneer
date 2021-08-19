@@ -280,6 +280,11 @@ export async function buildTransaction(transaction:any) {
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
                 log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
                 break
+            case 'osmosislpadd':
+                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                break
             case 'osmosisswap':
                 log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
