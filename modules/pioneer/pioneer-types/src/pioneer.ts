@@ -141,6 +141,49 @@ export interface Redelegate {
     noBroadcast?:boolean
 }
 
+export interface JoinPool {
+    context?:string
+    network: string;
+    asset: string;
+    symbol?: string;
+    nonce?:number
+    fee?: any
+    poolId: string
+    shareOutAmount: string
+    tokenInMaxs:any
+    memo?:string
+    noBroadcast?:boolean
+}
+
+export interface IBCdeposit {
+    context?:string
+    network: string;
+    asset: string;
+    symbol?: string;
+    nonce?:number
+    fee?: any
+    poolId: string
+    shareOutAmount: string
+    tokenInMaxs:any
+    memo?:string
+    noBroadcast?:boolean
+}
+
+//OsmosisSwap
+export interface OsmosisSwap {
+    context?:string
+    network: string;
+    asset: string;
+    symbol?: string;
+    nonce?:number
+    fee?: any
+    routes: any
+    tokenIn: any
+    tokenOutMinAmount: string
+    memo?:string
+    noBroadcast?:boolean
+}
+
 export interface Deposit {
     network: string;
     asset: string;

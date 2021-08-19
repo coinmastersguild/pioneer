@@ -9,11 +9,17 @@ export interface Invocation {
     addressTo?:string,
     validator?:string,
     validatorOld?:string,
+    poolId?: string
+    shareOutAmount?: string
+    tokenInMaxs?:any
     memo?:string
     fee:any
     asset:any
     blockchain?:string
     network:string
+    routes?:any
+    tokenIn?:any
+    tokenOutMinAmount?:string
     coin?:string
     amount?:string
     context:string

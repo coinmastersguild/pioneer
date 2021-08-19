@@ -24,6 +24,8 @@ if(!URL_OSMO_RPC) throw Error('missing env URL_OSMO_RPC')
 let URL_OSMO_LCD = process.env['URL_OSMO_LCD']
 if(!URL_OSMO_LCD) throw Error('missing env URL_OSMO_LCD')
 
+let URL_OSMO_POOLS = process.env['URL_OSMO_POOLS'] || `https://api-osmosis.imperator.co`
+
 let BASE_OSMO = 100000000
 
 /**********************************
@@ -40,6 +42,9 @@ module.exports = {
     info:function () {
         return get_node_info_verbose();
     },
+    getBlockHeight:function () {
+        return get_block_height();
+    },
     getBalance:function (address:string) {
         return get_balance(address);
     },
@@ -48,6 +53,9 @@ module.exports = {
     },
     getAccount:function (address:string) {
         return get_account_info(address);
+    },
+    getPools:function () {
+        return get_pools();
     },
     getValidators:function () {
         return get_validators();
@@ -73,6 +81,42 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+//
+let get_block_height = async function(){
+    let tag = TAG + " | get_block_height | "
+    let output:any = {}
+    try{
+
+        let resp = await axios({method:'GET',url: URL_OSMO_LCD+'/blocks/latest'})
+        log.debug(tag,"resp: ",resp.data)
+
+        let height = resp.data.block.header.height
+
+        return parseInt(height)
+    }catch(e){
+        throw e
+    }
+}
+
+//get pools
+let get_pools = async function(){
+    let tag = TAG + " | get_pools | "
+    let output:any = {}
+    try{
+        let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pools'})
+        log.debug(tag,"poolInfo: ",poolInfo.data)
+
+        //wtf is imperator?
+        // let txInfo
+        // let poolInfo = await axios({method:'GET',url: URL_OSMO_POOLS+'/search/v1/pools'})
+        // log.debug(tag,"txInfo: ",poolInfo.data)
+
+        return poolInfo.data
+    }catch(e){
+        throw e
+    }
+}
 
 let get_delegations = async function(address:string,valAddress:string){
     let tag = TAG + " | get_delegations | "

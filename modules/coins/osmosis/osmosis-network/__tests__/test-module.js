@@ -45,13 +45,27 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
-
-//osmosis swap
-// network.transaction("1B28ABF5D2864B8316640684F654B1CBE47D2EAA0531BC0A42486526A890DDCC")
+// network.getBlockHeight()
 //     .then(function(resp){
-//         console.log("resp: ",JSON.stringify(resp))
+//         console.log("resp: ",resp)
+//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
+
+//get pools
+// network.getPools()
+//     .then(function(resp){
+//         // console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp.pools[0]))
+//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
+
+network.transaction("5D4F698DE548A7444CAAE27FD3A7DE724D402DAD2E9EFCE52DE0FAC82ACD3A9F")
+    .then(function(resp){
+        console.log("resp: ",JSON.stringify(resp))
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.txs("osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6")
 //     .then(function(resp){
@@ -69,9 +83,9 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 // tx = JSON.stringify(tx)
 
 //good
-let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"190000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgBeginRedelegate","value":{"delegator_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn","validator_dst_address":"osmovaloper1n3mhyp9fvcmuu8l0q8qvjy07x0rql8q4d3kvts","amount":{"denom":"uosmo","amount":"100"}}}],"signatures":[{"signature":"3d25z15KIUI7FVw0TSipv9ojAurJ3hS1o1fPBIo9wyEp8SF0ta4e30WiggfUaFPNfzxLppNE5uFQ4wva6JWDEA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvDuqURiCj8S0tQDxSmNL4fUzfAJez6Vy2e3DLQNpmcl"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"190000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgBeginRedelegate","value":{"delegator_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn","validator_dst_address":"osmovaloper1n3mhyp9fvcmuu8l0q8qvjy07x0rql8q4d3kvts","amount":{"denom":"uosmo","amount":"100"}}}],"signatures":[{"signature":"3d25z15KIUI7FVw0TSipv9ojAurJ3hS1o1fPBIo9wyEp8SF0ta4e30WiggfUaFPNfzxLppNE5uFQ4wva6JWDEA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvDuqURiCj8S0tQDxSmNL4fUzfAJez6Vy2e3DLQNpmcl"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+// network.broadcast(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })

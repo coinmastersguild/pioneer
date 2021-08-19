@@ -1346,6 +1346,42 @@ module.exports = class wallet {
                             }
 
                             break;
+                        case "osmosislpadd":
+                            if(!transaction.routes) throw Error("102: Missing routes!")
+                            if(!transaction.tokenIn) throw Error("103: Missing tokenIn!")
+                            if(!transaction.tokenOutMinAmount) throw Error("104: Missing tokenOutMinAmount!")
+
+                            msg = {
+                                "type":"osmosis/gamm/swap-exact-amount-in",
+                                "value":{
+                                    "sender":addressFrom,
+                                    "routes":transaction.routes,
+                                    "tokenIn":transaction.tokenIn,
+                                    "tokenOutMinAmount":transaction.tokenOutMinAmount
+                                }
+                            }
+
+                            break;
+                        case "osmosisswap":
+                            if(!transaction.routes) throw Error("102: Missing routes!")
+                            if(!transaction.tokenIn) throw Error("103: Missing tokenIn!")
+                            if(!transaction.tokenOutMinAmount) throw Error("104: Missing tokenOutMinAmount!")
+
+                            msg = {
+                                "type":"osmosis/gamm/swap-exact-amount-in",
+                                "value":{
+                                    "sender":addressFrom,
+                                    "routes":transaction.routes,
+                                    "tokenIn":transaction.tokenIn,
+                                    "tokenOutMinAmount":transaction.tokenOutMinAmount
+                                }
+                            }
+
+                            break;
+                       case "ibcWithdrawal":
+                            //TODO
+                            throw Error("TODO")
+                            break;
                         case "ibcWithdrawal":
                             //TODO
                             throw Error("TODO")

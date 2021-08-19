@@ -74,13 +74,17 @@ let run_test = async function(){
         // onlineUsers = onlineUsers.data
         // console.log("onlineUsers: ",onlineUsers)
 
+        let blockheight = await pioneer.instance.BlockHeight({network:"OSMO"})
+        blockheight = blockheight.data
+        console.log("blockheight: ",blockheight)
+
         // let validators = await pioneer.instance.GetValidators('osmosis')
         // validators = validators.data
         // console.log("validators: ",validators)
 
-        let validators = await pioneer.instance.GetDelegations({network:'osmosis',address:'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn',validator:'osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n'})
-        validators = validators.data
-        console.log("validators: ",validators)
+        // let validators = await pioneer.instance.GetDelegations({network:'osmosis',address:'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn',validator:'osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n'})
+        // validators = validators.data
+        // console.log("validators: ",validators)
 
         // let isOnline = false
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
