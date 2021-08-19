@@ -1347,19 +1347,7 @@ module.exports = class wallet {
 
                             break;
                         case "osmosislpadd":
-                            if(!transaction.routes) throw Error("102: Missing routes!")
-                            if(!transaction.tokenIn) throw Error("103: Missing tokenIn!")
-                            if(!transaction.tokenOutMinAmount) throw Error("104: Missing tokenOutMinAmount!")
-
-                            msg = {
-                                "type":"osmosis/gamm/swap-exact-amount-in",
-                                "value":{
-                                    "sender":addressFrom,
-                                    "routes":transaction.routes,
-                                    "tokenIn":transaction.tokenIn,
-                                    "tokenOutMinAmount":transaction.tokenOutMinAmount
-                                }
-                            }
+                            //TODO
 
                             break;
                         case "osmosisswap":
@@ -1373,7 +1361,7 @@ module.exports = class wallet {
                                     "sender":addressFrom,
                                     "routes":transaction.routes,
                                     "tokenIn":transaction.tokenIn,
-                                    "tokenOutMinAmount":transaction.tokenOutMinAmount
+                                    "tokenOutMinAmount":transaction.tokenOutMinAmount.toString()
                                 }
                             }
 

@@ -261,7 +261,7 @@ const test_service = async function () {
         //TODO
 
         //get out MIN (slippage)
-        let tokenOutMinAmount = "126316"
+        let tokenOutMinAmount = "126"
 
 
         let options:any = {
@@ -285,7 +285,7 @@ const test_service = async function () {
                      "denom":"uosmo",
                      "amount":"1000000"
                   },
-                  "tokenOutMinAmount":"126316"
+                  "tokenOutMinAmount":"126"
                }
 
          */
@@ -295,13 +295,13 @@ const test_service = async function () {
             asset: ASSET,
             network: ASSET,
             memo: '',
-            routes:{
+            routes:[{
                 poolId,
                 tokenOutDenom
-            },
+            }],
             tokenIn:{
                 denom:"uosmo",
-                amount:amountTestNative
+                amount:amountTestNative.toString()
             },
             tokenOutMinAmount,
             fee:{
