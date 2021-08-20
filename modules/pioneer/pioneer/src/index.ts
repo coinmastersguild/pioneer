@@ -1221,8 +1221,120 @@ module.exports = class wallet {
             try{
                 let rawTx = {}
 
-                //
-                if(transaction.network === 'FIO'){
+                //if ibc
+                //TODO flag of ibc?
+                if(transaction.type === 'ibcdeposit'){
+
+                    //TODO dont assume cosmos dumbass
+                    let amountNative = ATOM_BASE * parseFloat(transaction.amount)
+                    amountNative = parseInt(amountNative.toString())
+                    log.debug(tag,"amountNative: ",amountNative)
+
+                    //get account number
+                    let addressFrom
+                    if(transaction.addressFrom){
+                        addressFrom = transaction.addressFrom
+                    } else {
+                        addressFrom = await this.getMaster('ATOM')
+                    }
+                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
+                    masterInfo = masterInfo.data
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
+
+                    let sequence = masterInfo.result.value.sequence
+                    let account_number = masterInfo.result.value.account_number
+                    sequence = parseInt(sequence)
+                    sequence = sequence.toString()
+                    let	chain_id = ATOM_CHAIN
+
+                    let msg:any
+                    switch(transaction.type) {
+                        case "ibcdeposit":
+                            if(!transaction.source_port) throw Error("Missing source_port !")
+                            if(!transaction.source_channel) throw Error("Missing source_channel!")
+                            if(!transaction.token) throw Error("Missing token!")
+                            if(!transaction.timeout_height) throw Error("Missing timeout_height!")
+
+                            msg = {
+                                "type":"cosmos-sdk/MsgTransfer",
+                                "value":{
+                                    "sender":transaction.sender,
+                                    "receiver":transaction.receiver,
+                                    "source_port":transaction.source_port,
+                                    "source_channel":transaction.source_channel,
+                                    "token":transaction.token,
+                                    "timeout_height":transaction.timeout_height,
+                                }
+                            }
+
+                            break;
+                        default:
+                            throw Error("unsupported IBC tx type: "+transaction.type)
+                        //code block
+                    }
+                    let txType = "cosmos-sdk/MsgSend"
+                    let gas = "100000"
+                    let fee = "1000"
+                    let memo = transaction.memo || ""
+
+                    if(!msg) throw Error('failed to make tx msg')
+
+                    let unsigned = {
+                        "fee": {
+                            "amount": [
+                                {
+                                    "amount": fee,
+                                    "denom": "uatom"
+                                }
+                            ],
+                            "gas": gas
+                        },
+                        "memo": memo,
+                        "msg": [
+                            msg
+                        ],
+                        "signatures": null
+                    }
+
+                    if(!sequence) throw Error("112: Failed to get sequence")
+                    if(!account_number) throw Error("113: Failed to get account_number")
+
+                    //verify from address
+                    let fromAddress = await this.WALLET.cosmosGetAddress({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        showDisplay: false,
+                    });
+                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
+                    log.debug(tag,"fromAddress: ",addressFrom)
+
+                    log.debug("res: ",prettyjson.render({
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }))
+
+                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+                    let atomTx = {
+                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                        chain_id:ATOM_CHAIN,
+                        account_number: account_number,
+                        sequence:sequence,
+                        tx: unsigned,
+                    }
+
+                    let unsignedTx = {
+                        network:network,
+                        asset:network,
+                        transaction,
+                        HDwalletPayload:atomTx,
+                        verbal:"ibc transaction"
+                    }
+
+                    rawTx = unsignedTx
+
+                }else if(transaction.network === 'FIO'){
 
                     //types
                     let tx:any

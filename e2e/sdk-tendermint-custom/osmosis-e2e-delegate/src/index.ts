@@ -76,7 +76,7 @@ let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
 
-let noBroadcast = false
+let noBroadcast = true
 
 console.log("spec: ",spec)
 console.log("wss: ",wss)
@@ -280,19 +280,18 @@ const test_service = async function () {
         assert(invocationId)
 
         //wait until app get's invocation event
-        //TODO
-        // let invocationReceived = false
-        // while(!invocationReceived){
-        //     await sleep(1000)
-        //     let invocations = await getInvocations()
-        //     log.info(tag,"invocations: ",invocations)
-        //     let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-        //     log.info(tag,"invocationEventValue: ",invocationEventValue)
-        //     if(invocationEventValue){
-        //         assert(invocationEventValue.invocationId)
-        //         invocationReceived = true
-        //     }
-        // }
+        let invocationReceived = false
+        while(!invocationReceived){
+            await sleep(1000)
+            let invocations = await getInvocations()
+            log.info(tag,"invocations: ",invocations)
+            let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+            log.info(tag,"invocationEventValue: ",invocationEventValue)
+            if(invocationEventValue){
+                assert(invocationEventValue.invocationId)
+                invocationReceived = true
+            }
+        }
 
         let transaction = {
             invocationId,

@@ -29,19 +29,23 @@
 
  */
 
-import {Transfer} from "@pioneer-platform/pioneer-types";
-
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
+
+import {
+    Transfer,
+    Delegate
+} from "@pioneer-platform/pioneer-types";
 
 let {
     supportedBlockchains,
@@ -273,17 +277,21 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             expect(balanceBase).toBeGreaterThan(Number(TEST_AMOUNT));
         });
 
-        it('Build transfer (init) ', async function() {
+        it('Build delegate (init) ', async function() {
             let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
             expect(amountTestNative).toBeDefined();
 
-            let transfer:Transfer = {
+            let validators = await user.clients[BLOCKCHAIN].getValidators()
+            let selected = validators[0]
+            let validator = selected.operator_address
+
+            let delegate:Delegate = {
                 context:user.context,
-                recipient: FAUCET_OSMO_ADDRESS,
+                validator,
                 asset: ASSET,
                 network: ASSET,
                 memo: '',
-                "amount":{
+                amount:{
                     amount: function(){
                         return BigNumber.BigNumber.from(amountTestNative)
                     }
@@ -299,7 +307,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
                 txidOnResp: false, // txidOnResp is the output format
             }
 
-            let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+            let responseTransfer = await user.clients[BLOCKCHAIN].delegate(delegate,options)
             log(tag,"responseTransfer: ",responseTransfer)
             invocationId = responseTransfer
             expect(invocationId).toBeDefined();
@@ -310,22 +318,22 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             }
         });
 
-        // it.skip('App received invocation event', async function() {
-        //
-        //     let invocationReceived = false
-        //     while(!invocationReceived){
-        //         await sleep(300)
-        //         let invocations = await getInvocations()
-        //         log(tag,"invocations: ",invocations)
-        //         let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-        //         if(invocationEventValue){
-        //             invocationReceived = true
-        //         }
-        //     }
-        //
-        // });
+        it('App received invocation event', async function() {
 
-        it('Build transfer (with context)', async function() {
+            let invocationReceived = false
+            while(!invocationReceived){
+                await sleep(300)
+                let invocations = await getInvocations()
+                log(tag,"invocations: ",invocations)
+                let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+                if(invocationEventValue){
+                    invocationReceived = true
+                }
+            }
+
+        });
+
+        it('Build transaction', async function() {
 
             let unsignedTx = await buildTransaction(transaction)
             log(tag,"unsignedTx: ",unsignedTx)

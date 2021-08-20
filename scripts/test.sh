@@ -85,8 +85,21 @@ then
 #  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run dev && cd ../../../
 
 else
-#  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../ &&/
+  #support functions
   cd e2e/sdk-support/abort-tx && npm run test && cd ../../../ &&/
+  cd e2e/sdk-support/context-switching && npm run test && cd ../../../ &&/
+  cd e2e/sdk-support/forget-user && npm run test && cd ../../../ &&/
+  cd e2e/sdk-support/querykey-migration && npm run test && cd ../../../ &&/
+  cd e2e/sdk-support/rbf-ethereum && npm run test && cd ../../../ &&/
+  #transfers
+  cd e2e/sdk-transfers/osmosis-e2e-transfer && npm run test && cd ../../../ &&/
+  #osmosis
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../ &&/
+
+#thorchain offline TODO re-enable
+#  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-swaps/etherum-e2e-swap && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
 fi

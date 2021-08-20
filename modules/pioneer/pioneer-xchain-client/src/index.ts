@@ -35,7 +35,8 @@ import {
     Delegate,
     Redelegate,
     JoinPool,
-    OsmosisSwap
+    OsmosisSwap,
+    IBCdeposit
 } from "@pioneer-platform/pioneer-types";
 
 import {
@@ -123,6 +124,7 @@ module.exports = class wallet {
     private getBlockHeight: () => any;
     private getPool: ((asset: string) => Promise<any>) | undefined;
     private swap: ((tx: OsmosisSwap) => Promise<any>) | undefined;
+    private ibcDeposit: ((tx: IBCdeposit) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -193,6 +195,89 @@ module.exports = class wallet {
                 throw e
             }
         }
+
+        /*
+            All IBC coins have IBC functions
+            cosmos osmosis
+                soon? thorchain?
+
+         */
+        if(this.network === 'osmosis' || this.network === 'cosmos'){
+
+            //IBC deposit
+            this.ibcDeposit = async function (tx:IBCdeposit) {
+                let tag = TAG + " | ibcDeposit | "
+                try {
+                    let coin = this.nativeAsset
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    //TODO wtf removeme
+                    // @ts-ignore
+                    let timeout_height = tx.timeout_height
+                    // @ts-ignore
+                    let source_channel = tx.source_channel
+                    // @ts-ignore
+                    let source_port = tx.source_port
+                    let sender = this.getAddress()
+                    // @ts-ignore
+                    let receiver = tx.receiver
+                    // @ts-ignore
+                    let token = tx.token
+
+                    if(!source_channel) throw Error("103: missing source_channel")
+                    if(!source_port) throw Error("104: missing source_port")
+                    if(!sender) throw Error("105: missing sender")
+                    if(!receiver) throw Error("106: missing receiver")
+                    if(!token) throw Error("107: missing token")
+
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'ibcdeposit',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        // @ts-ignore
+                        sender,
+                        receiver,
+                        token,
+                        timeout_height,
+                        source_channel,
+                        source_port,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+        }
+
+
         /*
             Network specific functions
 

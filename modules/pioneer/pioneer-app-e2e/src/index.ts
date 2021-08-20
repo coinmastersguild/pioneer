@@ -275,6 +275,9 @@ export async function buildTransaction(transaction:any) {
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
                 break
+            case 'redelegate':
+            case 'undelegate':
+            case 'ibcdeposit':
             case 'delegate':
                 log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
@@ -311,7 +314,7 @@ export async function buildTransaction(transaction:any) {
                 log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
-                console.error("Unhandled type: ",invocation.type)
+                console.error("APP E2E Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
                 throw Error("Unhandled type: "+invocation.type)
         }

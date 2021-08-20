@@ -162,9 +162,10 @@ export interface IBCdeposit {
     symbol?: string;
     nonce?:number
     fee?: any
-    poolId: string
-    shareOutAmount: string
-    tokenInMaxs:any
+    receiver: string
+    token: any
+    source_port: string
+    source_channel:string
     memo?:string
     noBroadcast?:boolean
 }
