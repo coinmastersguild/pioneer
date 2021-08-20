@@ -44,7 +44,7 @@ let WALLETS_NAMES:any = []
 let WALLET_CONTEXT = ""
 let INVOCATIONS:any = []
 let INVOCATIONS_SIGNED:any = []
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 
 export function getContext() {
@@ -130,7 +130,7 @@ export async function startApp() {
         App.updateConfig({wss});
         //get config
         config = await App.getConfig()
-        config.blockchains = ['ethereum','thorchain']
+        config.blockchains = blockchains
         config.spec = spec
         config.pioneerSocket = wss
         config.queryKey = queryKey
@@ -184,7 +184,7 @@ export async function startApp() {
 }
 
 export async function setUsername(usernameNew:string) {
-    let tag = " | getInvocations | "
+    let tag = " | setUsername | "
     try {
         username = usernameNew
         return username
@@ -275,6 +275,29 @@ export async function buildTransaction(transaction:any) {
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
                 break
+            case 'redelegate':
+            case 'undelegate':
+            case 'ibcdeposit':
+            case 'delegate':
+                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                break
+            case 'osmosislpadd':
+                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                break
+            case 'osmosisswap':
+                log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
+                break
+            case 'redelegate':
+                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
+                break
             case 'approve':
                 log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
@@ -291,7 +314,7 @@ export async function buildTransaction(transaction:any) {
                 log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
-                console.error("Unhandled type: ",invocation.type)
+                console.error("APP E2E Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
                 throw Error("Unhandled type: "+invocation.type)
         }

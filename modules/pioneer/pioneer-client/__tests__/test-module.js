@@ -52,10 +52,14 @@ let run_test = async function(){
 
         // console.log("pioneer: ",pioneer)
 
-        let xpub = "ypub6Wev4wL7q61rBeyLc7GpHF3z3nsSz2LXCga32o5ChbEQSaiSGvg7dQqRWv6Md2FzhefZhHP7NpTz4sYUeCsqxs6brzqoeRb81t7YQpVsy5H"
-        let data = await pioneer.instance.ListUnspent({network:'BTC',xpub})
-        data = data.data
-        console.log("txData: ",data)
+        // let xpub = ""
+        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub})
+        // data = data.data
+        // console.log("txData: ",data)
+
+        // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
+        // data = data.data
+        // console.log("txData: ",data)
 
         //get online
 
@@ -69,6 +73,18 @@ let run_test = async function(){
         // let onlineUsers = await pioneer.instance.Online()
         // onlineUsers = onlineUsers.data
         // console.log("onlineUsers: ",onlineUsers)
+
+        let blockheight = await pioneer.instance.BlockHeight({network:"OSMO"})
+        blockheight = blockheight.data
+        console.log("blockheight: ",blockheight)
+
+        // let validators = await pioneer.instance.GetValidators('osmosis')
+        // validators = validators.data
+        // console.log("validators: ",validators)
+
+        // let validators = await pioneer.instance.GetDelegations({network:'osmosis',address:'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn',validator:'osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n'})
+        // validators = validators.data
+        // console.log("validators: ",validators)
 
         // let isOnline = false
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true

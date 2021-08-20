@@ -32,6 +32,11 @@ import {
     FeesParams,
     EstimateFeeParams,
     CallDepositParams,
+    Delegate,
+    Redelegate,
+    JoinPool,
+    OsmosisSwap,
+    IBCdeposit
 } from "@pioneer-platform/pioneer-types";
 
 import {
@@ -111,6 +116,15 @@ module.exports = class wallet {
     private deposit: (deposit: any, options: any) => Promise<any>;
     private replace: ((invocationId: string, fee: any) => Promise<any>) | undefined;
     private getTxCount: ((address: string) => Promise<any>) | undefined;
+    private getValidators: (() => any) | undefined;
+    private delegate: ((tx: Delegate) => Promise<any>) | undefined;
+    private redelegate: ((tx: Redelegate) => Promise<any>) | undefined;
+    private getDelegations: ((validator: string) => Promise<any>) | undefined;
+    private joinPool: ((tx: JoinPool) => Promise<any>) | undefined;
+    private getBlockHeight: () => any;
+    private getPool: ((asset: string) => Promise<any>) | undefined;
+    private swap: ((tx: OsmosisSwap) => Promise<any>) | undefined;
+    private ibcDeposit: ((tx: IBCdeposit) => Promise<any>) | undefined;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -181,6 +195,393 @@ module.exports = class wallet {
                 throw e
             }
         }
+
+        /*
+            All IBC coins have IBC functions
+            cosmos osmosis
+                soon? thorchain?
+
+         */
+        if(this.network === 'osmosis' || this.network === 'cosmos'){
+
+            //IBC deposit
+            this.ibcDeposit = async function (tx:IBCdeposit) {
+                let tag = TAG + " | ibcDeposit | "
+                try {
+                    let coin = this.nativeAsset
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    //TODO wtf removeme
+                    // @ts-ignore
+                    let timeout_height = tx.timeout_height
+                    // @ts-ignore
+                    let source_channel = tx.source_channel
+                    // @ts-ignore
+                    let source_port = tx.source_port
+                    let sender = this.getAddress()
+                    // @ts-ignore
+                    let receiver = tx.receiver
+                    // @ts-ignore
+                    let token = tx.token
+
+                    if(!source_channel) throw Error("103: missing source_channel")
+                    if(!source_port) throw Error("104: missing source_port")
+                    if(!sender) throw Error("105: missing sender")
+                    if(!receiver) throw Error("106: missing receiver")
+                    if(!token) throw Error("107: missing token")
+
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'ibcdeposit',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        // @ts-ignore
+                        sender,
+                        receiver,
+                        token,
+                        timeout_height,
+                        source_channel,
+                        source_port,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+        }
+
+
+        /*
+            Network specific functions
+
+            osmosis:
+
+            getValidators
+            getStaking Positions
+            getPools
+
+            custom tx's
+            delegate
+            redelegate
+            undelegate
+
+         */
+        if(this.network === 'osmosis'){
+            this.getValidators = async function () {
+                let tag = TAG + " | getValidators | "
+                try {
+                    let validators = await this.pioneerApi.GetValidators('osmosis')
+                    return validators.data
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //get Delegation balance
+            this.getDelegations = async function (validator:string) {
+                let tag = TAG + " | getValidators | "
+                try {
+                    let validators = await this.pioneerApi.GetDelegations({network:this.network,address:this.getAddress(),validator:validator})
+                    return validators.data
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //get Delegation balance
+            this.getPool = async function (asset:string) {
+                let tag = TAG + " | getPool | "
+                try {
+                    let poolInfo = await this.pioneerApi.GetOsmosisPools()
+                    return poolInfo.data
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //delegate
+            this.swap = async function (tx:OsmosisSwap) {
+                let tag = TAG + " | delegate | "
+                try {
+                    let coin = this.nativeAsset
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    let routes = tx.routes
+                    let tokenIn = tx.tokenIn
+                    let tokenOutMinAmount = tx.tokenOutMinAmount
+
+                    let memo = tx.memo || ''
+
+                    if(!routes) throw Error("103: routes is required")
+                    if(!tokenIn) throw Error("104: tokenIn is required")
+                    if(!tokenOutMinAmount) throw Error("105: tokenOutMinAmount is required")
+
+                    let invocation:Invocation = {
+                        type:'osmosisswap',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        // @ts-ignore
+                        routes,
+                        tokenIn,
+                        tokenOutMinAmount,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //delegate
+            this.delegate = async function (tx:Delegate) {
+                let tag = TAG + " | delegate | "
+                try {
+                    let coin = this.nativeAsset
+                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx.amount: ",tx.amount)
+                    log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
+                    log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                    let amount = tx.amount.amount().toNumber()
+                    amount = nativeToBaseAmount(this.nativeAsset,amount)
+                    amount = amount.toString()
+
+                    log.debug(tag,"amount (final): ",amount)
+                    if(!amount) throw Error("Failed to get amount!")
+
+                    //TODO min transfer size 10$
+                    //TODO validate addresses
+                    //TODO validate midgard addresses not expired
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    let validator = tx.validator
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'delegate',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        amount,
+                        // @ts-ignore
+                        validator,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //redelegate
+            this.redelegate = async function (tx:Redelegate) {
+                let tag = TAG + " | delegate | "
+                try {
+                    let coin = this.nativeAsset
+                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx.amount: ",tx.amount)
+                    log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
+                    log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
+                    let amount = tx.amount.amount().toNumber()
+                    amount = nativeToBaseAmount(this.nativeAsset,amount)
+                    amount = amount.toString()
+
+                    log.debug(tag,"amount (final): ",amount)
+                    if(!amount) throw Error("Failed to get amount!")
+
+                    //TODO min transfer size 10$
+                    //TODO validate addresses
+                    //TODO validate midgard addresses not expired
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    let validator = tx.validator
+                    let validatorOld = tx.validatorOld
+                    if(!validator) throw Error("validator required!")
+                    if(!validatorOld) throw Error("validatorOld required!")
+
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'redelegate',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        amount,
+                        // @ts-ignore
+                        validator,
+                        // @ts-ignore
+                        validatorOld,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+            //redelegate
+            this.joinPool = async function (tx:JoinPool) {
+                let tag = TAG + " | joinPool | "
+                try {
+                    let coin = this.nativeAsset
+                    log.info(tag,"tx: ",tx)
+
+
+                    //TODO min transfer size 10$
+                    //TODO validate addresses
+                    //TODO validate midgard addresses not expired
+
+                    if(!tx.fee) throw Error("103: fee required!")
+
+                    //context
+                    log.info(tag,"currentContext: ",this.context)
+                    log.info(tag,"txContext: ",tx.context)
+                    if(tx.context){
+                        if(this.context !== tx.context){
+                            //TODO validate context is valid
+                            this.context = tx.context
+                        }
+                    } else {
+                        log.info(tag,"using default context:",this.context)
+                        tx.context = this.context
+                    }
+                    if(!tx.context) throw Error("102: context is required on invocations!")
+
+                    let poolId = tx.poolId
+                    let shareOutAmount = tx.shareOutAmount
+                    let tokenInMaxs = tx.tokenInMaxs
+                    if(!poolId) throw Error("poolId required!")
+                    if(!shareOutAmount) throw Error("shareOutAmount required!")
+
+                    let memo = tx.memo || ''
+                    let invocation:Invocation = {
+                        type:'osmosislpadd',
+                        context:tx.context,
+                        username:this.username,
+                        coin,
+                        fee:tx.fee,
+                        network:coin,
+                        asset:coin,
+                        poolId,
+                        shareOutAmount,
+                        tokenInMaxs,
+                        memo
+                    }
+                    if(tx.noBroadcast) invocation.noBroadcast = true
+
+                    log.info(tag,"invocation: ",invocation)
+                    let result = await this.invoke.invoke(invocation)
+                    if(!result) throw Error("Failed to create invocation!")
+                    log.info("result: ",result)
+
+                    return result.invocationId
+                } catch (e) {
+                    log.error(tag, "e: ", e)
+                }
+            }
+
+        }
+
         /*
             Network specific functions
 
@@ -667,6 +1068,16 @@ module.exports = class wallet {
             let tag = TAG + " | getExplorerTxUrl | "
             try {
                 return getExplorerTxUrl(tx,this.network,'native',this.isTestnet)
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getBlockHeight = async function () {
+            let tag = TAG + " | getBlockHeight | "
+            try {
+                //TODO move from asset to blockchain
+                let result = await this.pioneerApi.BlockHeight({network:this.nativeAsset})
+                return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

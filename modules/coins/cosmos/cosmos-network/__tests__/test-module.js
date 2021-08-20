@@ -54,11 +54,12 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.getTransaction("")
+// network.getTransaction("5A94A8DC72D2A49330999BD704BD08D3228689DC27EF0297DAB96DF72048F7DC")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
+
 //
 // let tx = ''
 // let tx = ''

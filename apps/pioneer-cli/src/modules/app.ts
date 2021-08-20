@@ -41,7 +41,7 @@ let help: any = {
     info: "",
 };
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 function standardRandomBytesFunc(size:any) {
     /* istanbul ignore if: not testable on node */

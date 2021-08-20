@@ -11,6 +11,7 @@ let TAG = " | audit | "
 const log = require('@pioneer-platform/loggerdog')()
 const util = require('ethereumjs-util')
 const BASE = 1000000000000000000
+let Web3 = require('web3');
 
 module.exports = {
     auditTransaction: function (txInfo:any,source:any) {
@@ -182,7 +183,7 @@ const audit_receipt = function(contract:string,receipt:any){
 
  */
 
-const audit_token_transfer = async function(tokenTxInfo:any){
+const audit_token_transfer = function(tokenTxInfo:any){
     let tag = TAG + " | audit_transaction | ";
     try {
 
@@ -196,39 +197,44 @@ const audit_token_transfer = async function(tokenTxInfo:any){
         txFinal.type = "transfer"
         txFinal.height = parseInt(tokenTxInfo.block)
 
-        txFinal.addresses.push(tokenTxInfo.transaction.to)
-        txFinal.addresses.push(tokenTxInfo.transaction.from)
-        txFinal.addresses.push(tokenTxInfo.transaction.contractAddress)
+        //if no logs, then not token transfer
+        if(tokenTxInfo.receipt.logs.length === 0){
+            //Not an erc20 transfer
+        }else{
+
+            txFinal.addresses.push(tokenTxInfo.transaction.to)
+            txFinal.addresses.push(tokenTxInfo.transaction.from)
 
 
-        //2 events, send receive
-        let eventCredit = {
-            type:"credit",
-            address:tokenTxInfo.transaction.to,
-            amount:tokenTxInfo.transaction.amount,
-            asset:tokenTxInfo.token,
-            txid:tokenTxInfo.transaction.txid
+            //2 events, send receive
+            let eventCredit = {
+                type:"credit",
+                address:tokenTxInfo.transaction.to,
+                amount:tokenTxInfo.transaction.amount,
+                asset:tokenTxInfo.token,
+                txid:tokenTxInfo.transaction.txid
+            }
+            let eventDebit = {
+                type:"debit",
+                address:tokenTxInfo.transaction.from,
+                amount:tokenTxInfo.transaction.amount * -1,
+                asset:tokenTxInfo.token,
+                txid:tokenTxInfo.transaction.txid
+            }
+            // let eventFee = {
+            //     type:"debit",
+            //     asset:"ETH", //Fees paid in ETH
+            //     fee:true,
+            //     address:tokenTxInfo.transaction.from,
+            //     //amount:tx.gas_wanted / 1000, // NOTE mintscan shows fees as wanted. default fee currently 2x gas used
+            //     txid
+            // }
+
+            txFinal.events.push(eventCredit)
+            txFinal.events.push(eventDebit)
+            //txFinal.events.push(eventFee)
+
         }
-        let eventDebit = {
-            type:"debit",
-            address:tokenTxInfo.transaction.from,
-            amount:tokenTxInfo.transaction.amount * -1,
-            asset:tokenTxInfo.token,
-            txid:tokenTxInfo.transaction.txid
-        }
-        // let eventFee = {
-        //     type:"debit",
-        //     asset:"ETH", //Fees paid in ETH
-        //     fee:true,
-        //     address:tokenTxInfo.transaction.from,
-        //     //amount:tx.gas_wanted / 1000, // NOTE mintscan shows fees as wanted. default fee currently 2x gas used
-        //     txid
-        // }
-
-        txFinal.events.push(eventCredit)
-        txFinal.events.push(eventDebit)
-        //txFinal.events.push(eventFee)
-
 
         return txFinal;
     } catch (e) {
@@ -242,7 +248,7 @@ const audit_token_transfer = async function(tokenTxInfo:any){
 
  */
 
-const audit_transaction = async function(txInfo:any,source:any){
+const audit_transaction = function(txInfo:any,source:any){
     let tag = TAG + " | audit_transaction | ";
     try {
         let tx:any = {};

@@ -74,7 +74,6 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_BTC_ADDRESS = process.env['FAUCET_BTC_ADDRESS'] || 'bc1q0dt53aa0v366zdpsf2ant3pw4maugf50y2ywqy'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_BCH_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
 let noBroadcast = true
 

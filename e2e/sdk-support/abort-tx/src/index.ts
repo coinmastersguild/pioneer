@@ -34,7 +34,8 @@ require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let BigNumber = require('@ethersproject/bignumber')
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 
 let assert = require('assert')
@@ -92,6 +93,9 @@ const test_service = async function () {
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
+        if(!balance){
+            log.error(tag,"Failed to get balance! asset: "+ASSET,wallets.wallets[contextAlpha].WALLET_BALANCES)
+        }
         assert(balance)
 
         let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)

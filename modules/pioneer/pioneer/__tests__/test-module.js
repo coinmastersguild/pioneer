@@ -21,7 +21,7 @@ let TEST_COINS = [
     // 'ATOM'
 ]
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 let FAUCET_ADDRESSES = {
 
@@ -45,7 +45,7 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['WALLET_MAIN'],
+            mnemonic: process.env['WALLET_STAGE_ATOM'],
             username,
             pioneerApi:true,
             spec:urlSpec,
@@ -67,6 +67,58 @@ let run_test = async function(){
 
         // let info2 = await Wallet.getInfo()
         // console.log("info2: ",info2)
+
+        /*
+              OSMO
+        */
+
+        //OSMO
+        let masterOSMO = await Wallet.getMaster("OSMO")
+        console.log("masterOSMO: ",masterOSMO)
+
+        let balanceOSMO = await Wallet.getBalance("OSMO")
+        console.log("balanceOSMO: ",balanceOSMO)
+
+        //get all tokens/ibc balances
+        let tokens = await Wallet.getBalance("OSMO")
+
+        //console.log("correct OSMO: ","osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r")
+        //if(masterOSMO !== "osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r") throw Error("Incorect master!")
+
+        // let address = "osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn"
+        // let amount = "0.1"
+        // let memo = ""
+        //
+        // let transfer = {
+        //     coin:"OSMO",
+        //     network:"OSMO",
+        //     asset:"OSMO",
+        //     addressTo:address,
+        //     fee:{
+        //         priority:5,
+        //     },
+        //     amount,
+        //     memo
+        // }
+        //
+        // let transferUnSigned = await Wallet.buildTransfer(transfer)
+        // console.log("transferUnSigned: ",transferUnSigned)
+        //
+        // let transferSigned = await Wallet.signTransaction(transferUnSigned)
+        // console.log("transferSigned: ",transferSigned)
+        //
+        // let resultBroadcast = await Wallet.broadcastTransaction('OSMO',transferSigned)
+        // console.log("resultBroadcast: ",resultBroadcast)
+
+        // let intent = {
+        //     coin:"OSMO",
+        //     amount:"all",
+        //     address,
+        //     // noBroadcast:true,
+        // }
+        //
+        // let txid = await Wallet.sendToAddress(intent)
+        // console.log("txid: ",txid)
 
         /*
             ETH
@@ -108,11 +160,11 @@ let run_test = async function(){
         // console.log("info: ",prettyjson.render(info.public.RUNE))
 
         //RUNE
-        let masterRUNE = await Wallet.getMaster("RUNE")
-        console.log("masterRUNE: ",masterRUNE)
-
-        let balanceRUNE = await Wallet.getBalance("RUNE")
-        console.log("balanceRUNE: ",balanceRUNE)
+        // let masterRUNE = await Wallet.getMaster("RUNE")
+        // console.log("masterRUNE: ",masterRUNE)
+        //
+        // let balanceRUNE = await Wallet.getBalance("RUNE")
+        // console.log("balanceRUNE: ",balanceRUNE)
 
         // let address = "thor1s8jgmfta3008lemq3x2673lhdv3qqrhw3psuhh"
         // let amount = "100"
@@ -256,24 +308,24 @@ let run_test = async function(){
             BTC
          */
 
-        let masterBTC = await Wallet.getMaster("BTC")
-        console.log("masterBTC: ",masterBTC)
-
-        let balanceBTC = await Wallet.getBalance("BTC")
-        console.log("balanceBTC: ",balanceBTC)
+        // let masterBTC = await Wallet.getMaster("BTC")
+        // console.log("masterBTC: ",masterBTC)
         //
-        let amount = "0.0001"
-        let memo = null //Uses OP_RETURN outputs
-        let feeLevel = 5
-
-        //TODO offer input override
-        let transfer = {
-            coin:"BTC",
-            addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
-            amount,
-            memo,
-            feeLevel
-        }
+        // let balanceBTC = await Wallet.getBalance("BTC")
+        // console.log("balanceBTC: ",balanceBTC)
+        // //
+        // let amount = "0.0001"
+        // let memo = null //Uses OP_RETURN outputs
+        // let feeLevel = 5
+        //
+        // //TODO offer input override
+        // let transfer = {
+        //     coin:"BTC",
+        //     addressTo:"1MU8xvQJESoZRYuhmpTc6TY5eL7PG7ufLA",
+        //     amount,
+        //     memo,
+        //     feeLevel
+        // }
 
         // let transferUnSigned = await Wallet.buildTransfer(transfer)
         // console.log("transferUnSigned: ",JSON.stringify(transferUnSigned))
@@ -286,11 +338,11 @@ let run_test = async function(){
          */
 
 
-        let masterBCH = await Wallet.getMaster("BCH")
-        console.log("masterBCH: ",masterBCH)
-
-        let balanceBCH = await Wallet.getBalance("BCH")
-        console.log("balanceBCH: ",balanceBCH)
+        // let masterBCH = await Wallet.getMaster("BCH")
+        // console.log("masterBCH: ",masterBCH)
+        //
+        // let balanceBCH = await Wallet.getBalance("BCH")
+        // console.log("balanceBCH: ",balanceBCH)
         // //
         // let amount = "0.0001"
         // let memo = null //Uses OP_RETURN outputs

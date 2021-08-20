@@ -2,4 +2,4 @@ coverage
 node_modules
 src
 __tests__
-__tests__/*
+__tests__/test-module.js

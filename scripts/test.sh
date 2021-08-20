@@ -8,69 +8,7 @@ env=$1
 debug=$2
 coin=$3
 
-
-test_eth_debug () {
-  if [[ $coin = 'eth' || $coin = 'false' ]]
-  then
-    echo "Starting eth test"
-    cd e2e/sdk-swaps/ethereum-e2e-swap && npm run dev && cd ../../../
-  fi
-}
-
-test_bch_debug () {
-  if [[ $coin = 'bch' || $coin = 'false' ]]
-  then
-    echo "Starting bch test"
-    cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run dev && cd ../../../
-  fi
-}
-
-test_rune_debug () {
-  if [[ $coin = 'rune' || $coin = 'false' ]]
-  then
-    echo "Starting rune test"
-    cd e2e/sdk-swaps/thorchain-e2e-swap && npm run dev && cd ../../../
-  fi
-}
-
-test_eth () {
-  if [[ $coin = 'eth' || $coin = 'false' ]]
-  then
-    echo "Starting rune test"
-    cd e2e/sdk-swaps/etherum-e2e-swap && npm run test && cd ../../../
-  fi
-}
-
-test_bch () {
-  if [[ $coin = 'bch' || $coin = 'false' ]]
-  then
-    echo "Starting bch test"
-    cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../
-  fi
-}
-
-
-test_rune () {
-  if [[ $coin = 'rune' || $coin = 'false' ]]
-  then
-    echo "Starting rune test"
-    cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test && cd ../../../
-  fi
-}
-
-#if [[ $2 = 'true' ]]
-#then
-#  test_eth_debug
-#  test_bch_debug
-#  test_rune_debug
-#
-#else
-#  test_eth
-#  test_bch
-#  test_rune
-#fi
-
-
+# DEV move (dont use jest)
 if [[ $2 = 'true' ]]
 then
   cd e2e/sdk-transfers/thorchain-e2e-transfer && npm run dev && cd ../../../ &&/
@@ -84,11 +22,29 @@ then
 #  cd e2e/sdk-swaps/etherum-e2e-swap && npm run dev && cd ../../../ &&/
 #  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run dev && cd ../../../
 
+# Default mode
 else
-#  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../ &&/
+  #support functions
   cd e2e/sdk-support/abort-tx && npm run test && cd ../../../ &&/
-  cd e2e/sdk-swaps/etherum-e2e-swap && npm run test && cd ../../../ &&/
-  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
+# TODO addmeback
+#  cd e2e/sdk-support/context-switching && npm run test && cd ../../../ &&/
+#  cd e2e/sdk-support/forget-user && npm run test && cd ../../../ &&/
+#  cd e2e/sdk-support/querykey-migration && npm run test && cd ../../../ &&/
+#  cd e2e/sdk-support/rbf-ethereum && npm run test && cd ../../../ &&/
+  #transfers
+  cd e2e/sdk-transfers/osmosis-e2e-transfer && npm run test && cd ../../../ &&/
+  #ibc depsoit
+  cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run test && cd ../../../ &&/
+  #osmosis
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../
+#remember last entry can NOT have &&/
+
+#thorchain offline TODO re-enable
+#  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run test && cd ../../../ &&/
+#  cd e2e/sdk-swaps/etherum-e2e-swap && npm run test && cd ../../../ &&/
+#  cd e2e/sdk-swaps/thorchain-e2e-swap && npm run test
 fi
 
 #	cd e2e/sdk-swaps/thorchain-e2e-swap && npm run dev

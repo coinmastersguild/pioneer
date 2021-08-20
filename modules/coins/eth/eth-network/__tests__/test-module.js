@@ -10,11 +10,33 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
+//check is address elgible
+
+
+//already claimed
+// let address = "0x57e5551F5c9FB975C44Be80c27eA924c91701616"
+//elgable
+let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
+
+// network.checkAirdropClaim(address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//build claim tx
+// network.buildAirdropClaim(address)
+//     .then(function(resp){
+//         console.log(resp)
+//         if(resp === "0x2e7ba6ef0000000000000000000000000000000000000000000000000000000000010fc1000000000000000000000000c8bd3e67e3963b149b02b028511789f0cc6a502e00000000000000000000000000000000000000000000000821ab0d4414980000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000116958681ef852839a25c30b22409721a05c10c823ed0504a194d2f162c9b75c24d0d1461d608c1258caf1ec5270476e3e9c6f17c678b65c1a9af3cc82e05893228d5837924e8c8aa67e1e440796662ea07e9f837a11586d9cdb53e3160ff5974ab782e5aca30d245d6be16515938b6e2a9ae0e4300b813da2c7e392f1c75459515c3c0997e77befde7d53e418f4ebb6d4a6e71fcbf8169ea46f102fcc6768aabc5c996b6777de25fcf39258cfe0a5917f3901e7db7b5d2f1d2e72e0950873c59dc6051ae67f9700d6d3d8f7cb112b853627300fc3d037c211e74968477263039987d4f1e0f8a211cc665d6f3cf96071ea2cdfc57aa6f0fa8f8f2d24d021a28ebdbaddc1d9e6cefeb1e619240513ffd7681f2d3d25163e7830cbb8de9ac25d7bcc22a6f2b744f9873611c9562d6e8763d892d4df4443cd2a6b599edf601f9bd85699745c32af7e1890968bd7a01cdda66534db6bf79dd89819410e1cf8f84e367a4b18589c92902501701a9f41e7f578dcaff2a00cd447b711db25776c7ccecc91ab9110b415d119c5f0b28b32e09f4013f86f0f030015ac0a5295c2fd66ffdb71968b0dd9dcfb736331c06536141b1b81c59835bffa579afa5d68fe074d3f824f08137fe1254397919eba73ccd54b615a545385a60094bdc53bc3954711b6ecf4e47401baec05b8685e717f4cc4e6ee581ef36d2a798dc4c2faf7d05bb67b55456b940e119f0ab96e95d52420bd5d7db0b2b8c8d344a16fb3595546eafb51adfe"){
+//             console.log("WINNING!")
+//         }
+//     })
+
 //get symbol from contract
-network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.getStreamInfo('')
 //     .then(function(resp){
@@ -170,10 +192,10 @@ network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
 //         console.log(resp)
 //     })
 
-// network.getInfo()
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getInfo()
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getInfo()
 //     .then(function(resp){
@@ -205,7 +227,7 @@ network.getSymbolFromContract('0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d')
 //     })
 
 //getBalanceToken
-// network.getBalanceToken(address,"FOX")
+// network.getBalanceToken(address,"0xc770eefad204b5180df6a14ee197d99d808ee52d")
 //     .then(function(resp){
 //         console.log(resp)
 //     })

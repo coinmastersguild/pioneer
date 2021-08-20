@@ -33,7 +33,8 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 import {v4 as uuidv4} from 'uuid';
@@ -67,7 +68,7 @@ let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wag
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 let queryKey = process.env['TEST_QUERY_KEY_2'] || 'e2e-user-1-migration'
 
-let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin']
+let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 //pre-register username on key
 const pre_register = async function () {
@@ -115,7 +116,7 @@ const pre_register = async function () {
     }
 }
 
-describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
+describe(' - e2e test '+TAG, function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;

@@ -17,9 +17,9 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagge
 // let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
 let username = process.env['TEST_USERNAME_2'] || 'test-user-2'
-// let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
-// let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsaasda'
-let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsa'
+
+//let queryKey = process.env['TEST_QUERY_KEY_2'] || 'fobarbrasdfsdfsadoaasdasdasdsa'
+let queryKey = 'fobarbrasdfsdfsadoaasdasdasdsaasdasasdasd'
 
 let run_test = async function(){
     try{
@@ -37,7 +37,7 @@ let run_test = async function(){
         console.log(config)
         let app = new SDK.SDK(spec,config,true)
         //console.log(app)
-        let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash']
+        let seedChains = ['bitcoin','ethereum','thorchain','litecoin','bitcoincash','osmosis']
         await app.init(seedChains)
 
         //init

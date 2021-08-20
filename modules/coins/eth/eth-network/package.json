@@ -1,11 +1,11 @@
 {
   "name": "@pioneer-platform/eth-network",
-  "version": "8.1.24",
+  "version": "8.1.32",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
     "testfile": "cross-env WALLETPACK_TESTING=true mocha --require @babel/register --require @babel/polyfill --exit --timeout 1000000",
-    "test-babel": "npm run testfile \"__tests__/**/*.test.js\"",
+    "test-babel": "npm run testfile \"__tests__/test-module.js*/*.test.js\"",
     "test": "npm run build && node __tests__/test-module.js",
     "test-dev": "npm run build && node lib/index.js",
     "start": "npm run build:live",

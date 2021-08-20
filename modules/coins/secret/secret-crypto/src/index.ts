@@ -46,6 +46,7 @@ module.exports = {
 
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //log.debug(mk.publicExtendedKey)
+            mk = mk.derive(hdPath)
 
             //get correct address with xpub
             let xpub = mk.publicExtendedKey

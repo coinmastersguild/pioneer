@@ -7,7 +7,6 @@
 
 const TAG = " | blockbook-client | "
 
-import { Blockbook } from 'blockbook-client'
 const log = require('@pioneer-platform/loggerdog')()
 const fakeUa = require('fake-useragent');
 const Axios = require('axios')
@@ -30,8 +29,6 @@ axiosRetry(axios, {
         return error.response.status === 503;
     },
 });
-
-import { getBlockBooks } from "./blockbooks";
 
 let BLOCKBOOK_URLS:any = {}
 
@@ -239,28 +236,31 @@ let init_network = function (servers:any,runtime?:string) {
         log.debug(tag,"checkpoint: ")
         let output:any = []
 
+        //get networks from coins module
 
-        let blockbooks = getBlockBooks()
-        for(let i = 0; i < blockbooks.length; i++){
-            let coinInfo = blockbooks[i]
-            coinInfo.symbol = coinInfo.symbol.toUpperCase()
-            log.debug("coinInfo: ",coinInfo)
-            let blockbookurl = coinInfo.explorer.tx
-            blockbookurl = blockbookurl.replace("/tx/","")
 
-            if(servers && servers[coinInfo.symbol]){
-                //use configured
-                BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
-                log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
-            }else{
-                if(!runtime || runtime === 'public'){
-                    //use public
-                    BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
-                    log.info(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
-                }
-                //TODO use pioneer's
-            }
-        }
+
+        // let blockbooks = getBlockBooks()
+        // for(let i = 0; i < blockbooks.length; i++){
+        //     let coinInfo = blockbooks[i]
+        //     coinInfo.symbol = coinInfo.symbol.toUpperCase()
+        //     log.debug("coinInfo: ",coinInfo)
+        //     let blockbookurl = coinInfo.explorer.tx
+        //     blockbookurl = blockbookurl.replace("/tx/","")
+        //
+        //     if(servers && servers[coinInfo.symbol]){
+        //         //use configured
+        //         BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
+        //         log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
+        //     }else{
+        //         if(!runtime || runtime === 'public'){
+        //             //use public
+        //             BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
+        //             log.info(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
+        //         }
+        //         //TODO use pioneer's
+        //     }
+        // }
 
 
         return true

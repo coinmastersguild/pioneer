@@ -112,8 +112,8 @@ let run_test = async function(){
             console.log("invocations: ",invocations.length)
 
             //delete invocation
-            let resultDelete = await App.deleteInvocation(invocations[0].invocationId)
-            console.log("resultDelete: ",resultDelete)
+            // let resultDelete = await App.deleteInvocation(invocations[0].invocationId)
+            // console.log("resultDelete: ",resultDelete)
 
             // App.playChingle()
             // let updateInvocation = await App.updateInvocation(updateBody)

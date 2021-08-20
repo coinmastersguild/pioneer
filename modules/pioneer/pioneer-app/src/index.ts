@@ -398,6 +398,20 @@ let build_transaction = async function (transaction:any) {
 
         let unsignedTx
         switch(invocation.type) {
+            case 'osmosislpadd':
+            case 'osmosisswap':
+            case 'redelegate':
+            case 'undelegate':
+            case 'ibcdeposit':
+            case 'delegate':
+                log.debug(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+
+                //TODO validate transfer object
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                unsignedTx.invocation = invocation.invocation
+                log.debug(" **** RESULT buildTransfer ****  unsignedTx: ",unsignedTx)
+
+                break
             case 'transfer':
                 log.debug(" **** BUILD transfer ****  invocation: ",invocation.invocation)
 
@@ -420,7 +434,7 @@ let build_transaction = async function (transaction:any) {
                 log.debug(" **** RESULT buildSwap ****  swapUnSigned: ",unsignedTx)
                 break
             default:
-                console.error("Unhandled type: ",invocation.type)
+                console.error("APP Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
                 throw Error("Unhandled type: "+invocation.type)
         }
@@ -1429,7 +1443,49 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
             let invocationId
             let resultUpdate
             let updateBody
+
             switch(request.type) {
+                //custom txs fio/tendermint
+                case 'osmosislpadd':
+                case 'osmosisswap':
+                case 'redelegate':
+                case 'undelegate':
+                case 'ibcdeposit':
+                case 'delegate':
+                    //thorchain deposit (native RUNE inputs to swaps)
+                    if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                    if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                    request.invocation.invocationId = request.invocationId
+
+                    if(request.invocation.context) context = request.invocation.context
+                    if(!context) context = WALLET_CONTEXT
+                    if(!WALLETS_LOADED[context]) {
+                        log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                        log.error(tag,"context: ",context)
+                        throw Error("Unable to build transaction! context not found!")
+                    }
+                    log.debug(tag,"Building transaction with context: ",context)
+                    log.debug(tag,"invocation: ",request.invocation)
+                    //TODO validate tx object to type delegate
+                    unsignedTx = await WALLETS_LOADED[context].buildTx(request.invocation)
+                    log.debug(tag,"txid: ", unsignedTx.txid)
+                    log.debug(tag,"unsignedTx: ", unsignedTx)
+
+                    //update invocation
+                    invocationId = request.invocation.invocationId
+                    unsignedTx.invocationId = invocationId
+                    updateBody = {
+                        invocationId,
+                        invocation:request.invocation,
+                        unsignedTx
+                    }
+
+                    //update invocation remote
+                    resultUpdate = await update_invocation(updateBody)
+                    log.debug(tag,"resultUpdate: ",resultUpdate)
+                    clientEvents.events.emit('unsignedTx',updateBody)
+
+                    break;
                 case 'deposit':
                     //thorchain deposit (native RUNE inputs to swaps)
                     if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
