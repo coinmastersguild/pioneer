@@ -71,7 +71,7 @@ let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5
 
 let noBroadcast = true
 
-describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
+describe(' - e2e test '+BLOCKCHAIN+' lp add - ', function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;
