@@ -61,7 +61,7 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.transaction("5D4F698DE548A7444CAAE27FD3A7DE724D402DAD2E9EFCE52DE0FAC82ACD3A9F")
+network.transaction("7253107953F220C95924E91995988DB9E0CC6F94DF9D0808C8B2F241E71B0269")
     .then(function(resp){
         console.log("resp: ",JSON.stringify(resp))
         //console.log("resp: ",JSON.stringify(resp))

@@ -242,10 +242,10 @@ const test_service = async function () {
         log.info(tag,"poolInfo: ",poolInfo.pools[0])
 
         //get route
-        let poolId = poolInfo.pools[0].id
+        //let poolId = poolInfo.pools[0].id
         //IBC atoms
         let tokenOutDenom = poolInfo.pools[0].poolAssets[0].token.denom
-        log.info(tag,"poolId: ",poolId)
+        //log.info(tag,"poolId: ",poolId)
         log.info(tag,"tokenOutDenom: ",tokenOutDenom)
 
         //TODO get rates
@@ -255,20 +255,22 @@ const test_service = async function () {
         //select first
 
         //get ibc channels
-        let shareOutAmount = "9702198039983527548"
+        let poolId = '1'
+
+        let shareOutAmount = "700930022109918661"
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
         }
 
         let inAsset = {
-            'denum':'uosmo',
-            'amount':'953288'
+            'denom':'uosmo',
+            'amount':'66134'
         }
 
         let outAsset = {
-            'denum':tokenOutDenom,
-            'amount':'135876'
+            'denom':'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
+            'amount':'10248'
         }
 
         /*
@@ -384,7 +386,7 @@ const test_service = async function () {
         //wait for confirmation
 
         if(!noBroadcast && false){
-            //TODO
+            //TODO unnerf
             /*
                 Status codes
 

@@ -1213,6 +1213,9 @@ module.exports = class wallet {
                 throw e
             }
         },
+        /*
+                CatchAll for custom Tx's
+         */
         this.buildTx = async function (transaction:any) {
             let tag = TAG + " | buildTx | "
             try{
