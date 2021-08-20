@@ -33,7 +33,8 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 
 import {v4 as uuidv4} from 'uuid';
@@ -66,7 +67,7 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
-describe(' - e2e test ETH Swaps - ', function() {
+describe(' - e2e test '+TAG, function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;

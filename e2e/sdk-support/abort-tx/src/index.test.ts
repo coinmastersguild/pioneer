@@ -33,7 +33,8 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 import {v4 as uuidv4} from 'uuid';
@@ -51,6 +52,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     sendPairingCode,
     cancelTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
@@ -65,7 +68,7 @@ let wss = process.env['URL_PIONEER_SOCKET']
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
+describe(' - e2e test '+TAG, function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;
@@ -82,7 +85,8 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
         const queryKey = uuidv4();
         let username
         let balance
-        let wallet:any
+        let wallets:any
+        let context:any
         let app:any
         let eventPairReceived = false
         let seedChains = ['ethereum','thorchain']
@@ -102,24 +106,26 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         it('Starts Wallet', async function() {
             //start app and get wallet
-            wallet = await startApp()
+            wallets = await startApp()
             //log(tag,"wallet: ",wallet)
-            username = wallet.username
+            username = wallets.username
             expect(username).toBeDefined();
+        });
+
+        it('Gets Context', async function() {
+
+            //get balance
+            let appWallets = getWallets()
+            context = appWallets[0]
+            let balance = wallets.wallets[context].WALLET_BALANCES[ASSET]
+            expect(balance).toBeDefined();
         });
 
         it('gets balance', async function() {
 
             //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
+            balance = wallets.wallets[context].WALLET_BALANCES[ASSET]
             expect(balance).toBeDefined();
-        });
-
-        it('Balance is enough for test', async function() {
-
-            //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
-            expect(Number(balance)).toBeGreaterThan(Number(MIN_BALANCE));
         });
 
         it('SDK initialization', async function() {
