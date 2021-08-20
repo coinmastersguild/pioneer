@@ -29,7 +29,7 @@
 
  */
 
-import {Transfer} from "@pioneer-platform/pioneer-types";
+import {IBCdeposit, Transfer} from "@pioneer-platform/pioneer-types";
 
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
@@ -60,18 +60,16 @@ const {
     broadcastTransaction,
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'osmosis'
-let ASSET = 'OSMO'
-let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.004"
+let BLOCKCHAIN = 'cosmos'
+let ASSET = 'ATOM'
+let MIN_BALANCE = process.env['MIN_BALANCE_ATOM'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
 
 let noBroadcast = true
 
-describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
+describe(' - e2e test '+BLOCKCHAIN+' ibc deposit - ', function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;
@@ -93,16 +91,16 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
         let app:any
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
-        let seedChains = ['ethereum','thorchain','osmosis']
+        let seedChains = ['ethereum','thorchain','osmosis','cosmos']
         let code:any
         let user:any
         let client:any
         let balanceSdk:any
         let balanceNative:any
         let balanceBase:any
+        let masterAddress:string
         let valueBalanceUsd:any
         let estimateCost:any
-        let transfer:any
         let invocationId:string
         let signedTx:any
         let transaction:any
@@ -238,7 +236,7 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
         it('Assert master exists ', async function() {
 
 
-            let masterAddress = await client.getAddress()
+            masterAddress = await client.getAddress()
             log(tag,"masterAddress: ",masterAddress)
             expect(masterAddress).toBeDefined();
 
@@ -273,36 +271,80 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             expect(balanceBase).toBeGreaterThan(Number(TEST_AMOUNT));
         });
 
-        it('Build transfer (init) ', async function() {
-            let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
-            expect(amountTestNative).toBeDefined();
+        it('Build IBC deposit (init) ', async function() {
+            //get ibc channels
 
-            let transfer:Transfer = {
+            //get current block height
+            let blockheight = await user.clients[BLOCKCHAIN].getBlockHeight()
+            //set expiration at +10000
+            let expiration =  blockheight + 10000
+            log(tag,"expiration: ",expiration)
+
+
+            let options:any = {
+                verbose: true,
+                txidOnResp: false, // txidOnResp is the output format
+            }
+            let clientOsmosis = user.clients['osmosis']
+            let osmosisAddy = await clientOsmosis.getAddress()
+
+            //TODO figure out source_channel
+            let source_channel = 'channel-141'
+            let source_port = 'transfer'
+
+            /*
+                Example
+                      "value":{
+             "msg":[
+                {
+                   "type":"cosmos-sdk/MsgTransfer",
+                   "value":{
+                      "source_port":"transfer",
+                      "source_channel":"channel-141",
+                      "token":{
+                         "denom":"uatom",
+                         "amount":"200000"
+                      },
+                      "sender":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg",
+                      "receiver":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+                      "timeout_height":{
+                         "revision_number":"1",
+                         "revision_height":"841428"
+                      }
+                   }
+                }
+             ],
+
+             */
+
+            let customTx:IBCdeposit = {
                 context:user.context,
-                recipient: FAUCET_OSMO_ADDRESS,
                 asset: ASSET,
                 network: ASSET,
                 memo: '',
-                "amount":{
-                    amount: function(){
-                        return BigNumber.BigNumber.from(amountTestNative)
-                    }
+                // @ts-ignore
+                sender:masterAddress,
+                receiver:osmosisAddy,
+                source_port,
+                source_channel,
+                token: {
+                    "denom":"uatom",
+                    "amount":"10000"
+                },
+                timeout_height: {
+                    "revision_number":"1", //TODO wtf is this?
+                    "revision_height":expiration.toString()
                 },
                 fee:{
                     priority:5, //1-5 5 = highest
                 },
                 noBroadcast
             }
+            log(tag,"customTx: ",customTx)
 
-            let options:any = {
-                verbose: true,
-                txidOnResp: false, // txidOnResp is the output format
-            }
-
-            let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+            let responseTransfer = await user.clients[BLOCKCHAIN].ibcDeposit(customTx,options)
             log(tag,"responseTransfer: ",responseTransfer)
             invocationId = responseTransfer
-            expect(invocationId).toBeDefined();
 
             transaction = {
                 invocationId,
@@ -310,7 +352,8 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             }
         });
 
-        // it.skip('App received invocation event', async function() {
+        //TODO fixme (works in dev)
+        // it('App received invocation event', async function() {
         //
         //     let invocationReceived = false
         //     while(!invocationReceived){

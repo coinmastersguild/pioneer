@@ -233,13 +233,6 @@ const test_service = async function () {
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
         }
 
-        //estimate BCH fee? lol
-        let asset = {
-            chain:ASSET,
-            symbol:ASSET,
-            ticker:ASSET,
-        }
-
         //get current block height
         let blockheight = await user.clients[BLOCKCHAIN].getBlockHeight()
         log.info(tag,"blockheight: ",blockheight)
@@ -260,16 +253,6 @@ const test_service = async function () {
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
-        }
-
-        let inAsset = {
-            'denum':'',
-            'amount':''
-        }
-
-        let outAsset = {
-            'denum':'',
-            'amount':''
         }
 
         let osmosisAddy = await clientOsmosis.getAddress()
