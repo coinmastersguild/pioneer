@@ -22,9 +22,9 @@ const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs
 let seed = process.env['WALLET_MAIN']
-let seed2 = process.env['WALLET_TEST']
+// let seed2 = process.env['WALLET_TEST']
 if(!seed) throw Error("Failed to find test seed!")
-if(seed === seed2) throw Error("bravo seed MUST be eunique!")
+// if(seed === seed2) throw Error("bravo seed MUST be eunique!")
 let password = process.env['WALLET_PASSWORD'] || '123'
 let username = process.env['TEST_USERNAME_2'] || 'e2e-user-134'
 let queryKey = process.env['TEST_QUERY_KEY_2'] || 'testkey12346'
@@ -96,10 +96,10 @@ export async function startApp() {
             password
         }
 
-        let wallet2:any = {
-            mnemonic:seed2,
-            password
-        }
+        // let wallet2:any = {
+        //     mnemonic:seed2,
+        //     password
+        // }
         //get master for seed
         let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
         wallet1.masterAddress = walletEth.masterAddress
@@ -111,8 +111,8 @@ export async function startApp() {
 
         //create bravo
         //get master for seed
-        let walletEth2 = await ethCrypto.generateWalletFromSeed(wallet2.mnemonic)
-        wallet2.masterAddress = walletEth2.masterAddress
+        // let walletEth2 = await ethCrypto.generateWalletFromSeed(wallet2.mnemonic)
+        // wallet2.masterAddress = walletEth2.masterAddress
 
         //create wallet files
         // log.info(tag,"wallet2: ",wallet2)

@@ -34,7 +34,8 @@ require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 let assert = require('assert')

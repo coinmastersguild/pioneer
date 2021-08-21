@@ -108,13 +108,15 @@ const test_service = async function () {
         let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
-        if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
-            throw Error("101: Low funds!")
-        } else {
-            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-        }
-        log.info(tag,"CHECKPOINT 1 balance")
+
+        //NOTE: OSMOS ALLOWS FREE TXS!!!! yea wtf??
+        // if(balance < MIN_BALANCE){
+        //     log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+        //     throw Error("101: Low funds!")
+        // } else {
+        //     log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+        // }
+        // log.info(tag,"CHECKPOINT 1 balance")
 
         //generate new key
         const queryKey = uuidv4();
@@ -240,8 +242,8 @@ const test_service = async function () {
         let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
 
         //swap tokens
-        let TOKEN_IN = "OSMO"
-        let TOKEN_OUT = "ATOM"
+        let TOKEN_IN = "ATOM"
+        let TOKEN_OUT = "OSMO"
 
         //get pool
         let poolInfo = await user.clients[BLOCKCHAIN].getPool(TOKEN_OUT)
@@ -253,16 +255,16 @@ const test_service = async function () {
 
         //get route
         let poolId = poolInfo.pools[0].id
-        let tokenOutDenom = poolInfo.pools[0].poolAssets[0].token.denom
+        let tokenInDenom = poolInfo.pools[0].poolAssets[0].token.denom
         log.info(tag,"poolId: ",poolId)
-        log.info(tag,"tokenOutDenom: ",tokenOutDenom)
+        log.info(tag,"tokenOutDenom: ",tokenInDenom)
 
         //get rate
         //TODO
 
         //get out MIN (slippage)
         let tokenOutMinAmount = "126"
-
+        let tokenOutDenom = 'uosmo'
 
         let options:any = {
             verbose: true,
@@ -271,7 +273,7 @@ const test_service = async function () {
 
         /*
             Example
-
+            OSMO -> ATOM
                "type":"osmosis/gamm/swap-exact-amount-in",
                "value":{
                   "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
@@ -288,6 +290,25 @@ const test_service = async function () {
                   "tokenOutMinAmount":"126"
                }
 
+            ATOM -> OSMO
+            {
+               "type":"osmosis/gamm/swap-exact-amount-in",
+               "value":{
+                  "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+                  "routes":[
+                     {
+                        "poolId":"1",
+                        "tokenOutDenom":"uosmo"
+                     }
+                  ],
+                  "tokenIn":{
+                     "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                     "amount":"100000"
+                  },
+                  "tokenOutMinAmount":"620317"
+               }
+            }
+
          */
 
         let delegate:OsmosisSwap = {
@@ -300,7 +321,7 @@ const test_service = async function () {
                 tokenOutDenom
             }],
             tokenIn:{
-                denom:"uosmo",
+                denom:tokenInDenom,
                 amount:amountTestNative.toString()
             },
             tokenOutMinAmount,

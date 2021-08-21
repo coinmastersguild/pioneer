@@ -15,6 +15,7 @@
     "build": "lerna run build --include-dependencies",
     "refresh": "make clean && make",
     "up-dev": "make && make up=dev",
+    "init-env": "cp .example-env .env",
     "test": "make test",
     "test-debug": "make test debug=true",
     "release": "make && make up=release",

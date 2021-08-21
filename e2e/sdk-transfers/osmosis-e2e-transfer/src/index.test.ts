@@ -35,7 +35,8 @@ require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 import {v4 as uuidv4} from 'uuid';
@@ -71,7 +72,7 @@ let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5
 
 let noBroadcast = true
 
-describe(' - e2e test '+BLOCKCHAIN+' transfer - ', function() {
+describe(' - e2e test '+TAG, function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;

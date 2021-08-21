@@ -63,9 +63,9 @@ const {
     cancelTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
+let BLOCKCHAIN = 'ethereum'
+let ASSET = 'ETH'
+let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
@@ -100,7 +100,7 @@ const test_service = async function () {
 
         let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
+        log.debug(tag,"masterAlpha: ",masterAlpha)
         if(balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")

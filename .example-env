@@ -1,0 +1,26 @@
+#log levels options INFO | DEBUG
+DEFAULT_LOG_LEVEL=INFO
+
+#comment out to remove support (DO NOT USE false)
+FEATURE_BITCOIN_BLOCKCHAIN=true
+FEATURE_BITCOINCASH_BLOCKCHAIN=true
+FEATURE_LITECOIN_BLOCKCHAIN=true
+FEATURE_ETHEREUM_BLOCKCHAIN=true
+FEATURE_THORCHAIN_BLOCKCHAIN=true
+FEATURE_COSMOS_BLOCKCHAIN=true
+FEATURE_BINANCE_BLOCKCHAIN=true
+FEATURE_SECRET_BLOCKCHAIN=true
+FEATURE_KAVA_BLOCKCHAIN=true
+FEATURE_TERRA_BLOCKCHAIN=true
+
+#pioneer server
+#for local dev
+#URL_PIONEER_SPEC=http://127.0.0.1:9001/spec/swagger.json
+#URL_PIONEER_SOCKET="ws://127.0.0.1:9001"
+
+#public node
+URL_PIONEER_SPEC=https://pioneers.dev/spec/swagger.json
+URL_PIONEER_SOCKET="wss://pioneers.dev"
+
+URL_OSMO_RPC=https://rpc-osmosis.keplr.app
+URL_OSMO_LCD=https://lcd-osmosis.keplr.app

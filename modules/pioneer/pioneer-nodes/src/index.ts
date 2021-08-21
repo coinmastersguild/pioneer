@@ -67,8 +67,9 @@ const log = require('@pioneer-platform/loggerdog')()
 
 let TIER_ONE_SEED = {
     "COSMOS":{
+        "GAIAD":"https://lcd-cosmoshub.keplr.app"
         //"GAIAD":"https://45.79.249.253"
-        "GAIAD":"https://3.87.179.235:26656"
+        // "GAIAD":"https://3.87.179.235:26656"
     }
 }
 

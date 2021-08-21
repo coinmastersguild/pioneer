@@ -58,8 +58,8 @@ const {
     cancelTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
+let BLOCKCHAIN = 'ethereum'
+let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']

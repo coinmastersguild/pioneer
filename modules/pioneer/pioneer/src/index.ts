@@ -1505,8 +1505,16 @@ module.exports = class wallet {
                             //code block
                     }
                     let txType = "cosmos-sdk/MsgSend"
+
+                    //Osmosis is cheap, > 0 = max everything
                     let gas = "290000"
                     let fee = "2800"
+
+                    if(transaction.priority === 0){
+                        gas = "0"
+                        fee = "0"
+                    }
+
                     let memo = transaction.memo || ""
 
                     if(!msg) throw Error('failed to make tx msg')

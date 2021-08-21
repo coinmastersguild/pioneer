@@ -29,11 +29,14 @@
 
  */
 
+import {Transfer} from "@pioneer-platform/pioneer-types";
+
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-const TAG  = " | e2e-test | "
+let pjson = require("../package.json");
+let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
 let BigNumber = require('@ethersproject/bignumber')
 import {v4 as uuidv4} from 'uuid';
@@ -51,6 +54,8 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     getInvocations,
     sendPairingCode,
     buildTransaction,
@@ -58,17 +63,17 @@ const {
     broadcastTransaction,
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
+let BLOCKCHAIN = 'cosmos'
+let ASSET = 'ATOM'
+let MIN_BALANCE = process.env['MIN_BALANCE_ATOM'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+let FAUCET_ATOM_ADDRESS = process.env['FAUCET_ATOM_ADDRESS'] || 'cosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3'
 
-describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
+let noBroadcast = true
+
+describe(' - e2e test '+TAG, function() {
     let tag = TAG + " | test_service | "
     try {
         const log = console.log;
@@ -85,11 +90,12 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
         const queryKey = uuidv4();
         let username
         let balance
-        let wallet:any
+        let wallets:any
+        let contextAlpha:string
         let app:any
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
-        let seedChains = ['ethereum','thorchain']
+        let seedChains = ['ethereum','thorchain','cosmos']
         let code:any
         let user:any
         let client:any
@@ -106,23 +112,28 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
 
         it('Starts Wallet', async function() {
             //start app and get wallet
-            wallet = await startApp()
-            //log(tag,"wallet: ",wallet)
-            username = wallet.username
+            wallets = await startApp()
+            log(tag,"wallets: ",wallets)
+            username = wallets.username
             expect(username).toBeDefined();
         });
 
         it('gets balance', async function() {
 
-            //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
+            let appContext = getContext()
+            expect(appContext).toBeDefined();
+
+            //get wallets
+            let appWallets = getWallets()
+            contextAlpha = appWallets[0]
+            balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
             expect(balance).toBeDefined();
         });
 
         it('Balance is enough for test', async function() {
 
             //get balance
-            balance = wallet.WALLET_BALANCES[ASSET]
+            balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
             expect(Number(balance)).toBeGreaterThan(Number(MIN_BALANCE));
         });
 
@@ -264,47 +275,27 @@ describe(' - e2e test '+BLOCKCHAIN+' Swaps - ', function() {
             expect(balanceBase).toBeGreaterThan(Number(TEST_AMOUNT));
         });
 
-        it('Get transfer Params from midgard ', async function() {
-
-            //get pool address
-            let poolInfo = await midgard.getPoolAddress()
-
-            //filter by chain
-            let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-            log(tag,"thorVault: ",thorVault)
-            expect(thorVault).toBeDefined();
-
-            log(tag,"thorVault: ",thorVault)
-            expect(thorVault[0]).toBeDefined();
-            thorVault = thorVault[0]
-            expect(thorVault.address).toBeDefined();
-            const vaultAddress = thorVault.address
-            const gasRate = thorVault.gas_rate
-            expect(vaultAddress).toBeDefined();
-            expect(gasRate).toBeDefined();
-
-            //test amount in native
-            let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        it('Build transfer (init) ', async function() {
+            let amountTestNative = baseAmountToNative(ASSET,TEST_AMOUNT)
             expect(amountTestNative).toBeDefined();
 
-            transfer = {
-                inboundAddress: thorVault,
-                recipient:vaultAddress,
-                coin: ASSET,
+            let transfer:Transfer = {
+                context:user.context,
+                recipient: FAUCET_ATOM_ADDRESS,
                 asset: ASSET,
                 network: ASSET,
-                memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
+                memo: '',
                 "amount":{
                     amount: function(){
                         return BigNumber.BigNumber.from(amountTestNative)
                     }
                 },
-                fee:gasRate, // fee === gas (xcode inheritance)
-                noBroadcast:true
+                fee:{
+                    priority:5, //1-5 5 = highest
+                },
+                noBroadcast
             }
-        });
 
-        it('Build transfer (init) ', async function() {
             let options:any = {
                 verbose: true,
                 txidOnResp: false, // txidOnResp is the output format

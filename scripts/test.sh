@@ -32,13 +32,13 @@ else
 #  cd e2e/sdk-support/querykey-migration && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-support/rbf-ethereum && npm run test && cd ../../../ &&/
   #transfers
-  cd e2e/sdk-transfers/osmosis-e2e-transfer && npm run test && cd ../../../ &&/
+  cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run test && cd ../../../ &&/
   #ibc depsoit
   cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run test && cd ../../../ &&/
   #osmosis
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../ &&/
   cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../ &&/
-  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../ &&/
-  cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../
 #remember last entry can NOT have &&/
 
 #thorchain offline TODO re-enable
