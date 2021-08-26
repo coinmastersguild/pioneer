@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/nodes",
-  "version": "8.1.6",
+  "version": "8.1.7",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,7 +20,7 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.6",
+    "@pioneer-platform/loggerdog": "^8.1.7",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
