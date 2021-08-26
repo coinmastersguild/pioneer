@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app-e2e",
-  "version": "8.1.24",
+  "version": "8.1.25",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -22,13 +22,13 @@
   "dependencies": {
     "@babel/runtime": "^7.14.0",
     "@peculiar/webcrypto": "^1.1.4",
-    "@pioneer-platform/eth-crypto": "^8.1.19",
-    "@pioneer-platform/loggerdog": "^8.1.7",
-    "@pioneer-platform/pioneer": "^8.1.22",
-    "@pioneer-platform/pioneer-coins": "^8.1.23",
-    "@pioneer-platform/pioneer-config": "^8.1.13",
-    "@pioneer-platform/pioneer-events": "^8.1.19",
-    "@pioneer-platform/pioneer-hardware": "^8.1.23",
+    "@pioneer-platform/eth-crypto": "^8.1.20",
+    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/pioneer": "^8.1.23",
+    "@pioneer-platform/pioneer-coins": "^8.1.24",
+    "@pioneer-platform/pioneer-config": "^8.1.14",
+    "@pioneer-platform/pioneer-events": "^8.1.20",
+    "@pioneer-platform/pioneer-hardware": "^8.1.24",
     "@types/node": "^13.13.51",
     "@types/uuid": "^8.3.0",
     "assert": "^2.0.0",

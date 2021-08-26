@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cosmos-network",
-  "version": "8.1.9",
+  "version": "8.1.10",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
@@ -9,8 +9,8 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.7",
-    "@pioneer-platform/nodes": "^8.1.7",
+    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/nodes": "^8.1.8",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",

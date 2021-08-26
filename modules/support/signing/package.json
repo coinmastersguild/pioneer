@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/signing",
-  "version": "8.1.7",
+  "version": "8.1.8",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -13,7 +13,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.7",
+    "@pioneer-platform/loggerdog": "^8.1.8",
     "@types/node": "^13.13.12",
     "bitcoinjs-lib": "3.3.2",
     "bitcoinjs-message": "2.0.0",

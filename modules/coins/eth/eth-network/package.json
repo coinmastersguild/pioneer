@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-network",
-  "version": "8.1.34",
+  "version": "8.1.35",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.1.0",
-    "@pioneer-platform/blockbook": "^8.1.24",
-    "@pioneer-platform/loggerdog": "^8.1.7",
+    "@pioneer-platform/blockbook": "^8.1.25",
+    "@pioneer-platform/loggerdog": "^8.1.8",
     "@xchainjs/xchain-util": "^0.2.6",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
