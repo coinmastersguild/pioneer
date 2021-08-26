@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-audit",
-  "version": "8.1.20",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,7 @@
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.5",
+    "@pioneer-platform/loggerdog": "^8.1.6",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
