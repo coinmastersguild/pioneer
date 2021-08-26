@@ -20,13 +20,12 @@ const TAG = " | App | ";
 const inquirer = require("inquirer");
 
 //primary app
+const App = require("@pioneer-platform/pioneer-app");
+
 import {
     showWelcome
 } from './modules/views'
-import {
-    onStart,
-    onRun
-} from './modules/app'
+
 
 
 
@@ -51,18 +50,18 @@ program.on('--help', () => {
         (docs)
  */
 //TODO flag run on port
-// const projectCommand = program
-//     .command( 'server start' )
-//     .description( 'Start The Pioneer Server' )
-//     .action( () => {
-//         server.start()
-//     } );
-//
-// projectCommand
-//     .command( 'start' )
-//     .action( () => {
-//         server.start()
-//     } );
+const projectCommand = program
+    .command( 'server start' )
+    .description( 'Start The Pioneer Server' )
+    .action( () => {
+        server.start()
+    } );
+
+projectCommand
+    .command( 'start' )
+    .action( () => {
+        server.start()
+    } );
 
 //TODO stop server
 //TODO kill on exit
@@ -82,13 +81,13 @@ const userCommand = program
 userCommand
     .command( 'list' )
     .action( () => {
-
+        log.info(" user list command passed")
     } );
 
 userCommand
     .command( 'request' )
     .action( () => {
-
+        log.info(" user request command passed")
     } );
 
 /*
@@ -153,15 +152,12 @@ const onInteractiveTerminal = async function(){
     let tag = TAG + " | onInteractiveTerminal | "
     try{
         log.info("Starting Interactive Terminal")
-        //start it mode
+        //start --it mode
         showWelcome()
 
-        let successStart = await onStart()
-        log.debug(tag,"successStart: ",successStart)
-        //display dashboard
+        //TODO
+        //all the things
 
-        //onRun
-        onRun()
 
     }catch(e){
         log.error("Terminal Exit: ",e)

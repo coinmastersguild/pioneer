@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@bithighlander/usb-detection": "^4.10.4",
-    "@pioneer-platform/pioneer-app": "^8.1.21",
+    "@pioneer-platform/pioneer-app": "^8.1.19",
     "@pioneer-platform/pioneer-client": "^8.1.10",
     "@pioneer-platform/pioneer-config": "^8.1.11",
     "@pioneer-platform/pioneer-hardware": "^8.1.21",

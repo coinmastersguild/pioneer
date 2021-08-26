@@ -5,4 +5,4 @@ let vocab:any = {
 
 
 
-module.exports = paths
+module.exports = vocab
