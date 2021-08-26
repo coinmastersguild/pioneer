@@ -50,18 +50,18 @@ program.on('--help', () => {
         (docs)
  */
 //TODO flag run on port
-const projectCommand = program
-    .command( 'server start' )
-    .description( 'Start The Pioneer Server' )
-    .action( () => {
-        server.start()
-    } );
-
-projectCommand
-    .command( 'start' )
-    .action( () => {
-        server.start()
-    } );
+// const projectCommand = program
+//     .command( 'server start' )
+//     .description( 'Start The Pioneer Server' )
+//     .action( () => {
+//         server.start()
+//     } );
+//
+// projectCommand
+//     .command( 'start' )
+//     .action( () => {
+//         server.start()
+//     } );
 
 //TODO stop server
 //TODO kill on exit
