@@ -56,16 +56,11 @@ const {
     getWallets,
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'thorchain'
-let ASSET = 'RUNE'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
+let BLOCKCHAIN = 'ethereum'
+let ASSET = 'ETH'
+let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.0002"
 let spec = process.env['URL_PIONEER_SPEC']
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
-let noBroadcast = true
 let contextAlpha
 let contextBravo
 

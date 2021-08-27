@@ -26,9 +26,6 @@ import {
     showWelcome
 } from './modules/views'
 
-
-
-
 //platform
 // let platform = require("@pioneer-platform/platform");
 
