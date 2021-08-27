@@ -71,6 +71,9 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
+log.info(TAG+" spec: ",spec)
+log.info(TAG+" wss: ",wss)
+
 let noBroadcast = true
 
 const test_service = async function () {
