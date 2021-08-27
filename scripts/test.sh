@@ -26,7 +26,7 @@ then
 # Default mode
 else
   #support functions
-  cd e2e/sdk-support/abort-tx && npm run test && cd ../../../
+  cd e2e/sdk-support/abort-tx && npm run test && cd ../../../ &&/
 # TODO addmeback
 #  cd e2e/sdk-support/context-switching && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-support/forget-user && npm run test && cd ../../../ &&/
@@ -34,7 +34,7 @@ else
 #  cd e2e/sdk-support/rbf-ethereum && npm run test && cd ../../../ &&/
 
 #  #transfers
-#  cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run test && cd ../../../ &&/
+  cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run test && cd ../../../
 #  #ibc depsoit
 #  cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run test && cd ../../../ &&/
 #  #osmosis
