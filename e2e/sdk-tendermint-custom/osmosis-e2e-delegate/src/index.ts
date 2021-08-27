@@ -104,7 +104,7 @@ const test_service = async function () {
         log.info(tag,"balance: ",balance)
         assert(balance)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
+        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){

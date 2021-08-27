@@ -36,25 +36,18 @@ require("dotenv").config({path:'../../../../.env'})
 
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
-let BigNumber = require('@ethersproject/bignumber')
-let assert = require('assert')
+const assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
-let SDK = require('@pioneer-platform/pioneer-sdk')
-let wait = require('wait-promise');
-let sleep = wait.sleep;
-let midgard = require("@pioneer-platform/midgard-client")
-// let coincap = require("@pioneer-platform/coincap")
+const SDK = require('@pioneer-platform/pioneer-sdk')
+const wait = require('wait-promise');
+const sleep = wait.sleep;
+const midgard = require("@pioneer-platform/midgard-client")
 
 import {
-    Transfer,
-    Delegate,
-    JoinPool,
     IBCdeposit
 } from "@pioneer-platform/pioneer-types";
 
-let {
-    supportedBlockchains,
-    baseAmountToNative,
+const {
     nativeToBaseAmount,
 } = require("@pioneer-platform/pioneer-coins")
 
@@ -69,22 +62,20 @@ const {
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'cosmos'
-let ASSET = 'ATOM'
-let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
-let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
+const BLOCKCHAIN = 'cosmos'
+const ASSET = 'ATOM'
+const MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
+const TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
+const spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+const wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
-let noBroadcast = false
+const noBroadcast = false
 
 console.log("spec: ",spec)
 console.log("wss: ",wss)
 
 const test_service = async function () {
-    let tag = TAG + " | test_service | "
+    const tag = TAG + " | test_service | "
     try {
 
         //start app and get wallet
@@ -106,10 +97,22 @@ const test_service = async function () {
         log.info(tag,"balance: ",balance)
         assert(balance)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
+        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){
+            //verify
+            log.info(tag,"wallets.wallets[contextAlpha]: ",wallets.wallets[contextAlpha])
+
+            //
+            let params = {coin:ASSET,pubkey:masterAlpha}
+            let resultBalance = await wallets.wallets[contextAlpha].pioneerClient.instance.GetPubkeyBalance(params)
+            log.info(tag,"resultBalance: ",resultBalance)
+
+            //if !== then forget user
+
+            //throw error anyway because the pioneer server lied
+
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {

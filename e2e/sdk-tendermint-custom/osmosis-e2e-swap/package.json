@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/osmosis-e2e-delegate",
+  "name": "@pioneer-platform/osmosis-e2e-swap",
   "version": "8.1.21",
   "scripts": {
     "yarn": "yarn",

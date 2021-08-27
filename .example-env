@@ -13,6 +13,10 @@ FEATURE_SECRET_BLOCKCHAIN=true
 FEATURE_KAVA_BLOCKCHAIN=true
 FEATURE_TERRA_BLOCKCHAIN=true
 
+#your wallet
+WALLET_MAIN=alcohol woman abuse must during monitor noble actual mixed trade anger aisle
+ATOM_MASTER=cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj
+
 #pioneer server
 #for local dev
 #URL_PIONEER_SPEC=http://127.0.0.1:9001/spec/swagger.json
@@ -24,3 +28,5 @@ URL_PIONEER_SOCKET="wss://pioneers.dev"
 
 URL_OSMO_RPC=https://rpc-osmosis.keplr.app
 URL_OSMO_LCD=https://lcd-osmosis.keplr.app
+URL_COSMOS_LCD=https://lcd-cosmoshub.keplr.app
+URL_COSMOS_RPC=https://rpc-cosmoshub.keplr.app

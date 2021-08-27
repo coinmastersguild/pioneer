@@ -308,6 +308,7 @@ export class SDK {
             let tag = TAG + " | getUserParams | "
             try {
                 if(!this.context){
+                    log.info(tag,"No local context!")
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
                     log.info(tag,"userInfo: ",userInfo)
@@ -328,9 +329,10 @@ export class SDK {
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
                 log.info(tag,"context: ",this.context)
-                log.debug(tag,"blockchains: ",this.blockchains)
+                log.info(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
+                log.info(tag,"result: ",result)
                 if(result.wallets){
                     this.contexts = result.wallets
                     log.debug(tag,"result: ",result)

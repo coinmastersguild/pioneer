@@ -318,12 +318,20 @@ export async function continueSetup(event:any, data:any) {
                     }
                 } else {
                     await createUsername(event, data)
-                    continueSetup(event, data)
+                    return {
+                        setup:false,
+                        success:false,
+                        result:"username required! generated username"
+                    }
                 }
             }else{
                 if(config.spec && config.wss){
                     await startNetwork(event, data)
-                    continueSetup(event, data)
+                    return {
+                        setup:false,
+                        success:false,
+                        result:"starting network!"
+                    }
                 }else{
                     log.info(tag,"Checkpoint2b NO NETWORK found!")
                     if(config.queryKey){

@@ -26,7 +26,7 @@ if(!URL_OSMO_LCD) throw Error('missing env URL_OSMO_LCD')
 
 let URL_OSMO_POOLS = process.env['URL_OSMO_POOLS'] || `https://api-osmosis.imperator.co`
 
-let BASE_OSMO = 100000000
+let BASE_OSMO = 1000000
 
 /**********************************
  // Module
