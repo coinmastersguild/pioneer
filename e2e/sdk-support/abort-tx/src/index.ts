@@ -47,7 +47,6 @@ let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
 let {
-    supportedBlockchains,
     baseAmountToNative,
     nativeToBaseAmount,
 } = require("@pioneer-platform/pioneer-coins")
@@ -57,9 +56,6 @@ const {
     sendPairingCode,
     getContext,
     getWallets,
-    buildTransaction,
-    approveTransaction,
-    broadcastTransaction,
     cancelTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
@@ -70,9 +66,6 @@ let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
-
-log.info(TAG+" spec: ",spec)
-log.info(TAG+" wss: ",wss)
 
 let noBroadcast = true
 
