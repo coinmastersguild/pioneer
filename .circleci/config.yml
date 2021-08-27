@@ -16,8 +16,6 @@ jobs:
     steps:
       - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0
       - checkout
-      - run:
-          name: "test environment variables"
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
