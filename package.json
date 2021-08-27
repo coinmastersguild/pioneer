@@ -6,7 +6,8 @@
     "packages": [
       "modules/**/**/*",
       "services/**/*",
-      "apps/**/*"
+      "apps/**/*",
+      "e2e/**/*"
     ],
     "version": "independent"
   },
