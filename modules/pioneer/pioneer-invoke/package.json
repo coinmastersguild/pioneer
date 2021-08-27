@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/pioneer-types": "^8.1.32",
     "@pioneer-platform/signing": "^8.1.8",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",

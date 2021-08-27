@@ -11,12 +11,18 @@ coin=$3
 # DEV move (dont use jest)
 if [[ $2 = 'true' ]]
 then
-  cd e2e/sdk-transfers/thorchain-e2e-transfer && npm run dev && cd ../../../ &&/
-  cd e2e/sdk-transfers/ethereum-e2e-transfer && npm run dev && cd ../../../ &&/
-#   cd e2e/sdk-support/rbf-ethereum && npm run dev && cd ../../../ &&/
   cd e2e/sdk-support/abort-tx && npm run dev && cd ../../../ &&/
-  cd e2e/sdk-support/forget-user && npm run dev && cd ../../../ &&/
-  cd e2e/sdk-support/querykey-migration && npm run dev && cd ../../../ &&/
+  cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run dev && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run dev && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run dev && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run dev && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run dev && cd ../../../
+#  cd e2e/sdk-transfers/thorchain-e2e-transfer && npm run dev && cd ../../../ &&/
+#  cd e2e/sdk-transfers/ethereum-e2e-transfer && npm run dev && cd ../../../ &&/
+##   cd e2e/sdk-support/rbf-ethereum && npm run dev && cd ../../../ &&/
+#  cd e2e/sdk-support/abort-tx && npm run dev && cd ../../../ &&/
+#  cd e2e/sdk-support/forget-user && npm run dev && cd ../../../ &&/
+#  cd e2e/sdk-support/querykey-migration && npm run dev && cd ../../../ &&/
 #  cd e2e/sdk-support/context-switching && npm run dev && cd ../../../ &&/
 #  cd e2e/sdk-swaps/bitcoincash-e2e-swap && npm run dev && cd ../../../ &&/
 #  cd e2e/sdk-swaps/etherum-e2e-swap && npm run dev && cd ../../../ &&/
@@ -31,7 +37,8 @@ else
 #  cd e2e/sdk-support/forget-user && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-support/querykey-migration && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-support/rbf-ethereum && npm run test && cd ../../../ &&/
-  #transfers
+
+#  #transfers
   cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run test && cd ../../../ &&/
   #ibc depsoit
   cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run test && cd ../../../ &&/
@@ -39,6 +46,7 @@ else
   cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../ &&/
   cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../ &&/
   cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../
+
 #remember last entry can NOT have &&/
 
 #thorchain offline TODO re-enable

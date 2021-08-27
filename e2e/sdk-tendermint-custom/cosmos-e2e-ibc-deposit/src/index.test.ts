@@ -414,7 +414,9 @@ describe(' - e2e test '+BLOCKCHAIN+' ibc deposit - ', function() {
             let invocationView = await app.getInvocation(invocationId)
             log(tag,"invocationView3: (VIEW) ",invocationView)
             expect(invocationView).toBeDefined();
-            expect(invocationView.state).toBe('broadcasted');
+            if(!noBroadcast){
+                expect(invocationView.state).toBe('broadcasted');
+            }
         });
 
         it('Closes Websocket ', async function() {
