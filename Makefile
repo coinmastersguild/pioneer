@@ -21,8 +21,11 @@ build::
 test::
 	sh scripts/test.sh $(env) $(debug) $(coin)
 
+bump::
+	lerna version patch --yes
+
 publish::
-	lerna version patch --yes && lerna publish from-package --no-private --yes
+	lerna publish from-package --no-private --yes
 
 ## TODO start application
 up::
