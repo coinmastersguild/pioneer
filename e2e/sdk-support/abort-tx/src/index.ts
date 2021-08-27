@@ -67,10 +67,8 @@ let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
 let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
-let spec = process.env['URL_PIONEER_SPEC']
-let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let wss = process.env['URL_PIONEER_SOCKET']
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
 let noBroadcast = true
