@@ -26,7 +26,7 @@ then
 # Default mode
 else
   #support functions
-  cd e2e/sdk-support/abort-tx && npm run test && cd ../../../ &&/
+  cd e2e/sdk-support/abort-tx && npm run dev && cd ../../../ &&/
 # TODO addmeback
 #  cd e2e/sdk-support/context-switching && npm run test && cd ../../../ &&/
 #  cd e2e/sdk-support/forget-user && npm run test && cd ../../../ &&/
