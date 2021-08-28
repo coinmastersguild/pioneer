@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-e2e-swap",
-  "version": "8.1.21",
+  "version": "8.1.22",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,10 +15,10 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/midgard-client": "^8.1.14",
-    "@pioneer-platform/pioneer-app": "^8.1.19",
-    "@pioneer-platform/pioneer-sdk": "^8.1.21",
+    "@pioneer-platform/loggerdog": "^8.1.9",
+    "@pioneer-platform/midgard-client": "^8.1.20",
+    "@pioneer-platform/pioneer-app": "^8.1.25",
+    "@pioneer-platform/pioneer-sdk": "^8.1.27",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
