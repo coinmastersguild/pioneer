@@ -16,7 +16,8 @@
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
     "moment": "^2.29.1",
-    "wait-promise": "^0.4.1"
+    "wait-promise": "^0.4.1",
+    "typescript": "^3.9.5"
   },
   "description": "Cosmos events to redis pub/sub",
   "main": "./lib/index.js",
@@ -26,5 +27,5 @@
   ],
   "author": "Bithighlander <pioneer@gmail.com>",
   "license": "ISC",
-  "gitHead": "61817016c96d9a1fa3d741d440776ad2dbce8422"
+  "gitHead": "6555ac0afa34607d8c250794a974f183f56cc178"
 }
