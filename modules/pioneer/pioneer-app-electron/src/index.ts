@@ -51,19 +51,19 @@ let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
 let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
 let featureInsecurePassword = process.env['INSECURE_PASSWORD']
 
-let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
-//let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-spec = spec.replace(/"/g, '')
-let wss = process.env['URL_PIONEER_WS'] || 'ws://127.0.0.1:9001'
-// let wss = process.env['URL_PIONEER_WS'] || 'wss://pioneers.dev'
-wss = wss.replace(/"/g, '')
+// let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+// spec = spec.replace(/"/g, '')
+// let wss = process.env['URL_PIONEER_WS'] || 'ws://127.0.0.1:9001'
+let wss = process.env['URL_PIONEER_WS'] || 'wss://pioneers.dev'
+// wss = wss.replace(/"/g, '')
 let queryKey: string
 let username: any
 //blockchains
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','osmosis']
 
 
-export async function checkPioneerUrls(event: { sender: { send: (arg0: string, arg1: { result: any; server: any; }) => void; }; }, data: { servers: any; }) {
+export async function checkPioneerUrls(event: any, data: any) {
     let tag = TAG + " | checkPioneerUrl | ";
     try {
         // log.info(tag,"data: ",data)
@@ -158,8 +158,15 @@ export async function startNetwork(event:any, data:any) {
 export async function createUsername(event:any, data:any) {
   let tag = TAG + " | createUsername | ";
   try {
-    username = "user:"+uuidv4()
-    App.updateConfig({username:data.username});
+    let username
+    if(!data.username){
+        username = "user:"+uuidv4()
+    } else {
+        username = data.username
+    }
+
+    log.info(tag,"create username: ",username)
+    App.updateConfig({username});
     //write to config
   } catch (e) {
     console.error(tag, "e: ", e);
@@ -273,7 +280,7 @@ export async function continueSetup(event:any, data:any) {
             if(!config.queryKey) throw Error("Invalid config!")
             queryKey = config.queryKey
             //verify net inited
-            if(NETWORK){
+            if(NETWORK && NETWORK.instance){
                 log.info(tag,"Checkpoint2 NETWORK found!")
                 //is online?
                 let globals = await NETWORK.instance.Globals()

@@ -201,8 +201,8 @@ module.exports = {
     getConfig: function () {
         return getConfig();
     },
-    updateConfig: function (language:string) {
-        return updateConfig(language);
+    updateConfig: function (params:any) {
+        return updateConfig(params);
     },
     createWallet: function (type:string,wallet:Wallet) {
         return create_wallet(type,wallet);

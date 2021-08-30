@@ -33,6 +33,7 @@
     "cli-table": "^0.3.6",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.6.0",
+    "electron-log": "^4.4.1",
     "eosjs": "^21.0.4",
     "fetch": "^1.1.0",
     "fs-extra": "^9.0.1",
@@ -50,5 +51,5 @@
     "typescript": "^3.9.9",
     "when": "^3.7.8"
   },
-  "gitHead": "6555ac0afa34607d8c250794a974f183f56cc178"
+  "gitHead": "79665cced94aff051f8f641c21b1a982c05e4736"
 }
