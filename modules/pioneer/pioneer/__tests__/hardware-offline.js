@@ -102,7 +102,7 @@ let run_test = async function(){
 
         let walletInfo = await Wallet.init(KEEPKEY)
         console.log("walletInfo: ",walletInfo)
-        console.log("total Value: ",walletInfo.totalValueUsd)
+        // console.log("total Value: ",walletInfo.totalValueUsd)
 
         //RUNE
         let masterRUNE = await Wallet.getMaster("RUNE")

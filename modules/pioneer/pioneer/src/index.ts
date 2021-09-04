@@ -70,7 +70,6 @@ const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
 const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
 let GIG =  1000000000
-
 const OSMO_CHAIN="osmosis-1"
 
 function bech32ify(address:any, prefix:string) {
@@ -166,11 +165,12 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
-                if(!this.spec) throw Error("103: Must init a pioneer server spec")
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
+                        if(!config.mnemonic) throw Error("103: mnemonic required!")
+                        if(!config.username) throw Error("104: username required!")
                         if(!this.context && config.mnemonic){
                             //calculate
                             let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
@@ -189,6 +189,7 @@ module.exports = class wallet {
                         log.debug(tag,"isTestnet: ",this.isTestnet)
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
+                        if(!this.WALLET) throw Error("Failed to init wallet!")
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
 
                         //verify testnet
@@ -392,7 +393,16 @@ module.exports = class wallet {
 
                     return walletInfo
                 } else {
-                    log.debug(tag,"Offline mode!")
+                    log.info(tag,"Offline mode!")
+                    log.info(tag,"this: ",this)
+                    return {
+                        isTestnet:this.isTestnet,
+                        context:this.context,
+                        username:this.username,
+                        blockchains:this.blockchains,
+                        wallet:this.PUBLIC_WALLET,
+                        paths:this.paths
+                    }
                 }
             }catch(e){
                 log.error(tag,e)
@@ -598,8 +608,8 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.debug(tag,"address (HDwallet): ",address)
-                    log.debug(tag,"address (private): ",output)
+                    log.info(tag,"address (HDwallet): ",address)
+                    log.info(tag,"address (private): ",output)
                     if(address !== output) {
                         throw Error("unable to verify address in HDwallet!")
                     }

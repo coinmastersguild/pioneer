@@ -16,7 +16,8 @@ network.init()
 //already claimed
 // let address = "0x57e5551F5c9FB975C44Be80c27eA924c91701616"
 //elgable
-let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
+//let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
+let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 
 // network.checkAirdropClaim(address)
 //     .then(function(resp){
@@ -192,10 +193,10 @@ let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
 //         console.log(resp)
 //     })
 
-network.getInfo()
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getInfo()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.getInfo()
 //     .then(function(resp){
@@ -227,10 +228,10 @@ network.getInfo()
 //     })
 
 //getBalanceToken
-// network.getBalanceToken(address,"0xc770eefad204b5180df6a14ee197d99d808ee52d")
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getBalanceToken(address,"0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7")
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getBalanceTokens(address)
 //     .then(function(resp){
