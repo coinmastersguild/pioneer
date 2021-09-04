@@ -32,7 +32,7 @@ export interface EventsConfig {
 
 export interface AppConfig {
     wss: string;
-    password?:string | undefined
+    password?:string
     spec: string;
     username:string
     queryKey:string
@@ -63,6 +63,7 @@ export interface PioneerConfig {
     localeSelected?:boolean
     isCli?:boolean
     temp?:string
+    password?:string
     blockchains:any
     created?:string
     walletDescription?:any

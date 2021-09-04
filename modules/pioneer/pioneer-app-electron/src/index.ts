@@ -6,7 +6,7 @@
           -highlander
  */
 
-const TAG = ' | APP | '
+const TAG = ' | pioneer-app-electron | '
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 
 const loadtest = require('loadtest');
@@ -270,6 +270,19 @@ export async function initConfig() {
     }
 }
 
+/*
+    Setup Status code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+
+    //TODO fio/eos/usernames ext
+ */
+
 export async function continueSetup(event:any, data:any) {
     let tag = TAG + " | continueSetup | ";
     try {
@@ -309,6 +322,7 @@ export async function continueSetup(event:any, data:any) {
                             log.info(tag,"Checkpoint6a wallet ready")
                             return {
                                 setup:true,
+                                status:0,
                                 success:true,
                                 result:"ready to start!"
                             }
@@ -316,6 +330,7 @@ export async function continueSetup(event:any, data:any) {
                             log.info(tag,"Checkpoint6b wallet failed to load")
                             return {
                                 setup:false,
+                                status:2,
                                 success:false,
                                 result:"setup required! wallet not initialized"
                             }
@@ -328,15 +343,19 @@ export async function continueSetup(event:any, data:any) {
                     return {
                         setup:false,
                         success:false,
+                        status:2,
                         result:"username required! generated username"
                     }
                 }
-            }else{
+            } else {
+                log.info(tag,"Checkpoint2b Network instance not found!")
+                log.info(tag,"NETWORK: ",NETWORK)
                 if(config.spec && config.wss){
                     await startNetwork(event, data)
                     return {
                         setup:false,
                         success:false,
+                        status:1,
                         result:"starting network!"
                     }
                 }else{
@@ -351,7 +370,6 @@ export async function continueSetup(event:any, data:any) {
                         }
                     }
                 }
-
             }
         } else {
             event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
@@ -398,7 +416,7 @@ export async function checkspec(event:any, data:any) {
         })
         networkTest = await networkTest.init()
 
-        //
+        //Globals
         let globals = await networkTest.instance.Globals()
         globals = globals.data
         log.info(tag,"globals: ",globals)
@@ -510,6 +528,20 @@ export async function getUsbDevices(event:any, data:any) {
 //   }
 // }
 
+/*
+    Setup Status code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+    5 need password
+
+    //TODO fio/eos/usernames ext
+ */
+
 export async function onStart(event:any, data:any) {
     let tag = TAG + " | onStart | ";
     try {
@@ -541,24 +573,11 @@ export async function onStart(event:any, data:any) {
 
         //let configStatus = checkConfigs()
         let config = await App.getConfig()
-        delete config.isTestnet //kill flag with fire rabble
 
         //send config to ui
         event.sender.send('updateConfig',config)
-
         log.info(tag,"config: ",config)
         //log.debug(tag,"configStatus() | configStatus: ", configStatus)
-
-        if(data.password){
-            config.temp = data.password
-            WALLET_PASSWORD = data.password
-            if(featureInsecurePassword){
-                //write password to file (auto-login)
-                //NOTE: it is bad form to store USER passwords on disk
-                //however: it is accepted to store generated passwords on disk
-                await App.updateConfig({temp: data.password});
-            }
-        }
 
         if(!config){
             throw Error("Attempting to start wallet before configuration!")
@@ -576,32 +595,63 @@ export async function onStart(event:any, data:any) {
         }
 
         if(!config.username){
-            throw Error("2 Attempting to start wallet before configuration!")
+            throw Error("Attempting to start wallet before username configuration!")
         }
 
-        if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
-            WALLET_HASH = config.passwordHash
-            event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
-            return
-        } else if(config.temp) {
+        /*
+            Password Logic
+
+            if "temp" in config, attempt to unlock context wallet
+            if fail, return needed password
+
+            after success, iterate over all wallets with pw
+            if unlocked, mark
+            if locked mark
+
+         */
+
+        if(config.temp){
             WALLET_PASSWORD = config.temp
-        } else {
-            //generate password
-            if(featurePasswordless){
-                log.info(tag,"featurePasswordless TRUE")
-                //create password
-                let randomChars = generator.generateMultiple(1, {
-                    length: 10,
-                    uppercase: false
-                });
-                WALLET_PASSWORD = randomChars[0]
-                await App.updateConfig({temp:WALLET_PASSWORD});
-            } else {
-                //get password
-                event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
-                return true
-            }
         }
+        if(data.password){
+            //overrides temp
+            WALLET_PASSWORD = data.password
+        }
+
+
+
+        // if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
+        //     WALLET_HASH = config.passwordHash
+        //     event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+        //     return {
+        //         success:false,
+        //         status:5,
+        //         msg:"Need a password to unlock wallet! (no temp found)"
+        //     }
+        // } else if(config.temp) {
+        //     WALLET_PASSWORD = config.temp
+        // } else {
+        //     //generate password
+        //     if(featurePasswordless){
+        //         log.info(tag,"featurePasswordless TRUE")
+        //         //create password
+        //         let randomChars = generator.generateMultiple(1, {
+        //             length: 10,
+        //             uppercase: false
+        //         });
+        //         WALLET_PASSWORD = randomChars[0]
+        //         await App.updateConfig({temp:WALLET_PASSWORD});
+        //     } else {
+        //         //get password
+        //         event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+        //         return {
+        //             success:false,
+        //             status:5,
+        //             msg:"Need a password to unlock wallet!"
+        //         }
+        //     }
+        // }
+
         if(!WALLET_PASSWORD) throw Error("Error: Password required! ")
 
         //get wallet files
@@ -617,16 +667,16 @@ export async function onStart(event:any, data:any) {
         //TODO blockchains configurable?
         config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
 
-        //start App
-        if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")
-        config.password = WALLET_PASSWORD
-        log.info(tag,"config: ",config)
 
-        //TODO validate config?
-        // let resultInit = await initConfig()
+        if(WALLET_PASSWORD)config.temp = WALLET_PASSWORD
+        log.info(tag,"config: ",config)
 
         let resultInit = await App.init(config)
         log.info(tag,"resultInit: ",resultInit)
+
+        if(!resultInit) throw Error("103: app failed to init!")
+        if(!resultInit.events) throw Error("104: app failed to init, missing events!")
+
         //push devices
         if(resultInit.devices){
             event.sender.send('loadDevices',{devices:resultInit.devices})
@@ -712,6 +762,20 @@ export async function onStart(event:any, data:any) {
     }
 }
 
+/*
+    refreshPioneer code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+
+    //TODO fio/eos/usernames ext
+ */
+
+
 export async function refreshPioneer(event:any, data:any) {
     let tag = TAG + " | refreshPioneer | ";
     try {
@@ -747,7 +811,7 @@ export async function refreshPioneer(event:any, data:any) {
 
                 //wallets
                 let walletNames = await App.getWalletNames()
-                if(walletNames){
+                if(walletNames) {
                     WALLETS_NAMES = walletNames
                     log.info(tag,"walletNames: ",walletNames)
                 } else {
@@ -766,16 +830,25 @@ export async function refreshPioneer(event:any, data:any) {
 
             } else {
                 log.info(tag,"Wallet not started yet! ")
+                return {
+                    succcess: false,
+                    status: 1
+                }
             }
         } else {
             log.info(tag,"No config file! start new user")
             //TODO
             //launch startup
             event.sender.send('navigation',{ dialog: 'Welcome', action: 'open'})
+
+            return {
+                succcess: false,
+                status: 3
+            }
         }
     } catch (e) {
-        console.error(tag, "e: ", e);
-        return {error:e};
+        log.error(tag,e)
+        throw Error(e)
     }
 }
 
@@ -1092,7 +1165,6 @@ export async function createWallet(event:any, data:any) {
                 if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
                 let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
                 data.mnemonic = mnemonic
-
             }else{
                 throw Error("unhandled action featureSoftwareCreate: "+featureSoftwareCreate)
             }

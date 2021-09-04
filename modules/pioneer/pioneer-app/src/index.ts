@@ -5,7 +5,7 @@
 
  */
 
-const TAG = " | app | ";
+const TAG = " | pioneer-app | ";
 
 import {
     getConfig,
@@ -112,8 +112,8 @@ module.exports = {
     isInitialized: function () {
         return IS_INIT;
     },
-    init: function (config: any,isTestnet?:boolean) {
-        return init_wallet(config,isTestnet);
+    init: function (config: any) {
+        return init_wallet(config);
     },
     initConfig: function (language: any) {
         return innitConfig(language);
@@ -1008,7 +1008,7 @@ let create_wallet = async function (type:string,wallet:any,isTestnet?:boolean) {
     }
 };
 
-let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
+let init_wallet = async function (config:AppConfig) {
     let tag = TAG+" | init_wallet | ";
     try {
         if(IS_INIT) throw Error("App already initialized!")
@@ -1023,9 +1023,8 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
         if(!config.username) throw Error("102: username required!")
         if(!config.queryKey) throw Error("103: queryKey required!")
 
-
         let output:any = {}
-
+        log.info(tag,"config: ",config)
         //get wallets
         let walletFiles = await getWallets()
         log.debug(tag,"walletFiles: ",walletFiles)
@@ -1040,9 +1039,9 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
         userInfoRemote = userInfoRemote.data
         log.info(tag,"userInfoRemote: ",userInfoRemote)
         //check if username matches config
-
         //if doesnt, create new apiKey
-        if(userInfoRemote.username !== config.username){
+        if(userInfoRemote.success && userInfoRemote.username !== config.username){
+            log.info(tag,"Migrating API key!")
             //migrate
             config = migrate_query_key()
             // throw Error("103: queryKey migration! restart application")
@@ -1179,7 +1178,7 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                         queryKey:config.queryKey
                     }
                     log.debug(tag,"KEEPKEY init config: ",configPioneer)
-                    let wallet = new Pioneer('keepkey',configPioneer,isTestnet);
+                    let wallet = new Pioneer('keepkey',configPioneer);
                     //init
                     if(!KEEPKEY) throw Error("Can not start hardware wallet without global KEEPKEY")
                     let walletInfo = await wallet.init(KEEPKEY)
@@ -1239,11 +1238,24 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                     const walletCrypto = new native.crypto.EncryptedWallet(engine);
 
                     //if wallet has pw, use it
-                    if(walletFile.password) config.password = walletFile.password
-
-                    //TODO get rid of email bs in hdwallet
-                    let password = config.password || config.temp
-                    if(!password) throw Error("Missing Password!")
+                    let password
+                    if(walletFile.password) {
+                        log.info(tag,"Password in wallet file, using password")
+                        password = walletFile.password
+                    }
+                    //password ovrrides temp
+                    if(!password && config.password){
+                        log.info(tag,"Password in config file, using password")
+                        password = config.password
+                    }
+                    if(!password && config.temp){
+                        log.info(tag,"Password in config temp file, using password")
+                        password = config.temp
+                    }
+                    if(!password) {
+                        log.error(tag,"invalid config! config: ",config)
+                        throw Error("unable to find a Password!")
+                    }
                     const resultOut = await walletCrypto.init('placeholder', password, walletFile.vault);
                     if(!walletFile.vault) throw Error("Wallet vault not found! ")
 
@@ -1275,7 +1287,8 @@ let init_wallet = async function (config:AppConfig,isTestnet?:boolean) {
                         pioneerApi:true,
                         spec:config.spec,
                         wss:config.wss,
-                        queryKey:config.queryKey
+                        queryKey:config.queryKey,
+                        password:config.temp || config.password
                     }
                     if(walletPaths) configPioneer.paths = walletPaths
 

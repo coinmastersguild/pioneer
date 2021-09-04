@@ -16,8 +16,7 @@
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
-    "prepublish": "npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "@babel/runtime": "^7.14.0",
