@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-hardware",
-  "version": "8.1.26",
+  "version": "8.1.27",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -13,8 +13,8 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.10",
-    "@pioneer-platform/pioneer-coins": "^8.1.26",
+    "@pioneer-platform/loggerdog": "^8.1.11",
+    "@pioneer-platform/pioneer-coins": "^8.1.27",
     "@shapeshiftoss/hdwallet-core": "latest",
     "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "latest",
     "@shapeshiftoss/hdwallet-keepkey-tcp": "latest",

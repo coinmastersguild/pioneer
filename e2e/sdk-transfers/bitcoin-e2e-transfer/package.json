@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/bitcoin-e2e-transfer",
-  "version": "8.1.23",
+  "version": "8.1.24",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,10 +15,10 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.10",
-    "@pioneer-platform/midgard-client": "^8.1.21",
-    "@pioneer-platform/pioneer-app": "^8.1.26",
-    "@pioneer-platform/pioneer-sdk": "^8.1.28",
+    "@pioneer-platform/loggerdog": "^8.1.11",
+    "@pioneer-platform/midgard-client": "^8.1.22",
+    "@pioneer-platform/pioneer-app": "^8.1.27",
+    "@pioneer-platform/pioneer-sdk": "^8.1.29",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
