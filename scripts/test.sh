@@ -11,6 +11,8 @@ coin=$3
 # DEV move (dont use jest)
 if [[ $2 = 'true' ]]
 then
+  cd e2e/app-offline/offline-electron-app && npm run dev && cd ../../../ &&/
+  cd e2e/app-online/online-electron-app && npm run dev && cd ../../../ &&/
   cd e2e/sdk-support/abort-tx && npm run dev && cd ../../../ &&/
   cd e2e/sdk-transfers/cosmos-e2e-transfer && npm run dev && cd ../../../ &&/
   cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run dev && cd ../../../ &&/
@@ -30,6 +32,8 @@ then
 
 # Default mode
 else
+  cd e2e/app-offline/offline-electron-app && npm run test && cd ../../../ &&/
+  cd e2e/app-online/online-electron-app && npm run test && cd ../../../ &&/
   #support functions
   cd e2e/sdk-support/abort-tx && npm run test && cd ../../../ &&/
 # TODO addmeback
@@ -44,7 +48,7 @@ else
   cd e2e/sdk-tendermint-custom/cosmos-e2e-ibc-deposit && npm run test && cd ../../../ &&/
   #osmosis
   cd e2e/sdk-tendermint-custom/osmosis-e2e-swap && npm run test && cd ../../../ &&/
-  cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../ &&/
+  cd e2e/sdk-tendermint-custom/osmosis-e2e-delegate && npm run test && cd ../../../
 #  cd e2e/sdk-tendermint-custom/osmosis-e2e-lp-add && npm run test && cd ../../../ BROKE TODO FIXME
 
 #remember last entry can NOT have &&/
