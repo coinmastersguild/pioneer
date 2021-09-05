@@ -24,6 +24,10 @@ const Network = require("@pioneer-platform/pioneer-client")
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 import {v4 as uuidv4} from 'uuid';
 
+import {
+    AppConfig
+} from "@pioneer-platform/pioneer-types";
+
 //Globals
 let WALLET_INIT = false
 let WALLETS_LOADED: never[] = []
@@ -232,7 +236,7 @@ export async function attemptPair(event:any, data:any) {
 //   }
 // }
 
-export async function initConfig() {
+export async function initConfig(config?:any){
     let tag = TAG + " | initConfig | ";
     try {
         let config = await App.getConfig()
@@ -255,12 +259,13 @@ export async function initConfig() {
             log.info(tag,"current env!: spec:",spec)
             log.info(tag,"current env!: wss:",wss)
             log.info(tag,"current env!: blockchains:",blockchains)
+
             //create key/save to config
             await App.initConfig("english");
             queryKey = uuidv4()
             App.updateConfig({queryKey});
-            App.updateConfig({spec});
-            App.updateConfig({wss});
+            App.updateConfig({spec:config.spec || spec});
+            App.updateConfig({wss: config.wss || wss});
             App.updateConfig({blockchains});
             return true
         }
@@ -292,8 +297,50 @@ export async function continueSetup(event:any, data:any) {
             log.info(tag,"Checkpoint1 config found!")
             if(!config.queryKey) throw Error("Invalid config!")
             queryKey = config.queryKey
+
+            //is username set?
+            if(config.username){
+                log.info(tag,"username: ",config.username)
+                log.info(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
+                username = config.username
+                //start wallet?
+                if(!WALLET_INIT){
+                    log.info(tag,"Checkpoint5a Started Wallet!")
+                    //if wallet files?
+                    let walletFiles = await App.getWalletNames()
+                    log.info(tag,"walletFiles: ",walletFiles)
+                    if(walletFiles.length > 0){
+                        log.info(tag,"Checkpoint6a wallet ready")
+                        return {
+                            setup:true,
+                            status:0,
+                            success:true,
+                            result:"ready to start!"
+                        }
+                    } else {
+                        log.info(tag,"Checkpoint6b wallet failed to load")
+                        return {
+                            setup:false,
+                            status:2,
+                            success:false,
+                            result:"setup required! wallet not initialized"
+                        }
+                    }
+                } else {
+                    log.info(tag,"Checkpoint5b Wallet already started! will not re-attempt")
+                }
+            } else {
+                await createUsername(event, data)
+                return {
+                    setup:false,
+                    success:false,
+                    status:2,
+                    result:"username required! generated username"
+                }
+            }
+
             //verify net inited
-            if(NETWORK && NETWORK.instance){
+            if(NETWORK && NETWORK.instance && !data.isOffline){
                 log.info(tag,"Checkpoint2 NETWORK found!")
                 //is online?
                 let globals = await NETWORK.instance.Globals()
@@ -306,51 +353,12 @@ export async function continueSetup(event:any, data:any) {
                     online:true,
                     globals
                 })
-
-                //is username set?
-                if(config.username){
-                    log.info(tag,"username: ",config.username)
-                    log.info(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
-                    username = config.username
-                    //start wallet?
-                    if(!WALLET_INIT){
-                        log.info(tag,"Checkpoint5a Started Wallet!")
-                        //if wallet files?
-                        let walletFiles = await App.getWalletNames()
-                        log.info(tag,"walletFiles: ",walletFiles)
-                        if(walletFiles.length > 0){
-                            log.info(tag,"Checkpoint6a wallet ready")
-                            return {
-                                setup:true,
-                                status:0,
-                                success:true,
-                                result:"ready to start!"
-                            }
-                        } else {
-                            log.info(tag,"Checkpoint6b wallet failed to load")
-                            return {
-                                setup:false,
-                                status:2,
-                                success:false,
-                                result:"setup required! wallet not initialized"
-                            }
-                        }
-                    } else {
-                        log.info(tag,"Checkpoint5b Wallet already started! will not re-attempt")
-                    }
-                } else {
-                    await createUsername(event, data)
-                    return {
-                        setup:false,
-                        success:false,
-                        status:2,
-                        result:"username required! generated username"
-                    }
-                }
             } else {
                 log.info(tag,"Checkpoint2b Network instance not found!")
-                log.info(tag,"NETWORK: ",NETWORK)
-                if(config.spec && config.wss){
+                log.info(tag,"data: ",data)
+                log.debug(tag,"NETWORK: ",NETWORK)
+                if(config.spec && config.wss && !data.isOffline){
+                    log.info(tag,"Checkpoint3 starting Network")
                     await startNetwork(event, data)
                     return {
                         setup:false,
@@ -359,14 +367,29 @@ export async function continueSetup(event:any, data:any) {
                         result:"starting network!"
                     }
                 }else{
-                    log.info(tag,"Checkpoint2b NO NETWORK found!")
-                    if(config.queryKey){
-                        log.info(tag,"Checkpoint3a Starting network select!")
-                        event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
+                    log.info(tag,"Checkpoint3b not starting Network")
+                    if(!data.isOffline){
+                        log.info(tag,"Checkpoint4 not offline, attempting to start network")
+                        if(config.queryKey){
+                            log.info(tag,"Checkpoint3a Starting network select!")
+                            event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
+                            return {
+                                setup:false,
+                                success:false,
+                                result:"setup required! network not found!"
+                            }
+                        } else {
+                            return {
+                                setup:false,
+                                success:false,
+                                result:"setup required! network not found! invalid config, missing queryKey"
+                            }
+                        }
+                    }else {
                         return {
-                            setup:false,
-                            success:false,
-                            result:"setup required! network not found!"
+                            setup:true,
+                            success:true,
+                            result:"offline setup complete!"
                         }
                     }
                 }
@@ -671,11 +694,15 @@ export async function onStart(event:any, data:any) {
         if(WALLET_PASSWORD)config.temp = WALLET_PASSWORD
         log.info(tag,"config: ",config)
 
+        if(data.isOffline){
+            config.pioneerApi = false
+        }
+
         let resultInit = await App.init(config)
         log.info(tag,"resultInit: ",resultInit)
 
         if(!resultInit) throw Error("103: app failed to init!")
-        if(!resultInit.events) throw Error("104: app failed to init, missing events!")
+        //if(!resultInit.events) throw Error("104: app failed to init, missing events!")
 
         //push devices
         if(resultInit.devices){
@@ -707,20 +734,23 @@ export async function onStart(event:any, data:any) {
 
 
         //wallet events
-        resultInit.events.on('unsignedTx', async (transaction:any) => {
-            log.info(tag,"*** unsignedTx: ", transaction)
-            if(!transaction.invocationId){
-                if(transaction.swap && transaction.swap.invocationId) transaction.invocationId = transaction.swap.invocationId
-                if(transaction.transaction && transaction.transaction.invocationId) transaction.invocationId = transaction.transaction.invocationId
-            }
-            if(!transaction.invocationId) throw Error("failed to find transaction.invocationId")
+        if(resultInit.events){
+            resultInit.events.on('unsignedTx', async (transaction:any) => {
+                log.info(tag,"*** unsignedTx: ", transaction)
+                if(!transaction.invocationId){
+                    if(transaction.swap && transaction.swap.invocationId) transaction.invocationId = transaction.swap.invocationId
+                    if(transaction.transaction && transaction.transaction.invocationId) transaction.invocationId = transaction.transaction.invocationId
+                }
+                if(!transaction.invocationId) throw Error("failed to find transaction.invocationId")
 
-            event.sender.send('setInvocationContext',{invocationId:transaction.invocationId})
-            let invocation = await App.getInvocation(transaction.invocationId)
-            log.info(tag,"*** invocation: ", invocation)
-            //open invocation dialog
-            event.sender.send('addInvocation',invocation)
-        })
+                event.sender.send('setInvocationContext',{invocationId:transaction.invocationId})
+                let invocation = await App.getInvocation(transaction.invocationId)
+                log.info(tag,"*** invocation: ", invocation)
+                //open invocation dialog
+                event.sender.send('addInvocation',invocation)
+            })
+        }
+
 
         //TODO block events per blockchain activated
 
@@ -730,22 +760,23 @@ export async function onStart(event:any, data:any) {
 
         //globals
 
+        if(config.pioneerApi) {
+            //get user info
+            let userInfo = await App.getUserInfo()
+            if(!userInfo.context) throw Error("113: invalid user! missing context!")
+            if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
+                log.info(tag,"set context to remote")
+                WALLET_CONTEXT = userInfo.context
+                event.sender.send('setContext',{context:userInfo.context})
+                let resultUpdateConextRemote = await App.setContext(userInfo.context)
+                log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+            }
 
-        //get user info
-        let userInfo = await App.getUserInfo()
-        if(!userInfo.context) throw Error("113: invalid user! missing context!")
-        if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
-            log.info(tag,"set context to remote")
-            WALLET_CONTEXT = userInfo.context
-            event.sender.send('setContext',{context:userInfo.context})
-            let resultUpdateConextRemote = await App.setContext(userInfo.context)
-            log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+            //get invocations
+            let invocationsRemote = await App.getInvocations()
+            log.info(tag,"invocationsRemote: ",invocationsRemote)
+            event.sender.send('invocations',invocationsRemote)
         }
-
-        //get invocations
-        let invocationsRemote = await App.getInvocations()
-        log.info(tag,"invocationsRemote: ",invocationsRemote)
-        event.sender.send('invocations',invocationsRemote)
 
         //load masters
         // let info = await context.getInfo(contextName)

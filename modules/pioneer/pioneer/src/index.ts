@@ -105,6 +105,7 @@ module.exports = class wallet {
     private sendToAddress: (intent: SendToAddress) => Promise<any>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
     private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
+    private masters: any;
     private mode: string;
     private queryKey: string | undefined;
     private username: string;
@@ -143,7 +144,11 @@ module.exports = class wallet {
         this.APPROVE_QUEUE = []
         this.PENDING_QUEUE = []
         this.isTestnet = false
-        this.offline = false //TODO supportme
+        if(config.pioneerApi){
+            this.offline = false
+        }else{
+            this.offline = true
+        }
         this.mode = config.mode
         this.context = config.context
         this.queryKey = config.queryKey
@@ -243,6 +248,8 @@ module.exports = class wallet {
                                 pubkey.symbol = nativeAsset
                             }
                             this.PUBLIC_WALLET[pubkey.symbol] = pubkey
+                            if(!this.masters) this.masters = {}
+                            this.masters[pubkey.symbol] = pubkey.master
                         }
                         break;
                     case HDWALLETS.keepkey:
@@ -448,8 +455,16 @@ module.exports = class wallet {
                     //query api
                     walletInfo = await this.pioneerClient.instance.Info(context)
                     log.debug(tag,"walletInfo: ",walletInfo)
+                    walletInfo = walletInfo.data
+                    walletInfo.pioneerApi = true
+                } else {
+                    walletInfo.pioneerApi = false
+                    walletInfo.pubkeys = this.pubkeys
+                    walletInfo.wallet = this.PUBLIC_WALLET
+                    walletInfo.paths = this.paths
+                    walletInfo.masters = this.masters
                 }
-                return walletInfo.data
+                return walletInfo
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

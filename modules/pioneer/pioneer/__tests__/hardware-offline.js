@@ -77,6 +77,7 @@ let run_test = async function(){
             return b[2] - a[2];
         });
         console.log("\n \n PIN ENTRY \n \n " + table.toString() + "\n \n");
+
         //end keepkey
         //pioneer
         let config = {

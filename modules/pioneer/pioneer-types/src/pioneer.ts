@@ -30,6 +30,31 @@ export interface EventsConfig {
     queryKey?:string
 }
 
+/*
+    TODO combine all configs?
+    tech debt
+ */
+export interface Config {
+    walletId?:string
+    context:string
+    blockchains:any
+    wss?:string,
+    spec:string,
+    env:string,
+    mode:string,
+    username:string,
+    addresses?:[]
+    wallet?:any,
+    pubkeys?:any,
+    auth?:string,
+    paths?:any,
+    privWallet?:any,
+    mnemonic?:string,
+    queryKey?:string
+    offline?:boolean
+    pioneerApi?:boolean
+}
+
 export interface AppConfig {
     wss: string;
     password?:string
@@ -41,6 +66,7 @@ export interface AppConfig {
     localeSelected?:boolean
     isCli?:boolean
     temp?:string
+    pioneerApi:boolean
     blockchains:any
     created?:string
 }
@@ -268,25 +294,5 @@ export interface SendToAddress {
     noBroadcast?:boolean
 }
 
-export interface Config {
-    walletId?:string
-    context:string
-    blockchains:any
-    wss?:string,
-    spec:string,
-    env:string,
-    mode:string,
-    username:string,
-    addresses?:[]
-    wallet?:any,
-    pubkeys?:any,
-    auth?:string,
-    paths?:any,
-    privWallet?:any,
-    mnemonic?:string,
-    queryKey?:string
-    offline?:boolean
-    pioneerApi?:boolean
-}
 
 

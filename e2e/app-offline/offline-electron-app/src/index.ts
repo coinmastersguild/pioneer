@@ -50,7 +50,11 @@ const App = require('@pioneer-platform/pioneer-app-electron')
 
 const Hardware = require("@pioneer-platform/pioneer-hardware")
 
-const TEST_SEED = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+
+const TEST_SEED = process.env['WALLET_MAIN']
+if(!TEST_SEED) throw Error("Failed to load seed!")
 
 let event = {
     sender:{
@@ -72,28 +76,6 @@ let onStartMain = async function(event:any, data:any){
         let onStartResult = await App.onStart(event,data)
         log.info(tag,"onStartResult: ",onStartResult)
 
-        //on on invocations add to queue
-        onStartResult.events.on('message', async (request:any) => {
-            log.info(tag,"**** message MAIN: ", request)
-            if(!request.invocationId) throw Error("102: invalid invocation!")
-            switch(request.type) {
-                case 'swap':
-                    break;
-                case 'approve':
-                    break;
-                case 'transfer':
-                    //open invocation window
-                    event.sender.send('navigation',{ dialog: 'Invocation', action: 'open'})
-                    //set invocationConext to invocationId
-                    event.sender.send('setInvocationContext',{ invocationId:request.invocationId })
-                    bringWindowToFront()
-                    break;
-                case 'context':
-                    break;
-                default:
-                    log.error("Unknown event: "+request.type)
-            }
-        })
         event.sender.send('setContext',{context:onStartResult.context})
         return onStartResult
     }catch(e){
@@ -111,6 +93,12 @@ const test_service = async function () {
         log.info(tag,"config: ",config)
 
         // setup process
+        config = {
+            wss:'offline',
+            spec:'offline',
+            mode:'offline'
+        }
+        await App.initConfig(config)
         // Iterate through setup
 
         let isSetup = false
@@ -122,7 +110,9 @@ const test_service = async function () {
                 throw Error("Failed to configure!")
             }
             //
-            let data = {}
+            let data = {
+                isOffline:true
+            }
             let resultSetup = await App.continueSetup(event, data)
             log.info(tag,"resultSetup: ",resultSetup)
 
@@ -164,19 +154,20 @@ const test_service = async function () {
 
 
         //
-        let data = {}
+        let data = {
+            password:"123",
+            pionerApi:false,
+            isOffline:true
+        }
         let onStartResult = await onStartMain(event, data)
         log.info(tag,"onStartResult: ",onStartResult)
+        assert(onStartResult)
 
+        //get wallet in context
+        log.info(tag,"context: ",onStartResult.context)
+        log.info(tag,"wallet 0: ",onStartResult.wallets[0])
 
-        //refresh
-        let resultRefresh = await App.refreshPioneer(event, data)
-        log.info(tag,"resultRefresh: ",resultRefresh)
-        assert(resultRefresh)
-
-
-
-
+        //TODO filter wallets by context
 
         //get balances
 
