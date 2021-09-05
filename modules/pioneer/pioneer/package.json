@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer",
-  "version": "8.1.26",
+  "version": "8.1.27",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -23,12 +23,12 @@
     "@bithighlander/hdwallet-core": "^1.10.19",
     "@bithighlander/hdwallet-native": "^1.10.19",
     "@cosmostation/cosmosjs": "^0.9.5",
-    "@pioneer-platform/coincap": "^8.1.11",
-    "@pioneer-platform/eth-crypto": "^8.1.23",
-    "@pioneer-platform/loggerdog": "^8.1.11",
-    "@pioneer-platform/pioneer-client": "^8.1.16",
-    "@pioneer-platform/pioneer-coins": "^8.1.27",
-    "@pioneer-platform/pioneer-types": "^8.1.35",
+    "@pioneer-platform/coincap": "^8.1.12",
+    "@pioneer-platform/eth-crypto": "^8.1.24",
+    "@pioneer-platform/loggerdog": "^8.1.12",
+    "@pioneer-platform/pioneer-client": "^8.1.17",
+    "@pioneer-platform/pioneer-coins": "^8.1.28",
+    "@pioneer-platform/pioneer-types": "^8.1.36",
     "@types/google-protobuf": "^3.15.1",
     "bchaddrjs": "^0.5.2",
     "bech32": "^1.1.4",
@@ -50,7 +50,7 @@
     "web3-utils": "^1.3.5"
   },
   "devDependencies": {
-    "@pioneer-platform/pioneer-hardware": "^8.1.27",
+    "@pioneer-platform/pioneer-hardware": "^8.1.28",
     "@types/jest": "^25.2.3",
     "@types/node": "^13.13.50",
     "@types/source-map-support": "^0.5.3",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/kava-tx-builder",
-  "version": "8.1.11",
+  "version": "8.1.12",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@kava-labs/javascript-sdk": "^4.0.1-beta.2",
-    "@pioneer-platform/loggerdog": "^8.1.11",
-    "@pioneer-platform/terra-network": "^8.1.11",
+    "@pioneer-platform/loggerdog": "^8.1.12",
+    "@pioneer-platform/terra-network": "^8.1.12",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
