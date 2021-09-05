@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/rbf-ethereum-e2e",
-  "version": "8.1.27",
+  "version": "8.1.28",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -14,11 +14,11 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.12",
-    "@pioneer-platform/midgard-client": "^8.1.23",
-    "@pioneer-platform/pioneer-app": "^8.1.28",
-    "@pioneer-platform/pioneer-app-e2e": "^8.1.29",
-    "@pioneer-platform/pioneer-sdk": "^8.1.30",
+    "@pioneer-platform/loggerdog": "^8.1.13",
+    "@pioneer-platform/midgard-client": "^8.1.24",
+    "@pioneer-platform/pioneer-app": "^8.1.29",
+    "@pioneer-platform/pioneer-app-e2e": "^8.1.30",
+    "@pioneer-platform/pioneer-sdk": "^8.1.31",
     "assert": "^2.0.0",
     "cli-table": "^0.3.6",
     "dotenv": "^6.2.0",

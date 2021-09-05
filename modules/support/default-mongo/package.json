@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/default-mongo",
-  "version": "8.1.12",
+  "version": "8.1.13",
   "dependencies": {
     "dotenv": "^8.0.0",
     "monk": "latest"
