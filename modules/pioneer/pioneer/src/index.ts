@@ -401,7 +401,7 @@ module.exports = class wallet {
                     return walletInfo
                 } else {
                     log.info(tag,"Offline mode!")
-                    log.info(tag,"this: ",this)
+                    //log.info(tag,"this: ",this)
                     return {
                         isTestnet:this.isTestnet,
                         context:this.context,

@@ -267,6 +267,7 @@ export async function initConfig(config?:any){
             App.updateConfig({spec:config.spec || spec});
             App.updateConfig({wss: config.wss || wss});
             App.updateConfig({blockchains});
+            App.updateConfig({pioneerApi:true});
             return true
         }
     } catch (e) {
@@ -702,6 +703,7 @@ export async function onStart(event:any, data:any) {
             config.wss = wss
         }
 
+        log.info(tag,"init app with config: ",config)
         let resultInit = await App.init(config)
         log.info(tag,"resultInit: ",resultInit)
 

@@ -128,6 +128,7 @@ export async function startApp() {
         App.updateConfig({blockchains})
         App.updateConfig({spec});
         App.updateConfig({wss});
+        App.updateConfig({pioneerApi:true});
         //get config
         config = await App.getConfig()
         config.blockchains = blockchains
