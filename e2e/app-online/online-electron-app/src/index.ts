@@ -169,7 +169,9 @@ const test_service = async function () {
 
         //
         let data = {
-            password:"123"
+            password:"123",
+            pioneerApi:true
+
         }
         let onStartResult = await onStartMain(event, data)
         log.info(tag,"onStartResult: ",onStartResult)

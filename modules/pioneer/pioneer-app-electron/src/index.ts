@@ -696,6 +696,10 @@ export async function onStart(event:any, data:any) {
 
         if(data.isOffline){
             config.pioneerApi = false
+        } else {
+            config.pioneerApi = true
+            config.spec = spec
+            config.wss = wss
         }
 
         let resultInit = await App.init(config)
