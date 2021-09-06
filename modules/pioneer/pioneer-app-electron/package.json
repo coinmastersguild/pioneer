@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app-electron",
-  "version": "8.1.37",
+  "version": "8.1.38",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -20,8 +20,8 @@
     "@peculiar/webcrypto": "^1.1.4",
     "@pioneer-platform/eth-crypto": "^8.1.26",
     "@pioneer-platform/loggerdog": "^8.1.14",
-    "@pioneer-platform/pioneer": "^8.1.29",
-    "@pioneer-platform/pioneer-coins": "^8.1.30",
+    "@pioneer-platform/pioneer": "^8.1.30",
+    "@pioneer-platform/pioneer-coins": "^8.1.31",
     "@pioneer-platform/pioneer-config": "^8.1.20",
     "@pioneer-platform/pioneer-events": "^8.1.26",
     "@types/node": "^13.13.51",
