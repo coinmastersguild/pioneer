@@ -30,9 +30,10 @@ console.log(PoSchains['Osmosis'])
 // // console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 //
+let paths = getPaths(['osmosis'])
 // let paths = getPaths(['cosmos'])
-// // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'])
-// // console.log("paths: ",paths)
+// let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis'])
+console.log("paths: ",paths)
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
 // // let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
 // console.log(classifyPubkey(address))
@@ -63,25 +64,34 @@ console.log(PoSchains['Osmosis'])
 //     },
 //     {
 //         xpub: 'xpub6CqACLchVFzXdgKnuWrEun6oC65wmmC1XJy22xb9NSXFPDmb3gcECi17SVptNujJ1uqN8iY8JpWkhpzXxGSMokYjf3UEYjq5GGqrVqbgjfr'
-//     }
-// ]
-//
-// let result = [
+//     },
 //     {
-//         xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
+//         xpub: 'xpub6CqACLchVFzXdgKnuWrEun6oC65wmmC1XJy22xb9NSXFPDmb3gcECi17SVptNujJ1uqN8iY8JpWkhpzXxGSMokYjf3UEYjq5GGqrVqbgjfr'
+//     },
+//     {
+//         xpub: 'xpub6CqACLchVFzXdgKnuWrEun6oC65wmmC1XJy22xb9NSXFPDmb3gcECi17SVptNujJ1uqN8iY8JpWkhpzXxGSMokYjf3UEYjq5GGqrVqbgjfr'
+//     },
+//     {
+//         xpub: 'xpub6CqACLchVFzXdgKnuWrEun6oC65wmmC1XJy22xb9NSXFPDmb3gcECi17SVptNujJ1uqN8iY8JpWkhpzXxGSMokYjf3UEYjq5GGqrVqbgjfr'
 //     }
 // ]
-//
-// let run_test = async function(){
-//     try{
-//         let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-//
-//         console.log("pubkeys: ",pubkeys)
-//     }catch(e){
-//         console.error(e)
-//     }
-// }
-// run_test()
+
+let result = [
+    {
+        xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
+    }
+]
+
+let run_test = async function(){
+    try{
+        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+
+        console.log("pubkeys: ",pubkeys)
+    }catch(e){
+        console.error(e)
+    }
+}
+run_test()
 //
 //
 // let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"

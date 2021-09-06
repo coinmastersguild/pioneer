@@ -9,6 +9,7 @@
 const TAG = ' | pioneer-app-electron | '
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 
+const bcrypt = require("bcryptjs");
 const loadtest = require('loadtest');
 const CryptoJS = require("crypto-js")
 const bip39 = require(`bip39`)
@@ -19,7 +20,7 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 const log = require('electron-log');
 const generator = require('generate-password');
-// const Hardware = require("@pioneer-platform/pioneer-hardware")
+const Hardware = require("@pioneer-platform/pioneer-hardware")
 const Network = require("@pioneer-platform/pioneer-client")
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 import {v4 as uuidv4} from 'uuid';
@@ -37,7 +38,7 @@ let FIO_ACCEPT = false
 let FIO_REJECT = false
 let PASSWORDLESS_ENABLE = false
 let WALLET_PASSWORD: any
-let WALLET_HASH
+let WALLET_HASH: any
 let USERNAME
 let PRIMARY_VAULT
 let FIRST_START = true
@@ -320,6 +321,7 @@ export async function continueSetup(event:any, data:any) {
                         }
                     } else {
                         log.info(tag,"Checkpoint6b wallet failed to load")
+                        event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
                         return {
                             setup:false,
                             status:2,
@@ -401,6 +403,7 @@ export async function continueSetup(event:any, data:any) {
             return {
                 setup:false,
                 success:false,
+                status:3,
                 result:"setup required!"
             }
         }
@@ -489,68 +492,68 @@ export async function getUsbDevices(event:any, data:any) {
 
  */
 
-// let KEEPKEY_STATUS = 'unknown'
-// export async function startHardware(event:any, data:any) {
-//   let tag = TAG + " | startHardware | ";
-//   try {
-//     log.info(tag,"Checkpoint 0")
-//     //start
-//     KEEPKEY = await Hardware.start()
-//     log.info(tag,"Checkpoint 1")
-//     KEEPKEY.events.on('event', async (eventKeepkey) => {
-//       log.info(tag,"eventKeepkey: ",eventKeepkey)
-//       //event.sender.send('hardware',{event:eventKeepkey})
-//     });
-//
-//     // let allUsbDevices = await Hardware.allDevices()
-//     // event.sender.send('allUsbDevices',{ allUsbDevices })
-//     // log.debug(tag,"allUsbDevices: ",allUsbDevices)
-//     //
-//     // let allKeepKeys = await Hardware.listKeepKeys()
-//     // event.sender.send('allKeepKeys',{ allKeepKeys })
-//     // log.info(tag,"allKeepKeys: ",allKeepKeys)
-//
-//     let info = await Hardware.info()
-//     event.sender.send('hardwareInfo',{ info })
-//     log.info(tag,"info: ",info)
-//
-//     let state = await Hardware.state()
-//     event.sender.send('hardwareState',{ state })
-//     event.sender.send('hardwareStatus',{ state })
-//     log.info(tag,"state: ",state)
-//
-//     if(parseInt(state.state) > 1){
-//       log.info(tag,"Connected to device!")
-//       //lockStatus
-//       let lockStatus = await Hardware.isLocked()
-//       event.sender.send('hardwareLockStatus',{ lockStatus })
-//       log.info("lockStatus: ",lockStatus)
-//
-//       //if locked
-//       if(lockStatus){
-//         KEEPKEY_STATUS = 'locked'
-//         Hardware.displayPin(blockchains)
-//         //open pin
-//         event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
-//       } else {
-//         KEEPKEY_STATUS = 'unlocked'
-//         //is connected?
-//         let info = await Hardware.info()
-//         log.info("info: ",info)
-//
-//         //check Is paired
-//         //TODO if not paired/ start pairing
-//
-//         event.sender.send('deviceInfo',info)
-//       }
-//     }
-//
-//     return KEEPKEY
-//   } catch (e) {
-//     console.error(tag, "e: ", e);
-//     return {error:e};
-//   }
-// }
+let KEEPKEY_STATUS = 'unknown'
+export async function startHardware(event:any, data:any) {
+  let tag = TAG + " | startHardware | ";
+  try {
+    log.info(tag,"Checkpoint 0")
+    //start
+    KEEPKEY = await Hardware.start()
+    log.info(tag,"Checkpoint 1")
+    KEEPKEY.events.on('event', async (eventKeepkey:any) => {
+      log.info(tag,"eventKeepkey: ",eventKeepkey)
+      //event.sender.send('hardware',{event:eventKeepkey})
+    });
+
+    // let allUsbDevices = await Hardware.allDevices()
+    // event.sender.send('allUsbDevices',{ allUsbDevices })
+    // log.debug(tag,"allUsbDevices: ",allUsbDevices)
+    //
+    // let allKeepKeys = await Hardware.listKeepKeys()
+    // event.sender.send('allKeepKeys',{ allKeepKeys })
+    // log.info(tag,"allKeepKeys: ",allKeepKeys)
+
+    let info = await Hardware.info()
+    event.sender.send('hardwareInfo',{ info })
+    log.info(tag,"info: ",info)
+
+    let state = await Hardware.state()
+    event.sender.send('hardwareState',{ state })
+    event.sender.send('hardwareStatus',{ state })
+    log.info(tag,"state: ",state)
+
+    if(parseInt(state.state) > 1){
+      log.info(tag,"Connected to device!")
+      //lockStatus
+      let lockStatus = await Hardware.isLocked()
+      event.sender.send('hardwareLockStatus',{ lockStatus })
+      log.info("lockStatus: ",lockStatus)
+
+      //if locked
+      if(lockStatus){
+        KEEPKEY_STATUS = 'locked'
+        Hardware.displayPin(blockchains)
+        //open pin
+        event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
+      } else {
+        KEEPKEY_STATUS = 'unlocked'
+        //is connected?
+        let info = await Hardware.info()
+        log.info("info: ",info)
+
+        //check Is paired
+        //TODO if not paired/ start pairing
+
+        event.sender.send('deviceInfo',info)
+      }
+    }
+
+    return KEEPKEY
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
 
 /*
     Setup Status code
@@ -643,7 +646,6 @@ export async function onStart(event:any, data:any) {
         }
 
 
-
         // if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
         //     WALLET_HASH = config.passwordHash
         //     event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
@@ -676,17 +678,31 @@ export async function onStart(event:any, data:any) {
         //     }
         // }
 
-        if(!WALLET_PASSWORD) throw Error("Error: Password required! ")
-
         //get wallet files
         let walletFiles = await App.getWalletNames()
         log.info("walletFiles: ",walletFiles)
 
         if(walletFiles.length === 0){
+            event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
             //Always have atleast 1 wallet!
             log.error(" No Wallets found! ")
             throw Error("Can not start until wallet created!")
         }
+
+        //if length === 1 then, set context to only
+        if(walletFiles.length === 1){
+            //TODO
+            //WALLET_CONTEXT = walletFiles[0].name
+        }
+        //if > 1
+            //remote or local
+
+        if(!WALLET_PASSWORD) {
+            //collect password
+            event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+            throw Error("Error: Password required! ")
+        }
+        //verify password is valid
 
         //TODO blockchains configurable?
         config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
@@ -1170,7 +1186,7 @@ export async function createWallet(event:any, data:any) {
 
         //if no password
         if(!data.password){
-            if(featurePasswordless){
+            if(featurePasswordless || true){
                 log.info(tag,"featurePasswordless TRUE")
                 let randomChars = generator.generateMultiple(1, {
                     length: 10,
@@ -1227,24 +1243,24 @@ export async function createWallet(event:any, data:any) {
     }
 }
 
-// export function onLogin(event:any, data:any) {
-//   let tag = TAG + " | onLogin | ";
-//   try {
-//     //
-//     if(!WALLET_HASH) throw Error("Wallet Hash not found! ")
-//     if(!data.password) throw Error("password not found! ")
-//
-//     let isValid = bcrypt.compareSync(data.password, WALLET_HASH); // true
-//     if(isValid) {
-//       //close password
-//       WALLET_PASSWORD = data.password
-//       onStart(event:any, data:any)
-//     } else {
-//       log.error(tag," invalid password! ")
-//       //TODO send error msg over ipc invalid pw
-//     }
-//   } catch (e) {
-//     console.error(tag, "e: ", e);
-//     return {error:e};
-//   }
-// }
+export function onLogin(event:any, data:any) {
+  let tag = TAG + " | onLogin | ";
+  try {
+    //
+    if(!WALLET_HASH) throw Error("Wallet Hash not found! ")
+    if(!data.password) throw Error("password not found! ")
+
+    let isValid = bcrypt.compareSync(data.password, WALLET_HASH); // true
+    if(isValid) {
+      //close password
+      WALLET_PASSWORD = data.password
+      onStart(event, data)
+    } else {
+      log.error(tag," invalid password! ")
+      //TODO send error msg over ipc invalid pw
+    }
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}

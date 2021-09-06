@@ -56,9 +56,27 @@ let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 const TEST_SEED = process.env['WALLET_MAIN']
 if(!TEST_SEED) throw Error("Failed to load seed!")
 
+let shownSetupPioneer = false
+let shownSetup = false
+
 let event = {
     sender:{
         send:function (channel:string,data:any){
+            log.info("Got EVENT: ",{channel,data})
+
+            switch(data.dialog) {
+                case 'SetupPioneer':
+                    shownSetupPioneer = true
+                    //accept default server pioneers.dev
+                    break;
+                case 'Setup':
+                    shownSetup = true
+                    break;
+                default:
+                // code block
+            }
+
+
             return true
         }
     }
@@ -106,6 +124,9 @@ let onStartMain = async function(event:any, data:any){
     }
 }
 
+let data:any = {}
+
+let USERNAME_TEST = "testOnlineElectron"
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -113,84 +134,42 @@ const test_service = async function () {
         //confirm config missing
         let config = getConfig()
         log.info(tag,"config: ",config)
+        assert(!config)
 
-        // setup process
-        // Iterate through setup
+        //should show pioneer init if not configured
+        let resultSetup = await App.continueSetup(event, data)
+        log.info(tag,"resultSetup: ",resultSetup)
 
-        let isSetup = false
-        let i = 1
-        while(!isSetup){
-            i++
-            //Cap attempts
-            if(i > 5){
-                throw Error("Failed to configure!")
-            }
-            //
-            let data = {}
-            let resultSetup = await App.continueSetup(event, data)
-            log.info(tag,"resultSetup: ",resultSetup)
+        assert(shownSetupPioneer)
 
-            //if code is need username create
+        //default init
+        await App.initConfig(config)
 
-            //if code is need url create
+        // set username
+        data.username = USERNAME_TEST
+        await App.createUsername(event, data)
 
-            //if code is wallet needed, create
-            if(resultSetup && resultSetup.status && resultSetup.status === 2){
-                log.info(tag,"Creating Wallet")
+        //verify correct username
+        let config2 = getConfig()
+        log.info(tag,"config2: ",config2)
+        assert(config2.username, USERNAME_TEST)
 
-                //create new wallet
-                let data = {
-                    password:"123",
-                    mnemonic:TEST_SEED
-                }
+        //select wallet type
+        //should show no wallets setup!
+        let resultSetup2 = await App.continueSetup(event, data)
+        log.info(tag,"resultSetup2: ",resultSetup2)
 
-                let result = await App.createWallet(event,data)
-                log.info(tag,"createWallet result: ",result)
+        assert(resultSetup2.status,2)
+        assert(shownSetup)
 
-                //TODO user verified wallet?
-            }
-
-            if(!resultSetup.setup){
-                //wallet not setup
-                log.info(tag,"Not setup!")
-            }
-
-            if(!resultSetup.success){
-                //wallet not setup
-                log.info(tag,"Not success!")
-            }
-
-            if(resultSetup.setup && resultSetup.success){
-                log.info(tag,"Setup Successfully!")
-                isSetup = true
-            }
-        }
-
-
-        //
-        let data = {
+        //if software display seed
+        data = {
             password:"123",
-            pioneerApi:true
-
+            mnemonic:TEST_SEED
         }
-        let onStartResult = await onStartMain(event, data)
-        log.info(tag,"onStartResult: ",onStartResult)
-        assert(onStartResult)
 
-        //get wallet in context
-        log.info(tag,"context: ",onStartResult.context)
-        log.info(tag,"wallet 0: ",onStartResult.wallets[0])
-
-        //TODO filter wallets by context
-
-        //get balances
-
-        //build
-
-        //sign
-
-        //broadcast
-
+        let result = await App.createWallet(event,data)
+        log.info(tag,"createWallet result: ",result)
 
 
         log.info("****** TEST PASS 2******")
