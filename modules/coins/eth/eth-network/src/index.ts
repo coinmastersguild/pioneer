@@ -601,6 +601,9 @@ module.exports = {
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
 		}
 	},
+	decodeTx:function (tx:string) {
+		return decode_tx(tx);
+	},
 	getInfo:function () {
 		return check_online_status();
 	},
@@ -678,6 +681,17 @@ module.exports = {
 	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
+	}
+}
+
+const decode_tx = async function(tx:string){
+	let tag = TAG + " | decode_tx | "
+	try{
+		const data = ethers.utils.parseTransaction(tx)
+
+		return data
+	}catch(e){
+		console.error(tag,e)
 	}
 }
 

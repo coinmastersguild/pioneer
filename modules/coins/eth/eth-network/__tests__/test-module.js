@@ -19,6 +19,16 @@ network.init()
 //let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
 let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 
+
+//
+let tx = "0x02f86d01018204008204008256229412ec06288edd7ae2cc41a843fe089237fc7354f0872c68af0bb1400080c001a0429c6ce090e272049a94b13466b3d27a4d79e31dcf50dbc614db7e239f3103c7a02ffc46592f561f7fdbac10cd3521dca47d1afa00ebc03af7ea0d05081e503cb7"
+
+//let tx = "0x02f86d01018204008204008256229412ec06288edd7ae2cc41a843fe089237fc7354f0872c68af0bb1400080c080a0abcd0d1d6c5792f5c6dca352f032e8012386fc2cb7f07245fe46c6bd7d26d23da06b63aab8cac33da3f028078393e87408aa0189f132ca395efcab4de7fa8795db"
+network.decodeTx(tx)
+    .then(function(resp){
+        console.log(JSON.stringify(resp))
+    })
+
 // network.checkAirdropClaim(address)
 //     .then(function(resp){
 //         console.log(resp)
@@ -228,10 +238,10 @@ let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 //     })
 
 //getBalanceToken
-network.getBalanceToken(address,"0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7")
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getBalanceToken(address,"0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.getBalanceTokens(address)
 //     .then(function(resp){

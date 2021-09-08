@@ -7,7 +7,7 @@
  */
 
 const TAG = ' | pioneer-app-electron | '
-import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
+import {checkConfigs, getConfig, innitConfig, updateConfig, getWallet} from "@pioneer-platform/pioneer-config";
 
 const bcrypt = require("bcryptjs");
 const loadtest = require('loadtest');
@@ -692,10 +692,22 @@ export async function onStart(event:any, data:any) {
         //if length === 1 then, set context to only
         if(walletFiles.length === 1){
             //TODO
-            //WALLET_CONTEXT = walletFiles[0].name
+            WALLET_CONTEXT = walletFiles[0]
+
+            //get file
+            let walletFile = await getWallet(WALLET_CONTEXT)
+            log.info(tag,"walletFile: ",walletFile)
+            //
+            if(walletFile.KEEPKEY){
+                WALLET_PASSWORD = 'hardware'
+                config.hardware = true
+            }
+        } else {
+            throw Error("TODO multi-wallets")
         }
         //if > 1
-            //remote or local
+            //remote or local context set from state
+
 
         if(!WALLET_PASSWORD) {
             //collect password
@@ -885,6 +897,7 @@ export async function refreshPioneer(event:any, data:any) {
                 log.info(tag,"Wallet not started yet! ")
                 return {
                     succcess: false,
+                    message: 'wallet class returning not initalized',
                     status: 1
                 }
             }
