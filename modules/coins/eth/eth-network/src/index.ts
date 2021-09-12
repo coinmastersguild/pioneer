@@ -1223,15 +1223,16 @@ let broadcast_transaction = async function(tx:any){
 
 		//push etherscan
 		//https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
-		let resp = await axios({
-			method:'GET',
-			url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
-		})
+		// let resp = await axios({
+		// 	method:'GET',
+		// 	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
+		// })
+		// console.log(resp)
 		//push blockbook
 
 
 		//TODO lifecycle hook?
-		// web3.eth.sendSignedTransaction(tx)
+		// let resp = await web3.eth.sendSignedTransaction(tx)
 		// 	.on('transactionHash', function(hash:any){
 		// 		console.log("hash: ",hash)
 		// 	})
@@ -1242,6 +1243,8 @@ let broadcast_transaction = async function(tx:any){
 		// 		console.log(confirmationNumber,receipt)
 		// 	})
 		// 	.on('error', console.error);
+
+		//console.log("resp: ",resp)
 
 		let output = {
 			success:true,

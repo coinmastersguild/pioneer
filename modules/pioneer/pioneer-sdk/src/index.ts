@@ -66,6 +66,7 @@ export class SDK {
     private contextWalletInfo: any;
     private valueUsdContext: any;
     private chart: (chart: Chart) => Promise<any>;
+    private setAssetContext: (asset: string) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -205,6 +206,20 @@ export class SDK {
                     return result.data
                 }else{
                     return {success:false,error:"unknown context! context: "+context,options:this.wallets}
+                }
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.setAssetContext = async function (asset:string) {
+            let tag = TAG + " | setAssetContext | "
+            try {
+                if(asset && this.assetContext && this.assetContext !== asset){
+                    this.assetContext = asset
+                    let result = await this.pioneerApi.SetAssetContext(null,{asset:this.assetContext})
+                    return result.data
+                }else{
+                    return {success:false,error:"already assetContext="+asset}
                 }
             } catch (e) {
                 log.error(tag, "e: ", e)

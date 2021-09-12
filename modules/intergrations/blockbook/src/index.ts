@@ -45,6 +45,9 @@ module.exports = {
     getAddressInfo:function (coin:string,address:string,filter?:string) {
         return get_info_by_address(coin,address,filter);
     },
+    getPubkeyInfo:function (coin:string,pubkey:string,filter?:string | undefined) {
+        return get_info_by_pubkey(coin,pubkey,filter);
+    },
     txidsByAddress:function (coin:string,address:string,page?:number) {
         return get_txids_by_address(coin,address,page);
     },
@@ -61,6 +64,32 @@ module.exports = {
         return broadcast_transaction(coin,hex);
     },
 }
+
+let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: string | undefined){
+    let tag = TAG + " | get_info_by_pubkey | "
+    try{
+        if(!page) page = "1"
+
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey+"&details=all"
+        log.info(tag,"url: ",url)
+        let body = {
+            method: 'GET',
+            url,
+            headers: {
+                'content-type': 'application/json',
+                'User-Agent': fakeUa()
+            },
+        };
+        let resp = await axios(body)
+
+        //TODO paginate?
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
 
 let get_txids_by_address = async function(coin:string,address:string,page?:number){
     let tag = TAG + " | get_txids_by_address | "

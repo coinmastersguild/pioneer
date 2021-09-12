@@ -39,6 +39,10 @@ export interface SetContextBody {
     context:string
 }
 
+export interface SetAssetContextBody {
+    asset:string
+}
+
 export interface RegisterEosUsername {
     username:string
     pubkey:string

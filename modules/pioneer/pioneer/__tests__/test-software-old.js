@@ -24,8 +24,8 @@ let FAUCET_ADDRESSES = {
 
 }
 
-let username = process.env['TEST_USERNAME_2']
-let queryKey = process.env['TEST_QUERY_KEY_2']
+let username = process.env['TEST_USERNAME_2'] || 'test-sdfklsdfkjds'
+let queryKey = process.env['TEST_QUERY_KEY_2'] || 'test-sdfklsdfkjds'
 
 let run_test = async function(){
     try{
@@ -39,7 +39,7 @@ let run_test = async function(){
         let config = {
             isTestnet:false,
             blockchains,
-            mnemonic: process.env['FOUND_KEY'],
+            mnemonic: process.env['WALLET_MAIN'],
             walletId:context,
             username,
             pioneerApi:true,
