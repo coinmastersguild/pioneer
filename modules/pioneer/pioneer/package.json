@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer",
-  "version": "8.1.32",
+  "version": "8.1.33",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -28,7 +28,7 @@
     "@pioneer-platform/loggerdog": "^8.1.14",
     "@pioneer-platform/pioneer-client": "^8.1.19",
     "@pioneer-platform/pioneer-coins": "^8.1.31",
-    "@pioneer-platform/pioneer-types": "^8.1.40",
+    "@pioneer-platform/pioneer-types": "^8.1.41",
     "@types/google-protobuf": "^3.15.1",
     "bchaddrjs": "^0.5.2",
     "bech32": "^1.1.4",
