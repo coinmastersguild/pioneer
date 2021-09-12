@@ -184,6 +184,12 @@ const test_service = async function () {
         log.info(tag,"result: ",result)
         assert(result)
 
+        //TODO verify event happened over socket
+
+        //verify update on api state
+
+        //verify update on sdk state
+
         log.info("****** TEST PASS 2******")
         //process
         process.exit(0)
