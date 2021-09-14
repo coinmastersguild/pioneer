@@ -30,10 +30,10 @@ console.log(PoSchains['Osmosis'])
 // // console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 //
-let paths = getPaths(['osmosis'])
+// let paths = getPaths(['osmosis'])
 // let paths = getPaths(['cosmos'])
 // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis'])
-console.log("paths: ",paths)
+// console.log("paths: ",paths)
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
 // // let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
 // console.log(classifyPubkey(address))
