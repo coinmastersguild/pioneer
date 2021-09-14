@@ -41,6 +41,7 @@ const TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 let SDK = require('@pioneer-platform/pioneer-sdk')
 const log = require('electron-log');
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
+import {Transfer} from "@pioneer-platform/pioneer-types";
 
 let {
     supportedBlockchains,
@@ -56,7 +57,7 @@ const sleep = wait.sleep;
 
 //primary
 const App = require('@pioneer-platform/pioneer-app-electron')
-
+let BigNumber = require('@ethersproject/bignumber')
 const Hardware = require("@pioneer-platform/pioneer-hardware")
 
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
@@ -74,6 +75,7 @@ if(!TEST_SEED) throw Error("Failed to load seed!")
 
 let shownSetupPioneer = false
 let shownSetup = false
+let noBroadcast = true
 
 let event = {
     sender:{
@@ -313,10 +315,137 @@ const test_service = async function () {
 
 
         //build invocation with sdk
+        if(balanceBase < TEST_AMOUNT){
+            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        }
+
+        //estimate BCH fee? lol
+        let asset = {
+            chain:ASSET,
+            symbol:ASSET,
+            ticker:ASSET,
+        }
+
+        //test amount in native
+        let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
+
+        let options:any = {
+            verbose: true,
+            txidOnResp: false, // txidOnResp is the output format
+        }
+
+        let transfer:Transfer = {
+            context:user.context,
+            recipient: FAUCET_OSMO_ADDRESS,
+            asset: ASSET,
+            network: ASSET,
+            memo: '',
+            "amount":{
+                amount: function(){
+                    return BigNumber.BigNumber.from(amountTestNative)
+                }
+            },
+            fee:{
+                priority:5, //1-5 5 = highest
+            },
+            noBroadcast
+        }
+        log.info(tag,"transfer: ",transfer)
+
+        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        assert(responseTransfer)
+        log.info(tag,"responseTransfer: ",responseTransfer)
+        let invocationId = responseTransfer
+        //do not continue without invocationId
+        assert(invocationId)
 
         //invoke
-
+        let transaction = {
+            invocationId,
+            context:user.context
+        }
         //verify client tx event
+
+        //sign transaction
+        let signedTx = await App.approveTransaction(transaction)
+        log.info(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        // assert(signedTx.txid)
+
+        //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        assert(invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await App.broadcastTransaction(transaction)
+        log.info(tag,"broadcastResult: ",broadcastResult)
+
+        let invocationView3 = await app.getInvocation(invocationId)
+        assert(invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+
+        //get invocation info EToC
+        let isConfirmed = false
+        //wait for confirmation
+
+        if(!noBroadcast){
+            //TODO
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            let txid
+
+            //wait till confirmed in block
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
+
+                txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.info(tag,"txInfo: ",txInfo)
+
+                if(txInfo && txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
+                    statusCode = 3
+                } else {
+                    log.info(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                await sleep(6000)
+            }
+
+
+            let isFullfilled = false
+        }
+
+        let resultEnd = await app.stopSocket()
+        log.info(tag,"resultEnd: ",resultEnd)
+
 
 
         log.info("****** TEST PASS 2******")

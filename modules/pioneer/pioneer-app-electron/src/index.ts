@@ -712,8 +712,12 @@ export async function onStart(event:any, data:any) {
         }
         //verify password is valid
 
-        //TODO blockchains configurable?
-        config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+        //
+        if(data.blockchains) {
+            config.blockchains = data.blockchains
+        } else {
+            config.blockchains = blockchains
+        }
 
 
         if(WALLET_PASSWORD)config.temp = WALLET_PASSWORD
@@ -729,7 +733,7 @@ export async function onStart(event:any, data:any) {
 
         log.info(tag,"init app with config: ",config)
         let resultInit = await App.init(config)
-        log.info(tag,"resultInit: ",resultInit)
+        log.debug(tag,"resultInit: ",resultInit)
 
         if(!resultInit) throw Error("103: app failed to init!")
         //if(!resultInit.events) throw Error("104: app failed to init, missing events!")
