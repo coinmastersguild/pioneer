@@ -56,12 +56,8 @@ let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
 let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
 let featureInsecurePassword = process.env['INSECURE_PASSWORD']
 
-// let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-// spec = spec.replace(/"/g, '')
-// let wss = process.env['URL_PIONEER_WS'] || 'ws://127.0.0.1:9001'
-let wss = process.env['URL_PIONEER_WS'] || 'wss://pioneers.dev'
-// wss = wss.replace(/"/g, '')
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let queryKey: string
 let username: any
 //blockchains
@@ -1253,6 +1249,19 @@ export async function createWallet(event:any, data:any) {
     } catch (e) {
         console.error(tag, "e: ", e);
         return {error:e};
+    }
+}
+
+export async function sendPairingCode(code:string) {
+    let tag = " | sendPairingCode | "
+    try {
+        let result = await App.pair(code)
+        log.debug(tag,"result: ",result)
+
+        return result
+    } catch (e) {
+        log.error(e)
+        throw e
     }
 }
 
