@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/bitcoincash-e2e-transfer",
-  "version": "8.1.32",
+  "version": "8.1.33",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -17,8 +17,8 @@
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.14",
     "@pioneer-platform/midgard-client": "^8.1.25",
-    "@pioneer-platform/pioneer-app": "^8.1.36",
-    "@pioneer-platform/pioneer-sdk": "^8.1.37",
+    "@pioneer-platform/pioneer-app": "^8.1.37",
+    "@pioneer-platform/pioneer-sdk": "^8.1.38",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
