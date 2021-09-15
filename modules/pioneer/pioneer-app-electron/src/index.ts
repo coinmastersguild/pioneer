@@ -7,7 +7,7 @@
  */
 
 const TAG = ' | pioneer-app-electron | '
-import {checkConfigs, getConfig, innitConfig, updateConfig, getWallet} from "@pioneer-platform/pioneer-config";
+import {checkConfigs, getConfig, innitConfig, updateConfig, getWallet, getWallets} from "@pioneer-platform/pioneer-config";
 
 const bcrypt = require("bcryptjs");
 const loadtest = require('loadtest');
@@ -78,16 +78,6 @@ export function getContext() {
     }
 }
 
-export function getWallets() {
-    let tag = " | getWallets | "
-    try {
-        return WALLETS_NAMES
-    } catch (e) {
-        log.error(e)
-        throw e
-    }
-}
-
 export function getInvocations() {
     let tag = " | getInvocations | "
     try {
@@ -98,16 +88,42 @@ export function getInvocations() {
     }
 }
 
-export function getInvocation(invocationId:string) {
-    let tag = " | getInvocation | "
+export async function attemptUnlock(event:any, data:any) {
+    let tag = TAG + " | attemptUnlock | ";
     try {
-        return App.getInvocation(invocationId)
+
+        //get all wallets
+        let allWallets = await getWallets()
+        log.info(tag,"allWallets: ",allWallets)
+
+        for(let i = 0; i < allWallets.length; i++){
+            let walletId = allWallets[i]
+            let wallet = getWallet(walletId)
+            log.info(tag,"wallet: ",wallet)
+
+            let isValid = bcrypt.compareSync(data.password, wallet.hash); // true
+            if(isValid){
+                //WALLET_PASSWORD
+                WALLET_PASSWORD = data.password
+
+                //TODO multi passwords
+
+                //add to batch unlock
+                //init app with multiple passwords and unlock multiple wallets
+            }
+        }
+        if(WALLET_PASSWORD){
+            return true
+        } else {
+            return false
+        }
     } catch (e) {
-        log.error(e)
-        throw e
+        console.error(tag, "e: ", e);
+        return {error:e};
     }
 }
 
+//attemptUnlock
 
 export async function checkPioneerUrls(event: any, data: any) {
     let tag = TAG + " | checkPioneerUrl | ";
@@ -685,7 +701,6 @@ export async function onStart(event:any, data:any) {
             //overrides temp
             WALLET_PASSWORD = data.password
         }
-
 
         // if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
         //     WALLET_HASH = config.passwordHash
@@ -1341,26 +1356,4 @@ export async function sendPairingCode(code:string) {
         log.error(e)
         throw e
     }
-}
-
-export function onLogin(event:any, data:any) {
-  let tag = TAG + " | onLogin | ";
-  try {
-    //
-    if(!WALLET_HASH) throw Error("Wallet Hash not found! ")
-    if(!data.password) throw Error("password not found! ")
-
-    let isValid = bcrypt.compareSync(data.password, WALLET_HASH); // true
-    if(isValid) {
-      //close password
-      WALLET_PASSWORD = data.password
-      onStart(event, data)
-    } else {
-      log.error(tag," invalid password! ")
-      //TODO send error msg over ipc invalid pw
-    }
-  } catch (e) {
-    console.error(tag, "e: ", e);
-    return {error:e};
-  }
 }

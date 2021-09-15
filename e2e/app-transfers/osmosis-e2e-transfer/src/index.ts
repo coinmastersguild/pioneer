@@ -442,6 +442,7 @@ const test_service = async function () {
 
         //get invocation info EToC
         let isConfirmed = false
+
         //wait for confirmation
         //
         // if(!noBroadcast){

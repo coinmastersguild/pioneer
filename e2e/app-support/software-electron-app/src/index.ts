@@ -56,6 +56,8 @@ let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 const TEST_SEED = process.env['WALLET_MAIN']
 if(!TEST_SEED) throw Error("Failed to load seed!")
 
+let WALLET_PASSWORD = process.env['WALLET_PASSWORD'] || 123
+
 let shownSetupPioneer = false
 let shownSetup = false
 
@@ -164,7 +166,7 @@ const test_service = async function () {
 
         //if software display seed
         data = {
-            password:"123",
+            password:WALLET_PASSWORD,
             mnemonic:TEST_SEED
         }
 
