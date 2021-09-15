@@ -30,6 +30,8 @@ import {
 } from "@pioneer-platform/pioneer-types";
 
 //Globals
+let INVOCATIONS:any = []
+let INVOCATIONS_SIGNED:any = []
 let WALLET_INIT = false
 let WALLETS_LOADED: any
 let WALLETS_NAMES: string | any[] = []
@@ -60,8 +62,51 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let queryKey: string
 let username: any
+
 //blockchains
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','osmosis']
+
+
+
+export function getContext() {
+    let tag = " | getContext | "
+    try {
+        return WALLET_CONTEXT
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getWallets() {
+    let tag = " | getWallets | "
+    try {
+        return WALLETS_NAMES
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getInvocations() {
+    let tag = " | getInvocations | "
+    try {
+        return INVOCATIONS
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getInvocation(invocationId:string) {
+    let tag = " | getInvocation | "
+    try {
+        return App.getInvocation(invocationId)
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
 
 
 export async function checkPioneerUrls(event: any, data: any) {

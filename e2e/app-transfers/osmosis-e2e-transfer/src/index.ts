@@ -100,7 +100,9 @@ let event = {
     }
 }
 
+let broughtWindowFront = false
 let bringWindowToFront = function(){
+    broughtWindowFront = true
     console.log("bringWindowToFront: called")
 }
 
@@ -108,7 +110,7 @@ let bringWindowToFront = function(){
     App Start
  */
 
-let appE
+let eventInvokeReceived = false
 let onStartMain = async function(event:any, data:any){
     const tag = TAG + ' | onStartMain | '
     try{
@@ -128,6 +130,8 @@ let onStartMain = async function(event:any, data:any){
                 case 'approve':
                     break;
                 case 'transfer':
+                    log.info(tag,"transfer Received!")
+                    eventInvokeReceived = true
                     //open invocation window
                     event.sender.send('navigation',{ dialog: 'Invocation', action: 'open'})
                     //set invocationConext to invocationId
@@ -385,16 +389,34 @@ const test_service = async function () {
         assert.equal(invocationView1.state,'builtTx')
 
         //TODO
-        //verify transaction is what I think it should be
+        //verify App got event invoke
+        while(!eventInvokeReceived){
+            await sleep(1000)
+            console.log("eventInvokeReceived")
+            //TODO timeout & fail?
+        }
+        log.info(tag,"CHECKPOINT 3 GOT INVOKE EVENT!")
 
-        //verify I like context x
+        //broughtWindowFront
+        while(!broughtWindowFront){
+            await sleep(1000)
+            console.log("broughtWindowFront")
+            //TODO timeout & fail?
+        }
+        log.info(tag,"CHECKPOINT 4 brought window forward!")
 
-        //offer change in fee's
+        //TODO verify transaction is what I think it should be
 
-        //offer change in context
+        let invocation = await App.getInvocation()
+        log.info(tag,"invocation: App: ",invocation)
+
+        //TODO verify I like context x
+
+        //TODO offer change in fee's
+
+        //TODO offer change in context
 
         //then approve
-
         //sign transaction
         let signedTx = await App.approveTransaction(event,transaction)
         log.info(tag,"signedTx: ",signedTx)
@@ -418,9 +440,9 @@ const test_service = async function () {
         assert.equal(invocationView3.state,'broadcasted')
         log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
-        // //get invocation info EToC
-        // let isConfirmed = false
-        // //wait for confirmation
+        //get invocation info EToC
+        let isConfirmed = false
+        //wait for confirmation
         //
         // if(!noBroadcast){
         //     //TODO
