@@ -31,7 +31,7 @@ import {
 
 //Globals
 let WALLET_INIT = false
-let WALLETS_LOADED: never[] = []
+let WALLETS_LOADED: any
 let WALLETS_NAMES: string | any[] = []
 let WALLET_CONTEXT = ""
 let FIO_ACCEPT = false
@@ -759,6 +759,8 @@ export async function onStart(event:any, data:any) {
         let walletNames = await App.getWalletNames()
         WALLETS_NAMES = walletNames
 
+        if(!WALLET_CONTEXT) WALLET_CONTEXT = WALLETS_LOADED[0]
+
         if(resultInit.wallets){
             log.info(tag,"registering wallets: ",resultInit.wallets)
             event.sender.send('updateWallets',resultInit.wallets)
@@ -949,99 +951,129 @@ export async function setMnemonic(event:any, data:any) {
     }
 }
 
-export async function buildTransaction(event:any, data:any) {
-    let tag = TAG + " | buildTransaction | ";
+export async function buildTransaction(event:any, transaction:any) {
+    let tag = " | buildTransaction | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"transaction: ",transaction)
+        if(!transaction.invocationId) throw Error("invocationId required!")
+
         //get invocation
 
         //TODO validate type and fields
 
-        let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        let invocation = await App.getInvocation(transaction.invocationId)
+        log.info(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
-        let context:any
-        if(!data.context){
+        let context
+        if(!transaction.context){
             context = WALLET_CONTEXT
+        } else {
+            context = transaction.context
+            WALLET_CONTEXT = context
         }
-        if(!context) {
+        if(!context || !WALLETS_LOADED[context]) {
             log.error("context: ",context)
-            log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            log.error("Available: ",WALLETS_LOADED)
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.info(tag,"walletContext: ",walletContext.walletId)
 
+        let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
-
+                log.info(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
                 //TODO validate transfer object
-
-                let transferUnSigned = await walletContext.buildTransfer(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  transferUnSigned: ",transferUnSigned)
-
-                let invocationId = invocation.invocationId
-                let updateBody = {
-                    invocationId,
-                    invocation,
-                    unsignedTx:transferUnSigned
-                }
-                log.info(tag,"updateBody: ",updateBody)
-
-                //update invocation remote
-                let resultUpdate = await App.updateInvocation(updateBody)
-                log.info(tag,"resultUpdate: ",resultUpdate)
-
-                //push update to sign tab
-                event.sender.send('transactionBuilt', {invocationId,invocation,unsignedTx:transferUnSigned,resultUpdate})
-
+                unsignedTx = await walletContext.buildTransfer(invocation.invocation)
+                log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
+                break
+            case 'redelegate':
+            case 'undelegate':
+            case 'ibcdeposit':
+            case 'delegate':
+                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                break
+            case 'osmosislpadd':
+                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                break
+            case 'osmosisswap':
+                log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
+                break
+            case 'redelegate':
+                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
                 break
             case 'approve':
-                console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
-                let approvalSigned = await walletContext.buildApproval(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  approvalSigned: ",approvalSigned)
+                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildApproval(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                break
+            case 'deposit':
+                log.info(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.deposit(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
-                let swapSigned = await walletContext.buildSwap(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  swapSigned: ",swapSigned)
+                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildSwap(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
-                console.error("Unhandled type: ",invocation.type)
+                console.error("APP E2E Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
+                throw Error("Unhandled type: "+invocation.type)
         }
 
-        //types
-        //transfer (all coins + eth (except swaps)
-        //approve
-        //swap
+        //update invocation
+        let invocationId = invocation.invocationId
+        let updateBody = {
+            network:invocation.network,
+            invocationId,
+            invocation,
+            unsignedTx
+        }
 
+        //update invocation remote
+        let resultUpdate = await App.updateInvocation(updateBody)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
-        // let resultBuild = await App.buildTransfer(await App.context(),data.invocationId)
-        //
-        // return resultBuild
-
+        return unsignedTx
     } catch (e) {
         console.error(tag, "e: ", e);
-        return {error:e};
+        throw e
     }
 }
 
 export async function approveTransaction(event:any, data:any) {
     let tag = TAG + " | approveTransaction | ";
     try {
+        log.info("Checkpoint pre-getInvocation: ",data)
+        if(!data || !data.invocationId) throw Error(" missing invocationId!")
         //get invocation
 
         let invocation = await App.getInvocation(data.invocationId)
         log.info(tag,"invocation: ",invocation)
-
+        if(!invocation) throw Error(" failed to get invocation! "+data.invocationId)
+        if(!invocation.unsignedTx) throw Error(" invocation not built! you must build first! "+data.invocationId)
         //
         let context:any
         if(!data.context){
             context = WALLET_CONTEXT
+        } else {
+            context = data.context
         }
         if(!context) {
             log.error("context: ",context)

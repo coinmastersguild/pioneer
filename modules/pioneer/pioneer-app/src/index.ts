@@ -367,6 +367,7 @@ let delete_invocation = async function (invocationId:string) {
 let get_invocation = async function (invocationId:any) {
     let tag = " | get_invocation | ";
     try {
+        //TODO if local? get from cache?
         let output = await network.instance.Invocation(invocationId)
         return output.data;
     } catch (e) {

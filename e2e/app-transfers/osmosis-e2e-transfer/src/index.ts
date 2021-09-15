@@ -108,11 +108,12 @@ let bringWindowToFront = function(){
     App Start
  */
 
+let appE
 let onStartMain = async function(event:any, data:any){
     const tag = TAG + ' | onStartMain | '
     try{
         let onStartResult = await App.onStart(event,data)
-        log.info(tag,"onStartResult: ",onStartResult)
+        log.debug(tag,"onStartResult: ",onStartResult)
 
         //on on invocations add to queue
         onStartResult.events.on('message', async (request:any) => {
@@ -360,91 +361,119 @@ const test_service = async function () {
         assert(invocationId)
 
         //invoke
+        // do this thing (id)
+        //with context x
+
         let transaction = {
             invocationId,
             context:user.context
         }
+        assert(transaction.context)
+        log.info(tag,"transaction: ",transaction)
         //verify client tx event
 
+        //build
+        let unsignedTx = await App.buildTransaction(event,transaction)
+        log.info(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
+
+        //get invocation
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+        assert(invocationView1.state)
+        assert.equal(invocationView1.state,'builtTx')
+
+        //TODO
+        //verify transaction is what I think it should be
+
+        //verify I like context x
+
+        //offer change in fee's
+
+        //offer change in context
+
+        //then approve
+
         //sign transaction
-        let signedTx = await App.approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
-        assert(signedTx)
+        // let signedTx = await App.approveTransaction(event,transaction)
+        // log.info(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
         // assert(signedTx.txid)
 
         //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        assert(invocationView2)
-        assert(invocationView2.state)
-        assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // assert(invocationView2)
+        // assert(invocationView2.state)
+        // assert.equal(invocationView2.state,'signedTx')
+        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //broadcast transaction
+        // let broadcastResult = await App.broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // assert(invocationView3)
+        // assert(invocationView3.state)
+        // assert.equal(invocationView3.state,'broadcasted')
+        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
-        //broadcast transaction
-        let broadcastResult = await App.broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        let invocationView3 = await app.getInvocation(invocationId)
-        assert(invocationView3)
-        assert(invocationView3.state)
-        assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
-
-        //get invocation info EToC
-        let isConfirmed = false
-        //wait for confirmation
-
-        if(!noBroadcast){
-            //TODO
-            /*
-                Status codes
-
-                -1: errored
-                 0: unknown
-                 1: built
-                 2: broadcasted
-                 3: confirmed
-                 4: fullfilled (swap completed)
-             */
-
-            //monitor tx lifecycle
-            let currentStatus
-            let statusCode = 0
-            let txid
-
-            //wait till confirmed in block
-            while(!isConfirmed){
-                //get invocationInfo
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
-
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let txInfo = await client.getTransactionData(txid)
-                log.info(tag,"txInfo: ",txInfo)
-
-                if(txInfo && txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
-                    statusCode = 3
-                } else {
-                    log.info(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
-                }
-
-                await sleep(6000)
-            }
-
-
-            let isFullfilled = false
-        }
-
-        let resultEnd = await app.stopSocket()
-        log.info(tag,"resultEnd: ",resultEnd)
+        // //get invocation info EToC
+        // let isConfirmed = false
+        // //wait for confirmation
+        //
+        // if(!noBroadcast){
+        //     //TODO
+        //     /*
+        //         Status codes
+        //
+        //         -1: errored
+        //          0: unknown
+        //          1: built
+        //          2: broadcasted
+        //          3: confirmed
+        //          4: fullfilled (swap completed)
+        //      */
+        //
+        //     //monitor tx lifecycle
+        //     let currentStatus
+        //     let statusCode = 0
+        //     let txid
+        //
+        //     //wait till confirmed in block
+        //     while(!isConfirmed){
+        //         //get invocationInfo
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.info(tag,"invocationInfo: ",invocationInfo)
+        //
+        //         txid = invocationInfo.signedTx.txid
+        //         assert(txid)
+        //         if(!currentStatus) currentStatus = 'transaction built!'
+        //         if(statusCode <= 0) statusCode = 1
+        //
+        //         //lookup txid
+        //         let txInfo = await client.getTransactionData(txid)
+        //         log.info(tag,"txInfo: ",txInfo)
+        //
+        //         if(txInfo && txInfo.blockNumber){
+        //             log.info(tag,"Confirmed!")
+        //             statusCode = 3
+        //         } else {
+        //             log.info(tag,"Not confirmed!")
+        //             //get gas price recomended
+        //
+        //             //get tx gas price
+        //         }
+        //
+        //         await sleep(6000)
+        //     }
+        //
+        //
+        //     let isFullfilled = false
+        // }
+        //
+        // let resultEnd = await app.stopSocket()
+        // log.info(tag,"resultEnd: ",resultEnd)
 
 
 
