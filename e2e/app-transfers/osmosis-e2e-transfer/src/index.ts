@@ -396,27 +396,27 @@ const test_service = async function () {
         //then approve
 
         //sign transaction
-        // let signedTx = await App.approveTransaction(event,transaction)
-        // log.info(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // assert(signedTx.txid)
+        let signedTx = await App.approveTransaction(event,transaction)
+        log.info(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        assert(signedTx.txid)
 
         //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // assert(invocationView2)
-        // assert(invocationView2.state)
-        // assert.equal(invocationView2.state,'signedTx')
-        // log.info(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await App.broadcastTransaction(transaction)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
-        //
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // assert(invocationView3)
-        // assert(invocationView3.state)
-        // assert.equal(invocationView3.state,'broadcasted')
-        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        let invocationView2 = await app.getInvocation(invocationId)
+        assert(invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await App.broadcastTransaction(event, transaction)
+        log.info(tag,"broadcastResult: ",broadcastResult)
+
+        let invocationView3 = await app.getInvocation(invocationId)
+        assert(invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
         // //get invocation info EToC
         // let isConfirmed = false

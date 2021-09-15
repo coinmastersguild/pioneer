@@ -1065,23 +1065,28 @@ export async function approveTransaction(event:any, data:any) {
         //get invocation
 
         let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
-        if(!invocation) throw Error(" failed to get invocation! "+data.invocationId)
-        if(!invocation.unsignedTx) throw Error(" invocation not built! you must build first! "+data.invocationId)
-        //
-        let context:any
+        log.debug(tag,"invocation: ",invocation)
+        if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
+        if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
+
+        let context
         if(!data.context){
             context = WALLET_CONTEXT
         } else {
             context = data.context
         }
-        if(!context) {
+
+        if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
             log.error("context: ",context)
             log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
@@ -1106,69 +1111,61 @@ export async function approveTransaction(event:any, data:any) {
         //push update to sign tab
         event.sender.send('transactionSigned', {invocationId,invocation,unsignedTx:invocation.unsignedTx,signedTx,resultUpdate})
 
+        return signedTx
     } catch (e) {
         console.error(tag, "e: ", e);
         return {error:e};
     }
 }
 
-export async function broadcastTransaction(event:any, data:any) {
-    let tag = TAG + " | broadcastTransaction | ";
+export async function broadcastTransaction(event:any,transaction:any) {
+    let tag = " | broadcastTransaction | ";
     try {
         //get invocation
 
-        let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        let invocation = await App.getInvocation(transaction.invocationId)
+        log.debug(tag,"invocation: ",invocation)
 
         //
-        let context:any
-        if(!data.context){
+        if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
+
+        //
+        let context
+        if(!transaction.context){
             context = WALLET_CONTEXT
+        } else {
+            context = transaction.context
         }
-        if(!context) {
+
+        if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
             log.error("context: ",context)
             log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
+        //TODO fix this tech debt
         //normalize
-        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
-        //override noBroadcast
-        if(invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = false
+        if(!invocation.network) invocation.network = invocation.invocation.network
+        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocation.invocationId
+        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.network
+        if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
+        if(invocation.signedTx && invocation.noBroadcast) invocation.signedTx.noBroadcast = true
 
-        let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
+        //force noBroadcast
+        //invocation.signedTx.noBroadcast = true
+        let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
-
-
-        //update invocation
-        let invocationId = invocation.invocationId
-        let updateBody = {
-            invocationId:invocation.invocation.invocationId,
-            invocation:invocation.invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult
-        }
-        log.info(tag,"updateBody: ",updateBody)
-        //update invocation remote
-        let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
-
-        //push update to sign tab
-        event.sender.send('transactionSigned', {
-            invocationId,
-            invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult,
-            resultUpdate
-        })
-
+        return broadcastResult
     } catch (e) {
         console.error(tag, "e: ", e);
-        return {error:e};
+        throw e
     }
 }
 
