@@ -75,12 +75,12 @@ if(!TEST_SEED) throw Error("Failed to load seed!")
 
 let shownSetupPioneer = false
 let shownSetup = false
-let noBroadcast = true
+let noBroadcast = false
 
 let event = {
     sender:{
         send:function (channel:string,data:any){
-            log.info("Got EVENT: ",{channel,data})
+            log.info("Got EVENT: ",JSON.stringify({channel,data}))
 
             switch(data.dialog) {
                 case 'SetupPioneer':
@@ -384,6 +384,11 @@ const test_service = async function () {
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
         log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        if(noBroadcast){
+            assert(invocationView1.noBroadcast)
+        } else {
+            assert(!invocationView1.noBroadcast)
+        }
         assert(invocationView1)
         assert(invocationView1.state)
         assert.equal(invocationView1.state,'builtTx')
@@ -407,8 +412,9 @@ const test_service = async function () {
 
         //TODO verify transaction is what I think it should be
 
-        let invocation = await App.getInvocation()
-        log.info(tag,"invocation: App: ",invocation)
+        //TODO
+        // let invocation = await App.getInvocation()
+        // log.info(tag,"invocation: App: ",invocation)
 
         //TODO verify I like context x
 
@@ -438,65 +444,64 @@ const test_service = async function () {
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.info(tag,"invocationView3: (VIEW) ",JSON.stringify(invocationView3))
 
         //get invocation info EToC
         let isConfirmed = false
 
         //wait for confirmation
-        //
-        // if(!noBroadcast){
-        //     //TODO
-        //     /*
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     let txid
-        //
-        //     //wait till confirmed in block
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await client.getTransactionData(txid)
-        //         log.info(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo && txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
-        //             statusCode = 3
-        //         } else {
-        //             log.info(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         await sleep(6000)
-        //     }
-        //
-        //
-        //     let isFullfilled = false
-        // }
-        //
-        // let resultEnd = await app.stopSocket()
-        // log.info(tag,"resultEnd: ",resultEnd)
+        if(!noBroadcast){
+            log.info(tag," Monitoring tx for confirmations...")
+
+            // /*
+            //     Status codes
+            //
+            //     -1: errored
+            //      0: unknown
+            //      1: built
+            //      2: broadcasted
+            //      3: confirmed
+            //      4: fullfilled (swap completed)
+            //  */
+            //
+            // //monitor tx lifecycle
+            // let currentStatus
+            // let statusCode = 0
+            // let txid
+            //
+            // //wait till confirmed in block
+            // while(!isConfirmed){
+            //     //get invocationInfo
+            //     let invocationInfo = await app.getInvocation(invocationId)
+            //     log.info(tag,"invocationInfo: ",invocationInfo)
+            //
+            //     txid = invocationInfo.signedTx.txid
+            //     assert(txid)
+            //     if(!currentStatus) currentStatus = 'transaction built!'
+            //     if(statusCode <= 0) statusCode = 1
+            //
+            //     //lookup txid
+            //     let txInfo = await client.getTransactionData(txid)
+            //     log.info(tag,"txInfo: ",txInfo)
+            //
+            //     if(txInfo && txInfo.blockNumber){
+            //         log.info(tag,"Confirmed!")
+            //         statusCode = 3
+            //     } else {
+            //         log.info(tag,"Not confirmed!")
+            //         //get gas price recommended
+            //         //get tx gas price
+            //     }
+            //
+            //     await sleep(6000)
+            // }
+            //
+            //
+            // let isFullfilled = false
+        }
+
+        let resultEnd = await app.stopSocket()
+        log.info(tag,"resultEnd: ",resultEnd)
 
 
 

@@ -1443,6 +1443,7 @@ module.exports = class wallet {
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
                     sequence = parseInt(sequence)
+                    if(!sequence || isNaN(sequence)) sequence = 0
                     sequence = sequence.toString()
                     let	chain_id = OSMO_CHAIN
 
@@ -1562,7 +1563,8 @@ module.exports = class wallet {
                     }
 
                     if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
+                    if(isNaN(sequence)) throw Error("113: Failed to get valid sequence")
+                    if(!account_number) throw Error("114: Failed to get account_number")
 
                     //verify from address
                     let fromAddress = await this.WALLET.osmosisGetAddress({
@@ -2492,6 +2494,7 @@ module.exports = class wallet {
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
                     sequence = parseInt(sequence)
+                    if(!sequence || isNaN(sequence)) sequence = 0
                     sequence = sequence.toString()
 
                     let txType = "cosmos-sdk/MsgSend"

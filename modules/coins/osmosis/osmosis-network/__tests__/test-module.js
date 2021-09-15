@@ -84,8 +84,10 @@ network.transaction("DEC4EB867F6EB461B8A640BA5038275E735A4BC63162FDEE2EEE5E4B25D
 
 //good
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"190000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgBeginRedelegate","value":{"delegator_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn","validator_dst_address":"osmovaloper1n3mhyp9fvcmuu8l0q8qvjy07x0rql8q4d3kvts","amount":{"denom":"uosmo","amount":"100"}}}],"signatures":[{"signature":"3d25z15KIUI7FVw0TSipv9ojAurJ3hS1o1fPBIo9wyEp8SF0ta4e30WiggfUaFPNfzxLppNE5uFQ4wva6JWDEA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AvDuqURiCj8S0tQDxSmNL4fUzfAJez6Vy2e3DLQNpmcl"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+
+let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100","denom":"uosmo"}],"from_address":"osmo10jqlqxqd0extg75s3gxzzrcdp4wvrs6zf49yu4","to_address":"osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k"}}],"signatures":[{"signature":"JnL4zAO5Iwz0onyaYmDcKuNTtce7CvoXXMmuPw3iUfk8YqhglKuARbB5EgLr4SRs2Guo4nwYirZJYItck6vBIQ==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AmrURAPLuqG8lK8M9F8Scq5JA4oOU5aB3qEXDsFJwU4h"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })
