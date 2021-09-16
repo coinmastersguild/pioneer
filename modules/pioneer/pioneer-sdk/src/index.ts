@@ -49,6 +49,12 @@ export class SDK {
     private startSocket: () => Promise<any>;
     private isPaired: boolean
     private context: string;
+    private pubkeys:any
+    private masters:any
+    private balances:any
+    private ibcChannels:any[]
+    private paymentStreams:any[]
+    private nfts:any[]
     private contexts: any;
     private info: any;
     private wallets: any[];
@@ -89,6 +95,9 @@ export class SDK {
         this.events = {}
         this.totalValueUsd = 0
         this.blockchains = []
+        this.ibcChannels = []
+        this.paymentStreams = []
+        this.nfts = []
         this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
             try{
@@ -116,8 +125,15 @@ export class SDK {
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
+                log.info(tag,"userInfo: ",userInfo)
                 if(!this.username)this.username = userInfo.username
                 this.wallets = userInfo.wallets
+                this.balances = userInfo.balances
+                this.masters = userInfo.masters
+                this.pubkeys = userInfo.pubkeys
+                this.ibcChannels = userInfo.ibcChannels
+                this.nfts = userInfo.nfts
+                this.paymentStreams = userInfo.paymentStreams
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
                 this.context = userInfo.context
                 this.invocationContext = userInfo.invocationContext
@@ -354,6 +370,11 @@ export class SDK {
                 }
                 if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
                 let thorAddress = result.masters.RUNE
+
+                this.wallets = result.wallets
+                this.balances = result.balances
+                this.masters = result.masters
+                this.pubkeys = result.pubkeys
 
                 log.debug(tag,"this.spec: ",this.spec)
                 log.debug(tag,"supportedBlockchains: ",supportedBlockchains)
