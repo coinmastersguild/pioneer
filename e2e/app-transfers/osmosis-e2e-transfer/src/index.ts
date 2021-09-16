@@ -453,51 +453,51 @@ const test_service = async function () {
         if(!noBroadcast){
             log.info(tag," Monitoring tx for confirmations...")
 
-            // /*
-            //     Status codes
-            //
-            //     -1: errored
-            //      0: unknown
-            //      1: built
-            //      2: broadcasted
-            //      3: confirmed
-            //      4: fullfilled (swap completed)
-            //  */
-            //
-            // //monitor tx lifecycle
-            // let currentStatus
-            // let statusCode = 0
-            // let txid
-            //
-            // //wait till confirmed in block
-            // while(!isConfirmed){
-            //     //get invocationInfo
-            //     let invocationInfo = await app.getInvocation(invocationId)
-            //     log.info(tag,"invocationInfo: ",invocationInfo)
-            //
-            //     txid = invocationInfo.signedTx.txid
-            //     assert(txid)
-            //     if(!currentStatus) currentStatus = 'transaction built!'
-            //     if(statusCode <= 0) statusCode = 1
-            //
-            //     //lookup txid
-            //     let txInfo = await client.getTransactionData(txid)
-            //     log.info(tag,"txInfo: ",txInfo)
-            //
-            //     if(txInfo && txInfo.blockNumber){
-            //         log.info(tag,"Confirmed!")
-            //         statusCode = 3
-            //     } else {
-            //         log.info(tag,"Not confirmed!")
-            //         //get gas price recommended
-            //         //get tx gas price
-            //     }
-            //
-            //     await sleep(6000)
-            // }
-            //
-            //
-            // let isFullfilled = false
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            let txid
+
+            //wait till confirmed in block
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
+
+                txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.info(tag,"txInfo: ",txInfo)
+
+                if(txInfo && txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
+                    statusCode = 3
+                } else {
+                    log.info(tag,"Not confirmed!")
+                    //get gas price recommended
+                    //get tx gas price
+                }
+
+                await sleep(6000)
+            }
+
+
+            let isFullfilled = false
         }
 
         let resultEnd = await app.stopSocket()

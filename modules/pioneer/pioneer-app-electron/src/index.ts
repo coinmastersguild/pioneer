@@ -855,7 +855,6 @@ export async function onStart(event:any, data:any) {
         //requests Filter requests by privacy settings
 
         //globals
-
         if(config.pioneerApi) {
             //get user info
             let userInfo = await App.getUserInfo()
