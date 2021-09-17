@@ -493,6 +493,10 @@ const test_service = async function () {
                     //get tx gas price
                 }
 
+                //verify tx is in pending
+
+                //
+
                 await sleep(6000)
             }
 

@@ -940,6 +940,7 @@ export async function refreshPioneer(event:any, data:any) {
                 if(walletNames) {
                     WALLETS_NAMES = walletNames
                     log.info(tag,"walletNames: ",walletNames)
+                    event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
                 } else {
                     log.info(tag,"No wallets loaded!")
                 }
