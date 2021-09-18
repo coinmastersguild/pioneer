@@ -1,0 +1,36 @@
+{
+  "name": "@pioneer-platform/cosmos-e2e-ibc-withdrawal",
+  "version": "8.1.35",
+  "scripts": {
+    "yarn": "yarn",
+    "start": "node lib/index.js",
+    "build": "tsc -p .",
+    "dev": "rm -Rf ~/.pioneer && npm run build && npm run start",
+    "test": "rm -Rf ~/.pioneer && jest --verbose --silent=true  --forceExit",
+    "test-debug": "rm -Rf ~/.pioneer && jest --verbose --forceExit",
+    "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/osmosis-e2e-join-pool:latest .",
+    "docker:run": "docker run --env-file=../../.env pioneer/osmosis-e2e-join-pool:latest",
+    "docker:tag": "docker tag pioneer/osmosis-e2e-join-pool:latest registry.digitalocean.com/pioneer/pioneer/osmosis-e2e-join-pool:latest",
+    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/osmosis-e2e-join-pool:latest",
+    "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
+  },
+  "dependencies": {
+    "@pioneer-platform/loggerdog": "^8.1.14",
+    "@pioneer-platform/midgard-client": "^8.1.25",
+    "@pioneer-platform/pioneer-app": "^8.1.38",
+    "@pioneer-platform/pioneer-sdk": "^8.1.39",
+    "assert": "^2.0.0",
+    "dotenv": "^6.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
+    "typescript": "^4.2.4",
+    "wait-promise": "^0.4.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.5",
+    "typescript": "^4.2.4"
+  },
+  "gitHead": "f5dafc61d38d38a1396ca39f1e4f7c7c0c738461"
+}

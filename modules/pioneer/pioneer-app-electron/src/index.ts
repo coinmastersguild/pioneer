@@ -1295,6 +1295,7 @@ export async function createWallet(event:any, data:any) {
                     uppercase: false
                 });
                 data.password = "temp:"+randomChars[0]
+                await updateConfig({temp:data.password})
             }else{
                 throw Error("unhandled action featurePasswordless: "+featurePasswordless)
             }
