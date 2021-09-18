@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-app-electron",
-  "version": "8.1.51",
+  "version": "8.1.52",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
