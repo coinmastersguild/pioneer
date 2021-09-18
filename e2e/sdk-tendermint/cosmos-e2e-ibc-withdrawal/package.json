@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cosmos-e2e-ibc-withdrawal",
-  "version": "8.1.35",
+  "version": "8.1.36",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
