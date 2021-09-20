@@ -54,6 +54,13 @@ let run_test = async function(){
         let info = await app.clients.osmosis
         console.log(info)
 
+        let switchContext = await app.setAssetContext('OSMO')
+        console.log(switchContext)
+
+        console.log("masters: ",app)
+        // console.log("app.balances",app)
+
+
     }catch(e){
         console.error(e)
     }

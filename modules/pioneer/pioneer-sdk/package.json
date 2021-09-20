@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-sdk",
-  "version": "8.1.26",
+  "version": "8.1.39",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,9 +20,10 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-coins": "^8.1.24",
-    "@pioneer-platform/pioneer-events": "^8.1.20",
-    "@pioneer-platform/pioneer-xchain-client": "^8.1.26",
+    "@pioneer-platform/pioneer-coins": "^8.1.33",
+    "@pioneer-platform/pioneer-events": "^8.1.26",
+    "@pioneer-platform/pioneer-types": "^8.1.41",
+    "@pioneer-platform/pioneer-xchain-client": "^8.1.35",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
     "openapi-client-axios": "^3.13.1",
@@ -40,5 +41,5 @@
     "ts-jest": "^25.4.0",
     "typescript": "^3.9.9"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "f5dafc61d38d38a1396ca39f1e4f7c7c0c738461"
 }

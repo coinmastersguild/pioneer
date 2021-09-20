@@ -96,10 +96,6 @@ export async function startApp() {
             password
         }
 
-        // let wallet2:any = {
-        //     mnemonic:seed2,
-        //     password
-        // }
         //get master for seed
         let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
         wallet1.masterAddress = walletEth.masterAddress
@@ -108,6 +104,7 @@ export async function startApp() {
         log.info(tag,"wallet1: ",wallet1)
         let successCreate = await App.createWallet('software',wallet1)
         assert(successCreate)
+        log.info(tag,"successCreate: ",successCreate)
 
         //create bravo
         //get master for seed
@@ -128,6 +125,7 @@ export async function startApp() {
         App.updateConfig({blockchains})
         App.updateConfig({spec});
         App.updateConfig({wss});
+        App.updateConfig({pioneerApi:true});
         //get config
         config = await App.getConfig()
         config.blockchains = blockchains
@@ -136,7 +134,7 @@ export async function startApp() {
         config.queryKey = queryKey
 
         //verify startup
-        log.debug(tag,"config: ",config)
+        log.info(tag,"config: ",config)
         let resultInit = await App.init(config)
         let isInit2 = App.isInitialized()
         assert(isInit2)

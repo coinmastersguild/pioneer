@@ -16,14 +16,11 @@ jobs:
     steps:
       - run: sudo apt-get install libudev-dev libusb-dev libusb-1.0
       - checkout
-#      - setup_remote_docker:
-#          docker_layer_caching: true
-      - run:
-          command: "ls"
-      - run:
-          command: "yarn"
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           command: "make && make test"
+
 workflows:
   version: 2
   build-master:

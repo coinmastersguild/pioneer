@@ -663,8 +663,8 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
         if(!isTestnet) isTestnet = false
 
         if(pathsIn.length !== pubkeys.length){
-            log.error(tag,"pubkeys: ",pubkeys)
-            log.error(tag,"pathsIn: ",pathsIn)
+            log.error(tag,"pubkeys: ",pubkeys.length)
+            log.error(tag,"pathsIn: ",pathsIn.length)
             throw Error("102: invalid input, paths dont match!")
         }
 
@@ -677,7 +677,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                 normalized.path = addressNListToBIP32(pathsIn[i].addressNList)
                 normalized.pathMaster = addressNListToBIP32(pathsIn[i].addressNListMaster)
 
-                log.debug(tag,"pubkey: ",pubkey)
+                log.info(tag,"pubkey: ",pubkey)
                 normalized.source = format
                 if(pubkey.type === 'xpub'){
                     normalized.type = 'xpub'
@@ -693,7 +693,8 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     normalized.pubkey = zpub
                     pubkey.pubkey = zpub
                 }
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM'){
+                //TODO get this from supported coins? DRY
+                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM' || pubkey.symbol === 'OSMO'){
                     pubkey.pubkey = pubkeys[i].xpub
                 }
                 normalized.note = pubkey.note
@@ -709,7 +710,7 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
                     throw Error("address master required for valid pubkey")
                 }
                 normalized.script_type = pubkey.script_type //TODO select script type?
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB'){
+                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM' || pubkey.symbol === 'OSMO'){
                     normalized.type = "address"
                     normalized.pubkey = address
                 }

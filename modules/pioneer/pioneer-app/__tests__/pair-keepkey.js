@@ -18,8 +18,8 @@ const Table = require('cli-table');
 prompt.start();
 
 
-let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
-if(!WALLET_PASSWORD) throw Error(".env not found!")
+// let WALLET_PASSWORD = process.env['WALLET_PASSWORD']
+// if(!WALLET_PASSWORD) throw Error(".WALLET_PASSWORD not found!")
 
 //force
 //process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
@@ -110,6 +110,7 @@ let run_test = async function(){
             App.updateConfig({temp:password});
             App.updateConfig({blockchains})
             App.updateConfig({created: new Date().getTime()});
+
         }else{
             console.log(state)
             console.log("Please connect a device!")

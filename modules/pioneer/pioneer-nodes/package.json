@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/nodes",
-  "version": "8.1.8",
+  "version": "8.1.14",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,7 +20,7 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/loggerdog": "^8.1.14",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
@@ -34,5 +34,5 @@
     "ts-jest": "^25.4.0",
     "typescript": "^3.9.7"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "29767e45c4dc1cb9d17c741ac9a06051c30525b5"
 }

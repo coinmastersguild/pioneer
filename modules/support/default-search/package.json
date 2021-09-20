@@ -1,9 +1,9 @@
 {
   "name": "default-search",
-  "version": "1.0.7",
+  "version": "1.0.13",
   "dependencies": {
     "redredisearch": "0.0.1",
     "reds": "^1.0.0"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "29767e45c4dc1cb9d17c741ac9a06051c30525b5"
 }

@@ -6,7 +6,7 @@
 
  */
 
-const TAG = " | Pioneer | "
+const TAG = " | pioneer | "
 const log = require("@pioneer-platform/loggerdog")()
 const cryptoTools = require('crypto');
 const ripemd160 = require("crypto-js/ripemd160")
@@ -70,7 +70,6 @@ const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
 const ATOM_CHAIN="cosmoshub-4"
 const ATOM_BASE=1000000
 let GIG =  1000000000
-
 const OSMO_CHAIN="osmosis-1"
 
 function bech32ify(address:any, prefix:string) {
@@ -106,6 +105,7 @@ module.exports = class wallet {
     private sendToAddress: (intent: SendToAddress) => Promise<any>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
     private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
+    private masters: any;
     private mode: string;
     private queryKey: string | undefined;
     private username: string;
@@ -144,7 +144,11 @@ module.exports = class wallet {
         this.APPROVE_QUEUE = []
         this.PENDING_QUEUE = []
         this.isTestnet = false
-        this.offline = false //TODO supportme
+        if(config.pioneerApi){
+            this.offline = false
+        }else{
+            this.offline = true
+        }
         this.mode = config.mode
         this.context = config.context
         this.queryKey = config.queryKey
@@ -166,11 +170,12 @@ module.exports = class wallet {
             let tag = TAG + " | init_wallet | "
             try{
                 if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
-                if(!this.spec) throw Error("103: Must init a pioneer server spec")
                 log.debug(tag,"checkpoint")
                 let paths = getPaths(this.blockchains)
                 switch (+HDWALLETS[this.type]) {
                     case HDWALLETS.pioneer:
+                        if(!config.mnemonic) throw Error("103: mnemonic required!")
+                        if(!config.username) throw Error("104: username required!")
                         if(!this.context && config.mnemonic){
                             //calculate
                             let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
@@ -189,6 +194,7 @@ module.exports = class wallet {
                         log.debug(tag,"isTestnet: ",this.isTestnet)
                         //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
+                        if(!this.WALLET) throw Error("Failed to init wallet!")
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
 
                         //verify testnet
@@ -242,6 +248,8 @@ module.exports = class wallet {
                                 pubkey.symbol = nativeAsset
                             }
                             this.PUBLIC_WALLET[pubkey.symbol] = pubkey
+                            if(!this.masters) this.masters = {}
+                            this.masters[pubkey.symbol] = pubkey.master
                         }
                         break;
                     case HDWALLETS.keepkey:
@@ -392,7 +400,16 @@ module.exports = class wallet {
 
                     return walletInfo
                 } else {
-                    log.debug(tag,"Offline mode!")
+                    log.info(tag,"Offline mode!")
+                    //log.info(tag,"this: ",this)
+                    return {
+                        isTestnet:this.isTestnet,
+                        context:this.context,
+                        username:this.username,
+                        blockchains:this.blockchains,
+                        wallet:this.PUBLIC_WALLET,
+                        paths:this.paths
+                    }
                 }
             }catch(e){
                 log.error(tag,e)
@@ -438,8 +455,16 @@ module.exports = class wallet {
                     //query api
                     walletInfo = await this.pioneerClient.instance.Info(context)
                     log.debug(tag,"walletInfo: ",walletInfo)
+                    walletInfo = walletInfo.data
+                    walletInfo.pioneerApi = true
+                } else {
+                    walletInfo.pioneerApi = false
+                    walletInfo.pubkeys = this.pubkeys
+                    walletInfo.wallet = this.PUBLIC_WALLET
+                    walletInfo.paths = this.paths
+                    walletInfo.masters = this.masters
                 }
-                return walletInfo.data
+                return walletInfo
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -598,8 +623,8 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.debug(tag,"address (HDwallet): ",address)
-                    log.debug(tag,"address (private): ",output)
+                    log.info(tag,"address (HDwallet): ",address)
+                    log.info(tag,"address (private): ",output)
                     if(address !== output) {
                         throw Error("unable to verify address in HDwallet!")
                     }
@@ -1418,6 +1443,7 @@ module.exports = class wallet {
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
                     sequence = parseInt(sequence)
+                    if(!sequence || isNaN(sequence)) sequence = 0
                     sequence = sequence.toString()
                     let	chain_id = OSMO_CHAIN
 
@@ -1537,7 +1563,8 @@ module.exports = class wallet {
                     }
 
                     if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
+                    if(isNaN(sequence)) throw Error("113: Failed to get valid sequence")
+                    if(!account_number) throw Error("114: Failed to get account_number")
 
                     //verify from address
                     let fromAddress = await this.WALLET.osmosisGetAddress({
@@ -2467,6 +2494,7 @@ module.exports = class wallet {
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number
                     sequence = parseInt(sequence)
+                    if(!sequence || isNaN(sequence)) sequence = 0
                     sequence = sequence.toString()
 
                     let txType = "cosmos-sdk/MsgSend"

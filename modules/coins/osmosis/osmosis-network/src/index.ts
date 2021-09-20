@@ -69,6 +69,9 @@ module.exports = {
     txs: function (address:string) {
         return get_txs_by_address(address);
     },
+    getTransaction: function (txid:string) {
+        return get_transaction(txid);
+    },
     transaction: function (txid:string) {
         return get_transaction(txid);
     },

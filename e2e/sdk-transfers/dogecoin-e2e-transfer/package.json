@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/dogecoin-e2e-transfer",
-  "version": "8.1.21",
+  "version": "8.1.35",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -14,10 +14,10 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.5",
-    "@pioneer-platform/midgard-client": "^8.1.14",
-    "@pioneer-platform/pioneer-app": "^8.1.19",
-    "@pioneer-platform/pioneer-sdk": "^8.1.21",
+    "@pioneer-platform/loggerdog": "^8.1.14",
+    "@pioneer-platform/midgard-client": "^8.1.25",
+    "@pioneer-platform/pioneer-app": "^8.1.38",
+    "@pioneer-platform/pioneer-sdk": "^8.1.39",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
@@ -31,5 +31,5 @@
     "ts-jest": "^26.5.5",
     "typescript": "^4.2.4"
   },
-  "gitHead": "d49231c76d9cf2c9591038047d6c702e600464c7"
+  "gitHead": "f5dafc61d38d38a1396ca39f1e4f7c7c0c738461"
 }

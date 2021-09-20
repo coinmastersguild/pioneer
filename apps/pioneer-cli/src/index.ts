@@ -43,6 +43,26 @@ program.on('--help', () => {
 });
 
 /*
+    Platform APPs
+        App ecosystem
+        Create
+        Publish
+        Revoke
+ */
+
+const walletCommand = program
+    .command( 'wallet' )
+    .description( 'Create a wallet' )
+    .forwardSubcommands();
+
+walletCommand
+    .command( 'create' )
+    .action( () => {
+        log.info(" Create a new wallet")
+    } );
+
+
+/*
     Pioneer Server
         (docs)
  */
@@ -95,35 +115,35 @@ userCommand
         Revoke
  */
 
-// const appCommand = program
-//     .command( 'app' )
-//     .description( 'Create a Pioneer Application' )
-//     .forwardSubcommands();
-//
-// appCommand
-//     .command( 'create' )
-//     .action( () => {
-//         let tag = " | app | "
-//
-//         const questions = [
-//             {
-//                 type: "input",
-//                 name: "appname",
-//                 message: "select an application name",
-//                 default: "sample app",
-//             },
-//             //wallets
-//         ];
-//
-//         inquirer.prompt(questions).then(async function (answers: any) {
-//             //check if name available
-//             log.info(tag,"answers: ",answers)
-//             //generate template to file
-//             platform.create(answers.appname)
-//             //create app remote
-//
-//         });
-//     } );
+const appCommand = program
+    .command( 'app' )
+    .description( 'Create a Pioneer Application' )
+    .forwardSubcommands();
+
+appCommand
+    .command( 'create' )
+    .action( () => {
+        let tag = " | app | "
+
+        const questions = [
+            {
+                type: "input",
+                name: "appname",
+                message: "select an application name",
+                default: "sample app",
+            },
+            //wallets
+        ];
+
+        inquirer.prompt(questions).then(async function (answers: any) {
+            //check if name available
+            log.info(tag,"answers: ",answers)
+            //generate template to file
+            //platform.create(answers.appname)
+            //create app remote
+
+        });
+    } );
 
 // appCommand
 //     .command( 'ls' )

@@ -29,6 +29,12 @@ network.init(servers)
 //         console.log(JSON.stringify(resp))
 //     })
 
+network.getPubkeyInfo('BTC',"xprv9z2bF1eiQoEpzM78iMXTE999QNSeAJ7LibHe7ujUJ2qCgPprJnTJqEM3WewhQLY19fkT9CBu3B1ZQPj6Zqm94rKLgkqVvocRrgyopeR7EuP")
+    .then(function(resp){
+        console.log(resp)
+        console.log(JSON.stringify(resp))
+    })
+
 // network.getTransaction('BCH',"")
 //     .then(function(resp){
 //         console.log(resp)

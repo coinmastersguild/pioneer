@@ -6,9 +6,10 @@
           -highlander
  */
 
-const TAG = ' | APP | '
-import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
+const TAG = ' | pioneer-app-electron | '
+import {checkConfigs, getConfig, innitConfig, updateConfig, getWallet, getWallets} from "@pioneer-platform/pioneer-config";
 
+const bcrypt = require("bcryptjs");
 const loadtest = require('loadtest');
 const CryptoJS = require("crypto-js")
 const bip39 = require(`bip39`)
@@ -19,21 +20,27 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 const log = require('electron-log');
 const generator = require('generate-password');
-// const Hardware = require("@pioneer-platform/pioneer-hardware")
+const Hardware = require("@pioneer-platform/pioneer-hardware")
 const Network = require("@pioneer-platform/pioneer-client")
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 import {v4 as uuidv4} from 'uuid';
 
+import {
+    AppConfig
+} from "@pioneer-platform/pioneer-types";
+
 //Globals
+let INVOCATIONS:any = []
+let INVOCATIONS_SIGNED:any = []
 let WALLET_INIT = false
-let WALLETS_LOADED: never[] = []
+let WALLETS_LOADED: any
 let WALLETS_NAMES: string | any[] = []
 let WALLET_CONTEXT = ""
 let FIO_ACCEPT = false
 let FIO_REJECT = false
 let PASSWORDLESS_ENABLE = false
 let WALLET_PASSWORD: any
-let WALLET_HASH
+let WALLET_HASH: any
 let USERNAME
 let PRIMARY_VAULT
 let FIRST_START = true
@@ -51,19 +58,74 @@ let featureSoftwareCreate = process.env['CREATE_SOFTWARE_FEATURE']
 let featurePasswordless = process.env['PASSWORDLESS_FEATURE']
 let featureInsecurePassword = process.env['INSECURE_PASSWORD']
 
-let spec = process.env['URL_PIONEER_SPEC'] || 'http://127.0.0.1:9001/spec/swagger.json'
-//let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-spec = spec.replace(/"/g, '')
-let wss = process.env['URL_PIONEER_WS'] || 'ws://127.0.0.1:9001'
-// let wss = process.env['URL_PIONEER_WS'] || 'wss://pioneers.dev'
-wss = wss.replace(/"/g, '')
+let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let queryKey: string
 let username: any
+
 //blockchains
 let blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','osmosis']
 
 
-export async function checkPioneerUrls(event: { sender: { send: (arg0: string, arg1: { result: any; server: any; }) => void; }; }, data: { servers: any; }) {
+
+export function getContext() {
+    let tag = " | getContext | "
+    try {
+        return WALLET_CONTEXT
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export function getInvocations() {
+    let tag = " | getInvocations | "
+    try {
+        return INVOCATIONS
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}
+
+export async function attemptUnlock(event:any, data:any) {
+    let tag = TAG + " | attemptUnlock | ";
+    try {
+
+        //get all wallets
+        let allWallets = await getWallets()
+        log.info(tag,"allWallets: ",allWallets)
+
+        for(let i = 0; i < allWallets.length; i++){
+            let walletId = allWallets[i]
+            let wallet = getWallet(walletId)
+            log.info(tag,"wallet: ",wallet)
+
+            let isValid = bcrypt.compareSync(data.password, wallet.hash); // true
+            if(isValid){
+                //WALLET_PASSWORD
+                WALLET_PASSWORD = data.password
+
+                //TODO multi passwords
+
+                //add to batch unlock
+                //init app with multiple passwords and unlock multiple wallets
+            }
+        }
+        if(WALLET_PASSWORD){
+            return true
+        } else {
+            return false
+        }
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        return {error:e};
+    }
+}
+
+//attemptUnlock
+
+export async function checkPioneerUrls(event: any, data: any) {
     let tag = TAG + " | checkPioneerUrl | ";
     try {
         // log.info(tag,"data: ",data)
@@ -158,8 +220,15 @@ export async function startNetwork(event:any, data:any) {
 export async function createUsername(event:any, data:any) {
   let tag = TAG + " | createUsername | ";
   try {
-    username = "user:"+uuidv4()
-    App.updateConfig({username:data.username});
+    let username
+    if(!data.username){
+        username = "user:"+uuidv4()
+    } else {
+        username = data.username
+    }
+
+    log.info(tag,"create username: ",username)
+    App.updateConfig({username});
     //write to config
   } catch (e) {
     console.error(tag, "e: ", e);
@@ -225,7 +294,7 @@ export async function attemptPair(event:any, data:any) {
 //   }
 // }
 
-export async function initConfig() {
+export async function initConfig(config?:any){
     let tag = TAG + " | initConfig | ";
     try {
         let config = await App.getConfig()
@@ -248,13 +317,15 @@ export async function initConfig() {
             log.info(tag,"current env!: spec:",spec)
             log.info(tag,"current env!: wss:",wss)
             log.info(tag,"current env!: blockchains:",blockchains)
+
             //create key/save to config
             await App.initConfig("english");
             queryKey = uuidv4()
             App.updateConfig({queryKey});
-            App.updateConfig({spec});
-            App.updateConfig({wss});
+            App.updateConfig({spec:config.spec || spec});
+            App.updateConfig({wss: config.wss || wss});
             App.updateConfig({blockchains});
+            App.updateConfig({pioneerApi:true});
             return true
         }
     } catch (e) {
@@ -262,6 +333,19 @@ export async function initConfig() {
         return {error:e};
     }
 }
+
+/*
+    Setup Status code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+
+    //TODO fio/eos/usernames ext
+ */
 
 export async function continueSetup(event:any, data:any) {
     let tag = TAG + " | continueSetup | ";
@@ -272,8 +356,51 @@ export async function continueSetup(event:any, data:any) {
             log.info(tag,"Checkpoint1 config found!")
             if(!config.queryKey) throw Error("Invalid config!")
             queryKey = config.queryKey
+
+            //is username set?
+            if(config.username){
+                log.info(tag,"username: ",config.username)
+                log.info(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
+                username = config.username
+                //start wallet?
+                if(!WALLET_INIT){
+                    log.info(tag,"Checkpoint5a Started Wallet!")
+                    //if wallet files?
+                    let walletFiles = await App.getWalletNames()
+                    log.info(tag,"walletFiles: ",walletFiles)
+                    if(walletFiles.length > 0){
+                        log.info(tag,"Checkpoint6a wallet ready")
+                        return {
+                            setup:true,
+                            status:0,
+                            success:true,
+                            result:"ready to start!"
+                        }
+                    } else {
+                        log.info(tag,"Checkpoint6b wallet failed to load")
+                        event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
+                        return {
+                            setup:false,
+                            status:2,
+                            success:false,
+                            result:"setup required! wallet not initialized"
+                        }
+                    }
+                } else {
+                    log.info(tag,"Checkpoint5b Wallet already started! will not re-attempt")
+                }
+            } else {
+                await createUsername(event, data)
+                return {
+                    setup:false,
+                    success:false,
+                    status:2,
+                    result:"username required! generated username"
+                }
+            }
+
             //verify net inited
-            if(NETWORK){
+            if(NETWORK && NETWORK.instance && !data.isOffline){
                 log.info(tag,"Checkpoint2 NETWORK found!")
                 //is online?
                 let globals = await NETWORK.instance.Globals()
@@ -286,65 +413,46 @@ export async function continueSetup(event:any, data:any) {
                     online:true,
                     globals
                 })
-
-                //is username set?
-                if(config.username){
-                    log.info(tag,"username: ",config.username)
-                    log.info(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
-                    username = config.username
-                    //start wallet?
-                    if(!WALLET_INIT){
-                        log.info(tag,"Checkpoint5a Started Wallet!")
-                        //if wallet files?
-                        let walletFiles = await App.getWalletNames()
-                        log.info(tag,"walletFiles: ",walletFiles)
-                        if(walletFiles.length > 0){
-                            log.info(tag,"Checkpoint6a wallet ready")
-                            return {
-                                setup:true,
-                                success:true,
-                                result:"ready to start!"
-                            }
-                        } else {
-                            log.info(tag,"Checkpoint6b wallet failed to load")
-                            return {
-                                setup:false,
-                                success:false,
-                                result:"setup required! wallet not initialized"
-                            }
-                        }
-                    } else {
-                        log.info(tag,"Checkpoint5b Wallet already started! will not re-attempt")
-                    }
-                } else {
-                    await createUsername(event, data)
-                    return {
-                        setup:false,
-                        success:false,
-                        result:"username required! generated username"
-                    }
-                }
-            }else{
-                if(config.spec && config.wss){
+            } else {
+                log.info(tag,"Checkpoint2b Network instance not found!")
+                log.info(tag,"data: ",data)
+                log.debug(tag,"NETWORK: ",NETWORK)
+                if(config.spec && config.wss && !data.isOffline){
+                    log.info(tag,"Checkpoint3 starting Network")
                     await startNetwork(event, data)
                     return {
                         setup:false,
                         success:false,
+                        status:1,
                         result:"starting network!"
                     }
                 }else{
-                    log.info(tag,"Checkpoint2b NO NETWORK found!")
-                    if(config.queryKey){
-                        log.info(tag,"Checkpoint3a Starting network select!")
-                        event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
+                    log.info(tag,"Checkpoint3b not starting Network")
+                    if(!data.isOffline){
+                        log.info(tag,"Checkpoint4 not offline, attempting to start network")
+                        if(config.queryKey){
+                            log.info(tag,"Checkpoint3a Starting network select!")
+                            event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
+                            return {
+                                setup:false,
+                                success:false,
+                                result:"setup required! network not found!"
+                            }
+                        } else {
+                            return {
+                                setup:false,
+                                success:false,
+                                result:"setup required! network not found! invalid config, missing queryKey"
+                            }
+                        }
+                    }else {
                         return {
-                            setup:false,
-                            success:false,
-                            result:"setup required! network not found!"
+                            setup:true,
+                            success:true,
+                            result:"offline setup complete!"
                         }
                     }
                 }
-
             }
         } else {
             event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
@@ -352,6 +460,7 @@ export async function continueSetup(event:any, data:any) {
             return {
                 setup:false,
                 success:false,
+                status:3,
                 result:"setup required!"
             }
         }
@@ -391,7 +500,7 @@ export async function checkspec(event:any, data:any) {
         })
         networkTest = await networkTest.init()
 
-        //
+        //Globals
         let globals = await networkTest.instance.Globals()
         globals = globals.data
         log.info(tag,"globals: ",globals)
@@ -440,68 +549,82 @@ export async function getUsbDevices(event:any, data:any) {
 
  */
 
-// let KEEPKEY_STATUS = 'unknown'
-// export async function startHardware(event:any, data:any) {
-//   let tag = TAG + " | startHardware | ";
-//   try {
-//     log.info(tag,"Checkpoint 0")
-//     //start
-//     KEEPKEY = await Hardware.start()
-//     log.info(tag,"Checkpoint 1")
-//     KEEPKEY.events.on('event', async (eventKeepkey) => {
-//       log.info(tag,"eventKeepkey: ",eventKeepkey)
-//       //event.sender.send('hardware',{event:eventKeepkey})
-//     });
-//
-//     // let allUsbDevices = await Hardware.allDevices()
-//     // event.sender.send('allUsbDevices',{ allUsbDevices })
-//     // log.debug(tag,"allUsbDevices: ",allUsbDevices)
-//     //
-//     // let allKeepKeys = await Hardware.listKeepKeys()
-//     // event.sender.send('allKeepKeys',{ allKeepKeys })
-//     // log.info(tag,"allKeepKeys: ",allKeepKeys)
-//
-//     let info = await Hardware.info()
-//     event.sender.send('hardwareInfo',{ info })
-//     log.info(tag,"info: ",info)
-//
-//     let state = await Hardware.state()
-//     event.sender.send('hardwareState',{ state })
-//     event.sender.send('hardwareStatus',{ state })
-//     log.info(tag,"state: ",state)
-//
-//     if(parseInt(state.state) > 1){
-//       log.info(tag,"Connected to device!")
-//       //lockStatus
-//       let lockStatus = await Hardware.isLocked()
-//       event.sender.send('hardwareLockStatus',{ lockStatus })
-//       log.info("lockStatus: ",lockStatus)
-//
-//       //if locked
-//       if(lockStatus){
-//         KEEPKEY_STATUS = 'locked'
-//         Hardware.displayPin(blockchains)
-//         //open pin
-//         event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
-//       } else {
-//         KEEPKEY_STATUS = 'unlocked'
-//         //is connected?
-//         let info = await Hardware.info()
-//         log.info("info: ",info)
-//
-//         //check Is paired
-//         //TODO if not paired/ start pairing
-//
-//         event.sender.send('deviceInfo',info)
-//       }
-//     }
-//
-//     return KEEPKEY
-//   } catch (e) {
-//     console.error(tag, "e: ", e);
-//     return {error:e};
-//   }
-// }
+let KEEPKEY_STATUS = 'unknown'
+export async function startHardware(event:any, data:any) {
+  let tag = TAG + " | startHardware | ";
+  try {
+    log.info(tag,"Checkpoint 0")
+    //start
+    KEEPKEY = await Hardware.start()
+    log.info(tag,"Checkpoint 1")
+    KEEPKEY.events.on('event', async (eventKeepkey:any) => {
+      log.info(tag,"eventKeepkey: ",eventKeepkey)
+      //event.sender.send('hardware',{event:eventKeepkey})
+    });
+
+    // let allUsbDevices = await Hardware.allDevices()
+    // event.sender.send('allUsbDevices',{ allUsbDevices })
+    // log.debug(tag,"allUsbDevices: ",allUsbDevices)
+    //
+    // let allKeepKeys = await Hardware.listKeepKeys()
+    // event.sender.send('allKeepKeys',{ allKeepKeys })
+    // log.info(tag,"allKeepKeys: ",allKeepKeys)
+
+    let info = await Hardware.info()
+    event.sender.send('hardwareInfo',{ info })
+    log.info(tag,"info: ",info)
+
+    let state = await Hardware.state()
+    event.sender.send('hardwareState',{ state })
+    event.sender.send('hardwareStatus',{ state })
+    log.info(tag,"state: ",state)
+
+    if(parseInt(state.state) > 1){
+      log.info(tag,"Connected to device!")
+      //lockStatus
+      let lockStatus = await Hardware.isLocked()
+      event.sender.send('hardwareLockStatus',{ lockStatus })
+      log.info("lockStatus: ",lockStatus)
+
+      //if locked
+      if(lockStatus){
+        KEEPKEY_STATUS = 'locked'
+        Hardware.displayPin(blockchains)
+        //open pin
+        event.sender.send('navigation',{ dialog: 'Pin', action: 'open'})
+      } else {
+        KEEPKEY_STATUS = 'unlocked'
+        //is connected?
+        let info = await Hardware.info()
+        log.info("info: ",info)
+
+        //check Is paired
+        //TODO if not paired/ start pairing
+
+        event.sender.send('deviceInfo',info)
+      }
+    }
+
+    return KEEPKEY
+  } catch (e) {
+    console.error(tag, "e: ", e);
+    return {error:e};
+  }
+}
+
+/*
+    Setup Status code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+    5 need password
+
+    //TODO fio/eos/usernames ext
+ */
 
 export async function onStart(event:any, data:any) {
     let tag = TAG + " | onStart | ";
@@ -534,24 +657,11 @@ export async function onStart(event:any, data:any) {
 
         //let configStatus = checkConfigs()
         let config = await App.getConfig()
-        delete config.isTestnet //kill flag with fire rabble
 
         //send config to ui
         event.sender.send('updateConfig',config)
-
         log.info(tag,"config: ",config)
         //log.debug(tag,"configStatus() | configStatus: ", configStatus)
-
-        if(data.password){
-            config.temp = data.password
-            WALLET_PASSWORD = data.password
-            if(featureInsecurePassword){
-                //write password to file (auto-login)
-                //NOTE: it is bad form to store USER passwords on disk
-                //however: it is accepted to store generated passwords on disk
-                await App.updateConfig({temp: data.password});
-            }
-        }
 
         if(!config){
             throw Error("Attempting to start wallet before configuration!")
@@ -569,57 +679,125 @@ export async function onStart(event:any, data:any) {
         }
 
         if(!config.username){
-            throw Error("2 Attempting to start wallet before configuration!")
+            throw Error("Attempting to start wallet before username configuration!")
         }
 
-        if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
-            WALLET_HASH = config.passwordHash
-            event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
-            return
-        } else if(config.temp) {
+        /*
+            Password Logic
+
+            if "temp" in config, attempt to unlock context wallet
+            if fail, return needed password
+
+            after success, iterate over all wallets with pw
+            if unlocked, mark
+            if locked mark
+
+         */
+
+        if(config.temp){
             WALLET_PASSWORD = config.temp
-        } else {
-            //generate password
-            if(featurePasswordless){
-                log.info(tag,"featurePasswordless TRUE")
-                //create password
-                let randomChars = generator.generateMultiple(1, {
-                    length: 10,
-                    uppercase: false
-                });
-                WALLET_PASSWORD = randomChars[0]
-                await App.updateConfig({temp:WALLET_PASSWORD});
-            } else {
-                //get password
-                event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
-                return true
-            }
         }
-        if(!WALLET_PASSWORD) throw Error("Error: Password required! ")
+        if(data.password){
+            //overrides temp
+            WALLET_PASSWORD = data.password
+        }
+
+        // if(!config.temp && config.passwordHash && !WALLET_PASSWORD){
+        //     WALLET_HASH = config.passwordHash
+        //     event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+        //     return {
+        //         success:false,
+        //         status:5,
+        //         msg:"Need a password to unlock wallet! (no temp found)"
+        //     }
+        // } else if(config.temp) {
+        //     WALLET_PASSWORD = config.temp
+        // } else {
+        //     //generate password
+        //     if(featurePasswordless){
+        //         log.info(tag,"featurePasswordless TRUE")
+        //         //create password
+        //         let randomChars = generator.generateMultiple(1, {
+        //             length: 10,
+        //             uppercase: false
+        //         });
+        //         WALLET_PASSWORD = randomChars[0]
+        //         await App.updateConfig({temp:WALLET_PASSWORD});
+        //     } else {
+        //         //get password
+        //         event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+        //         return {
+        //             success:false,
+        //             status:5,
+        //             msg:"Need a password to unlock wallet!"
+        //         }
+        //     }
+        // }
 
         //get wallet files
         let walletFiles = await App.getWalletNames()
         log.info("walletFiles: ",walletFiles)
 
         if(walletFiles.length === 0){
+            event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
             //Always have atleast 1 wallet!
             log.error(" No Wallets found! ")
             throw Error("Can not start until wallet created!")
         }
 
-        //TODO blockchains configurable?
-        config.blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance']
+        //if length === 1 then, set context to only
+        if(walletFiles.length === 1){
+            //TODO
+            WALLET_CONTEXT = walletFiles[0]
 
-        //start App
-        if(!WALLET_PASSWORD) throw Error("unable to start! missing, WALLET_PASSWORD")
-        config.password = WALLET_PASSWORD
+            //get file
+            let walletFile = await getWallet(WALLET_CONTEXT)
+            log.info(tag,"walletFile: ",walletFile)
+            //
+            if(walletFile.KEEPKEY){
+                WALLET_PASSWORD = 'hardware'
+                config.hardware = true
+            }
+        } else {
+            throw Error("TODO multi-wallets")
+        }
+        //if > 1
+            //remote or local context set from state
+
+
+        if(!WALLET_PASSWORD) {
+            //collect password
+            event.sender.send('navigation',{ dialog: 'Unlock', action: 'open'})
+            throw Error("Error: Password required! ")
+        }
+        //verify password is valid
+
+        //
+        if(data.blockchains) {
+            config.blockchains = data.blockchains
+        } else {
+            config.blockchains = blockchains
+        }
+
+
+        if(WALLET_PASSWORD)config.temp = WALLET_PASSWORD
         log.info(tag,"config: ",config)
 
-        //TODO validate config?
-        // let resultInit = await initConfig()
+        if(data.isOffline){
+            config.pioneerApi = false
+        } else {
+            config.pioneerApi = true
+            config.spec = spec
+            config.wss = wss
+        }
 
+        log.info(tag,"init app with config: ",config)
         let resultInit = await App.init(config)
-        log.info(tag,"resultInit: ",resultInit)
+        log.debug(tag,"resultInit: ",resultInit)
+
+        if(!resultInit) throw Error("103: app failed to init!")
+        //if(!resultInit.events) throw Error("104: app failed to init, missing events!")
+
         //push devices
         if(resultInit.devices){
             event.sender.send('loadDevices',{devices:resultInit.devices})
@@ -641,6 +819,8 @@ export async function onStart(event:any, data:any) {
         let walletNames = await App.getWalletNames()
         WALLETS_NAMES = walletNames
 
+        if(!WALLET_CONTEXT) WALLET_CONTEXT = WALLETS_LOADED[0]
+
         if(resultInit.wallets){
             log.info(tag,"registering wallets: ",resultInit.wallets)
             event.sender.send('updateWallets',resultInit.wallets)
@@ -650,20 +830,23 @@ export async function onStart(event:any, data:any) {
 
 
         //wallet events
-        resultInit.events.on('unsignedTx', async (transaction:any) => {
-            log.info(tag,"*** unsignedTx: ", transaction)
-            if(!transaction.invocationId){
-                if(transaction.swap && transaction.swap.invocationId) transaction.invocationId = transaction.swap.invocationId
-                if(transaction.transaction && transaction.transaction.invocationId) transaction.invocationId = transaction.transaction.invocationId
-            }
-            if(!transaction.invocationId) throw Error("failed to find transaction.invocationId")
+        if(resultInit.events){
+            resultInit.events.on('unsignedTx', async (transaction:any) => {
+                log.info(tag,"*** unsignedTx: ", transaction)
+                if(!transaction.invocationId){
+                    if(transaction.swap && transaction.swap.invocationId) transaction.invocationId = transaction.swap.invocationId
+                    if(transaction.transaction && transaction.transaction.invocationId) transaction.invocationId = transaction.transaction.invocationId
+                }
+                if(!transaction.invocationId) throw Error("failed to find transaction.invocationId")
 
-            event.sender.send('setInvocationContext',{invocationId:transaction.invocationId})
-            let invocation = await App.getInvocation(transaction.invocationId)
-            log.info(tag,"*** invocation: ", invocation)
-            //open invocation dialog
-            event.sender.send('addInvocation',invocation)
-        })
+                event.sender.send('setInvocationContext',{invocationId:transaction.invocationId})
+                let invocation = await App.getInvocation(transaction.invocationId)
+                log.info(tag,"*** invocation: ", invocation)
+                //open invocation dialog
+                event.sender.send('addInvocation',invocation)
+            })
+        }
+
 
         //TODO block events per blockchain activated
 
@@ -672,23 +855,23 @@ export async function onStart(event:any, data:any) {
         //requests Filter requests by privacy settings
 
         //globals
+        if(config.pioneerApi) {
+            //get user info
+            let userInfo = await App.getUserInfo()
+            if(!userInfo.context) throw Error("113: invalid user! missing context!")
+            if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
+                log.info(tag,"set context to remote")
+                WALLET_CONTEXT = userInfo.context
+                event.sender.send('setContext',{context:userInfo.context})
+                let resultUpdateConextRemote = await App.setContext(userInfo.context)
+                log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+            }
 
-
-        //get user info
-        let userInfo = await App.getUserInfo()
-        if(!userInfo.context) throw Error("113: invalid user! missing context!")
-        if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
-            log.info(tag,"set context to remote")
-            WALLET_CONTEXT = userInfo.context
-            event.sender.send('setContext',{context:userInfo.context})
-            let resultUpdateConextRemote = await App.setContext(userInfo.context)
-            log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+            //get invocations
+            let invocationsRemote = await App.getInvocations()
+            log.info(tag,"invocationsRemote: ",invocationsRemote)
+            event.sender.send('invocations',invocationsRemote)
         }
-
-        //get invocations
-        let invocationsRemote = await App.getInvocations()
-        log.info(tag,"invocationsRemote: ",invocationsRemote)
-        event.sender.send('invocations',invocationsRemote)
 
         //load masters
         // let info = await context.getInfo(contextName)
@@ -704,6 +887,20 @@ export async function onStart(event:any, data:any) {
         return {error:e};
     }
 }
+
+/*
+    refreshPioneer code
+
+    -1 Error
+    0 online
+    1 not paired with server
+    2 no wallets found
+    3 config not found
+    4 need username
+
+    //TODO fio/eos/usernames ext
+ */
+
 
 export async function refreshPioneer(event:any, data:any) {
     let tag = TAG + " | refreshPioneer | ";
@@ -740,9 +937,10 @@ export async function refreshPioneer(event:any, data:any) {
 
                 //wallets
                 let walletNames = await App.getWalletNames()
-                if(walletNames){
+                if(walletNames) {
                     WALLETS_NAMES = walletNames
                     log.info(tag,"walletNames: ",walletNames)
+                    event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
                 } else {
                     log.info(tag,"No wallets loaded!")
                 }
@@ -759,16 +957,26 @@ export async function refreshPioneer(event:any, data:any) {
 
             } else {
                 log.info(tag,"Wallet not started yet! ")
+                return {
+                    succcess: false,
+                    message: 'wallet class returning not initalized',
+                    status: 1
+                }
             }
         } else {
             log.info(tag,"No config file! start new user")
             //TODO
             //launch startup
             event.sender.send('navigation',{ dialog: 'Welcome', action: 'open'})
+
+            return {
+                succcess: false,
+                status: 3
+            }
         }
     } catch (e) {
-        console.error(tag, "e: ", e);
-        return {error:e};
+        log.error(tag,e)
+        throw Error(e)
     }
 }
 
@@ -803,107 +1011,142 @@ export async function setMnemonic(event:any, data:any) {
     }
 }
 
-export async function buildTransaction(event:any, data:any) {
-    let tag = TAG + " | buildTransaction | ";
+export async function buildTransaction(event:any, transaction:any) {
+    let tag = " | buildTransaction | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"transaction: ",transaction)
+        if(!transaction.invocationId) throw Error("invocationId required!")
+
         //get invocation
 
         //TODO validate type and fields
 
-        let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        let invocation = await App.getInvocation(transaction.invocationId)
+        log.info(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
-        let context:any
-        if(!data.context){
+        let context
+        if(!transaction.context){
             context = WALLET_CONTEXT
+        } else {
+            context = transaction.context
+            WALLET_CONTEXT = context
         }
-        if(!context) {
+        if(!context || !WALLETS_LOADED[context]) {
             log.error("context: ",context)
-            log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            log.error("Available: ",WALLETS_LOADED)
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.info(tag,"walletContext: ",walletContext.walletId)
 
+        let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                console.log(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
-
+                log.info(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
                 //TODO validate transfer object
-
-                let transferUnSigned = await walletContext.buildTransfer(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  transferUnSigned: ",transferUnSigned)
-
-                let invocationId = invocation.invocationId
-                let updateBody = {
-                    invocationId,
-                    invocation,
-                    unsignedTx:transferUnSigned
-                }
-                log.info(tag,"updateBody: ",updateBody)
-
-                //update invocation remote
-                let resultUpdate = await App.updateInvocation(updateBody)
-                log.info(tag,"resultUpdate: ",resultUpdate)
-
-                //push update to sign tab
-                event.sender.send('transactionBuilt', {invocationId,invocation,unsignedTx:transferUnSigned,resultUpdate})
-
+                unsignedTx = await walletContext.buildTransfer(invocation.invocation)
+                log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
+                break
+            case 'redelegate':
+            case 'undelegate':
+            case 'ibcdeposit':
+            case 'delegate':
+                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                break
+            case 'osmosislpadd':
+                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                break
+            case 'osmosisswap':
+                log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
+                break
+            case 'redelegate':
+                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildTx(invocation.invocation)
+                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
                 break
             case 'approve':
-                console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
-                let approvalSigned = await walletContext.buildApproval(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  approvalSigned: ",approvalSigned)
+                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildApproval(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                break
+            case 'deposit':
+                log.info(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.deposit(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                console.log(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
-                let swapSigned = await walletContext.buildSwap(invocation.invocation)
-                console.log(" **** RESULT TRANSACTION ****  swapSigned: ",swapSigned)
+                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                unsignedTx = await walletContext.buildSwap(invocation.invocation)
+                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
-                console.error("Unhandled type: ",invocation.type)
+                console.error("APP E2E Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
+                throw Error("Unhandled type: "+invocation.type)
         }
 
-        //types
-        //transfer (all coins + eth (except swaps)
-        //approve
-        //swap
+        //update invocation
+        let invocationId = invocation.invocationId
+        let updateBody = {
+            network:invocation.network,
+            invocationId,
+            invocation,
+            unsignedTx
+        }
 
+        //update invocation remote
+        let resultUpdate = await App.updateInvocation(updateBody)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
-        // let resultBuild = await App.buildTransfer(await App.context(),data.invocationId)
-        //
-        // return resultBuild
-
+        return unsignedTx
     } catch (e) {
         console.error(tag, "e: ", e);
-        return {error:e};
+        throw e
     }
 }
 
 export async function approveTransaction(event:any, data:any) {
     let tag = TAG + " | approveTransaction | ";
     try {
+        log.info("Checkpoint pre-getInvocation: ",data)
+        if(!data || !data.invocationId) throw Error(" missing invocationId!")
         //get invocation
 
         let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
+        if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
+        if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 
-        //
-        let context:any
+        let context
         if(!data.context){
             context = WALLET_CONTEXT
+        } else {
+            context = data.context
         }
-        if(!context) {
+
+        if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
             log.error("context: ",context)
             log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
@@ -928,69 +1171,61 @@ export async function approveTransaction(event:any, data:any) {
         //push update to sign tab
         event.sender.send('transactionSigned', {invocationId,invocation,unsignedTx:invocation.unsignedTx,signedTx,resultUpdate})
 
+        return signedTx
     } catch (e) {
         console.error(tag, "e: ", e);
         return {error:e};
     }
 }
 
-export async function broadcastTransaction(event:any, data:any) {
-    let tag = TAG + " | broadcastTransaction | ";
+export async function broadcastTransaction(event:any,transaction:any) {
+    let tag = " | broadcastTransaction | ";
     try {
         //get invocation
 
-        let invocation = await App.getInvocation(data.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        let invocation = await App.getInvocation(transaction.invocationId)
+        log.debug(tag,"invocation: ",invocation)
 
         //
-        let context:any
-        if(!data.context){
+        if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
+
+        //
+        let context
+        if(!transaction.context){
             context = WALLET_CONTEXT
+        } else {
+            context = transaction.context
         }
-        if(!context) {
+
+        if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
             log.error("context: ",context)
             log.error("Available: ",Object.keys(WALLETS_LOADED))
-            throw Error("103: could not find context!")
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
-        let walletContext:any = WALLETS_LOADED[context]
-        log.info(tag,"walletContext: ",walletContext.context)
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
+        //TODO fix this tech debt
         //normalize
-        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocationId
-        //override noBroadcast
-        if(invocation.signedTx.noBroadcast) invocation.signedTx.noBroadcast = false
+        if(!invocation.network) invocation.network = invocation.invocation.network
+        if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocation.invocationId
+        if(!invocation.signedTx.network) invocation.signedTx.network = invocation.network
+        if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
+        if(invocation.signedTx && invocation.noBroadcast) invocation.signedTx.noBroadcast = true
 
-        let broadcastResult = await walletContext.broadcastTransaction(invocation.invocation.coin,invocation.signedTx)
+        //force noBroadcast
+        //invocation.signedTx.noBroadcast = true
+        let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
-
-
-        //update invocation
-        let invocationId = invocation.invocationId
-        let updateBody = {
-            invocationId:invocation.invocation.invocationId,
-            invocation:invocation.invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult
-        }
-        log.info(tag,"updateBody: ",updateBody)
-        //update invocation remote
-        let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
-
-        //push update to sign tab
-        event.sender.send('transactionSigned', {
-            invocationId,
-            invocation,
-            unsignedTx:invocation.unsignedTx,
-            signedTx:invocation.signedTx,
-            broadcastResult,
-            resultUpdate
-        })
-
+        return broadcastResult
     } catch (e) {
         console.error(tag, "e: ", e);
-        return {error:e};
+        throw e
     }
 }
 
@@ -1053,13 +1288,14 @@ export async function createWallet(event:any, data:any) {
 
         //if no password
         if(!data.password){
-            if(featurePasswordless){
+            if(featurePasswordless || true){
                 log.info(tag,"featurePasswordless TRUE")
                 let randomChars = generator.generateMultiple(1, {
                     length: 10,
                     uppercase: false
                 });
                 data.password = "temp:"+randomChars[0]
+                await updateConfig({temp:data.password})
             }else{
                 throw Error("unhandled action featurePasswordless: "+featurePasswordless)
             }
@@ -1085,7 +1321,6 @@ export async function createWallet(event:any, data:any) {
                 if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
                 let mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
                 data.mnemonic = mnemonic
-
             }else{
                 throw Error("unhandled action featureSoftwareCreate: "+featureSoftwareCreate)
             }
@@ -1111,24 +1346,15 @@ export async function createWallet(event:any, data:any) {
     }
 }
 
-// export function onLogin(event:any, data:any) {
-//   let tag = TAG + " | onLogin | ";
-//   try {
-//     //
-//     if(!WALLET_HASH) throw Error("Wallet Hash not found! ")
-//     if(!data.password) throw Error("password not found! ")
-//
-//     let isValid = bcrypt.compareSync(data.password, WALLET_HASH); // true
-//     if(isValid) {
-//       //close password
-//       WALLET_PASSWORD = data.password
-//       onStart(event:any, data:any)
-//     } else {
-//       log.error(tag," invalid password! ")
-//       //TODO send error msg over ipc invalid pw
-//     }
-//   } catch (e) {
-//     console.error(tag, "e: ", e);
-//     return {error:e};
-//   }
-// }
+export async function sendPairingCode(code:string) {
+    let tag = " | sendPairingCode | "
+    try {
+        let result = await App.pair(code)
+        log.debug(tag,"result: ",result)
+
+        return result
+    } catch (e) {
+        log.error(e)
+        throw e
+    }
+}

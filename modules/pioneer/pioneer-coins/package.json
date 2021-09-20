@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-coins",
-  "version": "8.1.24",
+  "version": "8.1.33",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -14,7 +14,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/loggerdog": "^8.1.14",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",
     "bip84": "^0.2.5",
@@ -37,5 +37,5 @@
     "nodemon": "^2.0.3",
     "typescript": "^3.8.3"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "f5dafc61d38d38a1396ca39f1e4f7c7c0c738461"
 }
