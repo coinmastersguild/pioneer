@@ -86,7 +86,7 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
@@ -100,9 +100,9 @@ const test_service = async function () {
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
         assert(balance)
 
-        log.info(tag,"wallets.wallets[contextAlpha]: ",wallets.wallets[contextAlpha])
+        log.debug(tag,"wallets.wallets[contextAlpha]: ",wallets.wallets[contextAlpha])
         let contextInfo = await wallets.wallets[contextAlpha].getInfo(contextAlpha)
-        log.info(tag,"contextInfo: ",contextInfo)
+        log.debug(tag,"contextInfo: ",contextInfo)
 
         let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
@@ -157,7 +157,7 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
@@ -170,7 +170,7 @@ const test_service = async function () {
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
         //create chart

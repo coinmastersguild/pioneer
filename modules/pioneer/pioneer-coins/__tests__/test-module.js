@@ -32,6 +32,8 @@ console.log(PoSchains['Osmosis'])
 //
 // let paths = getPaths(['osmosis'])
 // let paths = getPaths(['cosmos'])
+let paths = getPaths(['terra'])
+console.log("paths: ",paths)
 // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis'])
 // console.log("paths: ",paths)
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
@@ -76,22 +78,22 @@ console.log(PoSchains['Osmosis'])
 //     }
 // ]
 
-let result = [
-    {
-        xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
-    }
-]
-
-let run_test = async function(){
-    try{
-        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-
-        console.log("pubkeys: ",pubkeys)
-    }catch(e){
-        console.error(e)
-    }
-}
-run_test()
+// let result = [
+//     {
+//         xpub: 'xpub6GsQ4VeKaLqzWpibcgpjy5zkanB5bimBdhUMiRGFuzirKcmamEX3PA9PkcdnTw1jVNTHzzqgQTTosQ16QuKXRkfGcGmBBQioftuV48qFScA'
+//     }
+// ]
+//
+// let run_test = async function(){
+//     try{
+//         let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+//
+//         console.log("pubkeys: ",pubkeys)
+//     }catch(e){
+//         console.error(e)
+//     }
+// }
+// run_test()
 //
 //
 // let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"

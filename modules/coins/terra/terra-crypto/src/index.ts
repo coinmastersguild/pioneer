@@ -22,6 +22,7 @@ const log = require('@pioneer-platform/loggerdog')()
  // Module
  //**********************************/
 
+
 // NOTE: this only works with a compressed public key (33 bytes)
 function createAddress(publicKey:string,prefix:string) {
     // @ts-ignore

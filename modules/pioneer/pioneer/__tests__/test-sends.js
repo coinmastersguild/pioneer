@@ -93,11 +93,11 @@ let run_test = async function(){
          */
 
         //RUNE
-        // let masterRUNE = await Wallet.getMaster("RUNE")
-        // console.log("masterRUNE: ",masterRUNE)
-        //
-        // let balanceRUNE = await Wallet.getBalance("RUNE")
-        // console.log("balanceRUNE: ",balanceRUNE)
+        let masterTERRA = await Wallet.getMaster("TERRA")
+        console.log("masterTERRA: ",masterTERRA)
+
+        let balanceTERRA = await Wallet.getBalance("TERRA")
+        console.log("balanceTERRA: ",balanceTERRA)
         //
         // let address = "thor1msnlcmu755zxlnha0s9e7yadq2tdx33tk7d9rr"
         // let amount = "100"

@@ -73,13 +73,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -127,12 +127,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -143,20 +143,20 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
         /*
@@ -167,7 +167,7 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
@@ -175,16 +175,16 @@ const test_service = async function () {
 
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
+        log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.info(tag,"balanceBase: ",balanceBase)
+        log.debug(tag,"balanceBase: ",balanceBase)
         assert(balanceBase)
 
         //value USD
         let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
@@ -214,9 +214,9 @@ const test_service = async function () {
 
         //filter by chain
         let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.info(tag,"thorVault: ",thorVault)
+        log.debug(tag,"thorVault: ",thorVault)
 
-        log.info(tag,"thorVault: ",thorVault)
+        log.debug(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
         assert(thorVault.address)
@@ -248,13 +248,13 @@ const test_service = async function () {
             fee:gasRate, // fee === gas (xcode inheritance)
             noBroadcast:true
         }
-        log.info(tag,"transfer: ",transfer)
+        log.debug(tag,"transfer: ",transfer)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
         assert(responseTransfer)
-        log.info(tag,"responseTransfer: ",responseTransfer)
+        log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
 
         //do not continue without invocationId
@@ -267,7 +267,7 @@ const test_service = async function () {
 
         //cancel transaction
         let cancelResult = await cancelTransaction(transaction)
-        log.info(tag,"cancelResult: ",cancelResult)
+        log.debug(tag,"cancelResult: ",cancelResult)
 
         //
 
