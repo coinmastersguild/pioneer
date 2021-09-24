@@ -14,7 +14,7 @@ const sha256 = require("crypto-js/sha256")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const HDKey = require('hdkey')
-const hdPath = `m/44'/931'/0'/0/0` //TODO get from coins
+const hdPath = `m/44'/118'/0'/0/0` //TODO get from coins
 let bitcoin = require("bitcoinjs-lib");
 
 const log = require('@pioneer-platform/loggerdog')()
@@ -48,7 +48,7 @@ module.exports = {
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //log.debug(mk.publicExtendedKey)
 
-            mk = mk.derive(hdPath)
+            // mk = mk.derive(hdPath)
 
             //get correct address with xpub
             let xpub = mk.publicExtendedKey
