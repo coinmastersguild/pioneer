@@ -61,7 +61,7 @@ let run_test = async function(){
             let walletEth = await ethCrypto.generateWalletFromSeed(wallet1.mnemonic)
             wallet1.masterAddress = walletEth.masterAddress
 
-            console.log("wallet1: ",wallet1)
+            //console.log("wallet1: ",wallet1)
             //create wallet files
             let successCreate = await App.createWallet('software',wallet1)
             console.log("successCreate: ",successCreate)

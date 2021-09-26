@@ -25,7 +25,7 @@
 
         * check balances
         * check tx history
-        * verify tx
+        * verify payment
 
  */
 
@@ -45,11 +45,11 @@ let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 // let coincap = require("@pioneer-platform/coincap")
 
-// import {
-//     Transfer,
-//     Delegate,
-//     //Redelegate TODO
-// } from "@pioneer-platform/pioneer-types";
+import {
+    Transfer,
+    Delegate,
+    JoinPool
+} from "@pioneer-platform/pioneer-types";
 
 let {
     supportedBlockchains,
@@ -71,7 +71,7 @@ const {
 let BLOCKCHAIN = 'osmosis'
 let ASSET = 'OSMO'
 let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
-let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
+let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
@@ -105,7 +105,7 @@ const test_service = async function () {
         log.info(tag,"balance: ",balance)
         assert(balance)
 
-        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
+        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
         //assert balance local
         //log.debug(tag,"wallet: ",wallet)
         if(balance < MIN_BALANCE){
@@ -229,65 +229,87 @@ const test_service = async function () {
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
         }
 
-        //estimate BCH fee? lol
-        let asset = {
-            chain:ASSET,
-            symbol:ASSET,
-            ticker:ASSET,
-        }
+        //swap tokens
+        let POOL_TOKEN_OSMO = "OSMO"
+        let POOL_TOKEN_TRADE = "ATOM"
 
-        //test amount in native
-        let amountTestNative = baseAmountToNative("OSMO",TEST_AMOUNT)
+        //get pool
+        let poolInfo = await user.clients[BLOCKCHAIN].getPool(POOL_TOKEN_TRADE)
+        //log.info(tag,"poolInfo: ",poolInfo)
+        assert(poolInfo)
 
-        //assume current delegation is on sentinel
-        let current_validator = "osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n"
+        //TODO dont filter here
+        log.info(tag,"poolInfo: ",poolInfo.pools[0])
 
-        //get balance current delegation
-        let balanceDelegated = await user.clients[BLOCKCHAIN].getDelegations(current_validator)
-        log.info(tag,"balanceDelegated: ",balanceDelegated)
-        balanceDelegated = balanceDelegated.result.balance.amount
-        log.info(tag,"balanceDelegated: ",balanceDelegated)
+        //get route
+        //let poolId = poolInfo.pools[0].id
+        //IBC atoms
+        let tokenOutDenom = poolInfo.pools[0].poolAssets[0].token.denom
+        //log.info(tag,"poolId: ",poolId)
+        log.info(tag,"tokenOutDenom: ",tokenOutDenom)
 
-        //amount base
-        let delegatedBase = await nativeToBaseAmount(ASSET,parseInt(balanceDelegated))
-        if(delegatedBase < TEST_AMOUNT){
-            log.error(tag,"delegatedBase: ",delegatedBase)
-            log.error(tag,"TEST_AMOUNT: ",TEST_AMOUNT)
-            throw Error("Fist must delegate to sentinel(osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n)")
-        }
+        //TODO get rates
 
-        //get new delegator
-        //get validators
-        let validators = await user.clients[BLOCKCHAIN].getValidators()
-        log.info(tag,"validators: ",validators)
-        assert(validators[1])
-        let selected = validators[1]
-        selected = selected.operator_address
-        log.info(tag,"selected: ",selected)
+        //TODO calculate amounts
 
-        //get balance delegated
+        //select first
 
-        //verify > test_amount
+        //get ibc channels
+        let poolId = '1'
 
-        //perform redelgate
-
+        let shareOutAmount = "700930022109918661"
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let delegate:any = {
+        let inAsset = {
+            'denom':'uosmo',
+            'amount':'66134'
+        }
+
+        let outAsset = {
+            'denom':'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
+            'amount':'10248'
+        }
+
+        /*
+             Example
+
+         "msg":[
+            {
+               "type":"osmosis/gamm/join-pool",
+               "value":{
+                  "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
+                  "poolId":"1",
+                  "shareOutAmount":"9702198039983527548",
+                  "tokenInMaxs":[
+                     {
+                        "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                        "amount":"135876"
+                     },
+                     {
+                        "denom":"uosmo",
+                        "amount":"953288"
+                     }
+                  ]
+               }
+            }
+         ],
+
+         */
+
+        let delegate:JoinPool = {
             context:user.context,
-            validator:selected,
-            validatorOld:current_validator,
             asset: ASSET,
             network: ASSET,
             memo: '',
-            amount:{
-                amount: function(){
-                    return BigNumber.BigNumber.from(amountTestNative)
-                }
-            },
+            poolId,
+            shareOutAmount,
+            tokenInMaxs:[
+                outAsset,
+                inAsset
+            ],
             fee:{
                 priority:5, //1-5 5 = highest
             },
@@ -295,7 +317,7 @@ const test_service = async function () {
         }
         log.info(tag,"delegate: ",delegate)
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].redelegate(delegate,options)
+        let responseTransfer = await user.clients[BLOCKCHAIN].joinPool(delegate,options)
         assert(responseTransfer)
         log.info(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
@@ -363,79 +385,77 @@ const test_service = async function () {
         let isConfirmed = false
         //wait for confirmation
 
-        // if(!noBroadcast){
-        //     //TODO
-        //     /*
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     let txid
-        //
-        //     //wait till confirmed in block
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await client.getTransactionData(txid)
-        //         log.info(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo && txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
-        //             statusCode = 3
-        //         } else {
-        //             log.info(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         await sleep(6000)
-        //     }
-        //
-        //
-        //     let isFullfilled = false
-        //     //wait till swap is fullfilled
-        //     while(!isFullfilled){
-        //         //get midgard info
-        //         let txInfoMidgard = midgard.getTransaction(txid)
-        //         log.info(tag,"txInfoMidgard: ",txInfoMidgard)
-        //
-        //         //
-        //         if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-        //             let depositInfo = txInfoMidgard.actions[0].in
-        //             log.info(tag,"deposit: ",depositInfo)
-        //
-        //             let fullfillmentInfo = txInfoMidgard.actions[0].out
-        //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
-        //
-        //             if(fullfillmentInfo.status === 'success'){
-        //                 statusCode = 4
-        //                 isFullfilled = true
-        //             }
-        //         }
-        //
-        //         await sleep(6000)
-        //     }
-        //
-        //
-        // }
+        if(!noBroadcast && false){
+            //TODO unnerf
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            let txid
+
+            //wait till confirmed in block
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
+
+                txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.info(tag,"txInfo: ",txInfo)
+
+                if(txInfo && txInfo.blockNumber){
+                    log.info(tag,"Confirmed!")
+                    statusCode = 3
+                } else {
+                    log.info(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                await sleep(6000)
+            }
+
+
+            let isFullfilled = false
+            //wait till swap is fullfilled
+            while(!isFullfilled){
+                //get midgard info
+                let txInfoMidgard = midgard.getTransaction(txid)
+                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+
+                //
+                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+                    let depositInfo = txInfoMidgard.actions[0].in
+                    log.info(tag,"deposit: ",depositInfo)
+
+                    let fullfillmentInfo = txInfoMidgard.actions[0].out
+                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+
+                    if(fullfillmentInfo.status === 'success'){
+                        statusCode = 4
+                        isFullfilled = true
+                    }
+                }
+
+                await sleep(6000)
+            }
+        }
 
         let result = await app.stopSocket()
         log.info(tag,"result: ",result)

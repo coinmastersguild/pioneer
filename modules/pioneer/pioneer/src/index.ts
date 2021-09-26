@@ -1960,9 +1960,9 @@ module.exports = class wallet {
                     log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
 
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    log.debug(tag,"input: ",input)
+                    log.info(tag,"input: ",input)
 
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input})
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input.xpub})
                     unspentInputs = unspentInputs.data
                     log.debug(tag,"unspentInputs: ",unspentInputs)
 
@@ -2153,7 +2153,6 @@ module.exports = class wallet {
 
                     //hdwallet input
                     //TODO type this
-
                     let hdwalletTxDescription = {
                         opReturnData:memo,
                         coin: longName,

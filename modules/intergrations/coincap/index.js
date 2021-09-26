@@ -20,6 +20,7 @@ const symbolIDMap = require('./symbolIDMap');
 const graphql = new GraphQLClient('https://graphql.coincap.io/',{
     headers: {
         "x-coincap-bypass-limit": process.env['BYPASS_RATE_LIMIT_KEY'],
+        "Authorization": "Bearer "+process.env['COINCAP_API_KEY'],
     }
 });
 

@@ -52,10 +52,17 @@ let run_test = async function(){
 
         // console.log("pioneer: ",pioneer)
 
+        //get new address
+        //zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i
+        let newAddy = await pioneer.instance.GetNewAddress({network:'BTC',xpub:"zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i"})
+        console.log("newAddy: ",newAddy)
+
+        //get change address
+
         // let xpub = ""
-        let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"})
-        data = data.data
-        console.log("txData: ",JSON.stringify(data))
+        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"})
+        // data = data.data
+        // console.log("txData: ",JSON.stringify(data))
 
         // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         // data = data.data

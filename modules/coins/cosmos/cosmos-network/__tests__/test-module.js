@@ -54,10 +54,10 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.getTransaction("E5D4C0D15EAD276FD789A687F99AF16ACF4C781C50640C1D8D28432729D77674")
+network.getTransaction("7D4121836243782872BE5EC8833481E4E46EC57D0AC2D4E55318EEEA85FBEC2E")
     .then(function(resp){
         console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
+        // console.log("resp: ",JSON.stringify(resp))
     })
 
 //

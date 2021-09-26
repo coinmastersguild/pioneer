@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/osmosis-e2e-lp-add",
+  "name": "@pioneer-platform/osmosis-e2e-lp-remove",
   "version": "8.1.35",
   "scripts": {
     "yarn": "yarn",

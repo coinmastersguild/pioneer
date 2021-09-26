@@ -25,12 +25,18 @@ axiosRetry(axios, {
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
+        console.error(error)
         // if retry condition is not specified, by default idempotent requests are retried
         return error.response.status === 503;
     },
 });
 
-let BLOCKBOOK_URLS:any = {}
+let BLOCKBOOK_URLS:any = {
+    'BTC':process.env['BTC_BLOCKBOOK_URL'],
+    'ETH':process.env['ETH_BLOCKBOOK_URL'],
+    'BCH':process.env['BCH_BLOCKBOOK_URL'],
+    'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
+}
 
 module.exports = {
     init:function (servers:any,runtime?:string) {
@@ -70,7 +76,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
     try{
         if(!page) page = "1"
 
-        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey+"&details=all"
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey
         log.info(tag,"url: ",url)
         let body = {
             method: 'GET',
@@ -81,7 +87,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
             },
         };
         let resp = await axios(body)
-
+        log.info(tag,"resp: ",resp)
         //TODO paginate?
 
         return resp.data

@@ -1,7 +1,8 @@
 {
   "name": "@pioneer-platform/coincap",
-  "version": "8.1.14",
+  "version": "8.1.15",
   "dependencies": {
+    "@pioneer-platform/coincap": "^8.1.15",
     "@pioneer-platform/loggerdog": "^8.1.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",

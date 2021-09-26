@@ -177,6 +177,9 @@ module.exports = {
     utxosByXpub: function (coin:string,xpub:any) {
         return get_utxos_by_xpub(coin,xpub);
     },
+    getPubkeyInfo: function (coin:string,xpub:any) {
+        return get_pubkey_info(coin,xpub);
+    },
     getBalanceByXpub: function (coin:string,xpub:any) {
         return get_balance_by_xpub(coin,xpub);
     },
@@ -238,6 +241,20 @@ module.exports = {
     //     return get_validators();
     // }
 }
+
+
+let get_pubkey_info = async function(coin:string,xpub:string){
+    let tag = TAG + " | get_pubkey_info | "
+    try{
+        let output = await blockbook.getPubkeyInfo(coin,xpub)
+        log.debug(tag,"output: ",output)
+
+        return output
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
 
 let get_fees_with_memo = async function(coin:string,memo?:string){
     let tag = TAG + " | get_fees_with_memo | "

@@ -964,7 +964,9 @@ let getTransaction = async function(txid:string){
 
         log.debug("gaiacli get tx")
 
-        txInfo = await axios({method:'GET',url:  URL_GAIAD+'/txs/'+txid})
+        log.info(tag,"URL_GAIAD: ",URL_GAIAD)
+
+        txInfo = await axios({method:'GET',url:  URL_GAIAD+'/cosmos/tx/v1beta1/txs/'+txid})
 
 
         log.debug(tag,"txInfo: ",txInfo.data)

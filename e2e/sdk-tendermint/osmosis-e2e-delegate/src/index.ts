@@ -77,6 +77,18 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
 
 let noBroadcast = true
+process.argv.forEach(function (val, index, array) {
+    console.log(index + ': ' + val);
+    //split
+    let params = val.split("=")
+    if(params[0]=== 'noBroadcast'){
+        if(params[1]!== 'true'){
+            noBroadcast = false
+        }
+    }
+});
+
+
 
 console.log("spec: ",spec)
 console.log("wss: ",wss)
