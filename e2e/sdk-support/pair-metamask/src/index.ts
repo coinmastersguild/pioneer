@@ -94,7 +94,7 @@ const test_service = async function () {
         //assert balance local
         log.debug(tag,"masterAlpha: ",masterAlpha)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send monies to "+ASSET+": "+masterAlpha)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -134,7 +134,32 @@ const test_service = async function () {
         log.info(tag,"pairWalletOnboard: ",pairWalletOnboard)
 
         //pair wallet
+        let resultRegister = await app.registerWallet(pairWalletOnboard)
+        log.info(tag,"resultRegister: ",resultRegister)
 
+        //pair with pioneer
+        let code = await app.createPairingCode()
+        code = code.code
+        log.debug("code: ",code)
+        assert(code)
+
+        let pairSuccess = await sendPairingCode(code)
+        log.debug("pairSuccess: ",pairSuccess)
+        assert(pairSuccess)
+
+        //dont release till pair event
+        while(!eventPairReceived){
+            await sleep(300)
+        }
+
+        //get user
+        let user = await app.getUserParams()
+        log.info("user: ",user)
+        assert(user.context)
+
+        //verify pairing has metamask wallet
+
+        //switch context
 
 
         log.info("****** TEST PASS 2******")

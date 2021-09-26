@@ -22,7 +22,8 @@ import {
     SendToAddress,
     Config,
     User,
-    SDKConfig
+    SDKConfig,
+    OnboardWallet
 } from "@pioneer-platform/pioneer-types";
 
 //xchain adapter
@@ -73,6 +74,7 @@ export class SDK {
     private valueUsdContext: any;
     private chart: (chart: Chart) => Promise<any>;
     private setAssetContext: (asset: string) => Promise<any>;
+    private registerWallet: (wallet: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -183,6 +185,67 @@ export class SDK {
             try {
                 this.events.disconnect()
                 return this.events.events
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        /*
+              Supported wallets:
+
+                  Onboard.js
+
+              TODO kepler
+
+         */
+        this.registerWallet = async function (wallet:OnboardWallet) {
+            let tag = TAG + " | registerWallet | "
+            try {
+                if(wallet.network !== 1){
+                    throw Error('Network not supported!')
+                }
+                //if no username
+                if(!this.username){
+                    this.username = 'onboard:user:'+wallet.name+":"+wallet.address
+                }
+
+                //register wallet
+                let register = {
+                    username:this.username,
+                    blockchains:['ethereum'],
+                    context:wallet.name+":"+wallet.address,
+                    walletDescription:{
+                        context:wallet.name+":"+wallet.address,
+                        type:wallet.name
+                    },
+                    data:{
+                        pubkeys:[
+                            {
+                                "blockchain": "ethereum",
+                                "symbol": "ETH",
+                                "asset": "ETH",
+                                "path": "m/44'/60'/0'", //TODO capture from onBoard.js on user input paths. ie keepkey
+                                "script_type": "ethereum",
+                                "network": "ethereum",
+                                "created": new Date().getTime(),
+                                "tags": [
+                                    wallet.name,
+                                    "onboard",
+                                    "sdk",
+                                    wallet.name+":"+wallet.address
+                                ],
+                                "pubkey": wallet.address,
+                                "master": wallet.address,
+                                "address": wallet.address
+                            }
+                        ]
+                    },
+                    queryKey:this.queryKey,
+                    auth:'lol',
+                    provider:'lol'
+                }
+
+                let result = await this.pioneerApi.Register(null, register)
+                return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

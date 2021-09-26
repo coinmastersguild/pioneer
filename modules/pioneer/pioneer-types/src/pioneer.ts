@@ -111,6 +111,13 @@ export interface User {
 
 }
 
+export interface OnboardWallet {
+    name: string;
+    network: number;
+    initialized: string;
+    address:string
+}
+
 export interface Wallet {
     mnemonic: string;
     password: string;
