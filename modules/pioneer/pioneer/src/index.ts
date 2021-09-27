@@ -30,7 +30,8 @@ const {
     COIN_MAP_LONG,
     getNativeAssetForBlockchain,
     addressNListToBIP32,
-    bip32ToAddressNList
+    bip32ToAddressNList,
+    get_address_from_xpub
 } = require('@pioneer-platform/pioneer-coins')
 
 //support
@@ -1958,7 +1959,7 @@ module.exports = class wallet {
                     log.debug(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
                     log.debug(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
                     log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
-
+                    let pubkeyInfo = this.PUBLIC_WALLET[network]
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
                     log.info(tag,"input: ",input)
 
@@ -2084,7 +2085,7 @@ module.exports = class wallet {
                         log.debug(tag,"inputInfo: ",inputInfo)
                         let input = {
                             addressNList:support.bip32ToAddressNList(inputInfo.path),
-                            scriptType:"p2sh-p2wpkh",
+                            scriptType:pubkeyInfo.script_type,
                             amount:String(inputInfo.value),
                             vout:inputInfo.vout,
                             txid:inputInfo.txId,
@@ -2095,10 +2096,21 @@ module.exports = class wallet {
                         inputs.push(input)
                     }
 
-                    //TODO get new change address
-                    //hack send all change to master (address reuse bad, stop dis)
-                    //let changeAddress = await this.getMaster(network)
-                    let changeAddress = 'bc1qxzsgclsnyerfn2why242em5zd5pjy9yx6qy20n'
+
+                    log.info(tag,"pubkeyInfo: change: ",pubkeyInfo)
+                    //getNewChange
+                    let changeAddressIndex = await this.pioneerClient.instance.GetChangeAddress({network,xpub:input.xpub})
+                    changeAddressIndex = changeAddressIndex.data.changeIndex
+                    let xpub = input.xpub
+                    let scriptType = pubkeyInfo.script_type
+                    let coin = network
+                    let account = 0 //TODO adjustable by pubkey data?
+                    let index = changeAddressIndex
+                    let isTestnet = false
+                    log.info(tag,"input: ",{xpub,scriptType,coin,account,index,isChange:true,isTestnet})
+                    let changeAddress = await get_address_from_xpub(xpub,scriptType,coin,account,index,true,isTestnet)
+                    log.info(tag,"changeAddress: ",changeAddress)
+                    if(!changeAddress) throw Error("103 Failed to get new change address!")
 
                     //if bch convert format
                     if(network === 'BCH'){
@@ -2117,7 +2129,7 @@ module.exports = class wallet {
                             let output = {
                                 address,
                                 addressType:"spend",
-                                scriptType:"p2wpkh",//TODO more types
+                                scriptType:pubkeyInfo.stript_type,//TODO more types
                                 amount:String(outputInfo.value),
                                 isChange: false,
                             }
@@ -2127,7 +2139,7 @@ module.exports = class wallet {
                             let output = {
                                 address:changeAddress,
                                 addressType:"spend",
-                                scriptType:"p2pkh",//TODO more types
+                                scriptType:pubkeyInfo.stript_type,//TODO more types
                                 amount:String(outputInfo.value),
                                 isChange: true,
                             }

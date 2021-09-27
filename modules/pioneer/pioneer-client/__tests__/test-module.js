@@ -55,7 +55,10 @@ let run_test = async function(){
         //get new address
         //zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i
         let newAddy = await pioneer.instance.GetNewAddress({network:'BTC',xpub:"zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i"})
-        console.log("newAddy: ",newAddy)
+        console.log("newAddy: ",newAddy.data)
+
+        let newAddyChange = await pioneer.instance.GetChangeAddress({network:'BTC',xpub:"zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i"})
+        console.log("newAddyChange: ",newAddyChange.data)
 
         //get change address
 

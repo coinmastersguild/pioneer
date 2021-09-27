@@ -755,7 +755,8 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
             case 'BTC':
                 //TODO more types
                 console.log("CHECKPOINT1")
-                if(scriptType === 'bech32' || 'p2wpkh'){
+                if(scriptType === 'bech32' || scriptType === 'p2wpkh'){
+                    if(xpub[0] !== 'z') throw Error("103: not a Zpub")
                     let account0 = new BIP84.fromZPub(xpub)
                     output = account0.getAddress(0)
                 } else if(scriptType === 'legacy' || 'p2pkh'){

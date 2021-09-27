@@ -32,8 +32,10 @@ console.log(PoSchains['Osmosis'])
 //
 // let paths = getPaths(['osmosis'])
 // let paths = getPaths(['cosmos'])
-let paths = getPaths(['terra'])
-console.log("paths: ",paths)
+
+// let paths = getPaths(['terra'])
+// console.log("paths: ",paths)
+
 // let paths = getPaths(['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis'])
 // console.log("paths: ",paths)
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
@@ -41,7 +43,6 @@ console.log("paths: ",paths)
 // console.log(classifyPubkey(address))
 
 
-// //
 // // console.log("supportedAssets: ",supportedAssets)
 // //console.log("supportedBlockchains: ",supportedBlockchains)
 //
@@ -96,16 +97,16 @@ console.log("paths: ",paths)
 // run_test()
 //
 //
-// let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
-// let scriptType = "p2pkh"
-// let coin = "BTC"
-// let account = 0
-// let index = 0
-// let isTestnet = true
-//
-// get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
-//     .then(function(address){
-//         console.log("address: ",address)
-//     })
+let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
+let scriptType = "legacy"
+let coin = "BTC"
+let account = 0
+let index = 0
+let isTestnet = false
+
+get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
+    .then(function(address){
+        console.log("address: ",address)
+    })
 
 
