@@ -61,6 +61,17 @@ let run_test = async function(){
         // console.log("app.balances",app)
 
 
+        //Exchange module
+        // let allPaths = app.get
+
+        //get available paths
+
+        //get asset context from sdk
+
+        //get available outputs
+
+        //get estimate swap fee
+
     }catch(e){
         console.error(e)
     }

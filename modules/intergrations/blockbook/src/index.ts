@@ -77,7 +77,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
         if(!page) page = "1"
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let body = {
             method: 'GET',
             url,
@@ -87,7 +87,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
             },
         };
         let resp = await axios(body)
-        log.info(tag,"resp: ",resp)
+        log.debug(tag,"resp: ",resp)
         //TODO paginate?
 
         return resp.data
@@ -103,7 +103,7 @@ let get_txids_by_address = async function(coin:string,address:string,page?:numbe
         if(!page) page = 1
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?page="+page+"&details=all"
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let body = {
             method: 'GET',
             url,
@@ -247,7 +247,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         log.debug(tag,"coin: ",coin)
         log.debug(tag,"xpub: ",xpub)
         let output = await get_utxos_by_xpub(coin,xpub)
-        log.info(tag,"output: ",output)
+        log.debug(tag,"output: ",output)
 
         let balance = 0
 
@@ -286,12 +286,12 @@ let init_network = function (servers:any,runtime?:string) {
         //     if(servers && servers[coinInfo.symbol]){
         //         //use configured
         //         BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
-        //         log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
+        //         log.debug(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
         //     }else{
         //         if(!runtime || runtime === 'public'){
         //             //use public
         //             BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
-        //             log.info(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
+        //             log.debug(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
         //         }
         //         //TODO use pioneer's
         //     }

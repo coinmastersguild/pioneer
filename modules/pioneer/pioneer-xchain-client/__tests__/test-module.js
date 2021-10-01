@@ -141,7 +141,7 @@ let run_test = async function(){
         //     let txidApprove = await app.approve(routerAddy,tokenAddress,amount,true)
         //     console.log("txidApprove: ",txidApprove)
         // } else {
-        //     log.info(tag,"Already Approved!")
+        //     log.debug(tag,"Already Approved!")
         // }
 
 

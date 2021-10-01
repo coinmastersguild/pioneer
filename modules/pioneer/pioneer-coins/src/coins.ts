@@ -659,7 +659,7 @@ export function xpubConvert(xpub:string,target:string){
 export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
     let tag = TAG + " | normalize_pubkeys | "
     try {
-        log.info(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
+        log.debug(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
         if(!isTestnet) isTestnet = false
 
         if(pathsIn.length !== pubkeys.length){
@@ -672,12 +672,12 @@ export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, i
         if(format === 'keepkey'){
             for(let i = 0; i < pubkeys.length; i++){
                 let pubkey:any = pathsIn[i]
-                log.info(tag,"pubkey: ",pubkey)
+                log.debug(tag,"pubkey: ",pubkey)
                 let normalized:any = {}
                 normalized.path = addressNListToBIP32(pathsIn[i].addressNList)
                 normalized.pathMaster = addressNListToBIP32(pathsIn[i].addressNListMaster)
 
-                log.info(tag,"pubkey: ",pubkey)
+                log.debug(tag,"pubkey: ",pubkey)
                 normalized.source = format
                 if(pubkey.type === 'xpub'){
                     normalized.type = 'xpub'
@@ -739,7 +739,7 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
     let tag = TAG + " | get_address_from_xpub | "
     try {
         let output
-        log.info(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
+        log.debug(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
         //if xpub get next unused
         if(!xpub) throw Error("xpub required! coin:"+coin)
         console.log("CHECKPOINT")

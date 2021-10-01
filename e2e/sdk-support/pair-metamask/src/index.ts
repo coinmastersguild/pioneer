@@ -114,10 +114,11 @@ const test_service = async function () {
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
-        events.on('message', async (request:any) => {
-            assert(request.queryKey)
-            assert(request.username)
-            assert(request.url)
+        events.on('message', async (message:any) => {
+            log.info(tag,"message: ",message)
+            assert(message.queryKey)
+            assert(message.username)
+            assert(message.url)
             eventPairReceived = true
         })
 

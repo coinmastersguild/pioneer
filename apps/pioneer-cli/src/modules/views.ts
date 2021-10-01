@@ -12,11 +12,11 @@ const log = require("loggerdog-client")();
 export function showWelcome() {
     let tag = TAG + " | importConfig | ";
     try {
-        log.info(
+        log.debug(
             "\n",
             chalk.blue(figlet.textSync("Pioneer-cli", {horizontalLayout: "full"}))
         );
-        log.info(
+        log.debug(
             "\n        ,    .  ,   .           .\n" +
             "    *  / \\_ *  / \\_      " +
             chalk.yellowBright(".-.") +
@@ -32,7 +32,7 @@ export function showWelcome() {
             " /  `-.__ ^   / .-'.--\\ =-=~_=-=~=^/  _ `--./ .-'  `-\n" +
             "/        `.  / /       `.~-^=-=~=^=.-'      '-._ `._"
         );
-        log.info(
+        log.debug(
             " \n A simple Multi-Coin Wallet and explorer CLI      \n \n                        ---Highlander \n "
         );
     } catch (e) {

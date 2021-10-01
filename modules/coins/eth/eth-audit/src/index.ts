@@ -58,7 +58,7 @@ const audit_receipt = function(contract:string,receipt:any){
         log.debug(tag,"receipt last : ",receipt.logs[6])
 
         if(contract === 'sablier (proxy)' && receipt.logs.length === 7){
-            log.info(tag,"receipt.logs: ",receipt.logs.length)
+            log.debug(tag,"receipt.logs: ",receipt.logs.length)
             // let streamStart = receipt.logs[5].address
 
             log.debug(tag,"receipt.receipt: ",receipt)

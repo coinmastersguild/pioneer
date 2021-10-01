@@ -1,7 +1,35 @@
 /*
      OSMO Network
 
+     https://api-osmosis.imperator.co/swagger/#/
 
+
+https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/query
+
+    endpoints
+    '/osmosis/gamm/v1beta1/num_pools'
+    `/osmosis/pool-incentives/v1beta1/distr_info`
+    `/osmosis/mint/v1beta1/epoch_provisions`
+    '/osmosis/pool-incentives/v1beta1/lockable_durations'
+    `/cosmos/params/v1beta1/params?subspace=gamm&key=PoolCreationFee`
+    `/osmosis/mint/v1beta1/params`
+    `/osmosis/claim/v1beta1/params`
+    `/osmosis/gamm/v1beta1/pools/${poolId}`
+    `/osmosis/claim/v1beta1/total_claimable/${bech32Address}`
+    `/osmosis/lockup/v1beta1/account_unlockable_coins/${bech32Address}`
+    `/osmosis/lockup/v1beta1/account_locked_coins/${bech32Address}`
+    `/osmosis/lockup/v1beta1/account_unlocking_coins/${bech32Address}`
+    `/osmosis/claim/v1beta1/claim_record/${bech32Address}`
+    `/osmosis/incentives/v1beta1/gauge_by_id/${id}`
+    `/osmosis/gamm/v1beta1/pools?pagination.limit=500`
+    `/osmosis/lockup/v1beta1/account_locked_longer_duration/${bech32Address}`
+    '/osmosis/pool-incentives/v1beta1/incentivized_pools'
+
+
+    IBC
+    `/ibc/core/channel/v1beta1/channels/${params.channelId}/ports/${params.portId}`
+    `/ibc/core/channel/v1beta1/channels/${channelId}/ports/${portId}/client_state`
+    "/cosmos/base/tendermint/v1beta1/node_info"
 */
 const pjson = require("../package.json")
 const TAG = " | "+pjson.name.replace("@pioneer-platform/","")+" | "
@@ -238,13 +266,13 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: tx,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             if(result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
             if(result2.data.raw_log){
                 let logSend = result2.data.raw_log
-                log.info(tag,"logSend: ",logSend)
+                log.debug(tag,"logSend: ",logSend)
             }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
@@ -283,7 +311,7 @@ let get_account_info = async function(address:string){
         //
         console.log("URL ",URL_OSMO_LCD+'/auth/accounts/'+address)
         let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/auth/accounts/'+address})
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -304,7 +332,7 @@ let normalize_tx = function(tx:any,address?:string){
 
         let rawlog = JSON.parse(tx.raw_log)
         rawlog = rawlog
-        log.info("rawlog: ",rawlog)
+        log.debug("rawlog: ",rawlog)
 
         output.txid = tx.txhash
         output.height = tx.height
@@ -337,13 +365,13 @@ let normalize_tx = function(tx:any,address?:string){
                 //log.info(tag,"attributes: ",prettyjson.render(event.attributes))
 
                 //detect event type
-                log.info(tag,"type: ",event.type)
+                log.debug(tag,"type: ",event.type)
                 switch(event.type) {
                     case 'message':
                         // ignore
                         break;
                     case 'transfer':
-                        log.info(tag,"attributes: ",event.attributes)
+                        log.debug(tag,"attributes: ",event.attributes)
                         for(let k = 0; k < event.attributes.length; k++){
                             let attribute = event.attributes[k]
                             if(attribute.key === 'recipient'){
@@ -384,14 +412,15 @@ let get_txs_by_address = async function(address:string){
         let output:any = []
 
         //sends
-        let url = URL_OSMO_LCD+ '/txs?message.sender='+address
-        log.info(tag,"url: ",url)
+        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?transfer.sender='+address
+        let url = URL_OSMO_LCD+ '/txs?transfer.sender='+address
+        log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        log.info('sends: ', sends)
+        //log.info('sends: ', sends)
 
         if(sends.txs){
             for(let i = 0; i < sends.txs.length; i++ ){
@@ -403,13 +432,13 @@ let get_txs_by_address = async function(address:string){
 
         //receives
         url = URL_OSMO_LCD+ '/txs?transfer.recipient='+address
-        console.log("URL_OSMO_LCD: ",url)
+        //console.log("URL_OSMO_LCD: ",url)
         let resultRecieves = await axios({
             url: url,
             method: 'GET'
         })
         let receives = resultRecieves.data
-        log.info('receives: ', receives)
+        //log.info('receives: ', receives)
         if(receives.txs){
             for(let i = 0; i < receives.txs.length; i++ ){
                 let tx = receives.txs[i]
@@ -433,7 +462,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -467,7 +496,7 @@ let get_balance = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -501,7 +530,7 @@ let get_node_info_verbose = async function(){
 
         //get syncing status
         let syncInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/syncing'})
-        log.info(tag,"syncInfo: ",syncInfo.data)
+        log.debug(tag,"syncInfo: ",syncInfo.data)
 
         output.isSyncing = syncInfo.data
 
@@ -512,7 +541,7 @@ let get_node_info_verbose = async function(){
 
 
         // let lastBlock = await axios({method:'GET',url: URL_OSMO_LCD+'/blocks/latest'})
-        // log.info(tag,"lastBlock: ",lastBlock.data)
+        // log.debug(tag,"lastBlock: ",lastBlock.data)
 
         //let height
 

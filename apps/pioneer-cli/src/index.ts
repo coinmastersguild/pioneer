@@ -58,7 +58,7 @@ const walletCommand = program
 walletCommand
     .command( 'create' )
     .action( () => {
-        log.info(" Create a new wallet")
+        log.debug(" Create a new wallet")
     } );
 
 
@@ -98,13 +98,13 @@ const userCommand = program
 userCommand
     .command( 'list' )
     .action( () => {
-        log.info(" user list command passed")
+        log.debug(" user list command passed")
     } );
 
 userCommand
     .command( 'request' )
     .action( () => {
-        log.info(" user request command passed")
+        log.debug(" user request command passed")
     } );
 
 /*
@@ -137,7 +137,7 @@ appCommand
 
         inquirer.prompt(questions).then(async function (answers: any) {
             //check if name available
-            log.info(tag,"answers: ",answers)
+            log.debug(tag,"answers: ",answers)
             //generate template to file
             //platform.create(answers.appname)
             //create app remote
@@ -163,12 +163,12 @@ appCommand
     onStart
         If no commands, assume --it
  */
-log.info("args",process.argv)
+log.debug("args",process.argv)
 
 const onInteractiveTerminal = async function(){
     let tag = TAG + " | onInteractiveTerminal | "
     try{
-        log.info("Starting Interactive Terminal")
+        log.debug("Starting Interactive Terminal")
         //start --it mode
         showWelcome()
 
