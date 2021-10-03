@@ -207,7 +207,7 @@ const test_service = async function () {
         let resultStart = await onStartMain(event,data)
         assert(resultStart)
         log.info("walletFiles: ",resultStart.walletFiles)
-        log.info("wallets: ",resultStart.wallets.length)
+        log.info("wallets: ",resultStart)
 
         //TODO get wallet Descriptions
 

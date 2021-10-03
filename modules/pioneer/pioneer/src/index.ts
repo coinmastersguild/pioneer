@@ -359,7 +359,7 @@ module.exports = class wallet {
 
                     log.debug(tag,"getting info on context: ",this.context)
                     let walletInfo = await this.getInfo(this.context)
-                    log.debug(tag,"walletInfo: ",walletInfo)
+                    log.info(tag,"walletInfo: ",walletInfo)
 
                     //validate info
                     log.debug("walletInfo: ",walletInfo)

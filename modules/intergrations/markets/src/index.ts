@@ -58,7 +58,7 @@ module.exports = {
     }
 }
 
-let hydrate_pubkeys = async function (pubkeys:[any]) {
+let hydrate_pubkeys = async function (pubkeys:any) {
     let tag = TAG + ' | hydrate_pubkeys | '
     try {
         //GLOBAL_RATES
@@ -76,9 +76,14 @@ let hydrate_pubkeys = async function (pubkeys:[any]) {
             if(!pubkey.balances) { // @ts-ignore
                 pubkey.balances = []
             }
+            log.info(tag,"pubkey: ",pubkey)
+            let hydratedPubkey = JSON.parse(JSON.stringify(pubkey));
+            hydratedPubkey.balances = []
             for(let j = 0; j < pubkey.balances.length; j++){
                 let entry:any = pubkey.balances[j]
-                log.debug(tag,"entry: ",entry)
+                //clone
+
+                log.info(tag,"entry: ",entry)
                 let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
@@ -190,8 +195,9 @@ let hydrate_pubkeys = async function (pubkeys:[any]) {
                     log.error("Incomplete market data!")
                 }
 
-                hydratedPubkeys.push(entry)
+                hydratedPubkey.balances.push(entry)
             }
+            hydratedPubkeys.push(hydratedPubkey)
         }
 
         // log.debug(tag,'names: ',allNames)
