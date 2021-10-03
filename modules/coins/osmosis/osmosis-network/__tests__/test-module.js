@@ -45,10 +45,10 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
-// network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 // network.getBlockHeight()
 //     .then(function(resp){

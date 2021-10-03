@@ -54,11 +54,12 @@ let run_test = async function(){
         let info = await app.clients.osmosis
         console.log(info)
 
-        let switchContext = await app.setAssetContext('OSMO')
-        console.log(switchContext)
+        //let switchContext = await app.setAssetContext('OSMO')
+        //console.log(switchContext)
 
-        console.log("masters: ",app)
-        // console.log("app.balances",app)
+        //console.log("masters: ",app.masters)
+        //console.log("masters: ",app.walletDescriptions)
+        //console.log("app.balances",app)
 
 
         //Exchange module

@@ -180,29 +180,15 @@ module.exports = class wallet {
                         if(!this.context && config.mnemonic){
                             //calculate
                             let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
-                            log.debug(tag,"walletEth:",walletEth)
-                            log.debug(tag,"walletEth:",walletEth.masterAddress)
-                            log.debug(tag,"walletEth:",walletEth.masterAddress+".wallet.json")
                             this.context = walletEth.masterAddress+".wallet.json"
                         }
                         if(!this.context) throw Error("102: unable to determine correct context!")
-                        log.debug(tag,"context: ",this.context)
                         const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
-                        log.debug(tag,"checkpoint"," pioneer wallet detected! ")
                         if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
                         if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
-
-                        log.debug(tag,"isTestnet: ",this.isTestnet)
-                        //pair
                         this.WALLET = await pioneerAdapter.pairDevice(config.username)
                         if(!this.WALLET) throw Error("Failed to init wallet!")
                         await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
-
-                        //verify testnet
-                        const isTestnet = false
-                        log.debug(tag,"hdwallet isTestnet: ",isTestnet)
-                        log.debug(tag,"paths: ",paths.length)
-                        log.debug(tag,"blockchains: ",this.blockchains)
                         //verify paths for each enabled blockchain
                         for(let i = 0; i < this.blockchains.length; i++){
                             let blockchain = this.blockchains[i]
@@ -230,15 +216,6 @@ module.exports = class wallet {
                                 throw Error("Failed to find path for blockchain: "+blockchain)
                             }
                         }
-                        log.debug(tag,"Checkpoint valid pubkeys ** ")
-                        //TODO verify hdwallet init successfull
-
-                        log.debug("pubkeys ",this.pubkeys)
-                        log.debug("pubkeys.length ",this.pubkeys.length)
-                        log.debug("paths.length ",paths.length)
-                        log.debug("blockchainsEnabled: ",this.blockchains.length)
-                        let blockchainsEnabled = this.blockchains.length
-
                         for(let i = 0; i < this.pubkeys.length; i++){
                             let pubkey = this.pubkeys[i]
                             log.debug(tag,"pubkey: ",pubkey)
@@ -339,7 +316,7 @@ module.exports = class wallet {
                         if(!register.context) throw Error("102: missing context Can not register!")
                         let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
                         if(regsiterResponse.code === 104){
-                            //request change of queryKey
+                            //TODO request change of queryKey
                         }
                         log.debug("registerResponse: ",regsiterResponse)
 
@@ -352,7 +329,6 @@ module.exports = class wallet {
                         log.debug(tag,"userInfo: ",userInfo)
                         log.debug(tag,"userInfo: ",userInfo.blockchains)
                         log.debug(tag,"userInfo: ",userInfo.blockchains.length)
-
                         log.debug(tag,"blockchains: ",this.blockchains)
                         log.debug(tag,"blockchains: ",this.blockchains.length)
 
