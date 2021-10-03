@@ -20,6 +20,11 @@ const axios = Axios.create({
         }
     })
 });
+
+import {
+    Pubkey,
+} from "@pioneer-platform/pioneer-types";
+
 const log = require("@pioneer-platform/loggerdog")()
 
 const URL_COINCAP = "https://api.coincap.io/v2/"
@@ -48,90 +53,148 @@ module.exports = {
     getPricesInQuote: function (assets:[any], quote:string) {
         return get_prices_in_quote(assets,quote);
     },
-    valuePortfolio:function(portfolio:any,quote:string){
-        return get_value_portfolio(portfolio,quote)
-    },
-    getNetworks:function(portfolio:any,quote:string){
-        return get_value_portfolio(portfolio,quote)
-    },
+    hydratePubkeys:function(pubkeys:any){
+        return hydrate_pubkeys(pubkeys)
+    }
 }
 
-let get_value_portfolio = async function (portfolio:any,quote:string) {
-    let tag = TAG + ' | get_value_portfolio | '
+let hydrate_pubkeys = async function (pubkeys:[any]) {
+    let tag = TAG + ' | hydrate_pubkeys | '
     try {
         //GLOBAL_RATES
         if(!GLOBAL_RATES_COINCAP) GLOBAL_RATES_COINCAP = await get_assets_coincap()
         if(!GLOBAL_RATES_COINGECKO) GLOBAL_RATES_COINGECKO = await get_assets_coingecko()
 
-        let coins:any = Object.keys(portfolio)
 
         let valuesUsd:any = {}
         let totalValueUsd = 0
 
         let allNames = []
-        for(let i = 0; i < coins.length; i++){
-            let coin:any = coins[i]
-            //log.debug(tag,"coin: ",coin)
-            //coinInfo
-            // let coinInfoCoinCap = GLOBAL_RATES_COINCAP[coin]
-            // log.info(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
-            // if(coinInfoCoinCap && coinInfoCoinCap.id)allNames.push(coinInfoCoinCap.id)
-
-            let rateUsdCoinCap = 0
-            if(GLOBAL_RATES_COINCAP[coin] && GLOBAL_RATES_COINCAP[coin].priceUsd){
-                rateUsdCoinCap = GLOBAL_RATES_COINCAP[coin].priceUsd
-            } else {
-                log.error(tag," COINCAP Missing rate data for "+coin)
+        let hydratedPubkeys:any = []
+        for(let i = 0; i < pubkeys.length; i++){
+            let pubkey:Pubkey = pubkeys[i]
+            if(!pubkey.balances) { // @ts-ignore
+                pubkey.balances = []
             }
+            for(let j = 0; j < pubkey.balances.length; j++){
+                let entry:any = pubkey.balances[j]
+                log.debug(tag,"entry: ",entry)
+                let symbol = entry.asset
+                //log.debug(tag,"entry: ",entry)
+                //coinInfo
+                let coinInfoCoinCap = GLOBAL_RATES_COINCAP[symbol]
+                log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
 
-            //
-            let rateUsdCoinGecko = 0
-            if(GLOBAL_RATES_COINGECKO[coin] && GLOBAL_RATES_COINGECKO[coin].current_price){
-                rateUsdCoinGecko = GLOBAL_RATES_COINGECKO[coin].current_price
-            } else {
-                log.error(tag," COINGECKO Missing rate data for "+coin)
+                let coinInfoCoinGecko = GLOBAL_RATES_COINGECKO[symbol]
+                log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
+
+                let rateUsdCoinCap = 0
+                if(GLOBAL_RATES_COINCAP[symbol] && GLOBAL_RATES_COINCAP[symbol].priceUsd){
+                    rateUsdCoinCap = GLOBAL_RATES_COINCAP[symbol].priceUsd
+                } else {
+                    log.error(tag," COINCAP Missing rate data for "+symbol)
+                }
+                //
+                let rateUsdCoinGecko = 0
+                if(GLOBAL_RATES_COINGECKO[symbol] && GLOBAL_RATES_COINGECKO[symbol].current_price){
+                    rateUsdCoinGecko = GLOBAL_RATES_COINGECKO[symbol].current_price
+                } else {
+                    log.error(tag," COINGECKO Missing rate data for "+symbol)
+                }
+
+                log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
+                log.debug(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
+
+                let relDiff = function(a:number, b:number) {
+                    return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
+                }
+
+                //if either = 0, then accept other price
+                //flag Danger
+
+                //Calculate the percent.
+                var percent = relDiff(Number(rateUsdCoinCap),Number(rateUsdCoinGecko))
+                log.debug(symbol," percent: ",percent)
+                //percent diff
+
+                /*
+                    Algo
+                    if any are 0, use other
+                    if both, choose lowest
+                 */
+
+                let chosenRate = 0
+                if(rateUsdCoinCap === 0){
+                    chosenRate = rateUsdCoinGecko
+                } else if(rateUsdCoinGecko === 0){
+                    chosenRate = rateUsdCoinCap
+                } else if(rateUsdCoinGecko > rateUsdCoinCap){
+                    chosenRate = rateUsdCoinCap
+                } else {
+                    chosenRate = rateUsdCoinGecko
+                }
+                chosenRate = Number(chosenRate)
+                entry.priceUsd = String(chosenRate)
+                let valueUsd = entry.balance * chosenRate
+                entry.valueUsd = String(valueUsd)
+
+                //valueUsd
+                totalValueUsd = Number(totalValueUsd) + Number(valueUsd)
+
+                //TODO if quote !== USD
+                //calc conversion
+
+
+                if(coinInfoCoinCap && coinInfoCoinGecko){
+                    entry.marketInfo = {
+                        symbol: coinInfoCoinCap.symbol || coinInfoCoinGecko.symbol,
+                        id_coincap: coinInfoCoinCap.id,
+                        id_coingecko: coinInfoCoinGecko.id,
+                        rank_coincap: coinInfoCoinCap.rank,
+                        rank_coingecko: coinInfoCoinGecko.market_cap_rank,
+                        name_coincap: coinInfoCoinCap.name,
+                        name_coingecko: coinInfoCoinGecko.name,
+                        supply: coinInfoCoinCap.supply,
+                        maxSupply: coinInfoCoinCap.maxSupply,
+                        marketCapUsd: coinInfoCoinCap.marketCapUsd,
+                        volumeUsd24Hr: coinInfoCoinCap.volumeUsd24Hr,
+                        priceUsd: coinInfoCoinCap.priceUsd,
+                        changePercent24Hr: coinInfoCoinCap.changePercent24Hr,
+                        vwap24Hr: coinInfoCoinCap.vwap24Hr,
+                        explorer: coinInfoCoinCap.explorer,
+                        //gecko
+                        image: coinInfoCoinGecko.image,
+                        current_price: coinInfoCoinGecko.current_price,
+                        market_cap: coinInfoCoinGecko.market_cap,
+                        fully_diluted_valuation: coinInfoCoinGecko.fully_diluted_valuation,
+                        total_volume: coinInfoCoinGecko.total_volume,
+                        high_24h: coinInfoCoinGecko.high_24h,
+                        low_24h: coinInfoCoinGecko.low_24h,
+                        price_change_24h: coinInfoCoinGecko.price_change_24h,
+                        price_change_percentage_24h: coinInfoCoinGecko.price_change_percentage_24h,
+                        market_cap_change_24h: coinInfoCoinGecko.market_cap_change_24h,
+                        market_cap_change_percentage_24h: coinInfoCoinGecko.market_cap_change_percentage_24h,
+                        circulating_supply: coinInfoCoinGecko.circulating_supply,
+                        total_supply: coinInfoCoinGecko.total_supply,
+                        max_supply: coinInfoCoinGecko.max_supply,
+                        ath: coinInfoCoinGecko.ath,
+                        ath_change_percentage: coinInfoCoinGecko.ath_change_percentage,
+                        ath_date: coinInfoCoinGecko.ath_date,
+                        atl: coinInfoCoinGecko.atl,
+                        atl_change_percentage: coinInfoCoinGecko.atl_change_percentage,
+                        atl_date: coinInfoCoinGecko.atl_date,
+                        roi: coinInfoCoinGecko.roi,
+                        last_updated: coinInfoCoinGecko.last_updated
+                    }
+                } else {
+                    log.error("Incomplete market data!")
+                }
+
+                hydratedPubkeys.push(entry)
             }
-
-            log.info(coin," rateUsdCoinCap: ",rateUsdCoinCap)
-            log.info(coin," rateUsdCoinGecko: ",rateUsdCoinGecko)
-
-            let relDiff = function(a:number, b:number) {
-                return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
-            }
-
-            //if either = 0, then accept other price
-            //flag Danger
-
-            //Calculate the percent.
-            var percent = relDiff(Number(rateUsdCoinCap),Number(rateUsdCoinGecko))
-            log.info(coin," percent: ",percent)
-            //percent diff
-
-            /*
-                Algo
-                if any are 0, use other
-                if both, choose lowest
-             */
-
-            let chosenRate = 0
-            if(rateUsdCoinCap === 0){
-                chosenRate = rateUsdCoinGecko
-            } else if(rateUsdCoinGecko === 0){
-                chosenRate = rateUsdCoinCap
-            } else if(rateUsdCoinGecko > rateUsdCoinCap){
-                chosenRate = rateUsdCoinCap
-            } else {
-                chosenRate = rateUsdCoinGecko
-            }
-            chosenRate = Number(chosenRate)
-            valuesUsd[coin] = chosenRate
-            totalValueUsd += valuesUsd[coin] + chosenRate
-
-            //TODO if quote !== USD
-            //calc conversion
         }
 
-        // log.info(tag,'names: ',allNames)
+        // log.debug(tag,'names: ',allNames)
 
         //let priceData in USD
         //let allValuesUsd = get_prices_in_quote()
@@ -142,7 +205,7 @@ let get_value_portfolio = async function (portfolio:any,quote:string) {
 
         //TODO https://www.coingecko.com/api/documentations/v3#/simple/get_simple_price
 
-        return {values:valuesUsd,total:totalValueUsd}
+        return {pubkeys:hydratedPubkeys,total:totalValueUsd}
     } catch (e) {
         console.error(tag, 'Error: ', e)
         throw e
@@ -164,7 +227,7 @@ let get_assets_coincap = async function () {
 
         //parse into keys array off ticker
         let allCoinsArray = result.data.data
-        log.info(tag,"allCoinsArray: ",allCoinsArray.length)
+        log.debug(tag,"allCoinsArray: ",allCoinsArray.length)
 
         for(let i = 0; i < allCoinsArray.length; i++){
             //
@@ -177,8 +240,8 @@ let get_assets_coincap = async function () {
 
         return output
     } catch (e) {
-        console.error(tag, 'Error: ', e)
-        throw e
+        //handle error gracefully
+        return {}
     }
 }
 
@@ -209,8 +272,8 @@ let get_assets_coingecko = async function () {
 
         return output
     } catch (e) {
-        console.error(tag, 'Error: ', e)
-        throw e
+        //handle error gracefully
+        return {}
     }
 }
 

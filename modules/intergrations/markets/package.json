@@ -1,6 +1,6 @@
 {
-  "name": "@pioneer-platform/shapeshift-client",
-  "version": "8.1.14",
+  "name": "@pioneer-platform/markets",
+  "version": "8.1.17",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

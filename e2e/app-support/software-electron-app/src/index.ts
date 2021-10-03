@@ -238,7 +238,6 @@ const test_service = async function () {
                 log.error("Invalid pubkey! pubkey:  ",pubkey)
                 //throw Error('Invalid pubkey! missing balance!')
             }
-
         }
         //validate
 

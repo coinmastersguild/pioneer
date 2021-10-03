@@ -178,10 +178,8 @@ let get_balance = async function(address:string,token:string){
 
         return output
     }catch(e){
-        //log.error(tag,"e: ",{e})
-        output.success = false
-        output.error = e
-        return output
+        //node 404's on fresh addresses like an asshole
+        return 0
     }
 }
 
