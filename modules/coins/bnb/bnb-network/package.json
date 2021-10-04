@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/binance-network",
-  "version": "8.1.17",
+  "version": "8.1.18",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@crypto-hex-decoder/bnb": "^2.1.0",
-    "@pioneer-platform/loggerdog": "^8.1.16",
-    "@pioneer-platform/nodes": "^8.1.16",
+    "@pioneer-platform/loggerdog": "^8.1.17",
+    "@pioneer-platform/nodes": "^8.1.17",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
