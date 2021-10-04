@@ -73,27 +73,27 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.debug(tag,"wallets: ",wallets)
+        log.info(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.debug(tag,"appContext: ",appContext)
+        log.info(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
         let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
+        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
 
         //balance
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"pubkey: ",pubkey)
+        log.info(tag,"pubkey: ",pubkey)
         let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
-        log.debug(tag,"balance: ",balance)
+        log.info(tag,"balance: ",balance)
         balance = balance.balance
-        log.debug(tag,"balance: ",balance)
+        log.info(tag,"balance: ",balance)
 
         if(!balance){
             log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
@@ -128,162 +128,178 @@ const test_service = async function () {
             assert(request.queryKey)
             assert(request.username)
             assert(request.url)
-            eventPairReceived = true
+            log.info(tag,"request: ",request)
+            if(request.type === 'pairing'){
+                eventPairReceived = true
+            }
         })
 
         let seedChains = ['ethereum','thorchain']
-        await app.init(seedChains)
+        let resultInfo = await app.init(seedChains)
+
+        //sdk info
+        log.info("* resultInfo: ",resultInfo)
+        log.info("app pubkeys: ",app.pubkeys)
+        log.info("app balances: ",app.balances)
+        assert(app.pubkeys)
+        assert(app.balances)
 
         //pair sdk
-        let code = await app.createPairingCode()
-        code = code.code
-        log.debug("code: ",code)
-        assert(code)
-
-
-        let pairSuccess = await sendPairingCode(code)
-        log.debug("pairSuccess: ",pairSuccess)
-        assert(pairSuccess)
-
-        //dont release till pair event
-        while(!eventPairReceived){
-            await sleep(300)
-        }
-
-        //assert sdk user
-        //get user
-        let user = await app.getUserParams()
-        log.debug("user: ",user.context)
-        assert(user.context)
-        //assert user clients
-        assert(user.clients[BLOCKCHAIN])
-
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
-
-        let client = user.clients[BLOCKCHAIN]
-
-        //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
-        assert(masterAddress)
-
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
-
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
-
-        assert(balanceSdk[0])
-        assert(balanceSdk[0].amount)
-        assert(balanceSdk[0].amount.amount())
-        assert(balanceSdk[0].amount.amount().toString())
-
-
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
-
-        let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
-
-        //value USD
-        let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        assert(valueBalanceUsd)
-
-        if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        }
-
-        //estimate BCH fee? lol
-        let asset = {
-            chain:ASSET,
-            symbol:ASSET,
-            ticker:ASSET,
-        }
-
-        //TODO estimate cost
-        // assert(estimateCost)
-
-        //max cost - balance
-
-        //you have x max amount spendable
-
-        //you are attempting to spend x
-
-        //this is x percent of total available
-
-        //get pool address
-        let poolInfo = await midgard.getPoolAddress()
-
-        //filter by chain
-        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.debug(tag,"thorVault: ",thorVault)
-
-        log.debug(tag,"thorVault: ",thorVault)
-        assert(thorVault[0])
-        thorVault = thorVault[0]
-        assert(thorVault.address)
-
-        const vaultAddress = thorVault.address
-        const gasRate = thorVault.gas_rate
-        assert(vaultAddress)
-        assert(gasRate)
-
-        //test amount in native
-        let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
-
-        let options:any = {
-            verbose: true,
-            txidOnResp: false, // txidOnResp is the output format
-        }
-
-        let transfer = {
-            inboundAddress: thorVault,
-            recipient:vaultAddress,
-            coin: ASSET,
-            asset: ASSET,
-            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
-            "amount":{
-                amount: function(){
-                    return BigNumber.BigNumber.from(amountTestNative)
-                }
-            },
-            fee:gasRate, // fee === gas (xcode inheritance)
-            noBroadcast:true
-        }
-        log.debug(tag,"transfer: ",transfer)
-        //if monitor
-        //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
-
-        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
-        assert(responseTransfer)
-        log.debug(tag,"responseTransfer: ",responseTransfer)
-        let invocationId = responseTransfer
-
-        //do not continue without invocationId
-        assert(invocationId)
-
-        let transaction = {
-            invocationId,
-            context:user.context
-        }
-
-        //cancel transaction
-        let cancelResult = await cancelTransaction(transaction)
-        log.debug(tag,"cancelResult: ",cancelResult)
-
+        // let code = await app.createPairingCode()
+        // code = code.code
+        // log.debug("code: ",code)
+        // assert(code)
         //
+        //
+        // let pairSuccess = await sendPairingCode(code)
+        // log.debug("pairSuccess: ",pairSuccess)
+        // assert(pairSuccess)
+        //
+        // //dont release till pair event
+        // while(!eventPairReceived){
+        //     await sleep(300)
+        // }
+        //
+        // //assert sdk user
+        // //get user
+        // let user = await app.getUserParams()
+        // log.info("* user: ",user)
 
 
-        log.info("****** TEST PASS 2******")
+
+        // log.info("user: ",user)
+        // log.info("user: ",user.balances)
+
+        // assert(user.context)
+        // //assert user clients
+        // assert(user.clients[BLOCKCHAIN])
+        //
+        // //intergration test asgard-exchange
+        // let blockchains = Object.keys(user.clients)
+        // log.debug("blockchains: ",blockchains)
+        //
+        // let client = user.clients[BLOCKCHAIN]
+        //
+        // //get master
+        // let masterAddress = await client.getAddress()
+        // log.debug(tag,"masterAddress: ",masterAddress)
+        // assert(masterAddress)
+        //
+        // /*
+        //     3 ways to express balance
+        //         Sdk (x-chain compatible object type)
+        //         native (satoshi/wei)
+        //         base (normal 0.001 ETH)
+        //  */
+        //
+        // let balanceSdk = await client.getBalance()
+        // log.debug(" balanceSdk: ",balanceSdk)
+        //
+        // assert(balanceSdk[0])
+        // assert(balanceSdk[0].amount)
+        // assert(balanceSdk[0].amount.amount())
+        // assert(balanceSdk[0].amount.amount().toString())
+        //
+        //
+        // let balanceNative = balanceSdk[0].amount.amount().toString()
+        // log.info(tag,"balanceNative: ",balanceNative)
+        // assert(balanceNative)
+        //
+        // let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
+        // log.debug(tag,"balanceBase: ",balanceBase)
+        // assert(balanceBase)
+        //
+        // //value USD
+        // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
+        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        // assert(valueBalanceUsd)
+        //
+        // if(balanceBase < TEST_AMOUNT){
+        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        // }
+        //
+        // //estimate BCH fee? lol
+        // let asset = {
+        //     chain:ASSET,
+        //     symbol:ASSET,
+        //     ticker:ASSET,
+        // }
+        //
+        // //TODO estimate cost
+        // // assert(estimateCost)
+        //
+        // //max cost - balance
+        //
+        // //you have x max amount spendable
+        //
+        // //you are attempting to spend x
+        //
+        // //this is x percent of total available
+        //
+        // //get pool address
+        // let poolInfo = await midgard.getPoolAddress()
+        //
+        // //filter by chain
+        // let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
+        // log.debug(tag,"thorVault: ",thorVault)
+        //
+        // log.debug(tag,"thorVault: ",thorVault)
+        // assert(thorVault[0])
+        // thorVault = thorVault[0]
+        // assert(thorVault.address)
+        //
+        // const vaultAddress = thorVault.address
+        // const gasRate = thorVault.gas_rate
+        // assert(vaultAddress)
+        // assert(gasRate)
+        //
+        // //test amount in native
+        // let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        //
+        // let options:any = {
+        //     verbose: true,
+        //     txidOnResp: false, // txidOnResp is the output format
+        // }
+        //
+        // let transfer = {
+        //     inboundAddress: thorVault,
+        //     recipient:vaultAddress,
+        //     coin: ASSET,
+        //     asset: ASSET,
+        //     memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
+        //     "amount":{
+        //         amount: function(){
+        //             return BigNumber.BigNumber.from(amountTestNative)
+        //         }
+        //     },
+        //     fee:gasRate, // fee === gas (xcode inheritance)
+        //     noBroadcast:true
+        // }
+        // log.debug(tag,"transfer: ",transfer)
+        // //if monitor
+        // //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
+        //
+        // let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        // assert(responseTransfer)
+        // log.debug(tag,"responseTransfer: ",responseTransfer)
+        // let invocationId = responseTransfer
+        //
+        // //do not continue without invocationId
+        // assert(invocationId)
+        //
+        // let transaction = {
+        //     invocationId,
+        //     context:user.context
+        // }
+        //
+        // //cancel transaction
+        // let cancelResult = await cancelTransaction(transaction)
+        // log.debug(tag,"cancelResult: ",cancelResult)
+        //
+        // //
+
+
+        log.info("****** TEST PASS 2 ******")
         //process
         process.exit(0)
     } catch (e) {

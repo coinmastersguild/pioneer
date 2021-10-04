@@ -351,7 +351,7 @@ const test_service = async function () {
         }
 
 
-        log.debug("****** TEST PASS ******")
+        log.notice("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

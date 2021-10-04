@@ -165,7 +165,7 @@ const test_service = async function () {
             Start app
          */
 
-        log.debug("******"+TAG+" TEST PASS ******")
+        log.notice("******"+TAG+" TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

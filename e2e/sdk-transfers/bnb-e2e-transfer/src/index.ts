@@ -403,7 +403,7 @@ const test_service = async function () {
         // let result = await app.stopSocket()
         // log.debug(tag,"result: ",result)
 
-        log.debug("****** TEST PASS 2******")
+        log.notice("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

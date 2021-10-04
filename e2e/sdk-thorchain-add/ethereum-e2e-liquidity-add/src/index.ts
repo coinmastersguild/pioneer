@@ -404,13 +404,13 @@ const test_service = async function () {
 
 
             }
-            log.debug("****** TEST Report: "+fullfillmentTxid+" ******")
+            log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
         let result = await app.stopSocket()
         log.debug(tag,"result: ",result)
 
 
-        log.debug("****** TEST PASS ******")
+        log.notice("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

@@ -50,9 +50,9 @@ export class SDK {
     private startSocket: () => Promise<any>;
     private isPaired: boolean
     private context: string;
-    private pubkeys:any
+    private pubkeys:any[]
     private masters:any
-    private balances:any
+    private balances:any[]
     private ibcChannels:any[]
     private paymentStreams:any[]
     private nfts:any[]
@@ -88,6 +88,8 @@ export class SDK {
         this.spec = config.spec
         this.clients = {}
         this.contexts = []
+        this.pubkeys = []
+        this.balances = []
         this.context = ""
         this.invocationContext = ""
         this.assetContext = ""
@@ -127,12 +129,30 @@ export class SDK {
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.debug(tag,"userInfo: ",userInfo)
+                log.info(tag,"userInfo: ",userInfo)
+                //for each wallet
+                // if(userInfo.walletDescriptions){
+                //     for(let i = 0; userInfo.walletDescriptions.length; i++){
+                //         let walletInfo = userInfo.walletDescriptions[i]
+                //         for(let j =0; j < walletInfo.pubkeys.length; j++){
+                //             let pubkey = walletInfo.pubkeys[j]
+                //             pubkey.context = walletInfo.context
+                //             this.pubkeys.push(pubkey)
+                //             for(let k = 0; k < pubkey.balances.length; k++){
+                //                 let balance:any = pubkey.balances[k]
+                //                 //add wallet context
+                //                 balance.context = walletInfo.context
+                //                 balance.pubkey = pubkey.pubkey
+                //                 this.balances.push(balance)
+                //             }
+                //         }
+                //     }
+                // }
+
                 if(!this.username)this.username = userInfo.username
                 this.wallets = userInfo.wallets
-                this.balances = userInfo.balances
-                this.masters = userInfo.masters
-                this.pubkeys = userInfo.pubkeys
+
+                // this.pubkeys = userInfo.pubkeys
                 this.ibcChannels = userInfo.ibcChannels
                 this.nfts = userInfo.nfts
                 this.paymentStreams = userInfo.paymentStreams
@@ -226,6 +246,7 @@ export class SDK {
                                 "path": "m/44'/60'/0'", //TODO capture from onBoard.js on user input paths. ie keepkey
                                 "script_type": "ethereum",
                                 "network": "ethereum",
+                                "type": "address",
                                 "created": new Date().getTime(),
                                 "tags": [
                                     wallet.name,
@@ -243,8 +264,8 @@ export class SDK {
                     auth:'lol',
                     provider:'lol'
                 }
-
                 let result = await this.pioneerApi.Register(null, register)
+                await this.getUserParams()
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -421,6 +442,30 @@ export class SDK {
                     this.assetBalanceUsdValueContext = balance.valueUsd || '0'
                     log.debug(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
                     log.debug(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
+                    // this.balances = []
+                    // this.pubkeys = []
+                    //for each wallet
+                    if(userInfo.walletDescriptions){
+                        log.info("Parse Wallet Descriptions")
+                        for(let i = 0; i < userInfo.walletDescriptions.length; i++){
+                            let walletInfo = userInfo.walletDescriptions[i]
+                            log.info(tag,"walletInfo: ",walletInfo)
+                            for(let j =0; j < walletInfo.pubkeys.length; j++){
+                                let pubkey = walletInfo.pubkeys[j]
+                                pubkey.context = walletInfo.context
+                                this.pubkeys.push(pubkey)
+                                for(let k = 0; k < pubkey.balances.length; k++){
+                                    let balance:any = pubkey.balances[k]
+                                    //add wallet context
+                                    balance.context = walletInfo.context
+                                    balance.pubkey = pubkey.pubkey
+                                    this.balances.push(balance)
+                                }
+                            }
+                        }
+                    }
+
+
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
@@ -433,13 +478,10 @@ export class SDK {
                     this.contexts = result.wallets
                     log.debug(tag,"result: ",result)
                 }
-                if(!result.masters.RUNE) throw Error("102: RUNE required asset! ")
-                let thorAddress = result.masters.RUNE
 
                 this.wallets = result.wallets
-                this.balances = result.balances
-                this.masters = result.masters
-                this.pubkeys = result.pubkeys
+                if(result.balances) this.balances = result.balances
+                if(result.pubkeys) this.pubkeys = result.pubkeys
 
                 log.debug(tag,"this.spec: ",this.spec)
                 log.debug(tag,"supportedBlockchains: ",supportedBlockchains)
@@ -541,7 +583,7 @@ export class SDK {
                     valueUsdContext: this.valueUsdContext,
                     assetBalanceNativeContext: this.assetBalanceNativeContext,
                     assetBalanceUsdValueContext: this.assetBalanceUsdValueContext,
-                    wallet: thorAddress,
+                    wallet: this.username || 'sdkuser',
                     keystore:{},
                     clients:this.clients
                 }

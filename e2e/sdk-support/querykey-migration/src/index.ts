@@ -164,7 +164,7 @@ const test_service = async function () {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
-        log.debug("****** TEST PASS 2******")
+        log.notice("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

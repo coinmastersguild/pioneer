@@ -289,11 +289,11 @@ let get_pubkeys = async function (blockchains:any,isTestnet?:boolean) {
         }
 
 
-        log.debug("***** paths IN: ",pathsKeepkey.length)
+        log.notice("***** paths IN: ",pathsKeepkey.length)
         //NOTE: keepkey returns an ordered array.
         //To build verbose pubkey info we must rebuild based on order
         const result = await KEEPKEY_WALLET.getPublicKeys(pathsKeepkey);
-        log.debug("***** pubkeys OUT: ",result.length)
+        log.notice("***** pubkeys OUT: ",result.length)
         if(pathsKeepkey.length !== result.length) {
             log.error(tag, {pathsKeepkey})
             log.error(tag, {result})

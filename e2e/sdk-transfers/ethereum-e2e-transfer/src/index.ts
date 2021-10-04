@@ -379,7 +379,7 @@ const test_service = async function () {
         log.debug(tag,"result: ",result)
 
 
-        log.debug("****** TEST PASS ******")
+        log.notice("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

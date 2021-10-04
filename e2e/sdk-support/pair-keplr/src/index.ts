@@ -164,7 +164,7 @@ const test_service = async function () {
         //switch context
 
 
-        log.debug("****** TEST PASS 2******")
+        log.notice("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {
