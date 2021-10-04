@@ -171,7 +171,7 @@ const test_service = async function () {
             await sleep(300)
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 2 pairing")
+        log.debug(tag,"CHECKPOINT 2 pairing")
 
         //assert sdk user
         //get user
@@ -191,13 +191,13 @@ const test_service = async function () {
         log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
-        log.info(tag,"CHECKPOINT 3 sdk client")
+        log.debug(tag,"CHECKPOINT 3 sdk client")
 
         //get master
         let masterAddress = await client.getAddress()
         log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
-        log.info(tag,"CHECKPOINT 4 master address")
+        log.debug(tag,"CHECKPOINT 4 master address")
 
         /*
             3 ways to express balance
@@ -366,7 +366,7 @@ const test_service = async function () {
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
         // assert.equal(invocationView1.state,'builtTx')
@@ -384,7 +384,7 @@ const test_service = async function () {
         assert(invocationView2)
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
@@ -394,7 +394,7 @@ const test_service = async function () {
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
         let isConfirmed = false
@@ -452,15 +452,15 @@ const test_service = async function () {
             while(!isFullfilled){
                 //get midgard info
                 let txInfoMidgard = midgard.getTransaction(txid)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
 
                 //
                 if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
                     let depositInfo = txInfoMidgard.actions[0].in
-                    log.info(tag,"deposit: ",depositInfo)
+                    log.debug(tag,"deposit: ",depositInfo)
 
                     let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
 
                     if(fullfillmentInfo.status === 'success'){
                         statusCode = 4
@@ -473,9 +473,9 @@ const test_service = async function () {
         }
 
         let result = await app.stopSocket()
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

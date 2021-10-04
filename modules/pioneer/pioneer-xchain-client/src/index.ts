@@ -213,15 +213,15 @@ module.exports = class wallet {
                     if(!tx.fee) throw Error("103: fee required!")
 
                     //context
-                    log.info(tag,"currentContext: ",this.context)
-                    log.info(tag,"txContext: ",tx.context)
+                    log.debug(tag,"currentContext: ",this.context)
+                    log.debug(tag,"txContext: ",tx.context)
                     if(tx.context){
                         if(this.context !== tx.context){
                             //TODO validate context is valid
                             this.context = tx.context
                         }
                     } else {
-                        log.info(tag,"using default context:",this.context)
+                        log.debug(tag,"using default context:",this.context)
                         tx.context = this.context
                     }
                     if(!tx.context) throw Error("102: context is required on invocations!")
@@ -265,10 +265,10 @@ module.exports = class wallet {
                     }
                     if(tx.noBroadcast) invocation.noBroadcast = true
 
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke(invocation)
                     if(!result) throw Error("Failed to create invocation!")
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
                     return result.invocationId
                 } catch (e) {
@@ -335,15 +335,15 @@ module.exports = class wallet {
                     if(!tx.fee) throw Error("103: fee required!")
 
                     //context
-                    log.info(tag,"currentContext: ",this.context)
-                    log.info(tag,"txContext: ",tx.context)
+                    log.debug(tag,"currentContext: ",this.context)
+                    log.debug(tag,"txContext: ",tx.context)
                     if(tx.context){
                         if(this.context !== tx.context){
                             //TODO validate context is valid
                             this.context = tx.context
                         }
                     } else {
-                        log.info(tag,"using default context:",this.context)
+                        log.debug(tag,"using default context:",this.context)
                         tx.context = this.context
                     }
                     if(!tx.context) throw Error("102: context is required on invocations!")
@@ -374,10 +374,10 @@ module.exports = class wallet {
                     }
                     if(tx.noBroadcast) invocation.noBroadcast = true
 
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke(invocation)
                     if(!result) throw Error("Failed to create invocation!")
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
                     return result.invocationId
                 } catch (e) {
@@ -390,7 +390,7 @@ module.exports = class wallet {
                 let tag = TAG + " | delegate | "
                 try {
                     let coin = this.nativeAsset
-                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx: ",tx)
                     log.debug(tag,"tx.amount: ",tx.amount)
                     log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                     log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
@@ -408,15 +408,15 @@ module.exports = class wallet {
                     if(!tx.fee) throw Error("103: fee required!")
 
                     //context
-                    log.info(tag,"currentContext: ",this.context)
-                    log.info(tag,"txContext: ",tx.context)
+                    log.debug(tag,"currentContext: ",this.context)
+                    log.debug(tag,"txContext: ",tx.context)
                     if(tx.context){
                         if(this.context !== tx.context){
                             //TODO validate context is valid
                             this.context = tx.context
                         }
                     } else {
-                        log.info(tag,"using default context:",this.context)
+                        log.debug(tag,"using default context:",this.context)
                         tx.context = this.context
                     }
                     if(!tx.context) throw Error("102: context is required on invocations!")
@@ -438,10 +438,10 @@ module.exports = class wallet {
                     }
                     if(tx.noBroadcast) invocation.noBroadcast = true
 
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke(invocation)
                     if(!result) throw Error("Failed to create invocation!")
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
                     return result.invocationId
                 } catch (e) {
@@ -454,7 +454,7 @@ module.exports = class wallet {
                 let tag = TAG + " | delegate | "
                 try {
                     let coin = this.nativeAsset
-                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx: ",tx)
                     log.debug(tag,"tx.amount: ",tx.amount)
                     log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                     log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
@@ -472,15 +472,15 @@ module.exports = class wallet {
                     if(!tx.fee) throw Error("103: fee required!")
 
                     //context
-                    log.info(tag,"currentContext: ",this.context)
-                    log.info(tag,"txContext: ",tx.context)
+                    log.debug(tag,"currentContext: ",this.context)
+                    log.debug(tag,"txContext: ",tx.context)
                     if(tx.context){
                         if(this.context !== tx.context){
                             //TODO validate context is valid
                             this.context = tx.context
                         }
                     } else {
-                        log.info(tag,"using default context:",this.context)
+                        log.debug(tag,"using default context:",this.context)
                         tx.context = this.context
                     }
                     if(!tx.context) throw Error("102: context is required on invocations!")
@@ -508,10 +508,10 @@ module.exports = class wallet {
                     }
                     if(tx.noBroadcast) invocation.noBroadcast = true
 
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke(invocation)
                     if(!result) throw Error("Failed to create invocation!")
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
                     return result.invocationId
                 } catch (e) {
@@ -524,7 +524,7 @@ module.exports = class wallet {
                 let tag = TAG + " | joinPool | "
                 try {
                     let coin = this.nativeAsset
-                    log.info(tag,"tx: ",tx)
+                    log.debug(tag,"tx: ",tx)
 
 
                     //TODO min transfer size 10$
@@ -534,15 +534,15 @@ module.exports = class wallet {
                     if(!tx.fee) throw Error("103: fee required!")
 
                     //context
-                    log.info(tag,"currentContext: ",this.context)
-                    log.info(tag,"txContext: ",tx.context)
+                    log.debug(tag,"currentContext: ",this.context)
+                    log.debug(tag,"txContext: ",tx.context)
                     if(tx.context){
                         if(this.context !== tx.context){
                             //TODO validate context is valid
                             this.context = tx.context
                         }
                     } else {
-                        log.info(tag,"using default context:",this.context)
+                        log.debug(tag,"using default context:",this.context)
                         tx.context = this.context
                     }
                     if(!tx.context) throw Error("102: context is required on invocations!")
@@ -569,10 +569,10 @@ module.exports = class wallet {
                     }
                     if(tx.noBroadcast) invocation.noBroadcast = true
 
-                    log.info(tag,"invocation: ",invocation)
+                    log.debug(tag,"invocation: ",invocation)
                     let result = await this.invoke.invoke(invocation)
                     if(!result) throw Error("Failed to create invocation!")
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
                     return result.invocationId
                 } catch (e) {
@@ -901,7 +901,7 @@ module.exports = class wallet {
                         fee
                     }
                     let result = await this.invoke.invoke(invocation)
-                    log.info("result: ",result)
+                    log.debug("result: ",result)
 
 
                     return result.invocationId
@@ -1118,7 +1118,12 @@ module.exports = class wallet {
                 //assume native on master
                 if(!address && !asset){
                     let returnAssetAmount = ():number =>{
-                        return this.info.balances[this.nativeAsset]
+                        //for pubkeys by symbol
+                        log.info(tag,"info: ",this.info)
+                        let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === this.nativeAsset)[0]
+                        log.info(tag,"pubkey: ",pubkey)
+                        let balance = pubkey.balances.filter((e:any) => e.asset === this.nativeAsset)[0]
+                        return balance.balance
                     }
 
                     let assetDescription: Asset = {
@@ -1314,7 +1319,7 @@ module.exports = class wallet {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke(invocation)
                 console.log("result: ",result)
 
@@ -1336,7 +1341,7 @@ module.exports = class wallet {
             let tag = TAG + " | transfer | "
             try {
                 let coin = this.nativeAsset
-                log.info(tag,"tx: ",tx)
+                log.debug(tag,"tx: ",tx)
                 log.debug(tag,"tx.amount: ",tx.amount)
                 log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                 log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
@@ -1354,15 +1359,15 @@ module.exports = class wallet {
                 if(!tx.fee) throw Error("103: fee required!")
 
                 //context
-                log.info(tag,"currentContext: ",this.context)
-                log.info(tag,"txContext: ",tx.context)
+                log.debug(tag,"currentContext: ",this.context)
+                log.debug(tag,"txContext: ",tx.context)
                 if(tx.context){
                     if(this.context !== tx.context){
                         //TODO validate context is valid
                         this.context = tx.context
                     }
                 } else {
-                    log.info(tag,"using default context:",this.context)
+                    log.debug(tag,"using default context:",this.context)
                     tx.context = this.context
                 }
                 if(!tx.context) throw Error("102: context is required on invocations!")
@@ -1384,10 +1389,10 @@ module.exports = class wallet {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke(invocation)
                 if(!result) throw Error("Failed to create invocation!")
-                log.info("result: ",result)
+                log.debug("result: ",result)
 
                 return result.invocationId
             } catch (e) {

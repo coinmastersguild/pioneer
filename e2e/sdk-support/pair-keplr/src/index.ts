@@ -131,11 +131,11 @@ const test_service = async function () {
             initialized:true,
             address:"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9"
         }
-        log.info(tag,"pairWalletOnboard: ",pairWalletOnboard)
+        log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
 
         //pair wallet
         let resultRegister = await app.registerWallet(pairWalletOnboard)
-        log.info(tag,"resultRegister: ",resultRegister)
+        log.debug(tag,"resultRegister: ",resultRegister)
 
         //pair with pioneer
         let code = await app.createPairingCode()
@@ -156,7 +156,7 @@ const test_service = async function () {
 
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
+        log.debug("user: ",user)
         assert(user.context)
 
         //verify pairing has metamask wallet
@@ -164,7 +164,7 @@ const test_service = async function () {
         //switch context
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

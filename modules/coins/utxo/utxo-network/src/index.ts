@@ -302,7 +302,7 @@ let get_fee = async function(coin:string){
             let query = "https://bitcoinfees.earn.com/api/v1/fees/recommended"
 
             output = await axios({method:'GET',url:query})
-            log.info(tag,"output: ",output.data)
+            log.debug(tag,"output: ",output.data)
             output = output.data.fastestFee
         }else{
             //eh just send whatever, probally be fine
@@ -621,7 +621,7 @@ let get_block = async function(coin:string,height:number){
 let get_node_info = async function(coin:string){
     let tag = TAG + " | get_node_info | "
     try{
-        log.info(nodeMap)
+        log.debug(nodeMap)
         //
         //let results = await nodeMap[coin].getBlockchainInfo()
         // let results = await nodeMap[coin].getBlockchainInfo()

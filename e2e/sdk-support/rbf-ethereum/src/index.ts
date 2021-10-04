@@ -108,13 +108,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -194,7 +194,7 @@ const test_service = async function () {
         if(user.context !== TEST_CONTEXT){
             //set context to correct context
             let resultContextSwitch = await app.setContext(TEST_CONTEXT)
-            log.info("resultContextSwitch: ",resultContextSwitch)
+            log.debug("resultContextSwitch: ",resultContextSwitch)
         }
 
         let user2 = await app.getUserParams()
@@ -241,8 +241,8 @@ const test_service = async function () {
         assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
-            log.info(tag,"balanceBase: ",balanceBase)
-            log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+            log.debug(tag,"balanceBase: ",balanceBase)
+            log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: "+masterAddress)
         }
 
@@ -263,7 +263,7 @@ const test_service = async function () {
         log.debug(tag,"estimatePayload: ",estimatePayload)
 
         let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.info(tag,"estimateCost: ",estimateCost)
+        log.debug(tag,"estimateCost: ",estimateCost)
         assert(estimateCost)
 
         //max cost - balance
@@ -276,7 +276,7 @@ const test_service = async function () {
 
         //get unconfirmed
         let txCount = await client.getTxCount();
-        log.info(tag,"txCount: ",txCount)
+        log.debug(tag,"txCount: ",txCount)
         assert(txCount)
         assert(txCount.confirmed)
 
@@ -318,7 +318,7 @@ const test_service = async function () {
 
         //if create new
         let responseTransfer = await user.clients.ethereum.transfer(transfer,options)
-        log.info(tag,"responseTransfer: ",responseTransfer)
+        log.debug(tag,"responseTransfer: ",responseTransfer)
         // //optional (configurable with options above) .invocationId response
         invocationId = responseTransfer
 
@@ -332,22 +332,22 @@ const test_service = async function () {
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
-        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
-        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
+        log.debug(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
+        log.debug(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
         assert(unsignedTx)
         let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
         txFeeGwei = parseInt(String(txFeeGwei))
         //verify fee level
         if(txFeeGwei !== LOW_FEE_LEVEL){
-            log.info(tag,"FEE LEVEL created: ",txFeeGwei)
-            log.info(tag,"FEE LEVEL expected: ",LOW_FEE_LEVEL)
+            log.debug(tag,"FEE LEVEL created: ",txFeeGwei)
+            log.debug(tag,"FEE LEVEL expected: ",LOW_FEE_LEVEL)
             throw Error("Failed to use correct fee on txbuilding!")
         }
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         //assert(invocationView1.fee)
         assert(invocationView1.state)
@@ -382,7 +382,7 @@ const test_service = async function () {
 
                 //broadcast transaction
                 let broadcastResult = await broadcastTransaction(transaction)
-                log.info(tag,"broadcastResult: ",broadcastResult)
+                log.debug(tag,"broadcastResult: ",broadcastResult)
 
             });
             while(!isAccepted){
@@ -426,14 +426,14 @@ const test_service = async function () {
 
                 //lookup txid
                 let response = await client.getTransactionData(txid)
-                log.info(tag,"response: ",response)
+                log.debug(tag,"response: ",response)
 
                 if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                     isConfirmed = true
                 } else {
-                    log.info(tag,"Not confirmed! txid: ",txid)
+                    log.debug(tag,"Not confirmed! txid: ",txid)
                     //get gas price recommended
 
                     //get tx gas price
@@ -442,19 +442,19 @@ const test_service = async function () {
 
                 //time unconfirmed
                 let timeUnconfirmed = (new Date().getTime() - timeBroadcast) / 1000
-                log.info(tag,"timeUnconfirmed: ",timeUnconfirmed)
-                log.info(tag,"ttrbf: ",ttrbf)
+                log.debug(tag,"timeUnconfirmed: ",timeUnconfirmed)
+                log.debug(tag,"ttrbf: ",ttrbf)
 
                 //if timeUnconfirmed > x
                 if(timeUnconfirmed > ttrbf){
                     if(!isReplaced){
                         isReplaced = true
-                        log.info(" *** BEGIN RBF procedure *** ")
+                        log.debug(" *** BEGIN RBF procedure *** ")
 
                         //manual create new invocation with same nonce
                         //get unconfirmed
                         let txCount = await client.getTxCount();
-                        log.info(tag,"txCount: ",txCount)
+                        log.debug(tag,"txCount: ",txCount)
                         assert(txCount)
                         assert(txCount.confirmed)
 
@@ -496,14 +496,14 @@ const test_service = async function () {
 
                         //if create new
                         let responseTransfer = await user.clients.ethereum.transfer(transfer,options)
-                        log.info(tag,"responseTransfer: ",responseTransfer)
+                        log.debug(tag,"responseTransfer: ",responseTransfer)
 
                         invocationId = responseTransfer
 
                         //get invocationInfo
                         let invocationInfo = await app.getInvocation(invocationId)
                         assert(invocationId)
-                        log.info(tag,"invocationInfo: ",invocationInfo)
+                        log.debug(tag,"invocationInfo: ",invocationInfo)
 
                         //do not continue invocation
                         assert(invocationId)
@@ -515,29 +515,29 @@ const test_service = async function () {
 
                         //build
                         let unsignedTx = await buildTransaction(transactionReplace)
-                        log.info(tag,"unsignedTx: ",unsignedTx)
-                        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
-                        log.info(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
+                        log.debug(tag,"unsignedTx: ",unsignedTx)
+                        log.debug(tag,"unsignedTx.HDwalletPayload.gasPrice: ",unsignedTx.HDwalletPayload.gasPrice)
+                        log.debug(tag,"unsignedTx.HDwalletPayload.gasPrice: ",parseInt(unsignedTx.HDwalletPayload.gasPrice))
                         assert(unsignedTx)
                         let txFeeGwei =  parseInt(unsignedTx.HDwalletPayload.gasPrice) / GIG
                         txFeeGwei = parseInt(String(txFeeGwei))
                         //verify fee level
                         if(txFeeGwei !== HIGH_FEE_LEVEL){
-                            log.info(tag,"FEE LEVEL created: ",txFeeGwei)
-                            log.info(tag,"FEE LEVEL expected: ",HIGH_FEE_LEVEL)
+                            log.debug(tag,"FEE LEVEL created: ",txFeeGwei)
+                            log.debug(tag,"FEE LEVEL expected: ",HIGH_FEE_LEVEL)
                             throw Error("Failed to use correct fee on txbuilding!")
                         }
 
                         //sign transaction
                         let signedTx = await approveTransaction(transactionReplace)
-                        log.info(tag,"transactionReplace signedTx: ",signedTx)
+                        log.debug(tag,"transactionReplace signedTx: ",signedTx)
                         assert(signedTx)
                         assert(signedTx.txid)
                         txid = signedTx.txid
 
                         //broadcast transaction
                         let broadcastResult = await broadcastTransaction(transactionReplace)
-                        log.info(tag,"broadcastResult: ",broadcastResult)
+                        log.debug(tag,"broadcastResult: ",broadcastResult)
 
 
                         //TODO
@@ -545,16 +545,16 @@ const test_service = async function () {
                         // isReplaced = true
                         // //get invocation
                         // let invocationInfo = await app.getInvocation(invocationId)
-                        // log.info(tag,"invocationInfo: ",invocationInfo)
+                        // log.debug(tag,"invocationInfo: ",invocationInfo)
                         //
                         // //rebuild rbf tx
                         // let responseReplace = await user.clients.ethereum.replace(invocationId,{unit:'gwei',value:HIGH_FEE_LEVEL})
                         // assert(responseReplace)
-                        // log.info(tag,"responseReplace: ",responseReplace)
+                        // log.debug(tag,"responseReplace: ",responseReplace)
                         //
                         // //re-sign
                         // let signedTx = await approveTransaction(transaction)
-                        // log.info(tag,"signedTx: ",signedTx)
+                        // log.debug(tag,"signedTx: ",signedTx)
                         // assert(signedTx)
                         // assert(signedTx.txid)
                         //
@@ -562,10 +562,10 @@ const test_service = async function () {
                         // txid = signedTx.txid
                         // //re-broadcast
                         // let broadcastResult = await broadcastTransaction(transaction)
-                        // log.info(tag,"broadcastResult: ",broadcastResult)
+                        // log.debug(tag,"broadcastResult: ",broadcastResult)
                     }
                 } else {
-                    log.info(tag,"already replaced!")
+                    log.debug(tag,"already replaced!")
                 }
             }
         }
@@ -575,7 +575,7 @@ const test_service = async function () {
         log.debug(tag,"result: ",result)
 
 
-        log.info("****** TEST PASS ******")
+        log.debug("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

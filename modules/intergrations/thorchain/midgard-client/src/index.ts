@@ -73,7 +73,7 @@ const get_transaction = async function (txid:string) {
             txid = txid.replace('0x','')
         }
         txid = txid.toUpperCase()
-        log.info(tag,"txid formatted: ",txid)
+        log.debug(tag,"txid formatted: ",txid)
 
         //params
         let params = {
@@ -107,7 +107,7 @@ const get_new_addresses = async function () {
             headers: {'content-type': 'application/json'},
         };
 
-        log.info(body)
+        log.debug(body)
         let resp = await axios(body)
 
 
@@ -159,7 +159,7 @@ const get_pool_addresses = async function () {
             // json: true
         };
 
-        log.info(body)
+        log.debug(body)
         let resp = await axios(body)
 
 
@@ -182,7 +182,7 @@ const get_info = async function () {
             // json: true
         };
 
-        log.info(body.url)
+        log.debug(body.url)
         let resp = await axios(body)
 
 
@@ -196,7 +196,7 @@ const get_info = async function () {
 
         log.debug(bodyStats)
         let respStats = await axios(bodyStats)
-        log.info(tag,"respStats: ",respStats.data)
+        log.debug(tag,"respStats: ",respStats.data)
 
         output.stats = respStats.data
         output.health = resp.data

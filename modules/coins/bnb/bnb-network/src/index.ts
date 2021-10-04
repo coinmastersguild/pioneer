@@ -162,7 +162,7 @@ let get_balance = async function(address:string,token:string){
             method: 'GET'
         })
         let balanceInfo = result.data
-        log.info('balanceInfo: ', balanceInfo)
+        log.debug('balanceInfo: ', balanceInfo)
 
         if(!balanceInfo || !balanceInfo.balances || balanceInfo.balances.length === 0){
             output = 0
@@ -521,7 +521,7 @@ let broadcast_transaction = async function(rawTx:string){
         log.debug('result: ', result.data)
 
         if(result.data[0].hash){
-            log.info("success! ")
+            log.debug("success! ")
         }
 
         return result.data[0].hash

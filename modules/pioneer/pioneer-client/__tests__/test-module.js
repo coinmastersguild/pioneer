@@ -34,16 +34,16 @@ let run_test = async function(){
         //get config
 
 
-        // let config = {
-        //     queryKey,
-        //     username,
-        //     spec
-        // }
         let config = {
-            queryKey:"79d94b78-eb50-445d-b97f-e524dca80b58",
-            username:'test-user-2',
+            queryKey,
+            username,
             spec
         }
+        // let config = {
+        //     queryKey:"79d94b78-eb50-445d-b97f-e524dca80b58",
+        //     username:'test-user-2',
+        //     spec
+        // }
         console.log("config: ",config)
 
         //get config
@@ -53,12 +53,12 @@ let run_test = async function(){
         // console.log("pioneer: ",pioneer)
 
         //get new address
-        //zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i
-        let newAddy = await pioneer.instance.GetNewAddress({network:'BTC',xpub:"zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i"})
-        console.log("newAddy: ",newAddy.data)
-
-        let newAddyChange = await pioneer.instance.GetChangeAddress({network:'BTC',xpub:"zpub6rLj8yHs3mXRYSGNBSbajrkwghwLtpZLJf16q8bETA2mhZsMQdcPhXE4QQJAkQMAv8wpVeZYWqm3V45zzyAYS7exCugndVv8F8PmGfBTC5i"})
-        console.log("newAddyChange: ",newAddyChange.data)
+        //
+        // let newAddy = await pioneer.instance.GetNewAddress({network:'BTC',xpub:""})
+        // console.log("newAddy: ",newAddy.data)
+        //
+        // let newAddyChange = await pioneer.instance.GetChangeAddress({network:'BTC',xpub:""})
+        // console.log("newAddyChange: ",newAddyChange.data)
 
         //get change address
 
@@ -84,9 +84,9 @@ let run_test = async function(){
         // onlineUsers = onlineUsers.data
         // console.log("onlineUsers: ",onlineUsers)
 
-        let blockheight = await pioneer.instance.BlockHeight({network:"OSMO"})
-        blockheight = blockheight.data
-        console.log("blockheight: ",blockheight)
+        // let blockheight = await pioneer.instance.BlockHeight({network:"OSMO"})
+        // blockheight = blockheight.data
+        // console.log("blockheight: ",blockheight)
 
         // let validators = await pioneer.instance.GetValidators('osmosis')
         // validators = validators.data
@@ -100,9 +100,9 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        // let user = await pioneer.instance.User()
-        // console.log("user: ",user.data)
-        // console.log("user: ",JSON.stringify(user.data))
+        let user = await pioneer.instance.User()
+        console.log("user: ",user.data)
+        console.log("user: ",JSON.stringify(user.data))
         //
         // let info = await pioneer.instance.Info(user.data.context)
         // console.log("info: ",info.data)

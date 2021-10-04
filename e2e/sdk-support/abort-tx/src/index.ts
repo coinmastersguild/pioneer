@@ -84,17 +84,27 @@ const test_service = async function () {
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
-        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //balance
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.debug(tag,"pubkey: ",pubkey)
+        let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
+        log.debug(tag,"balance: ",balance)
+        balance = balance.balance
+        log.debug(tag,"balance: ",balance)
+
         if(!balance){
-            log.error(tag,"Failed to get balance! asset: "+ASSET,wallets.wallets[contextAlpha].WALLET_BALANCES)
+            log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
         }
         assert(balance)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
+        let master = pubkey.master
         //assert balance local
-        log.debug(tag,"masterAlpha: ",masterAlpha)
+        log.debug(tag,"master: ",master)
         if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -168,6 +178,7 @@ const test_service = async function () {
 
         let balanceSdk = await client.getBalance()
         log.debug(" balanceSdk: ",balanceSdk)
+
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
@@ -175,7 +186,7 @@ const test_service = async function () {
 
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
+        log.info(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())

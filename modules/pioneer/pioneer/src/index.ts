@@ -359,7 +359,7 @@ module.exports = class wallet {
 
                     log.debug(tag,"getting info on context: ",this.context)
                     let walletInfo = await this.getInfo(this.context)
-                    log.info(tag,"walletInfo: ",walletInfo)
+                    log.debug(tag,"walletInfo: ",walletInfo)
 
                     //validate info
                     log.debug("walletInfo: ",walletInfo)
@@ -377,8 +377,8 @@ module.exports = class wallet {
 
                     return walletInfo
                 } else {
-                    log.info(tag,"Offline mode!")
-                    //log.info(tag,"this: ",this)
+                    log.debug(tag,"Offline mode!")
+                    //log.debug(tag,"this: ",this)
                     return {
                         isTestnet:this.isTestnet,
                         context:this.context,
@@ -600,8 +600,8 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.info(tag,"address (HDwallet): ",address)
-                    log.info(tag,"address (private): ",output)
+                    log.debug(tag,"address (HDwallet): ",address)
+                    log.debug(tag,"address (private): ",output)
                     if(address !== output) {
                         throw Error("unable to verify address in HDwallet!")
                     }
@@ -1937,7 +1937,7 @@ module.exports = class wallet {
                     log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
                     let pubkeyInfo = this.PUBLIC_WALLET[network]
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    log.info(tag,"input: ",input)
+                    log.debug(tag,"input: ",input)
 
                     let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input.xpub})
                     unspentInputs = unspentInputs.data
@@ -2073,7 +2073,7 @@ module.exports = class wallet {
                     }
 
 
-                    log.info(tag,"pubkeyInfo: change: ",pubkeyInfo)
+                    log.debug(tag,"pubkeyInfo: change: ",pubkeyInfo)
                     //getNewChange
                     let changeAddressIndex = await this.pioneerClient.instance.GetChangeAddress({network,xpub:input.xpub})
                     changeAddressIndex = changeAddressIndex.data.changeIndex
@@ -2083,9 +2083,9 @@ module.exports = class wallet {
                     let account = 0 //TODO adjustable by pubkey data?
                     let index = changeAddressIndex
                     let isTestnet = false
-                    log.info(tag,"input: ",{xpub,scriptType,coin,account,index,isChange:true,isTestnet})
+                    log.debug(tag,"input: ",{xpub,scriptType,coin,account,index,isChange:true,isTestnet})
                     let changeAddress = await get_address_from_xpub(xpub,scriptType,coin,account,index,true,isTestnet)
-                    log.info(tag,"changeAddress: ",changeAddress)
+                    log.debug(tag,"changeAddress: ",changeAddress)
                     if(!changeAddress) throw Error("103 Failed to get new change address!")
 
                     //if bch convert format

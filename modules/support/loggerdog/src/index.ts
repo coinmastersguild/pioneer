@@ -42,6 +42,7 @@ let dog = require("./modules/datadog")
 const clc = require('cli-color')
 
 const LOG_LEVELS:any = {
+    TEST: { val: 0, label: 'TEST', color: clc.cyanBright },
     EMERG: { val: 0, label: 'EMERG', color: clc.magentaBright },
     ALERT: { val: 1, label: 'ALERT', color: clc.magentaBright },
     CRIT: { val:  2, label: 'CRIT', color: clc.redBright },

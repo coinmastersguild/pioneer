@@ -70,30 +70,30 @@ const test_service = async function () {
 
         //start app and get wallet
         let App = await startApp()
-        log.info(tag,"App: ",App)
+        log.debug(tag,"App: ",App)
         let username = App.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
 
         //multi-wallet
         assert(appWallets.length,2)
-        log.info(tag,"appWallets: ",appWallets)
+        log.debug(tag,"appWallets: ",appWallets)
 
         //TODO bounce funds between and test max amounts
         //set highest balance to main
-        log.info(tag,"appWallets[0]: ",appWallets[0])
-        log.info(tag,"appWallets[1]: ",appWallets[1])
+        log.debug(tag,"appWallets[0]: ",appWallets[0])
+        log.debug(tag,"appWallets[1]: ",appWallets[1])
 
         let balance1 = App.wallets[appWallets[0]].WALLET_BALANCES[ASSET]
         let balance2 = App.wallets[appWallets[1]].WALLET_BALANCES[ASSET]
-        log.info(tag,"balance1: ",balance1)
-        log.info(tag,"balance2: ",balance2)
+        log.debug(tag,"balance1: ",balance1)
+        log.debug(tag,"balance2: ",balance2)
 
         if(balance1 > balance2){
             contextAlpha = App.wallets[appWallets[0]].context
@@ -102,8 +102,8 @@ const test_service = async function () {
             contextAlpha = App.wallets[appWallets[1]].context
             contextBravo = App.wallets[appWallets[0]].context
         }
-        log.info(tag,"contextAlpha: ",contextAlpha)
-        log.info(tag,"contextBravo: ",contextBravo)
+        log.debug(tag,"contextAlpha: ",contextAlpha)
+        log.debug(tag,"contextBravo: ",contextBravo)
 
         //set context to main
         //set faucet addresses to secondary
@@ -113,10 +113,10 @@ const test_service = async function () {
         assert(balance)
 
         let masterBravo = await App.wallets[contextBravo].getMaster(ASSET)
-        log.info(tag,"masterBravo: ",masterBravo)
+        log.debug(tag,"masterBravo: ",masterBravo)
 
         let masterAlpha = await App.wallets[contextAlpha].getMaster(ASSET)
-        log.info(tag,"masterAlpha: ",masterAlpha)
+        log.debug(tag,"masterAlpha: ",masterAlpha)
 
 
 
@@ -140,14 +140,14 @@ const test_service = async function () {
             spec,
             wss
         }
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         let eventContextReceived = false
         events.on('message', async (event:any) => {
-            log.info(tag,"event: ",event)
+            log.debug(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -156,7 +156,7 @@ const test_service = async function () {
                     eventPairReceived = true
                     break;
                 case 'context':
-                    log.info(tag,"context event!")
+                    log.debug(tag,"context event!")
                     //get new params
                     await app.getUserParams()
                     eventContextReceived = true
@@ -180,13 +180,13 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
         assert(pairSuccess.user.username,username)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -195,7 +195,7 @@ const test_service = async function () {
         }
 
         let userInfo = await app.getUserInfo()
-        log.info("userInfo: ",userInfo)
+        log.debug("userInfo: ",userInfo)
         assert(userInfo.walletDescriptions)
         assert(userInfo.walletDescriptions.length,2)
         assert(userInfo.context)
@@ -204,12 +204,12 @@ const test_service = async function () {
 
         //should be 2 wallet descriptions
         let wallets = userInfo.walletDescriptions
-        log.info("wallets: ",wallets)
+        log.debug("wallets: ",wallets)
 
 
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
+        log.debug("user: ",user)
         assert(user.context)
         assert(user.assetContext)
         assert(user.valueUsdContext)
@@ -222,13 +222,13 @@ const test_service = async function () {
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
         /*
@@ -239,23 +239,23 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
         assert(balanceSdk[0].amount.amount().toString())
 
         let availableWallets = await getWallets()
-        log.info(tag,"availableWallets: ",availableWallets)
-        log.info(tag,"availableWallets.indexOf(user.context): ",availableWallets.indexOf(user.context))
+        log.debug(tag,"availableWallets: ",availableWallets)
+        log.debug(tag,"availableWallets.indexOf(user.context): ",availableWallets.indexOf(user.context))
         if(availableWallets.indexOf(user.context) === 1){
-            log.info(tag,"setting to 0: ",availableWallets[0])
+            log.debug(tag,"setting to 0: ",availableWallets[0])
             let success = await app.setContext(availableWallets[0])
-            log.info(tag,"success: ",success)
+            log.debug(tag,"success: ",success)
         }else if(availableWallets.indexOf(user.context) === 0){
-            log.info(tag,"setting to 1: ",availableWallets[1])
+            log.debug(tag,"setting to 1: ",availableWallets[1])
             let success = await app.setContext(availableWallets[1])
-            log.info(tag,"success: ",success)
+            log.debug(tag,"success: ",success)
         }
 
         //fail test after 30 seconds
@@ -274,19 +274,19 @@ const test_service = async function () {
 
         //get context from remote
         let userInfoPOST = await app.getUserInfo()
-        log.info("userInfoPOST: ",userInfoPOST)
+        log.debug("userInfoPOST: ",userInfoPOST)
 
-        log.info(tag,"userInfo.context: ",userInfo.context)
-        log.info(tag,"userInfoPOST.context: ",userInfoPOST.context)
+        log.debug(tag,"userInfo.context: ",userInfo.context)
+        log.debug(tag,"userInfoPOST.context: ",userInfoPOST.context)
         if(userInfoPOST.context === userInfo.context){
-            log.info(tag,"userInfo.context: ",userInfo.context)
-            log.info(tag,"userInfoPOST.context: ",userInfoPOST.context)
+            log.debug(tag,"userInfo.context: ",userInfo.context)
+            log.debug(tag,"userInfoPOST.context: ",userInfoPOST.context)
             throw Error("CONTEXT Context Switched and client did NOT switch context! 1")
         }
 
         user = await app.getUserParams()
         client = user.clients[BLOCKCHAIN]
-        log.info("user: ",user)
+        log.debug("user: ",user)
         assert(user.context)
         assert(user.assetContext)
         assert(user.valueUsdContext)
@@ -297,7 +297,7 @@ const test_service = async function () {
         //verify clients changed context
         //get master
         let masterAddressPOST = await client.getAddress()
-        log.info(tag,"masterAddressPOST: ",masterAddressPOST)
+        log.debug(tag,"masterAddressPOST: ",masterAddressPOST)
         assert(masterAddressPOST)
 
         /*
@@ -308,20 +308,20 @@ const test_service = async function () {
          */
 
         let balanceSdkPOST = await client.getBalance()
-        log.info(" balanceSdkPOST: ",balanceSdkPOST)
+        log.debug(" balanceSdkPOST: ",balanceSdkPOST)
         assert(balanceSdkPOST[0])
         assert(balanceSdkPOST[0].amount)
         assert(balanceSdkPOST[0].amount.amount())
         assert(balanceSdkPOST[0].amount.amount().toString())
 
         if(masterAddressPOST === masterAddress){
-            log.info(tag,"masterAddress: ",masterAddress)
-            log.info(tag,"balanceSdkPOST: ",balanceSdkPOST)
+            log.debug(tag,"masterAddress: ",masterAddress)
+            log.debug(tag,"balanceSdkPOST: ",balanceSdkPOST)
             throw Error("ADDRESS Context Switched and client did NOT switch context! 2")
         }
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

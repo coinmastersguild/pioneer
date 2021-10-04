@@ -233,7 +233,7 @@ let broadcast_transaction = async function(tx:string){
             // //verify success
             // if(result2.data.raw_log){
             //     let logSend = result2.data.raw_log
-            //     log.info(tag,"logSend: ",logSend)
+            //     log.debug(tag,"logSend: ",logSend)
             // }
             // output.height = result2.height
             // output.gas_wanted = result2.gas_wanted
@@ -242,7 +242,7 @@ let broadcast_transaction = async function(tx:string){
 
             // console.log("tx: ",tx)
             // let txInfo = await axios({method:'GET',url: URL_OSMO_RPC+'/broadcast_tx_sync?tx='+txBytesBase64})
-            // log.info(tag,"txInfo: ",txInfo.data)
+            // log.debug(tag,"txInfo: ",txInfo.data)
 
             // const txBytesBase64 = Buffer.from(tx, 'binary').toString('base64');
             //
@@ -354,15 +354,15 @@ let normalize_tx = function(tx:any,address?:string){
         for(let i = 0; i < rawlog.length; i++){
             let txEvents = rawlog[i]
 
-            //log.info(tag,"txEvents: ",txEvents)
+            //log.debug(tag,"txEvents: ",txEvents)
             txEvents = txEvents.events
 
             for(let j = 0; j < txEvents.length; j++){
                 let event = txEvents[j]
 
                 //
-                //log.info(tag,"event: ",event)
-                //log.info(tag,"attributes: ",prettyjson.render(event.attributes))
+                //log.debug(tag,"event: ",event)
+                //log.debug(tag,"attributes: ",prettyjson.render(event.attributes))
 
                 //detect event type
                 log.debug(tag,"type: ",event.type)
@@ -420,7 +420,7 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let sends = resultSends.data
-        //log.info('sends: ', sends)
+        //log.debug('sends: ', sends)
 
         if(sends.txs){
             for(let i = 0; i < sends.txs.length; i++ ){
@@ -438,7 +438,7 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let receives = resultRecieves.data
-        //log.info('receives: ', receives)
+        //log.debug('receives: ', receives)
         if(receives.txs){
             for(let i = 0; i < receives.txs.length; i++ ){
                 let tx = receives.txs[i]

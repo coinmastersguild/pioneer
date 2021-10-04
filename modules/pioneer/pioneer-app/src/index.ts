@@ -1024,7 +1024,7 @@ let init_wallet = async function (config:AppConfig) {
     let tag = TAG+" | init_wallet | ";
     try {
         if(IS_INIT) throw Error("App already initialized!")
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         if(!config.pioneerApi){
             config.spec = 'offline'
             config.wss = 'offline'
@@ -1037,7 +1037,7 @@ let init_wallet = async function (config:AppConfig) {
         if(!config.queryKey) throw Error("103: queryKey required!")
 
         let output:any = {}
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         //get wallets
         let walletFiles = await getWallets()
         log.debug(tag,"walletFiles: ",walletFiles)
@@ -1056,11 +1056,11 @@ let init_wallet = async function (config:AppConfig) {
             //get remote has more wallets
             let userInfoRemote = await network.instance.User()
             userInfoRemote = userInfoRemote.data
-            log.info(tag,"userInfoRemote: ",userInfoRemote)
+            log.debug(tag,"userInfoRemote: ",userInfoRemote)
             //check if username matches config
             //if doesnt, create new apiKey
             if(userInfoRemote.success && userInfoRemote.username !== config.username){
-                log.info(tag,"Migrating API key!")
+                log.debug(tag,"Migrating API key!")
                 //migrate
                 config = migrate_query_key()
                 // throw Error("103: queryKey migration! restart application")
@@ -1141,7 +1141,7 @@ let init_wallet = async function (config:AppConfig) {
         for(let i = 0; i < walletFiles.length; i++){
             let context = walletFiles[i]
             //if !offline aka, online!
-            log.info(tag,"output.offline: ",output.offline)
+            log.debug(tag,"output.offline: ",output.offline)
             if(output.offline.indexOf(context) < 0){
                 log.debug(tag,"wallet is online! ",context)
 
@@ -1262,16 +1262,16 @@ let init_wallet = async function (config:AppConfig) {
                     //if wallet has pw, use it
                     let password
                     if(walletFile.password) {
-                        log.info(tag,"Password in wallet file, using password")
+                        log.debug(tag,"Password in wallet file, using password")
                         password = walletFile.password
                     }
                     //password ovrrides temp
                     if(!password && config.password){
-                        log.info(tag,"Password in config file, using password")
+                        log.debug(tag,"Password in config file, using password")
                         password = config.password
                     }
                     if(!password && config.temp){
-                        log.info(tag,"Password in config temp file, using password")
+                        log.debug(tag,"Password in config temp file, using password")
                         password = config.temp
                     }
                     if(!password) {
@@ -1314,7 +1314,7 @@ let init_wallet = async function (config:AppConfig) {
                     }
                     if(walletPaths) configPioneer.paths = walletPaths
 
-                    log.info(tag,"creating wallet with config (pioneer): ",configPioneer)
+                    log.debug(tag,"creating wallet with config (pioneer): ",configPioneer)
                     let wallet = new Pioneer('pioneer',configPioneer);
                     //init
                     let walletClient = await wallet.init()
@@ -1324,8 +1324,8 @@ let init_wallet = async function (config:AppConfig) {
                     let masterEthMenomic = walletEthVerify.masterAddress
                     let masterEthHdWallet = await wallet.getMaster('ETH')
                     masterEthHdWallet = masterEthHdWallet.toLowerCase()
-                    log.info(tag,"masterEthMenomic: ",masterEthMenomic)
-                    log.info(tag,"masterEthHdWallet: ",masterEthHdWallet)
+                    log.debug(tag,"masterEthMenomic: ",masterEthMenomic)
+                    log.debug(tag,"masterEthHdWallet: ",masterEthHdWallet)
                     if(masterEthMenomic !== masterEthHdWallet) throw Error("HDwallet wallet loaded invalid!")
 
                     //load
@@ -1389,7 +1389,7 @@ let init_wallet = async function (config:AppConfig) {
 
         //get remote user info
         if(network && network.instance){
-            log.info(tag,"checkpoint getting user from network!")
+            log.debug(tag,"checkpoint getting user from network!")
             let userInfo = await network.instance.User()
             userInfo = userInfo.data
             log.debug(tag,"userInfo: ",userInfo)
@@ -1430,7 +1430,7 @@ let init_wallet = async function (config:AppConfig) {
                 WALLET_CONTEXT = walletFiles[0]
             }
         } else {
-            log.info(tag,"checkpoint using position 0 for context")
+            log.debug(tag,"checkpoint using position 0 for context")
             //set_context(walletFiles[0])
             WALLET_CONTEXT = walletFiles[0]
         }
@@ -1635,8 +1635,8 @@ let init_wallet = async function (config:AppConfig) {
                         if(request.invocation.context) {
                             context = request.invocation.context
                             //context specified
-                            log.info(tag,"Context Specified: ",context)
-                            log.info(tag,"Current Context: ",WALLET_CONTEXT)
+                            log.debug(tag,"Context Specified: ",context)
+                            log.debug(tag,"Current Context: ",WALLET_CONTEXT)
                             WALLET_CONTEXT = context
                         }
                         if(!context) context = WALLET_CONTEXT
@@ -1665,7 +1665,7 @@ let init_wallet = async function (config:AppConfig) {
 
                         break;
                     case 'context':
-                        log.info(tag,"context event! event: ",request)
+                        log.debug(tag,"context event! event: ",request)
                         //switch context
                         if(WALLETS_LOADED[request.context]){
                             WALLET_CONTEXT = request.context

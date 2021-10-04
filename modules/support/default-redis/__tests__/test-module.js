@@ -64,7 +64,7 @@ let run_test = async function(){
         let timeFinish = new Date().getTime()
 
         let duration = timeFinish - timeStart
-        log.info(tag,"duration: ",duration / 1000)
+        log.debug(tag,"duration: ",duration / 1000)
 
         //get all
         //scan

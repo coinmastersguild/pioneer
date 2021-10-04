@@ -96,13 +96,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -238,7 +238,7 @@ const test_service = async function () {
         log.debug(tag,"estimatePayload: ",estimatePayload)
 
         let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.info(tag,"estimateCost: ",estimateCost)
+        log.debug(tag,"estimateCost: ",estimateCost)
         assert(estimateCost)
 
         //max cost - balance
@@ -314,7 +314,7 @@ const test_service = async function () {
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -349,7 +349,7 @@ const test_service = async function () {
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -358,14 +358,14 @@ const test_service = async function () {
 
                 //lookup txid
                 let response = await client.getTransactionData(txid)
-                log.info(tag,"response: ",response)
+                log.debug(tag,"response: ",response)
 
                 if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                     isConfirmed = true
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     //get gas price recomended
 
                     //get tx gas price
@@ -379,7 +379,7 @@ const test_service = async function () {
         log.debug(tag,"result: ",result)
 
 
-        log.info("****** TEST PASS ******")
+        log.debug("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

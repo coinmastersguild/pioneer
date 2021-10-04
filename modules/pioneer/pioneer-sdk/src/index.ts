@@ -127,7 +127,7 @@ export class SDK {
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
                 if(!this.username)this.username = userInfo.username
                 this.wallets = userInfo.wallets
                 this.balances = userInfo.balances
@@ -170,7 +170,7 @@ export class SDK {
                 });
 
                 this.events.events.on('context', (event:any) => {
-                    log.info(tag,'context set to '+event.context);
+                    log.debug(tag,'context set to '+event.context);
                     this.context = event.context
                     this.getUserParams()
                 });
@@ -402,31 +402,33 @@ export class SDK {
             let tag = TAG + " | getUserParams | "
             try {
                 if(!this.context){
-                    log.info(tag,"No local context!")
+                    log.debug(tag,"No local context!")
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
-                    log.info(tag,"userInfo: ",userInfo)
+                    log.debug(tag,"userInfo: ",userInfo)
                     this.wallets = userInfo.wallets
                     this.context = userInfo.context
                     this.assetContext = userInfo.assetContext
-                    log.info(tag,"this.context: ",this.context)
-                    log.info(tag,"userInfo.walletDescriptions: ",userInfo.walletDescriptions)
+                    log.debug(tag,"this.context: ",this.context)
+                    log.debug(tag,"userInfo.walletDescriptions: ",userInfo.walletDescriptions)
                     this.contextWalletInfo = userInfo.walletDescriptions.filter((e:any) => e.context === this.context)[0]
-                    log.info(tag,"this.contextWalletInfo: ",this.contextWalletInfo)
-                    log.info(tag,"assetContext: ",this.assetContext)
+                    log.debug(tag,"this.contextWalletInfo: ",this.contextWalletInfo)
+                    log.debug(tag,"assetContext: ",this.assetContext)
                     this.valueUsdContext = this.contextWalletInfo.valueUsdContext
-                    this.assetBalanceNativeContext = this.contextWalletInfo.balances[userInfo.assetContext] || '0'
-                    this.assetBalanceUsdValueContext = this.contextWalletInfo.values[userInfo.assetContext] || '0'
-                    log.info(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
-                    log.info(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
+                    //get pubkeys for asset
+                    let balance = this.contextWalletInfo.pubkeys.filter((e:any) => e.symbol === this.assetContext)[0]
+                    this.assetBalanceNativeContext = balance.balance || '0'
+                    this.assetBalanceUsdValueContext = balance.valueUsd || '0'
+                    log.debug(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
+                    log.debug(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
-                log.info(tag,"context: ",this.context)
-                log.info(tag,"blockchains: ",this.blockchains)
+                log.debug(tag,"context: ",this.context)
+                log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                log.info(tag,"result: ",result)
+                log.debug(tag,"result: ",result)
                 if(result.wallets){
                     this.contexts = result.wallets
                     log.debug(tag,"result: ",result)

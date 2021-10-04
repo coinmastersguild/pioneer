@@ -101,10 +101,10 @@ export async function startApp() {
         wallet1.masterAddress = walletEth.masterAddress
 
         //create wallet files
-        log.info(tag,"wallet1: ",wallet1)
+        log.debug(tag,"wallet1: ",wallet1)
         let successCreate = await App.createWallet('software',wallet1)
         assert(successCreate)
-        log.info(tag,"successCreate: ",successCreate)
+        log.debug(tag,"successCreate: ",successCreate)
 
         //create bravo
         //get master for seed
@@ -112,7 +112,7 @@ export async function startApp() {
         // wallet2.masterAddress = walletEth2.masterAddress
 
         //create wallet files
-        // log.info(tag,"wallet2: ",wallet2)
+        // log.debug(tag,"wallet2: ",wallet2)
         // let successCreate2 = await App.createWallet('software',wallet2)
         // assert(successCreate2)
 
@@ -134,15 +134,15 @@ export async function startApp() {
         config.queryKey = queryKey
 
         //verify startup
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         let resultInit = await App.init(config)
         let isInit2 = App.isInitialized()
         assert(isInit2)
 
         //AutonomousOn
         resultInit.events.on('unsignedTx', async (transaction:any) => {
-            log.info("unsigned transaction received! transaction: ",transaction)
-            log.info("unsigned transaction received! transaction: ",JSON.stringify(transaction))
+            log.debug("unsigned transaction received! transaction: ",transaction)
+            log.debug("unsigned transaction received! transaction: ",JSON.stringify(transaction))
             if(!transaction.invocationId) throw Error("102: invalid transaction invocationId")
             if(!transaction.invocation) throw Error("103: invalid transaction invocation")
             if(!transaction.unsignedTx) throw Error("104: invalid transaction unsignedTx")
@@ -243,7 +243,7 @@ export async function buildTransaction(transaction:any) {
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag," APP invocation: ",invocation)
+        log.debug(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -264,12 +264,12 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                log.info(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
@@ -278,39 +278,39 @@ export async function buildTransaction(transaction:any) {
             case 'undelegate':
             case 'ibcdeposit':
             case 'delegate':
-                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD delegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
                 break
             case 'osmosislpadd':
-                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
                 break
             case 'osmosisswap':
-                log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
                 break
             case 'redelegate':
-                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
                 break
             case 'approve':
-                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
                 break
             case 'deposit':
-                log.info(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.deposit(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("APP E2E Unhandled type: ",invocation.type)

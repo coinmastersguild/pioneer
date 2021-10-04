@@ -92,7 +92,7 @@ const test_service = async function () {
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -141,12 +141,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -164,7 +164,7 @@ const test_service = async function () {
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
@@ -183,11 +183,11 @@ const test_service = async function () {
         }
         //pair sdk
         let successChart = await app.chart(chart)
-        log.info(tag,"successChart: ",successChart)
+        log.debug(tag,"successChart: ",successChart)
         assert(successChart)
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

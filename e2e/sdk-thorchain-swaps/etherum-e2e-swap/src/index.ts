@@ -97,13 +97,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -255,10 +255,10 @@ const test_service = async function () {
 
         //filter by chain
         let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-        log.info(tag,"ethVault: ",ethVault)
+        log.debug(tag,"ethVault: ",ethVault)
 
         if(ethVault.halted) {
-            log.info(tag,"ethVault: ",ethVault)
+            log.debug(tag,"ethVault: ",ethVault)
             throw Error("Unable to swap! network halted!")
         } else {
             throw Error("wtf")
@@ -296,7 +296,7 @@ const test_service = async function () {
 
         //if create new
         let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.info(tag,"responseSwap: ",responseSwap)
+        log.debug(tag,"responseSwap: ",responseSwap)
         invocationId = responseSwap
 
         //do not continue invocation
@@ -334,7 +334,7 @@ const test_service = async function () {
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -369,7 +369,7 @@ const test_service = async function () {
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -378,14 +378,14 @@ const test_service = async function () {
 
                 //lookup txid
                 let response = await client.getTransactionData(txid)
-                log.info(tag,"response: ",response)
+                log.debug(tag,"response: ",response)
 
                 if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                     isConfirmed = true
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     //get gas price recomended
 
                     //get tx gas price
@@ -400,21 +400,21 @@ const test_service = async function () {
             while(!isFullfilled){
                 //get midgard info
                 let txInfoMidgard = await midgard.getTransaction(txid)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
-                log.info(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
+                log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
 
                 //TODO handle multiple actions?
                 if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
                     let depositInfo = txInfoMidgard.actions[0].in
-                    log.info(tag,"deposit: ",depositInfo)
+                    log.debug(tag,"deposit: ",depositInfo)
 
                     let fullfillmentInfo = txInfoMidgard.actions[0]
-                    log.info(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
+                    log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
 
                     if(fullfillmentInfo.status === 'success'){
-                        log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
-                        log.info(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
+                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
 
                         statusCode = 4
                         isFullfilled = true
@@ -434,13 +434,13 @@ const test_service = async function () {
 
 
             }
-            log.info("****** TEST Report: "+fullfillmentTxid+" ******")
+            log.debug("****** TEST Report: "+fullfillmentTxid+" ******")
         }
         let result = await app.stopSocket()
         log.debug(tag,"result: ",result)
 
 
-        log.info("****** TEST PASS ******")
+        log.debug("****** TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

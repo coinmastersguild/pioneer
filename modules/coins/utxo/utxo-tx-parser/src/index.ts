@@ -36,7 +36,7 @@ let decode_hex_to_tx = function(hex:string){
         let output:any = {}
 
         const btcDecodedRawTx = txHexDecoder.decodeBtcRawTx(hex);
-        log.info(tag,"btcDecodedRawTx: ",btcDecodedRawTx)
+        log.debug(tag,"btcDecodedRawTx: ",btcDecodedRawTx)
 
         output.txid = ""
         // output.hash = ""

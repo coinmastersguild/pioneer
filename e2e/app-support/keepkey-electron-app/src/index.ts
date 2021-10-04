@@ -63,7 +63,7 @@ let shownSetup = false
 let event = {
     sender:{
         send:function (channel:string,data:any){
-            log.info("Got EVENT: ",{channel,data})
+            log.debug("Got EVENT: ",{channel,data})
 
             switch(data.dialog) {
                 case 'SetupPioneer':
@@ -90,11 +90,11 @@ let onStartMain = async function(event:any, data:any){
     const tag = TAG + ' | onStartMain | '
     try{
         let onStartResult = await App.onStart(event,data)
-        log.info(tag,"onStartResult: ",onStartResult)
+        log.debug(tag,"onStartResult: ",onStartResult)
 
         //on on invocations add to queue
         onStartResult.events.on('message', async (request:any) => {
-            log.info(tag,"**** message MAIN: ", request)
+            log.debug(tag,"**** message MAIN: ", request)
             if(!request.invocationId) throw Error("102: invalid invocation!")
             switch(request.type) {
                 case 'swap':
@@ -131,12 +131,12 @@ const test_service = async function () {
     try {
         //confirm config missing
         let config = getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         assert(!config)
 
         //should show pioneer init if not configured
         let resultSetup = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup: ",resultSetup)
+        log.debug(tag,"resultSetup: ",resultSetup)
 
         assert(shownSetupPioneer)
 
@@ -149,13 +149,13 @@ const test_service = async function () {
 
         //verify correct username
         let config2 = getConfig()
-        log.info(tag,"config2: ",config2)
+        log.debug(tag,"config2: ",config2)
         assert(config2.username, USERNAME_TEST)
 
         //select wallet type
         //should show no wallets setup!
         let resultSetup2 = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup2: ",resultSetup2)
+        log.debug(tag,"resultSetup2: ",resultSetup2)
 
         assert(resultSetup2.status,2)
         assert(shownSetup)
@@ -167,10 +167,10 @@ const test_service = async function () {
         }
 
         let result = await App.createWallet(event,data)
-        log.info(tag,"createWallet result: ",result)
+        log.debug(tag,"createWallet result: ",result)
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

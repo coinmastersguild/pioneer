@@ -125,7 +125,7 @@ const test_service = async function () {
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
-        log.info(tag,"CHECKPOINT 1 balance")
+        log.debug(tag,"CHECKPOINT 1 balance")
 
         //generate new key
         const queryKey = uuidv4();
@@ -180,7 +180,7 @@ const test_service = async function () {
             await sleep(300)
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 2 pairing")
+        log.debug(tag,"CHECKPOINT 2 pairing")
 
         //assert sdk user
         //get user
@@ -200,13 +200,13 @@ const test_service = async function () {
         log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
-        log.info(tag,"CHECKPOINT 3 sdk client")
+        log.debug(tag,"CHECKPOINT 3 sdk client")
 
         //get master
         let masterAddress = await client.getAddress()
         log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
-        log.info(tag,"CHECKPOINT 4 master address")
+        log.debug(tag,"CHECKPOINT 4 master address")
 
         /*
             3 ways to express balance
@@ -298,7 +298,7 @@ const test_service = async function () {
             let invocations = await getInvocations()
             log.debug(tag,"invocations: ",invocations)
             let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-            log.info(tag,"invocationEventValue: ",invocationEventValue)
+            log.debug(tag,"invocationEventValue: ",invocationEventValue)
             if(invocationEventValue){
                 assert(invocationEventValue.invocationId)
                 invocationReceived = true
@@ -312,12 +312,12 @@ const test_service = async function () {
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
         assert(unsignedTx)
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
         assert.equal(invocationView1.state,'builtTx')
@@ -326,7 +326,7 @@ const test_service = async function () {
 
         //sign transaction
         let signedTx = await approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
+        log.debug(tag,"signedTx: ",signedTx)
         assert(signedTx)
         // assert(signedTx.txid)
 
@@ -335,17 +335,17 @@ const test_service = async function () {
         assert(invocationView2)
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         let invocationView3 = await app.getInvocation(invocationId)
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
         let isConfirmed = false
@@ -373,7 +373,7 @@ const test_service = async function () {
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -382,13 +382,13 @@ const test_service = async function () {
 
                 //lookup txid
                 let txInfo = await client.getTransactionData(txid)
-                log.info(tag,"txInfo: ",txInfo)
+                log.debug(tag,"txInfo: ",txInfo)
 
                 if(txInfo && txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     //get gas price recomended
 
                     //get tx gas price
@@ -403,15 +403,15 @@ const test_service = async function () {
             while(!isFullfilled){
                 //get midgard info
                 let txInfoMidgard = midgard.getTransaction(txid)
-                log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
 
                 //
                 if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
                     let depositInfo = txInfoMidgard.actions[0].in
-                    log.info(tag,"deposit: ",depositInfo)
+                    log.debug(tag,"deposit: ",depositInfo)
 
                     let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
 
                     if(fullfillmentInfo.status === 'success'){
                         statusCode = 4
@@ -424,9 +424,9 @@ const test_service = async function () {
         }
 
         let result = await app.stopSocket()
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

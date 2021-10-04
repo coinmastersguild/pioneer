@@ -47,7 +47,7 @@ async function startApp() {
 
         //create wallet files
         let successCreate = await App.createWallet('software',wallet1)
-        log.info(tag,"successCreate: ",successCreate)
+        log.debug(tag,"successCreate: ",successCreate)
         //assert(successCreate)
 
         await App.initConfig("english");
@@ -63,7 +63,7 @@ async function startApp() {
 
         //verify startup
         //let isTestnet = null
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         let resultInit = await App.init(config)
         assert(resultInit)
 

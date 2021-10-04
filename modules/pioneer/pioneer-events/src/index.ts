@@ -43,7 +43,7 @@ export class Events {
 
                 //sub
                 this.socket.on('connect', () => {
-                    log.info(tag,'Connected to '+this.wss);
+                    log.debug(tag,'Connected to '+this.wss);
                     this.isConnected = true
                     //rejoin
                     if(this.username){
@@ -54,7 +54,7 @@ export class Events {
                 });
 
                 this.socket.on('subscribedToUsername', (event:any) => {
-                    log.info(tag,'subscribed to '+event.username," id: "+event.socketId);
+                    log.debug(tag,'subscribed to '+event.username," id: "+event.socketId);
                     this.isPaired = true
                     this.username = event.username
                 });

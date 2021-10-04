@@ -76,14 +76,14 @@ let hydrate_pubkeys = async function (pubkeys:any) {
             if(!pubkey.balances) { // @ts-ignore
                 pubkey.balances = []
             }
-            log.info(tag,"pubkey: ",pubkey)
+            log.debug(tag,"pubkey: ",pubkey)
             let hydratedPubkey = JSON.parse(JSON.stringify(pubkey));
             hydratedPubkey.balances = []
             for(let j = 0; j < pubkey.balances.length; j++){
                 let entry:any = pubkey.balances[j]
                 //clone
 
-                log.info(tag,"entry: ",entry)
+                log.debug(tag,"entry: ",entry)
                 let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo

@@ -82,13 +82,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -133,13 +133,13 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
         assert(pairSuccess.user.username,username)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -151,7 +151,7 @@ const test_service = async function () {
             forget user
          */
         let result = await forgetUser()
-        log.info("result: ",result)
+        log.debug("result: ",result)
 
         /*
             verify user deleted
@@ -165,7 +165,7 @@ const test_service = async function () {
             Start app
          */
 
-        log.info("******"+TAG+" TEST PASS ******")
+        log.debug("******"+TAG+" TEST PASS ******")
         //process
         process.exit(0)
     } catch (e) {

@@ -73,13 +73,13 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -87,7 +87,7 @@ const test_service = async function () {
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
 
         let allAssets = Object.keys(wallets.wallets[contextAlpha].WALLET_BALANCES)
-        log.info(tag,"allAssets: ",allAssets)
+        log.debug(tag,"allAssets: ",allAssets)
 
         if(!balance){
             log.error(tag,"Failed to get balance! asset: "+ASSET,wallets.wallets[contextAlpha].WALLET_BALANCES)
@@ -127,17 +127,17 @@ const test_service = async function () {
 
         let seedChains = ['ethereum','thorchain']
         let initResp = await app.init(seedChains)
-        log.info("initResp: ",initResp)
+        log.debug("initResp: ",initResp)
 
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -148,23 +148,23 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
-        log.info(tag,"user: ",user)
+        log.debug(tag,"user: ",user)
 
         let isSelecting = true
         let isSelected
@@ -176,12 +176,12 @@ const test_service = async function () {
             }
         }
         //selected new context
-        log.info(tag,"isSelected: ",isSelected)
+        log.debug(tag,"isSelected: ",isSelected)
         assert(isSelected)
 
         //
         let result = await app.setAssetContext(isSelected)
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
         assert(result)
 
         //TODO verify event happened over socket
@@ -190,7 +190,7 @@ const test_service = async function () {
 
         //verify update on sdk state
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

@@ -279,7 +279,7 @@ module.exports = {
                 addressMaster = address
             }
 
-            log.info(addressMaster)
+            log.debug(addressMaster)
             let coinInfo: CoinInfo = {
                 coin,
                 master:addressMaster,
@@ -296,7 +296,7 @@ module.exports = {
                 coinInfo.zpub = zpub
             }
 
-            log.info({coinInfo})
+            log.debug({coinInfo})
 
             output.coins[coin] = coinInfo
 

@@ -577,7 +577,7 @@ let CLAIM_URL = "https://fox-api.shapeshift.com/claims"
 module.exports = {
 	init:function (settings:any) {
 		//blockbook.init()
-		//log.info("node: ",process.env['PARITY_ARCHIVE_NODE'])
+		//log.debug("node: ",process.env['PARITY_ARCHIVE_NODE'])
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -760,7 +760,7 @@ const check_airdrop_claim = async function(address:string){
 			const airdropContract = new web3.eth.Contract(AIRDROP_ABI, accountInfo.data.contractAddress)
 
 			//get index by address?
-			//log.info("index: ",accountInfo.data.index)
+			//log.debug("index: ",accountInfo.data.index)
 
 			let isClaimed = await airdropContract.methods.isClaimed(accountInfo.data.index as number).call()
 			output.isClaimed = isClaimed
@@ -783,10 +783,10 @@ const get_symbol_from_contract = async function(address:string){
 
 		//LP token
 		const contract:any = new web3.eth.Contract(ERC20ABI, address)
-		//log.info(tag,"contract: ",contract)
+		//log.debug(tag,"contract: ",contract)
 
 		let tokenName = await contract.methods.name().call()
-		//log.info(tag,"tokenName: ",tokenName)
+		//log.debug(tag,"tokenName: ",tokenName)
 
 		return tokenName
 	}catch(e){
@@ -801,12 +801,12 @@ const get_stream = async function(streamId:any){
 
 		//LP token
 		const sablierContract = new web3.eth.Contract(SABLIER_ABI, PROXY_CONTRACT_SABLIER)
-		//log.info(tag,"sablierContract: ",sablierContract)
+		//log.debug(tag,"sablierContract: ",sablierContract)
 
-		//log.info(tag,"streamId: ",streamId)
+		//log.debug(tag,"streamId: ",streamId)
 		streamId = parseInt(streamId)
 		let totalFox = await sablierContract.methods.getSalary(streamId).call()
-		//log.info(tag,"totalFox: ",totalFox)
+		//log.debug(tag,"totalFox: ",totalFox)
 
 		return totalFox
 	}catch(e){
@@ -818,7 +818,7 @@ const get_stream = async function(streamId:any){
 const get_tx_count = async function(address:string,options?:any){
 	let tag = TAG + " | get_tx_count | "
 	try{
-		log.info(tag,"address: ",address)
+		log.debug(tag,"address: ",address)
 		if(!address) throw Error("102: address required!")
 		//confirmed
 		let txsConfirmed = await web3.eth.getTransactionCount(address)
@@ -848,34 +848,34 @@ const get_pool_percent = async function(amountFox:number,amountEth:string,poolAd
 		const foxContract = new web3.eth.Contract(ERC20ABI, FOX_TOKEN_CONTRACT_ADDRESS)
 		const wethContract = new web3.eth.Contract(ERC20ABI, WETH_TOKEN_CONTRACT_ADDRESS)
 
-		//log.info("lpContract: ",lpContract)
+		//log.debug("lpContract: ",lpContract)
 
 		let totalSupply = await lpContract.methods.totalSupply().call()
 		totalSupply = totalSupply / BASE
-		log.info("LP totalSupply: ",totalSupply)
+		log.debug("LP totalSupply: ",totalSupply)
 
 		//get total fox in pool
 		let totalFox = await foxContract.methods.balanceOf(UNISWAP_V2_WETH_FOX_POOL_ADDRESS).call()
 		totalFox = totalFox / BASE
-		log.info("totalFox: ",totalFox / BASE)
+		log.debug("totalFox: ",totalFox / BASE)
 
 		//get total eth in pool
 		let totalEth = await wethContract.methods.balanceOf(UNISWAP_V2_WETH_FOX_POOL_ADDRESS).call()
 		totalEth = totalEth / BASE
-		log.info("totalEth: ",totalEth)
+		log.debug("totalEth: ",totalEth)
 
 		//token math
 		let result = totalFox / totalEth
-		log.info("result: ",result)
+		log.debug("result: ",result)
 
 		//balance
 		let lpTokens = (amountFox * totalSupply)/totalFox
-		log.info("lpTokens: ",lpTokens)
+		log.debug("lpTokens: ",lpTokens)
 		//total LP tokens
 		//liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
 
 		let percent = (lpTokens / totalSupply) * 100
-		log.info("percent: ",percent)
+		log.debug("percent: ",percent)
 
 		return percent
 	}catch(e){
@@ -972,7 +972,7 @@ const get_all_tokens_blockbook = async function(address:string){
 		//
 		let ethInto = await blockbook.getEthInfo(address)
 
-		log.info(tag,"ethInto: ",ethInto)
+		log.debug(tag,"ethInto: ",ethInto)
 
 		return true
 	}catch(e){
@@ -989,7 +989,7 @@ const get_nfts = async function(address:string){
 		let ethInfo = await blockbook.getAddressInfo('ETH',address)
 
 		//TODO filter by LP contracts
-		log.info(tag,"ethInfo: ",ethInfo)
+		log.debug(tag,"ethInfo: ",ethInfo)
 
 		return ethInfo
 	}catch(e){
@@ -1006,7 +1006,7 @@ const get_pool_positions = async function(address:string){
 		let ethInfo = await blockbook.getAddressInfo('ETH',address)
 
 		//TODO filter by LP contracts
-		log.info(tag,"ethInfo: ",ethInfo)
+		log.debug(tag,"ethInfo: ",ethInfo)
 
 		return ethInfo
 	}catch(e){
@@ -1116,7 +1116,7 @@ let estimate_fee = async function(sourceAsset:any, params:any){
 let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParams){
 	let tag = TAG + " | get_gas_limit | "
 	try{
-		log.info(tag,"input: ",{ asset, recipient, amount, memo })
+		log.debug(tag,"input: ",{ asset, recipient, amount, memo })
 		const txAmount = BigNumber.from(amount?.amount().toFixed())
 
 		let assetAddress
@@ -1180,7 +1180,7 @@ let get_fees = async function(params: any){
 			}
 		}
 
-		log.info(tag,"get_gas_limit: ",{
+		log.debug(tag,"get_gas_limit: ",{
 			asset: params.asset,
 			amount: params.amount,
 			recipient: params.recipient,
@@ -1215,7 +1215,7 @@ let get_fees = async function(params: any){
 let broadcast_transaction = async function(tx:any){
 	let tag = TAG + " | broadcast_transaction | "
 	try{
-		log.info(tag,"tx: ",tx)
+		log.debug(tag,"tx: ",tx)
 		if(!tx) throw Error("101: missing tx!")
 
 		//push node
@@ -1327,10 +1327,10 @@ const get_balance_token = async function(address:string,token:string){
 		//decimals
 		let contract = new web3.eth.Contract(ERC20ABI,token);
 		let decimals = await contract.methods.decimals().call()
-		//log.info(tag,"decimals: ",decimals)
+		//log.debug(tag,"decimals: ",decimals)
 
 		let balance = await contract.methods.balanceOf(address).call()
-		//log.info(tag,"balance: ",balance)
+		//log.debug(tag,"balance: ",balance)
 
 		return balance / Math.pow(10, decimals);
 	}catch(e){

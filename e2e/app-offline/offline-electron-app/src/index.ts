@@ -62,7 +62,7 @@ let shownSetupPioneer = false
 let event = {
     sender:{
         send:function (channel:string,data:any){
-            log.info("Got EVENT: ",{channel,data})
+            log.debug("Got EVENT: ",{channel,data})
 
             switch(data.dialog) {
                 case 'SetupPioneer':
@@ -91,7 +91,7 @@ let onStartMain = async function(event:any, data:any){
     const tag = TAG + ' | onStartMain | '
     try{
         let onStartResult = await App.onStart(event,data)
-        log.info(tag,"onStartResult: ",onStartResult)
+        log.debug(tag,"onStartResult: ",onStartResult)
 
         event.sender.send('setContext',{context:onStartResult.context})
         return onStartResult
@@ -107,7 +107,7 @@ const test_service = async function () {
     try {
         //confirm config missing
         let config = getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         assert(!config)
 
         // setup process
@@ -124,7 +124,7 @@ const test_service = async function () {
         let resultSetup = await App.continueSetup(event, data)
 
         if(resultSetup && resultSetup.status && resultSetup.status === 2){
-            log.info(tag,"Creating Wallet")
+            log.debug(tag,"Creating Wallet")
 
             //create new wallet
             let data = {
@@ -133,11 +133,11 @@ const test_service = async function () {
             }
 
             let result = await App.createWallet(event,data)
-            log.info(tag,"createWallet result: ",result)
+            log.debug(tag,"createWallet result: ",result)
 
             //TODO user verified wallet?
         } else {
-            log.info(tag,"resultSetup: ",resultSetup)
+            log.debug(tag,"resultSetup: ",resultSetup)
             throw Error("102: failed to setup correct!")
         }
 
@@ -147,11 +147,11 @@ const test_service = async function () {
             isOffline:true
         }
         let onStartResult = await onStartMain(event, data)
-        log.info(tag,"onStartResult: ",onStartResult)
+        log.debug(tag,"onStartResult: ",onStartResult)
         assert(onStartResult)
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

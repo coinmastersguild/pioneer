@@ -117,9 +117,9 @@ const pre_register = async function () {
             auth:"lol",
             queryKey,
         }
-        //log.info("pioneer: ",pioneer)
+        //log.debug("pioneer: ",pioneer)
         let registerResp = await pioneer.instance.Register(null,register)
-        log.info("registerResp: ",registerResp.body)
+        log.debug("registerResp: ",registerResp.body)
 
         return true
     } catch (e) {
@@ -135,18 +135,18 @@ const test_service = async function () {
 
         let success = await pre_register()
         assert(success)
-        log.info(tag,"success: ",success)
+        log.debug(tag,"success: ",success)
 
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
@@ -164,7 +164,7 @@ const test_service = async function () {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

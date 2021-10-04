@@ -94,12 +94,12 @@ export async function attemptUnlock(event:any, data:any) {
 
         //get all wallets
         let allWallets = await getWallets()
-        log.info(tag,"allWallets: ",allWallets)
+        log.debug(tag,"allWallets: ",allWallets)
 
         for(let i = 0; i < allWallets.length; i++){
             let walletId = allWallets[i]
             let wallet = getWallet(walletId)
-            log.info(tag,"wallet: ",wallet)
+            log.debug(tag,"wallet: ",wallet)
 
             let isValid = bcrypt.compareSync(data.password, wallet.hash); // true
             if(isValid){
@@ -128,8 +128,8 @@ export async function attemptUnlock(event:any, data:any) {
 export async function checkPioneerUrls(event: any, data: any) {
     let tag = TAG + " | checkPioneerUrl | ";
     try {
-        // log.info(tag,"data: ",data)
-        // log.info(tag,"data: ",data)
+        // log.debug(tag,"data: ",data)
+        // log.debug(tag,"data: ",data)
         if(!data.servers) throw Error("102: invalid payload checkPioneerUrls! servers")
         let servers = data.servers
 
@@ -187,8 +187,8 @@ export async function checkPioneerUrls(event: any, data: any) {
 export async function startNetwork(event:any, data:any) {
     let tag = TAG + " | startNetwork | ";
     try {
-        log.info(tag,"spec: ",spec)
-        log.info(tag,"wss: ",wss)
+        log.debug(tag,"spec: ",spec)
+        log.debug(tag,"wss: ",wss)
         if(!queryKey) throw Error("QueryKey required for network startup!")
         NETWORK = new Network(spec,{
             queryKey
@@ -198,7 +198,7 @@ export async function startNetwork(event:any, data:any) {
         //get health
         let global = await NETWORK.instance.Globals()
         global = global.data
-        log.info(tag,"global: ",global)
+        log.debug(tag,"global: ",global)
 
         if(global.online){
             event.sender.send('pushPioneerStatus',{ online:true, spec, global})
@@ -227,7 +227,7 @@ export async function createUsername(event:any, data:any) {
         username = data.username
     }
 
-    log.info(tag,"create username: ",username)
+    log.debug(tag,"create username: ",username)
     App.updateConfig({username});
     //write to config
   } catch (e) {
@@ -239,8 +239,8 @@ export async function createUsername(event:any, data:any) {
 export async function updateServerSelection(event:any, data:any) {
     let tag = TAG + " | updateServerSelection | ";
     try {
-        log.info(tag,"spec: ",spec)
-        log.info(tag,"wss: ",wss)
+        log.debug(tag,"spec: ",spec)
+        log.debug(tag,"wss: ",wss)
         if(data.spec) spec = data.spec
         if(data.wss) wss = data.wss
         App.updateConfig({spec});
@@ -259,7 +259,7 @@ export async function updateServerSelection(event:any, data:any) {
 export async function attemptPair(event:any, data:any) {
     let tag = TAG + " | attemptPair | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"data: ",data)
         let resultPair = await App.pair(data)
         return resultPair
     } catch (e) {
@@ -271,7 +271,7 @@ export async function attemptPair(event:any, data:any) {
 // export async function onPairKeepKey(event:any, data:any) {
 //   let tag = TAG + " | onPairKeepkey | ";
 //   try {
-//     log.info(tag,"data: ",data)
+//     log.debug(tag,"data: ",data)
 //     let wallet = await Hardware.getPubkeys(blockchains)
 //     //init
 //     wallet.hardware = true
@@ -298,9 +298,9 @@ export async function initConfig(config?:any){
     let tag = TAG + " | initConfig | ";
     try {
         let config = await App.getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         if(config){
-            log.info(tag,"config found!: Verify")
+            log.debug(tag,"config found!: Verify")
             if(!config.spec){
                 App.updateConfig({spec});
             }
@@ -313,10 +313,10 @@ export async function initConfig(config?:any){
             }
             return true
         } else {
-            log.info(tag,"config empty!: init")
-            log.info(tag,"current env!: spec:",spec)
-            log.info(tag,"current env!: wss:",wss)
-            log.info(tag,"current env!: blockchains:",blockchains)
+            log.debug(tag,"config empty!: init")
+            log.debug(tag,"current env!: spec:",spec)
+            log.debug(tag,"current env!: wss:",wss)
+            log.debug(tag,"current env!: blockchains:",blockchains)
 
             //create key/save to config
             await App.initConfig("english");
@@ -351,25 +351,25 @@ export async function continueSetup(event:any, data:any) {
     let tag = TAG + " | continueSetup | ";
     try {
         let config = await App.getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         if(config){
-            log.info(tag,"Checkpoint1 config found!")
+            log.debug(tag,"Checkpoint1 config found!")
             if(!config.queryKey) throw Error("Invalid config!")
             queryKey = config.queryKey
 
             //is username set?
             if(config.username){
-                log.info(tag,"username: ",config.username)
-                log.info(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
+                log.debug(tag,"username: ",config.username)
+                log.debug(tag,"Checkpoint4a Username found! SuccessFully Setup Wallet!")
                 username = config.username
                 //start wallet?
                 if(!WALLET_INIT){
-                    log.info(tag,"Checkpoint5a Started Wallet!")
+                    log.debug(tag,"Checkpoint5a Started Wallet!")
                     //if wallet files?
                     let walletFiles = await App.getWalletNames()
-                    log.info(tag,"walletFiles: ",walletFiles)
+                    log.debug(tag,"walletFiles: ",walletFiles)
                     if(walletFiles.length > 0){
-                        log.info(tag,"Checkpoint6a wallet ready")
+                        log.debug(tag,"Checkpoint6a wallet ready")
                         return {
                             setup:true,
                             status:0,
@@ -377,7 +377,7 @@ export async function continueSetup(event:any, data:any) {
                             result:"ready to start!"
                         }
                     } else {
-                        log.info(tag,"Checkpoint6b wallet failed to load")
+                        log.debug(tag,"Checkpoint6b wallet failed to load")
                         event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
                         return {
                             setup:false,
@@ -387,7 +387,7 @@ export async function continueSetup(event:any, data:any) {
                         }
                     }
                 } else {
-                    log.info(tag,"Checkpoint5b Wallet already started! will not re-attempt")
+                    log.debug(tag,"Checkpoint5b Wallet already started! will not re-attempt")
                 }
             } else {
                 await createUsername(event, data)
@@ -401,11 +401,11 @@ export async function continueSetup(event:any, data:any) {
 
             //verify net inited
             if(NETWORK && NETWORK.instance && !data.isOffline){
-                log.info(tag,"Checkpoint2 NETWORK found!")
+                log.debug(tag,"Checkpoint2 NETWORK found!")
                 //is online?
                 let globals = await NETWORK.instance.Globals()
                 globals = globals.data
-                log.info(tag,"globals: ",globals)
+                log.debug(tag,"globals: ",globals)
 
                 //push status
                 event.sender.send('pushPioneerStatus',{
@@ -414,11 +414,11 @@ export async function continueSetup(event:any, data:any) {
                     globals
                 })
             } else {
-                log.info(tag,"Checkpoint2b Network instance not found!")
-                log.info(tag,"data: ",data)
+                log.debug(tag,"Checkpoint2b Network instance not found!")
+                log.debug(tag,"data: ",data)
                 log.debug(tag,"NETWORK: ",NETWORK)
                 if(config.spec && config.wss && !data.isOffline){
-                    log.info(tag,"Checkpoint3 starting Network")
+                    log.debug(tag,"Checkpoint3 starting Network")
                     await startNetwork(event, data)
                     return {
                         setup:false,
@@ -427,11 +427,11 @@ export async function continueSetup(event:any, data:any) {
                         result:"starting network!"
                     }
                 }else{
-                    log.info(tag,"Checkpoint3b not starting Network")
+                    log.debug(tag,"Checkpoint3b not starting Network")
                     if(!data.isOffline){
-                        log.info(tag,"Checkpoint4 not offline, attempting to start network")
+                        log.debug(tag,"Checkpoint4 not offline, attempting to start network")
                         if(config.queryKey){
-                            log.info(tag,"Checkpoint3a Starting network select!")
+                            log.debug(tag,"Checkpoint3a Starting network select!")
                             event.sender.send('navigation',{ dialog: 'SetupPioneer', action: 'open'})
                             return {
                                 setup:false,
@@ -478,11 +478,11 @@ export async function checkspec(event:any, data:any) {
         let config = await App.getConfig()
         let spec
         if(!data.spec){
-            log.info("url NOT passed to check, checking default")
+            log.debug("url NOT passed to check, checking default")
             //is initialized?
             if(config){
                 //use spec from config
-                log.info(tag,"config: ",config)
+                log.debug(tag,"config: ",config)
                 spec = config.spec
             } else {
                 await initConfig()
@@ -503,7 +503,7 @@ export async function checkspec(event:any, data:any) {
         //Globals
         let globals = await networkTest.instance.Globals()
         globals = globals.data
-        log.info(tag,"globals: ",globals)
+        log.debug(tag,"globals: ",globals)
 
         //TODO this assume online! lol fixme when remote
         //push status
@@ -522,14 +522,14 @@ export async function checkspec(event:any, data:any) {
 export async function getUsbDevices(event:any, data:any) {
     let tag = TAG + " | getUsbDevices | ";
     try {
-        log.info(tag,"Checkpoint 0")
+        log.debug(tag,"Checkpoint 0")
 
         // let allUsbDevices = await Hardware.allDevices()
-        // log.info(tag,"allUsbDevices: ",allUsbDevices)
+        // log.debug(tag,"allUsbDevices: ",allUsbDevices)
         // event.sender.send('allUsbDevices',{ allUsbDevices })
 
         // let allKeepKeys = await Hardware.listKeepKeys()
-        // log.info(tag,"allKeepKeys: ",allKeepKeys)
+        // log.debug(tag,"allKeepKeys: ",allKeepKeys)
         // event.sender.send('allKeepKeys',{ allKeepKeys })
 
 
@@ -553,12 +553,12 @@ let KEEPKEY_STATUS = 'unknown'
 export async function startHardware(event:any, data:any) {
   let tag = TAG + " | startHardware | ";
   try {
-    log.info(tag,"Checkpoint 0")
+    log.debug(tag,"Checkpoint 0")
     //start
     KEEPKEY = await Hardware.start()
-    log.info(tag,"Checkpoint 1")
+    log.debug(tag,"Checkpoint 1")
     KEEPKEY.events.on('event', async (eventKeepkey:any) => {
-      log.info(tag,"eventKeepkey: ",eventKeepkey)
+      log.debug(tag,"eventKeepkey: ",eventKeepkey)
       //event.sender.send('hardware',{event:eventKeepkey})
     });
 
@@ -568,23 +568,23 @@ export async function startHardware(event:any, data:any) {
     //
     // let allKeepKeys = await Hardware.listKeepKeys()
     // event.sender.send('allKeepKeys',{ allKeepKeys })
-    // log.info(tag,"allKeepKeys: ",allKeepKeys)
+    // log.debug(tag,"allKeepKeys: ",allKeepKeys)
 
     let info = await Hardware.info()
     event.sender.send('hardwareInfo',{ info })
-    log.info(tag,"info: ",info)
+    log.debug(tag,"info: ",info)
 
     let state = await Hardware.state()
     event.sender.send('hardwareState',{ state })
     event.sender.send('hardwareStatus',{ state })
-    log.info(tag,"state: ",state)
+    log.debug(tag,"state: ",state)
 
     if(parseInt(state.state) > 1){
-      log.info(tag,"Connected to device!")
+      log.debug(tag,"Connected to device!")
       //lockStatus
       let lockStatus = await Hardware.isLocked()
       event.sender.send('hardwareLockStatus',{ lockStatus })
-      log.info("lockStatus: ",lockStatus)
+      log.debug("lockStatus: ",lockStatus)
 
       //if locked
       if(lockStatus){
@@ -596,7 +596,7 @@ export async function startHardware(event:any, data:any) {
         KEEPKEY_STATUS = 'unlocked'
         //is connected?
         let info = await Hardware.info()
-        log.info("info: ",info)
+        log.debug("info: ",info)
 
         //check Is paired
         //TODO if not paired/ start pairing
@@ -630,13 +630,13 @@ export async function onStart(event:any, data:any) {
     let tag = TAG + " | onStart | ";
     try {
         if(!event) throw Error("Failed to pass ipc to app")
-        log.info(tag," onStart() ")
+        log.debug(tag," onStart() ")
         if(FIRST_START){
             //Print banner
-            log.info(  chalk.red(
+            log.debug(  chalk.red(
                 figlet.textSync('Pioneer-Native', { horizontalLayout: 'full' })
             ))
-            log.info(
+            log.debug(
                 "\n \n \n        ,    .  ,   .           .\n" +
                 "    *  / \\_ *  / \\_      " +
                 chalk.yellowBright(".-.") +
@@ -660,7 +660,7 @@ export async function onStart(event:any, data:any) {
 
         //send config to ui
         event.sender.send('updateConfig',config)
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         //log.debug(tag,"configStatus() | configStatus: ", configStatus)
 
         if(!config){
@@ -668,7 +668,7 @@ export async function onStart(event:any, data:any) {
         }
 
         if(config && !config.promptedPasswordless){
-            //log.info(tag," offer encryption ")
+            //log.debug(tag," offer encryption ")
             //TODO opt-into passwords
             //event.sender.send('navigation',{ dialog: 'PasswordCreate', action: 'open'})
             //return true
@@ -715,7 +715,7 @@ export async function onStart(event:any, data:any) {
         // } else {
         //     //generate password
         //     if(featurePasswordless){
-        //         log.info(tag,"featurePasswordless TRUE")
+        //         log.debug(tag,"featurePasswordless TRUE")
         //         //create password
         //         let randomChars = generator.generateMultiple(1, {
         //             length: 10,
@@ -736,7 +736,7 @@ export async function onStart(event:any, data:any) {
 
         //get wallet files
         let walletFiles = await App.getWalletNames()
-        log.info("walletFiles: ",walletFiles)
+        log.debug("walletFiles: ",walletFiles)
 
         if(walletFiles.length === 0){
             event.sender.send('navigation',{ dialog: 'Setup', action: 'open'})
@@ -752,7 +752,7 @@ export async function onStart(event:any, data:any) {
 
             //get file
             let walletFile = await getWallet(WALLET_CONTEXT)
-            log.info(tag,"walletFile: ",walletFile)
+            log.debug(tag,"walletFile: ",walletFile)
             //
             if(walletFile.KEEPKEY){
                 WALLET_PASSWORD = 'hardware'
@@ -781,7 +781,7 @@ export async function onStart(event:any, data:any) {
 
 
         if(WALLET_PASSWORD)config.temp = WALLET_PASSWORD
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
 
         if(data.isOffline){
             config.pioneerApi = false
@@ -791,7 +791,7 @@ export async function onStart(event:any, data:any) {
             config.wss = wss
         }
 
-        log.info(tag,"init app with config: ",config)
+        log.debug(tag,"init app with config: ",config)
         let resultInit = await App.init(config)
         log.debug(tag,"resultInit: ",resultInit)
 
@@ -822,7 +822,7 @@ export async function onStart(event:any, data:any) {
         if(!WALLET_CONTEXT) WALLET_CONTEXT = WALLETS_LOADED[0]
 
         if(resultInit.wallets){
-            log.info(tag,"registering wallets: ",resultInit.wallets)
+            log.debug(tag,"registering wallets: ",resultInit.wallets)
             event.sender.send('updateWallets',resultInit.wallets)
         } else {
             throw Error("102: failed to init, failed to get wallets!")
@@ -832,7 +832,7 @@ export async function onStart(event:any, data:any) {
         //wallet events
         if(resultInit.events){
             resultInit.events.on('unsignedTx', async (transaction:any) => {
-                log.info(tag,"*** unsignedTx: ", transaction)
+                log.debug(tag,"*** unsignedTx: ", transaction)
                 if(!transaction.invocationId){
                     if(transaction.swap && transaction.swap.invocationId) transaction.invocationId = transaction.swap.invocationId
                     if(transaction.transaction && transaction.transaction.invocationId) transaction.invocationId = transaction.transaction.invocationId
@@ -841,7 +841,7 @@ export async function onStart(event:any, data:any) {
 
                 event.sender.send('setInvocationContext',{invocationId:transaction.invocationId})
                 let invocation = await App.getInvocation(transaction.invocationId)
-                log.info(tag,"*** invocation: ", invocation)
+                log.debug(tag,"*** invocation: ", invocation)
                 //open invocation dialog
                 event.sender.send('addInvocation',invocation)
             })
@@ -860,26 +860,26 @@ export async function onStart(event:any, data:any) {
             let userInfo = await App.getUserInfo()
             if(!userInfo.context) throw Error("113: invalid user! missing context!")
             if(userInfo.context && userInfo.context !== WALLET_CONTEXT) {
-                log.info(tag,"set context to remote")
+                log.debug(tag,"set context to remote")
                 WALLET_CONTEXT = userInfo.context
                 event.sender.send('setContext',{context:userInfo.context})
                 let resultUpdateConextRemote = await App.setContext(userInfo.context)
-                log.info(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
+                log.debug(tag,"resultUpdateConextRemote: ",resultUpdateConextRemote)
             }
 
             //get invocations
             let invocationsRemote = await App.getInvocations()
-            log.info(tag,"invocationsRemote: ",invocationsRemote)
+            log.debug(tag,"invocationsRemote: ",invocationsRemote)
             event.sender.send('invocations',invocationsRemote)
         }
 
         //load masters
         // let info = await context.getInfo(contextName)
-        // log.info("(context) info: ",info)
+        // log.debug("(context) info: ",info)
         // event.sender.send('setWalletInfoContext',info)
 
         //Start wallet interface
-        log.info(tag,"CHECKPOINT **** return start")
+        log.debug(tag,"CHECKPOINT **** return start")
         refreshPioneer(event, data)
         return resultInit
     } catch (e) {
@@ -908,17 +908,17 @@ export async function refreshPioneer(event:any, data:any) {
         //is initialized?
         let config = await App.getConfig()
         if(config){
-            log.info(tag,"loadConfig: ",config)
+            log.debug(tag,"loadConfig: ",config)
             event.sender.send('loadConfig',{
                 config
             })
 
             //if App is init
             let initStatus = App.isInitialized()
-            log.info(tag,"initStatus: ",initStatus)
+            log.debug(tag,"initStatus: ",initStatus)
             if(initStatus){
                 let userInfo = await App.getUserInfo()
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
                 if(userInfo){
                     if(userInfo.context){
                         event.sender.send('setContext',{context:userInfo.context})
@@ -930,33 +930,33 @@ export async function refreshPioneer(event:any, data:any) {
 
                     //get global online
                     let usersOnline = await App.getUsersOnline()
-                    log.info(tag,"usersOnline: ",usersOnline)
+                    log.debug(tag,"usersOnline: ",usersOnline)
                 } else {
-                    log.info(tag,"user is unregistered!  no remote user info!")
+                    log.debug(tag,"user is unregistered!  no remote user info!")
                 }
 
                 //wallets
                 let walletNames = await App.getWalletNames()
                 if(walletNames) {
                     WALLETS_NAMES = walletNames
-                    log.info(tag,"walletNames: ",walletNames)
+                    log.debug(tag,"walletNames: ",walletNames)
                     event.sender.send('navigation',{ dialog: 'Connect', action: 'close'})
                 } else {
-                    log.info(tag,"No wallets loaded!")
+                    log.debug(tag,"No wallets loaded!")
                 }
 
                 //wallets
                 // let wallets = await App.getWallets()
                 // if(wallets){
                 //   WALLETS_LOADED = wallets
-                //   log.info(tag,"registering wallets: ",wallets)
+                //   log.debug(tag,"registering wallets: ",wallets)
                 //   event.sender.send('updateWallets',wallets)
                 // } else {
-                //   log.info(tag,"No wallets loaded!")
+                //   log.debug(tag,"No wallets loaded!")
                 // }
 
             } else {
-                log.info(tag,"Wallet not started yet! ")
+                log.debug(tag,"Wallet not started yet! ")
                 return {
                     succcess: false,
                     message: 'wallet class returning not initalized',
@@ -964,7 +964,7 @@ export async function refreshPioneer(event:any, data:any) {
                 }
             }
         } else {
-            log.info(tag,"No config file! start new user")
+            log.debug(tag,"No config file! start new user")
             //TODO
             //launch startup
             event.sender.send('navigation',{ dialog: 'Welcome', action: 'open'})
@@ -983,9 +983,9 @@ export async function refreshPioneer(event:any, data:any) {
 export async function setContext(event:any, data:any) {
     let tag = TAG + " | setContext | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"data: ",data)
         if(WALLETS_NAMES.indexOf(data.context) >= 0){
-            log.info(tag,"valid context")
+            log.debug(tag,"valid context")
             let resultCreate = await App.setContext(data.context)
             return resultCreate
         } else {
@@ -1002,7 +1002,7 @@ export async function setContext(event:any, data:any) {
 export async function setMnemonic(event:any, data:any) {
     let tag = TAG + " | setMnemonic | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"data: ",data)
         let resultCreate = await App.setSeed('software',data.seed)
         return resultCreate
     } catch (e) {
@@ -1022,7 +1022,7 @@ export async function buildTransaction(event:any, transaction:any) {
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag," APP invocation: ",invocation)
+        log.debug(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -1043,12 +1043,12 @@ export async function buildTransaction(event:any, transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
 
         let unsignedTx
         switch(invocation.type) {
             case 'transfer':
-                log.info(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD TRANSACTION ****  invocation: ",invocation.invocation)
                 //TODO validate transfer object
                 unsignedTx = await walletContext.buildTransfer(invocation.invocation)
                 log.debug(" **** RESULT TRANSACTION ****  unsignedTx: ",unsignedTx)
@@ -1057,39 +1057,39 @@ export async function buildTransaction(event:any, transaction:any) {
             case 'undelegate':
             case 'ibcdeposit':
             case 'delegate':
-                log.info(" **** BUILD delegate ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD delegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT delegate ****  delegateUnSigned: ",unsignedTx)
                 break
             case 'osmosislpadd':
-                log.info(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD osmosislpadd ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT osmosisswap ****  osmosislpaddUnSigned: ",unsignedTx)
                 break
             case 'osmosisswap':
-                log.info(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD osmosisswap ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT osmosisswap ****  osmosisswapUnSigned: ",unsignedTx)
                 break
             case 'redelegate':
-                log.info(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD redelegate ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildTx(invocation.invocation)
-                log.info(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT delegate ****  redelegateUnSigned: ",unsignedTx)
                 break
             case 'approve':
-                log.info(" **** BUILD Approval ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD Approval ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildApproval(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  approvalUnSigned: ",unsignedTx)
                 break
             case 'deposit':
-                log.info(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD DEPOSIT ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.deposit(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("APP E2E Unhandled type: ",invocation.type)
@@ -1120,7 +1120,7 @@ export async function buildTransaction(event:any, transaction:any) {
 export async function approveTransaction(event:any, data:any) {
     let tag = TAG + " | approveTransaction | ";
     try {
-        log.info("Checkpoint pre-getInvocation: ",data)
+        log.debug("Checkpoint pre-getInvocation: ",data)
         if(!data || !data.invocationId) throw Error(" missing invocationId!")
         //get invocation
 
@@ -1152,7 +1152,7 @@ export async function approveTransaction(event:any, data:any) {
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
 
         //unsinged TX
-        log.info(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
+        log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
         let signedTx = await walletContext.signTransaction(invocation.unsignedTx)
 
         //update invocation
@@ -1166,7 +1166,7 @@ export async function approveTransaction(event:any, data:any) {
 
         //update invocation remote
         let resultUpdate = await App.updateInvocation(updateBody)
-        log.info(tag,"resultUpdate: ",resultUpdate)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
 
         //push update to sign tab
         event.sender.send('transactionSigned', {invocationId,invocation,unsignedTx:invocation.unsignedTx,signedTx,resultUpdate})
@@ -1234,7 +1234,7 @@ export async function cancelTransaction(event:any, data:any) {
     try {
         //cancelTransaction
         let removeInvocation = await App.deleteInvocation(data.invocationId)
-        log.info(tag,"removeInvocation: ",removeInvocation)
+        log.debug(tag,"removeInvocation: ",removeInvocation)
 
         //TODO update local db?
 
@@ -1260,7 +1260,7 @@ export async function onAttemptCreateUsername(event:any, data:any) {
         console.log("userInfoPublic: ",userInfoPublic)
 
         if(userInfoPublic.available){
-            log.info("username available!: ")
+            log.debug("username available!: ")
             updateConfig({username: data.username});
 
             //note: App will register on startup*
@@ -1271,7 +1271,7 @@ export async function onAttemptCreateUsername(event:any, data:any) {
             event.sender.send('navigation', {dialog: 'Setup', action: 'open'})
 
         } else {
-            log.info("username NOT available!: ",userInfoPublic.data)
+            log.debug("username NOT available!: ",userInfoPublic.data)
             event.sender.send('errors', {dialog: 'Username', action: 'create',error:userInfoPublic.data})
         }
 
@@ -1284,12 +1284,12 @@ export async function onAttemptCreateUsername(event:any, data:any) {
 export async function createWallet(event:any, data:any) {
     let tag = TAG + " | createWallet | ";
     try {
-        log.info(tag,"data: ",data)
+        log.debug(tag,"data: ",data)
 
         //if no password
         if(!data.password){
             if(featurePasswordless || true){
-                log.info(tag,"featurePasswordless TRUE")
+                log.debug(tag,"featurePasswordless TRUE")
                 let randomChars = generator.generateMultiple(1, {
                     length: 10,
                     uppercase: false
@@ -1315,7 +1315,7 @@ export async function createWallet(event:any, data:any) {
         //if no mnemonic
         if(!data.mnemonic){
             if(featureSoftwareCreate){
-                log.info(tag,"featureSoftwareCreate TRUE")
+                log.debug(tag,"featureSoftwareCreate TRUE")
                 let randomBytesFunc = standardRandomBytesFunc
                 const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)
                 if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
@@ -1337,7 +1337,7 @@ export async function createWallet(event:any, data:any) {
         wallet.masterAddress = walletEth.masterAddress
 
         //create wallet files
-        log.info("1 creating wallet: ",wallet)
+        log.debug("1 creating wallet: ",wallet)
         let resultCreate = await App.createWallet('software',wallet)
         return resultCreate
     } catch (e) {

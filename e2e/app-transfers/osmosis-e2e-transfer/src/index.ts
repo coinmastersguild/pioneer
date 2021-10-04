@@ -80,7 +80,7 @@ let noBroadcast = false
 let event = {
     sender:{
         send:function (channel:string,data:any){
-            log.info("Got EVENT: ",JSON.stringify({channel,data}))
+            log.debug("Got EVENT: ",JSON.stringify({channel,data}))
 
             switch(data.dialog) {
                 case 'SetupPioneer':
@@ -119,18 +119,18 @@ let onStartMain = async function(event:any, data:any){
 
         //on on invocations add to queue
         onStartResult.events.on('message', async (request:any) => {
-            log.info(tag,"**** message MAIN: ", request)
+            log.debug(tag,"**** message MAIN: ", request)
             if(!request.invocationId) throw Error("102: invalid invocation!")
             switch(request.type) {
                 case 'pair':
-                    log.info("PAIR EVENT: ")
+                    log.debug("PAIR EVENT: ")
                     break;
                 case 'swap':
                     break;
                 case 'approve':
                     break;
                 case 'transfer':
-                    log.info(tag,"transfer Received!")
+                    log.debug(tag,"transfer Received!")
                     eventInvokeReceived = true
                     //open invocation window
                     event.sender.send('navigation',{ dialog: 'Invocation', action: 'open'})
@@ -161,12 +161,12 @@ const test_service = async function () {
     try {
         //confirm config missing
         let config = getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         assert(!config)
 
         //should show pioneer init if not configured
         let resultSetup = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup: ",resultSetup)
+        log.debug(tag,"resultSetup: ",resultSetup)
 
         assert(shownSetupPioneer)
 
@@ -179,13 +179,13 @@ const test_service = async function () {
 
         //verify correct username
         let config2 = getConfig()
-        log.info(tag,"config2: ",config2)
+        log.debug(tag,"config2: ",config2)
         assert(config2.username, USERNAME_TEST)
 
         //select wallet type
         //should show no wallets setup!
         let resultSetup2 = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup2: ",resultSetup2)
+        log.debug(tag,"resultSetup2: ",resultSetup2)
 
         assert(resultSetup2.status,2)
         assert(shownSetup)
@@ -197,7 +197,7 @@ const test_service = async function () {
         }
 
         let result = await App.createWallet(event,data)
-        log.info(tag,"createWallet result: ",result)
+        log.debug(tag,"createWallet result: ",result)
 
         //todo all balance's are defined
 
@@ -206,7 +206,7 @@ const test_service = async function () {
         //
         let resultStart = await onStartMain(event,data)
         assert(resultStart)
-        log.info("resultStart: ",resultStart)
+        log.debug("resultStart: ",resultStart)
 
         //await sleep(2000)
 
@@ -223,13 +223,13 @@ const test_service = async function () {
             spec,
             wss
         }
-        log.info(tag,"configSDK: ",configSDK)
+        log.debug(tag,"configSDK: ",configSDK)
         let app = new SDK.SDK(spec,configSDK)
         let events = await app.startSocket()
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         events.on('message', async (event:any) => {
-            log.info(tag,"event: ",event)
+            log.debug(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -254,12 +254,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await App.sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //verify balances
@@ -268,14 +268,14 @@ const test_service = async function () {
             await sleep(300)
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 2 pairing")
+        log.debug(tag,"CHECKPOINT 2 pairing")
 
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
+        log.debug("user: ",user)
 
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         if(!user.clients[BLOCKCHAIN]){
@@ -285,16 +285,16 @@ const test_service = async function () {
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
-        log.info(tag,"CHECKPOINT 3 sdk client")
+        log.debug(tag,"CHECKPOINT 3 sdk client")
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
-        log.info(tag,"CHECKPOINT 4 master address")
+        log.debug(tag,"CHECKPOINT 4 master address")
 
         /*
             3 ways to express balance
@@ -304,18 +304,18 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
         assert(balanceSdk[0].amount.amount().toString())
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
+        log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.info(tag,"balanceBase: ",balanceBase)
+        log.debug(tag,"balanceBase: ",balanceBase)
         assert(balanceBase)
 
 
@@ -355,11 +355,11 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"transfer: ",transfer)
+        log.debug(tag,"transfer: ",transfer)
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
         assert(responseTransfer)
-        log.info(tag,"responseTransfer: ",responseTransfer)
+        log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
         //do not continue without invocationId
         assert(invocationId)
@@ -373,17 +373,17 @@ const test_service = async function () {
             context:user.context
         }
         assert(transaction.context)
-        log.info(tag,"transaction: ",transaction)
+        log.debug(tag,"transaction: ",transaction)
         //verify client tx event
 
         //build
         let unsignedTx = await App.buildTransaction(event,transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
         assert(unsignedTx)
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         if(noBroadcast){
             assert(invocationView1.noBroadcast)
         } else {
@@ -400,7 +400,7 @@ const test_service = async function () {
             console.log("eventInvokeReceived")
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 3 GOT INVOKE EVENT!")
+        log.debug(tag,"CHECKPOINT 3 GOT INVOKE EVENT!")
 
         //broughtWindowFront
         while(!broughtWindowFront){
@@ -408,13 +408,13 @@ const test_service = async function () {
             console.log("broughtWindowFront")
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 4 brought window forward!")
+        log.debug(tag,"CHECKPOINT 4 brought window forward!")
 
         //TODO verify transaction is what I think it should be
 
         //TODO
         // let invocation = await App.getInvocation()
-        // log.info(tag,"invocation: App: ",invocation)
+        // log.debug(tag,"invocation: App: ",invocation)
 
         //TODO verify I like context x
 
@@ -425,7 +425,7 @@ const test_service = async function () {
         //then approve
         //sign transaction
         let signedTx = await App.approveTransaction(event,transaction)
-        log.info(tag,"signedTx: ",signedTx)
+        log.debug(tag,"signedTx: ",signedTx)
         assert(signedTx)
         assert(signedTx.txid)
 
@@ -434,24 +434,24 @@ const test_service = async function () {
         assert(invocationView2)
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await App.broadcastTransaction(event, transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         let invocationView3 = await app.getInvocation(invocationId)
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",JSON.stringify(invocationView3))
+        log.debug(tag,"invocationView3: (VIEW) ",JSON.stringify(invocationView3))
 
         //get invocation info EToC
         let isConfirmed = false
 
         //wait for confirmation
         if(!noBroadcast){
-            log.info(tag," Monitoring tx for confirmations...")
+            log.debug(tag," Monitoring tx for confirmations...")
 
             /*
                 Status codes
@@ -473,7 +473,7 @@ const test_service = async function () {
             while(!isConfirmed){
                 //get invocationInfo
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
                 txid = invocationInfo.signedTx.txid
                 assert(txid)
@@ -482,13 +482,13 @@ const test_service = async function () {
 
                 //lookup txid
                 let txInfo = await client.getTransactionData(txid)
-                log.info(tag,"txInfo: ",txInfo)
+                log.debug(tag,"txInfo: ",txInfo)
 
                 if(txInfo && txInfo.blockNumber){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                 } else {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     //get gas price recommended
                     //get tx gas price
                 }
@@ -505,11 +505,11 @@ const test_service = async function () {
         }
 
         let resultEnd = await app.stopSocket()
-        log.info(tag,"resultEnd: ",resultEnd)
+        log.debug(tag,"resultEnd: ",resultEnd)
 
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

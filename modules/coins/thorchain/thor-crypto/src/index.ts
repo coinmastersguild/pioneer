@@ -56,8 +56,8 @@ module.exports = {
 
             let publicKey = bitcoin.bip32.fromBase58(xpub).derive(0).derive(0).publicKey
             let privateKey = bitcoin.bip32.fromBase58(xpriv).derive(0).derive(0).privateKey
-            log.info("publicKey: ",publicKey)
-            log.info("privateKey: ",privateKey)
+            log.debug("publicKey: ",publicKey)
+            log.debug("privateKey: ",privateKey)
 
             let prefix
             if(isTestnet){

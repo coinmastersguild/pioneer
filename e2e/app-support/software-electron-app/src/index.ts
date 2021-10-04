@@ -40,6 +40,7 @@ const pjson = require("../package.json");
 const TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 let SDK = require('@pioneer-platform/pioneer-sdk')
 const log = require('electron-log');
+// @ts-ignore
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 import {Transfer} from "@pioneer-platform/pioneer-types";
 
@@ -80,7 +81,7 @@ let noBroadcast = false
 let event = {
     sender:{
         send:function (channel:string,data:any){
-            log.info("Got EVENT: ",JSON.stringify({channel,data}))
+            log.debug("Got EVENT: ",JSON.stringify({channel,data}))
 
             switch(data.dialog) {
                 case 'SetupPioneer':
@@ -119,18 +120,18 @@ let onStartMain = async function(event:any, data:any){
 
         //on on invocations add to queue
         onStartResult.events.on('message', async (request:any) => {
-            log.info(tag,"**** message MAIN: ", request)
+            log.debug(tag,"**** message MAIN: ", request)
             if(!request.invocationId) throw Error("102: invalid invocation!")
             switch(request.type) {
                 case 'pair':
-                    log.info("PAIR EVENT: ")
+                    log.debug("PAIR EVENT: ")
                     break;
                 case 'swap':
                     break;
                 case 'approve':
                     break;
                 case 'transfer':
-                    log.info(tag,"transfer Received!")
+                    log.debug(tag,"transfer Received!")
                     eventInvokeReceived = true
                     //open invocation window
                     event.sender.send('navigation',{ dialog: 'Invocation', action: 'open'})
@@ -161,12 +162,12 @@ const test_service = async function () {
     try {
         //confirm config missing
         let config = getConfig()
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         assert(!config)
 
         //should show pioneer init if not configured
         let resultSetup = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup: ",resultSetup)
+        log.debug(tag,"resultSetup: ",resultSetup)
 
         assert(shownSetupPioneer)
 
@@ -179,13 +180,13 @@ const test_service = async function () {
 
         //verify correct username
         let config2 = getConfig()
-        log.info(tag,"config2: ",config2)
+        log.debug(tag,"config2: ",config2)
         assert(config2.username, USERNAME_TEST)
 
         //select wallet type
         //should show no wallets setup!
         let resultSetup2 = await App.continueSetup(event, data)
-        log.info(tag,"resultSetup2: ",resultSetup2)
+        log.debug(tag,"resultSetup2: ",resultSetup2)
 
         assert(resultSetup2.status,2)
         assert(shownSetup)
@@ -197,7 +198,7 @@ const test_service = async function () {
         }
 
         let result = await App.createWallet(event,data)
-        log.info(tag,"createWallet result: ",result)
+        log.debug(tag,"createWallet result: ",result)
 
         //todo all balance's are defined
 
@@ -206,8 +207,8 @@ const test_service = async function () {
         //
         let resultStart = await onStartMain(event,data)
         assert(resultStart)
-        log.info("walletFiles: ",resultStart.walletFiles)
-        log.info("wallets: ",resultStart)
+        log.debug("walletFiles: ",resultStart.walletFiles)
+        log.debug("wallets: ",resultStart)
 
         //TODO get wallet Descriptions
 
@@ -215,7 +216,7 @@ const test_service = async function () {
 
         //TODO let current context
         //addresses masters coininfo
-        // log.info("wallets: ",resultStart.wallets[0].pubkeys)
+        // log.debug("wallets: ",resultStart.wallets[0].pubkeys)
 
         //let context wallet
         let walletContext = resultStart.wallets[0]
@@ -228,11 +229,16 @@ const test_service = async function () {
                 //for each balance
                 for(let j = 0; j < pubkey.balances.length; j++){
                     let balance = pubkey.balances[j]
-                    log.info(tag,balance.symbol+" balance: ",balance.balance)
+                    log.debug(tag,balance.symbol+" balance: ",balance.balance)
 
                     //how old
                     let age = new Date().getTime() - balance.lastUpdated
-                    log.info(tag,"age: ",age/1000)
+                    log.debug(tag,"age: ",age/1000)
+
+                    //market info
+                    log.debug(tag,balance.symbol+" info: ",balance.marketInfo.image)
+
+
                 }
             } else {
                 log.error("Invalid pubkey! pubkey:  ",pubkey)
@@ -244,7 +250,7 @@ const test_service = async function () {
 
 
         // let pairSuccess = await App.getInfo()
-        // log.info("pairSuccess: ",pairSuccess)
+        // log.debug("pairSuccess: ",pairSuccess)
         // assert(pairSuccess)
 
 
@@ -254,7 +260,7 @@ const test_service = async function () {
 
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

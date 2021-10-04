@@ -88,21 +88,21 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
-        log.info(tag,"wallets.wallets[contextAlpha].WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
+        log.debug(tag,"wallets.wallets[contextAlpha].WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
 
         let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
         assert(balance)
 
         let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
@@ -114,7 +114,7 @@ const test_service = async function () {
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
-        log.info(tag,"CHECKPOINT 1 balance")
+        log.debug(tag,"CHECKPOINT 1 balance")
 
         //generate new key
         const queryKey = uuidv4();
@@ -125,13 +125,13 @@ const test_service = async function () {
             spec,
             wss
         }
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         events.on('message', async (event:any) => {
-            log.info(tag,"event: ",event)
+            log.debug(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -156,12 +156,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -169,14 +169,14 @@ const test_service = async function () {
             await sleep(300)
             //TODO timeout & fail?
         }
-        log.info(tag,"CHECKPOINT 2 pairing")
+        log.debug(tag,"CHECKPOINT 2 pairing")
 
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user)
+        log.debug("user: ",user)
 
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         if(!user.clients[BLOCKCHAIN]){
@@ -186,16 +186,16 @@ const test_service = async function () {
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
-        log.info(tag,"CHECKPOINT 3 sdk client")
+        log.debug(tag,"CHECKPOINT 3 sdk client")
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
-        log.info(tag,"CHECKPOINT 4 master address")
+        log.debug(tag,"CHECKPOINT 4 master address")
 
         /*
             3 ways to express balance
@@ -205,24 +205,24 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
         assert(balanceSdk[0].amount.amount().toString())
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
+        log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.info(tag,"balanceBase: ",balanceBase)
+        log.debug(tag,"balanceBase: ",balanceBase)
         assert(balanceBase)
 
         //value USD
         //TODO not in coincap yet!
         // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        // log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         // assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
@@ -244,9 +244,9 @@ const test_service = async function () {
 
         //get balance current delegation
         let balanceDelegated = await user.clients[BLOCKCHAIN].getDelegations(current_validator)
-        log.info(tag,"balanceDelegated: ",balanceDelegated)
+        log.debug(tag,"balanceDelegated: ",balanceDelegated)
         balanceDelegated = balanceDelegated.result.balance.amount
-        log.info(tag,"balanceDelegated: ",balanceDelegated)
+        log.debug(tag,"balanceDelegated: ",balanceDelegated)
 
         //amount base
         let delegatedBase = await nativeToBaseAmount(ASSET,parseInt(balanceDelegated))
@@ -259,11 +259,11 @@ const test_service = async function () {
         //get new delegator
         //get validators
         let validators = await user.clients[BLOCKCHAIN].getValidators()
-        log.info(tag,"validators: ",validators)
+        log.debug(tag,"validators: ",validators)
         assert(validators[1])
         let selected = validators[1]
         selected = selected.operator_address
-        log.info(tag,"selected: ",selected)
+        log.debug(tag,"selected: ",selected)
 
         //get balance delegated
 
@@ -293,11 +293,11 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"delegate: ",delegate)
+        log.debug(tag,"delegate: ",delegate)
 
         let responseTransfer = await user.clients[BLOCKCHAIN].redelegate(delegate,options)
         assert(responseTransfer)
-        log.info(tag,"responseTransfer: ",responseTransfer)
+        log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
         //do not continue without invocationId
         assert(invocationId)
@@ -308,9 +308,9 @@ const test_service = async function () {
         // while(!invocationReceived){
         //     await sleep(1000)
         //     let invocations = await getInvocations()
-        //     log.info(tag,"invocations: ",invocations)
+        //     log.debug(tag,"invocations: ",invocations)
         //     let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-        //     log.info(tag,"invocationEventValue: ",invocationEventValue)
+        //     log.debug(tag,"invocationEventValue: ",invocationEventValue)
         //     if(invocationEventValue){
         //         assert(invocationEventValue.invocationId)
         //         invocationReceived = true
@@ -324,12 +324,12 @@ const test_service = async function () {
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
         assert(unsignedTx)
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
         assert.equal(invocationView1.state,'builtTx')
@@ -338,7 +338,7 @@ const test_service = async function () {
 
         //sign transaction
         let signedTx = await approveTransaction(transaction)
-        log.info(tag,"signedTx: ",signedTx)
+        log.debug(tag,"signedTx: ",signedTx)
         assert(signedTx)
         // assert(signedTx.txid)
 
@@ -347,17 +347,17 @@ const test_service = async function () {
         assert(invocationView2)
         assert(invocationView2.state)
         assert.equal(invocationView2.state,'signedTx')
-        log.info(tag,"invocationView2: (VIEW) ",invocationView2)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         let invocationView3 = await app.getInvocation(invocationId)
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
         let isConfirmed = false
@@ -385,7 +385,7 @@ const test_service = async function () {
         //     while(!isConfirmed){
         //         //get invocationInfo
         //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
+        //         log.debug(tag,"invocationInfo: ",invocationInfo)
         //
         //         txid = invocationInfo.signedTx.txid
         //         assert(txid)
@@ -394,13 +394,13 @@ const test_service = async function () {
         //
         //         //lookup txid
         //         let txInfo = await client.getTransactionData(txid)
-        //         log.info(tag,"txInfo: ",txInfo)
+        //         log.debug(tag,"txInfo: ",txInfo)
         //
         //         if(txInfo && txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
+        //             log.debug(tag,"Confirmed!")
         //             statusCode = 3
         //         } else {
-        //             log.info(tag,"Not confirmed!")
+        //             log.debug(tag,"Not confirmed!")
         //             //get gas price recomended
         //
         //             //get tx gas price
@@ -415,15 +415,15 @@ const test_service = async function () {
         //     while(!isFullfilled){
         //         //get midgard info
         //         let txInfoMidgard = midgard.getTransaction(txid)
-        //         log.info(tag,"txInfoMidgard: ",txInfoMidgard)
+        //         log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
         //
         //         //
         //         if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
         //             let depositInfo = txInfoMidgard.actions[0].in
-        //             log.info(tag,"deposit: ",depositInfo)
+        //             log.debug(tag,"deposit: ",depositInfo)
         //
         //             let fullfillmentInfo = txInfoMidgard.actions[0].out
-        //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+        //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
         //
         //             if(fullfillmentInfo.status === 'success'){
         //                 statusCode = 4
@@ -438,9 +438,9 @@ const test_service = async function () {
         // }
 
         let result = await app.stopSocket()
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

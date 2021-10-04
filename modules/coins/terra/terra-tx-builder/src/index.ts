@@ -70,7 +70,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
             [send],
             memo
         );
-        log.info(tag,"tx: ",tx)
+        log.debug(tag,"tx: ",tx)
 
         let signed = await mk.signTx(tx);
 

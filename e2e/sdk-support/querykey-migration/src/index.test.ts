@@ -104,9 +104,9 @@ const pre_register = async function () {
             auth:"lol",
             queryKey,
         }
-        //log.info("pioneer: ",pioneer)
+        //log.debug("pioneer: ",pioneer)
         let registerResp = await pioneer.instance.Register(null,register)
-        log.info("registerResp: ",registerResp.body)
+        log.debug("registerResp: ",registerResp.body)
 
         return true
     } catch (e) {

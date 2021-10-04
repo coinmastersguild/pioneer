@@ -10,7 +10,7 @@ console.log("structured logging flag: ",process.env['STRUCTURED_LOGGING'])
 console.log("DATADOG_API_KEY flag: ",process.env['DATADOG_API_KEY'])
 console.log("redis loggin: ",process.env['REDIS_LOGGING'])
 
-log.info(" | test | ","foo","bar")
+log.debug(" | test | ","foo","bar")
 
 try{
     throw Error("102: you suck bro! ")

@@ -84,13 +84,13 @@ const test_service = async function () {
         assert(balance)
 
         //assert balance local
-        //log.info(tag,"wallet: ",wallet)
+        //log.debug(tag,"wallet: ",wallet)
         log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
         if(balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
             throw Error("101: Low funds!")
         } else {
-            log.info(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
         //generate new key
@@ -120,12 +120,12 @@ const test_service = async function () {
         //pair sdk
         let code = await app.createPairingCode()
         code = code.code
-        log.info("code: ",code)
+        log.debug("code: ",code)
         assert(code)
 
 
         let pairSuccess = await sendPairingCode(code)
-        log.info("pairSuccess: ",pairSuccess)
+        log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
 
         //dont release till pair event
@@ -136,20 +136,20 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.info("user: ",user.context)
+        log.debug("user: ",user.context)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.info("blockchains: ",blockchains)
+        log.debug("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
         //get master
         let masterAddress = await client.getAddress()
-        log.info(tag,"masterAddress: ",masterAddress)
+        log.debug(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
 
         /*
@@ -160,7 +160,7 @@ const test_service = async function () {
          */
 
         let balanceSdk = await client.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
@@ -168,16 +168,16 @@ const test_service = async function () {
 
 
         let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.info(tag,"balanceNative: ",balanceNative)
+        log.debug(tag,"balanceNative: ",balanceNative)
         assert(balanceNative)
 
         let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.info(tag,"balanceBase: ",balanceBase)
+        log.debug(tag,"balanceBase: ",balanceBase)
         assert(balanceBase)
 
         //value USD
         let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        log.info(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         assert(valueBalanceUsd)
 
         if(balanceBase < TEST_AMOUNT){
@@ -207,9 +207,9 @@ const test_service = async function () {
 
         //filter by chain
         let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.info(tag,"thorVault: ",thorVault)
+        log.debug(tag,"thorVault: ",thorVault)
 
-        log.info(tag,"thorVault: ",thorVault)
+        log.debug(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
         assert(thorVault.address)
@@ -241,12 +241,12 @@ const test_service = async function () {
             },
             noBroadcast:true //TODO configurable
         }
-        log.info(tag,"transfer: ",transfer)
+        log.debug(tag,"transfer: ",transfer)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
-        log.info(tag,"responseTransfer: ",responseTransfer)
+        log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
 
         //do not continue without invocationId
@@ -259,17 +259,17 @@ const test_service = async function () {
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
         assert(unsignedTx)
 
         //get invocation
         // let invocationView1 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         // assert(invocationView1)
         //
         // //sign transaction
         // let signedTx = await approveTransaction(transaction)
-        // log.info(tag,"signedTx: ",signedTx)
+        // log.debug(tag,"signedTx: ",signedTx)
         // assert(signedTx)
         // // assert(signedTx.txid)
         //
@@ -279,7 +279,7 @@ const test_service = async function () {
 
         //broadcast transaction
         // let broadcastResult = await broadcastTransaction(transaction)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
+        // log.debug(tag,"broadcastResult: ",broadcastResult)
         //
         // let invocationView3 = await app.getInvocation(invocationId)
         // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
@@ -308,7 +308,7 @@ const test_service = async function () {
         //     while(!isConfirmed){
         //         //get invocationInfo
         //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.info(tag,"invocationInfo: ",invocationInfo)
+        //         log.debug(tag,"invocationInfo: ",invocationInfo)
         //
         //         let txid = invocationInfo.signedTx.txid
         //         assert(txid)
@@ -320,10 +320,10 @@ const test_service = async function () {
         //         log.debug(tag,"txInfo: ",txInfo)
         //
         //         if(txInfo.blockNumber){
-        //             log.info(tag,"Confirmed!")
+        //             log.debug(tag,"Confirmed!")
         //
         //         } else {
-        //             log.info(tag,"Not confirmed!")
+        //             log.debug(tag,"Not confirmed!")
         //             //get gas price recomended
         //
         //             //get tx gas price
@@ -335,7 +335,7 @@ const test_service = async function () {
         //
         //         //if
         //         // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-        //         // log.info(tag,"txInfo: ",txInfo)
+        //         // log.debug(tag,"txInfo: ",txInfo)
         //         //
         //         // if(txInfo.confirmations > 0){
         //         //     isConfirmed = true
@@ -346,7 +346,7 @@ const test_service = async function () {
         // }
 
 
-        log.info("****** TEST PASS 2******")
+        log.debug("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {

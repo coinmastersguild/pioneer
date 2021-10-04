@@ -147,7 +147,7 @@ let get_account_info_from_account = async function(account:string){
         let output:any = {}
         output.account = account
 
-        log.info(tag,"account: ",account)
+        log.debug(tag,"account: ",account)
 
         //TODO is valid?
         output.isValid = true
@@ -701,7 +701,7 @@ let get_actor = async function(pubkey:string){
 //         let body = {method:'POST',url: fioNode+'/chain/get_fio_names',data}
 //         log.debug(body)
 //         let resp = await axios(body)
-//         log.info(tag,"resp: ",resp.data)
+//         log.debug(tag,"resp: ",resp.data)
 //
 //         //if more then 1
 //         for(let i =0; i < resp.data.fio_addresses.length; i++){

@@ -590,7 +590,7 @@ let getDevice = async function(keyring: Keyring) {
         return wallet;
     } catch (e) {
         //log.error(tag,"*** e: ",e.toString())
-        log.info("failed to get device: ",e.message)
+        log.debug("failed to get device: ",e.message)
         if(e.message.indexOf("no devices found") >= 0){
             return {
                 error:true,
@@ -658,7 +658,7 @@ let createWallet = async function () {
 
             return wallet
         } else {
-            log.info(tag," Device not able to claim yet")
+            log.debug(tag," Device not able to claim yet")
             return null
         }
 
