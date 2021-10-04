@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "8.1.26",
+  "version": "8.1.27",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,8 +14,8 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.14",
-    "@pioneer-platform/pioneer-types": "^8.1.38",
+    "@pioneer-platform/loggerdog": "^8.1.15",
+    "@pioneer-platform/pioneer-types": "^8.1.42",
     "@types/node": "^13.13.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",

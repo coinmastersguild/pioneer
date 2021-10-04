@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/ethereum-e2e-tranfer",
-  "version": "8.1.36",
+  "version": "8.1.37",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -14,11 +14,11 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.14",
-    "@pioneer-platform/midgard-client": "^8.1.25",
-    "@pioneer-platform/pioneer-app": "^8.1.38",
-    "@pioneer-platform/pioneer-app-e2e": "^8.1.38",
-    "@pioneer-platform/pioneer-sdk": "^8.1.39",
+    "@pioneer-platform/loggerdog": "^8.1.15",
+    "@pioneer-platform/midgard-client": "^8.1.26",
+    "@pioneer-platform/pioneer-app": "^8.1.39",
+    "@pioneer-platform/pioneer-app-e2e": "^8.1.39",
+    "@pioneer-platform/pioneer-sdk": "^8.1.40",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
