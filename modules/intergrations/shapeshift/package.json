@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/shapeshift",
-  "version": "8.1.15",
+  "version": "8.1.16",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.15",
+    "@pioneer-platform/loggerdog": "^8.1.16",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0"
   },
