@@ -203,7 +203,7 @@ const test_service = async function () {
 
         //todo verify all balances externally
 
-        //
+        //onStartMain
         let resultStart = await onStartMain(event,data)
         assert(resultStart)
         log.debug("resultStart: ",resultStart)
