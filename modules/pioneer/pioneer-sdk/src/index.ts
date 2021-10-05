@@ -131,23 +131,23 @@ export class SDK {
                 userInfo = userInfo.data
                 log.info(tag,"userInfo: ",userInfo)
                 //for each wallet
-                // if(userInfo.walletDescriptions){
-                //     for(let i = 0; userInfo.walletDescriptions.length; i++){
-                //         let walletInfo = userInfo.walletDescriptions[i]
-                //         for(let j =0; j < walletInfo.pubkeys.length; j++){
-                //             let pubkey = walletInfo.pubkeys[j]
-                //             pubkey.context = walletInfo.context
-                //             this.pubkeys.push(pubkey)
-                //             for(let k = 0; k < pubkey.balances.length; k++){
-                //                 let balance:any = pubkey.balances[k]
-                //                 //add wallet context
-                //                 balance.context = walletInfo.context
-                //                 balance.pubkey = pubkey.pubkey
-                //                 this.balances.push(balance)
-                //             }
-                //         }
-                //     }
-                // }
+                if(userInfo.walletDescriptions){
+                    for(let i = 0; userInfo.walletDescriptions.length; i++){
+                        let walletInfo = userInfo.walletDescriptions[i]
+                        for(let j =0; j < walletInfo.pubkeys.length; j++){
+                            let pubkey = walletInfo.pubkeys[j]
+                            pubkey.context = walletInfo.context
+                            this.pubkeys.push(pubkey)
+                            for(let k = 0; k < pubkey.balances.length; k++){
+                                let balance:any = pubkey.balances[k]
+                                //add wallet context
+                                balance.context = walletInfo.context
+                                balance.pubkey = pubkey.pubkey
+                                this.balances.push(balance)
+                            }
+                        }
+                    }
+                }
 
                 if(!this.username)this.username = userInfo.username
                 this.wallets = userInfo.wallets
@@ -459,13 +459,17 @@ export class SDK {
                                     //add wallet context
                                     balance.context = walletInfo.context
                                     balance.pubkey = pubkey.pubkey
+                                    //force to webspec
+                                    balance.address = pubkey.pubkey
+                                    balance.name = pubkey.pubkey
+                                    balance.chainId = 1
+                                    balance.decimals = 18
+                                    if(balance.marketData && balance.marketData.image) balance.logoURI = balance.marketData.image
                                     this.balances.push(balance)
                                 }
                             }
                         }
                     }
-
-
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
@@ -473,7 +477,7 @@ export class SDK {
                 log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                log.debug(tag,"result: ",result)
+                log.info(tag,"result: ",result)
                 if(result.wallets){
                     this.contexts = result.wallets
                     log.debug(tag,"result: ",result)
