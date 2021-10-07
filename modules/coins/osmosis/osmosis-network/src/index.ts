@@ -54,7 +54,7 @@ if(!URL_OSMO_LCD) throw Error('missing env URL_OSMO_LCD')
 
 let URL_OSMO_POOLS = process.env['URL_OSMO_POOLS'] || `https://api-osmosis.imperator.co`
 
-let BASE_OSMO = 1000000
+let BASE_OSMO = 100000000
 
 /**********************************
  // Module
@@ -495,8 +495,9 @@ let get_balance = async function(address:string){
         let output = 0
 
         try{
+            console.log("URL: ",URL_OSMO_LCD+'/bank/balances/'+address)
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){

@@ -53,17 +53,17 @@ module.exports = {
     getPricesInQuote: function (assets:[any], quote:string) {
         return get_prices_in_quote(assets,quote);
     },
-    hydratePubkeys:function(pubkeys:any){
-        return hydrate_pubkeys(pubkeys)
+    hydratePubkeys:function(marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any){
+        return hydrate_pubkeys(marketInfoCoincap,marketInfoCoinGecko,pubkeys)
     }
 }
 
-let hydrate_pubkeys = async function (pubkeys:any) {
+let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any) {
     let tag = TAG + ' | hydrate_pubkeys | '
     try {
         //GLOBAL_RATES
-        if(!GLOBAL_RATES_COINCAP) GLOBAL_RATES_COINCAP = await get_assets_coincap()
-        if(!GLOBAL_RATES_COINGECKO) GLOBAL_RATES_COINGECKO = await get_assets_coingecko()
+        if(!marketInfoCoincap) marketInfoCoincap = await get_assets_coincap()
+        if(!marketInfoCoinGecko) marketInfoCoinGecko = await get_assets_coingecko()
 
 
         let valuesUsd:any = {}

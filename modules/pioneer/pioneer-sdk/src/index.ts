@@ -134,16 +134,18 @@ export class SDK {
                 if(userInfo.walletDescriptions){
                     for(let i = 0; userInfo.walletDescriptions.length; i++){
                         let walletInfo = userInfo.walletDescriptions[i]
-                        for(let j =0; j < walletInfo.pubkeys.length; j++){
-                            let pubkey = walletInfo.pubkeys[j]
-                            pubkey.context = walletInfo.context
-                            this.pubkeys.push(pubkey)
-                            for(let k = 0; k < pubkey.balances.length; k++){
-                                let balance:any = pubkey.balances[k]
-                                //add wallet context
-                                balance.context = walletInfo.context
-                                balance.pubkey = pubkey.pubkey
-                                this.balances.push(balance)
+                        if(walletInfo && walletInfo.pubkeys){
+                            for(let j =0; j < walletInfo.pubkeys.length; j++){
+                                let pubkey = walletInfo.pubkeys[j]
+                                pubkey.context = walletInfo.context
+                                this.pubkeys.push(pubkey)
+                                for(let k = 0; k < pubkey.balances.length; k++){
+                                    let balance:any = pubkey.balances[k]
+                                    //add wallet context
+                                    balance.context = walletInfo.context
+                                    balance.pubkey = pubkey.pubkey
+                                    this.balances.push(balance)
+                                }
                             }
                         }
                     }

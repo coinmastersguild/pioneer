@@ -36,7 +36,7 @@ require("dotenv").config({path:'../../../../.env'})
 
 const pjson = require("../package.json");
 const TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
-const log = require('electron-log');
+const log = require("@pioneer-platform/loggerdog")()
 // @ts-ignore
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 
@@ -48,7 +48,6 @@ const sleep = wait.sleep;
 
 //primary
 const App = require('@pioneer-platform/pioneer-app-electron')
-
 const Hardware = require("@pioneer-platform/pioneer-hardware")
 
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
@@ -117,11 +116,13 @@ const test_service = async function () {
             mode:'offline'
         }
         await App.initConfig(config)
+        assert(App)
 
         //create random username
         await App.createUsername(event, data)
 
         let resultSetup = await App.continueSetup(event, data)
+        assert(resultSetup)
 
         if(resultSetup && resultSetup.status && resultSetup.status === 2){
             log.debug(tag,"Creating Wallet")
@@ -129,11 +130,14 @@ const test_service = async function () {
             //create new wallet
             let data = {
                 password:"123",
-                mnemonic:TEST_SEED
+                mnemonic:"alcohol woman abuse must during monitor noble actual mixed trade anger aisle",
+                isOffline:true
             }
 
             let result = await App.createWallet(event,data)
-            log.debug(tag,"createWallet result: ",result)
+            log.info(tag,"createWallet result: ",result)
+
+
 
             //TODO user verified wallet?
         } else {
@@ -147,8 +151,18 @@ const test_service = async function () {
             isOffline:true
         }
         let onStartResult = await onStartMain(event, data)
-        log.debug(tag,"onStartResult: ",onStartResult)
+        log.info(tag,"onStartResult: ",onStartResult)
+        log.info(tag,"pubkeys: ",JSON.stringify(onStartResult.wallets[0].pubkeys))
+        log.info(tag,"paths: ",JSON.stringify(onStartResult.wallets[0].paths))
+        log.info(tag,"masters: ",JSON.stringify(onStartResult.wallets[0].masters))
         assert(onStartResult)
+        assert(onStartResult.wallets)
+        assert(onStartResult.wallets[0])
+        assert(onStartResult.wallets[0].pubkeys)
+        assert(onStartResult.wallets[0].masters)
+        // assert(onStartResult.wallets[0].paths)
+
+        //TODO verify pubkeys
 
 
         log.notice("****** TEST PASS 2******")

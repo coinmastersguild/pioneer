@@ -217,6 +217,7 @@ export async function startNetwork(event:any, data:any) {
     }
 }
 
+//createUsername
 export async function createUsername(event:any, data:any) {
   let tag = TAG + " | createUsername | ";
   try {
@@ -856,6 +857,7 @@ export async function onStart(event:any, data:any) {
 
         //globals
         if(config.pioneerApi) {
+
             //get user info
             let userInfo = await App.getUserInfo()
             if(!userInfo.context) throw Error("113: invalid user! missing context!")
@@ -871,16 +873,13 @@ export async function onStart(event:any, data:any) {
             let invocationsRemote = await App.getInvocations()
             log.debug(tag,"invocationsRemote: ",invocationsRemote)
             event.sender.send('invocations',invocationsRemote)
-        }
 
-        //load masters
-        // let info = await context.getInfo(contextName)
-        // log.debug("(context) info: ",info)
-        // event.sender.send('setWalletInfoContext',info)
+            refreshPioneer(event, data)
+
+        }
 
         //Start wallet interface
         log.debug(tag,"CHECKPOINT **** return start")
-        refreshPioneer(event, data)
         return resultInit
     } catch (e) {
         console.error(tag, "e: ", e);
@@ -908,7 +907,7 @@ export async function refreshPioneer(event:any, data:any) {
         //is initialized?
         let config = await App.getConfig()
         if(config){
-            log.debug(tag,"loadConfig: ",config)
+            log.info(tag,"loadConfig: ",config)
             event.sender.send('loadConfig',{
                 config
             })
@@ -916,7 +915,7 @@ export async function refreshPioneer(event:any, data:any) {
             //if App is init
             let initStatus = App.isInitialized()
             log.debug(tag,"initStatus: ",initStatus)
-            if(initStatus){
+            if(initStatus && config){
                 let userInfo = await App.getUserInfo()
                 log.debug(tag,"userInfo: ",userInfo)
                 if(userInfo){

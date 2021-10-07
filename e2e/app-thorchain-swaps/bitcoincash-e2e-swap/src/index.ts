@@ -42,6 +42,7 @@ let SDK = require('@pioneer-platform/pioneer-sdk')
 const log = require("@pioneer-platform/loggerdog")()
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 import {Transfer} from "@pioneer-platform/pioneer-types";
+let midgard = require("@pioneer-platform/midgard-client")
 
 let {
     supportedBlockchains,
@@ -63,12 +64,12 @@ const Hardware = require("@pioneer-platform/pioneer-hardware")
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
-let BLOCKCHAIN = 'osmosis'
-let ASSET = 'OSMO'
+let BLOCKCHAIN = 'bitcoincash'
+let ASSET = 'BCH'
 let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
-let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
+let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 
 const TEST_SEED = process.env['WALLET_MAIN']
 if(!TEST_SEED) throw Error("Failed to load seed!")
@@ -248,7 +249,7 @@ const test_service = async function () {
             }
         })
 
-        let seedChains = ['ethereum','thorchain','bitcoin','osmosis']
+        let seedChains = ['ethereum','thorchain','bitcoin','osmosis','bitcoincash']
         await app.init(seedChains)
 
         //pair sdk
@@ -324,6 +325,24 @@ const test_service = async function () {
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
         }
 
+        //get pool address
+        let poolInfo = await midgard.getPoolAddress()
+
+        //filter by chain
+        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
+        log.debug(tag,"thorVault: ",thorVault)
+
+        log.debug(tag,"thorVault: ",thorVault)
+        assert(thorVault[0])
+        thorVault = thorVault[0]
+        assert(thorVault.address)
+
+        const vaultAddress = thorVault.address
+        const gasRate = thorVault.gas_rate
+        assert(vaultAddress)
+        assert(gasRate)
+
+
         //estimate BCH fee? lol
         let asset = {
             chain:ASSET,
@@ -339,21 +358,19 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let transfer:Transfer = {
-            context:user.context,
-            recipient: FAUCET_OSMO_ADDRESS,
+        let transfer = {
+            inboundAddress: thorVault,
+            coin: ASSET,
             asset: ASSET,
-            network: ASSET,
-            memo: '',
+            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
             "amount":{
+                // "type":"BASE",
+                // "decimal":18,
                 amount: function(){
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
             },
-            fee:{
-                priority:5, //1-5 5 = highest
-            },
-            noBroadcast
+            noBroadcast:true //TODO configurable
         }
         log.debug(tag,"transfer: ",transfer)
 

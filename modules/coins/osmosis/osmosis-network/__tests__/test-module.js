@@ -34,21 +34,21 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
-// network.getAccountInfo(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getAccountInfo(address)
+    .then(function(resp){
+        console.log("resp: ",JSON.stringify(resp))
+    })
 
 // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
-
-network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
+network.getBalance(address)
     .then(function(resp){
         console.log("resp: ",resp)
     })
+
+// network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.getBlockHeight()
 //     .then(function(resp){

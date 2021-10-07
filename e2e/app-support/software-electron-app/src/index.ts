@@ -39,7 +39,7 @@ require("dotenv").config({path:'../../../../.env'})
 const pjson = require("../package.json");
 const TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 let SDK = require('@pioneer-platform/pioneer-sdk')
-const log = require('electron-log');
+const log = require("@pioneer-platform/loggerdog")()
 // @ts-ignore
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 import {Transfer} from "@pioneer-platform/pioneer-types";
@@ -229,14 +229,14 @@ const test_service = async function () {
                 //for each balance
                 for(let j = 0; j < pubkey.balances.length; j++){
                     let balance = pubkey.balances[j]
-                    log.debug(tag,balance.symbol+" balance: ",balance.balance)
+                    log.info(tag,balance.symbol+" balance: ",balance.balance)
 
                     //how old
                     let age = new Date().getTime() - balance.lastUpdated
-                    log.debug(tag,"age: ",age/1000)
+                    log.info(tag,"age: ",age/1000)
 
                     //market info
-                    log.debug(tag,balance.symbol+" info: ",balance.marketInfo.image)
+                    log.info(tag,balance.symbol+" info: ",balance?.marketInfo?.image)
 
 
                 }

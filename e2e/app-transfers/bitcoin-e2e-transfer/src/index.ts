@@ -63,8 +63,8 @@ const Hardware = require("@pioneer-platform/pioneer-hardware")
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
-let BLOCKCHAIN = 'osmosis'
-let ASSET = 'OSMO'
+let BLOCKCHAIN = 'bitcoin'
+let ASSET = 'BTC'
 let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
