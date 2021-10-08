@@ -154,6 +154,7 @@ let get_delegations = async function(address:string,valAddress:string){
     let output:any = {}
     try{
         // let txInfo
+        log.info(URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations/'+valAddress)
         let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations/'+valAddress})
         log.debug(tag,"txInfo: ",txInfo.data)
 

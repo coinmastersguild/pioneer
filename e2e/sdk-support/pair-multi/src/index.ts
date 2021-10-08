@@ -72,48 +72,48 @@ const test_service = async function () {
     try {
 
         // start app and get wallet
-        // let wallets = await startApp()
-        // log.info(tag,"wallets: ",wallets)
-        // let username = wallets.username
-        // assert(username)
-        //
-        // let appContext = getContext()
-        // assert(appContext)
-        // log.info(tag,"appContext: ",appContext)
-        //
-        // //get wallets
-        // let appWallets = getWallets()
-        // let contextAlpha = appWallets[0]
-        // let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        // log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
-        //
-        // //balance
-        // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        // log.info(tag,"pubkey: ",pubkey)
-        // let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
-        // log.info(tag,"balance: ",balance)
-        // balance = balance.balance
-        // log.info(tag,"balance: ",balance)
-        //
-        // if(!balance){
-        //     log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
-        // }
-        // assert(balance)
-        //
-        // let master = pubkey.master
-        // //assert balance local
-        // log.debug(tag,"master: ",master)
-        // if(balance < MIN_BALANCE){
-        //     log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
-        //     throw Error("101: Low funds!")
-        // } else {
-        //     log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-        // }
+        let wallets = await startApp()
+        log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
+        assert(username)
+
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
+
+        //get wallets
+        let appWallets = getWallets()
+        let contextAlpha = appWallets[0]
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //balance
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.info(tag,"pubkey: ",pubkey)
+        let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
+        log.info(tag,"balance: ",balance)
+        balance = balance.balance
+        log.info(tag,"balance: ",balance)
+
+        if(!balance){
+            log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
+        }
+        assert(balance)
+
+        let master = pubkey.master
+        //assert balance local
+        log.debug(tag,"master: ",master)
+        if(balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
+            throw Error("101: Low funds!")
+        } else {
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+        }
 
         //generate new key
         //sdk:4339eec1-343a-438f-823a-4f56d1f528c2
-        // const queryKey = "sdk:4339eec1-343a-438f-823a-4f56d1f528c2";
-        const queryKey = uuidv4();
+        const queryKey = "sdk:4339eec1-343a-438f-823a-4f56d1f528c2";
+        // const queryKey = uuidv4();
         assert(queryKey)
 
         let config = {
@@ -199,26 +199,26 @@ const test_service = async function () {
         //verify icons
 
         //pair with pioneer
-        // let code = await app.createPairingCode()
-        // code = code.code
-        // log.debug("code: ",code)
-        // assert(code)
-        //
-        // let pairSuccess = await sendPairingCode(code)
-        // log.debug("pairSuccess: ",pairSuccess)
-        // assert(pairSuccess)
-        //
-        // //dont release till pair event
-        // while(!eventPairReceived){
-        //     await sleep(300)
-        // }
-        //
-        // //TODO verify username migration to app username in sdk
-        //
-        // //get user
-        // let user = await app.getUserParams()
-        // log.debug("user: ",user)
-        // assert(user.context)
+        let code = await app.createPairingCode()
+        code = code.code
+        log.debug("code: ",code)
+        assert(code)
+
+        let pairSuccess = await sendPairingCode(code)
+        log.debug("pairSuccess: ",pairSuccess)
+        assert(pairSuccess)
+
+        //dont release till pair event
+        while(!eventPairReceived){
+            await sleep(300)
+        }
+
+        //TODO verify username migration to app username in sdk
+
+        //get user
+        let user = await app.getUserParams()
+        log.debug("user: ",user)
+        assert(user.context)
 
         //verify pairing has metamask wallet
 

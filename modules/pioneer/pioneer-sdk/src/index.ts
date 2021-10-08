@@ -130,28 +130,37 @@ export class SDK {
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
                 log.info(tag,"userInfo: ",userInfo)
-                //for each wallet
+
+                if(userInfo.username)this.username = userInfo.username
+
                 if(userInfo.walletDescriptions){
-                    for(let i = 0; userInfo.walletDescriptions.length; i++){
+                    log.info("Parse Wallet Descriptions")
+                    for(let i = 0; i < userInfo.walletDescriptions.length; i++){
                         let walletInfo = userInfo.walletDescriptions[i]
-                        if(walletInfo && walletInfo.pubkeys){
-                            for(let j =0; j < walletInfo.pubkeys.length; j++){
-                                let pubkey = walletInfo.pubkeys[j]
-                                pubkey.context = walletInfo.context
-                                this.pubkeys.push(pubkey)
-                                for(let k = 0; k < pubkey.balances.length; k++){
-                                    let balance:any = pubkey.balances[k]
-                                    //add wallet context
-                                    balance.context = walletInfo.context
-                                    balance.pubkey = pubkey.pubkey
-                                    this.balances.push(balance)
-                                }
+                        log.info(tag,"walletInfo: ",walletInfo)
+                        for(let j =0; j < walletInfo.pubkeys.length; j++){
+                            let pubkey = walletInfo.pubkeys[j]
+                            pubkey.context = walletInfo.context
+                            this.pubkeys.push(pubkey)
+                            for(let k = 0; k < pubkey.balances.length; k++){
+                                let balance:any = pubkey.balances[k]
+                                //add wallet context
+                                balance.context = walletInfo.context
+                                balance.pubkey = pubkey.pubkey
+                                //force to webspec
+                                //TODO fixme dont assume prescision bro
+                                balance.address = pubkey.pubkey
+                                balance.name = pubkey.pubkey
+                                balance.chainId = 1
+                                balance.decimals = 18
+                                if(balance.marketData && balance.marketData.image) balance.logoURI = balance.marketData.image
+                                this.balances.push(balance)
                             }
                         }
                     }
                 }
 
-                if(!this.username)this.username = userInfo.username
+                if(userInfo.pubkeys)this.pubkeys = userInfo.pubkeys
                 this.wallets = userInfo.wallets
 
                 // this.pubkeys = userInfo.pubkeys
@@ -267,7 +276,7 @@ export class SDK {
                     provider:'lol'
                 }
                 let result = await this.pioneerApi.Register(null, register)
-                await this.getUserParams()
+
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -462,6 +471,7 @@ export class SDK {
                                     balance.context = walletInfo.context
                                     balance.pubkey = pubkey.pubkey
                                     //force to webspec
+                                    //TODO fixme dont assume prescision bro
                                     balance.address = pubkey.pubkey
                                     balance.name = pubkey.pubkey
                                     balance.chainId = 1
