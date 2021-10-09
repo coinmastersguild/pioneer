@@ -15,7 +15,6 @@ const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false,
         headers: {
-            "authorization": "Bearer "+process.env['COINCAP_API_KEY'],
             "Authorization": "Bearer "+process.env['COINCAP_API_KEY'],
         }
     })
