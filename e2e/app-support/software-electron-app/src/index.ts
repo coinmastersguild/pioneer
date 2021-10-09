@@ -229,14 +229,14 @@ const test_service = async function () {
                 //for each balance
                 for(let j = 0; j < pubkey.balances.length; j++){
                     let balance = pubkey.balances[j]
-                    log.info(tag,balance.symbol+" balance: ",balance.balance)
+                    log.debug(tag,balance.symbol+" balance: ",balance.balance)
 
                     //how old
                     let age = new Date().getTime() - balance.lastUpdated
-                    log.info(tag,"age: ",age/1000)
+                    log.debug(tag,"age: ",age/1000)
 
                     //market info
-                    log.info(tag,balance.symbol+" info: ",balance?.marketInfo?.image)
+                    log.debug(tag,balance.symbol+" info: ",balance?.marketInfo?.image)
 
 
                 }

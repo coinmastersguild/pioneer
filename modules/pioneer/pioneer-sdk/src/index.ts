@@ -137,13 +137,13 @@ export class SDK {
                 //is api online
                 let health = await this.pioneerApi.Health()
                 health = health.data
-                log.info(tag,"health: ",health)
+                log.debug(tag,"health: ",health)
                 this.apiVersion = health.version
 
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 if(userInfo.username)this.username = userInfo.username
 
@@ -200,12 +200,12 @@ export class SDK {
                 });
 
                 this.events.events.on('pubkey', (event:any) => {
-                    log.info(tag,"pubkey event!", event)
+                    log.debug(tag,"pubkey event!", event)
                     //update pubkeys
                 });
 
                 this.events.events.on('balances', (event:any) => {
-                    log.info(tag,"balances event!", event)
+                    log.debug(tag,"balances event!", event)
                 });
 
                 return this.events.events
@@ -444,7 +444,7 @@ export class SDK {
                     log.debug(tag,"No local context!")
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
-                    log.info(tag,"userInfo: ",userInfo)
+                    log.debug(tag,"userInfo: ",userInfo)
                     this.wallets = userInfo.wallets
                     this.balances = userInfo.balances
                     this.context = userInfo.context
@@ -468,7 +468,7 @@ export class SDK {
                 log.debug(tag,"blockchains: ",this.blockchains)
                 let result = await this.pioneerApi.Info(this.context)
                 result = result.data
-                log.info(tag,"result: ",result)
+                log.debug(tag,"result: ",result)
                 if(result.wallets){
                     this.contexts = result.wallets
                     log.debug(tag,"result: ",result)

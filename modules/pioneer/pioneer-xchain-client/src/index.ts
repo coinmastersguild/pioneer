@@ -1119,9 +1119,9 @@ module.exports = class wallet {
                 if(!address && !asset){
                     let returnAssetAmount = ():number =>{
                         //for pubkeys by symbol
-                        log.info(tag,"info: ",this.info)
+                        log.debug(tag,"info: ",this.info)
                         let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === this.nativeAsset)[0]
-                        log.info(tag,"pubkey: ",pubkey)
+                        log.debug(tag,"pubkey: ",pubkey)
                         let balance = pubkey.balances.filter((e:any) => e.asset === this.nativeAsset)[0]
                         return balance.balance
                     }

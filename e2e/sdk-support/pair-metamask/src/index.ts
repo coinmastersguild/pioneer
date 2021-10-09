@@ -117,24 +117,24 @@ const test_service = async function () {
 
         //pair wallet
         let resultRegister = await app.registerWallet(pairWalletOnboard)
-        log.info(tag,"resultRegister: ",resultRegister)
+        log.debug(tag,"resultRegister: ",resultRegister)
 
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
-        log.info("app context: ",app.context)
+        log.debug("app balances: ",app.balances)
+        log.debug("app context: ",app.context)
         assert(app.pubkeys)
         assert(app.balances)
         // assert(app.balances.length > 0)
         assert(app.context)
-        log.info("app balances: ",app.balances)
+        log.debug("app balances: ",app.balances)
         if(app.balances.length === 0) throw Error("Invalid balances! empty!")
 
         //check balances
         //verify icons
         for(let i = 0; i < app.balances.length; i++){
             let balance = app.balances[i]
-            log.info("balance: ",balance)
+            log.debug("balance: ",balance)
             if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
             //
             if(!balance.image){

@@ -135,7 +135,7 @@ const test_service = async function () {
             }
 
             let result = await App.createWallet(event,data)
-            log.info(tag,"createWallet result: ",result)
+            log.debug(tag,"createWallet result: ",result)
 
 
 
@@ -151,10 +151,10 @@ const test_service = async function () {
             isOffline:true
         }
         let onStartResult = await onStartMain(event, data)
-        log.info(tag,"onStartResult: ",onStartResult)
-        log.info(tag,"pubkeys: ",JSON.stringify(onStartResult.wallets[0].pubkeys))
-        log.info(tag,"paths: ",JSON.stringify(onStartResult.wallets[0].paths))
-        log.info(tag,"masters: ",JSON.stringify(onStartResult.wallets[0].masters))
+        log.debug(tag,"onStartResult: ",onStartResult)
+        log.debug(tag,"pubkeys: ",JSON.stringify(onStartResult.wallets[0].pubkeys))
+        log.debug(tag,"paths: ",JSON.stringify(onStartResult.wallets[0].paths))
+        log.debug(tag,"masters: ",JSON.stringify(onStartResult.wallets[0].masters))
         assert(onStartResult)
         assert(onStartResult.wallets)
         assert(onStartResult.wallets[0])

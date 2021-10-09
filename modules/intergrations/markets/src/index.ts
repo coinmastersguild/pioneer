@@ -106,7 +106,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 let coinInfoCoinCap = marketInfoCoincap[symbol]
                 log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
 
-                //log.info(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
+                //log.debug(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
                 let coinInfoCoinGecko = marketInfoCoinGecko[symbol]
                 log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
 
@@ -124,8 +124,8 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                     log.error(tag," COINGECKO Missing rate data for "+symbol)
                 }
 
-                log.info(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
-                log.info(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
+                log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
+                log.debug(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
 
                 let relDiff = function(a:number, b:number) {
                     return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
@@ -197,7 +197,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 }
 
                 if(coinInfoCoinGecko){
-                    log.info(coinInfoCoinGecko.symbol," cginfo: ",coinInfoCoinGecko)
+                    log.debug(coinInfoCoinGecko.symbol," cginfo: ",coinInfoCoinGecko)
                     balance.onCoinGecko = true
                     if(balance.symbol && balance.symbol !== coinInfoCoinGecko.symbol){
                         //symbol mismatch

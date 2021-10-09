@@ -73,27 +73,27 @@ const test_service = async function () {
 
         // start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
         let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
 
         //balance
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"pubkey: ",pubkey)
+        log.debug(tag,"pubkey: ",pubkey)
         let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
         balance = balance.balance
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
 
         if(!balance){
             log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
@@ -156,12 +156,12 @@ const test_service = async function () {
 
         //pair wallet
         let resultRegister = await app.registerWallet(pairWalletOnboard)
-        log.info(tag,"resultRegister: ",resultRegister)
+        log.debug(tag,"resultRegister: ",resultRegister)
 
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
-        log.info("app context: ",app.context)
+        log.debug("app balances: ",app.balances)
+        log.debug("app context: ",app.context)
         assert(app.pubkeys)
         assert(app.balances)
         // assert(app.balances.length > 0)
@@ -171,15 +171,15 @@ const test_service = async function () {
         while(!isSyncing){
             let pubkeys = app.pubkeys
             let user = await app.getUserParams()
-            log.info("user: ",user)
+            log.debug("user: ",user)
             let allSynced = []
             for(let i = 0; i < pubkeys.length; i++){
                 let pubkey = pubkeys[i]
-                log.info(tag,"pubkey: ",pubkey)
+                log.debug(tag,"pubkey: ",pubkey)
 
                 assert(pubkey.pubkey)
                 //pubkey
-                log.info(tag,"isSyncing: ",pubkey.isSyncing)
+                log.debug(tag,"isSyncing: ",pubkey.isSyncing)
                 if(!pubkey.lastUpdated){
                     isSyncing = true
                 } else {
@@ -194,7 +194,7 @@ const test_service = async function () {
             await sleep(3000)
         }
 
-        log.info("app balances: ",app.balances)
+        log.debug("app balances: ",app.balances)
         //check balances
         //verify icons
 

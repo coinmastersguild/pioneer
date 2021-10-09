@@ -73,27 +73,27 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.info(tag,"wallets: ",wallets)
+        log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
         let contextAlpha = appWallets[0]
         let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
 
         //balance
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"pubkey: ",pubkey)
+        log.debug(tag,"pubkey: ",pubkey)
         let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
         balance = balance.balance
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
 
         if(!balance){
             log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
@@ -128,7 +128,7 @@ const test_service = async function () {
             assert(request.queryKey)
             assert(request.username)
             assert(request.url)
-            log.info(tag,"request: ",request)
+            log.debug(tag,"request: ",request)
             if(request.type === 'pairing'){
                 eventPairReceived = true
             }
@@ -138,9 +138,9 @@ const test_service = async function () {
         let resultInfo = await app.init(seedChains)
 
         //sdk info
-        log.info("* resultInfo: ",resultInfo)
-        log.info("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
+        log.debug("* resultInfo: ",resultInfo)
+        log.debug("app pubkeys: ",app.pubkeys)
+        log.debug("app balances: ",app.balances)
         assert(app.pubkeys)
         assert(app.balances)
 
@@ -163,12 +163,12 @@ const test_service = async function () {
         // //assert sdk user
         // //get user
         // let user = await app.getUserParams()
-        // log.info("* user: ",user)
+        // log.debug("* user: ",user)
 
 
 
-        // log.info("user: ",user)
-        // log.info("user: ",user.balances)
+        // log.debug("user: ",user)
+        // log.debug("user: ",user.balances)
 
         // assert(user.context)
         // //assert user clients
@@ -202,7 +202,7 @@ const test_service = async function () {
         //
         //
         // let balanceNative = balanceSdk[0].amount.amount().toString()
-        // log.info(tag,"balanceNative: ",balanceNative)
+        // log.debug(tag,"balanceNative: ",balanceNative)
         // assert(balanceNative)
         //
         // let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
@@ -299,7 +299,7 @@ const test_service = async function () {
         // //
 
 
-        log.info("****** TEST PASS 2 ******")
+        log.debug("****** TEST PASS 2 ******")
         //process
         process.exit(0)
     } catch (e) {

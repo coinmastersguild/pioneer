@@ -154,7 +154,7 @@ let get_delegations = async function(address:string,valAddress:string){
     let output:any = {}
     try{
         // let txInfo
-        log.info(URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations/'+valAddress)
+        log.debug(URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations/'+valAddress)
         let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations/'+valAddress})
         log.debug(tag,"txInfo: ",txInfo.data)
 
@@ -498,7 +498,7 @@ let get_balance = async function(address:string){
         try{
             console.log("URL: ",URL_OSMO_LCD+'/bank/balances/'+address)
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){

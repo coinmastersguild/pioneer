@@ -907,7 +907,7 @@ export async function refreshPioneer(event:any, data:any) {
         //is initialized?
         let config = await App.getConfig()
         if(config){
-            log.info(tag,"loadConfig: ",config)
+            log.debug(tag,"loadConfig: ",config)
             event.sender.send('loadConfig',{
                 config
             })
