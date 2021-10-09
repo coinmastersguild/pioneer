@@ -71,47 +71,7 @@ const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
 
-        // start app and get wallet
-        // let wallets = await startApp()
-        // log.info(tag,"wallets: ",wallets)
-        // let username = wallets.username
-        // assert(username)
-        //
-        // let appContext = getContext()
-        // assert(appContext)
-        // log.info(tag,"appContext: ",appContext)
-        //
-        // //get wallets
-        // let appWallets = getWallets()
-        // let contextAlpha = appWallets[0]
-        // let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        // log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
-        //
-        // //balance
-        // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        // log.info(tag,"pubkey: ",pubkey)
-        // let balance = pubkey.balances.filter((e:any) => e.asset === ASSET)[0]
-        // log.info(tag,"balance: ",balance)
-        // balance = balance.balance
-        // log.info(tag,"balance: ",balance)
-        //
-        // if(!balance){
-        //     log.error(tag,"Failed to get balance! asset: "+ASSET,pubkey)
-        // }
-        // assert(balance)
-        //
-        // let master = pubkey.master
-        // //assert balance local
-        // log.debug(tag,"master: ",master)
-        // if(balance < MIN_BALANCE){
-        //     log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
-        //     throw Error("101: Low funds!")
-        // } else {
-        //     log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-        // }
-
         //generate new key
-        //sdk:4339eec1-343a-438f-823a-4f56d1f528c2
         // const queryKey = "sdk:4339eec1-343a-438f-823a-4f56d1f528c2";
         const queryKey = uuidv4();
         assert(queryKey)
@@ -142,7 +102,8 @@ const test_service = async function () {
             'binance',
             'litecoin',
             'cosmos',
-            'osmosis']
+            'osmosis'
+        ]
         await app.init(seedChains)
 
         //pair metamask
@@ -150,7 +111,7 @@ const test_service = async function () {
             name:'MetaMask',
             network:1,
             initialized:true,
-            address:"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9"
+            address:"0xc3affff54122658b89c31183cec4f15514f34624"
         }
         log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
 
@@ -167,58 +128,36 @@ const test_service = async function () {
         // assert(app.balances.length > 0)
         assert(app.context)
 
-        let isSyncing = true
-        while(!isSyncing){
-            let pubkeys = app.pubkeys
-            let user = await app.getUserParams()
-            log.info("user: ",user)
-            let allSynced = []
-            for(let i = 0; i < pubkeys.length; i++){
-                let pubkey = pubkeys[i]
-                log.info(tag,"pubkey: ",pubkey)
-
-                assert(pubkey.pubkey)
-                //pubkey
-                log.info(tag,"isSyncing: ",pubkey.isSyncing)
-                if(!pubkey.lastUpdated){
-                    isSyncing = true
-                } else {
-                    allSynced.push(pubkey)
-                }
-                if(allSynced.length >= pubkeys.length && pubkeys.length > 0){
-                    isSyncing = false
-                }
-            }
-            //done syncing
-            //sleep
-            await sleep(3000)
-        }
-
-        log.info("app balances: ",app.balances)
-        //check balances
-        //verify icons
-
-        //pair with pioneer
-        // let code = await app.createPairingCode()
-        // code = code.code
-        // log.debug("code: ",code)
-        // assert(code)
+        // let isSyncing = true
+        // while(!isSyncing){
+        //     let pubkeys = app.pubkeys
+        //     let user = await app.getUserParams()
+        //     log.info("user: ",user)
+        //     let allSynced = []
+        //     for(let i = 0; i < pubkeys.length; i++){
+        //         let pubkey = pubkeys[i]
+        //         log.info(tag,"pubkey: ",pubkey)
         //
-        // let pairSuccess = await sendPairingCode(code)
-        // log.debug("pairSuccess: ",pairSuccess)
-        // assert(pairSuccess)
-        //
-        // //dont release till pair event
-        // while(!eventPairReceived){
-        //     await sleep(300)
+        //         assert(pubkey.pubkey)
+        //         //pubkey
+        //         log.info(tag,"isSyncing: ",pubkey.isSyncing)
+        //         if(!pubkey.lastUpdated){
+        //             isSyncing = true
+        //         } else {
+        //             allSynced.push(pubkey)
+        //         }
+        //         if(allSynced.length >= pubkeys.length && pubkeys.length > 0){
+        //             isSyncing = false
+        //         }
+        //     }
+        //     //done syncing
+        //     //sleep
+        //     await sleep(3000)
         // }
         //
-        // //TODO verify username migration to app username in sdk
-        //
-        // //get user
-        // let user = await app.getUserParams()
-        // log.debug("user: ",user)
-        // assert(user.context)
+        // log.info("app balances: ",app.balances)
+        //check balances
+        //verify icons
 
         //verify pairing has metamask wallet
 

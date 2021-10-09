@@ -11,6 +11,67 @@ export enum HDWALLETS {
     'metamask'
 }
 
+export interface Balance {
+    blockchain: string
+    symbol: string
+    asset: string
+    path: string
+    script_type: string
+    network: string
+    created: number,
+    tags: any,
+    pubkey: string,
+    xpub: string,
+    type: string,
+    master: string,
+    address: string,
+    context: string,
+    isToken: boolean,
+    lastUpdated: number,
+    balance: any,
+    priceUsd: string
+    valueUsd: string
+    onCoincap: boolean
+    id_coincap: string
+    id_coingecko: string
+    rank_coincap: string
+    rank_coingecko: number
+    name_coincap: string
+    name_coingecko: string
+    supply: string
+    maxSupply: string
+    marketCapUsd: string
+    volumeUsd24Hr: string
+    changePercent24Hr: string
+    vwap24Hr: string
+    explorer: string
+    onCoinGecko: boolean
+    coinGeckoAgreeSymbol: boolean,
+    coinGeckoSymbol: string
+    image: string
+    current_price: string,
+    market_cap: string,
+    fully_diluted_valuation: string,
+    total_volume: string,
+    high_24h: string,
+    low_24h: string,
+    price_change_24h: string,
+    price_change_percentage_24h: string,
+    market_cap_change_24h: string,
+    market_cap_change_percentage_24h: string,
+    circulating_supply: string,
+    total_supply: string,
+    max_supply: string,
+    ath: string,
+    ath_change_percentage: string,
+    ath_date: string,
+    atl: string
+    atl_change_percentage: string,
+    atl_date: string,
+    roi: null,
+    last_updated: string
+}
+
 export interface Pubkey {
     blockchain: string,
     symbol: string,
@@ -31,48 +92,6 @@ export interface Pubkey {
             balance: string,
             symbol: string,
             network: string,
-            marketInfo:{
-                symbol: string,
-                id_coincap: string,
-                id_coingecko: string,
-                rank_coincap: string,
-                rank_coingecko: string,
-                symbol_coincap?: string,
-                symbol_coingecko?: string,
-                name_coincap: string,
-                supply: string,
-                maxSupply: string,
-                marketCapUsd: string,
-                volumeUsd24Hr: string,
-                priceUsd: string,
-                changePercent24Hr: string,
-                vwap24Hr: string,
-                explorer: string
-                name_coingecko: string,
-                image: string,
-                current_price: string,
-                market_cap: string,
-                market_cap_rank: string,
-                fully_diluted_valuation: string,
-                total_volume: string,
-                high_24h: string,
-                low_24h: string,
-                price_change_24h: string,
-                price_change_percentage_24h: string,
-                market_cap_change_24h: string,
-                market_cap_change_percentage_24h: string,
-                circulating_supply: string,
-                total_supply: string,
-                max_supply: string,
-                ath: string,
-                ath_change_percentage: string,
-                ath_date: string,
-                atl: string,
-                atl_change_percentage: string,
-                atl_date: string,
-                roi: string,
-                last_updated: string
-            }
         }
     ]
 }

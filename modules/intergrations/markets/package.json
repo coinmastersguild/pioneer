@@ -1,17 +1,19 @@
 {
   "name": "@pioneer-platform/markets",
-  "version": "8.1.23",
+  "version": "8.1.25",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
     "axios": "^0.21.1",
+    "axios-retry": "^3.2.0",
     "dotenv": "^8.2.0"
   },
   "scripts": {
     "npm": "npm i",
     "test": "npm run build && node __tests__/test-module.js",
     "build": "tsc -p .",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },

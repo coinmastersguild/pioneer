@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/support-e2e-pair-metamask",
+  "name": "@pioneer-platform/support-e2e-pair-multi",
   "version": "8.1.39",
   "scripts": {
     "yarn": "yarn",

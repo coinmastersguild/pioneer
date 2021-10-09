@@ -75,11 +75,15 @@ export class SDK {
     private chart: (chart: Chart) => Promise<any>;
     private setAssetContext: (asset: string) => Promise<any>;
     private registerWallet: (wallet: any) => Promise<any>;
+    private status: string;
+    private apiVersion: string;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
         this.isTestnet = false
         this.isPaired = false
+        this.status = 'preInit'
+        this.apiVersion = ""
         this.config = config
         this.username = config.username
         this.spec = spec || config.spec
@@ -105,7 +109,7 @@ export class SDK {
         this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
             try{
-
+                this.status = 'init'
                 log.debug(tag,"blockchains: ",blockchains)
                 if(!blockchains) blockchains = []
                 if(!this.queryKey) throw Error(" You must create an api key! ")
@@ -126,6 +130,12 @@ export class SDK {
                 if(this.blockchains.length === 0) throw Error("Failed to init! must have blockchains!")
                 this.pioneerApi = await this.pioneerApi.init()
 
+                //is api online
+                let health = await this.pioneerApi.Health()
+                health = health.data
+                log.info(tag,"health: ",health)
+                this.apiVersion = health.version
+
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
@@ -133,31 +143,10 @@ export class SDK {
 
                 if(userInfo.username)this.username = userInfo.username
 
-                if(userInfo.walletDescriptions){
-                    log.info("Parse Wallet Descriptions")
-                    for(let i = 0; i < userInfo.walletDescriptions.length; i++){
-                        let walletInfo = userInfo.walletDescriptions[i]
-                        log.info(tag,"walletInfo: ",walletInfo)
-                        for(let j =0; j < walletInfo.pubkeys.length; j++){
-                            let pubkey = walletInfo.pubkeys[j]
-                            pubkey.context = walletInfo.context
-                            this.pubkeys.push(pubkey)
-                            for(let k = 0; k < pubkey.balances.length; k++){
-                                let balance:any = pubkey.balances[k]
-                                //add wallet context
-                                balance.context = walletInfo.context
-                                balance.pubkey = pubkey.pubkey
-                                //force to webspec
-                                //TODO fixme dont assume prescision bro
-                                balance.address = pubkey.pubkey
-                                balance.name = pubkey.pubkey
-                                balance.chainId = 1
-                                balance.decimals = 18
-                                if(balance.marketData && balance.marketData.image) balance.logoURI = balance.marketData.image
-                                this.balances.push(balance)
-                            }
-                        }
-                    }
+                if(this.balances.length > 0){
+                    this.isPaired = true
+                    this.status = 'paired'
+                    this.balances = userInfo.balances
                 }
 
                 if(userInfo.pubkeys)this.pubkeys = userInfo.pubkeys
@@ -204,6 +193,15 @@ export class SDK {
                     log.debug(tag,'context set to '+event.context);
                     this.context = event.context
                     this.getUserParams()
+                });
+
+                this.events.events.on('pubkey', (event:any) => {
+                    log.info(tag,"pubkey event!", event)
+                    //update pubkeys
+                });
+
+                this.events.events.on('balances', (event:any) => {
+                    log.info(tag,"balances event!", event)
                 });
 
                 return this.events.events
@@ -276,7 +274,7 @@ export class SDK {
                     provider:'lol'
                 }
                 let result = await this.pioneerApi.Register(null, register)
-
+                await this.getUserParams()
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -437,8 +435,9 @@ export class SDK {
                     log.debug(tag,"No local context!")
                     let userInfo = await this.pioneerApi.User()
                     userInfo = userInfo.data
-                    log.debug(tag,"userInfo: ",userInfo)
+                    log.info(tag,"userInfo: ",userInfo)
                     this.wallets = userInfo.wallets
+                    this.balances = userInfo.balances
                     this.context = userInfo.context
                     this.assetContext = userInfo.assetContext
                     log.debug(tag,"this.context: ",this.context)
@@ -453,35 +452,6 @@ export class SDK {
                     this.assetBalanceUsdValueContext = balance.valueUsd || '0'
                     log.debug(tag,"this.assetBalanceNativeContext: ",this.assetBalanceNativeContext)
                     log.debug(tag,"this.assetBalanceUsdValueContext: ",this.assetBalanceUsdValueContext)
-                    // this.balances = []
-                    // this.pubkeys = []
-                    //for each wallet
-                    if(userInfo.walletDescriptions){
-                        log.info("Parse Wallet Descriptions")
-                        for(let i = 0; i < userInfo.walletDescriptions.length; i++){
-                            let walletInfo = userInfo.walletDescriptions[i]
-                            log.info(tag,"walletInfo: ",walletInfo)
-                            for(let j =0; j < walletInfo.pubkeys.length; j++){
-                                let pubkey = walletInfo.pubkeys[j]
-                                pubkey.context = walletInfo.context
-                                this.pubkeys.push(pubkey)
-                                for(let k = 0; k < pubkey.balances.length; k++){
-                                    let balance:any = pubkey.balances[k]
-                                    //add wallet context
-                                    balance.context = walletInfo.context
-                                    balance.pubkey = pubkey.pubkey
-                                    //force to webspec
-                                    //TODO fixme dont assume prescision bro
-                                    balance.address = pubkey.pubkey
-                                    balance.name = pubkey.pubkey
-                                    balance.chainId = 1
-                                    balance.decimals = 18
-                                    if(balance.marketData && balance.marketData.image) balance.logoURI = balance.marketData.image
-                                    this.balances.push(balance)
-                                }
-                            }
-                        }
-                    }
                 }
                 if(!this.context) throw Error("can not start without context! ")
                 if(!this.blockchains) throw Error("can not start without blockchains")
@@ -496,7 +466,6 @@ export class SDK {
                 }
 
                 this.wallets = result.wallets
-                if(result.balances) this.balances = result.balances
                 if(result.pubkeys) this.pubkeys = result.pubkeys
 
                 log.debug(tag,"this.spec: ",this.spec)

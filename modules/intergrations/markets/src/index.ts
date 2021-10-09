@@ -20,6 +20,20 @@ const axios = Axios.create({
         }
     })
 });
+const axiosRetry = require('axios-retry');
+
+axiosRetry(axios, {
+    retries: 5, // number of retries
+    retryDelay: (retryCount: number) => {
+        console.log(`retry attempt: ${retryCount}`);
+        return retryCount * 1000; // time interval between retries
+    },
+    retryCondition: (error: { response: { status: number; }; }) => {
+        console.error(error)
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 
 import {
     Pubkey,
@@ -53,14 +67,16 @@ module.exports = {
     getPricesInQuote: function (assets:[any], quote:string) {
         return get_prices_in_quote(assets,quote);
     },
-    hydratePubkeys:function(marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any){
-        return hydrate_pubkeys(marketInfoCoincap,marketInfoCoinGecko,pubkeys)
+    buildBalances:function(marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any, context:string){
+        return build_balances(marketInfoCoincap,marketInfoCoinGecko,pubkeys, context)
     }
 }
 
-let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any) {
-    let tag = TAG + ' | hydrate_pubkeys | '
+let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any, context:string) {
+    let tag = TAG + ' | build_balances | '
     try {
+        if(!pubkeys) throw Error("No pubkeys given!")
+        if(!context) throw Error("No context given!")
         //GLOBAL_RATES
         if(!marketInfoCoincap) marketInfoCoincap = await get_assets_coincap()
         if(!marketInfoCoinGecko) marketInfoCoinGecko = await get_assets_coingecko()
@@ -70,6 +86,7 @@ let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko
         let totalValueUsd = 0
 
         let allNames = []
+        let balances = []
         let hydratedPubkeys:any = []
         for(let i = 0; i < pubkeys.length; i++){
             let pubkey:Pubkey = pubkeys[i]
@@ -87,28 +104,28 @@ let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko
                 let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
-                let coinInfoCoinCap = GLOBAL_RATES_COINCAP[symbol]
+                let coinInfoCoinCap = marketInfoCoincap[symbol]
                 log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
 
-                let coinInfoCoinGecko = GLOBAL_RATES_COINGECKO[symbol]
+                let coinInfoCoinGecko = marketInfoCoinGecko[symbol]
                 log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
 
                 let rateUsdCoinCap = 0
-                if(GLOBAL_RATES_COINCAP[symbol] && GLOBAL_RATES_COINCAP[symbol].priceUsd){
-                    rateUsdCoinCap = GLOBAL_RATES_COINCAP[symbol].priceUsd
+                if(coinInfoCoinCap && coinInfoCoinCap.priceUsd){
+                    rateUsdCoinCap = coinInfoCoinCap.priceUsd
                 } else {
                     log.error(tag," COINCAP Missing rate data for "+symbol)
                 }
                 //
                 let rateUsdCoinGecko = 0
-                if(GLOBAL_RATES_COINGECKO[symbol] && GLOBAL_RATES_COINGECKO[symbol].current_price){
-                    rateUsdCoinGecko = GLOBAL_RATES_COINGECKO[symbol].current_price
+                if(coinInfoCoinGecko && coinInfoCoinGecko.current_price){
+                    rateUsdCoinGecko = coinInfoCoinGecko.current_price
                 } else {
                     log.error(tag," COINGECKO Missing rate data for "+symbol)
                 }
 
-                log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
-                log.debug(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
+                log.info(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
+                log.info(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
 
                 let relDiff = function(a:number, b:number) {
                     return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
@@ -149,16 +166,22 @@ let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko
                 //TODO if quote !== USD
                 //calc conversion
 
+                let balance:any = JSON.parse(JSON.stringify(pubkey))
+                delete balance.balances
+                balance.context = context
+                balance = {...balance,...entry}
 
-                if(coinInfoCoinCap && coinInfoCoinGecko){
-                    entry.marketInfo = {
-                        symbol: coinInfoCoinCap.symbol || coinInfoCoinGecko.symbol,
+                if(coinInfoCoinCap){
+                    balance.onCoincap = true
+                    if(balance.symbol && balance.symbol !== coinInfoCoinCap.symbol){
+                        //symbol mismatch
+                        balance.coincapAgreeSymbol = false
+                        balance.coincapSymbol = coinInfoCoinCap.symbol
+                    }
+                    let coincapInfo = {
                         id_coincap: coinInfoCoinCap.id,
-                        id_coingecko: coinInfoCoinGecko.id,
                         rank_coincap: coinInfoCoinCap.rank,
-                        rank_coingecko: coinInfoCoinGecko.market_cap_rank,
                         name_coincap: coinInfoCoinCap.name,
-                        name_coingecko: coinInfoCoinGecko.name,
                         supply: coinInfoCoinCap.supply,
                         maxSupply: coinInfoCoinCap.maxSupply,
                         marketCapUsd: coinInfoCoinCap.marketCapUsd,
@@ -167,7 +190,23 @@ let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko
                         changePercent24Hr: coinInfoCoinCap.changePercent24Hr,
                         vwap24Hr: coinInfoCoinCap.vwap24Hr,
                         explorer: coinInfoCoinCap.explorer,
-                        //gecko
+                    }
+                    balance = {...balance,...coincapInfo}
+                }else{
+                    balance.onCoincap = false
+                }
+
+                if(coinInfoCoinGecko){
+                    balance.onCoinGecko = true
+                    if(balance.symbol && balance.symbol !== coinInfoCoinGecko.symbol){
+                        //symbol mismatch
+                        balance.coinGeckoAgreeSymbol = false
+                        balance.coinGeckoSymbol = coinInfoCoinGecko.symbol
+                    }
+                    let coinGeckoInfo = {
+                        name_coingecko: coinInfoCoinGecko.name,
+                        rank_coingecko: coinInfoCoinGecko.market_cap_rank,
+                        id_coingecko: coinInfoCoinGecko.id,
                         image: coinInfoCoinGecko.image,
                         current_price: coinInfoCoinGecko.current_price,
                         market_cap: coinInfoCoinGecko.market_cap,
@@ -191,27 +230,21 @@ let hydrate_pubkeys = async function (marketInfoCoincap:any, marketInfoCoinGecko
                         roi: coinInfoCoinGecko.roi,
                         last_updated: coinInfoCoinGecko.last_updated
                     }
-                } else {
-                    log.error("Incomplete market data!")
+                    balance = {...balance,...coinGeckoInfo}
+                }else{
+                    balance.onCoincap = false
                 }
 
-                hydratedPubkey.balances.push(entry)
+                //figure out icon
+                if(!balance.image){
+                    //use network image? coincap
+                    balance.image = `https://static.coincap.io/assets/icons/256/${balance.network}.png`
+                }
+                balances.push(balance)
             }
-            hydratedPubkeys.push(hydratedPubkey)
         }
 
-        // log.debug(tag,'names: ',allNames)
-
-        //let priceData in USD
-        //let allValuesUsd = get_prices_in_quote()
-
-        //supplement with icons
-
-        //fill any missing from coingecko
-
-        //TODO https://www.coingecko.com/api/documentations/v3#/simple/get_simple_price
-
-        return {pubkeys:hydratedPubkeys,total:totalValueUsd}
+        return {balances,total:totalValueUsd}
     } catch (e) {
         console.error(tag, 'Error: ', e)
         throw e

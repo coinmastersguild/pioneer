@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/app-bitcoin-e2e-swap",
+  "name": "@pioneer-platform/app-bitcoincash-e2e-swap",
   "version": "8.1.39",
   "scripts": {
     "yarn": "yarn",
