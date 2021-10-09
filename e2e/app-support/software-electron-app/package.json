@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/online-electron-app",
-  "version": "8.1.40",
+  "version": "8.1.41",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -18,7 +18,7 @@
     "@pioneer-platform/midgard-client": "^8.1.28",
     "@pioneer-platform/pioneer-app": "^8.1.41",
     "@pioneer-platform/pioneer-app-e2e": "^8.1.41",
-    "@pioneer-platform/pioneer-sdk": "^8.1.48",
+    "@pioneer-platform/pioneer-sdk": "^8.1.49",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
