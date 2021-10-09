@@ -77,10 +77,12 @@ export class SDK {
     private registerWallet: (wallet: any) => Promise<any>;
     private status: string;
     private apiVersion: string;
+    private initialized: boolean;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
         this.isTestnet = false
+        this.initialized = false
         this.isPaired = false
         this.status = 'preInit'
         this.apiVersion = ""
@@ -109,6 +111,8 @@ export class SDK {
         this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
             try{
+                if(this.initialized) throw Error("102: already initialized!")
+                this.initialized = true
                 this.status = 'init'
                 log.debug(tag,"blockchains: ",blockchains)
                 if(!blockchains) blockchains = []
@@ -192,7 +196,7 @@ export class SDK {
                 this.events.events.on('context', (event:any) => {
                     log.debug(tag,'context set to '+event.context);
                     this.context = event.context
-                    this.getUserParams()
+                    // this.getUserParams()
                 });
 
                 this.events.events.on('pubkey', (event:any) => {

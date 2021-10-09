@@ -81,7 +81,6 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
         if(!marketInfoCoincap) marketInfoCoincap = await get_assets_coincap()
         if(!marketInfoCoinGecko) marketInfoCoinGecko = await get_assets_coingecko()
 
-
         let valuesUsd:any = {}
         let totalValueUsd = 0
 
@@ -101,12 +100,13 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 //clone
 
                 log.debug(tag,"entry: ",entry)
-                let symbol = entry.asset || entry.asset
+                let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
                 let coinInfoCoinCap = marketInfoCoincap[symbol]
                 log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
 
+                //log.info(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
                 let coinInfoCoinGecko = marketInfoCoinGecko[symbol]
                 log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
 
@@ -197,6 +197,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 }
 
                 if(coinInfoCoinGecko){
+                    log.info(coinInfoCoinGecko.symbol," cginfo: ",coinInfoCoinGecko)
                     balance.onCoinGecko = true
                     if(balance.symbol && balance.symbol !== coinInfoCoinGecko.symbol){
                         //symbol mismatch
@@ -237,8 +238,9 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
 
                 //figure out icon
                 if(!balance.image){
+                    //TODO lookup if icon exists, else use network icon
                     //use network image? coincap
-                    balance.image = `https://static.coincap.io/assets/icons/256/${balance.network}@2x.png`
+                    balance.image = `https://static.coincap.io/assets/icons/${balance.symbol.toLowerCase()}@2x.png`
                 }
                 balances.push(balance)
             }
