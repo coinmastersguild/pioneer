@@ -5,10 +5,10 @@ export type Address = string
 
 export type Network = 'testnet' | 'mainnet'
 
-export type Balance = {
-    asset: Asset
-    amount: BaseAmount
-}
+// export type Balance = {
+//     asset: Asset
+//     amount: BaseAmount
+// }
 
 export type TxType = 'transfer' | 'unknown'
 
