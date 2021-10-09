@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/thorchain-e2e-transfer",
-  "version": "8.1.38",
+  "version": "8.1.39",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -17,7 +17,7 @@
     "@pioneer-platform/loggerdog": "^8.1.17",
     "@pioneer-platform/midgard-client": "^8.1.28",
     "@pioneer-platform/pioneer-app": "^8.1.41",
-    "@pioneer-platform/pioneer-sdk": "^8.1.42",
+    "@pioneer-platform/pioneer-sdk": "^8.1.48",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
