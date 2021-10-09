@@ -127,38 +127,29 @@ const test_service = async function () {
         assert(app.balances)
         // assert(app.balances.length > 0)
         assert(app.context)
+        log.info("app balances: ",app.balances)
+        if(app.balances.length === 0) throw Error("Invalid balances! empty!")
 
-        // let isSyncing = true
-        // while(!isSyncing){
-        //     let pubkeys = app.pubkeys
-        //     let user = await app.getUserParams()
-        //     log.info("user: ",user)
-        //     let allSynced = []
-        //     for(let i = 0; i < pubkeys.length; i++){
-        //         let pubkey = pubkeys[i]
-        //         log.info(tag,"pubkey: ",pubkey)
-        //
-        //         assert(pubkey.pubkey)
-        //         //pubkey
-        //         log.info(tag,"isSyncing: ",pubkey.isSyncing)
-        //         if(!pubkey.lastUpdated){
-        //             isSyncing = true
-        //         } else {
-        //             allSynced.push(pubkey)
-        //         }
-        //         if(allSynced.length >= pubkeys.length && pubkeys.length > 0){
-        //             isSyncing = false
-        //         }
-        //     }
-        //     //done syncing
-        //     //sleep
-        //     await sleep(3000)
-        // }
-        //
-        // log.info("app balances: ",app.balances)
         //check balances
         //verify icons
+        for(let i = 0; i < app.balances.length; i++){
+            let balance = app.balances[i]
+            log.info("balance: ",balance)
+            if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
+            //
+            if(!balance.image){
+                log.error("INvalid image!: ",balance)
+            }
+            if(!balance.balance){
+                log.error("INvalid balance!: ",balance)
+            }
+            assert(balance.image)
+            assert(balance.pubkey)
+            assert(balance.balance)
+            assert(balance.path)
+            assert(balance.symbol)
 
+        }
         //verify pairing has metamask wallet
 
         //switch context

@@ -15,7 +15,7 @@ const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false,
         headers: {
-            "authorization": process.env['COINCAP_API_KEY'],
+            "authorization": "Bearer "+process.env['COINCAP_API_KEY'],
             "Authorization": "Bearer "+process.env['COINCAP_API_KEY'],
         }
     })
@@ -101,7 +101,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 //clone
 
                 log.debug(tag,"entry: ",entry)
-                let symbol = entry.asset
+                let symbol = entry.asset || entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
                 let coinInfoCoinCap = marketInfoCoincap[symbol]
@@ -238,7 +238,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 //figure out icon
                 if(!balance.image){
                     //use network image? coincap
-                    balance.image = `https://static.coincap.io/assets/icons/256/${balance.network}.png`
+                    balance.image = `https://static.coincap.io/assets/icons/256/${balance.network}@2x.png`
                 }
                 balances.push(balance)
             }
