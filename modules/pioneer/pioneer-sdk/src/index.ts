@@ -274,8 +274,13 @@ export class SDK {
                     provider:'lol'
                 }
                 let result = await this.pioneerApi.Register(null, register)
-                await this.getUserParams()
-                return result.data
+                result = result.data
+
+                this.context = result.context
+                this.pubkeys = result.pubkeys
+                this.balances = result.balances
+
+                return result
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
