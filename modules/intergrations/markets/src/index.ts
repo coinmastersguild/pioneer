@@ -113,14 +113,14 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 if(coinInfoCoinCap && coinInfoCoinCap.priceUsd){
                     rateUsdCoinCap = coinInfoCoinCap.priceUsd
                 } else {
-                    log.error(tag," COINCAP Missing rate data for "+symbol)
+                    //log.error(tag," COINCAP Missing rate data for "+symbol)
                 }
                 //
                 let rateUsdCoinGecko = 0
                 if(coinInfoCoinGecko && coinInfoCoinGecko.current_price){
                     rateUsdCoinGecko = coinInfoCoinGecko.current_price
                 } else {
-                    log.error(tag," COINGECKO Missing rate data for "+symbol)
+                    //log.error(tag," COINGECKO Missing rate data for "+symbol)
                 }
 
                 log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)

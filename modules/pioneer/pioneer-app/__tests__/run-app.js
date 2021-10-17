@@ -50,16 +50,16 @@ let run_test = async function(){
             console.log("First time startup, run pair first")
         } else {
             //blockchains
-            if(!config.blockchains) throw Error("Invalid configuration!")
+            if(!config.blockchains) throw Error("Invalid configuration! missing blockchains")
 
             config.password = password
             config.username = username
 
             let resultInit = await App.init(config)
-            //console.log("resultInit: ",resultInit)
+            console.log("resultInit: ",resultInit)
 
             //pair
-            let code = "FNDKHD"
+            let code = "89G7PI"
             console.log("code: ",code)
             let pairResult = await App.pair(code)
             console.log("pairResult: ",pairResult)

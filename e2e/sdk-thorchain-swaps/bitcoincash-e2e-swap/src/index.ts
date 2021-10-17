@@ -29,6 +29,8 @@
 
  */
 
+import {Transfer} from "@pioneer-platform/pioneer-types";
+
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
@@ -53,15 +55,17 @@ let {
 
 const {
     startApp,
+    getContext,
+    getWallets,
     sendPairingCode,
     buildTransaction,
     approveTransaction,
     broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'bitcoincash'
+let BLOCKCHAIN = 'bitcoinCash'
 let ASSET = 'BCH'
-let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.04"
+let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
@@ -76,18 +80,41 @@ const test_service = async function () {
     try {
 
         //start app and get wallet
-        let wallet = await startApp()
-        let username = wallet.username
+        let wallets = await startApp()
+        // log.info(tag,"wallets: ",wallets)
+        let username = wallets.username
         assert(username)
 
-        let balance = wallet.WALLET_BALANCES[ASSET]
-        assert(balance)
+        let appContext = getContext()
+        assert(appContext)
+        log.info(tag,"appContext: ",appContext)
 
-        //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
-        log.debug(tag,"wallet: ",wallet.WALLET_BALANCES)
-        if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+await wallet.getMaster(ASSET))
+        //get wallets
+        let appWallets = getWallets()
+        log.info(tag,"appWallets: ",appWallets)
+
+        //filter wallets with current context
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //get pubkey
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.info(tag,"pubkey: ",pubkey)
+        assert(pubkey)
+
+        //balance
+        let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
+        log.info(tag,"balance: ",balance)
+        assert(balance)
+        assert(balance.balance)
+
+        let master = pubkey.master
+        assert(master)
+
+        // //assert balance local
+        log.info(tag,"master: ",master)
+        if(balance.balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
@@ -114,7 +141,7 @@ const test_service = async function () {
             eventPairReceived = true
         })
 
-        let seedChains = ['ethereum','thorchain']
+        let seedChains = ['ethereum','thorchain','bitcoincash']
         await app.init(seedChains)
 
         //pair sdk
@@ -136,14 +163,14 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.debug("user: ",user.context)
+        log.debug("user: ",user.clients)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
+        log.info("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
@@ -207,9 +234,9 @@ const test_service = async function () {
 
         //filter by chain
         let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.debug(tag,"thorVault: ",thorVault)
+        log.info(tag,"thorVault: ",thorVault)
 
-        log.debug(tag,"thorVault: ",thorVault)
+        log.info(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
         assert(thorVault.address)
@@ -227,10 +254,15 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let transfer = {
-            inboundAddress: thorVault,
-            coin: ASSET,
+        let transfer:Transfer = {
+            context:user.context,
+            recipient: vaultAddress,
+            fee:{
+                // gasLimit: 20000,
+                priority:3, //1-5 5 = highest
+            },
             asset: ASSET,
+            network: ASSET,
             memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
             "amount":{
                 // "type":"BASE",
@@ -241,7 +273,7 @@ const test_service = async function () {
             },
             noBroadcast:true //TODO configurable
         }
-        log.debug(tag,"transfer: ",transfer)
+        log.info(tag,"transfer: ",transfer)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
@@ -263,19 +295,19 @@ const test_service = async function () {
         assert(unsignedTx)
 
         //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        //
-        // //sign transaction
-        // let signedTx = await approveTransaction(transaction)
-        // log.debug(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // // assert(signedTx.txid)
-        //
-        // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.debug(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        // assert(signedTx.txid)
+
+        //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         // let broadcastResult = await broadcastTransaction(transaction)
@@ -289,61 +321,61 @@ const test_service = async function () {
         let isConfirmed = false
         //wait for confirmation
 
-        // if(!noBroadcast){
-        //     //TODO
-        //     /*
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.debug(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         let txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await client.getTransactionData(txid)
-        //         log.debug(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo.blockNumber){
-        //             log.debug(tag,"Confirmed!")
-        //
-        //         } else {
-        //             log.debug(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         //get midgard info
-        //         let txInfoMidgard =
-        //         //update invocation
-        //
-        //         //if
-        //         // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-        //         // log.debug(tag,"txInfo: ",txInfo)
-        //         //
-        //         // if(txInfo.confirmations > 0){
-        //         //     isConfirmed = true
-        //         // }
-        //
-        //         await sleep(10000)
-        //     }
-        // }
+        if(!noBroadcast){
+            //TODO
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
+
+                let txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.debug(tag,"txInfo: ",txInfo)
+
+                if(txInfo.blockNumber){
+                    log.debug(tag,"Confirmed!")
+
+                } else {
+                    log.debug(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                //get midgard info
+                let txInfoMidgard =
+                //update invocation
+
+                //if
+                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+                // log.debug(tag,"txInfo: ",txInfo)
+                //
+                // if(txInfo.confirmations > 0){
+                //     isConfirmed = true
+                // }
+
+                await sleep(10000)
+            }
+        }
 
 
         log.notice("****** TEST PASS 2******")

@@ -7,8 +7,8 @@ interface Asset {
 }
 export interface ThorchainMemoEncodedBody {
     asset:Asset,
-        vaultAddress:string,
-        toAddress:string
+    vaultAddress:string,
+    toAddress:string
 }
 export interface BroadcastBody {
     coin?:string

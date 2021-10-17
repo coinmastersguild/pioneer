@@ -29,6 +29,11 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
+network.getValidators()
+    .then(function(resp){
+        console.log("resp: ",resp[0])
+    })
+
 // network.txs(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)

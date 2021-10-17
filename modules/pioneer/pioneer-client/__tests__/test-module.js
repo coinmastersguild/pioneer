@@ -50,6 +50,9 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
+        let status = await pioneer.instance.Status()
+        console.log("status: ",status.data.exchanges.markets)
+
         // console.log("pioneer: ",pioneer)
 
         //get new address
@@ -100,9 +103,9 @@ let run_test = async function(){
         // if(onlineUsers.indexOf(username) >= 0) isOnline = true
         // if(!isOnline) throw Error("User not connected!")
 
-        let user = await pioneer.instance.User()
-        console.log("user: ",user.data)
-        console.log("user: ",JSON.stringify(user.data))
+        // let user = await pioneer.instance.User()
+        // console.log("user: ",user.data)
+        // console.log("user: ",JSON.stringify(user.data))
         //
         // let info = await pioneer.instance.Info(user.data.context)
         // console.log("info: ",info.data)

@@ -1939,7 +1939,7 @@ module.exports = class wallet {
                     let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
                     log.debug(tag,"input: ",input)
 
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input.xpub})
+                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network,xpub:input.xpub})
                     unspentInputs = unspentInputs.data
                     log.debug(tag,"unspentInputs: ",unspentInputs)
 

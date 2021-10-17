@@ -29,13 +29,14 @@
 
  */
 
+import {Transfer} from "@pioneer-platform/pioneer-types";
+
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let BigNumber = require('@ethersproject/bignumber')
-let pjson = require("../package.json");
-let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
+const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
 let assert = require('assert')
@@ -47,25 +48,32 @@ let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
 let {
+    supportedBlockchains,
     baseAmountToNative,
     nativeToBaseAmount,
 } = require("@pioneer-platform/pioneer-coins")
 
 const {
     startApp,
-    sendPairingCode,
     getContext,
     getWallets,
-    cancelTransaction
+    sendPairingCode,
+    buildTransaction,
+    approveTransaction,
+    broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
 
-let BLOCKCHAIN = 'ethereum'
-let ASSET = 'ETH'
-let MIN_BALANCE = process.env['MIN_BALANCE_ETH'] || "0.004"
+let BLOCKCHAIN = 'litecoin'
+let ASSET = 'LTC'
+let MIN_BALANCE = process.env['MIN_BALANCE_RUNE'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
-let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
+let spec = process.env['URL_PIONEER_SPEC']
+let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
+let wss = process.env['URL_PIONEER_SOCKET']
+let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+
+let noBroadcast = true
 
 const test_service = async function () {
     let tag = TAG + " | test_service | "
@@ -130,21 +138,11 @@ const test_service = async function () {
             assert(request.queryKey)
             assert(request.username)
             assert(request.url)
-            log.debug(tag,"request: ",request)
-            if(request.type === 'pairing'){
-                eventPairReceived = true
-            }
+            eventPairReceived = true
         })
 
-        let seedChains = ['ethereum','thorchain']
-        let resultInfo = await app.init(seedChains)
-
-        //sdk info
-        log.debug("* resultInfo: ",resultInfo)
-        log.debug("app pubkeys: ",app.pubkeys)
-        log.debug("app balances: ",app.balances)
-        assert(app.pubkeys)
-        assert(app.balances)
+        let seedChains = ['ethereum','thorchain','litecoin']
+        await app.init(seedChains)
 
         //pair sdk
         let code = await app.createPairingCode()
@@ -165,20 +163,14 @@ const test_service = async function () {
         //assert sdk user
         //get user
         let user = await app.getUserParams()
-        log.debug("* user: ",user)
-
-
-
-        log.debug("user: ",user)
-        log.debug("user: ",user.balances)
-
+        log.debug("user: ",user.clients)
         assert(user.context)
         //assert user clients
         assert(user.clients[BLOCKCHAIN])
 
         //intergration test asgard-exchange
         let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
+        log.info("blockchains: ",blockchains)
 
         let client = user.clients[BLOCKCHAIN]
 
@@ -196,7 +188,6 @@ const test_service = async function () {
 
         let balanceSdk = await client.getBalance()
         log.debug(" balanceSdk: ",balanceSdk)
-
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
         assert(balanceSdk[0].amount.amount())
@@ -242,10 +233,10 @@ const test_service = async function () {
         let poolInfo = await midgard.getPoolAddress()
 
         //filter by chain
-        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
-        log.debug(tag,"thorVault: ",thorVault)
+        let thorVault = poolInfo.filter((e:any) => e.chain === ASSET)
+        log.info(tag,"thorVault: ",thorVault)
 
-        log.debug(tag,"thorVault: ",thorVault)
+        log.info(tag,"thorVault: ",thorVault)
         assert(thorVault[0])
         thorVault = thorVault[0]
         assert(thorVault.address)
@@ -256,33 +247,37 @@ const test_service = async function () {
         assert(gasRate)
 
         //test amount in native
-        let amountTestNative = baseAmountToNative("RUNE",TEST_AMOUNT)
+        let amountTestNative = baseAmountToNative(ASSET,TEST_AMOUNT)
 
         let options:any = {
             verbose: true,
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let transfer = {
-            inboundAddress: thorVault,
-            recipient:vaultAddress,
-            coin: ASSET,
+        let transfer:Transfer = {
+            context:user.context,
+            recipient: vaultAddress,
+            fee:{
+                // gasLimit: 20000,
+                priority:3, //1-5 5 = highest
+            },
             asset: ASSET,
-            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
+            network: ASSET,
+            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
             "amount":{
+                // "type":"BASE",
+                // "decimal":18,
                 amount: function(){
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
             },
-            fee:gasRate, // fee === gas (xcode inheritance)
-            noBroadcast:true
+            noBroadcast:true //TODO configurable
         }
-        log.debug(tag,"transfer: ",transfer)
+        log.info(tag,"transfer: ",transfer)
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
         let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
-        assert(responseTransfer)
         log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
 
@@ -294,14 +289,96 @@ const test_service = async function () {
             context:user.context
         }
 
-        //cancel transaction
-        let cancelResult = await cancelTransaction(transaction)
-        log.debug(tag,"cancelResult: ",cancelResult)
+        //build
+        let unsignedTx = await buildTransaction(transaction)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
 
+        //get invocation
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.debug(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        // assert(signedTx.txid)
+
+        //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.debug(tag,"broadcastResult: ",broadcastResult)
         //
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+
+        //get invocation info EToC
+
+        let isConfirmed = false
+        //wait for confirmation
+
+        if(!noBroadcast){
+            //TODO
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
+
+                let txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await client.getTransactionData(txid)
+                log.debug(tag,"txInfo: ",txInfo)
+
+                if(txInfo.blockNumber){
+                    log.debug(tag,"Confirmed!")
+
+                } else {
+                    log.debug(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                //get midgard info
+                let txInfoMidgard =
+                //update invocation
+
+                //if
+                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+                // log.debug(tag,"txInfo: ",txInfo)
+                //
+                // if(txInfo.confirmations > 0){
+                //     isConfirmed = true
+                // }
+
+                await sleep(10000)
+            }
+        }
 
 
-        log.debug("****** TEST PASS 2 ******")
+        log.notice("****** TEST PASS 2******")
         //process
         process.exit(0)
     } catch (e) {
