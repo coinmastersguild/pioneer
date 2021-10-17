@@ -78,6 +78,7 @@ export class SDK {
     private status: string;
     private apiVersion: string;
     private initialized: boolean;
+    private markets: any;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -96,6 +97,7 @@ export class SDK {
         this.contexts = []
         this.pubkeys = []
         this.balances = []
+        this.markets = {}
         this.context = ""
         this.invocationContext = ""
         this.assetContext = ""
@@ -139,6 +141,12 @@ export class SDK {
                 health = health.data
                 log.debug(tag,"health: ",health)
                 this.apiVersion = health.version
+
+                //market Status
+                let markets = await this.pioneerApi.Status()
+                markets = markets.data
+                log.info(tag,"markets: ",markets)
+                this.markets = markets
 
                 //get global info
                 let userInfo = await this.pioneerApi.User()

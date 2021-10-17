@@ -70,8 +70,12 @@ let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC']
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let wss = process.env['URL_PIONEER_SOCKET']
-let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
+//let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+
+let TRADE_PAIR  = "BCH_LTC"
+let INPUT_ASSET = ASSET
+let OUTPUT_ASSET = "LTC"
 
 let noBroadcast = true
 
@@ -101,6 +105,12 @@ const test_service = async function () {
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
         log.info(tag,"pubkey: ",pubkey)
         assert(pubkey)
+
+        //get master output
+        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.info(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        assert(pubkeyOutput)
+        assert(pubkeyOutput.master)
 
         //balance
         let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
@@ -149,7 +159,6 @@ const test_service = async function () {
         code = code.code
         log.debug("code: ",code)
         assert(code)
-
 
         let pairSuccess = await sendPairingCode(code)
         log.debug("pairSuccess: ",pairSuccess)
@@ -229,11 +238,19 @@ const test_service = async function () {
 
         //this is x percent of total available
 
+        //estimate output fee?
+
+
+
+
         //get pool address
         let poolInfo = await midgard.getPoolAddress()
+        assert(poolInfo)
+        log.info(tag,"poolInfo: ",poolInfo)
 
         //filter by chain
         let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
+        assert(thorVault)
         log.info(tag,"thorVault: ",thorVault)
 
         log.info(tag,"thorVault: ",thorVault)
@@ -248,6 +265,28 @@ const test_service = async function () {
 
         //test amount in native
         let amountTestNative = baseAmountToNative(ASSET,TEST_AMOUNT)
+        assert(amountTestNative)
+
+        //get rate from thorchain
+        let markets = app.markets
+        assert(markets)
+        log.info(tag,"markets: ",markets)
+        log.info(tag,"markets: ",markets.exchanges)
+        log.info(tag,"markets: ",markets.exchanges.markets)
+        let marketInfo = markets.exchanges.markets.filter((e:any) => e.pair == TRADE_PAIR)
+        log.info(tag,"marketInfo: ",marketInfo)
+        assert(marketInfo)
+        //todo handle multi?
+        marketInfo = marketInfo[0]
+        assert(marketInfo)
+        log.info(tag,"marketInfo: ",marketInfo)
+
+        //amountOut = amountIn * rate
+        let amountOut = parseFloat(TEST_AMOUNT) * marketInfo.rate
+        assert(amountOut)
+
+        //estimate output
+        log.info(tag,"amountOut: ",amountOut)
 
         let options:any = {
             verbose: true,
@@ -263,7 +302,7 @@ const test_service = async function () {
             },
             asset: ASSET,
             network: ASSET,
-            memo: '=:THOR.RUNE:'+FAUCET_RUNE_ADDRESS,
+            memo: '=:LTC.LTC:'+pubkeyOutput.master,
             "amount":{
                 // "type":"BASE",
                 // "decimal":18,

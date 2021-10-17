@@ -35,7 +35,7 @@ let run_test = async function(){
 
 
         let config = {
-            queryKey,
+            queryKey:'sdk:2d0ec79c-6733-4235-9b09-9b87171edc16',
             username,
             spec
         }
@@ -51,6 +51,7 @@ let run_test = async function(){
         pioneer = await pioneer.init()
 
         let status = await pioneer.instance.Status()
+        console.log("status: ",status.data)
         console.log("status: ",status.data.exchanges.markets)
 
         // console.log("pioneer: ",pioneer)
@@ -105,7 +106,7 @@ let run_test = async function(){
 
         // let user = await pioneer.instance.User()
         // console.log("user: ",user.data)
-        // console.log("user: ",JSON.stringify(user.data))
+        // console.log("user: ",user.data.walletDescriptions[0].balances)
         //
         // let info = await pioneer.instance.Info(user.data.context)
         // console.log("info: ",info.data)
