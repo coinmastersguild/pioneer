@@ -79,6 +79,12 @@ module.exports = {
     getBalances:function (address:string) {
         return get_balances(address);
     },
+    getDelegations:function (address:string) {
+        return get_delegations_by_address(address);
+    },
+    getRewards:function (address:string) {
+        return get_rewards(address);
+    },
     getAccount:function (address:string) {
         return get_account_info(address);
     },
@@ -88,7 +94,7 @@ module.exports = {
     getValidators:function () {
         return get_validators();
     },
-    getDelegations:function (address:string,validator:string) {
+    getDelegationsByValidator:function (address:string,validator:string) {
         return get_delegations(address,validator);
     },
     getAccountInfo:function (address:string) {
@@ -99,6 +105,9 @@ module.exports = {
     },
     getTransaction: function (txid:string) {
         return get_transaction(txid);
+    },
+    getStakingTxs: function (address:string) {
+        return get_staking_txs(address);
     },
     transaction: function (txid:string) {
         return get_transaction(txid);
@@ -112,6 +121,37 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+let get_staking_txs = async function(address:string) {
+    let tag = TAG + " | get_staking_txs | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/txs?delegator='+address})
+        log.debug(tag,"txInfo: ",txInfo.data)
+
+
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+let get_rewards = async function(address:string){
+    let tag = TAG + " | get_rewards | "
+    let output:any = {}
+    try{
+
+        let resp = await axios({method:'GET',url: URL_OSMO_LCD+'/distribution/delegators/'+address+'/rewards'})
+        log.debug(tag,"resp: ",resp.data)
+
+        let output = resp.data
+
+        return output
+    }catch(e){
+        throw e
+    }
+}
 
 //
 let get_block_height = async function(){
@@ -144,6 +184,22 @@ let get_pools = async function(){
         // log.debug(tag,"txInfo: ",poolInfo.data)
 
         return poolInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+let get_delegations_by_address = async function(address:string){
+    let tag = TAG + " | get_delegations_by_validator | "
+    let output:any = {}
+    try{
+
+        let resp = await axios({method:'GET',url: URL_OSMO_LCD+'/staking/delegators/'+address+'/delegations'})
+        log.debug(tag,"resp: ",resp.data)
+
+        let output = resp.data.result
+
+        return output
     }catch(e){
         throw e
     }

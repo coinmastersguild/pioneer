@@ -20,7 +20,8 @@ let network = require("../lib/index")
 //         //console.log("resp: ",resp.result.length)
 //     })
 
-let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
+let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
+// let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 //let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // let address = 'osmo1g33z2rn60acm3e897gmnjfpttfs4hfxzwu8pf6'
@@ -29,10 +30,25 @@ let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //         console.log("resp: ",resp)
 //     })
 
-network.getValidators()
+// network.getStakingTxs(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+network.getRewards(address)
     .then(function(resp){
-        console.log("resp: ",resp[0])
+        console.log("resp: ",JSON.stringify(resp))
     })
+
+// network.getDelegations(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// network.getValidators()
+//     .then(function(resp){
+//         console.log("resp: ",resp[0])
+//     })
 
 // network.txs(address)
 //     .then(function(resp){
@@ -43,17 +59,17 @@ network.getValidators()
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
-//
-// // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
+
+// let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
 
-network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.getBlockHeight()
 //     .then(function(resp){

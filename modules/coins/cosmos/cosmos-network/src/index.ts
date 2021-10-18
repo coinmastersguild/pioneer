@@ -240,7 +240,7 @@ let get_balance = async function(address:string){
 
 
 let get_balances = async function(address:string){
-    let tag = TAG + " | get_pioneer_status | "
+    let tag = TAG + " | get_balances | "
     let output:any = {}
     try{
 
