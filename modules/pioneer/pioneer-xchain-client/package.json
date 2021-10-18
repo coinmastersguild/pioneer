@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-xchain-client",
-  "version": "8.1.40",
+  "version": "8.1.41",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
-    "@pioneer-platform/pioneer-coins": "^8.1.38",
+    "@pioneer-platform/pioneer-coins": "^8.1.39",
     "@pioneer-platform/pioneer-invoke": "^8.1.35",
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-util": "^0.2.6",
