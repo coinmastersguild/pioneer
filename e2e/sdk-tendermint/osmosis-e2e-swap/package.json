@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-e2e-swap",
-  "version": "8.1.40",
+  "version": "8.1.41",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
-    "@pioneer-platform/midgard-client": "^8.1.28",
-    "@pioneer-platform/pioneer-app": "^8.1.41",
-    "@pioneer-platform/pioneer-sdk": "^8.1.49",
+    "@pioneer-platform/midgard-client": "^8.1.29",
+    "@pioneer-platform/pioneer-app": "^8.1.42",
+    "@pioneer-platform/pioneer-sdk": "^8.1.50",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",

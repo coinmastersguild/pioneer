@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/support-e2e-cancel",
-  "version": "8.1.41",
+  "version": "8.1.42",
   "scripts": {
     "yarn": "yarn",
     "start": "node lib/index.js",
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
-    "@pioneer-platform/midgard-client": "^8.1.28",
-    "@pioneer-platform/pioneer-app": "^8.1.41",
-    "@pioneer-platform/pioneer-app-e2e": "^8.1.41",
-    "@pioneer-platform/pioneer-sdk": "^8.1.49",
+    "@pioneer-platform/midgard-client": "^8.1.29",
+    "@pioneer-platform/pioneer-app": "^8.1.42",
+    "@pioneer-platform/pioneer-app-e2e": "^8.1.42",
+    "@pioneer-platform/pioneer-sdk": "^8.1.50",
     "assert": "^2.0.0",
     "dotenv": "^6.2.0",
     "request": "^2.88.2",
