@@ -580,13 +580,13 @@ let set_context = async function (context:string) {
 let approve_transaction = async function (transaction:any) {
     let tag = " | approve_transaction | ";
     try {
-        log.debug(tag,"invocationId: ",transaction)
+        log.info(tag,"transaction: ",transaction)
         //get invocation
         if(!transaction) throw Error("101: invocation required!")
         if(!transaction.invocationId) throw Error("102: invocationId required!")
 
         let invocation = await get_invocation(transaction.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 

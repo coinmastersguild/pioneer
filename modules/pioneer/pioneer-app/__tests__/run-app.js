@@ -59,7 +59,7 @@ let run_test = async function(){
             console.log("resultInit: ",resultInit)
 
             //pair
-            let code = "GJULOT"
+            let code = "PGG7VO"
             console.log("code: ",code)
             let pairResult = await App.pair(code)
             console.log("pairResult: ",pairResult)
@@ -80,9 +80,10 @@ let run_test = async function(){
                     //TODO swap/approve
                     case 'transfer':
                         console.log(" **** PROCESS EVENT ****  request: ",request)
+                        let unsignedTx = await App.buildTransaction(request.invocation)
                         //approve
                         console.log(" Approving transaction! ")
-                        let signedTx = await App.approveTransaction(App.context(),request.invocation.invocationId)
+                        let signedTx = await App.approveTransaction(request.invocation)
                         console.log(" ***  signedTx: ",signedTx)
                         break
                     default:

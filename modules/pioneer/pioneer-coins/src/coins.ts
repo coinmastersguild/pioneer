@@ -74,6 +74,24 @@ export const COIN_MAP_LONG:any = {
     FIO: "fio",
 };
 
+export const COIN_MAP_LONG_XCHAIN:any = {
+    BTC: "bitcoin",
+    ATOM: "cosmos",
+    OSMO: "osmosis",
+    BTCT: "testnet",
+    BCH: "bitcoinCash",
+    LTC: "litecoin",
+    DASH: "dash",
+    DGB: "digiByte",
+    DOGE: "dogecoin",
+    RUNE: "thorchain",
+    ETH: "ethereum",
+    ADA: "cardano",
+    BNB: "binance",
+    EOS: "eos",
+    FIO: "fio",
+};
+
 export const COIN_MAP_KEEPKEY_LONG:any = {
     BTC: "Bitcoin",
     ATOM: "cosmos",
