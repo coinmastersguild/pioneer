@@ -20,8 +20,8 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-core": "^1.10.19",
-    "@bithighlander/hdwallet-native": "^1.10.19",
+    "@bithighlander/hdwallet-core": "latest",
+    "@bithighlander/hdwallet-native": "latest",
     "@cosmostation/cosmosjs": "^0.9.5",
     "@pioneer-platform/coincap": "^8.1.18",
     "@pioneer-platform/eth-crypto": "^8.1.29",
@@ -29,6 +29,8 @@
     "@pioneer-platform/pioneer-client": "^8.1.24",
     "@pioneer-platform/pioneer-coins": "^8.1.39",
     "@pioneer-platform/pioneer-types": "^8.1.48",
+    "@shapeshiftoss/hdwallet-core": "^1.16.11",
+    "@shapeshiftoss/hdwallet-native": "^1.16.11",
     "@types/google-protobuf": "^3.15.1",
     "bchaddrjs": "^0.5.2",
     "bech32": "^1.1.4",

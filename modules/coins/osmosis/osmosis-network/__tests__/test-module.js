@@ -30,15 +30,15 @@ let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 //         console.log("resp: ",resp)
 //     })
 
-// network.getStakingTxs(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
-
-network.getRewards(address)
+network.getStakingTxs(address)
     .then(function(resp){
-        console.log("resp: ",JSON.stringify(resp))
+        console.log("resp: ",resp)
     })
+
+// network.getRewards(address)
+//     .then(function(resp){
+//         console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.getDelegations(address)
 //     .then(function(resp){

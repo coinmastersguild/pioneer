@@ -5,7 +5,7 @@ import * as Bitcoin from 'bitcoinjs-lib' // https://github.com/bitcoinjs/bitcoin
 const ETH_BASE = 1000000000000000000
 const HARDENED = 0x80000000;
 
-//
+//compileMemo
 export const compileMemo = (memo: string): Buffer => {
     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
     return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script

@@ -202,6 +202,7 @@ module.exports = class wallet {
                             }
                         }
                         log.debug(tag,"Checkpoint valid paths ** ")
+                        log.debug(tag,"Checkpoint valid paths ** paths: ",paths)
                         this.pubkeys = await this.WALLET.getPublicKeys(paths)
                         log.debug("pubkeys ",JSON.stringify(this.pubkeys))
 
