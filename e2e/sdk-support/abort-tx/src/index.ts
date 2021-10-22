@@ -70,7 +70,7 @@ let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjau
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
-
+        console.time('appStart')
         //start app and get wallet
         let wallets = await startApp()
         // log.info(tag,"wallets: ",wallets)
@@ -111,6 +111,7 @@ const test_service = async function () {
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
+        console.timeEnd("appStart");
 
         //generate new key
         const queryKey = uuidv4();
@@ -136,8 +137,10 @@ const test_service = async function () {
             }
         })
 
+        console.time('sdkInit')
         let seedChains = ['ethereum','thorchain']
         let resultInfo = await app.init(seedChains)
+        console.timeEnd("sdkInit");
 
         //sdk info
         log.debug("* resultInfo: ",resultInfo)

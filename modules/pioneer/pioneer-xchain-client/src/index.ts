@@ -125,6 +125,7 @@ module.exports = class wallet {
     private getPool: ((asset: string) => Promise<any>) | undefined;
     private swap: ((tx: OsmosisSwap) => Promise<any>) | undefined;
     private ibcDeposit: ((tx: IBCdeposit) => Promise<any>) | undefined;
+    private buildSwapRaw: (swap: any, options: any) => Promise<void>;
     constructor(spec:string,config:any) {
         this.username = ''
         this.context = ''
@@ -1240,6 +1241,71 @@ module.exports = class wallet {
                 } else {
                     throw Error("102: Unhandled configs!")
                 }
+
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.buildSwapRaw = async function (swap:any,options:any) {
+            let tag = TAG + " | buildSwapRaw | "
+            try {
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"options: ",options)
+
+                //verbose
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
+
+                //NOTE THIS IS ONLY ETH!
+                //ETH always the weird one
+                let coin = this.nativeAsset
+                if(this.network !== 'ethereum') throw Error("102: not supported!")
+
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"swap.amount: ",swap.amount)
+                log.debug(tag,"tx.amount.amount(): ",swap.amount.amount())
+                // log.debug(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
+                let amount = swap.amount.amount()
+                amount = nativeToBaseAmount(this.nativeAsset,amount)
+                amount = amount.toString()
+
+                //if native
+                // let amount = swap.amount.toString()
+                //amount = nativeToBaseAmount(this.nativeAsset,amount)
+                log.debug(tag,"amount (final): ",amount)
+                if(!amount) throw Error("Failed to get amount!")
+                // if(typeof(amount) !== 'string')
+                //TODO min transfer size 10$??
+                //TODO validate addresses
+                //TODO validate midgard addresses not expired
+
+                let memo = swap.memo || ''
+
+                let invocation:Invocation = {
+                    fee: {
+                        priority:3
+                    },
+                    context:this.context,
+                    type:'swap',
+                    username:this.username,
+                    inboundAddress:swap.inboundAddress,
+                    network:coin,
+                    asset:coin,
+                    coin,
+                    amount,
+                    memo
+                }
+                if(swap.noBroadcast) invocation.noBroadcast = true
+
+                let data = await this.pioneerApi.instance.GetThorchainMemoEncoded(null,swap)
+                data = data.data
+                log.debug(tag,"txData: ",data)
+
+
 
             } catch (e) {
                 log.error(tag, "e: ", e)

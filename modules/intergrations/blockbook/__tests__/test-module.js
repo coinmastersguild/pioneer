@@ -29,11 +29,11 @@ network.init(servers)
 //         console.log(JSON.stringify(resp))
 //     })
 
-network.getPubkeyInfo('BTC',"")
-    .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
-    })
+// network.getPubkeyInfo('BTC',"")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.getTransaction('BCH',"")
 //     .then(function(resp){

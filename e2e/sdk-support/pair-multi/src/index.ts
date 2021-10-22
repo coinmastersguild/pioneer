@@ -217,10 +217,16 @@ const test_service = async function () {
 
         //get user
         let user = await app.getUserParams()
-        log.debug("user: ",user)
+        log.info("user: ",user)
         assert(user.context)
-
+        assert(app.balances)
+        log.info("balances: ",app.balances.length)
+        log.info("balances: ",app.balances)
         //verify pairing has metamask wallet
+
+        //12?
+        assert(app.balances,12)
+
 
         //switch context
 

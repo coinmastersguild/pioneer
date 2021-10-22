@@ -31,8 +31,6 @@ let run_test = async function(){
         let lockStatus = await Hardware.isLocked()
         console.log("lockStatus: ",lockStatus)
 
-
-
         await Hardware.wipe()
 
         console.log("loading seed: ",process.env['WALLET_MAIN'])

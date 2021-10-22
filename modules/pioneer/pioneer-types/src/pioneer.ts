@@ -215,7 +215,7 @@ export interface CitadelWallet {
     temp?:string
     masterAddress: string;
     TYPE: string;
-    seed_encrypted:string
+    seed_encrypted?:string
     hash:string
     filename:string
 }

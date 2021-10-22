@@ -16,10 +16,6 @@ import {
     StdSignMsg
 } from '@terra-money/terra.js';
 
-import {
-    Key
-} from '@terra-money/terra.js';
-
 module.exports = {
     signTx:function (to:string,from:string,amount:number,memo:string,seed:string) {
         return sign_transaction(to,from,amount,memo,seed)

@@ -601,11 +601,11 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.debug(tag,"address (HDwallet): ",address)
-                    log.debug(tag,"address (private): ",output)
-                    if(address !== output) {
-                        throw Error("unable to verify address in HDwallet!")
-                    }
+                    log.info(tag,"address (HDwallet): ",address)
+                    log.info(tag,"address (private): ",output)
+                    // if(address !== output) {
+                    //     throw Error("unable to verify address in HDwallet!")
+                    // }
                     return output
                 }else{
                     log.error(tag,"PUBLIC_WALLET: ",this.PUBLIC_WALLET)

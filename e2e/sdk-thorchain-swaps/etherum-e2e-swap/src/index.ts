@@ -45,9 +45,6 @@ let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
-import {
-    Transfer
-} from "@pioneer-platform/pioneer-types";
 
 let {
     supportedBlockchains,
@@ -76,10 +73,12 @@ let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
 
-let CURRENCY_IN=ASSET
-let CURRENCY_OUT='BCH'
 
-let noBroadcast = false
+let TRADE_PAIR  = "ETH_BCH"
+let INPUT_ASSET = ASSET
+let OUTPUT_ASSET = "BCH"
+
+let noBroadcast = true
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -97,29 +96,51 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        log.debug(tag,"wallets: ",wallets)
+        // log.info(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.debug(tag,"appContext: ",appContext)
+        log.info(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
-        let contextAlpha = appWallets[0]
-        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
-        assert(balance)
+        log.info(tag,"appWallets: ",appWallets)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
-        //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
-        if(balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+        //filter wallets with current context
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //get pubkey
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.info(tag,"pubkey: ",pubkey)
+        assert(pubkey)
+
+        //get master output
+        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.info(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        assert(pubkeyOutput)
+        assert(pubkeyOutput.master)
+
+        //balance
+        let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
+        log.info(tag,"balance: ",balance)
+        assert(balance)
+        assert(balance.balance)
+
+        let master = pubkey.master
+        assert(master)
+
+        // //assert balance local
+        log.info(tag,"master: ",master)
+        if(balance.balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
+
 
         //generate new key
         const queryKey = uuidv4();
@@ -255,13 +276,11 @@ const test_service = async function () {
 
         //filter by chain
         let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-        log.debug(tag,"ethVault: ",ethVault)
+        log.info(tag,"ethVault: ",ethVault)
 
-        if(ethVault.halted) {
+        if(ethVault[0].halted) {
             log.debug(tag,"ethVault: ",ethVault)
             throw Error("Unable to swap! network halted!")
-        } else {
-            throw Error("wtf")
         }
 
         assert(ethVault[0])
@@ -334,7 +353,7 @@ const test_service = async function () {
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.debug(tag,"broadcastResult: ",broadcastResult)
+        log.info(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 

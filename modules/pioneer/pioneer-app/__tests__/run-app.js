@@ -54,12 +54,12 @@ let run_test = async function(){
 
             config.password = password
             config.username = username
-
+            console.log("config: ",config)
             let resultInit = await App.init(config)
             console.log("resultInit: ",resultInit)
 
             //pair
-            let code = "PGG7VO"
+            let code = "XSLEG9"
             console.log("code: ",code)
             let pairResult = await App.pair(code)
             console.log("pairResult: ",pairResult)
