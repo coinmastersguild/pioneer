@@ -66,7 +66,7 @@ let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.0001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
-
+let TEST_ADDRESS_METAMASK = process.env['TEST_ADDRESS_METAMASK'] || "0x727e17d0b8e5c793a64a3ff8dab748abfee46757"
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
@@ -150,18 +150,18 @@ const test_service = async function () {
             name:'MetaMask',
             network:1,
             initialized:true,
-            address:"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9"
+            address:TEST_ADDRESS_METAMASK
         }
         log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
 
         //pair wallet
         let resultRegister = await app.registerWallet(pairWalletOnboard)
-        log.debug(tag,"resultRegister: ",resultRegister)
+        log.info(tag,"resultRegister: ",resultRegister)
 
         //sdk info
-        log.debug("app pubkeys: ",app.pubkeys)
-        log.debug("app balances: ",app.balances)
-        log.debug("app context: ",app.context)
+        log.info("app pubkeys: ",app.pubkeys)
+        log.info("app balances: ",app.balances)
+        log.info("app context: ",app.context)
         assert(app.pubkeys)
         assert(app.balances)
         // assert(app.balances.length > 0)
@@ -216,16 +216,22 @@ const test_service = async function () {
         //TODO verify username migration to app username in sdk
 
         //get user
-        let user = await app.getUserParams()
-        log.info("user: ",user)
-        assert(user.context)
+        // let user = await app.getUserParams()
+        // log.info("user: ",user)
+        // assert(user.context)
         assert(app.balances)
-        log.info("balances: ",app.balances.length)
+        // log.info("balances: ",app.balances.length)
         log.info("balances: ",app.balances)
+        log.info("app: ",app)
         //verify pairing has metamask wallet
 
+        //verify metamask pubkey is found in balances
+        let metamaskPubkeyInfo = app.balances.filter((e:any) => e.pubkey == TEST_ADDRESS_METAMASK)[0]
+        log.info("metamaskPubkeyInfo: ",metamaskPubkeyInfo)
+        assert(metamaskPubkeyInfo)
+
         //12?
-        assert(app.balances,12)
+        // assert(app.balances,12)
 
 
         //switch context

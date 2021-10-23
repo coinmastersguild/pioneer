@@ -71,7 +71,7 @@ let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_RUNE_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5'
-let FAUCET_BCH_ADDRESS = process.env['FAUCET_RUNE_ADDRESS'] || 'qrsggegsd2msfjaueml6n6vyx6awfg5j4qmj0u89hj'
+let FAUCET_BCH_ADDRESS = process.env['FAUCET_BCH_ADDRESS'] || 'qzxp0xc6vsj8apg9ym4n4jl45pyxtkpshuvr9smjp3'
 
 
 let TRADE_PAIR  = "ETH_BCH"
@@ -197,71 +197,65 @@ const test_service = async function () {
 
         //assert sdk user
         //get user
-        let user = await app.getUserParams()
-        log.debug("user: ",user)
-        assert(user.context)
-        assert(user.clients[BLOCKCHAIN])
 
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
 
-        let client = user.clients['ethereum']
 
         //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
-        assert(masterAddress)
+        // let masterAddress = await client.getAddress()
+        // log.debug(tag,"masterAddress: ",masterAddress)
+        // assert(masterAddress)
+        //
+        // /*
+        //     3 ways to express balance
+        //         Sdk (x-chain compatible object type)
+        //         native (satoshi/wei)
+        //         base (normal 0.001 ETH)
+        //  */
+        //
+        // let balanceSdk = await client.getBalance()
+        // log.debug(" balanceSdk: ",balanceSdk)
+        // assert(balanceSdk[0])
+        // assert(balanceSdk[0].amount)
+        // assert(balanceSdk[0].amount.amount())
+        // assert(balanceSdk[0].amount.amount().toString())
+        //
+        //
+        // let balanceNative = balanceSdk[0].amount.amount().toString()
+        // log.debug(tag,"balanceNative: ",balanceNative)
+        // assert(balanceNative)
+        //
+        // let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
+        // log.debug(tag,"balanceBase: ",balanceBase)
+        // assert(balanceBase)
+        //
+        // //value USD
+        // let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
+        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        // assert(valueBalanceUsd)
+        //
+        // if(balanceBase < TEST_AMOUNT){
+        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        // }
 
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
 
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
-        assert(balanceSdk[0])
-        assert(balanceSdk[0].amount)
-        assert(balanceSdk[0].amount.amount())
-        assert(balanceSdk[0].amount.amount().toString())
-
-
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
-
-        let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
-
-        //value USD
-        let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
-        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        assert(valueBalanceUsd)
-
-        if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        }
-
-        let asset = {
-            chain:"ETH",
-            symbol:"ETH",
-            ticker:"ETH",
-        }
-
-        //get estimate
-        let estimatePayload = {
-            asset,
-            amount:balanceBase.toString(),
-            recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
-        }
-        log.debug(tag,"estimatePayload: ",estimatePayload)
-
-        let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        log.debug(tag,"estimateCost: ",estimateCost)
-        assert(estimateCost)
+        // let asset = {
+        //     chain:"ETH",
+        //     symbol:"ETH",
+        //     ticker:"ETH",
+        // }
+        //
+        //TODO
+        // //get estimate
+        // let estimatePayload = {
+        //     asset,
+        //     amount:balanceBase.toString(),
+        //     recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
+        // }
+        // log.debug(tag,"estimatePayload: ",estimatePayload)
+        //
+        // let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
+        // log.debug(tag,"estimateCost: ",estimateCost)
+        // assert(estimateCost)
 
         //max cost - balance
 
@@ -299,164 +293,165 @@ const test_service = async function () {
 
         let swap:any = {
             inboundAddress: ethVault,
+            addressFrom:pubkey.pubkey,
             coin: "ETH",
             asset: "ETH",
-            memo: '=:BCH.BCH:'+FAUCET_BCH_ADDRESS,
-            "amount":{
-                // "type":"BASE",
-                // "decimal":18,
-                //TODO bignum like asgardx?
-                amount: function(){
-                    return BigNumber.BigNumber.from(baseAmountToNative("ETH",TEST_AMOUNT))
-                }
-            },
+            memo: '=:'+OUTPUT_ASSET+'.'+OUTPUT_ASSET+':'+FAUCET_BCH_ADDRESS,
+            "amount":TEST_AMOUNT
         }
         if(noBroadcast) swap.noBroadcast = true
+        log.info(tag,"swap: ",swap)
+
+        //build swap
+        // let responseSwap = await app.buildSwap(swap,options)
+        // log.info(tag,"responseSwap: ",responseSwap)
+
+        //signTx
 
         //if create new
-        let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
-        log.debug(tag,"responseSwap: ",responseSwap)
-        invocationId = responseSwap
-
-        //do not continue invocation
-        assert(invocationId)
-
-        let transaction = {
-            invocationId,
-            context:user.context
-        }
-
-        //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
-
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-        assert(invocationView1.state)
-        assert.equal(invocationView1.state,'builtTx')
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.debug(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        assert(signedTx.txid)
-
+        // let responseSwap = await user.clients.ethereum.buildSwap(swap,options)
+        // log.debug(tag,"responseSwap: ",responseSwap)
+        // invocationId = responseSwap
+        //
+        // //do not continue invocation
+        // assert(invocationId)
+        //
+        // let transaction = {
+        //     invocationId,
+        //     context:user.context
+        // }
+        //
+        // //build
+        // let unsignedTx = await buildTransaction(transaction)
+        // log.debug(tag,"unsignedTx: ",unsignedTx)
+        // assert(unsignedTx)
+        //
         // //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        assert(invocationView2.state)
-        assert.equal(invocationView2.state,'signedTx')
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
-
-        //get invocation info EToC
-
-        let isConfirmed = false
-        //wait for confirmation
-
-        if(!noBroadcast){
-            // let invocationView3 = await app.getInvocation(invocationId)
-            // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-            // assert(invocationView3)
-            // assert(invocationView3.state)
-            // assert.equal(invocationView3.state,'broadcasted')
-
-            /*
-
-                Status codes
-
-                -1: errored
-                 0: unknown
-                 1: built
-                 2: broadcasted
-                 3: confirmed
-                 4: fullfilled (swap completed)
-
-             */
-
-            //monitor tx lifecycle
-            let currentStatus
-            let statusCode = 0
-            // let txid
-            //wait till confirmed in block
-            while(!isConfirmed){
-                //get invocationInfo
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
-
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let response = await client.getTransactionData(txid)
-                log.debug(tag,"response: ",response)
-
-                if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.debug(tag,"Confirmed!")
-                    statusCode = 3
-                    isConfirmed = true
-                } else {
-                    log.debug(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
-                    await sleep(6000)
-                }
-            }
-
-
-            let isFullfilled = false
-            let fullfillmentTxid
-            //wait till swap is fullfilled
-            while(!isFullfilled){
-                //get midgard info
-                let txInfoMidgard = await midgard.getTransaction(txid)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
-                log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
-
-                //TODO handle multiple actions?
-                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-                    let depositInfo = txInfoMidgard.actions[0].in
-                    log.debug(tag,"deposit: ",depositInfo)
-
-                    let fullfillmentInfo = txInfoMidgard.actions[0]
-                    log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
-
-                    if(fullfillmentInfo.status === 'success'){
-                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
-
-                        statusCode = 4
-                        isFullfilled = true
-                        fullfillmentTxid = fullfillmentInfo.out[0].txID
-
-                        //TODO get transaction info output
-
-                        //verify address
-                        //verify amount
-                        //verify confirmed
-                        //check outgoing fee?
-
-                    } else {
-                        await sleep(6000)
-                    }
-                }
-
-
-            }
-            log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
-        }
-        let result = await app.stopSocket()
-        log.debug(tag,"result: ",result)
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        // assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'builtTx')
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.debug(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // assert(signedTx.txid)
+        //
+        // // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        // assert(invocationView2.state)
+        // assert.equal(invocationView2.state,'signedTx')
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
+        //
+        // //get invocation info EToC
+        //
+        // let isConfirmed = false
+        // //wait for confirmation
+        //
+        // if(!noBroadcast){
+        //     // let invocationView3 = await app.getInvocation(invocationId)
+        //     // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        //     // assert(invocationView3)
+        //     // assert(invocationView3.state)
+        //     // assert.equal(invocationView3.state,'broadcasted')
+        //
+        //     /*
+        //
+        //         Status codes
+        //
+        //         -1: errored
+        //          0: unknown
+        //          1: built
+        //          2: broadcasted
+        //          3: confirmed
+        //          4: fullfilled (swap completed)
+        //
+        //      */
+        //
+        //     //monitor tx lifecycle
+        //     let currentStatus
+        //     let statusCode = 0
+        //     // let txid
+        //     //wait till confirmed in block
+        //     while(!isConfirmed){
+        //         //get invocationInfo
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.debug(tag,"invocationInfo: ",invocationInfo)
+        //
+        //         txid = invocationInfo.signedTx.txid
+        //         assert(txid)
+        //         if(!currentStatus) currentStatus = 'transaction built!'
+        //         if(statusCode <= 0) statusCode = 1
+        //
+        //         //lookup txid
+        //         let response = await client.getTransactionData(txid)
+        //         log.debug(tag,"response: ",response)
+        //
+        //         if(response && response.txInfo && response.txInfo.blockNumber){
+        //             log.debug(tag,"Confirmed!")
+        //             statusCode = 3
+        //             isConfirmed = true
+        //         } else {
+        //             log.debug(tag,"Not confirmed!")
+        //             //get gas price recomended
+        //
+        //             //get tx gas price
+        //             await sleep(6000)
+        //         }
+        //     }
+        //
+        //
+        //     let isFullfilled = false
+        //     let fullfillmentTxid
+        //     //wait till swap is fullfilled
+        //     while(!isFullfilled){
+        //         //get midgard info
+        //         let txInfoMidgard = await midgard.getTransaction(txid)
+        //         log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
+        //         log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
+        //         log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
+        //
+        //         //TODO handle multiple actions?
+        //         if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+        //             let depositInfo = txInfoMidgard.actions[0].in
+        //             log.debug(tag,"deposit: ",depositInfo)
+        //
+        //             let fullfillmentInfo = txInfoMidgard.actions[0]
+        //             log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
+        //
+        //             if(fullfillmentInfo.status === 'success'){
+        //                 log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
+        //                 log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
+        //
+        //                 statusCode = 4
+        //                 isFullfilled = true
+        //                 fullfillmentTxid = fullfillmentInfo.out[0].txID
+        //
+        //                 //TODO get transaction info output
+        //
+        //                 //verify address
+        //                 //verify amount
+        //                 //verify confirmed
+        //                 //check outgoing fee?
+        //
+        //             } else {
+        //                 await sleep(6000)
+        //             }
+        //         }
+        //
+        //
+        //     }
+        //     log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
+        // }
+        // let result = await app.stopSocket()
+        // log.debug(tag,"result: ",result)
 
 
         log.notice("****** TEST PASS ******")

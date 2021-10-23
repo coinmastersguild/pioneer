@@ -16,7 +16,7 @@ const Pioneer = require('openapi-client-axios').default;
 let pioneerApi:any
 
 module.exports = class wallet {
-    private init: (type: string, config: any) => Promise<any>;
+    private init: (spec: string, config: any) => Promise<any>;
     private spec: string;
     private queryKey: any;
     constructor(spec:string,config:any) {
