@@ -69,7 +69,7 @@ module.exports = class wallet {
         this.invoke = async function (invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
-                log.debug(tag,"invocation: ",invocation)
+                log.info(tag,"invocation: ",invocation)
                 if(!invocation.type) throw Error("invocation Type required!")
                 if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
@@ -81,9 +81,13 @@ module.exports = class wallet {
                 //TODO sign
                 let msg = JSON.stringify(invocation)
                 //let invocationSig = sign.sign(this.signingPubkey,msg,this.signingPrivkey)
+                if(invocation.type === 'swap' && !invocation.addressFrom){
+                    throw Error("AddressFrom required! on swaps")
+                }
 
                 //Dapps sign all invocations
                 let request:InvocationBody = {
+                    addressFrom:invocation.addressFrom,
                     network:invocation.network,
                     context:invocation.context,
                     // pubkey:this.signingPubkey,
@@ -95,7 +99,7 @@ module.exports = class wallet {
                     invocationId
                 }
                 //
-                log.debug(tag,"invocation BODY: ",request)
+                log.info(tag,"invocation BODY: ",request)
                 let result = await this.pioneerApi.instance.Invoke(null, request)
                 //log.debug(tag,"result: ",result)
                 return result.data

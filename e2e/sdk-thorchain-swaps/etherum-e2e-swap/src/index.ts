@@ -304,7 +304,8 @@ const test_service = async function () {
         }
 
         log.info(tag,"amountNative: ",baseAmountToNative("eth",TEST_AMOUNT))
-
+        assert(pubkey.pubkey)
+        assert(pubkey.address)
         let swap:any = {
             context:app.context,
             inboundAddress: ethVault,
@@ -330,7 +331,7 @@ const test_service = async function () {
         //signTx
 
         //if create new
-        invocationId = responseSwap
+        invocationId = responseSwap.invocationId
 
         //do not continue invocation
         assert(invocationId)
@@ -340,12 +341,21 @@ const test_service = async function () {
             context:app.context
         }
 
+        //get invocation
+        log.info(tag,"transaction: ",transaction)
+        log.info(tag,"invocationId: ",invocationId)
+        let invocationView1 = await app.getInvocation(responseSwap.invocationId)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        // assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'builtTx')
+
         //build
         // let unsignedTx = await buildTransaction(transaction)
-        // log.debug(tag,"unsignedTx: ",unsignedTx)
+        // log.info(tag,"unsignedTx: ",unsignedTx)
         // assert(unsignedTx)
-        //
-        // //get invocation
+
+        //get invocation
         // let invocationView1 = await app.getInvocation(invocationId)
         // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         // assert(invocationView1)

@@ -243,7 +243,8 @@ export async function buildTransaction(transaction:any) {
         //TODO validate type and fields
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.debug(tag," APP invocation: ",invocation)
+        if(!invocation) throw Error("103: failed to get invocation")
+        log.info(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -264,7 +265,8 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        log.info(tag,"walletContext: ",walletContext.walletId)
+        log.info(tag,"invocation: ",invocation)
 
         let unsignedTx
         switch(invocation.type) {
@@ -308,16 +310,16 @@ export async function buildTransaction(transaction:any) {
                 log.debug(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                log.debug(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
-                log.debug(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
+                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("APP E2E Unhandled type: ",invocation.type)
                 console.error("Unhandled: ",invocation)
                 throw Error("Unhandled type: "+invocation.type)
         }
-
+        if(!unsignedTx && !unsignedTx.txid) throw Error("Failed to build tx!")
         //update invocation
         let invocationId = invocation.invocationId
         let updateBody = {

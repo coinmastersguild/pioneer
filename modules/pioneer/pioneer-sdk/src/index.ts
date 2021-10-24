@@ -30,6 +30,7 @@ import {
     SendToAddress,
     Config,
     User,
+    Swap,
     SDKConfig,
     OnboardWallet,
     IBCdeposit,
@@ -281,7 +282,7 @@ export class SDK {
 
                 //TODO removeme?
                 this.events.events.on('pairing', (event:any) => {
-                    log.info(tag,'CHECKPOINT2 ***** ');
+                    log.info(tag,'CHECKPOINT2a ***** ');
                     log.info(tag,'app paired! ',event);
                     this.username = event.username
                     this.updateContext()
@@ -591,8 +592,9 @@ export class SDK {
         this.getInvocation = async function (invocationId:string) {
             let tag = TAG + " | getInvocations | "
             try {
-                if(!invocationId) invocationId = this.invocationContext
+                if(!invocationId) throw Error("invocationId required!")
                 let result = await this.pioneerApi.Invocation(invocationId)
+                log.info(tag,"result: ",result)
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -684,11 +686,8 @@ export class SDK {
         this.buildSwapTx = async function (swap:any) {
             let tag = TAG + " | buildSwapTx | "
             try {
-
+                if(!swap.addressFrom) throw Error("invalid swap input!")
                 let swapTx = await this.txBuilder.buildSwap(swap)
-
-                //invoke
-
                 return swapTx
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -1363,13 +1362,14 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.buildSwap = async function (swap:any,options:any, asset:string) {
+        this.buildSwap = async function (swap:Swap,options:any, asset:string) {
             let tag = TAG + " | buildSwap | "
             try {
                 if(!asset) throw Error("asset required!")
+                if(!swap.addressFrom) throw Error("invalid swap input!")
+
                 log.debug(tag,"swap: ",swap)
                 log.debug(tag,"options: ",options)
-
                 //verbose
                 let verbose
                 let txidOnResp
@@ -1399,11 +1399,12 @@ export class SDK {
                 //TODO validate midgard addresses not expired
 
                 let memo = swap.memo || ''
-
+                if(!swap.addressFrom) throw Error("from address required!")
                 let invocation:Invocation = {
                     fee: {
                         priority:3
                     },
+                    addressFrom:swap.addressFrom,
                     context:this.context,
                     type:'swap',
                     username:this.username,
@@ -1416,7 +1417,8 @@ export class SDK {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.info(tag,"**** invocation: ",invocation)
+                if(!invocation.addressFrom) throw Error("from address required!")
                 let result = await this.invoke.invoke(invocation)
                 log.info(tag,"result: ",result)
 

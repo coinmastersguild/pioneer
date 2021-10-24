@@ -24,6 +24,7 @@ export interface Invocation {
     context:string
     username:string
     //optionals
+    addressFrom?:string,
     type?:string
     noBroadcast?:boolean
     invocationId?:string
@@ -58,6 +59,7 @@ export interface InvocationBody {
     type:string
     username:string,
     invocation:Invocation
+    addressFrom?:string,
     invocationId?:string
     auth?:string
     service?:string
