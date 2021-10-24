@@ -78,7 +78,7 @@ let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
 
-let noBroadcast = true
+let noBroadcast = false
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -344,40 +344,36 @@ const test_service = async function () {
         //get invocation
         log.info(tag,"transaction: ",transaction)
         log.info(tag,"invocationId: ",invocationId)
-        let invocationView1 = await app.getInvocation(responseSwap.invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        // assert(invocationView1.state)
-        // assert.equal(invocationView1.state,'builtTx')
+
 
         //build
-        // let unsignedTx = await buildTransaction(transaction)
-        // log.info(tag,"unsignedTx: ",unsignedTx)
-        // assert(unsignedTx)
+        let unsignedTx = await buildTransaction(transaction)
+        log.info(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
 
         //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        // assert(invocationView1.state)
-        // assert.equal(invocationView1.state,'builtTx')
-        //
-        // //sign transaction
-        // let signedTx = await approveTransaction(transaction)
-        // log.debug(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // assert(signedTx.txid)
-        //
-        // // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        // assert(invocationView2.state)
-        // assert.equal(invocationView2.state,'signedTx')
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await broadcastTransaction(transaction)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+        assert(invocationView1.state)
+        assert.equal(invocationView1.state,'builtTx')
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.debug(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        assert(signedTx.txid)
+
+        // //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await broadcastTransaction(transaction)
+        log.info(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -420,7 +416,7 @@ const test_service = async function () {
                 if(statusCode <= 0) statusCode = 1
 
                 //lookup txid
-                let response = await app.getTransactionData(txid)
+                let response = await app.getTransactionData(txid,ASSET)
                 log.debug(tag,"response: ",response)
 
                 if(response && response.txInfo && response.txInfo.blockNumber){

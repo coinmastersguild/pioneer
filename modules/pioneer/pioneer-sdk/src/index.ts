@@ -514,7 +514,7 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTransactionData = async function (txid:string,asset?:string) {
+        this.getTransactionData = async function (txid:string,asset:string) {
             let tag = TAG + " | getTransactionData | "
             try {
                 if(!txid) throw Error("Txid is required!")
