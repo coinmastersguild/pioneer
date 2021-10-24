@@ -124,7 +124,7 @@ export class SDK {
     private validateAddress: (address: string) => boolean;
     private getBalance: (address?: any, asset?: string) => Promise<any>;
     private getTransactions: (address: string) => Promise<void>;
-    private getTransactionData: (txid: string, type?: string) => Promise<any>;
+    private getTransactionData: (txid: string, asset: string) => Promise<any>;
     private getFees: (params?: any) => Promise<any>;
     private deposit: (deposit: any, options: any, asset: string) => Promise<any>;
     private transfer: (tx: Transfer, asset: string) => Promise<any>;
@@ -301,6 +301,10 @@ export class SDK {
 
                 this.events.events.on('balances', (event:any) => {
                     log.debug(tag,"balances event!", event)
+                });
+
+                this.events.events.on('invocationUpdate', (event:any) => {
+                    log.debug(tag,"invocationUpdate event!", event)
                 });
 
                 return this.events.events
@@ -594,7 +598,7 @@ export class SDK {
             try {
                 if(!invocationId) throw Error("invocationId required!")
                 let result = await this.pioneerApi.Invocation(invocationId)
-                log.info(tag,"result: ",result)
+                //log.info(tag,"result: ",result)
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)

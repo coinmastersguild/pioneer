@@ -381,6 +381,23 @@ const test_service = async function () {
         //wait for confirmation
 
         if(!noBroadcast){
+            log.info("Broadcasting!")
+
+            //verify broadcasted
+            let invocationView3 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+
+            //rebroadcast
+            if(invocationView3.state !== 'broadcasted'){
+                //broadcast transaction
+                let broadcastResult = await broadcastTransaction(transaction)
+                log.info(tag,"broadcastResult: ",broadcastResult)
+            }
+
+            //TODO fixme force state to broadcast
+            // assert(invocationView3.state)
+            // assert.equal(invocationView3.state,'broadcasted')
+
             // let invocationView3 = await app.getInvocation(invocationId)
             // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
             // assert(invocationView3)
@@ -400,83 +417,108 @@ const test_service = async function () {
 
              */
 
+
             //monitor tx lifecycle
-            let currentStatus
-            let statusCode = 0
-            // let txid
-            //wait till confirmed in block
-            while(!isConfirmed){
-                //get invocationInfo
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
-
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let response = await app.getTransactionData(txid,ASSET)
-                log.debug(tag,"response: ",response)
-
-                if(response && response.txInfo && response.txInfo.blockNumber){
-                    log.debug(tag,"Confirmed!")
-                    statusCode = 3
-                    isConfirmed = true
-                } else {
-                    log.debug(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
-                    await sleep(6000)
-                }
-            }
-
 
             let isFullfilled = false
             let fullfillmentTxid
-            //wait till swap is fullfilled
-            while(!isFullfilled){
-                //get midgard info
-                let txInfoMidgard = await midgard.getTransaction(txid)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
-                log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
+            let currentStatus
+            let statusCode = 0
 
-                //TODO handle multiple actions?
-                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-                    let depositInfo = txInfoMidgard.actions[0].in
-                    log.debug(tag,"deposit: ",depositInfo)
+            while(!isConfirmed && !isFullfilled){
+                //get invocationInfo
+                await sleep(6000)
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.info(tag,"invocationInfo: ",invocationInfo)
 
-                    let fullfillmentInfo = txInfoMidgard.actions[0]
-                    log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
 
-                    if(fullfillmentInfo.status === 'success'){
-                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-                        log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
-
-                        statusCode = 4
-                        isFullfilled = true
-                        fullfillmentTxid = fullfillmentInfo.out[0].txID
-
-                        //TODO get transaction info output
-
-                        //verify address
-                        //verify amount
-                        //verify confirmed
-                        //check outgoing fee?
-
-                    } else {
-                        await sleep(6000)
-                    }
+                if(invocationInfo && invocationInfo.isConfirmed){
+                    log.info(tag,"Confirmed!")
+                    statusCode = 3
+                    isConfirmed = true
+                } else if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
+                    log.info(tag,"Not confirmed!")
+                    fullfillmentTxid = invocationInfo.fullfillmentTxid
+                    isFullfilled = true
+                    //get tx gas price
                 }
-
-
             }
+
+            // let txid
+            //wait till confirmed in block
+            // while(!isConfirmed){
+            //     //get invocationInfo
+            //     let invocationInfo = await app.getInvocation(invocationId)
+            //     log.info(tag,"invocationInfo: ",invocationInfo)
+            //
+            //     txid = invocationInfo.signedTx.txid
+            //     assert(txid)
+            //     if(!currentStatus) currentStatus = 'transaction built!'
+            //     if(statusCode <= 0) statusCode = 1
+            //
+            //     //lookup txid
+            //     let response = await app.getTransactionData(txid,ASSET)
+            //     log.info(tag,"response: ",response)
+            //
+            //     if(response && response.txInfo && response.txInfo.blockNumber){
+            //         log.info(tag,"Confirmed!")
+            //         statusCode = 3
+            //         isConfirmed = true
+            //     } else {
+            //         log.info(tag,"Not confirmed!")
+            //         //get gas price recomended
+            //
+            //         //get tx gas price
+            //         await sleep(6000)
+            //     }
+            // }
+            //
+            // //verify fullfilled manually
+            //
+            // //wait till swap is fullfilled
+            // while(!isFullfilled){
+            //     //get midgard info
+            //     let txInfoMidgard = await midgard.getTransaction(txid)
+            //     log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions)
+            //     log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
+            //     log.info(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
+            //
+            //     //TODO handle multiple actions?
+            //     if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+            //         let depositInfo = txInfoMidgard.actions[0].in
+            //         log.info(tag,"deposit: ",depositInfo)
+            //
+            //         let fullfillmentInfo = txInfoMidgard.actions[0]
+            //         log.info(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
+            //
+            //         if(fullfillmentInfo.status === 'success'){
+            //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
+            //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
+            //
+            //             statusCode = 4
+            //             isFullfilled = true
+            //             fullfillmentTxid = fullfillmentInfo.out[0].txID
+            //
+            //             //TODO get transaction info output
+            //
+            //             //verify address
+            //             //verify amount
+            //             //verify confirmed
+            //             //check outgoing fee?
+            //
+            //         } else {
+            //             await sleep(6000)
+            //         }
+            //     } else {
+            //         await sleep(6000)
+            //     }
+            //
+            //
+            // }
             log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
         let result = await app.stopSocket()
-        log.debug(tag,"result: ",result)
+        log.info(tag,"result: ",result)
 
 
         log.notice("****** TEST PASS ******")
