@@ -244,7 +244,7 @@ export async function buildTransaction(transaction:any) {
 
         let invocation = await App.getInvocation(transaction.invocationId)
         if(!invocation) throw Error("103: failed to get invocation")
-        log.info(tag," APP invocation: ",invocation)
+        log.debug(tag," APP invocation: ",invocation)
 
         if(!invocation.type) invocation.type = invocation.invocation.type
 
@@ -265,8 +265,8 @@ export async function buildTransaction(transaction:any) {
             walletContext.walletId = walletContext.context
         }
         if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.info(tag,"walletContext: ",walletContext.walletId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"walletContext: ",walletContext.walletId)
+        log.debug(tag,"invocation: ",invocation)
 
         let unsignedTx
         switch(invocation.type) {
@@ -310,9 +310,9 @@ export async function buildTransaction(transaction:any) {
                 log.debug(" **** RESULT TRANSACTION ****  depositUnSigned: ",unsignedTx)
                 break
             case 'swap':
-                log.info(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
+                log.debug(" **** BUILD SWAP ****  invocation: ",invocation.invocation)
                 unsignedTx = await walletContext.buildSwap(invocation.invocation)
-                log.info(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
+                log.debug(" **** RESULT TRANSACTION ****  swapUnSigned: ",unsignedTx)
                 break
             default:
                 console.error("APP E2E Unhandled type: ",invocation.type)
@@ -407,7 +407,7 @@ export async function broadcastTransaction(transaction:any) {
         //get invocation
 
         let invocation = await App.getInvocation(transaction.invocationId)
-        log.info(tag,"invocation: ",invocation)
+        log.debug(tag,"invocation: ",invocation)
 
         //
         if(!invocation.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")

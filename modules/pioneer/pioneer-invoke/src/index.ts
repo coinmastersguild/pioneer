@@ -69,7 +69,7 @@ module.exports = class wallet {
         this.invoke = async function (invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 if(!invocation.type) throw Error("invocation Type required!")
                 if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId
@@ -99,7 +99,7 @@ module.exports = class wallet {
                     invocationId
                 }
                 //
-                log.info(tag,"invocation BODY: ",request)
+                log.debug(tag,"invocation BODY: ",request)
                 let result = await this.pioneerApi.instance.Invoke(null, request)
                 //log.debug(tag,"result: ",result)
                 return result.data

@@ -214,7 +214,7 @@ export class SDK {
                 //market Status
                 let markets = await this.pioneerApi.Status()
                 markets = markets.data
-                log.info(tag,"markets: ",markets)
+                log.debug(tag,"markets: ",markets)
                 this.markets = markets
 
                 //get global info
@@ -259,14 +259,14 @@ export class SDK {
                 }
                 if(this.username) configEvents.username = this.username
                 //sub to events
-                log.info(tag,"configEvents: ",configEvents)
+                log.debug(tag,"configEvents: ",configEvents)
                 this.events = new Events.Events(config)
                 this.events.init()
 
                 //all this not hitting? wtf?
                 this.events.events.on('subscribedToUsername', (event:any) => {
-                    log.info(tag,'CHECKPOINT ***** ');
-                    log.info(tag,'paired to '+this.username);
+                    log.debug(tag,'CHECKPOINT ***** ');
+                    log.debug(tag,'paired to '+this.username);
                     this.isPaired = true
                     this.username = event.username
                     this.events.emit('subscribedToUsername',event)
@@ -274,16 +274,16 @@ export class SDK {
                 });
 
                 this.events.events.on('message', (event:any) => {
-                    log.info(tag,'CHECKPOINT2 ***** ');
-                    log.info(tag,'app paired! ',event);
+                    log.debug(tag,'CHECKPOINT2 ***** ');
+                    log.debug(tag,'app paired! ',event);
                     this.username = event.username
                     this.updateContext()
                 });
 
                 //TODO removeme?
                 this.events.events.on('pairing', (event:any) => {
-                    log.info(tag,'CHECKPOINT2a ***** ');
-                    log.info(tag,'app paired! ',event);
+                    log.debug(tag,'CHECKPOINT2a ***** ');
+                    log.debug(tag,'app paired! ',event);
                     this.username = event.username
                     this.updateContext()
                 });
@@ -598,7 +598,7 @@ export class SDK {
             try {
                 if(!invocationId) throw Error("invocationId required!")
                 let result = await this.pioneerApi.Invocation(invocationId)
-                //log.info(tag,"result: ",result)
+                //log.debug(tag,"result: ",result)
                 return result.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -1289,7 +1289,7 @@ export class SDK {
                 //get info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context
@@ -1382,10 +1382,10 @@ export class SDK {
                     txidOnResp = options.txidOnResp
                 }
                 let coin = asset
-                log.info(tag,"asset: ",asset)
-                log.info(tag,"swap: ",swap)
-                log.info(tag,"swap.amount: ",swap.amount)
-                log.info(tag,"tx.amount.amount(): ",swap.amount.amount())
+                log.debug(tag,"asset: ",asset)
+                log.debug(tag,"swap: ",swap)
+                log.debug(tag,"swap.amount: ",swap.amount)
+                log.debug(tag,"tx.amount.amount(): ",swap.amount.amount())
                 // log.debug(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
                 let amount = swap.amount.amount()
                 amount = nativeToBaseAmount(asset,amount)
@@ -1394,7 +1394,7 @@ export class SDK {
                 //if native
                 // let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(asset,amount)
-                log.info(tag,"amount (final): ",amount)
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
                 if(!this.username) throw Error("Failed to get this.username!")
                 // if(typeof(amount) !== 'string')
@@ -1421,10 +1421,10 @@ export class SDK {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"**** invocation: ",invocation)
+                log.debug(tag,"**** invocation: ",invocation)
                 if(!invocation.addressFrom) throw Error("from address required!")
                 let result = await this.invoke.invoke(invocation)
-                log.info(tag,"result: ",result)
+                log.debug(tag,"result: ",result)
 
                 if(!verbose && !txidOnResp){
                     return result.invocationId

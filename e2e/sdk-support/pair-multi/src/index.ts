@@ -156,12 +156,12 @@ const test_service = async function () {
 
         //pair wallet
         let resultRegister = await app.registerWallet(pairWalletOnboard)
-        log.info(tag,"resultRegister: ",resultRegister)
+        log.debug(tag,"resultRegister: ",resultRegister)
 
         //sdk info
-        log.info("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
-        log.info("app context: ",app.context)
+        log.debug("app pubkeys: ",app.pubkeys)
+        log.debug("app balances: ",app.balances)
+        log.debug("app context: ",app.context)
         assert(app.pubkeys)
         assert(app.balances)
         // assert(app.balances.length > 0)
@@ -217,17 +217,17 @@ const test_service = async function () {
 
         //get user
         // let user = await app.getUserParams()
-        // log.info("user: ",user)
+        // log.debug("user: ",user)
         // assert(user.context)
         assert(app.balances)
-        // log.info("balances: ",app.balances.length)
-        log.info("balances: ",app.balances)
-        log.info("app: ",app)
+        // log.debug("balances: ",app.balances.length)
+        log.debug("balances: ",app.balances)
+        log.debug("app: ",app)
         //verify pairing has metamask wallet
 
         //verify metamask pubkey is found in balances
         let metamaskPubkeyInfo = app.balances.filter((e:any) => e.pubkey == TEST_ADDRESS_METAMASK)[0]
-        log.info("metamaskPubkeyInfo: ",metamaskPubkeyInfo)
+        log.debug("metamaskPubkeyInfo: ",metamaskPubkeyInfo)
         assert(metamaskPubkeyInfo)
 
         //12?

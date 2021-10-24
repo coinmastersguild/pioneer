@@ -425,7 +425,7 @@ module.exports = class wallet {
             let tag = TAG + " | buildSwap | "
             try{
                 let rawTx
-                log.info(tag,"swap: ",swap)
+                log.debug(tag,"swap: ",swap)
 
                 let UTXOcoins = [
                     'BTC',

@@ -73,30 +73,30 @@ const test_service = async function () {
         console.time('appStart')
         //start app and get wallet
         let wallets = await startApp()
-        // log.info(tag,"wallets: ",wallets)
+        // log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
-        log.info(tag,"appWallets: ",appWallets)
+        log.debug(tag,"appWallets: ",appWallets)
 
         //filter wallets with current context
         let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
 
         //get pubkey
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"pubkey: ",pubkey)
+        log.debug(tag,"pubkey: ",pubkey)
         assert(pubkey)
 
         //balance
         let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
         assert(balance)
         assert(balance.balance)
 
@@ -104,7 +104,7 @@ const test_service = async function () {
         assert(master)
 
         // //assert balance local
-        log.info(tag,"master: ",master)
+        log.debug(tag,"master: ",master)
         if(balance.balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")

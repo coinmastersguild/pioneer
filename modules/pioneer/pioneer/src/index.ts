@@ -614,8 +614,8 @@ module.exports = class wallet {
                             throw Error("coin not yet implemented ! ")
                         // code block
                     }
-                    log.info(tag,"address (HDwallet): ",address)
-                    log.info(tag,"address (private): ",output)
+                    log.debug(tag,"address (HDwallet): ",address)
+                    log.debug(tag,"address (private): ",output)
                     // if(address !== output) {
                     //     throw Error("unable to verify address in HDwallet!")
                     // }
@@ -1029,7 +1029,7 @@ module.exports = class wallet {
             let tag = TAG + " | buildSwap | "
             try{
                 let rawTx
-                log.info(tag,"swap: ",swap)
+                log.debug(tag,"swap: ",swap)
 
                 let UTXOcoins = [
                     'BTC',

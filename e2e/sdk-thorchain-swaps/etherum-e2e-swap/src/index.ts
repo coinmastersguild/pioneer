@@ -78,7 +78,7 @@ let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
 
-let noBroadcast = false
+let noBroadcast = true
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -96,36 +96,36 @@ const test_service = async function () {
 
         //start app and get wallet
         let wallets = await startApp()
-        // log.info(tag,"wallets: ",wallets)
+        // log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
         let appContext = getContext()
         assert(appContext)
-        log.info(tag,"appContext: ",appContext)
+        log.debug(tag,"appContext: ",appContext)
 
         //get wallets
         let appWallets = getWallets()
-        log.info(tag,"appWallets: ",appWallets)
+        log.debug(tag,"appWallets: ",appWallets)
 
         //filter wallets with current context
         let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.info(tag,"walletDescriptionContext: ",walletDescriptionContext)
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
 
         //get pubkey
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"pubkey: ",pubkey)
+        log.debug(tag,"pubkey: ",pubkey)
         assert(pubkey)
 
         //get master output
         let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
-        log.info(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        log.debug(tag,"pubkeyOutput: ",pubkeyOutput.master)
         assert(pubkeyOutput)
         assert(pubkeyOutput.master)
 
         //balance
         let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
-        log.info(tag,"balance: ",balance)
+        log.debug(tag,"balance: ",balance)
         assert(balance)
         assert(balance.balance)
 
@@ -133,7 +133,7 @@ const test_service = async function () {
         assert(master)
 
         // //assert balance local
-        log.info(tag,"master: ",master)
+        log.debug(tag,"master: ",master)
         if(balance.balance < MIN_BALANCE){
             log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")
@@ -157,7 +157,7 @@ const test_service = async function () {
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         events.on('message', async (event:any) => {
-            log.info(tag,"event: ",event)
+            log.debug(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -197,15 +197,15 @@ const test_service = async function () {
 
         //assert sdk user
         let usernameSdk = await app.username
-        log.info("app: ",app.username)
-        log.info("usernameSdk: ",usernameSdk)
+        log.debug("app: ",app.username)
+        log.debug("usernameSdk: ",usernameSdk)
         assert(usernameSdk)
         assert(usernameSdk,username)
 
         await app.updateContext()
 
         //verify context
-        log.info("app.context: ",app.context)
+        log.debug("app.context: ",app.context)
         assert(app.context)
 
         //get user
@@ -282,7 +282,7 @@ const test_service = async function () {
 
         //filter by chain
         let ethVault = poolInfo.filter((e:any) => e.chain === 'ETH')
-        log.info(tag,"ethVault: ",ethVault)
+        log.debug(tag,"ethVault: ",ethVault)
 
         if(ethVault[0].halted) {
             log.debug(tag,"ethVault: ",ethVault)
@@ -303,7 +303,7 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        log.info(tag,"amountNative: ",baseAmountToNative("eth",TEST_AMOUNT))
+        log.debug(tag,"amountNative: ",baseAmountToNative("eth",TEST_AMOUNT))
         assert(pubkey.pubkey)
         assert(pubkey.address)
         let swap:any = {
@@ -322,11 +322,11 @@ const test_service = async function () {
             },
         }
         if(noBroadcast) swap.noBroadcast = true
-        log.info(tag,"swap: ",swap)
+        log.debug(tag,"swap: ",swap)
 
         //build swap
         let responseSwap = await app.buildSwap(swap,options,ASSET)
-        log.info(tag,"responseSwap: ",responseSwap)
+        log.debug(tag,"responseSwap: ",responseSwap)
 
         //signTx
 
@@ -342,13 +342,13 @@ const test_service = async function () {
         }
 
         //get invocation
-        log.info(tag,"transaction: ",transaction)
-        log.info(tag,"invocationId: ",invocationId)
+        log.debug(tag,"transaction: ",transaction)
+        log.debug(tag,"invocationId: ",invocationId)
 
 
         //build
         let unsignedTx = await buildTransaction(transaction)
-        log.info(tag,"unsignedTx: ",unsignedTx)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
         assert(unsignedTx)
 
         //get invocation
@@ -373,7 +373,7 @@ const test_service = async function () {
 
         //broadcast transaction
         let broadcastResult = await broadcastTransaction(transaction)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
 
         //get invocation info EToC
 
@@ -381,17 +381,17 @@ const test_service = async function () {
         //wait for confirmation
 
         if(!noBroadcast){
-            log.info("Broadcasting!")
+            log.debug("Broadcasting!")
 
             //verify broadcasted
-            let invocationView3 = await app.getInvocation(invocationId)
+            let invocationView3 = await app.getInvocation(transaction)
             log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
             //rebroadcast
             if(invocationView3.state !== 'broadcasted'){
                 //broadcast transaction
                 let broadcastResult = await broadcastTransaction(transaction)
-                log.info(tag,"broadcastResult: ",broadcastResult)
+                log.debug(tag,"broadcastResult: ",broadcastResult)
             }
 
             //TODO fixme force state to broadcast
@@ -429,15 +429,15 @@ const test_service = async function () {
                 //get invocationInfo
                 await sleep(6000)
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.info(tag,"invocationInfo: ",invocationInfo)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
 
 
                 if(invocationInfo && invocationInfo.isConfirmed){
-                    log.info(tag,"Confirmed!")
+                    log.debug(tag,"Confirmed!")
                     statusCode = 3
                     isConfirmed = true
                 } else if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-                    log.info(tag,"Not confirmed!")
+                    log.debug(tag,"Not confirmed!")
                     fullfillmentTxid = invocationInfo.fullfillmentTxid
                     isFullfilled = true
                     //get tx gas price
@@ -449,7 +449,7 @@ const test_service = async function () {
             // while(!isConfirmed){
             //     //get invocationInfo
             //     let invocationInfo = await app.getInvocation(invocationId)
-            //     log.info(tag,"invocationInfo: ",invocationInfo)
+            //     log.debug(tag,"invocationInfo: ",invocationInfo)
             //
             //     txid = invocationInfo.signedTx.txid
             //     assert(txid)
@@ -458,14 +458,14 @@ const test_service = async function () {
             //
             //     //lookup txid
             //     let response = await app.getTransactionData(txid,ASSET)
-            //     log.info(tag,"response: ",response)
+            //     log.debug(tag,"response: ",response)
             //
             //     if(response && response.txInfo && response.txInfo.blockNumber){
-            //         log.info(tag,"Confirmed!")
+            //         log.debug(tag,"Confirmed!")
             //         statusCode = 3
             //         isConfirmed = true
             //     } else {
-            //         log.info(tag,"Not confirmed!")
+            //         log.debug(tag,"Not confirmed!")
             //         //get gas price recomended
             //
             //         //get tx gas price
@@ -479,21 +479,21 @@ const test_service = async function () {
             // while(!isFullfilled){
             //     //get midgard info
             //     let txInfoMidgard = await midgard.getTransaction(txid)
-            //     log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions)
-            //     log.info(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
-            //     log.info(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
+            //     log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
+            //     log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
+            //     log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
             //
             //     //TODO handle multiple actions?
             //     if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
             //         let depositInfo = txInfoMidgard.actions[0].in
-            //         log.info(tag,"deposit: ",depositInfo)
+            //         log.debug(tag,"deposit: ",depositInfo)
             //
             //         let fullfillmentInfo = txInfoMidgard.actions[0]
-            //         log.info(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
+            //         log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
             //
             //         if(fullfillmentInfo.status === 'success'){
-            //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo)
-            //             log.info(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
+            //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
+            //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
             //
             //             statusCode = 4
             //             isFullfilled = true
@@ -518,7 +518,7 @@ const test_service = async function () {
             log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
         let result = await app.stopSocket()
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
 
         log.notice("****** TEST PASS ******")
