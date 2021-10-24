@@ -48,11 +48,7 @@ let run_test = async function(){
         // let invocation =  await app.getInvocation(invocationId)
         // console.log(invocation)
 
-        let user = await app.getUserParams()
-        console.log("user: ",user)
 
-        let info = await app.clients.osmosis
-        console.log(info)
 
         //let switchContext = await app.setAssetContext('OSMO')
         //console.log(switchContext)

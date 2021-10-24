@@ -640,8 +640,8 @@ let pair_sdk_user = async function (code:string) {
         log.debug(tag,"code: ",code)
         //send code
 
-        log.info(tag,"network: ",network)
-        log.info(tag,"network: ",network.instance)
+        // log.info(tag,"network: ",network)
+        // log.info(tag,"network: ",network.instance)
         let result = await network.instance.Pair(null,{code})
 
         return result.data

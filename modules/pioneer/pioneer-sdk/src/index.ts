@@ -21,6 +21,7 @@ let {
     baseAmountToNative,
     nativeToBaseAmount,
     assetToBase,
+    assetAmount,
 } = require('@pioneer-platform/pioneer-coins')
 let TxBuilder = require('@pioneer-platform/pioneer-tx-builder')
 
@@ -94,20 +95,41 @@ export class SDK {
     public initialized: boolean;
     public markets: any;
     public txBuilder: any;
-    public buildSwap: (swap: any) => Promise<any>;
+    public buildSwap: (swap: any, options: any, asset: string) => Promise<any>;
     public buildSwapTx: (swap: any) => Promise<any>;
     private invoke: any;
     private signTx: (unsignedTx: any) => Promise<{}>;
     private ibcDeposit: (tx: IBCdeposit, nativeAsset: string) => Promise<any>;
     private getValidators: () => Promise<any>;
-    private getDelegations: (validator: string) => Promise<any>;
+    private getDelegations: (validator: string, network: string, address: string) => Promise<any>;
     private getPool: (asset: string) => Promise<any>;
     private swap: (tx: OsmosisSwap, asset: string) => Promise<any>;
     private delegate: (tx: Delegate, asset: string) => Promise<any>;
-    private redelegate: (tx: Delegate) => Promise<any>;
+    private redelegate: (tx: Redelegate, asset: string) => Promise<any>;
     private joinPool: (tx: JoinPool, asset: string) => Promise<any>;
     private getFeesWithMemo: (memo?: string) => Promise<{ average: { amount: () => BigNumber }; fast: { amount: () => BigNumber }; fastest: { amount: () => BigNumber }; type: string }>;
     private getFeeRates: () => Promise<any>;
+    private getNetwork: () => (string);
+    private getExplorerUrl: (network: string) => any;
+    private approve: (asset: string, spender: string, sender: string, amount: string, noBroadcast?: boolean) => Promise<any>;
+    private replace: (invocationId: string, fee: any) => Promise<any>;
+    private estimateFee: ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: any) => Promise<BigNumber>;
+    private isApproved: (routerAddress: string, tokenAddress: string, amount: any) => Promise<boolean>;
+    private updateContext: () => Promise<any>;
+    private getExplorerAddressUrl: (address: string, network: string) => any;
+    private getExplorerTxUrl: (address: string, network: string) => any;
+    private getBlockHeight: (asset: string) => Promise<any>;
+    private getAddress: (asset: string) => any;
+    private validateAddress: (address: string) => boolean;
+    private getBalance: (address?: any, asset?: string) => Promise<any>;
+    private getTransactions: (address: string) => Promise<void>;
+    private getTransactionData: (txid: string, type?: string) => Promise<any>;
+    private getFees: (params?: any) => Promise<any>;
+    private deposit: (deposit: any, options: any, asset: string) => Promise<any>;
+    private transfer: (tx: Transfer, asset: string) => Promise<any>;
+    private estimateFeesWithGasPricesAndLimits: (params: any) => Promise<{ gasPrices: any; fees: { average: { amount: () => BigNumber }; fast: { amount: () => BigNumber }; fastest: { amount: () => BigNumber }; type: string } }>;
+    private getTxCount: (asset: string) => Promise<any>;
+    private updateUserInfo: () => any;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -236,21 +258,39 @@ export class SDK {
                 }
                 if(this.username) configEvents.username = this.username
                 //sub to events
+                log.info(tag,"configEvents: ",configEvents)
                 this.events = new Events.Events(config)
                 this.events.init()
 
+                //all this not hitting? wtf?
                 this.events.events.on('subscribedToUsername', (event:any) => {
-                    log.ingo(tag,'paired to '+this.username);
+                    log.info(tag,'CHECKPOINT ***** ');
+                    log.info(tag,'paired to '+this.username);
                     this.isPaired = true
                     this.username = event.username
                     this.events.emit('subscribedToUsername',event)
                     Events.setUsername(this.username)
                 });
 
+                this.events.events.on('message', (event:any) => {
+                    log.info(tag,'CHECKPOINT2 ***** ');
+                    log.info(tag,'app paired! ',event);
+                    this.username = event.username
+                    this.updateContext()
+                });
+
+                //TODO removeme?
+                this.events.events.on('pairing', (event:any) => {
+                    log.info(tag,'CHECKPOINT2 ***** ');
+                    log.info(tag,'app paired! ',event);
+                    this.username = event.username
+                    this.updateContext()
+                });
+
                 this.events.events.on('context', (event:any) => {
                     log.debug(tag,'context set to '+event.context);
                     this.context = event.context
-                    // this.getUserParams()
+                    this.updateContext()
                 });
 
                 this.events.events.on('pubkey', (event:any) => {
@@ -262,6 +302,15 @@ export class SDK {
                     log.debug(tag,"balances event!", event)
                 });
 
+                return this.events.events
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.updateUserInfo = function () {
+            let tag = TAG + " | updateUserInfo | "
+            try {
+                this.events.disconnect()
                 return this.events.events
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -339,6 +388,148 @@ export class SDK {
                 this.balances = result.balances
 
                 return result
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        // @ts-ignore
+        this.getNetwork = function () {
+            let tag = TAG + " | getNetwork | "
+            try {
+                if(this.isTestnet){
+                    return 'testnet'
+                } else {
+                    return 'mainnet'
+                }
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getExplorerUrl = function (network:string) {
+            let tag = TAG + " | getExplorerUrl | "
+            try {
+                return getExplorerUrl(network,'native',this.isTestnet)
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getExplorerAddressUrl = function (address:string,network:string) {
+            let tag = TAG + " | getExplorerAddressUrl | "
+            try {
+                return getExplorerAddressUrl(address,network,'native',this.isTestnet)
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getExplorerTxUrl = function (tx:string,network:string) {
+            let tag = TAG + " | getExplorerTxUrl | "
+            try {
+                return getExplorerTxUrl(tx,network,'native',this.isTestnet)
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getBlockHeight = async function (asset:string) {
+            let tag = TAG + " | getBlockHeight | "
+            try {
+                //TODO move from asset to blockchain
+                let result = await this.pioneerApi.BlockHeight({network:asset})
+                return result.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getAddress = function (asset:string) {
+            let tag = TAG + " | getAddress | "
+            try {
+                //filter by address
+                let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
+                //prefure context
+
+                return pubkey.master
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        // @ts-ignore
+        this.validateAddress = function (address:string) {
+            let tag = TAG + " | validateAddress | "
+            try {
+                //TODO
+                return true
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getBalance = async function (address?: any, asset?: string): Promise<any> {
+            let tag = TAG + " | getBalance | "
+            try {
+                const balances:any = []
+                //TODO if address
+                //request to api
+                //if no params
+                //assume native on master
+                if(!address && !asset){
+                    let returnAssetAmount = ():number =>{
+                        //for pubkeys by symbol
+                        log.debug(tag,"info: ",this.info)
+                        let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
+                        log.debug(tag,"pubkey: ",pubkey)
+                        let balance = pubkey.balances.filter((e:any) => e.asset === asset)[0]
+                        return balance.balance
+                    }
+
+                    let assetDescription: any = {
+                        // @ts-ignore
+                        chain:asset,
+                        symbol:asset,
+                        ticker:asset
+                    }
+
+                    log.debug(tag,"returnAssetAmount",returnAssetAmount())
+
+                    balances.push({
+                        asset: assetDescription,
+                        // @ts-ignore
+                        amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(asset))),
+                    })
+
+                } else {
+
+                }
+
+                return balances
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getTransactions = async function (address: string) {
+            let tag = TAG + " | getTransactions | "
+            try {
+                //TODO
+                //if xpub
+                //if eth
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getTransactionData = async function (txid:string,asset?:string) {
+            let tag = TAG + " | getTransactionData | "
+            try {
+                if(!txid) throw Error("Txid is required!")
+                log.debug("asset: ",asset)
+                //TODO tech debt, send network instead of asset
+                let output = await this.pioneerApi.GetTransaction({network:asset,txid,type:'thorchain'})
+                return output.data
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.getFees = async function (params?: any) {
+            let tag = TAG + " | getFees | "
+            try {
+                let output = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
+                return output
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -521,10 +712,10 @@ export class SDK {
                 soon? thorchain?
 
          */
-        this.ibcDeposit = async function (tx:IBCdeposit,nativeAsset:string) {
+        this.ibcDeposit = async function (tx:IBCdeposit,asset:string) {
             let tag = TAG + " | ibcDeposit | "
             try {
-                let coin = nativeAsset
+                let coin = asset
 
                 if(!tx.fee) throw Error("103: fee required!")
 
@@ -549,7 +740,7 @@ export class SDK {
                 let source_channel = tx.source_channel
                 // @ts-ignore
                 let source_port = tx.source_port
-                let sender = this.getAddress()
+                let sender = this.getAddress(asset)
                 // @ts-ignore
                 let receiver = tx.receiver
                 // @ts-ignore
@@ -560,6 +751,7 @@ export class SDK {
                 if(!sender) throw Error("105: missing sender")
                 if(!receiver) throw Error("106: missing receiver")
                 if(!token) throw Error("107: missing token")
+                if(!this.username) throw Error("108: missing username")
 
                 let memo = tx.memo || ''
                 let invocation:Invocation = {
@@ -601,10 +793,10 @@ export class SDK {
             }
         }
         //get Delegation balance
-        this.getDelegations = async function (validator:string) {
+        this.getDelegations = async function (validator:string,network:string,address:string) {
             let tag = TAG + " | getValidators | "
             try {
-                let validators = await this.pioneerApi.GetDelegations({network:this.network,address:this.getAddress(),validator:validator})
+                let validators = await this.pioneerApi.GetDelegations({network,address,validator})
                 return validators.data
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -651,6 +843,7 @@ export class SDK {
                 if(!routes) throw Error("103: routes is required")
                 if(!tokenIn) throw Error("104: tokenIn is required")
                 if(!tokenOutMinAmount) throw Error("105: tokenOutMinAmount is required")
+                if(!this.username) throw Error("106: username is required")
 
                 let invocation:Invocation = {
                     type:'osmosisswap',
@@ -713,6 +906,7 @@ export class SDK {
                     tx.context = this.context
                 }
                 if(!tx.context) throw Error("102: context is required on invocations!")
+                if(!this.username) throw Error("103: username is required!")
 
                 let validator = tx.validator
                 let memo = tx.memo || ''
@@ -742,7 +936,7 @@ export class SDK {
             }
         }
         //redelegate
-        this.redelegate = async function (tx:Redelegate) {
+        this.redelegate = async function (tx:Redelegate, asset:string) {
             let tag = TAG + " | delegate | "
             try {
                 let coin = asset
@@ -781,6 +975,7 @@ export class SDK {
                 let validatorOld = tx.validatorOld
                 if(!validator) throw Error("validator required!")
                 if(!validatorOld) throw Error("validatorOld required!")
+                if(!this.username) throw Error("this.username required!")
 
                 let memo = tx.memo || ''
                 let invocation:Invocation = {
@@ -843,6 +1038,7 @@ export class SDK {
                 let tokenInMaxs = tx.tokenInMaxs
                 if(!poolId) throw Error("poolId required!")
                 if(!shareOutAmount) throw Error("shareOutAmount required!")
+                if(!this.username) throw Error("username required!")
 
                 let memo = tx.memo || ''
                 let invocation:Invocation = {
@@ -922,18 +1118,19 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getTxCount = async function () {
+        this.getTxCount = async function (asset:string) {
             let tag = TAG + " | getTxCount | "
             try {
 
                 //output
-                let output = await this.pioneerApi.GetTxCount(this.getAddress())
+                let output = await this.pioneerApi.GetTxCount(this.getAddress(asset))
                 return output.data
 
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
+        // @ts-ignore
         this.estimateFeesWithGasPricesAndLimits = async function (params:any) {
             let tag = TAG + " | estimateFeesWithGasPricesAndLimits | "
             try {
@@ -967,8 +1164,8 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.approve = async function (spender: string, sender: string, amount: BaseAmount, noBroadcast?: boolean) {
-            let tag = TAG + " | getWallet | "
+        this.approve = async function (asset:string,spender: string, sender: string, amount: string, noBroadcast?: boolean) {
+            let tag = TAG + " | approve | "
             try {
                 //
                 let invocation:any = {
@@ -977,7 +1174,7 @@ export class SDK {
                     coin:asset,
                     contract:spender,
                     tokenAddress:sender,
-                    amount:amount.amount().toNumber()
+                    amount:amount
                 }
                 if(noBroadcast) invocation.noBroadcast = true
                 log.debug(tag,"invocation: ",invocation)
@@ -994,6 +1191,7 @@ export class SDK {
             let tag = TAG + " | replace | "
             try {
                 //
+                if(!this.username) throw Error("not paired! this.username required!")
                 let invocation:Invocation = {
                     type:'replace',
                     invocationId,
@@ -1033,8 +1231,9 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.estimateFee = async function ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: EstimateFeeParams) {
-            let tag = TAG + " | getWallet | "
+        // @ts-ignore
+        this.estimateFee = async function ({sourceAsset, ethClient, ethInbound, inputAmount, memo}: any) {
+            let tag = TAG + " | estimateFee | "
             try {
 
                 let params = {
@@ -1053,13 +1252,14 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
+        // @ts-ignore
         this.isApproved = async function (routerAddress:string,tokenAddress:string,amount:any) {
             let tag = TAG + " | isApproved | "
             try {
                 amount = amount.amount().toNumber()
                 if(amount === 0) throw Error("Failed to get a valid amount!")
                 //
-                let address = this.getAddress()
+                let address = this.getAddress('ETH')
                 let body = {
                     token:tokenAddress,
                     spender:routerAddress,
@@ -1085,163 +1285,26 @@ export class SDK {
             try {
                 //get info
                 let userInfo = await this.pioneerApi.User()
-                log.debug(tag,"userInfo: ",userInfo)
+                userInfo = userInfo.data
+                log.info(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context
                 this.wallets = userInfo.wallets
+                this.balances = userInfo.balances
+                this.pubkeys = userInfo.pubkeys
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
                 this.invocationContext = userInfo.invocationContext
                 this.assetContext = userInfo.assetContext
                 this.assetBalanceNativeContext = userInfo.assetBalanceNativeContext
                 this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
 
-                //get info
-                const walletInfo = await this.pioneerApi.Info(this.context)
-                this.info = walletInfo.data
-
                 return userInfo
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getNetwork = function () {
-            let tag = TAG + " | getNetwork | "
-            try {
-                if(this.isTestnet){
-                    return 'testnet'
-                } else {
-                    return 'mainnet'
-                }
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getExplorerUrl = function () {
-            let tag = TAG + " | getExplorerUrl | "
-            try {
-                return getExplorerUrl(this.network,'native',this.isTestnet)
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getExplorerAddressUrl = function (address:string) {
-            let tag = TAG + " | getExplorerAddressUrl | "
-            try {
-                return getExplorerAddressUrl(address,this.network,'native',this.isTestnet)
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getExplorerTxUrl = function (tx:string) {
-            let tag = TAG + " | getExplorerTxUrl | "
-            try {
-                return getExplorerTxUrl(tx,this.network,'native',this.isTestnet)
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getBlockHeight = async function () {
-            let tag = TAG + " | getBlockHeight | "
-            try {
-                //TODO move from asset to blockchain
-                let result = await this.pioneerApi.BlockHeight({network:asset})
-                return result.data
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getAddress = function () {
-            let tag = TAG + " | getAddress | "
-            try {
-                return this.info.masters[asset]
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.validateAddress = function (address:string) {
-            let tag = TAG + " | validateAddress | "
-            try {
-                //TODO
-                return true
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getBalance = async function (address?: Address, asset?: Asset): Promise<Balances> {
-            let tag = TAG + " | getBalance | "
-            try {
-                const balances:any = []
-                //TODO if address
-                //request to api
-                //if no params
-                //assume native on master
-                if(!address && !asset){
-                    let returnAssetAmount = ():number =>{
-                        //for pubkeys by symbol
-                        log.debug(tag,"info: ",this.info)
-                        let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
-                        log.debug(tag,"pubkey: ",pubkey)
-                        let balance = pubkey.balances.filter((e:any) => e.asset === asset)[0]
-                        return balance.balance
-                    }
-
-                    let assetDescription: Asset = {
-                        // @ts-ignore
-                        chain:asset,
-                        symbol:asset,
-                        ticker:asset
-                    }
-
-                    log.debug(tag,"returnAssetAmount",returnAssetAmount())
-
-                    balances.push({
-                        asset: assetDescription,
-                        // @ts-ignore
-                        amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(asset))),
-                    })
-
-                } else {
-
-                }
-
-                return balances
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getTransactions = async function (address: string) {
-            let tag = TAG + " | getTransactions | "
-            try {
-                //TODO
-                //if xpub
-                //if eth
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getTransactionData = async function (txid:string,type?:string) {
-            let tag = TAG + " | getTransactionData | "
-            try {
-                if(!txid) throw Error("Txid is required!")
-                log.debug("asset: ",asset)
-                //TODO tech debt, send network instead of asset
-                let output = await this.pioneerApi.GetTransaction({network:asset,txid,type:'thorchain'})
-                return output.data
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getFees = async function (params?: FeesParams) {
-            let tag = TAG + " | getFees | "
-            try {
-                let output = await this.pioneerApi.EstimateFeesWithGasPricesAndLimits(params)
-                return output
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.deposit = async function (deposit:any,options:any) {
+        this.deposit = async function (deposit:any,options:any,asset:string) {
             let tag = TAG + " | deposit | "
             try {
                 log.debug(tag,"deposit: ",deposit)
@@ -1257,7 +1320,6 @@ export class SDK {
 
                 //NOTE THIS IS ONLY Thorchain!
                 let coin = asset
-                if(this.network !== 'thorchain') throw Error("102: not supported!")
 
                 //if native
                 let amount = deposit.amount.toString()
@@ -1304,6 +1366,7 @@ export class SDK {
         this.buildSwap = async function (swap:any,options:any, asset:string) {
             let tag = TAG + " | buildSwap | "
             try {
+                if(!asset) throw Error("asset required!")
                 log.debug(tag,"swap: ",swap)
                 log.debug(tag,"options: ",options)
 
@@ -1315,10 +1378,10 @@ export class SDK {
                     txidOnResp = options.txidOnResp
                 }
                 let coin = asset
-
-                log.debug(tag,"swap: ",swap)
-                log.debug(tag,"swap.amount: ",swap.amount)
-                log.debug(tag,"tx.amount.amount(): ",swap.amount.amount())
+                log.info(tag,"asset: ",asset)
+                log.info(tag,"swap: ",swap)
+                log.info(tag,"swap.amount: ",swap.amount)
+                log.info(tag,"tx.amount.amount(): ",swap.amount.amount())
                 // log.debug(tag,"tx.amount.amount().toFixed(): ",swap.amount.amount().toNumber())
                 let amount = swap.amount.amount()
                 amount = nativeToBaseAmount(asset,amount)
@@ -1327,8 +1390,9 @@ export class SDK {
                 //if native
                 // let amount = swap.amount.toString()
                 //amount = nativeToBaseAmount(asset,amount)
-                log.debug(tag,"amount (final): ",amount)
+                log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
+                if(!this.username) throw Error("Failed to get this.username!")
                 // if(typeof(amount) !== 'string')
                 //TODO min transfer size 10$??
                 //TODO validate addresses
@@ -1352,9 +1416,9 @@ export class SDK {
                 }
                 if(swap.noBroadcast) invocation.noBroadcast = true
 
-                log.debug(tag,"invocation: ",invocation)
+                log.info(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke(invocation)
-                console.log("result: ",result)
+                log.info(tag,"result: ",result)
 
                 if(!verbose && !txidOnResp){
                     return result.invocationId
@@ -1408,6 +1472,7 @@ export class SDK {
                 let to = tx.recipient
                 let memo = tx.memo || ''
                 if(!to) throw Error("invalid TX missing recipient")
+                if(!this.username) throw Error("this.username required")
                 let invocation:Invocation = {
                     type:'transfer',
                     context:tx.context,
