@@ -368,13 +368,27 @@ export async function metamaskMock(transaction:any) {
         log.info(tag,"signedTx: ",signedTx)
         signedTx.network = 'ETH'
         //broadcast manually outside hook
-        let broadcastResult = await walletContext.broadcastTransaction('ETH',signedTx)
-        log.info(tag,"broadcastResult: ",broadcastResult)
+        // let broadcastResult = await walletContext.broadcastTransaction('ETH',signedTx)
+        // log.info(tag,"broadcastResult: ",broadcastResult)
 
         //TODO return metamask formated txInfo
 
 
         return signedTx
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e
+    }
+}
+
+export async function updateInvocation(updateBody:any) {
+    let tag = " | approveTransaction | ";
+    try {
+
+        let resultUpdate = await App.updateInvocation(updateBody)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
+
+        return resultUpdate
     } catch (e) {
         console.error(tag, "e: ", e);
         throw e

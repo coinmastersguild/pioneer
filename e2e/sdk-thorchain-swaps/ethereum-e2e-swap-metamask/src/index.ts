@@ -37,6 +37,14 @@ let BigNumber = require('@ethersproject/bignumber')
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
+const Axios = require('axios')
+const https = require('https')
+const axios = Axios.create({
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false
+    })
+});
+
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
@@ -61,7 +69,8 @@ const {
     metamaskMock,
     buildTransaction,
     approveTransaction,
-    broadcastTransaction
+    broadcastTransaction,
+    updateInvocation
 } = require('@pioneer-platform/pioneer-app-e2e')
 
 let BLOCKCHAIN = 'ethereum'
@@ -282,131 +291,138 @@ const test_service = async function () {
 
         //get invocation
         log.debug(tag,"transaction: ",transaction)
-        log.notice(tag,"invocationId: ",invocationId)
+        log.test(tag,"invocationId: ",invocationId)
 
         let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
         log.info(tag,"responseInvoke: ",responseInvoke)
-        transaction.invocationId = responseInvoke.invocationId
+        invocationId = responseInvoke.invocationId
+        transaction.invocationId = invocationId
 
         //Mock Metamask
         let resultMock = await metamaskMock(transaction)
         log.info(tag,"resultMock: ",resultMock)
 
-        //build
-        // let unsignedTx = await buildTransaction(transaction)
-        // log.debug(tag,"unsignedTx: ",unsignedTx)
-        // assert(unsignedTx)
-        //
-        // //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        // assert(invocationView1.state)
-        // assert.equal(invocationView1.state,'builtTx')
-        //
-        // //sign transaction
-        // let signedTx = await approveTransaction(transaction)
-        // log.debug(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // assert(signedTx.txid)
-        //
-        // // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        // assert(invocationView2.state)
-        // assert.equal(invocationView2.state,'signedTx')
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await broadcastTransaction(transaction)
-        // log.debug(tag,"broadcastResult: ",broadcastResult)
-        //
-        // //verify broadcasted
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
-        // assert(invocationView3.state)
-        // assert.equal(invocationView3.state,'broadcasted')
-        //
-        // //get invocation info EToC
-        // console.timeEnd('start2broadcast');
-        //
-        // //wait for confirmation
-        // console.time('timeToConfirmed')
-        // if(!noBroadcast){
-        //     log.test(tag,"Broadcasting!")
-        //
-        //     let invocationView4 = await app.getInvocation(invocationId)
-        //     log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
-        //     assert(invocationView4)
-        //     assert(invocationView4.state)
-        //     assert.equal(invocationView3.state,'broadcasted')
-        //
-        //     /*
-        //
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //
-        //      */
-        //
-        //
-        //     //monitor tx lifecycle
-        //     let isConfirmed = false
-        //     let isFullfilled = false
-        //     let fullfillmentTxid = false
-        //     let currentStatus
-        //     let statusCode = 0
-        //
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         await sleep(6000)
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.test(tag,"invocationInfo: ",invocationInfo.state)
-        //
-        //         if(invocationInfo.state === 'builtTx'){
-        //             //rebroadcast
-        //             let broadcastResult = await broadcastTransaction(transaction)
-        //             log.debug(tag,"broadcastResult: ",broadcastResult)
-        //         }
-        //
-        //
-        //         if(invocationInfo && invocationInfo.isConfirmed){
-        //             log.test(tag,"Confirmed!")
-        //             statusCode = 3
-        //             isConfirmed = true
-        //             console.timeEnd('timeToConfirmed')
-        //             console.time('confirm2fullfillment')
-        //         } else {
-        //             log.test(tag,"Not Confirmed!")
-        //         }
-        //
-        //     }
-        //
-        //     while(!isFullfilled){
-        //         //get invocationInfo
-        //         await sleep(6000)
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.test(tag,"invocationInfo: ",invocationInfo.state)
-        //
-        //         if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-        //             log.test(tag,"is fullfilled!")
-        //             fullfillmentTxid = invocationInfo.fullfillmentTxid
-        //             isFullfilled = true
-        //             console.timeEnd('confirm2fullfillment')
-        //             //get tx gas price
-        //         } else {
-        //             log.test(tag,"unfullfilled!")
-        //         }
-        //     }
-        //     log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
-        // }
-        // let result = await app.stopSocket()
-        // log.debug(tag,"result: ",result)
+        let rawTx = resultMock.serialized
+        let txid = resultMock.txid
+
+        //simulate metamask broadcasting first
+        //push etherscan
+        //https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
+        let resp = await axios({
+        	method:'GET',
+        	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+rawTx
+        })
+        // console.log(resp)
+        log.test(tag,"resp pushTx: ",resp.data)
+
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'broadcasted')
+
+        //updateTx
+        let updateBody = {
+            network:ASSET,
+            invocationId,
+            invocation:invocationView1,
+            unsignedTx:responseSwap,
+            signedTx:resultMock
+        }
+
+        //update invocation remote
+        let resultUpdate = await updateInvocation(updateBody)
+        log.debug(tag,"resultUpdate: ",resultUpdate)
+
+        //broadcast transaction
+        let broadcastResult = await broadcastTransaction(transaction)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
+
+        //verify broadcasted
+        let invocationView3 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
+
+        //get invocation info EToC
+        console.timeEnd('start2broadcast');
+
+        //wait for confirmation
+        console.time('timeToConfirmed')
+        if(!noBroadcast){
+            log.test(tag,"Broadcasting!")
+
+            let invocationView4 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
+            assert(invocationView4)
+            assert(invocationView4.state)
+            assert.equal(invocationView3.state,'broadcasted')
+
+            /*
+
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+
+             */
+
+
+            //monitor tx lifecycle
+            let isConfirmed = false
+            let isFullfilled = false
+            let fullfillmentTxid = false
+            let currentStatus
+            let statusCode = 0
+
+            while(!isConfirmed){
+                //get invocationInfo
+                await sleep(6000)
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.test(tag,"invocationInfo: ",invocationInfo.state)
+
+                if(invocationInfo.state === 'builtTx'){
+                    //rebroadcast
+                    let broadcastResult = await broadcastTransaction(transaction)
+                    log.debug(tag,"broadcastResult: ",broadcastResult)
+                }
+
+
+                if(invocationInfo && invocationInfo.isConfirmed){
+                    log.test(tag,"Confirmed!")
+                    statusCode = 3
+                    isConfirmed = true
+                    console.timeEnd('timeToConfirmed')
+                    console.time('confirm2fullfillment')
+                } else {
+                    log.test(tag,"Not Confirmed!")
+                }
+
+            }
+
+            while(!isFullfilled){
+                //get invocationInfo
+                await sleep(6000)
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.test(tag,"invocationInfo: ",invocationInfo.state)
+
+                if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
+                    log.test(tag,"is fullfilled!")
+                    fullfillmentTxid = invocationInfo.fullfillmentTxid
+                    isFullfilled = true
+                    console.timeEnd('confirm2fullfillment')
+                    //get tx gas price
+                } else {
+                    log.test(tag,"unfullfilled!")
+                }
+            }
+            log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
+        }
+        let result = await app.stopSocket()
+        log.debug(tag,"result: ",result)
 
 
         log.notice("****** TEST PASS ******")
