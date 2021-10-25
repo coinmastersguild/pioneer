@@ -78,7 +78,7 @@ let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
 
-let noBroadcast = true
+let noBroadcast = false
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -93,6 +93,10 @@ let invocationId:string
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
+        console.time('start2paired');
+        console.time('start2build');
+        console.time('start2broadcast');
+        console.time('start2end');
 
         //start app and get wallet
         let wallets = await startApp()
@@ -195,6 +199,7 @@ const test_service = async function () {
             await sleep(300)
         }
 
+
         //assert sdk user
         let usernameSdk = await app.username
         log.debug("app: ",app.username)
@@ -207,67 +212,7 @@ const test_service = async function () {
         //verify context
         log.debug("app.context: ",app.context)
         assert(app.context)
-
-        //get user
-
-
-
-        //get master
-        // let masterAddress = await client.getAddress()
-        // log.debug(tag,"masterAddress: ",masterAddress)
-        // assert(masterAddress)
-        //
-        // /*
-        //     3 ways to express balance
-        //         Sdk (x-chain compatible object type)
-        //         native (satoshi/wei)
-        //         base (normal 0.001 ETH)
-        //  */
-        //
-        // let balanceSdk = await client.getBalance()
-        // log.debug(" balanceSdk: ",balanceSdk)
-        // assert(balanceSdk[0])
-        // assert(balanceSdk[0].amount)
-        // assert(balanceSdk[0].amount.amount())
-        // assert(balanceSdk[0].amount.amount().toString())
-        //
-        //
-        // let balanceNative = balanceSdk[0].amount.amount().toString()
-        // log.debug(tag,"balanceNative: ",balanceNative)
-        // assert(balanceNative)
-        //
-        // let balanceBase = await nativeToBaseAmount('ETH',balanceSdk[0].amount.amount().toString())
-        // log.debug(tag,"balanceBase: ",balanceBase)
-        // assert(balanceBase)
-        //
-        // //value USD
-        // let valueBalanceUsd = await coincap.getValue("ETH",balanceBase)
-        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        // assert(valueBalanceUsd)
-        //
-        // if(balanceBase < TEST_AMOUNT){
-        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        // }
-
-
-        // let asset = {
-        //     chain:"ETH",
-        //     symbol:"ETH",
-        //     ticker:"ETH",
-        // }
-        //
-        //TODO
-        // //get estimate
-        // let estimatePayload = {
-        //     asset,
-        //     amount:balanceBase.toString(),
-        //     recipient: '0xf10e1893b2fd736c40d98a10b3a8f92d97d5095e' // dummy value only used to estimate ETH transfer
-        // }
-        // log.debug(tag,"estimatePayload: ",estimatePayload)
-        //
-        // let estimateCost = await client.estimateFeesWithGasPricesAndLimits(estimatePayload);
-        // log.debug(tag,"estimateCost: ",estimateCost)
-        // assert(estimateCost)
+        console.timeEnd('start2pair');
 
         //max cost - balance
 
@@ -327,7 +272,7 @@ const test_service = async function () {
         //build swap
         let responseSwap = await app.buildSwap(swap,options,ASSET)
         log.debug(tag,"responseSwap: ",responseSwap)
-
+        console.timeEnd('start2build');
         //signTx
 
         //if create new
@@ -343,7 +288,7 @@ const test_service = async function () {
 
         //get invocation
         log.debug(tag,"transaction: ",transaction)
-        log.debug(tag,"invocationId: ",invocationId)
+        log.notice(tag,"invocationId: ",invocationId)
 
 
         //build
@@ -375,25 +320,19 @@ const test_service = async function () {
         let broadcastResult = await broadcastTransaction(transaction)
         log.debug(tag,"broadcastResult: ",broadcastResult)
 
-        //get invocation info EToC
+        //verify broadcasted
+        let invocationView3 = await app.getInvocation(invocationId)
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
 
+        //get invocation info EToC
+        console.timeEnd('start2broadcast');
         let isConfirmed = false
         //wait for confirmation
-
+        console.time('timeToConfirmed')
         if(!noBroadcast){
-            log.debug("Broadcasting!")
-
-            //verify broadcasted
-            let invocationView3 = await app.getInvocation(transaction)
-            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-
-            //rebroadcast
-            if(invocationView3.state !== 'broadcasted'){
-                //broadcast transaction
-                let broadcastResult = await broadcastTransaction(transaction)
-                log.debug(tag,"broadcastResult: ",broadcastResult)
-            }
-
+            log.test(tag,"Broadcasting!")
             //TODO fixme force state to broadcast
             // assert(invocationView3.state)
             // assert.equal(invocationView3.state,'broadcasted')
@@ -421,7 +360,7 @@ const test_service = async function () {
             //monitor tx lifecycle
 
             let isFullfilled = false
-            let fullfillmentTxid
+            let fullfillmentTxid = false
             let currentStatus
             let statusCode = 0
 
@@ -429,17 +368,20 @@ const test_service = async function () {
                 //get invocationInfo
                 await sleep(6000)
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
+                log.test(tag,"invocationInfo: ",invocationInfo.status)
 
 
                 if(invocationInfo && invocationInfo.isConfirmed){
-                    log.debug(tag,"Confirmed!")
+                    log.test(tag,"Confirmed!")
                     statusCode = 3
                     isConfirmed = true
+                    console.timeEnd('timeToConfirmed')
+                    console.time('confirm2fullfillment')
                 } else if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-                    log.debug(tag,"Not confirmed!")
+                    log.test(tag,"is fullfilled!")
                     fullfillmentTxid = invocationInfo.fullfillmentTxid
                     isFullfilled = true
+                    console.timeEnd('confirm2fullfillment')
                     //get tx gas price
                 }
             }
@@ -522,6 +464,7 @@ const test_service = async function () {
 
 
         log.notice("****** TEST PASS ******")
+        console.timeEnd('start2end')
         //process
         process.exit(0)
     } catch (e) {

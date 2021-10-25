@@ -127,7 +127,7 @@ export class SDK {
     private getTransactionData: (txid: string, asset: string) => Promise<any>;
     private getFees: (params?: any) => Promise<any>;
     private deposit: (deposit: any, options: any, asset: string) => Promise<any>;
-    private transfer: (tx: Transfer, asset: string) => Promise<any>;
+    private transfer: (tx: Transfer, options: any, asset: string) => Promise<any>;
     private estimateFeesWithGasPricesAndLimits: (params: any) => Promise<{ gasPrices: any; fees: { average: { amount: () => BigNumber }; fast: { amount: () => BigNumber }; fastest: { amount: () => BigNumber }; type: string } }>;
     private getTxCount: (asset: string) => Promise<any>;
     private updateUserInfo: () => any;
@@ -1440,19 +1440,28 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.transfer = async function (tx:Transfer, asset:string) {
+        this.transfer = async function (tx:Transfer, options:any, asset:string) {
             let tag = TAG + " | transfer | "
             try {
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
+
                 let coin = asset
+                log.info(tag,"asset: ",asset)
                 log.debug(tag,"tx: ",tx)
                 log.debug(tag,"tx.amount: ",tx.amount)
                 log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                 log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
                 let amount = tx.amount.amount().toNumber()
+                log.info(tag,"asset: ",asset)
                 amount = nativeToBaseAmount(asset,amount)
                 amount = amount.toString()
 
-                log.debug(tag,"amount (final): ",amount)
+                log.info(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 
                 //TODO min transfer size 10$
@@ -1462,8 +1471,8 @@ export class SDK {
                 if(!tx.fee) throw Error("103: fee required!")
 
                 //context
-                log.debug(tag,"currentContext: ",this.context)
-                log.debug(tag,"txContext: ",tx.context)
+                log.info(tag,"currentContext: ",this.context)
+                log.info(tag,"txContext: ",tx.context)
                 if(tx.context){
                     if(this.context !== tx.context){
                         //TODO validate context is valid
@@ -1493,12 +1502,20 @@ export class SDK {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
-                log.debug(tag,"invocation: ",invocation)
+                log.info(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke(invocation)
                 if(!result) throw Error("Failed to create invocation!")
-                log.debug("result: ",result)
+                log.info("result: ",result)
 
-                return result.invocationId
+                if(!verbose && !txidOnResp){
+                    return result.invocationId
+                } else if(!verbose && txidOnResp){
+                    return result.txid
+                }else if(verbose){
+                    return result
+                } else {
+                    throw Error("102: Unhandled configs!")
+                }
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

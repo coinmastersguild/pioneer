@@ -170,62 +170,17 @@ const test_service = async function () {
         }
 
         //assert sdk user
-        //get user
-        let user = await app.getUserParams()
-        log.debug("user: ",user.clients)
-        assert(user.context)
-        //assert user clients
-        assert(user.clients[BLOCKCHAIN])
+        let usernameSdk = await app.username
+        log.debug("app: ",app.username)
+        log.test("usernameSdk: ",usernameSdk)
+        assert(usernameSdk)
+        assert(usernameSdk,username)
 
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
+        await app.updateContext()
 
-        let client = user.clients[BLOCKCHAIN]
-
-        //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
-        assert(masterAddress)
-
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
-
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
-        assert(balanceSdk[0])
-        assert(balanceSdk[0].amount)
-        assert(balanceSdk[0].amount.amount())
-        assert(balanceSdk[0].amount.amount().toString())
-
-
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
-
-        let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
-
-        //value USD
-        let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        assert(valueBalanceUsd)
-
-        if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        }
-
-        //estimate BCH fee? lol
-        let asset = {
-            chain:ASSET,
-            symbol:ASSET,
-            ticker:ASSET,
-        }
+        //verify context
+        log.test("app.context: ",app.context)
+        assert(app.context)
 
         //TODO estimate cost
         // assert(estimateCost)
@@ -240,16 +195,13 @@ const test_service = async function () {
 
         //estimate output fee?
 
-
-
-
         //get pool address
         let poolInfo = await midgard.getPoolAddress()
         assert(poolInfo)
         log.debug(tag,"poolInfo: ",poolInfo)
 
         //filter by chain
-        let thorVault = poolInfo.filter((e:any) => e.chain === 'BCH')
+        let thorVault = poolInfo.filter((e:any) => e.chain === ASSET)
         assert(thorVault)
         log.debug(tag,"thorVault: ",thorVault)
 
@@ -294,7 +246,7 @@ const test_service = async function () {
         }
 
         let transfer:Transfer = {
-            context:user.context,
+            context:app.context,
             recipient: vaultAddress,
             fee:{
                 // gasLimit: 20000,
@@ -310,14 +262,20 @@ const test_service = async function () {
                     return BigNumber.BigNumber.from(amountTestNative)
                 }
             },
-            noBroadcast:true //TODO configurable
         }
+        if(noBroadcast) transfer.noBroadcast = true
         log.debug(tag,"transfer: ",transfer)
+
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        // let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        // log.debug(tag,"responseTransfer: ",responseTransfer)
+
+        //build swap
+        let responseTransfer = await app.transfer(transfer,options,ASSET)
         log.debug(tag,"responseTransfer: ",responseTransfer)
+
         let invocationId = responseTransfer
 
         //do not continue without invocationId
@@ -325,7 +283,7 @@ const test_service = async function () {
 
         let transaction = {
             invocationId,
-            context:user.context
+            context:app.context
         }
 
         //build
@@ -373,47 +331,72 @@ const test_service = async function () {
                  4: fullfilled (swap completed)
              */
 
-            //monitor tx lifecycle
+            let isFullfilled = false
+            let fullfillmentTxid
             let currentStatus
             let statusCode = 0
-            while(!isConfirmed){
+
+            while(!isConfirmed && !isFullfilled){
                 //get invocationInfo
+                await sleep(10000)
                 let invocationInfo = await app.getInvocation(invocationId)
                 log.debug(tag,"invocationInfo: ",invocationInfo)
 
-                let txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
 
-                //lookup txid
-                let txInfo = await client.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
-
-                if(txInfo.blockNumber){
+                if(invocationInfo && invocationInfo.isConfirmed){
                     log.debug(tag,"Confirmed!")
-
-                } else {
+                    statusCode = 3
+                    isConfirmed = true
+                } else if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
                     log.debug(tag,"Not confirmed!")
-                    //get gas price recomended
-
+                    fullfillmentTxid = invocationInfo.fullfillmentTxid
+                    isFullfilled = true
                     //get tx gas price
                 }
-
-                //get midgard info
-                let txInfoMidgard =
-                //update invocation
-
-                //if
-                // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
-                // log.debug(tag,"txInfo: ",txInfo)
-                //
-                // if(txInfo.confirmations > 0){
-                //     isConfirmed = true
-                // }
-
-                await sleep(10000)
             }
+
+
+            //monitor tx lifecycle
+            // let currentStatus
+            // let statusCode = 0
+            // while(!isConfirmed){
+            //     //get invocationInfo
+            //     let invocationInfo = await app.getInvocation(invocationId)
+            //     log.debug(tag,"invocationInfo: ",invocationInfo)
+            //
+            //     let txid = invocationInfo.signedTx.txid
+            //     assert(txid)
+            //     if(!currentStatus) currentStatus = 'transaction built!'
+            //     if(statusCode <= 0) statusCode = 1
+            //
+            //     //lookup txid
+            //     let txInfo = await app.getTransactionData(txid)
+            //     log.debug(tag,"txInfo: ",txInfo)
+            //
+            //     if(txInfo.blockNumber){
+            //         log.debug(tag,"Confirmed!")
+            //
+            //     } else {
+            //         log.debug(tag,"Not confirmed!")
+            //         //get gas price recomended
+            //
+            //         //get tx gas price
+            //     }
+            //
+            //     //get midgard info
+            //     let txInfoMidgard =
+            //     //update invocation
+            //
+            //     //if
+            //     // let txInfo = await user.clients.bitcoinCash.getTransactionData(txid)
+            //     // log.debug(tag,"txInfo: ",txInfo)
+            //     //
+            //     // if(txInfo.confirmations > 0){
+            //     //     isConfirmed = true
+            //     // }
+            //
+            //     await sleep(10000)
+            // }
         }
 
 

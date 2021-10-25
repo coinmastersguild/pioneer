@@ -439,9 +439,11 @@ export async function broadcastTransaction(transaction:any) {
         if(!invocation.signedTx.network) invocation.signedTx.network = invocation.network
         if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
         if(invocation.signedTx && invocation.noBroadcast) invocation.signedTx.noBroadcast = true
+        if(invocation.signedTx && invocation.invocation.noBroadcast) invocation.signedTx.noBroadcast = true
 
         //force noBroadcast
         //invocation.signedTx.noBroadcast = true
+        log.debug(tag,"invocation.signed BROADCASTBODY: ",invocation.signedTx)
         let broadcastResult = await walletContext.broadcastTransaction(invocation.signedTx.network,invocation.signedTx)
         log.debug(tag,"broadcastResult: ",broadcastResult)
 
