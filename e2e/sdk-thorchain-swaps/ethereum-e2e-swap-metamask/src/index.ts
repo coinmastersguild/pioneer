@@ -58,6 +58,7 @@ const {
     getWallets,
     getInvocations,
     sendPairingCode,
+    metamaskMock,
     buildTransaction,
     approveTransaction,
     broadcastTransaction
@@ -175,7 +176,7 @@ const test_service = async function () {
                     eventInvokeTransferReceived = true
                     break;
                 default:
-                    log.error(tag,"unhandled event: ",event)
+                    //log.error(tag,"unhandled event: ",event)
                 // code block
             }
         })
@@ -258,226 +259,154 @@ const test_service = async function () {
             coin: "ETH",
             asset: "ETH",
             memo: '=:'+OUTPUT_ASSET+'.'+OUTPUT_ASSET+':'+FAUCET_BCH_ADDRESS,
-            "amount":{
-                // "type":"BASE",
-                // "decimal":18,
-                amount: function(){
-                    return BigNumber.BigNumber.from(baseAmountToNative("eth",TEST_AMOUNT))
-                }
-            },
+            amount:TEST_AMOUNT,
         }
         if(noBroadcast) swap.noBroadcast = true
         log.debug(tag,"swap: ",swap)
 
         //build swap
-        let responseSwap = await app.buildSwap(swap,options,ASSET)
+        let responseSwap = await app.buildSwapTx(swap,options,ASSET)
         log.debug(tag,"responseSwap: ",responseSwap)
         console.timeEnd('start2build');
         //signTx
 
-        //if create new
-        invocationId = responseSwap.invocationId
-
-        //do not continue invocation
-        assert(invocationId)
-
-        let transaction = {
-            invocationId,
-            context:app.context
+        let transaction:any = {
+            type:'MetaMask',
+            fee:{
+                priority:3
+            },
+            unsignedTx:responseSwap,
+            context:app.context,
+            network:ASSET
         }
 
         //get invocation
         log.debug(tag,"transaction: ",transaction)
         log.notice(tag,"invocationId: ",invocationId)
 
+        let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
+        log.info(tag,"responseInvoke: ",responseInvoke)
+        transaction.invocationId = responseInvoke.invocationId
+
+        //Mock Metamask
+        let resultMock = await metamaskMock(transaction)
+        log.info(tag,"resultMock: ",resultMock)
 
         //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
-
-        //get invocation
-        let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        assert(invocationView1)
-        assert(invocationView1.state)
-        assert.equal(invocationView1.state,'builtTx')
-
-        //sign transaction
-        let signedTx = await approveTransaction(transaction)
-        log.debug(tag,"signedTx: ",signedTx)
-        assert(signedTx)
-        assert(signedTx.txid)
-
+        // let unsignedTx = await buildTransaction(transaction)
+        // log.debug(tag,"unsignedTx: ",unsignedTx)
+        // assert(unsignedTx)
+        //
         // //get invocation
-        let invocationView2 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        assert(invocationView2.state)
-        assert.equal(invocationView2.state,'signedTx')
-        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-
-        //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.debug(tag,"broadcastResult: ",broadcastResult)
-
-        //verify broadcasted
-        let invocationView3 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
-        assert(invocationView3.state)
-        assert.equal(invocationView3.state,'broadcasted')
-
-        //get invocation info EToC
-        console.timeEnd('start2broadcast');
-
-        //wait for confirmation
-        console.time('timeToConfirmed')
-        if(!noBroadcast){
-            log.test(tag,"Broadcasting!")
-
-            let invocationView4 = await app.getInvocation(invocationId)
-            log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
-            assert(invocationView4)
-            assert(invocationView4.state)
-            assert.equal(invocationView3.state,'broadcasted')
-
-            /*
-
-                Status codes
-
-                -1: errored
-                 0: unknown
-                 1: built
-                 2: broadcasted
-                 3: confirmed
-                 4: fullfilled (swap completed)
-
-             */
-
-
-            //monitor tx lifecycle
-            let isConfirmed = false
-            let isFullfilled = false
-            let fullfillmentTxid = false
-            let currentStatus
-            let statusCode = 0
-
-            while(!isConfirmed){
-                //get invocationInfo
-                await sleep(6000)
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.test(tag,"invocationInfo: ",invocationInfo.state)
-
-                if(invocationInfo.state === 'builtTx'){
-                    //rebroadcast
-                    let broadcastResult = await broadcastTransaction(transaction)
-                    log.debug(tag,"broadcastResult: ",broadcastResult)
-                }
-
-
-                if(invocationInfo && invocationInfo.isConfirmed){
-                    log.test(tag,"Confirmed!")
-                    statusCode = 3
-                    isConfirmed = true
-                    console.timeEnd('timeToConfirmed')
-                    console.time('confirm2fullfillment')
-                } else {
-                    log.test(tag,"Not Confirmed!")
-                }
-
-            }
-
-            while(!isFullfilled){
-                //get invocationInfo
-                await sleep(6000)
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.test(tag,"invocationInfo: ",invocationInfo.state)
-
-                if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-                    log.test(tag,"is fullfilled!")
-                    fullfillmentTxid = invocationInfo.fullfillmentTxid
-                    isFullfilled = true
-                    console.timeEnd('confirm2fullfillment')
-                    //get tx gas price
-                } else {
-                    log.test(tag,"unfullfilled!")
-                }
-            }
-
-            // let txid
-            //wait till confirmed in block
-            // while(!isConfirmed){
-            //     //get invocationInfo
-            //     let invocationInfo = await app.getInvocation(invocationId)
-            //     log.debug(tag,"invocationInfo: ",invocationInfo)
-            //
-            //     txid = invocationInfo.signedTx.txid
-            //     assert(txid)
-            //     if(!currentStatus) currentStatus = 'transaction built!'
-            //     if(statusCode <= 0) statusCode = 1
-            //
-            //     //lookup txid
-            //     let response = await app.getTransactionData(txid,ASSET)
-            //     log.debug(tag,"response: ",response)
-            //
-            //     if(response && response.txInfo && response.txInfo.blockNumber){
-            //         log.debug(tag,"Confirmed!")
-            //         statusCode = 3
-            //         isConfirmed = true
-            //     } else {
-            //         log.debug(tag,"Not confirmed!")
-            //         //get gas price recomended
-            //
-            //         //get tx gas price
-            //         await sleep(6000)
-            //     }
-            // }
-            //
-            // //verify fullfilled manually
-            //
-            // //wait till swap is fullfilled
-            // while(!isFullfilled){
-            //     //get midgard info
-            //     let txInfoMidgard = await midgard.getTransaction(txid)
-            //     log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions)
-            //     log.debug(tag,"txInfoMidgard: ",txInfoMidgard.actions[0])
-            //     log.debug(tag,"txInfoMidgard: ",JSON.stringify(txInfoMidgard))
-            //
-            //     //TODO handle multiple actions?
-            //     if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-            //         let depositInfo = txInfoMidgard.actions[0].in
-            //         log.debug(tag,"deposit: ",depositInfo)
-            //
-            //         let fullfillmentInfo = txInfoMidgard.actions[0]
-            //         log.debug(tag,"fullfillmentInfo: ",JSON.stringify(fullfillmentInfo))
-            //
-            //         if(fullfillmentInfo.status === 'success'){
-            //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-            //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo.out[0].txID)
-            //
-            //             statusCode = 4
-            //             isFullfilled = true
-            //             fullfillmentTxid = fullfillmentInfo.out[0].txID
-            //
-            //             //TODO get transaction info output
-            //
-            //             //verify address
-            //             //verify amount
-            //             //verify confirmed
-            //             //check outgoing fee?
-            //
-            //         } else {
-            //             await sleep(6000)
-            //         }
-            //     } else {
-            //         await sleep(6000)
-            //     }
-            //
-            //
-            // }
-            log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
-        }
-        let result = await app.stopSocket()
-        log.debug(tag,"result: ",result)
+        // let invocationView1 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        // assert(invocationView1)
+        // assert(invocationView1.state)
+        // assert.equal(invocationView1.state,'builtTx')
+        //
+        // //sign transaction
+        // let signedTx = await approveTransaction(transaction)
+        // log.debug(tag,"signedTx: ",signedTx)
+        // assert(signedTx)
+        // assert(signedTx.txid)
+        //
+        // // //get invocation
+        // let invocationView2 = await app.getInvocation(invocationId)
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        // assert(invocationView2.state)
+        // assert.equal(invocationView2.state,'signedTx')
+        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        //
+        // //broadcast transaction
+        // let broadcastResult = await broadcastTransaction(transaction)
+        // log.debug(tag,"broadcastResult: ",broadcastResult)
+        //
+        // //verify broadcasted
+        // let invocationView3 = await app.getInvocation(invocationId)
+        // log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        // assert(invocationView3.state)
+        // assert.equal(invocationView3.state,'broadcasted')
+        //
+        // //get invocation info EToC
+        // console.timeEnd('start2broadcast');
+        //
+        // //wait for confirmation
+        // console.time('timeToConfirmed')
+        // if(!noBroadcast){
+        //     log.test(tag,"Broadcasting!")
+        //
+        //     let invocationView4 = await app.getInvocation(invocationId)
+        //     log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
+        //     assert(invocationView4)
+        //     assert(invocationView4.state)
+        //     assert.equal(invocationView3.state,'broadcasted')
+        //
+        //     /*
+        //
+        //         Status codes
+        //
+        //         -1: errored
+        //          0: unknown
+        //          1: built
+        //          2: broadcasted
+        //          3: confirmed
+        //          4: fullfilled (swap completed)
+        //
+        //      */
+        //
+        //
+        //     //monitor tx lifecycle
+        //     let isConfirmed = false
+        //     let isFullfilled = false
+        //     let fullfillmentTxid = false
+        //     let currentStatus
+        //     let statusCode = 0
+        //
+        //     while(!isConfirmed){
+        //         //get invocationInfo
+        //         await sleep(6000)
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.test(tag,"invocationInfo: ",invocationInfo.state)
+        //
+        //         if(invocationInfo.state === 'builtTx'){
+        //             //rebroadcast
+        //             let broadcastResult = await broadcastTransaction(transaction)
+        //             log.debug(tag,"broadcastResult: ",broadcastResult)
+        //         }
+        //
+        //
+        //         if(invocationInfo && invocationInfo.isConfirmed){
+        //             log.test(tag,"Confirmed!")
+        //             statusCode = 3
+        //             isConfirmed = true
+        //             console.timeEnd('timeToConfirmed')
+        //             console.time('confirm2fullfillment')
+        //         } else {
+        //             log.test(tag,"Not Confirmed!")
+        //         }
+        //
+        //     }
+        //
+        //     while(!isFullfilled){
+        //         //get invocationInfo
+        //         await sleep(6000)
+        //         let invocationInfo = await app.getInvocation(invocationId)
+        //         log.test(tag,"invocationInfo: ",invocationInfo.state)
+        //
+        //         if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
+        //             log.test(tag,"is fullfilled!")
+        //             fullfillmentTxid = invocationInfo.fullfillmentTxid
+        //             isFullfilled = true
+        //             console.timeEnd('confirm2fullfillment')
+        //             //get tx gas price
+        //         } else {
+        //             log.test(tag,"unfullfilled!")
+        //         }
+        //     }
+        //     log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
+        // }
+        // let result = await app.stopSocket()
+        // log.debug(tag,"result: ",result)
 
 
         log.notice("****** TEST PASS ******")

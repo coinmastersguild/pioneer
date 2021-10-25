@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/eth-e2e-sdk-swap",
+  "name": "@pioneer-platform/eth-e2e-sdk-swap-metamask",
   "version": "8.1.42",
   "scripts": {
     "yarn": "yarn",
@@ -9,8 +9,8 @@
     "test": "rm -Rf ~/.pioneer && jest --silent=true --verbose --forceExit",
     "docker:build": "docker build --build-arg NPM_TOKEN=$NPM_TOKEN -t pioneer/eth-e2e-sdk:latest .",
     "docker:run": "docker run --env-file=../../.env pioneer/eth-e2e-sdk:latest",
-    "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
-    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk:latest",
+    "docker:tag": "docker tag pioneer/eth-e2e-sdk:latest registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk-swap-metamask:latest",
+    "docker:push": "docker push registry.digitalocean.com/pioneer/pioneer/eth-e2e-sdk-swap-metamask:latest",
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {

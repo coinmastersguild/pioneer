@@ -340,6 +340,47 @@ export async function buildTransaction(transaction:any) {
     }
 }
 
+export async function metamaskMock(transaction:any) {
+    let tag = " | metamaskMock | ";
+    try {
+        let context
+        if(!transaction.context){
+            context = WALLET_CONTEXT
+        } else {
+            context = transaction.context
+        }
+
+        //get context
+        if(!context || Object.keys(WALLETS_LOADED).indexOf(context) < 0) {
+            log.error("context: ",context)
+            log.error("Available: ",Object.keys(WALLETS_LOADED))
+            throw Error("103: could not find context in WALLETS_LOADED! "+context)
+        }
+        let walletContext = WALLETS_LOADED[context]
+        if(!walletContext.walletId){
+            walletContext.walletId = walletContext.context
+        }
+        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
+        log.debug(tag,"walletContext: ",walletContext.walletId)
+
+        //signTx manually outside hook
+        let signedTx = await walletContext.signTransaction(transaction.unsignedTx)
+        log.info(tag,"signedTx: ",signedTx)
+        signedTx.network = 'ETH'
+        //broadcast manually outside hook
+        let broadcastResult = await walletContext.broadcastTransaction('ETH',signedTx)
+        log.info(tag,"broadcastResult: ",broadcastResult)
+
+        //TODO return metamask formated txInfo
+
+
+        return signedTx
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e
+    }
+}
+
 export async function approveTransaction(transaction:any) {
     let tag = " | approveTransaction | ";
     try {

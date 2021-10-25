@@ -69,7 +69,7 @@ module.exports = class wallet {
         this.invoke = async function (invocation:Invocation) {
             let tag = TAG + " | invoke | "
             try{
-                log.debug(tag,"invocation: ",invocation)
+                log.info(tag,"invocation: ",invocation)
                 if(!invocation.type) throw Error("invocation Type required!")
                 if(!invocation.context) throw Error("invocation Context required!")
                 //create invocationId

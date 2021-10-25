@@ -131,6 +131,7 @@ export class SDK {
     private estimateFeesWithGasPricesAndLimits: (params: any) => Promise<{ gasPrices: any; fees: { average: { amount: () => BigNumber }; fast: { amount: () => BigNumber }; fastest: { amount: () => BigNumber }; type: string } }>;
     private getTxCount: (asset: string) => Promise<any>;
     private updateUserInfo: () => any;
+    private invokeUnsigned: (tx: any, options: any, asset: string) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -1307,6 +1308,38 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
+        this.invokeUnsigned = async function (tx:any,options:any,asset:string) {
+            let tag = TAG + " | invokeUnsigned | "
+            try {
+                log.info(tag,"deposit: ",tx)
+                log.debug(tag,"options: ",options)
+                if(!tx.unsignedTx) throw Error('unsigned Required!')
+                //verbose
+                let verbose
+                let txidOnResp
+                if(options){
+                    verbose = options.verbose
+                    txidOnResp = options.txidOnResp
+                }
+
+                let invocation:any = {
+                    type:'unsignedHook',
+                    fee:tx.fee,
+                    network:tx.network,
+                    context:this.context,
+                    username:this.username,
+                    unsignedTx:tx.unsignedTx,
+                }
+
+                log.debug(tag,"invocation: ",invocation)
+                let result = await this.invoke.invoke(invocation)
+                console.log("result: ",result)
+
+                return result
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
         this.deposit = async function (deposit:any,options:any,asset:string) {
             let tag = TAG + " | deposit | "
             try {
@@ -1338,6 +1371,7 @@ export class SDK {
 
                 let invocation:any = {
                     type:'deposit',
+                    context:this.context,
                     username:this.username,
                     inboundAddress:deposit.inboundAddress,
                     network:coin,
