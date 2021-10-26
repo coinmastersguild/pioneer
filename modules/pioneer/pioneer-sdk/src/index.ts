@@ -39,7 +39,7 @@ import {
     Delegate,
     Redelegate,
     JoinPool,
-    Transfer
+    Transfer, BroadcastBody
 } from "@pioneer-platform/pioneer-types";
 
 //xchain adapter
@@ -132,6 +132,8 @@ export class SDK {
     private getTxCount: (asset: string) => Promise<any>;
     private updateUserInfo: () => any;
     private invokeUnsigned: (tx: any, options: any, asset: string) => Promise<any>;
+    private updateInvocation: (updateBody: any) => Promise<any>;
+    private broadcastTransaction: (network: string, signedTx: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -1304,6 +1306,52 @@ export class SDK {
                 this.assetBalanceUsdValueContext = userInfo.assetBalanceUsdValueContext
 
                 return userInfo
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.updateInvocation = async function (updateBody:any) {
+            let tag = TAG + " | updateInvocation | "
+            try {
+                let output = await this.pioneerApi.UpdateInvocation(null,updateBody)
+                return output.data;
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+        this.broadcastTransaction = async function (signedTx:any) {
+            let tag = TAG + " | broadcastTransaction | "
+            try {
+                if(!signedTx.signedTx) throw Error("102: Unable to broadcast transaction! signedTx not found!")
+
+                let invocation = await this.pioneerApi.Invocation(signedTx.invocationId)
+                invocation = invocation.data
+                log.info(tag,"invocation: ",invocation)
+                //
+                let context = this.context
+                if(!context) {
+                    throw Error("103: could not find context "+context)
+                }
+
+                //TODO fix this tech debt
+                //normalize
+                if(!invocation.network) invocation.network = invocation.invocation.network
+                if(!invocation.invocation.invocationId) invocation.invocation.invocationId = invocation.invocation.invocationId
+                if(!invocation.signedTx.network) invocation.signedTx.network = invocation.network
+                if(!invocation.signedTx.invocationId) invocation.signedTx.invocationId = invocation.invocationId
+                if(invocation.signedTx && invocation.noBroadcast) invocation.signedTx.noBroadcast = true
+                if(invocation.signedTx && invocation.invocation.noBroadcast) invocation.signedTx.noBroadcast = true
+
+
+                if(this.isTestnet && signedTx.network === 'BTC'){
+                    signedTx.network = "TEST"
+                }else{
+                    signedTx.network = signedTx.network
+                }
+                log.info(tag,"signedTx: ",signedTx)
+                let resultBroadcast = await this.pioneerApi.Broadcast(null,invocation.signedTx)
+                log.info(tag,"resultBroadcast: ",resultBroadcast.data)
+                return resultBroadcast.data;
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

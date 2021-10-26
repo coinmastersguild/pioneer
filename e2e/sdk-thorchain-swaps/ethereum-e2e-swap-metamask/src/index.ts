@@ -88,7 +88,7 @@ let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
 
-let noBroadcast = false
+let noBroadcast = true
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -308,12 +308,14 @@ const test_service = async function () {
         //simulate metamask broadcasting first
         //push etherscan
         //https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
-        let resp = await axios({
-        	method:'GET',
-        	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+rawTx
-        })
-        // console.log(resp)
-        log.test(tag,"resp pushTx: ",resp.data)
+        if(!noBroadcast){
+            let resp = await axios({
+                method:'GET',
+                url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+rawTx
+            })
+            // console.log(resp)
+            log.test(tag,"resp pushTx: ",resp.data)
+        }
 
         let invocationView1 = await app.getInvocation(invocationId)
         log.info(tag,"invocationView1: (VIEW) ",invocationView1)
@@ -330,12 +332,13 @@ const test_service = async function () {
         }
 
         //update invocation remote
-        let resultUpdate = await updateInvocation(updateBody)
-        log.debug(tag,"resultUpdate: ",resultUpdate)
+        let resultUpdate = await app.updateInvocation(updateBody)
+        assert(resultUpdate)
+        log.info(tag,"resultUpdate: ",resultUpdate)
 
         //broadcast transaction
-        let broadcastResult = await broadcastTransaction(transaction)
-        log.debug(tag,"broadcastResult: ",broadcastResult)
+        let broadcastResult = await app.broadcastTransaction(updateBody)
+        log.info(tag,"broadcastResult: ",broadcastResult)
 
         //verify broadcasted
         let invocationView3 = await app.getInvocation(invocationId)
