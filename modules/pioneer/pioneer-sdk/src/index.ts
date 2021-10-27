@@ -739,17 +739,11 @@ export class SDK {
                 }
                 if(!tx.context) throw Error("102: context is required on invocations!")
 
-                //TODO wtf removeme
-                // @ts-ignore
                 let timeout_height = tx.timeout_height
-                // @ts-ignore
                 let source_channel = tx.source_channel
-                // @ts-ignore
                 let source_port = tx.source_port
-                let sender = this.getAddress(asset)
-                // @ts-ignore
+                let sender = tx.sender
                 let receiver = tx.receiver
-                // @ts-ignore
                 let token = tx.token
 
                 if(!source_channel) throw Error("103: missing source_channel")

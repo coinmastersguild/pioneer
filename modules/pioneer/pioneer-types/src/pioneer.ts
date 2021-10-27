@@ -281,6 +281,8 @@ export interface IBCdeposit {
     symbol?: string;
     nonce?:number
     fee?: any
+    sender:string
+    timeout_height:any
     receiver: string
     token: any
     source_port: string

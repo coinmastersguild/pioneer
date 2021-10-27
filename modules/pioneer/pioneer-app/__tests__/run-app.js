@@ -59,7 +59,7 @@ let run_test = async function(){
             console.log("resultInit: ",resultInit)
 
             //pair
-            let code = "IU9BJU"
+            let code = "55AY9M"
             console.log("code: ",code)
             let pairResult = await App.pair(code)
             console.log("pairResult: ",pairResult)

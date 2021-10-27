@@ -302,6 +302,52 @@ const test_service = async function () {
         let resultMock = await metamaskMock(transaction)
         log.info(tag,"resultMock: ",resultMock)
 
+        /*
+            //TODO this is what metamask actually returns
+            {
+                "hash": "0xa4fd92ae21345de0b218f8951b9229d504cd55ef50780a7e5e18a81ecfa22a74",
+                "type": 2,
+                "accessList": null,
+                "blockHash": null,
+                "blockNumber": null,
+                "transactionIndex": null,
+                "confirmations": 0,
+                "from": "0xC3aFFff54122658b89C31183CeC4F15514F34624",
+                "gasPrice": {
+                    "type": "BigNumber",
+                    "hex": "0x1b5320a25b"
+                },
+                "maxPriorityFeePerGas": {
+                    "type": "BigNumber",
+                    "hex": "0x1b5320a25b"
+                },
+                "maxFeePerGas": {
+                    "type": "BigNumber",
+                    "hex": "0x1b5320a25b"
+                },
+                "gasLimit": {
+                    "type": "BigNumber",
+                    "hex": "0x013880"
+                },
+                "to": "0xC145990E84155416144C532E31f89B840Ca8c2cE",
+                "value": {
+                    "type": "BigNumber",
+                    "hex": "0x2386f26fc10000"
+                },
+                "nonce": 87,
+                "data": "0x1fece7b4000000000000000000000000f56cba49337a624e94042e325ad6bc864436e3700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002386f26fc10000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000403d3a4243482e4243483a626974636f696e636173683a717a78703078633676736a3861706739796d346e346a6c3435707978746b70736875767239736d6a7033",
+                "r": "0x1ccaf7e8e8ee44807686e209cb78972766387a2a59050d6ef7c4467b2bb6d6d0",
+                "s": "0x1a74183927cd0b07ac247156cdfa3b7df9a073b2fa44f684364ac68a04a1afac",
+                "v": 1,
+                "creates": null,
+                "chainId": 0,
+                "serialized": "fobarfixme",
+                "txid": "fobarfixme",
+                "network": "ETH"
+            }
+
+         */
+
         let rawTx = resultMock.serialized
         let txid = resultMock.txid
 

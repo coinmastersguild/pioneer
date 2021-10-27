@@ -87,11 +87,11 @@ network.getStakingTxs(address)
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.transaction("41003AE5F3D94BE8B7C6D55BE6F752C2877C76F90966ECD1053957598C2DE8F3")
-//     .then(function(resp){
-//         console.log("resp: ",JSON.stringify(resp))
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.transaction("AE3E35363C3856A231F12DA73A2E032A7E3E1665BBB745CC82507BAF0CDD7A3A")
+    .then(function(resp){
+        console.log("resp: ",JSON.stringify(resp))
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.txs("osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq")
 //     .then(function(resp){
