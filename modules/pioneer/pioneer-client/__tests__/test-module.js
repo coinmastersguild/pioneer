@@ -51,8 +51,8 @@ let run_test = async function(){
         pioneer = await pioneer.init()
 
         let status = await pioneer.instance.Status()
-        console.log("status: ",status.data)
-        console.log("status: ",status.data.exchanges.markets)
+        console.log("status: ",status.data.exchanges.osmosis)
+        console.log("status: ",status.data.exchanges.osmosis.markets)
 
         // console.log("pioneer: ",pioneer)
 

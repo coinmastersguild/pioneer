@@ -79,19 +79,19 @@ network.getStakingTxs(address)
 //     })
 
 //get pools
-// network.getPools()
-//     .then(function(resp){
-//         // console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp.pools[0]))
-//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
-
-network.transaction("AE3E35363C3856A231F12DA73A2E032A7E3E1665BBB745CC82507BAF0CDD7A3A")
+network.getPools()
     .then(function(resp){
-        console.log("resp: ",JSON.stringify(resp))
+        // console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp.pools))
+        // console.log("resp: ",JSON.stringify(resp.pools[0]))
         //console.log("resp: ",JSON.stringify(resp))
     })
+
+// network.transaction("F46AAB42779E5C92B67AC317F67447DF7E63866EA88041259DA5F71515D0A567")
+//     .then(function(resp){
+//         console.log("resp: ",JSON.stringify(resp))
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.txs("osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq")
 //     .then(function(resp){

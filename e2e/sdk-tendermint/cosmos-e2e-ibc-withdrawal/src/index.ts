@@ -273,25 +273,25 @@ const test_service = async function () {
         /*
             Example
                   "value":{
-         "msg":[
-            {
-               "type":"cosmos-sdk/MsgTransfer",
-               "value":{
-                  "source_port":"transfer",
-                  "source_channel":"channel-141",
-                  "token":{
-                     "denom":"uatom",
-                     "amount":"200000"
-                  },
-                  "sender":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg",
-                  "receiver":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
-                  "timeout_height":{
-                     "revision_number":"1",
-                     "revision_height":"841428"
-                  }
-               }
-            }
-         ],
+                 "msg":[
+                    {
+                       "type":"cosmos-sdk/MsgTransfer",
+                       "value":{
+                          "source_port":"transfer",
+                          "source_channel":"channel-0",
+                          "token":{
+                             "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                             "amount":"100000"
+                          },
+                          "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
+                          "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
+                          "timeout_height":{
+                             "revision_number":"4",
+                             "revision_height":"8146033"
+                          }
+                       }
+                    }
+                 ],
 
          */
 

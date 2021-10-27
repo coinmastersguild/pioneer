@@ -15,6 +15,41 @@ let {
     getPaths,
 } = require('./paths')
 
+
+/*
+    Thorchain string parser
+
+ */
+
+export const parseThorchainAssetString = function(input:string){
+    try{
+        let parts = input.split(".")
+        let network = parts[0]
+        let asset
+        let symbol
+        let contract
+        if(parts[1].indexOf("-") >= 0){
+            //is Token
+            let parts2 = parts[1].split("-")
+            contract = parts2[1]
+            asset = parts2[0]
+            symbol = parts2[0]
+        }else{
+            //is Native asset
+            asset = parts[0]
+            symbol = parts[0]
+        }
+        return {
+            asset,
+            symbol,
+            network,
+            contract
+        }
+    }catch(e){
+        log.error(e)
+    }
+}
+
 export enum HDWALLETS {
     'pioneer',
     'trezor',
