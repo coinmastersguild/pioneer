@@ -26,6 +26,7 @@
     "@pioneer-platform/pioneer-xchain-client": "^8.1.41",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
+    "nedb-promises": "^5.0.1",
     "openapi-client-axios": "^3.13.1",
     "prettyjson": "^1.2.1",
     "ts-node": "^9.1.1"

@@ -322,7 +322,7 @@ const test_service = async function () {
 
         //verify broadcasted
         let invocationView3 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
 

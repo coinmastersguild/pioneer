@@ -327,6 +327,24 @@ if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
     supportedAssets.push("LTC")
 }
 
+// (only 1 native assets for each enabled blockchain)
+export const COIN_ICONS_BY_SYMBOL = {
+    BTC:"https://assets.coingecko.com/coins/images/1/small/bitcoin.png?1547033579",
+    ETH:"https://assets.coingecko.com/coins/images/279/large/ethereum.png?1595348880",
+    LTC:"https://assets.coingecko.com/coins/images/16724/thumb/ltc.png",
+    BNB:"https://assets.coingecko.com/coins/images/825/thumb/binance-coin-logo.png?1547034615",
+    BCH:"https://assets.coingecko.com/coins/images/780/thumb/bitcoin-cash-circle.png?1594689492",
+    OSMO:"https://assets.coingecko.com/coins/images/16724/thumb/osmo.png",
+    ATOM:"https://assets.coingecko.com/coins/images/16724/thumb/atom.png",
+    FIO:"https://assets.coingecko.com/coins/images/16724/thumb/fio.png",
+    EOS:"https://assets.coingecko.com/coins/images/16724/thumb/eos.png",
+    RUNE:"https://assets.coingecko.com/coins/images/6595/thumb/RUNE.png",
+    ADA:"https://assets.coingecko.com/coins/images/16724/thumb/ada.png",
+    LUNA:"https://assets.coingecko.com/coins/images/8284/thumb/luna1557227471663.png?1567147072",
+    KAVA:"https://assets.coingecko.com/coins/images/16724/thumb/kava.png",
+    SCRT:"https://assets.coingecko.com/coins/images/16724/thumb/scrt.png",
+}
+
 //TODO add more flags by networks
 const NETWORKS:any = {
     btc: {

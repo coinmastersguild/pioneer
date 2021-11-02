@@ -12,7 +12,9 @@ const log = require("@pioneer-platform/loggerdog")()
 const Pioneer = require('openapi-client-axios').default;
 const Events = require("@pioneer-platform/pioneer-events")
 import BigNumber from 'bignumber.js'
+const Datastore = require('nedb-promises')
 import { ethers, BigNumberish } from 'ethers'
+
 let {
     getPrecision,
     getExplorerUrl,
@@ -41,9 +43,6 @@ import {
     JoinPool,
     Transfer, BroadcastBody
 } from "@pioneer-platform/pioneer-types";
-
-//xchain adapter
-const XchainClass = require("@pioneer-platform/pioneer-xchain-client")
 
 let Invoke = require("@pioneer-platform/pioneer-invoke")
 
@@ -90,7 +89,6 @@ export class SDK {
     public valueUsdContext: any;
     public chart: (chart: Chart) => Promise<any>;
     public setAssetContext: (asset: string) => Promise<any>;
-    public registerWallet: (wallet: any) => Promise<any>;
     public status: string;
     public apiVersion: string;
     public initialized: boolean;
@@ -134,9 +132,15 @@ export class SDK {
     private invokeUnsigned: (tx: any, options: any, asset: string) => Promise<any>;
     private updateInvocation: (updateBody: any) => Promise<any>;
     private broadcastTransaction: (network: string, signedTx: any) => Promise<any>;
+    private loadPubkeys: (pubkeys: any) => void;
+    private dbPubkeys: any;
+    private dbBalances: any;
+    private pairWallet: (wallet: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
+        this.dbPubkeys = Datastore.create('/path/to/dbPubkeys.db')
+        this.dbBalances = Datastore.create('/path/to/dbBalances.db')
         this.isTestnet = false
         this.initialized = false
         this.isPaired = false
@@ -165,6 +169,30 @@ export class SDK {
         this.ibcChannels = []
         this.paymentStreams = []
         this.nfts = []
+        this.loadPubkeys = function (pubkeys:any) {
+            let tag = TAG + " | loadPubkeys | "
+            try {
+                this.dbPubkeys.ensureIndex({fieldName:"pubkey"})
+                this.pubkeys = pubkeys
+
+                //for each pubkey
+                for(let i = 0; i < pubkeys.length; i++){
+                    let pubkey = pubkeys[i]
+                    log.debug(tag,"pubkey: ",pubkey)
+                    //get db pubkey
+                    this.dbPubkeys.insert(pubkey)
+                        //if none save
+
+                    //get db balances for pubkey
+                        //if none add unsyned
+                }
+                //does pubkey exist in db?
+
+                //does base balance exist in db?
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
         this.init = async function (blockchains?:any) {
             let tag = TAG + " | init_wallet | "
             try{
@@ -172,6 +200,7 @@ export class SDK {
                 this.initialized = true
                 this.status = 'init'
                 log.debug(tag,"blockchains: ",blockchains)
+
                 if(!blockchains) blockchains = []
                 if(!this.queryKey) throw Error(" You must create an api key! ")
                 this.pioneerApi = new Pioneer({
@@ -227,7 +256,7 @@ export class SDK {
 
                 if(userInfo.username)this.username = userInfo.username
 
-                if(this.balances.length > 0){
+                if(userInfo.balances > 0){
                     this.isPaired = true
                     this.status = 'paired'
                     this.balances = userInfo.balances
@@ -341,55 +370,101 @@ export class SDK {
               TODO kepler
 
          */
-        this.registerWallet = async function (wallet:OnboardWallet) {
-            let tag = TAG + " | registerWallet | "
+        this.pairWallet = async function (wallet:any) {
+            let tag = TAG + " | pairWallet | "
             try {
-                if(wallet.network !== 1){
-                    throw Error('Network not supported!')
-                }
-                //if no username
-                if(!this.username){
-                    this.username = 'onboard:user:'+wallet.name+":"+wallet.address
+                //TODO error if server is offline
+                let register
+                if(wallet.format === 'onboard'){
+                    if(wallet.network !== 1){
+                        throw Error('Network not supported!')
+                    }
+                    this.context = wallet.name+":"+wallet.address
+                    //register wallet
+                    register = {
+                        username:'onboard:user:'+wallet.name+":"+wallet.address,
+                        blockchains:['ethereum'],
+                        context:wallet.name+":"+wallet.address,
+                        walletDescription:{
+                            context:wallet.name+":"+wallet.address,
+                            type:wallet.name
+                        },
+                        data:{
+                            pubkeys:[
+                                {
+                                    "blockchain": "ethereum",
+                                    "symbol": "ETH",
+                                    "asset": "ETH",
+                                    "path": "m/44'/60'/0'", //TODO capture from onBoard.js on user input paths. ie keepkey
+                                    "script_type": "ethereum",
+                                    "network": "ethereum",
+                                    "type": "address",
+                                    "created": new Date().getTime(),
+                                    "tags": [
+                                        wallet.name,
+                                        "onboard",
+                                        "sdk",
+                                        wallet.name+":"+wallet.address
+                                    ],
+                                    "pubkey": wallet.address,
+                                    "master": wallet.address,
+                                    "address": wallet.address
+                                }
+                            ]
+                        },
+                        queryKey:this.queryKey,
+                        auth:'lol',
+                        provider:'lol'
+                    }
+                } else if (wallet.format === 'citadel'){
+                    if(!wallet.pubkeys) throw Error('invalid citadel wallet!')
+                    this.context = wallet.wallet.WALLET_ID
+                    log.debug(tag,"wallet: ",wallet)
+                    log.debug(tag,"wallet.name: ",wallet.name)
+                    log.debug(tag,"wallet.name2: ",wallet.wallet.name)
+                    //register
+                    register = {
+                        username:'keepkey:user:'+wallet.wallet.WALLET_ID,
+                        blockchains:this.blockchains,
+                        context:wallet.wallet.WALLET_ID,
+                        walletDescription:{
+                            context:wallet.name,
+                            type:'keepkey'
+                        },
+                        data:{
+                            pubkeys:wallet.pubkeys
+                        },
+                        queryKey:this.queryKey,
+                        auth:'lol',
+                        provider:'lol'
+                    }
+                } else{
+                    throw Error("102: Unhandled format!"+wallet.format)
                 }
 
-                //register wallet
-                let register = {
-                    username:this.username,
-                    blockchains:['ethereum'],
-                    context:wallet.name+":"+wallet.address,
-                    walletDescription:{
-                        context:wallet.name+":"+wallet.address,
-                        type:wallet.name
-                    },
-                    data:{
-                        pubkeys:[
-                            {
-                                "blockchain": "ethereum",
-                                "symbol": "ETH",
-                                "asset": "ETH",
-                                "path": "m/44'/60'/0'", //TODO capture from onBoard.js on user input paths. ie keepkey
-                                "script_type": "ethereum",
-                                "network": "ethereum",
-                                "type": "address",
-                                "created": new Date().getTime(),
-                                "tags": [
-                                    wallet.name,
-                                    "onboard",
-                                    "sdk",
-                                    wallet.name+":"+wallet.address
-                                ],
-                                "pubkey": wallet.address,
-                                "master": wallet.address,
-                                "address": wallet.address
-                            }
-                        ]
-                    },
-                    queryKey:this.queryKey,
-                    auth:'lol',
-                    provider:'lol'
-                }
+
+                log.debug(tag,"register payload: ",register)
                 let result = await this.pioneerApi.Register(null, register)
+                log.debug(tag,"register result: ",result)
                 result = result.data
+
+                //sub to key
+                //sub to pairings
+                this.events.subscribeToKey()
+
+                //create code
+                let pairingCode = await this.createPairingCode()
+                log.debug(tag,"pairingCode: ",pairingCode)
+
+                //now pair
+                let resultPairing = await this.pioneerApi.Pair(null,{code:pairingCode.code})
+                resultPairing = resultPairing.data
+                log.debug(tag,"resultPairing: ",resultPairing.data)
+
+                this.events.pair(this.username)
+
+                //get user
+                await this.updateContext()
 
                 this.context = result.context
                 this.pubkeys = result.pubkeys
@@ -1291,7 +1366,7 @@ export class SDK {
                 this.username = userInfo.username
                 this.context = userInfo.context
                 this.wallets = userInfo.wallets
-                this.balances = userInfo.balances
+                if(userInfo.balances)this.balances = userInfo.balances
                 this.pubkeys = userInfo.pubkeys
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
                 this.invocationContext = userInfo.invocationContext
@@ -1320,8 +1395,9 @@ export class SDK {
 
                 let invocation = await this.pioneerApi.Invocation(signedTx.invocationId)
                 invocation = invocation.data
-                log.info(tag,"invocation: ",invocation)
-                //
+                log.debug(tag,"invocation: ",invocation)
+
+                //context
                 let context = this.context
                 if(!context) {
                     throw Error("103: could not find context "+context)
@@ -1342,9 +1418,9 @@ export class SDK {
                 }else{
                     signedTx.network = signedTx.network
                 }
-                log.info(tag,"signedTx: ",signedTx)
+                log.debug(tag,"signedTx: ",signedTx)
                 let resultBroadcast = await this.pioneerApi.Broadcast(null,invocation.signedTx)
-                log.info(tag,"resultBroadcast: ",resultBroadcast.data)
+                log.debug(tag,"resultBroadcast: ",resultBroadcast.data)
                 return resultBroadcast.data;
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -1353,7 +1429,7 @@ export class SDK {
         this.invokeUnsigned = async function (tx:any,options:any,asset:string) {
             let tag = TAG + " | invokeUnsigned | "
             try {
-                log.info(tag,"deposit: ",tx)
+                log.debug(tag,"deposit: ",tx)
                 log.debug(tag,"options: ",options)
                 if(!tx.unsignedTx) throw Error('unsigned Required!')
                 //verbose
@@ -1527,17 +1603,17 @@ export class SDK {
                 }
 
                 let coin = asset
-                log.info(tag,"asset: ",asset)
+                log.debug(tag,"asset: ",asset)
                 log.debug(tag,"tx: ",tx)
                 log.debug(tag,"tx.amount: ",tx.amount)
                 log.debug(tag,"tx.amount.amount(): ",tx.amount.amount())
                 log.debug(tag,"tx.amount.amount().toFixed(): ",tx.amount.amount().toNumber())
                 let amount = tx.amount.amount().toNumber()
-                log.info(tag,"asset: ",asset)
+                log.debug(tag,"asset: ",asset)
                 amount = nativeToBaseAmount(asset,amount)
                 amount = amount.toString()
 
-                log.info(tag,"amount (final): ",amount)
+                log.debug(tag,"amount (final): ",amount)
                 if(!amount) throw Error("Failed to get amount!")
 
                 //TODO min transfer size 10$
@@ -1547,8 +1623,8 @@ export class SDK {
                 if(!tx.fee) throw Error("103: fee required!")
 
                 //context
-                log.info(tag,"currentContext: ",this.context)
-                log.info(tag,"txContext: ",tx.context)
+                log.debug(tag,"currentContext: ",this.context)
+                log.debug(tag,"txContext: ",tx.context)
                 if(tx.context){
                     if(this.context !== tx.context){
                         //TODO validate context is valid
@@ -1578,10 +1654,10 @@ export class SDK {
                 }
                 if(tx.noBroadcast) invocation.noBroadcast = true
 
-                log.info(tag,"invocation: ",invocation)
+                log.debug(tag,"invocation: ",invocation)
                 let result = await this.invoke.invoke(invocation)
                 if(!result) throw Error("Failed to create invocation!")
-                log.info("result: ",result)
+                log.debug("result: ",result)
 
                 if(!verbose && !txidOnResp){
                     return result.invocationId

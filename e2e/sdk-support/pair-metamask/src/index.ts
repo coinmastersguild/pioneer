@@ -116,7 +116,7 @@ const test_service = async function () {
         log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
 
         //pair wallet
-        let resultRegister = await app.registerWallet(pairWalletOnboard)
+        let resultRegister = await app.pairWallet(pairWalletOnboard)
         log.debug(tag,"resultRegister: ",resultRegister)
 
         //sdk info

@@ -241,7 +241,9 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                     //use network image? coincap
                     balance.image = `https://static.coincap.io/assets/icons/${balance.symbol.toLowerCase()}@2x.png`
                 }
-                balances.push(balance)
+                if(balance.balance > 0){
+                    balances.push(balance)
+                }
             }
         }
 

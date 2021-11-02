@@ -37,17 +37,10 @@ let BigNumber = require('@ethersproject/bignumber')
 const TAG  = " | e2e-test | "
 const log = require("@pioneer-platform/loggerdog")()
 
-const Axios = require('axios')
-const https = require('https')
-const axios = Axios.create({
-    httpsAgent: new https.Agent({
-        rejectUnauthorized: false
-    })
-});
-
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')
+let KKSDK = require("@keepkey/keepkey-sdk")
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
@@ -66,12 +59,13 @@ const {
     getWallets,
     getInvocations,
     sendPairingCode,
-    metamaskMock,
     buildTransaction,
     approveTransaction,
-    broadcastTransaction,
-    updateInvocation
+    broadcastTransaction
 } = require('@pioneer-platform/pioneer-app-e2e')
+
+const { NodeWebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-nodewebusb')
+const core = require('@shapeshiftoss/hdwallet-core');
 
 let BLOCKCHAIN = 'ethereum'
 let ASSET = 'ETH'
@@ -88,7 +82,12 @@ let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
 
-let noBroadcast = true
+let noBroadcast = false
+
+let blockchains = [
+    'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'
+]
+
 
 //force monitor
 // let FORCE_MONITOR = false
@@ -100,6 +99,44 @@ let noBroadcast = true
 let txid:string
 let invocationId:string
 
+//connect to keepkey
+let getDevice = async function(keyring:any) {
+    let tag = TAG + " | getDevice | "
+    try {
+        const keepkeyAdapter = NodeWebUSBKeepKeyAdapter.useKeyring(keyring);
+        let wallet = await keepkeyAdapter.pairDevice(undefined, true);
+        if (wallet) {
+            log.debug(tag,"Device found!")
+            log.debug(tag,"wallet: ",wallet)
+        }
+        return wallet;
+    } catch (e) {
+        //log.error(tag,"*** e: ",e.toString())
+        log.error("failed to get device: ",e)
+        //@ts-ignore
+        if(e.message.indexOf("no devices found") >= 0){
+            return {
+                error:true,
+                errorCode: 1,
+                errorMessage:"No devices"
+            }
+        //@ts-ignore
+        } else if(e.message.indexOf("claimInterface")>= 0){
+            return {
+                error:true,
+                errorCode: -1,
+                errorMessage:"Unable to claim!"
+            }
+        } else {
+            return {
+                error:true,
+                errorMessage:e
+            }
+        }
+    }
+}
+
+
 const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
@@ -108,55 +145,34 @@ const test_service = async function () {
         console.time('start2broadcast');
         console.time('start2end');
 
-        //start app and get wallet
-        let wallets = await startApp()
-        // log.debug(tag,"wallets: ",wallets)
-        let username = wallets.username
-        assert(username)
+        //connect to keepkey
+        const keyring = new core.Keyring();
 
-        let appContext = getContext()
-        assert(appContext)
-        log.debug(tag,"appContext: ",appContext)
+        let wallet = await getDevice(keyring);
 
-        //get wallets
-        let appWallets = getWallets()
-        log.debug(tag,"appWallets: ",appWallets)
-
-        //filter wallets with current context
-        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
-        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
-
-        //get pubkey
-        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"pubkey: ",pubkey)
-        assert(pubkey)
-
-        //get master output
-        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
-        log.debug(tag,"pubkeyOutput: ",pubkeyOutput.master)
-        assert(pubkeyOutput)
-        assert(pubkeyOutput.master)
-
-        //balance
-        let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"balance: ",balance)
-        assert(balance)
-        assert(balance.balance)
-
-        let master = pubkey.master
-        assert(master)
-
-        // //assert balance local
-        log.debug(tag,"master: ",master)
-        if(balance.balance < MIN_BALANCE){
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
-            throw Error("101: Low funds!")
+        let username:any
+        let keepkeySdk
+        let pubkeys
+        let walletWatch
+        if(!wallet.error){
+            log.debug(tag,"KKSDK: ",KKSDK)
+            keepkeySdk = new KKSDK(wallet,blockchains)
+            let pubkeysResp = await keepkeySdk.getPubkeys()
+            walletWatch = pubkeysResp.wallet
+            pubkeys = pubkeysResp.pubkeys
+            //console.log('pubkeys: ',JSON.stringify(pubkeys))
         } else {
-            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+            log.error(" Device error: ",wallet)
         }
 
+        //
 
-        //generate new key
+        //TODO verify 1 balance for each blockchain
+
+        //TODO init localDB with keys
+
+
+        // generate new key
         const queryKey = uuidv4();
         assert(queryKey)
 
@@ -167,6 +183,10 @@ const test_service = async function () {
         }
 
         let app = new SDK.SDK(spec,config)
+
+        //load pubkeys
+        // await app.loadPubkeys(pubkeys)
+
         let events = await app.startSocket()
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
@@ -175,7 +195,7 @@ const test_service = async function () {
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
-                    assert(event.username)
+                    assert(event.username,username)
                     assert(event.url)
                     eventPairReceived = true
                     break;
@@ -185,7 +205,7 @@ const test_service = async function () {
                     eventInvokeTransferReceived = true
                     break;
                 default:
-                    //log.error(tag,"unhandled event: ",event)
+                    log.error(tag,"unhandled event: ",event)
                 // code block
             }
         })
@@ -193,36 +213,64 @@ const test_service = async function () {
         let seedChains = ['ethereum','thorchain']
         await app.init(seedChains)
 
-        //pair sdk
-        let code = await app.createPairingCode()
-        code = code.code
-        log.debug("code: ",code)
-        assert(code)
+        //register
+        //pair
+        let pairWalletKeepKey:any = {
+            name:'keepkey',
+            format:'citadel',
+            isWatch:'true',
+            wallet:walletWatch,
+            pubkeys:pubkeys,
+        }
+        log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
+        let registerResult = await app.pairWallet(pairWalletKeepKey)
+        log.debug("registerResult: ",registerResult)
+        username = app.username
+        log.debug("app: ",app.username)
+        log.debug("username: ",username)
+        assert(username)
 
-        //
-        let pairSuccess = await sendPairingCode(code)
-        log.debug("pairSuccess: ",pairSuccess)
-        assert(pairSuccess)
+        assert(app.context)
 
         //dont release till pair event
         while(!eventPairReceived){
             await sleep(300)
         }
-
-
-        //assert sdk user
-        let usernameSdk = await app.username
-        log.debug("app: ",app.username)
-        log.debug("usernameSdk: ",usernameSdk)
-        assert(usernameSdk)
-        assert(usernameSdk,username)
+        console.timeEnd('start2paired');
 
         await app.updateContext()
 
-        //verify context
-        log.debug("app.context: ",app.context)
-        assert(app.context)
-        console.timeEnd('start2paired');
+        log.debug("app.username: ",app.username)
+        log.debug("app.balances: ",app.balances)
+        assert(app.balances)
+        for(let i = 0; i < app.balances.length; i++){
+            let balance = app.balances[i]
+            log.debug("balance: ",balance)
+            if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
+
+            //image
+            if(!balance.image){
+                log.error("INvalid image!: ",balance)
+            }
+            if(!balance.balance){
+                log.error("Invalid balance!: ",balance)
+            }
+            assert(balance.image)
+            assert(balance.pubkey)
+            assert(balance.balance)
+            assert(balance.path)
+            assert(balance.symbol)
+
+        }
+
+        //verify user is online
+        let onlineUsers = await app.pioneerApi.Globals()
+        onlineUsers = onlineUsers.data
+        log.debug(tag,"onlineUsers: ",onlineUsers)
+
+
+
+        //verify balances still exist
 
         //max cost - balance
 
@@ -258,6 +306,11 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
+        //select balance FROM keepkey ETH
+        let pubkey = app.balances.filter((balance:any) => balance.symbol === ASSET)[0]
+        log.debug(tag,"pubkey: ",pubkey)
+        //select TO pubkey as keepkey BCH
+
         log.debug(tag,"amountNative: ",baseAmountToNative("eth",TEST_AMOUNT))
         assert(pubkey.pubkey)
         assert(pubkey.address)
@@ -269,18 +322,26 @@ const test_service = async function () {
             asset: "ETH",
             memo: '=:'+OUTPUT_ASSET+'.'+OUTPUT_ASSET+':'+FAUCET_BCH_ADDRESS,
             amount:TEST_AMOUNT,
+            // "amount":{
+            //     // "type":"BASE",
+            //     // "decimal":18,
+            //     amount: function(){
+            //         return BigNumber.BigNumber.from(baseAmountToNative("eth",TEST_AMOUNT))
+            //     }
+            // },
         }
         if(noBroadcast) swap.noBroadcast = true
         log.debug(tag,"swap: ",swap)
 
         //build swap
         let responseSwap = await app.buildSwapTx(swap,options,ASSET)
-        log.debug(tag,"responseSwap: ",responseSwap)
+        assert(responseSwap)
+        assert(responseSwap.HDwalletPayload)
+        log.info(tag,"responseSwap: ",responseSwap)
         console.timeEnd('start2build');
-        //signTx
 
         let transaction:any = {
-            type:'MetaMask',
+            type:'keepkey-sdk',
             fee:{
                 priority:3
             },
@@ -294,79 +355,33 @@ const test_service = async function () {
         log.test(tag,"invocationId: ",invocationId)
 
         let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
+        assert(responseInvoke)
+        if(!responseInvoke.success){
+            assert(responseInvoke.invocationId)
+            log.error()
+        }
         log.debug(tag,"responseInvoke: ",responseInvoke)
+
         invocationId = responseInvoke.invocationId
         transaction.invocationId = invocationId
 
-        //Mock Metamask
-        let resultMock = await metamaskMock(transaction)
-        log.debug(tag,"resultMock: ",resultMock)
-
-        /*
-            //TODO this is what metamask actually returns
-            {
-                "hash": "0xa4fd92ae21345de0b218f8951b9229d504cd55ef50780a7e5e18a81ecfa22a74",
-                "type": 2,
-                "accessList": null,
-                "blockHash": null,
-                "blockNumber": null,
-                "transactionIndex": null,
-                "confirmations": 0,
-                "from": "0xC3aFFff54122658b89C31183CeC4F15514F34624",
-                "gasPrice": {
-                    "type": "BigNumber",
-                    "hex": "0x1b5320a25b"
-                },
-                "maxPriorityFeePerGas": {
-                    "type": "BigNumber",
-                    "hex": "0x1b5320a25b"
-                },
-                "maxFeePerGas": {
-                    "type": "BigNumber",
-                    "hex": "0x1b5320a25b"
-                },
-                "gasLimit": {
-                    "type": "BigNumber",
-                    "hex": "0x013880"
-                },
-                "to": "0xC145990E84155416144C532E31f89B840Ca8c2cE",
-                "value": {
-                    "type": "BigNumber",
-                    "hex": "0x2386f26fc10000"
-                },
-                "nonce": 87,
-                "data": "0x1fece7b4000000000000000000000000f56cba49337a624e94042e325ad6bc864436e3700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002386f26fc10000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000403d3a4243482e4243483a626974636f696e636173683a717a78703078633676736a3861706739796d346e346a6c3435707978746b70736875767239736d6a7033",
-                "r": "0x1ccaf7e8e8ee44807686e209cb78972766387a2a59050d6ef7c4467b2bb6d6d0",
-                "s": "0x1a74183927cd0b07ac247156cdfa3b7df9a073b2fa44f684364ac68a04a1afac",
-                "v": 1,
-                "creates": null,
-                "chainId": 0,
-                "serialized": "fobarfixme",
-                "txid": "fobarfixme",
-                "network": "ETH"
-            }
-
-         */
-
-        let rawTx = resultMock.serialized
-        let txid = resultMock.txid
-
-        //simulate metamask broadcasting first
-        //push etherscan
-        //https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
-        if(!noBroadcast){
-            let resp = await axios({
-                method:'GET',
-                url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+rawTx
-            })
-            // console.log(resp)
-            log.test(tag,"resp pushTx: ",resp.data)
-        }
-
+        //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
         assert(invocationView1.state)
-        // assert.equal(invocationView1.state,'broadcasted')
+        assert(invocationView1.invocation.unsignedTx)
+        assert(invocationView1.invocation.unsignedTx)
+        assert(invocationView1.invocation.unsignedTx.HDwalletPayload)
+        //assert.equal(invocationView1.state,'builtTx')
+
+        //TODO validate payload
+
+        //sign transaction
+        log.notice("************* SIGN ON KEEPKEY! LOOK DOWN BRO ***************")
+        let signedTx = await wallet.ethSignTx(invocationView1.invocation.unsignedTx.HDwalletPayload)
+        assert(signedTx)
+        log.debug(tag,"signedTx: ",signedTx)
 
         //updateTx
         let updateBody = {
@@ -374,13 +389,20 @@ const test_service = async function () {
             invocationId,
             invocation:invocationView1,
             unsignedTx:responseSwap,
-            signedTx:resultMock
+            signedTx
         }
 
         //update invocation remote
         let resultUpdate = await app.updateInvocation(updateBody)
         assert(resultUpdate)
         log.debug(tag,"resultUpdate: ",resultUpdate)
+
+        // //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
 
         //broadcast transaction
         let broadcastResult = await app.broadcastTransaction(updateBody)

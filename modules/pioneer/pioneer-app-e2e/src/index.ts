@@ -365,11 +365,11 @@ export async function metamaskMock(transaction:any) {
 
         //signTx manually outside hook
         let signedTx = await walletContext.signTransaction(transaction.unsignedTx)
-        log.info(tag,"signedTx: ",signedTx)
+        log.debug(tag,"signedTx: ",signedTx)
         signedTx.network = 'ETH'
         //broadcast manually outside hook
         // let broadcastResult = await walletContext.broadcastTransaction('ETH',signedTx)
-        // log.info(tag,"broadcastResult: ",broadcastResult)
+        // log.debug(tag,"broadcastResult: ",broadcastResult)
 
         //TODO return metamask formated txInfo
 
