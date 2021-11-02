@@ -13,6 +13,7 @@ const Pioneer = require('openapi-client-axios').default;
 const Events = require("@pioneer-platform/pioneer-events")
 import BigNumber from 'bignumber.js'
 const Datastore = require('nedb-promises')
+const keccak256 = require('keccak256')
 import { ethers, BigNumberish } from 'ethers'
 
 let {
@@ -74,6 +75,7 @@ export class SDK {
     public contexts: any;
     public info: any;
     public wallets: any[];
+    public keychain: any;
     public totalValueUsd: number;
     public getUserInfo: () => Promise<any>;
     public getWalletInfo: () => Promise<any>;
@@ -136,6 +138,7 @@ export class SDK {
     private dbPubkeys: any;
     private dbBalances: any;
     private pairWallet: (wallet: any) => Promise<any>;
+    private HDWallet: any;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -263,7 +266,7 @@ export class SDK {
                 }
 
                 if(userInfo.pubkeys)this.pubkeys = userInfo.pubkeys
-                this.wallets = userInfo.wallets
+                //if(userInfo.wallets)this.wallets = userInfo.wallets
 
                 // this.pubkeys = userInfo.pubkeys
                 this.ibcChannels = userInfo.ibcChannels
@@ -416,19 +419,24 @@ export class SDK {
                         auth:'lol',
                         provider:'lol'
                     }
-                } else if (wallet.format === 'citadel'){
+                } else if (wallet.type === 'keepkey'){
+                    log.info(tag,"wallet: ",wallet)
                     if(!wallet.pubkeys) throw Error('invalid citadel wallet!')
-                    this.context = wallet.wallet.WALLET_ID
-                    log.debug(tag,"wallet: ",wallet)
-                    log.debug(tag,"wallet.name: ",wallet.name)
-                    log.debug(tag,"wallet.name2: ",wallet.wallet.name)
+                    if(!wallet.serialized.WALLET_ID) throw Error('invalid serialized wallet!')
+                    this.context = wallet.serialized.WALLET_ID
+
+                    log.info(tag,"wallet: ",wallet)
+
+                    //set SDK to HDwallet
+                    this.HDWallet = wallet.wallet.hdwallet
+
                     //register
                     register = {
-                        username:'keepkey:user:'+wallet.wallet.WALLET_ID,
+                        username:'keepkey:user:'+wallet.serialized.WALLET_ID,
                         blockchains:this.blockchains,
-                        context:wallet.wallet.WALLET_ID,
+                        context:wallet.serialized.WALLET_ID,
                         walletDescription:{
-                            context:wallet.name,
+                            context:wallet.serialized.WALLET_ID,
                             type:'keepkey'
                         },
                         data:{
@@ -443,7 +451,7 @@ export class SDK {
                 }
 
 
-                log.debug(tag,"register payload: ",register)
+                log.info(tag,"register payload: ",register)
                 let result = await this.pioneerApi.Register(null, register)
                 log.debug(tag,"register result: ",result)
                 result = result.data
@@ -539,6 +547,9 @@ export class SDK {
             let tag = TAG + " | validateAddress | "
             try {
                 //TODO
+
+
+
                 return true
             } catch (e) {
                 log.error(tag, "e: ", e)
@@ -776,13 +787,32 @@ export class SDK {
             }
         }
 
-        // @ts-ignore
         this.signTx = async function (unsignedTx:any) {
             let tag = TAG + " | signTx | "
             try {
-                //invoke with unsigned
+                if(!this.HDWallet) throw Error('Can not not sign if not a HDWwallet')
+                log.info(tag,"unsignedTx: ",unsignedTx)
+                if(!unsignedTx.HDwalletPayload) throw Error('Invalid payload! missing: HDwalletPayload')
+                //TODO what if its not a swap?
+                let context = unsignedTx.swap.context
+                log.info(tag,"context: ",context)
+                if(!context) throw Error('Invalid payload! missing: context')
+                log.info(tag,"this.wallets: ",this.wallets)
 
-                return {}
+                //TODO validate payload
+                //TODO validate fee's
+                //TODO load EV data
+
+                //invoke with unsigned
+                let signedTx = await this.HDWallet.ethSignTx(unsignedTx.HDwalletPayload)
+                log.info(tag,"signedTx: ",signedTx)
+
+                //TODO do txid hashing in HDwallet
+                const txid = keccak256(signedTx.serialized).toString('hex')
+                log.info(tag,"txid: ",txid)
+                signedTx.txid = txid
+
+                return signedTx
             } catch (e) {
                 log.error(tag, "e: ", e)
             }

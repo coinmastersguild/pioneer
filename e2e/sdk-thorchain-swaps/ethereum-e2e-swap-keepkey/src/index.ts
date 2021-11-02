@@ -216,10 +216,11 @@ const test_service = async function () {
         //register
         //pair
         let pairWalletKeepKey:any = {
-            name:'keepkey',
+            type:'keepkey',
             format:'citadel',
             isWatch:'true',
-            wallet:walletWatch,
+            wallet:keepkeySdk,
+            serialized:walletWatch,
             pubkeys:pubkeys,
         }
         log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
@@ -267,8 +268,6 @@ const test_service = async function () {
         let onlineUsers = await app.pioneerApi.Globals()
         onlineUsers = onlineUsers.data
         log.debug(tag,"onlineUsers: ",onlineUsers)
-
-
 
         //verify balances still exist
 
@@ -370,7 +369,7 @@ const test_service = async function () {
         log.info(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
-        assert(invocationView1.invocation.unsignedTx)
+        assert(invocationView1.invocation)
         assert(invocationView1.invocation.unsignedTx)
         assert(invocationView1.invocation.unsignedTx.HDwalletPayload)
         //assert.equal(invocationView1.state,'builtTx')
@@ -379,9 +378,8 @@ const test_service = async function () {
 
         //sign transaction
         log.notice("************* SIGN ON KEEPKEY! LOOK DOWN BRO ***************")
-        let signedTx = await wallet.ethSignTx(invocationView1.invocation.unsignedTx.HDwalletPayload)
-        assert(signedTx)
-        log.debug(tag,"signedTx: ",signedTx)
+        let signedTx = await app.signTx(invocationView1.invocation.unsignedTx)
+        assert(signedTx.txid)
 
         //updateTx
         let updateBody = {
