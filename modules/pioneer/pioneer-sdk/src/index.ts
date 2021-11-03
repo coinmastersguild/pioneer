@@ -447,7 +447,7 @@ export class SDK {
                         provider:'lol'
                     }
                 } else{
-                    throw Error("102: Unhandled format!"+wallet.format)
+                    throw Error("102: Unhandled format! "+wallet.format)
                 }
 
 
@@ -648,8 +648,8 @@ export class SDK {
         this.getUserInfo = async function () {
             let tag = TAG + " | getUserInfo | "
             try {
-                let result = await this.pioneerApi.User()
-                return result.data
+                let result = await this.updateContext()
+                return result
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -1391,7 +1391,7 @@ export class SDK {
                 //get info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.debug(tag,"userInfo: ",userInfo)
+                log.info(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context

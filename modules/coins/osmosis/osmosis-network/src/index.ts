@@ -470,7 +470,7 @@ let get_txs_by_address = async function(address:string){
 
         //sends
         // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?transfer.sender='+address
-        let url = URL_OSMO_LCD+ '/txs?transfer.sender='+address
+        let url = URL_OSMO_LCD+ '/txs?message.sender='+address
         log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
@@ -482,7 +482,7 @@ let get_txs_by_address = async function(address:string){
         if(sends.txs){
             for(let i = 0; i < sends.txs.length; i++ ){
                 let tx = sends.txs[i]
-                tx = normalize_tx(tx,address)
+                //tx = normalize_tx(tx,address)
                 output.push(tx)
             }
         }

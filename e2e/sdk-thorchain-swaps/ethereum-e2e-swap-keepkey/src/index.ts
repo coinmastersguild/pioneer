@@ -165,8 +165,6 @@ const test_service = async function () {
             log.error(" Device error: ",wallet)
         }
 
-        //
-
         //TODO verify 1 balance for each blockchain
 
         //TODO init localDB with keys
@@ -321,13 +319,6 @@ const test_service = async function () {
             asset: "ETH",
             memo: '=:'+OUTPUT_ASSET+'.'+OUTPUT_ASSET+':'+FAUCET_BCH_ADDRESS,
             amount:TEST_AMOUNT,
-            // "amount":{
-            //     // "type":"BASE",
-            //     // "decimal":18,
-            //     amount: function(){
-            //         return BigNumber.BigNumber.from(baseAmountToNative("eth",TEST_AMOUNT))
-            //     }
-            // },
         }
         if(noBroadcast) swap.noBroadcast = true
         log.debug(tag,"swap: ",swap)

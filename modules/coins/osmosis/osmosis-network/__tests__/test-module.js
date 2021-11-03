@@ -79,25 +79,25 @@ network.getStakingTxs(address)
 //     })
 
 //get pools
-network.getPools()
-    .then(function(resp){
-        // console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp.pools))
-        // console.log("resp: ",JSON.stringify(resp.pools[0]))
-        //console.log("resp: ",JSON.stringify(resp))
-    })
+// network.getPools()
+//     .then(function(resp){
+//         // console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp.pools))
+//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
-// network.transaction("F46AAB42779E5C92B67AC317F67447DF7E63866EA88041259DA5F71515D0A567")
+// network.transaction("37D4E60A3A28DF11B5D3F04EE3C26E17D7647DAE02E95EBCBFBF26551145F383")
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.txs("osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.txs("osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9")
+    .then(function(resp){
+        console.log("resp: ",resp)
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 //good
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100000","denom":"uosmo"}],"from_address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6","to_address":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn"}}],"signatures":[{"signature":"4u/eYBnhQigP07lNm9KjLNsReGp0IoiG+HkCQMyEKAIpBgfemnEUg90LMVVRX7e1+fqCrLWPspMbz67romkyBQ==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
@@ -114,6 +114,7 @@ network.getPools()
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"40000","denom":"uosmo"}],"from_address":"osmo10jqlqxqd0extg75s3gxzzrcdp4wvrs6zf49yu4","to_address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"}}],"signatures":[{"signature":"tKYxB2rD4GXVvKeE9jtcY5c+UBPK4HKHepdkbGwrMUlFlMw3lpd79TSfFJGeKBpWuq4/cHhe8HX6oz3gfhqrwg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AmrURAPLuqG8lK8M9F8Scq5JA4oOU5aB3qEXDsFJwU4h"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
 
 // let tx = '{"tx":{"memo":"","fee":{"amount":[{"amount":"100","denom":"uosmo"}],"gas":"100000"},"msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100000","denom":"uosmo"}],"from_address":"osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9","to_address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"}}],"signatures":[{"signature":"wZyol+ayUUO/SiF09kV2jcZrAKe/Wb6zHR/DS0UVUoF3Q4XJv4bZIyAGK6taXOoSINODEurE7S3b2/AwlaukEg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AygtTy/nNZMzqH9BH+fxxVTtjejSow09LxpUcBcmhzkU"}}]},"mode":"sync","type":"cosmos-sdk/StdTx"}'
+// let tx = '{"tx":{"memo":"","fee":{"amount":[{"amount":"100","denom":"uosmo"}],"gas":"100000"},"msg":[{"type":"cosmos-sdk/MsgDelegate","value":{"delegator_address":"osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9","validator_address":"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n","amount":{"amount":"10000","denom":"uosmo"}}}],"signatures":[{"signature":"745U+vpid8sH0iBtsD90EWQRj+9T7o6YaptAVmd6VFM32QSGUUy9RSOimoZw5YpN7JrZHb1qPYD83FUxlE4brA==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AygtTy/nNZMzqH9BH+fxxVTtjejSow09LxpUcBcmhzkU"}}]},"mode":"sync","type":"cosmos-sdk/StdTx"}'
 // network.broadcast(tx)
 //     .then(function(resp){
 //         console.log("resp: ",resp)

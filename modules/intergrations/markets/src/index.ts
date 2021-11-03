@@ -96,8 +96,8 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
             hydratedPubkey.balances = []
             for(let j = 0; j < pubkey.balances.length; j++){
                 let entry:any = pubkey.balances[j]
-                //clone
 
+                //clone
                 log.debug(tag,"entry: ",entry)
                 let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
@@ -115,6 +115,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 } else {
                     //log.error(tag," COINCAP Missing rate data for "+symbol)
                 }
+
                 //
                 let rateUsdCoinGecko = 0
                 if(coinInfoCoinGecko && coinInfoCoinGecko.current_price){
@@ -241,9 +242,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                     //use network image? coincap
                     balance.image = `https://static.coincap.io/assets/icons/${balance.symbol.toLowerCase()}@2x.png`
                 }
-                if(balance.balance > 0){
-                    balances.push(balance)
-                }
+                balances.push(balance)
             }
         }
 
