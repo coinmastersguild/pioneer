@@ -189,7 +189,7 @@ const test_service = async function () {
         let eventPairReceived = false
         let eventInvokeTransferReceived = false
         events.on('message', async (event:any) => {
-            log.debug(tag,"event: ",event)
+            log.test(tag,"event: ",event)
             switch(event.type) {
                 case 'pairing':
                     assert(event.queryKey)
@@ -237,6 +237,10 @@ const test_service = async function () {
         }
         console.timeEnd('start2paired');
 
+        //verify isPaired
+        //log.info(tag,"app: ",app)
+        assert(app.isPaired)
+
         await app.updateContext()
 
         log.debug("app.username: ",app.username)
@@ -251,12 +255,12 @@ const test_service = async function () {
             if(!balance.image){
                 log.error("INvalid image!: ",balance)
             }
-            if(!balance.balance){
-                log.error("Invalid balance!: ",balance)
-            }
+            // if(!balance.balance){
+            //     log.error("Invalid balance!: ",balance)
+            // }
             assert(balance.image)
             assert(balance.pubkey)
-            assert(balance.balance)
+            // assert(balance.balance)
             assert(balance.path)
             assert(balance.symbol)
 
@@ -327,7 +331,7 @@ const test_service = async function () {
         let responseSwap = await app.buildSwapTx(swap,options,ASSET)
         assert(responseSwap)
         assert(responseSwap.HDwalletPayload)
-        log.info(tag,"responseSwap: ",responseSwap)
+        log.debug(tag,"responseSwap: ",responseSwap)
         console.timeEnd('start2build');
 
         let transaction:any = {
@@ -357,7 +361,7 @@ const test_service = async function () {
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
         assert(invocationView1.invocation)

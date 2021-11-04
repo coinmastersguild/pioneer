@@ -31,7 +31,7 @@ export interface Balance {
     balance: any,
     priceUsd: string
     valueUsd: string
-    onCoincap: boolean
+    onCoinCap: boolean
     id_coincap: string
     id_coingecko: string
     rank_coincap: string

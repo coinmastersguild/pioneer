@@ -54,7 +54,7 @@ module.exports = {
         }
         //if(!COINGECKO_API_KEY) throw Error("api key required! set env COINGECKO_API_KEY")
     },
-    getAssetsCoincap: function () {
+    getAssetsCoinCap: function () {
         return get_assets_coincap();
     },
     getAssetsCoingecko: function () {
@@ -66,18 +66,18 @@ module.exports = {
     getPricesInQuote: function (assets:[any], quote:string) {
         return get_prices_in_quote(assets,quote);
     },
-    buildBalances:function(marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any, context:string){
-        return build_balances(marketInfoCoincap,marketInfoCoinGecko,pubkeys, context)
+    buildBalances:function(marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any, context:string){
+        return build_balances(marketInfoCoinCap,marketInfoCoinGecko,pubkeys, context)
     }
 }
 
-let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:any, pubkeys:any, context:string) {
+let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any, context:string) {
     let tag = TAG + ' | build_balances | '
     try {
         if(!pubkeys) throw Error("No pubkeys given!")
         if(!context) throw Error("No context given!")
         //GLOBAL_RATES
-        if(!marketInfoCoincap) marketInfoCoincap = await get_assets_coincap()
+        if(!marketInfoCoinCap) marketInfoCoinCap = await get_assets_coincap()
         if(!marketInfoCoinGecko) marketInfoCoinGecko = await get_assets_coingecko()
 
         let valuesUsd:any = {}
@@ -102,7 +102,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 let symbol = entry.asset
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
-                let coinInfoCoinCap = marketInfoCoincap[symbol]
+                let coinInfoCoinCap = marketInfoCoinCap[symbol]
                 log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
 
                 //log.debug(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
@@ -172,7 +172,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                 balance = {...balance,...entry}
 
                 if(coinInfoCoinCap){
-                    balance.onCoincap = true
+                    balance.onCoinCap = true
                     if(balance.symbol && balance.symbol !== coinInfoCoinCap.symbol){
                         //symbol mismatch
                         balance.coincapAgreeSymbol = false
@@ -193,7 +193,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                     }
                     balance = {...balance,...coincapInfo}
                 }else{
-                    balance.onCoincap = false
+                    balance.onCoinCap = false
                 }
 
                 if(coinInfoCoinGecko){
@@ -233,7 +233,7 @@ let build_balances = async function (marketInfoCoincap:any, marketInfoCoinGecko:
                     }
                     balance = {...balance,...coinGeckoInfo}
                 }else{
-                    balance.onCoincap = false
+                    balance.onCoinCap = false
                 }
 
                 //figure out icon

@@ -205,7 +205,7 @@ getHistoryForSymbol = async (symbol) => {
 
 
 /****************************************************
- // Coincap Endpoints
+ // CoinCap Endpoints
  //****************************************************/
 
 

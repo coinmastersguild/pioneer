@@ -83,8 +83,8 @@ let getDevice = async function(keyring:any) {
         const keepkeyAdapter = NodeWebUSBKeepKeyAdapter.useKeyring(keyring);
         let wallet = await keepkeyAdapter.pairDevice(undefined, true);
         if (wallet) {
-            log.info(tag,"Device found!")
-            log.info(tag,"wallet: ",wallet)
+            log.debug(tag,"Device found!")
+            log.debug(tag,"wallet: ",wallet)
         }
         return wallet;
     } catch (e) {
@@ -122,14 +122,14 @@ const test_service = async function () {
         console.time('start2broadcast');
         console.time('start2end');
 
-        log.info(tag,"CHECKPOINT 1")
+        log.debug(tag,"CHECKPOINT 1")
         //connect to keepkey
         const keyring = new core.Keyring();
-        log.info(tag,"CHECKPOINT 2")
+        log.debug(tag,"CHECKPOINT 2")
 
         let wallet = await getDevice(keyring);
-        log.info(tag,"wallet: ",wallet)
-        log.info(tag,"CHECKPOINT 3")
+        log.debug(tag,"wallet: ",wallet)
+        log.debug(tag,"CHECKPOINT 3")
 
         let username:any
         let keepkeySdk
@@ -162,7 +162,7 @@ const test_service = async function () {
         let events = await app.startSocket()
         let eventPairReceived = false
         events.on('message', async (message:any) => {
-            log.info(tag,"message: ",message)
+            log.debug(tag,"message: ",message)
             assert(message.queryKey)
             assert(message.username)
             assert(message.url)
@@ -190,7 +190,7 @@ const test_service = async function () {
             serialized:walletWatch,
             pubkeys:pubkeys,
         }
-        log.info(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
+        log.debug(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
 
         log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
         let registerResult = await app.pairWallet(pairWalletKeepKey)
@@ -220,7 +220,7 @@ const test_service = async function () {
         //verify icons
         for(let i = 0; i < app.balances.length; i++){
             let balance = app.balances[i]
-            log.info("balance: ",balance.icon)
+            log.debug("balance: ",balance.icon)
             if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
             //
             if(!balance.image){

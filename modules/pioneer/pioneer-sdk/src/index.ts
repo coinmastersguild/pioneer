@@ -257,8 +257,9 @@ export class SDK {
                 userInfo = userInfo.data
                 log.debug(tag,"userInfo: ",userInfo)
 
-                if(userInfo.username)this.username = userInfo.username
-
+                if(userInfo.username){
+                    this.username = userInfo.username
+                }
                 if(userInfo.balances > 0){
                     this.isPaired = true
                     this.status = 'paired'
@@ -298,30 +299,37 @@ export class SDK {
                 this.events = new Events.Events(config)
                 this.events.init()
 
+                if(this.username){
+                    this.events.pair(this.username)
+                }
+
                 //all this not hitting? wtf?
-                this.events.events.on('subscribedToUsername', (event:any) => {
-                    log.debug(tag,'CHECKPOINT ***** ');
-                    log.debug(tag,'paired to '+this.username);
-                    this.isPaired = true
-                    this.username = event.username
-                    this.events.emit('subscribedToUsername',event)
-                    Events.setUsername(this.username)
-                });
+                // this.events.events.on('subscribedToUsername', (event:any) => {
+                //     log.debug(tag,'CHECKPOINT ***** ');
+                //     log.debug(tag,'paired to '+this.username);
+                //     this.isPaired = true
+                //     this.username = event.username
+                //     this.events.emit('subscribedToUsername',event)
+                //     Events.setUsername(this.username)
+                // });
 
                 this.events.events.on('message', (event:any) => {
                     log.debug(tag,'CHECKPOINT2 ***** ');
                     log.debug(tag,'app paired! ',event);
+                    this.isPaired = true
                     this.username = event.username
                     this.updateContext()
+                    this.events.pair(this.username)
                 });
 
                 //TODO removeme?
-                this.events.events.on('pairing', (event:any) => {
-                    log.debug(tag,'CHECKPOINT2a ***** ');
-                    log.debug(tag,'app paired! ',event);
-                    this.username = event.username
-                    this.updateContext()
-                });
+                // this.events.events.on('pairing', (event:any) => {
+                //     log.debug(tag,'CHECKPOINT2a ***** ');
+                //     log.debug(tag,'app paired! ',event);
+                //     this.isPaired = true
+                //     this.username = event.username
+                //     this.updateContext()
+                // });
 
                 this.events.events.on('context', (event:any) => {
                     log.debug(tag,'context set to '+event.context);
@@ -420,12 +428,12 @@ export class SDK {
                         provider:'lol'
                     }
                 } else if (wallet.type === 'keepkey'){
-                    log.info(tag,"wallet: ",wallet)
+                    log.debug(tag,"wallet: ",wallet)
                     if(!wallet.pubkeys) throw Error('invalid citadel wallet!')
                     if(!wallet.serialized.WALLET_ID) throw Error('invalid serialized wallet!')
                     this.context = wallet.serialized.WALLET_ID
 
-                    log.info(tag,"wallet: ",wallet)
+                    log.debug(tag,"wallet: ",wallet)
 
                     //set SDK to HDwallet
                     this.HDWallet = wallet.wallet.hdwallet
@@ -451,7 +459,7 @@ export class SDK {
                 }
 
 
-                log.info(tag,"register payload: ",register)
+                log.debug(tag,"register payload: ",register)
                 let result = await this.pioneerApi.Register(null, register)
                 log.debug(tag,"register result: ",result)
                 result = result.data
@@ -791,13 +799,13 @@ export class SDK {
             let tag = TAG + " | signTx | "
             try {
                 if(!this.HDWallet) throw Error('Can not not sign if not a HDWwallet')
-                log.info(tag,"unsignedTx: ",unsignedTx)
+                log.debug(tag,"unsignedTx: ",unsignedTx)
                 if(!unsignedTx.HDwalletPayload) throw Error('Invalid payload! missing: HDwalletPayload')
                 //TODO what if its not a swap?
                 let context = unsignedTx.swap.context
-                log.info(tag,"context: ",context)
+                log.debug(tag,"context: ",context)
                 if(!context) throw Error('Invalid payload! missing: context')
-                log.info(tag,"this.wallets: ",this.wallets)
+                log.debug(tag,"this.wallets: ",this.wallets)
 
                 //TODO validate payload
                 //TODO validate fee's
@@ -805,11 +813,11 @@ export class SDK {
 
                 //invoke with unsigned
                 let signedTx = await this.HDWallet.ethSignTx(unsignedTx.HDwalletPayload)
-                log.info(tag,"signedTx: ",signedTx)
+                log.debug(tag,"signedTx: ",signedTx)
 
                 //TODO do txid hashing in HDwallet
                 const txid = keccak256(signedTx.serialized).toString('hex')
-                log.info(tag,"txid: ",txid)
+                log.debug(tag,"txid: ",txid)
                 signedTx.txid = txid
 
                 return signedTx
@@ -917,7 +925,7 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        //delegate
+        //swap
         this.swap = async function (tx:OsmosisSwap, asset:string) {
             let tag = TAG + " | delegate | "
             try {
@@ -1391,7 +1399,7 @@ export class SDK {
                 //get info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 this.username = userInfo.username
                 this.context = userInfo.context
@@ -1474,7 +1482,7 @@ export class SDK {
                     type:'unsignedHook',
                     fee:tx.fee,
                     network:tx.network,
-                    context:this.context,
+                    context:tx.context || this.context,
                     username:this.username,
                     unsignedTx:tx.unsignedTx,
                 }
