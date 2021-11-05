@@ -67,6 +67,11 @@ const TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
 const spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 const wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
+
+let TRADE_PAIR  = "ATOM_OSMO"
+let INPUT_ASSET = ASSET
+let OUTPUT_ASSET = "OSMO"
+
 const noBroadcast = false
 
 console.log("spec: ",spec)
@@ -76,9 +81,14 @@ const test_service = async function () {
     const tag = TAG + " | test_service | "
     try {
 
+        console.time('start2paired');
+        console.time('start2build');
+        console.time('start2broadcast');
+        console.time('start2end');
+
         //start app and get wallet
         let wallets = await startApp()
-        log.debug(tag,"wallets: ",wallets)
+        // log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
@@ -88,35 +98,41 @@ const test_service = async function () {
 
         //get wallets
         let appWallets = getWallets()
-        let contextAlpha = appWallets[0]
-        log.debug(tag,"wallets.wallets[contextAlpha].WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
+        log.debug(tag,"appWallets: ",appWallets)
 
-        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
-        log.debug(tag,"balance: ",balance)
+        //filter wallets with current context
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //get pubkey
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.test(tag,"pubkey: ",pubkey.pubkey)
+        assert(pubkey)
+
+        //get master output
+        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.debug(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        assert(pubkeyOutput)
+        assert(pubkeyOutput.master)
+
+        //balance
+        let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
         assert(balance)
+        assert(balance.balance)
+        log.notice(tag,ASSET+" balance: ",balance.balance)
+        log.notice(tag,ASSET+" context: ",balance.context)
 
-        let masterAlpha = await wallets.wallets[contextAlpha].getMaster(ASSET)
-        //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
-        if(balance < MIN_BALANCE){
-            //verify
-            log.debug(tag,"wallets.wallets[contextAlpha]: ",wallets.wallets[contextAlpha])
+        let master = pubkey.master
+        assert(master)
 
-            //
-            let params = {coin:ASSET,pubkey:masterAlpha}
-            let resultBalance = await wallets.wallets[contextAlpha].pioneerClient.instance.GetPubkeyBalance(params)
-            log.debug(tag,"resultBalance: ",resultBalance)
-
-            //if !== then forget user
-
-            //throw error anyway because the pioneer server lied
-
-            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
+        // //assert balance local
+        log.debug(tag,"master: ",master)
+        if(balance.balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
             throw Error("101: Low funds!")
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
-        log.debug(tag,"CHECKPOINT 1 balance")
 
         //generate new key
         const queryKey = uuidv4();
@@ -161,7 +177,6 @@ const test_service = async function () {
         log.debug("code: ",code)
         assert(code)
 
-
         let pairSuccess = await sendPairingCode(code)
         log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
@@ -174,59 +189,13 @@ const test_service = async function () {
         log.debug(tag,"CHECKPOINT 2 pairing")
 
         //assert sdk user
-        //get user
-        let user = await app.getUserParams()
-        log.debug("user: ",user)
+        let usernameSdk = await app.username
+        log.debug("app: ",app.username)
+        log.debug("usernameSdk: ",usernameSdk)
+        assert(usernameSdk)
+        assert(usernameSdk,username)
 
-        log.debug("user: ",user.context)
-        assert(user.context)
-        //assert user clients
-        if(!user.clients[BLOCKCHAIN]){
-            log.error(tag,"Blockchain missing from sdk client! BLOCKCHAIN: ",BLOCKCHAIN)
-        }
-        assert(user.clients[BLOCKCHAIN])
 
-        //get sdk address for master
-        log.debug(tag,"masters: ",user)
-        log.debug(tag,"masters: ",user.masters)
-
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
-
-        let client = user.clients[BLOCKCHAIN]
-        let clientOsmosis = user.clients['osmosis']
-        log.debug(tag,"CHECKPOINT 3 sdk client")
-
-        //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
-        assert(masterAddress)
-        log.debug(tag,"CHECKPOINT 4 master address")
-
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
-
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
-        assert(balanceSdk[0])
-        assert(balanceSdk[0].amount)
-        assert(balanceSdk[0].amount.amount())
-        assert(balanceSdk[0].amount.amount().toString())
-
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
-
-        let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
-
-        let TEST_AMOUNT_BASE = nativeToBaseAmount(ASSET,TEST_AMOUNT)
 
         //value USD
         //TODO not in coincap yet!
@@ -234,17 +203,17 @@ const test_service = async function () {
         // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         // assert(valueBalanceUsd)
 
-        if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        }
+        // if(balanceBase < TEST_AMOUNT){
+        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        // }
 
         //get current block height
-        let blockheight = await user.clients[BLOCKCHAIN].getBlockHeight()
-        log.debug(tag,"blockheight: ",blockheight)
+        let blockheight = await app.getBlockHeight(OUTPUT_ASSET)
+        log.test(tag,"blockheight: ",blockheight)
         assert(blockheight)
         //set expiration at +10000
         let expiration =  blockheight + 10000
-        log.debug(tag,"expiration: ",expiration)
+        log.test(tag,"expiration: ",expiration)
         assert(expiration)
 
         //TODO
@@ -255,14 +224,19 @@ const test_service = async function () {
 
         //get ibc channels
 
-        let options:any = {
-            verbose: true,
-            txidOnResp: false, // txidOnResp is the output format
-        }
+        // let options:any = {
+        //     verbose: true,
+        //     txidOnResp: false, // txidOnResp is the output format
+        // }
+        //
 
-        let osmosisAddy = await clientOsmosis.getAddress()
-        log.debug(tag,"osmosisAddy: ",osmosisAddy)
+        // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        // log.test(tag,"pubkey: ",pubkey.pubkey)
+
+        let osmosisAddy = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.test(tag,"osmosisAddy: ",osmosisAddy)
         assert(osmosisAddy)
+        assert(osmosisAddy.pubkey)
 
         //TODO figure out source_channel
         let source_channel = 'channel-141'
@@ -270,37 +244,36 @@ const test_service = async function () {
 
         /*
             Example
-                  "value":{
-                 "msg":[
-                    {
-                       "type":"cosmos-sdk/MsgTransfer",
-                       "value":{
-                          "source_port":"transfer",
-                          "source_channel":"channel-0",
-                          "token":{
-                             "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-                             "amount":"100000"
-                          },
-                          "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
-                          "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
-                          "timeout_height":{
-                             "revision_number":"4",
-                             "revision_height":"8146033"
-                          }
-                       }
-                    }
-                 ],
+             "value":{
+             "msg":[
+                {
+                   "type":"cosmos-sdk/MsgTransfer",
+                   "value":{
+                      "source_port":"transfer",
+                      "source_channel":"channel-0",
+                      "token":{
+                         "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                         "amount":"100000"
+                      },
+                      "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
+                      "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
+                      "timeout_height":{
+                         "revision_number":"4",
+                         "revision_height":"8146033"
+                      }
+                   }
+                }
+             ],
 
          */
 
         let customTx:IBCdeposit = {
-            context:user.context,
+            context:app.context,
             asset: ASSET,
             network: ASSET,
             memo: '',
-            // @ts-ignore
-            sender:masterAddress,
-            receiver:osmosisAddy,
+            sender:pubkey.pubkey,
+            receiver:osmosisAddy.pubkey,
             source_port,
             source_channel,
             token: {
@@ -316,11 +289,11 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.debug(tag,"customTx: ",customTx)
+        log.info(tag,"customTx: ",customTx)
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].ibcDeposit(customTx,options)
+        let responseTransfer = await app.ibcDeposit(customTx, {})
         assert(responseTransfer)
-        log.debug(tag,"responseTransfer: ",responseTransfer)
+        log.test(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
         //do not continue without invocationId
         assert(invocationId)
@@ -341,7 +314,7 @@ const test_service = async function () {
 
         let transaction = {
             invocationId,
-            context:user.context
+            context:app.context
         }
 
         //build
@@ -415,7 +388,7 @@ const test_service = async function () {
                 if(statusCode <= 0) statusCode = 1
 
                 //lookup txid
-                let txInfo = await client.getTransactionData(txid)
+                let txInfo = await app.getTransactionData(txid)
                 log.debug(tag,"txInfo: ",txInfo)
 
                 if(txInfo && txInfo.blockNumber){

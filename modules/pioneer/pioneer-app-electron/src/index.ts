@@ -1124,7 +1124,7 @@ export async function approveTransaction(event:any, data:any) {
         //get invocation
 
         let invocation = await App.getInvocation(data.invocationId)
-        log.debug(tag,"invocation: ",invocation)
+        log.info(tag,"invocation: ",invocation)
         if(!invocation.unsignedTx) throw Error("invalid invocation! missing unsignedTx")
         if(!invocation.unsignedTx.HDwalletPayload) throw Error("invalid invocation! invalid unsignedTx missing HDwalletPayload")
 

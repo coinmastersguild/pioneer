@@ -70,12 +70,16 @@ const {
 
 let BLOCKCHAIN = 'osmosis'
 let ASSET = 'OSMO'
-let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.04"
+let MIN_BALANCE = process.env['MIN_BALANCE_OSMO'] || "0.004"
 let TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
 let spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 let wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 let NO_BROADCAST = process.env['E2E_BROADCAST'] || true
 let FAUCET_OSMO_ADDRESS = process.env['FAUCET_OSMO_ADDRESS'] || 'osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k'
+
+let TRADE_PAIR  = "ATOM_OSMO"
+let INPUT_ASSET = ASSET
+let OUTPUT_ASSET = "OSMO"
 
 let noBroadcast = false
 
@@ -86,9 +90,14 @@ const test_service = async function () {
     let tag = TAG + " | test_service | "
     try {
 
+        console.time('start2paired');
+        console.time('start2build');
+        console.time('start2broadcast');
+        console.time('start2end');
+
         //start app and get wallet
         let wallets = await startApp()
-        log.debug(tag,"wallets: ",wallets)
+        // log.debug(tag,"wallets: ",wallets)
         let username = wallets.username
         assert(username)
 
@@ -98,25 +107,43 @@ const test_service = async function () {
 
         //get wallets
         let appWallets = getWallets()
-        let contextAlpha = appWallets[0]
-        log.debug(tag,"wallets.wallets[contextAlpha].WALLET_BALANCES: ",wallets.wallets[contextAlpha].WALLET_BALANCES)
+        log.debug(tag,"appWallets: ",appWallets)
 
-        let balance = wallets.wallets[contextAlpha].WALLET_BALANCES[ASSET]
-        log.debug(tag,"balance: ",balance)
+        //filter wallets with current context
+        let walletDescriptionContext = wallets.user.walletDescriptions.filter((e:any) => e.context === appContext)[0]
+        log.debug(tag,"walletDescriptionContext: ",walletDescriptionContext)
+
+        //get pubkey
+        let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        log.test(tag,"pubkey: ",pubkey.pubkey)
+        assert(pubkey)
+
+        //get master output
+        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.debug(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        assert(pubkeyOutput)
+        assert(pubkeyOutput.master)
+
+        //balance
+        let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
+        log.notice(tag,ASSET+" balance: ",balance.balance)
+        log.notice(tag,ASSET+" context: ",balance.context)
         assert(balance)
+        assert(balance.balance)
 
-        let masterAlpha = wallets.wallets[contextAlpha].getMaster(ASSET)
-        //assert balance local
-        //log.debug(tag,"wallet: ",wallet)
 
-        //NOTE: OSMOS ALLOWS FREE TXS!!!! yea wtf??
-        // if(balance < MIN_BALANCE){
-        //     log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+masterAlpha)
-        //     throw Error("101: Low funds!")
-        // } else {
-        //     log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
-        // }
-        // log.debug(tag,"CHECKPOINT 1 balance")
+        let master = pubkey.master
+        assert(master)
+
+        // //assert balance local
+        log.debug(tag,"master: ",master)
+        if(balance.balance < MIN_BALANCE){
+            log.error(tag," Test wallet low! amount: "+balance+" target: "+MIN_BALANCE+" Send moneies to "+ASSET+": "+master)
+            throw Error("101: Low funds!")
+        } else {
+            log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
+        }
+
 
         //generate new key
         const queryKey = uuidv4();
@@ -152,7 +179,7 @@ const test_service = async function () {
             }
         })
 
-        let seedChains = ['ethereum','thorchain','bitcoin','osmosis']
+        let seedChains = ['ethereum','thorchain','bitcoin','osmosis','cosmos']
         await app.init(seedChains)
 
         //pair sdk
@@ -173,59 +200,24 @@ const test_service = async function () {
         }
         log.debug(tag,"CHECKPOINT 2 pairing")
 
-        //assert sdk user
-        //get user
-        let user = await app.getUserParams()
-        log.debug("user: ",user)
-
-        log.debug("user: ",user.context)
-        assert(user.context)
-        //assert user clients
-        if(!user.clients[BLOCKCHAIN]){
-            log.error(tag,"Blockchain missing from sdk client! BLOCKCHAIN: ",BLOCKCHAIN)
-        }
-        assert(user.clients[BLOCKCHAIN])
-
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
-
-        let client = user.clients[BLOCKCHAIN]
-        log.debug(tag,"CHECKPOINT 3 sdk client")
-
         //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
+        let masterAddress = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        masterAddress = masterAddress.pubkey
+        log.test(tag,"masterAddress: ",masterAddress)
         assert(masterAddress)
         log.debug(tag,"CHECKPOINT 4 master address")
 
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
 
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
-        assert(balanceSdk[0])
-        assert(balanceSdk[0].amount)
-        assert(balanceSdk[0].amount.amount())
-        assert(balanceSdk[0].amount.amount().toString())
-
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
-
-        let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
 
         //value USD
         //TODO not in coincap yet!
         // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
         // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
         // assert(valueBalanceUsd)
+
+        let balanceBase = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
+        balanceBase = balanceBase.balance
+        assert(balanceBase)
 
         if(balanceBase < TEST_AMOUNT){
             throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
@@ -246,7 +238,7 @@ const test_service = async function () {
         let TOKEN_OUT = "OSMO"
 
         //get pool
-        let poolInfo = await user.clients[BLOCKCHAIN].getPool(TOKEN_OUT)
+        let poolInfo = await app.getPool(TOKEN_OUT)
         //log.debug(tag,"poolInfo: ",poolInfo)
         assert(poolInfo)
 
@@ -311,8 +303,10 @@ const test_service = async function () {
 
          */
 
-        let delegate:OsmosisSwap = {
-            context:user.context,
+        let swap:any = {
+            type:'osmosisswap',
+            addressFrom:masterAddress,
+            context:app.context,
             asset: ASSET,
             network: ASSET,
             memo: '',
@@ -330,39 +324,38 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.debug(tag,"delegate: ",delegate)
-
-        let responseTransfer = await user.clients[BLOCKCHAIN].swap(delegate,options)
-        assert(responseTransfer)
-        log.debug(tag,"responseTransfer: ",responseTransfer)
-        let invocationId = responseTransfer
-        //do not continue without invocationId
-        assert(invocationId)
-
-        //wait until app get's invocation event
-        //TODO
-        // let invocationReceived = false
-        // while(!invocationReceived){
-        //     await sleep(1000)
-        //     let invocations = await getInvocations()
-        //     log.debug(tag,"invocations: ",invocations)
-        //     let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-        //     log.debug(tag,"invocationEventValue: ",invocationEventValue)
-        //     if(invocationEventValue){
-        //         assert(invocationEventValue.invocationId)
-        //         invocationReceived = true
-        //     }
-        // }
-
-        let transaction = {
-            invocationId,
-            context:user.context
-        }
+        log.info(tag,"swap: ",swap)
 
         //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
+        let responseTx = await app.buildTx(swap,options,ASSET)
+        assert(responseTx)
+        assert(responseTx.HDwalletPayload)
+        log.info(tag,"responseTx: ",responseTx)
+        console.timeEnd('start2build');
+
+        //invoke unsigned
+        let transaction:any = {
+            type:'pioneer',
+            fee:{
+                priority:3
+            },
+            unsignedTx:responseTx,
+            context:app.context,
+            network:ASSET
+        }
+
+        //get invocation
+        log.info(tag,"transaction: ",transaction)
+
+        let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
+        assert(responseInvoke)
+        if(!responseInvoke.success){
+            assert(responseInvoke.invocationId)
+            log.error()
+        }
+        log.debug(tag,"responseInvoke: ",responseInvoke)
+        let invocationId = responseInvoke.invocationId
+        transaction.invocationId = invocationId
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
@@ -377,7 +370,8 @@ const test_service = async function () {
         let signedTx = await approveTransaction(transaction)
         log.debug(tag,"signedTx: ",signedTx)
         assert(signedTx)
-        // assert(signedTx.txid)
+        assert(signedTx.txid)
+        log.test(tag,"signedTx.txid: ",signedTx.txid)
 
         //get invocation
         let invocationView2 = await app.getInvocation(invocationId)
@@ -397,12 +391,20 @@ const test_service = async function () {
         log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info EToC
-        let isConfirmed = false
         //wait for confirmation
 
-        if(!noBroadcast && false){
-            //TODO
+        if(!noBroadcast){
+
+            log.test(tag,"Broadcasting!")
+
+            let invocationView4 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
+            assert(invocationView4)
+            assert(invocationView4.state)
+            assert.equal(invocationView3.state,'broadcasted')
+
             /*
+
                 Status codes
 
                 -1: errored
@@ -411,65 +413,52 @@ const test_service = async function () {
                  2: broadcasted
                  3: confirmed
                  4: fullfilled (swap completed)
+
              */
 
+
             //monitor tx lifecycle
+            let isConfirmed = false
+            let isFullfilled = false
+            let fullfillmentTxid = false
             let currentStatus
             let statusCode = 0
-            let txid
 
-            //wait till confirmed in block
             while(!isConfirmed){
                 //get invocationInfo
+                await sleep(6000)
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
+                log.test(tag,"invocationInfo: ",invocationInfo.state)
 
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let txInfo = await client.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
-
-                if(txInfo && txInfo.blockNumber){
-                    log.debug(tag,"Confirmed!")
+                if(invocationInfo && invocationInfo.isConfirmed){
+                    log.test(tag,"Confirmed!")
                     statusCode = 3
+                    isConfirmed = true
+                    log.notice(" TXID fullfillment AND swap = ",invocationInfo.signedTx.txid)
+                    console.timeEnd('timeToConfirmed')
+                    console.time('confirm2fullfillment')
                 } else {
-                    log.debug(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
+                    log.test(tag,"Not Confirmed!")
                 }
-
-                await sleep(6000)
             }
 
-
-            let isFullfilled = false
-            //wait till swap is fullfilled
-            while(!isFullfilled){
-                //get midgard info
-                let txInfoMidgard = midgard.getTransaction(txid)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
-
-                //
-                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-                    let depositInfo = txInfoMidgard.actions[0].in
-                    log.debug(tag,"deposit: ",depositInfo)
-
-                    let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-
-                    if(fullfillmentInfo.status === 'success'){
-                        statusCode = 4
-                        isFullfilled = true
-                    }
-                }
-
-                await sleep(6000)
-            }
+            // while(!isFullfilled){
+            //     //get invocationInfo
+            //     await sleep(6000)
+            //     let invocationInfo = await app.getInvocation(invocationId)
+            //     log.test(tag,"invocationInfo: ",invocationInfo.state)
+            //
+            //     if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
+            //         log.test(tag,"is fullfilled!")
+            //         fullfillmentTxid = invocationInfo.fullfillmentTxid
+            //         isFullfilled = true
+            //         console.timeEnd('confirm2fullfillment')
+            //         //get tx gas price
+            //     } else {
+            //         log.test(tag,"unfullfilled!")
+            //     }
+            // }
+            //log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
 
         let result = await app.stopSocket()

@@ -77,7 +77,6 @@ let FAUCET_BCH_ADDRESS = process.env['FAUCET_BCH_ADDRESS'] || 'qzxp0xc6vsj8apg9y
 let TRADE_PAIR  = "ETH_BCH"
 let INPUT_ASSET = ASSET
 let OUTPUT_ASSET = "BCH"
-
 let noBroadcast = false
 
 //force monitor

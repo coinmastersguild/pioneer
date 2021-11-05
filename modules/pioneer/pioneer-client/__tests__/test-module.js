@@ -27,7 +27,8 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 // let username = process.env['TEST_USERNAME_1']
 // let queryKey = process.env['TEST_QUERY_KEY_1']
 
-let walletId = 'keepkey-pubkeys-343733331147363327003800'
+// let walletId = 'keepkey-pubkeys-343733331147363327003800'
+
 
 let run_test = async function(){
     try{
@@ -50,11 +51,13 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
-        let status = await pioneer.instance.Status()
-        console.log("status: ",status.data.exchanges.osmosis)
-        console.log("status: ",status.data.exchanges.osmosis.markets)
+        // let status = await pioneer.instance.Status()
+        // console.log("status: ",status.data.exchanges.osmosis)
+        // console.log("status: ",status.data.exchanges.osmosis.markets)
 
-        // console.log("pioneer: ",pioneer)
+        let invocation = 'pioneer:invocation:v0.01:OSMO:q5sdvDcx8MjWnw7pe4md3x'
+        let txInfo = await pioneer.instance.Invocation(invocation)
+        console.log("txInfo: ",txInfo.data)
 
         //get new address
         //

@@ -54,7 +54,7 @@ if(!URL_OSMO_LCD) throw Error('missing env URL_OSMO_LCD')
 
 let URL_OSMO_POOLS = process.env['URL_OSMO_POOLS'] || `https://api-osmosis.imperator.co`
 
-let BASE_OSMO = 100000000
+let BASE_OSMO = 1000000
 
 /**********************************
  // Module
@@ -254,6 +254,7 @@ let get_transaction = async function(txid:string){
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){
+        //if not found
         throw Error(e)
     }
 }

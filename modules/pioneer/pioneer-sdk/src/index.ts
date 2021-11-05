@@ -139,6 +139,7 @@ export class SDK {
     private dbBalances: any;
     private pairWallet: (wallet: any) => Promise<any>;
     private HDWallet: any;
+    buildTx: (tx: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
@@ -433,10 +434,10 @@ export class SDK {
                     if(!wallet.serialized.WALLET_ID) throw Error('invalid serialized wallet!')
                     this.context = wallet.serialized.WALLET_ID
 
-                    log.debug(tag,"wallet: ",wallet)
+                    log.info(tag,"wallet: ",wallet)
 
                     //set SDK to HDwallet
-                    this.HDWallet = wallet.wallet.hdwallet
+                    this.HDWallet = wallet.wallet
 
                     //register
                     register = {
@@ -563,44 +564,54 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getBalance = async function (address?: any, asset?: string): Promise<any> {
+        this.getBalance = async function (address?: any, asset?: string, context?:string): Promise<any> {
             let tag = TAG + " | getBalance | "
             try {
-                const balances:any = []
+                let output:any
+
+                //if address get from api
+                if(address) throw Error("Not supported")
+
+                //if asset get all with symbol
+
+                //if context filter by context
+
+                //if multiple?
+
                 //TODO if address
                 //request to api
                 //if no params
                 //assume native on master
-                if(!address && !asset){
-                    let returnAssetAmount = ():number =>{
-                        //for pubkeys by symbol
-                        log.debug(tag,"info: ",this.info)
-                        let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
-                        log.debug(tag,"pubkey: ",pubkey)
-                        let balance = pubkey.balances.filter((e:any) => e.asset === asset)[0]
-                        return balance.balance
-                    }
+                // if(!address && !asset){
+                //     let returnAssetAmount = ():number =>{
+                //         //for pubkeys by symbol
+                //         log.debug(tag,"info: ",this.info)
+                //         let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
+                //         log.debug(tag,"pubkey: ",pubkey)
+                //         let balance = pubkey.balances.filter((e:any) => e.asset === asset)[0]
+                //         return balance.balance
+                //     }
+                //
+                //     let assetDescription: any = {
+                //         // @ts-ignore
+                //         chain:asset,
+                //         symbol:asset,
+                //         ticker:asset
+                //     }
+                //
+                //     log.debug(tag,"returnAssetAmount",returnAssetAmount())
+                //
+                //     balances.push({
+                //         asset: assetDescription,
+                //         // @ts-ignore
+                //         amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(asset))),
+                //     })
+                //
+                // } else {
+                //     throw Error("Not Supported yet")
+                // }
 
-                    let assetDescription: any = {
-                        // @ts-ignore
-                        chain:asset,
-                        symbol:asset,
-                        ticker:asset
-                    }
-
-                    log.debug(tag,"returnAssetAmount",returnAssetAmount())
-
-                    balances.push({
-                        asset: assetDescription,
-                        // @ts-ignore
-                        amount: assetToBase(assetAmount(returnAssetAmount(), getPrecision(asset))),
-                    })
-
-                } else {
-
-                }
-
-                return balances
+                return output
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -795,11 +806,24 @@ export class SDK {
             }
         }
 
+        //SDK
+        this.buildTx = async function (tx:any) {
+            let tag = TAG + " | buildTx | "
+            try {
+                if(!tx.addressFrom) throw Error("invalid swap input!")
+                let swapTx = await this.txBuilder.buildTx(tx)
+                return swapTx
+            } catch (e) {
+                log.error(tag, "e: ", e)
+            }
+        }
+
+
         this.signTx = async function (unsignedTx:any) {
             let tag = TAG + " | signTx | "
             try {
-                if(!this.HDWallet) throw Error('Can not not sign if not a HDWwallet')
-                log.debug(tag,"unsignedTx: ",unsignedTx)
+                if(!this.HDWallet) throw Error('Can not not sign if a HDWwallet is not paired!')
+                log.info(tag,"unsignedTx: ",unsignedTx)
                 if(!unsignedTx.HDwalletPayload) throw Error('Invalid payload! missing: HDwalletPayload')
                 //TODO what if its not a swap?
                 let context = unsignedTx.swap.context
@@ -926,64 +950,64 @@ export class SDK {
             }
         }
         //swap
-        this.swap = async function (tx:OsmosisSwap, asset:string) {
-            let tag = TAG + " | delegate | "
-            try {
-                let coin = asset
-
-                if(!tx.fee) throw Error("103: fee required!")
-
-                //context
-                log.debug(tag,"currentContext: ",this.context)
-                log.debug(tag,"txContext: ",tx.context)
-                if(tx.context){
-                    if(this.context !== tx.context){
-                        //TODO validate context is valid
-                        this.context = tx.context
-                    }
-                } else {
-                    log.debug(tag,"using default context:",this.context)
-                    tx.context = this.context
-                }
-                if(!tx.context) throw Error("102: context is required on invocations!")
-
-                let routes = tx.routes
-                let tokenIn = tx.tokenIn
-                let tokenOutMinAmount = tx.tokenOutMinAmount
-
-                let memo = tx.memo || ''
-
-                if(!routes) throw Error("103: routes is required")
-                if(!tokenIn) throw Error("104: tokenIn is required")
-                if(!tokenOutMinAmount) throw Error("105: tokenOutMinAmount is required")
-                if(!this.username) throw Error("106: username is required")
-
-                let invocation:Invocation = {
-                    type:'osmosisswap',
-                    context:tx.context,
-                    username:this.username,
-                    coin,
-                    fee:tx.fee,
-                    network:coin,
-                    asset:coin,
-                    // @ts-ignore
-                    routes,
-                    tokenIn,
-                    tokenOutMinAmount,
-                    memo
-                }
-                if(tx.noBroadcast) invocation.noBroadcast = true
-
-                log.debug(tag,"invocation: ",invocation)
-                let result = await this.invoke.invoke(invocation)
-                if(!result) throw Error("Failed to create invocation!")
-                log.debug("result: ",result)
-
-                return result.invocationId
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
+        // this.swap = async function (tx:OsmosisSwap, asset:string) {
+        //     let tag = TAG + " | delegate | "
+        //     try {
+        //         let coin = asset
+        //
+        //         if(!tx.fee) throw Error("103: fee required!")
+        //
+        //         //context
+        //         log.info(tag,"currentContext: ",this.context)
+        //         log.info(tag,"txContext: ",tx.context)
+        //         if(tx.context){
+        //             if(this.context !== tx.context){
+        //                 //TODO validate context is valid
+        //                 this.context = tx.context
+        //             }
+        //         } else {
+        //             log.debug(tag,"using default context:",this.context)
+        //             tx.context = this.context
+        //         }
+        //         if(!tx.context) throw Error("102: context is required on invocations!")
+        //
+        //         let routes = tx.routes
+        //         let tokenIn = tx.tokenIn
+        //         let tokenOutMinAmount = tx.tokenOutMinAmount
+        //
+        //         let memo = tx.memo || ''
+        //
+        //         if(!routes) throw Error("103: routes is required")
+        //         if(!tokenIn) throw Error("104: tokenIn is required")
+        //         if(!tokenOutMinAmount) throw Error("105: tokenOutMinAmount is required")
+        //         if(!this.username) throw Error("106: username is required")
+        //
+        //         let invocation:Invocation = {
+        //             type:'osmosisswap',
+        //             context:tx.context,
+        //             username:this.username,
+        //             coin,
+        //             fee:tx.fee,
+        //             network:coin,
+        //             asset:coin,
+        //             // @ts-ignore
+        //             routes,
+        //             tokenIn,
+        //             tokenOutMinAmount,
+        //             memo
+        //         }
+        //         if(tx.noBroadcast) invocation.noBroadcast = true
+        //
+        //         log.info(tag,"invocation: ",invocation)
+        //         let result = await this.invoke.invoke(invocation)
+        //         if(!result) throw Error("Failed to create invocation!")
+        //         log.info("result: ",result)
+        //
+        //         return result.invocationId
+        //     } catch (e) {
+        //         log.error(tag, "e: ", e)
+        //     }
+        // }
         //delegate
         this.delegate = async function (tx:Delegate, asset:string) {
             let tag = TAG + " | delegate | "
