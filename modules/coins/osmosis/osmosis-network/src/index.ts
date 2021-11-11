@@ -43,6 +43,8 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+import { marshalTx, unmarshalTx } from '@tendermint/amino-js';
+
 const request = require("request-promise")
 const log = require('@pioneer-platform/loggerdog')()
 
@@ -103,6 +105,12 @@ module.exports = {
     txs: function (address:string) {
         return get_txs_by_address(address);
     },
+    txsAtHeight: function (height:any) {
+        return get_txs_at_height(height);
+    },
+    getBlock: function (block:string) {
+        return get_block(block);
+    },
     getTransaction: function (txid:string) {
         return get_transaction(txid);
     },
@@ -121,6 +129,37 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+let get_block = async function(height:string){
+    let tag = TAG + " | get_block | "
+    let output:any = {}
+    try{
+
+        //
+        log.debug(tag," URL_OSMO_LCD: ",URL_OSMO_LCD)
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/blocks/'+height})
+        // log.debug(tag,"txInfo: ",txInfo.data)
+
+        //for each tx in block decode
+        // log.debug(tag,"txInfo: ",txInfo.data.block)
+        log.debug(tag,"txInfo: ",txInfo.data.block.data.txs)
+
+        // txInfo.data.block.data.txsDecoded = []
+        // for(let i = 0; i < txInfo.data.block.data.txs.length; i++){
+        //     let txEncoded = txInfo.data.block.data.txs[i]
+        //     let txDecoded = unmarshalTx(txEncoded)
+        //     log.debug(tag,"txDecoded: ", txDecoded )
+        //     txInfo.data.block.data.txsDecoded(txDecoded)
+        // }
+
+        log.debug(tag,"txInfo: ",txInfo.data.block.data.txs)
+        return txInfo.data
+    }catch(e){
+        //TODO dont shh error fix em
+        throw e
+    }
+}
+
 
 let get_staking_txs = async function(address:string) {
     let tag = TAG + " | get_staking_txs | "
@@ -463,6 +502,40 @@ let normalize_tx = function(tx:any,address?:string){
         throw e
     }
 }
+
+let get_txs_at_height = async function(height:string){
+    let tag = TAG + " | get_txs_by_address | "
+    try{
+        let output:any = []
+
+        //sends
+        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?transfer.height='+height
+        // let url = URL_OSMO_LCD+ '/tx_search?tx.height='+height
+        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=tx.height='+height
+        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=blockHeight='+height
+        //blockHeight=$FOO
+        //let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?blockHeight='+height
+        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=block.height='+height
+        // let url = URL_OSMO_LCD+ '/txs?block.height='+height
+        let url = URL_OSMO_LCD+ '/txs?tx.height='+height
+        //tx.height=
+        //?tx.height=1891147&page=1
+        log.debug(tag,"url: ",url)
+        let resultSends = await axios({
+            url: url,
+            method: 'GET'
+        })
+        let sends = resultSends.data
+        //log.debug('sends: ', sends)
+
+
+        return sends
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
 
 let get_txs_by_address = async function(address:string){
     let tag = TAG + " | get_txs_by_address | "

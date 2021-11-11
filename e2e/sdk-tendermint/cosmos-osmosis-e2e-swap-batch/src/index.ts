@@ -267,7 +267,7 @@ const test_service = async function () {
 
          */
 
-        let customTx:IBCdeposit = {
+        let customTx:any = {
             context:app.context,
             asset: ASSET,
             network: ASSET,
@@ -289,7 +289,7 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"customTx: ",customTx)
+        log.debug(tag,"customTx: ",customTx)
 
         let responseTransfer = await app.ibcDeposit(customTx, {})
         assert(responseTransfer)

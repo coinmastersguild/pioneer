@@ -103,14 +103,18 @@ const test_service = async function () {
 
         //get pubkey
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"pubkey: ",pubkey)
+        log.test(tag,"pubkey: ",pubkey.pubkey)
         assert(pubkey)
 
         //balance
         let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"balance: ",balance)
+        if(!balance){
+            log.error(tag,"missing balance for asset: "+ASSET," balances: ",walletDescriptionContext)
+        }
         assert(balance)
         assert(balance.balance)
+        log.notice(tag,ASSET+" balance: ",balance.balance)
+        log.notice(tag,ASSET+" context: ",balance.context)
 
         let master = pubkey.master
         assert(master)
@@ -124,6 +128,7 @@ const test_service = async function () {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
 
+
         //generate new key
         const queryKey = uuidv4();
         assert(queryKey)
@@ -133,7 +138,7 @@ const test_service = async function () {
             spec,
             wss
         }
-
+        log.debug(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
@@ -153,7 +158,7 @@ const test_service = async function () {
                     eventInvokeTransferReceived = true
                     break;
                 default:
-                //log.error(tag,"unhandled event: ",event)
+                    log.error(tag,"unhandled event: ",event)
                 // code block
             }
         })
@@ -205,6 +210,14 @@ const test_service = async function () {
         log.debug(tag,"expiration: ",expiration)
         assert(expiration)
 
+        //get master
+        let masterAddress = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        masterAddress = masterAddress.pubkey
+        log.test(tag,"masterAddress: ",masterAddress)
+        assert(masterAddress)
+        log.debug(tag,"CHECKPOINT 4 master address")
+
+
         //TODO
         //get osmosis channel id
         //let poolInfo = await
@@ -228,30 +241,30 @@ const test_service = async function () {
 
         /*
             Example
-                  "value":{
-         "msg":[
-            {
-               "type":"cosmos-sdk/MsgTransfer",
-               "value":{
-                  "source_port":"transfer",
-                  "source_channel":"channel-141",
-                  "token":{
-                     "denom":"uatom",
-                     "amount":"200000"
-                  },
-                  "sender":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg",
-                  "receiver":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
-                  "timeout_height":{
-                     "revision_number":"1",
-                     "revision_height":"841428"
-                  }
-               }
-            }
-         ],
+          "value":{
+             "msg":[
+                {
+                   "type":"cosmos-sdk/MsgTransfer",
+                   "value":{
+                      "source_port":"transfer",
+                      "source_channel":"channel-141",
+                      "token":{
+                         "denom":"uatom",
+                         "amount":"200000"
+                      },
+                      "sender":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg",
+                      "receiver":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+                      "timeout_height":{
+                         "revision_number":"1",
+                         "revision_height":"841428"
+                      }
+                   }
+                }
+             ],
 
          */
 
-        let customTx:IBCdeposit = {
+        let customTx:any = {
             context:app.context,
             asset: ASSET,
             network: ASSET,

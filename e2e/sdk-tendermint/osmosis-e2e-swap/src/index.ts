@@ -43,7 +43,7 @@ let SDK = require('@pioneer-platform/pioneer-sdk')
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
-// let coincap = require("@pioneer-platform/coincap")
+//let coincap = require("@pioneer-platform/coincap")
 
 import {
     Transfer,
@@ -324,13 +324,13 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"swap: ",swap)
+        log.debug(tag,"swap: ",swap)
 
         //build
         let responseTx = await app.buildTx(swap,options,ASSET)
         assert(responseTx)
         assert(responseTx.HDwalletPayload)
-        log.info(tag,"responseTx: ",responseTx)
+        log.debug(tag,"responseTx: ",responseTx)
         console.timeEnd('start2build');
 
         //invoke unsigned
@@ -345,7 +345,7 @@ const test_service = async function () {
         }
 
         //get invocation
-        log.info(tag,"transaction: ",transaction)
+        log.debug(tag,"transaction: ",transaction)
 
         let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
         assert(responseInvoke)

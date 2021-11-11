@@ -130,6 +130,10 @@ const test_service = async function () {
         log.debug("app balances: ",app.balances)
         if(app.balances.length === 0) throw Error("Invalid balances! empty!")
 
+        //verify metamask pubkey is in pubkeys
+        let metamaskPubkey = app.pubkeys.filter
+        //verify metamask address is in balances
+
         //check balances
         //verify icons
         for(let i = 0; i < app.balances.length; i++){

@@ -238,7 +238,7 @@ const test_service = async function () {
         console.timeEnd('start2paired');
 
         //verify isPaired
-        //log.info(tag,"app: ",app)
+        //log.debug(tag,"app: ",app)
         assert(app.isPaired)
 
         await app.updateContext()

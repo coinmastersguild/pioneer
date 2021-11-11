@@ -5,6 +5,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
+    "@pioneer-platform/pioneer-types": "^8.1.48",
     "axios": "^0.21.1",
     "axios-retry": "^3.2.0",
     "dotenv": "^8.2.0"

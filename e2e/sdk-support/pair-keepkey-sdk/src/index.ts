@@ -203,7 +203,7 @@ const test_service = async function () {
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)
         log.debug("app balances: ",app.balances)
-        log.debug("app balances: ",JSON.stringify(app.balances))
+        // log.debug("app balances: ",JSON.stringify(app.balances))
         log.debug("app context: ",app.context)
         assert(app.pubkeys)
         assert(app.balances)
@@ -212,19 +212,20 @@ const test_service = async function () {
         log.debug("app balances: ",app.balances)
         if(app.balances.length === 0) throw Error("Invalid balances! empty!")
 
-
-        log.notice("app balances: length",app.balances.length)
+        log.notice("app balances: length",app.balances)
         //TODO has at least 1 balance for every enabled blockchain
-        assert.equal(app.balances.length,8)
+        if(app.balances.length === 0) throw Error("Empty balances!")
+        //assert.equal(app.balances.length,8)
 
         //verify icons
         for(let i = 0; i < app.balances.length; i++){
             let balance = app.balances[i]
-            log.debug("balance: ",balance.icon)
+
+            log.debug("balance: ",balance)
             if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
             //
             if(!balance.image){
-                log.error("INvalid image!: ",balance)
+                log.error("Invalid image!: ",balance)
             }
             // if(!balance.balance){
             //     log.error("Invalid balance!: ",balance)
@@ -234,6 +235,11 @@ const test_service = async function () {
             //assert(balance.balance)
             assert(balance.path)
             assert(balance.symbol)
+            assert(balance.protocols)
+
+            if(balance.symbol === 'BTC'){
+                if(balance.protocols.indexOf('thorchain') === -1) throw Error('Missing proto flag thorchain!')
+            }
         }
         //verify pairing has metamask wallet
 

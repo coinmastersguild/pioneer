@@ -104,7 +104,7 @@ export class SDK {
     private getValidators: () => Promise<any>;
     private getDelegations: (validator: string, network: string, address: string) => Promise<any>;
     private getPool: (asset: string) => Promise<any>;
-    private swap: (tx: OsmosisSwap, asset: string) => Promise<any>;
+    private swap: ((tx: OsmosisSwap, asset: string) => Promise<any>) | undefined;
     private delegate: (tx: Delegate, asset: string) => Promise<any>;
     private redelegate: (tx: Redelegate, asset: string) => Promise<any>;
     private joinPool: (tx: JoinPool, asset: string) => Promise<any>;

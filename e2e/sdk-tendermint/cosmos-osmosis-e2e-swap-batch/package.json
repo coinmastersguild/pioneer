@@ -1,5 +1,5 @@
 {
-  "name": "@pioneer-platform/cosmos-osmosis-e2e-swap",
+  "name": "@pioneer-platform/cosmos-osmosis-e2e-swap-batch",
   "version": "8.1.44",
   "scripts": {
     "yarn": "yarn",
