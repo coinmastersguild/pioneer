@@ -46,7 +46,7 @@ let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
-const { NodeWebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-nodewebusb')
+const { NodeWebUSBKeepKeyAdapter } = require('@bithighlander/hdwallet-keepkey-nodewebusb')
 const core = require('@shapeshiftoss/hdwallet-core');
 
 let {

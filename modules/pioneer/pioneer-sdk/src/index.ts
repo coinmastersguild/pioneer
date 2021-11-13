@@ -50,7 +50,7 @@ let Invoke = require("@pioneer-platform/pioneer-invoke")
 export class SDK {
     public spec: any;
     public pioneerApi: any;
-    public init: (blockchains: []) => Promise<any>;
+    public init: (blockchains: any) => Promise<any>;
     public config: SDKConfig;
     public clients: any;
     public createPairingCode: () => Promise<any>;
@@ -387,6 +387,7 @@ export class SDK {
             try {
                 //TODO error if server is offline
                 let register
+                if(!this.username) throw Error("username not set!")
                 if(wallet.format === 'onboard'){
                     if(wallet.network !== 1){
                         throw Error('Network not supported!')
@@ -394,7 +395,7 @@ export class SDK {
                     this.context = wallet.name+":"+wallet.address
                     //register wallet
                     register = {
-                        username:'onboard:user:'+wallet.name+":"+wallet.address,
+                        username:this.username,
                         blockchains:['ethereum'],
                         context:wallet.name+":"+wallet.address,
                         walletDescription:{
@@ -441,7 +442,7 @@ export class SDK {
 
                     //register
                     register = {
-                        username:'keepkey:user:'+wallet.serialized.WALLET_ID,
+                        username:this.username,
                         blockchains:this.blockchains,
                         context:wallet.serialized.WALLET_ID,
                         walletDescription:{

@@ -14,6 +14,7 @@
     "docker:push:all": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "dependencies": {
+    "@bithighlander/hdwallet-keepkey-nodewebusb": "2.0.7",
     "@pioneer-platform/loggerdog": "^8.1.17",
     "@pioneer-platform/midgard-client": "^8.1.30",
     "@pioneer-platform/pioneer-app": "^8.1.43",

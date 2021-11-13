@@ -46,8 +46,8 @@ let sleep = wait.sleep;
 let midgard = require("@pioneer-platform/midgard-client")
 let coincap = require("@pioneer-platform/coincap")
 
-const { NodeWebUSBKeepKeyAdapter } = require('@shapeshiftoss/hdwallet-keepkey-nodewebusb')
-const core = require('@shapeshiftoss/hdwallet-core');
+const { NodeWebUSBKeepKeyAdapter } = require('@bithighlander/hdwallet-keepkey-nodewebusb')
+const core = require('@bithighlander/hdwallet-core');
 
 let {
     baseAmountToNative,
@@ -74,7 +74,6 @@ let KKSDK = require("@keepkey/keepkey-sdk")
 let blockchains = [
     'bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin'
 ]
-
 
 //connect to keepkey
 let getDevice = async function(keyring:any) {
@@ -131,7 +130,6 @@ const test_service = async function () {
         log.debug(tag,"wallet: ",wallet)
         log.debug(tag,"CHECKPOINT 3")
 
-        let username:any
         let keepkeySdk
         let pubkeys
         let walletWatch
@@ -149,16 +147,25 @@ const test_service = async function () {
         //generate new key
         // const queryKey = "sdk:4339eec1-343a-438f-823a-4f56d1f528c2";
         const queryKey = uuidv4();
+        const username = 'test:pair-multi'+uuidv4();
         assert(queryKey)
+        assert(username)
 
         let config = {
             queryKey,
-            //username,
+            username,
             spec,
             wss
         }
 
         let app = new SDK.SDK(spec,config)
+
+        log.info("app: ",app.username)
+        log.notice("username: ",username)
+        assert(username)
+        assert(app.username)
+        assert(username,app.username)
+
         let events = await app.startSocket()
         let eventPairReceived = false
         events.on('message', async (message:any) => {
@@ -192,27 +199,31 @@ const test_service = async function () {
         }
         log.debug(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
 
-        log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
+        // log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
         let registerResult1 = await app.pairWallet(pairWalletKeepKey)
         log.debug("registerResult1: ",registerResult1)
-        username = app.username
-        log.debug("app: ",app.username)
-        log.notice("username: ",username)
-        assert(username)
 
         //pair onboard
         //pair metamask
-        // let pairWalletOnboard:any = {
-        //     name:'MetaMask',
-        //     network:1,
-        //     initialized:true,
-        //     address:"0xc3affff54122658b89c31183cec4f15514f34624"
-        // }
-        // log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
-        //
-        // //pair wallet
-        // let resultRegister2 = await app.pairWallet(pairWalletOnboard)
-        // log.info("resultRegister2: ",resultRegister2)
+        let pairWalletOnboard:any = {
+            name:'MetaMask',
+            format:'onboard',
+            network:1,
+            initialized:true,
+            address:"0xfEb8bf56e554fc47639e5Ed9E1dAe21DfF69d6A9"
+        }
+        log.debug(tag,"pairWalletOnboard: ",pairWalletOnboard)
+
+        //pair wallet
+        let resultRegister2 = await app.pairWallet(pairWalletOnboard)
+        log.info("resultRegister2: ",resultRegister2)
+
+
+        log.debug("app: ",app.username)
+        log.notice("username: ",username)
+        assert(username)
+        assert(app.username)
+        assert(username,app.username)
 
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)
@@ -229,6 +240,8 @@ const test_service = async function () {
         log.notice("app balances: length",app.balances)
         //TODO has at least 1 balance for every enabled blockchain
         if(app.balances.length === 0) throw Error("Empty balances!")
+
+        //TODO count networks verify 1 per network
         //assert.equal(app.balances.length,8)
 
         //verify icons
@@ -255,8 +268,10 @@ const test_service = async function () {
                 if(balance.protocols.indexOf('thorchain') === -1) throw Error('Missing proto flag thorchain!')
             }
         }
-        //verify pairing has metamask wallet
 
+        //verify pairing has metamask wallet
+        let pubkeysMetamaskContext = app.balances.filter((e:any) => e.pubkey === '0xfEb8bf56e554fc47639e5Ed9E1dAe21DfF69d6A9')[0]
+        assert(pubkeysMetamaskContext)
         //switch context
 
 

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@bithighlander/hdwallet-core": "latest",
-    "@bithighlander/hdwallet-native": "latest",
+    "@bithighlander/hdwallet-native": "2.0.5",
     "@cosmostation/cosmosjs": "^0.9.5",
     "@pioneer-platform/coincap": "^8.1.18",
     "@pioneer-platform/eth-crypto": "^8.1.29",
