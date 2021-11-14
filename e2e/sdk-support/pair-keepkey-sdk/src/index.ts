@@ -37,6 +37,7 @@ let BigNumber = require('@ethersproject/bignumber')
 let pjson = require("../package.json");
 let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
 const log = require("@pioneer-platform/loggerdog")()
+const Datastore = require('nedb-promises')
 
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
@@ -131,7 +132,6 @@ const test_service = async function () {
         log.debug(tag,"wallet: ",wallet)
         log.debug(tag,"CHECKPOINT 3")
 
-        let username:any
         let keepkeySdk
         let pubkeys
         let walletWatch
@@ -148,16 +148,19 @@ const test_service = async function () {
 
         //generate new key
         // const queryKey = "sdk:4339eec1-343a-438f-823a-4f56d1f528c2";
-        const queryKey = uuidv4();
+        const queryKey = "sdk:pair-keepkey:"+uuidv4();
+        const username = "user:pair-keepkey:"+uuidv4();
         assert(queryKey)
+        assert(username)
 
         let config = {
             queryKey,
-            //username,
+            username,
             spec,
             wss
         }
 
+        log.info(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
         let events = await app.startSocket()
         let eventPairReceived = false
@@ -168,6 +171,26 @@ const test_service = async function () {
             assert(message.url)
             eventPairReceived = true
         })
+
+        //pair metamask
+        let pairWalletKeepKey:any = {
+            type:'keepkey',
+            name:'keepkey',
+            format:'keepkey',
+            isWatch:'true',
+            wallet:keepkeySdk,
+            serialized:walletWatch,
+            pubkeys:pubkeys,
+        }
+        log.debug(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
+
+        //load pubkeys
+        let resultLoad = await app.loadPubkeys(pairWalletKeepKey)
+        log.info(tag,"resultLoad: ",resultLoad)
+
+
+        //validate balances returned
+
 
         let seedChains = [
             'bitcoin',
@@ -181,24 +204,14 @@ const test_service = async function () {
         ]
         await app.init(seedChains)
 
-        //pair metamask
-        let pairWalletKeepKey:any = {
-            type:'keepkey',
-            format:'keepkey',
-            isWatch:'true',
-            wallet:keepkeySdk,
-            serialized:walletWatch,
-            pubkeys:pubkeys,
-        }
-        log.debug(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
-
         log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
         let registerResult = await app.pairWallet(pairWalletKeepKey)
-        log.debug("registerResult: ",registerResult)
-        username = app.username
+        log.info("registerResult: ",registerResult)
+
         log.debug("app: ",app.username)
         log.notice("username: ",username)
         assert(username)
+        assert.equal(username,app.username)
 
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)

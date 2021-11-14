@@ -51,13 +51,13 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
-        // let status = await pioneer.instance.Status()
-        // console.log("status: ",status.data.exchanges.osmosis)
-        // console.log("status: ",status.data.exchanges.osmosis.markets)
+        let status = await pioneer.instance.Status()
+        // console.log("status: ",status.data.exchanges.thorchain.assets)
+        console.log("status: ",status.data.exchanges.osmosis.assets)
 
-        let invocation = 'pioneer:invocation:v0.01:OSMO:q5sdvDcx8MjWnw7pe4md3x'
-        let txInfo = await pioneer.instance.Invocation(invocation)
-        console.log("txInfo: ",txInfo.data)
+        // let invocation = 'pioneer:invocation:v0.01:OSMO:q5sdvDcx8MjWnw7pe4md3x'
+        // let txInfo = await pioneer.instance.Invocation(invocation)
+        // console.log("txInfo: ",txInfo.data)
 
         //get new address
         //

@@ -25,6 +25,7 @@ let {
     nativeToBaseAmount,
     assetToBase,
     assetAmount,
+    getSwapProtocals,
 } = require('@pioneer-platform/pioneer-coins')
 let TxBuilder = require('@pioneer-platform/pioneer-tx-builder')
 
@@ -61,7 +62,7 @@ export class SDK {
     public url: string;
     public events: any;
     public wss: string | undefined;
-    public username: string | undefined;
+    public username: string;
     public blockchains: any
     public startSocket: () => Promise<any>;
     public isPaired: boolean
@@ -139,12 +140,13 @@ export class SDK {
     private dbBalances: any;
     private pairWallet: (wallet: any) => Promise<any>;
     private HDWallet: any;
-    buildTx: (tx: any) => Promise<any>;
+    public buildTx: (tx: any) => Promise<any>;
     constructor(spec:string,config:SDKConfig) {
+        if(!config.username) throw Error("username required to init!")
         this.service = config.service || 'unknown'
         this.url = config.url || 'unknown'
-        this.dbPubkeys = Datastore.create('/path/to/dbPubkeys.db')
-        this.dbBalances = Datastore.create('/path/to/dbBalances.db')
+        this.dbPubkeys = Datastore.create('./path/to/dbPubkeys.db')
+        this.dbBalances = Datastore.create('./path/to/dbBalances.db')
         this.isTestnet = false
         this.initialized = false
         this.isPaired = false
@@ -173,26 +175,51 @@ export class SDK {
         this.ibcChannels = []
         this.paymentStreams = []
         this.nfts = []
-        this.loadPubkeys = function (pubkeys:any) {
+        this.loadPubkeys = function (wallet:any) {
             let tag = TAG + " | loadPubkeys | "
             try {
+                let output:any = {
+                    balances:[]
+                }
                 this.dbPubkeys.ensureIndex({fieldName:"pubkey"})
-                this.pubkeys = pubkeys
+                this.pubkeys = wallet.pubkeys
 
                 //for each pubkey
-                for(let i = 0; i < pubkeys.length; i++){
-                    let pubkey = pubkeys[i]
-                    log.debug(tag,"pubkey: ",pubkey)
+                for(let i = 0; i < wallet.pubkeys.length; i++){
+                    let pubkey = wallet.pubkeys[i]
+                    log.info(tag,"pubkey: ",pubkey)
                     //get db pubkey
                     this.dbPubkeys.insert(pubkey)
                         //if none save
 
                     //get db balances for pubkey
                         //if none add unsyned
-                }
-                //does pubkey exist in db?
 
-                //does base balance exist in db?
+                    let balance = {
+                        blockchain: pubkey.blockchain,
+                        symbol: pubkey.symbol,
+                        asset: pubkey.symbol,
+                        path: pubkey.path,
+                        pathMaster: pubkey.pathMaster,
+                        master: pubkey.master,
+                        pubkey: pubkey.pubkey,
+                        script_type: pubkey.script_type,
+                        network: pubkey.network,
+                        created: new Date().getTime(),
+                        tags: [
+                            this.username,
+                            //TODO context
+                        ],
+                        context: 'kk-undefined-3800',
+                        isToken: false,
+                        lastUpdated: null,
+                        balance: 0,
+                        protocols: getSwapProtocals(pubkey.symbol,pubkey.symbol)
+                    }
+                    output.balances.push(balance)
+                    this.dbBalances.insert(balance)
+                }
+                return output
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -201,6 +228,7 @@ export class SDK {
             let tag = TAG + " | init_wallet | "
             try{
                 if(this.initialized) throw Error("102: already initialized!")
+                if(!this.username) throw Error("103: username not set!")
                 this.initialized = true
                 this.status = 'init'
                 log.debug(tag,"blockchains: ",blockchains)
@@ -216,6 +244,16 @@ export class SDK {
                     }
                 });
 
+                //read pubkeys from db
+                let pubkeysDb = await this.dbPubkeys.find()
+                log.info(tag,"pubkeysDb: ",pubkeysDb)
+                this.pubkeys = pubkeysDb
+
+                //read balances from db
+                let balancesDb = await this.dbBalances.find()
+                log.info(tag,"balancesDb: ",balancesDb)
+                this.balances = balancesDb
+
                 //init blockchains
                 for(let i = 0; i < blockchains.length; i++){
                     let blockchain = blockchains[i]
@@ -223,9 +261,10 @@ export class SDK {
                 }
                 if(this.blockchains.length === 0) throw Error("Failed to init! must have blockchains!")
                 this.pioneerApi = await this.pioneerApi.init()
-
+                if(!this.pioneerApi) throw Error("Failed to init!")
                 let config = {
                     queryKey:this.queryKey,
+                    username:this.username,
                     blockchains,
                     spec
                 }
@@ -256,16 +295,20 @@ export class SDK {
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.debug(tag,"userInfo: ",userInfo)
+                log.info(tag,"userInfo: ",userInfo)
 
-                if(userInfo.username){
-                    this.username = userInfo.username
+                //if success false register username
+                if(!userInfo.success){
+                    //no wallets paired
+                    log.info(tag,"no wallets paired!")
                 }
-                if(userInfo.balances > 0){
-                    this.isPaired = true
-                    this.status = 'paired'
-                    this.balances = userInfo.balances
-                }
+                this.isPaired = true
+                this.status = 'paired'
+
+                //TODO sync balances
+                // if(userInfo.balances > 0){
+                //     this.balances = userInfo.balances
+                // }
 
                 if(userInfo.pubkeys)this.pubkeys = userInfo.pubkeys
                 //if(userInfo.wallets)this.wallets = userInfo.wallets
@@ -388,6 +431,7 @@ export class SDK {
                 //TODO error if server is offline
                 let register
                 if(!this.username) throw Error("username not set!")
+                if(!this.pioneerApi) throw Error("pioneerApi not set!")
                 if(wallet.format === 'onboard'){
                     if(wallet.network !== 1){
                         throw Error('Network not supported!')

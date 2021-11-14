@@ -15,6 +15,37 @@ let {
     getPaths,
 } = require('./paths')
 
+/*
+    Swap protocals
+
+ */
+
+export const getSwapProtocals = function(asset:string, network:string){
+    try{
+        let output = []
+        if(network === 'ETH'){
+            output.push('0x')
+        }
+        let thorchainAssets = [ 'BCH', 'BNB', 'BTC', 'ETH', 'LTC' ]
+        if(thorchainAssets.indexOf(asset) >= 0){
+            output.push('thorchain')
+        }
+        let osmoAssets = [ 'OSMO', 'ATOM' ]
+        if(osmoAssets.indexOf(asset) >= 0){
+            output.push('osmosis')
+        }
+        return output
+    }catch(e){
+        log.error(e)
+    }
+}
+
+
+/*
+    TODO SS caip decoder
+
+ */
+
 
 /*
     Thorchain string parser

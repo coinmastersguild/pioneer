@@ -99,7 +99,7 @@ export interface Pubkey {
 export interface SDKConfig {
     service?: string;
     url?:string
-    username?:string
+    username:string
     queryKey:string
     spec:string,
     wss: string;
