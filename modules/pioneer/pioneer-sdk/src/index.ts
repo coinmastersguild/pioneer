@@ -244,15 +244,16 @@ export class SDK {
                     }
                 });
 
-                //read pubkeys from db
-                let pubkeysDb = await this.dbPubkeys.find()
-                log.info(tag,"pubkeysDb: ",pubkeysDb)
-                this.pubkeys = pubkeysDb
-
-                //read balances from db
-                let balancesDb = await this.dbBalances.find()
-                log.info(tag,"balancesDb: ",balancesDb)
-                this.balances = balancesDb
+                //TODO when to use cache?
+                // //read pubkeys from db
+                // let pubkeysDb = await this.dbPubkeys.find()
+                // log.info(tag,"pubkeysDb: ",pubkeysDb)
+                // this.pubkeys = pubkeysDb
+                //
+                // //read balances from db
+                // let balancesDb = await this.dbBalances.find()
+                // log.info(tag,"balancesDb: ",balancesDb)
+                // this.balances = balancesDb
 
                 //init blockchains
                 for(let i = 0; i < blockchains.length; i++){
@@ -283,13 +284,13 @@ export class SDK {
                 //is api online
                 let health = await this.pioneerApi.Health()
                 health = health.data
-                log.debug(tag,"health: ",health)
+                log.info(tag,"health: ",health)
                 this.apiVersion = health.version
 
                 //market Status
                 let markets = await this.pioneerApi.Status()
                 markets = markets.data
-                log.debug(tag,"markets: ",markets)
+                log.info(tag,"markets: ",markets)
                 this.markets = markets
 
                 //get global info
@@ -300,7 +301,14 @@ export class SDK {
                 //if success false register username
                 if(!userInfo.success){
                     //no wallets paired
-                    log.info(tag,"no wallets paired!")
+                    log.info(tag,"user not registered!")
+
+                    let userInfo = {
+                        queryKey:this.queryKey,
+                        username:this.username
+                    }
+                    let registerUserResp = await this.pioneerApi.RegisterUser(null,userInfo)
+                    log.info(tag,"registerUserResp: ",registerUserResp)
                 }
                 this.isPaired = true
                 this.status = 'paired'

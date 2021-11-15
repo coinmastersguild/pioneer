@@ -162,17 +162,35 @@ const test_service = async function () {
 
         log.info(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
+
+        let seedChains = [
+            'bitcoin',
+            'ethereum',
+            'thorchain',
+            'bitcoincash',
+            'binance',
+            'litecoin',
+            'cosmos',
+            'osmosis'
+        ]
+        let resultInit = await app.init(seedChains)
+        //log.info(tag,"resultInit: ",resultInit)
+
+
+
         let events = await app.startSocket()
         let eventPairReceived = false
         events.on('message', async (message:any) => {
-            log.debug(tag,"message: ",message)
-            assert(message.queryKey)
-            assert(message.username)
-            assert(message.url)
-            eventPairReceived = true
+            log.info(tag,"message: ",message)
+
+
+            // assert(message.queryKey)
+            // assert(message.username)
+            // assert(message.url)
+            // eventPairReceived = true
         })
 
-        //pair metamask
+        //pair keepkey
         let pairWalletKeepKey:any = {
             type:'keepkey',
             name:'keepkey',
@@ -185,24 +203,12 @@ const test_service = async function () {
         log.debug(tag,"pairWalletKeepKey: ",pairWalletKeepKey)
 
         //load pubkeys
-        let resultLoad = await app.loadPubkeys(pairWalletKeepKey)
-        log.info(tag,"resultLoad: ",resultLoad)
-
+        // let resultLoad = await app.loadPubkeys(pairWalletKeepKey)
+        // log.info(tag,"resultLoad: ",resultLoad)
 
         //validate balances returned
 
 
-        let seedChains = [
-            'bitcoin',
-            'ethereum',
-            'thorchain',
-            'bitcoincash',
-            'binance',
-            'litecoin',
-            'cosmos',
-            'osmosis'
-        ]
-        await app.init(seedChains)
 
         log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
         let registerResult = await app.pairWallet(pairWalletKeepKey)
@@ -254,7 +260,6 @@ const test_service = async function () {
                 if(balance.protocols.indexOf('thorchain') === -1) throw Error('Missing proto flag thorchain!')
             }
         }
-        //verify pairing has metamask wallet
 
         //switch context
 
