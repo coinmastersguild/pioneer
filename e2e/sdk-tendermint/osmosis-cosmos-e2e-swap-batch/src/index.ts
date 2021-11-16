@@ -2,6 +2,8 @@
     E2E testing
         k8  "job" pattern
 
+    Osmo batched swap tx's
+
     load test seed
 
     verify empty
@@ -21,11 +23,7 @@
         verify socket connection
 
 
-    Use sdk to
 
-        * check balances
-        * check tx history
-        * verify payment
 
  */
 
@@ -69,6 +67,11 @@ const TEST_AMOUNT = process.env['TEST_AMOUNT'] || "0.001"
 const spec = process.env['URL_PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
 const wss = process.env['URL_PIONEER_SOCKET'] || 'wss://pioneers.dev'
 
+
+let TRADE_PAIR  = "OSMO_ATOM"
+let INPUT_ASSET = ASSET
+let OUTPUT_ASSET = "ATOM"
+
 const noBroadcast = false
 
 console.log("spec: ",spec)
@@ -77,6 +80,11 @@ console.log("wss: ",wss)
 const test_service = async function () {
     const tag = TAG + " | test_service | "
     try {
+
+        console.time('start2paired');
+        console.time('start2build');
+        console.time('start2broadcast');
+        console.time('start2end');
 
         //start app and get wallet
         let wallets = await startApp()
@@ -98,14 +106,21 @@ const test_service = async function () {
 
         //get pubkey
         let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"pubkey: ",pubkey)
+        log.test(tag,"pubkey: ",pubkey.pubkey)
         assert(pubkey)
+
+        //get master output
+        let pubkeyOutput = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.debug(tag,"pubkeyOutput: ",pubkeyOutput.master)
+        assert(pubkeyOutput)
+        assert(pubkeyOutput.master)
 
         //balance
         let balance = walletDescriptionContext.balances.filter((e:any) => e.symbol === ASSET)[0]
-        log.debug(tag,"balance: ",balance)
         assert(balance)
         assert(balance.balance)
+        log.notice(tag,ASSET+" balance: ",balance.balance)
+        log.notice(tag,ASSET+" context: ",balance.context)
 
         let master = pubkey.master
         assert(master)
@@ -118,7 +133,7 @@ const test_service = async function () {
         } else {
             log.debug(tag," Attempting e2e test "+ASSET+" balance: ",balance)
         }
-        console.timeEnd("appStart");
+
         //generate new key
         const queryKey = uuidv4();
         assert(queryKey)
@@ -163,7 +178,6 @@ const test_service = async function () {
         log.debug("code: ",code)
         assert(code)
 
-
         let pairSuccess = await sendPairingCode(code)
         log.debug("pairSuccess: ",pairSuccess)
         assert(pairSuccess)
@@ -175,26 +189,32 @@ const test_service = async function () {
         }
         log.debug(tag,"CHECKPOINT 2 pairing")
 
-
-        /*
-            3 ways to express balance
-                Sdk (x-chain compatible object type)
-                native (satoshi/wei)
-                base (normal 0.001 ETH)
-         */
-
+        //assert sdk user
+        let usernameSdk = await app.username
+        log.debug("app: ",app.username)
+        log.debug("usernameSdk: ",usernameSdk)
+        assert(usernameSdk)
+        assert(usernameSdk,username)
 
 
-        let TEST_AMOUNT_BASE = nativeToBaseAmount(ASSET,TEST_AMOUNT)
 
+        //value USD
+        //TODO not in coincap yet!
+        // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
+        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        // assert(valueBalanceUsd)
+
+        // if(balanceBase < TEST_AMOUNT){
+        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        // }
 
         //get current block height
-        let blockheight = await app.getBlockHeight('OSMO')
-        log.debug(tag,"blockheight: ",blockheight)
+        let blockheight = await app.getBlockHeight(OUTPUT_ASSET)
+        log.test(tag,"blockheight: ",blockheight)
         assert(blockheight)
         //set expiration at +10000
         let expiration =  blockheight + 10000
-        log.debug(tag,"expiration: ",expiration)
+        log.test(tag,"expiration: ",expiration)
         assert(expiration)
 
         //TODO
@@ -205,14 +225,19 @@ const test_service = async function () {
 
         //get ibc channels
 
-        let options:any = {
-            verbose: true,
-            txidOnResp: false, // txidOnResp is the output format
-        }
+        // let options:any = {
+        //     verbose: true,
+        //     txidOnResp: false, // txidOnResp is the output format
+        // }
+        //
 
-        let osmosisAddy = await app.getAddress('OSMO')
-        log.debug(tag,"osmosisAddy: ",osmosisAddy)
+        // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+        // log.test(tag,"pubkey: ",pubkey.pubkey)
+
+        let osmosisAddy = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.test(tag,"osmosisAddy: ",osmosisAddy)
         assert(osmosisAddy)
+        assert(osmosisAddy.pubkey)
 
         //TODO figure out source_channel
         let source_channel = 'channel-141'
@@ -220,40 +245,36 @@ const test_service = async function () {
 
         /*
             Example
-                  "value":{
-                 "msg":[
-                    {
-                       "type":"cosmos-sdk/MsgTransfer",
-                       "value":{
-                          "source_port":"transfer",
-                          "source_channel":"channel-0",
-                          "token":{
-                             "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-                             "amount":"100000"
-                          },
-                          "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
-                          "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
-                          "timeout_height":{
-                             "revision_number":"4",
-                             "revision_height":"8146033"
-                          }
-                       }
-                    }
-                 ],
+             "value":{
+             "msg":[
+                {
+                   "type":"cosmos-sdk/MsgTransfer",
+                   "value":{
+                      "source_port":"transfer",
+                      "source_channel":"channel-0",
+                      "token":{
+                         "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                         "amount":"100000"
+                      },
+                      "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
+                      "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
+                      "timeout_height":{
+                         "revision_number":"4",
+                         "revision_height":"8146033"
+                      }
+                   }
+                }
+             ],
 
          */
 
-        assert(app.context)
-        log.notice("Context: ",app.context)
-
-        let customTx:IBCdeposit = {
+        let customTx:any = {
             context:app.context,
             asset: ASSET,
             network: ASSET,
             memo: '',
-            // @ts-ignore
-            sender:masterAddress,
-            receiver:osmosisAddy,
+            sender:pubkey.pubkey,
+            receiver:osmosisAddy.pubkey,
             source_port,
             source_channel,
             token: {
@@ -271,9 +292,9 @@ const test_service = async function () {
         }
         log.debug(tag,"customTx: ",customTx)
 
-        let responseTransfer = await app.ibcDeposit(customTx,options)
+        let responseTransfer = await app.ibcDeposit(customTx, {})
         assert(responseTransfer)
-        log.debug(tag,"responseTransfer: ",responseTransfer)
+        log.test(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
         //do not continue without invocationId
         assert(invocationId)

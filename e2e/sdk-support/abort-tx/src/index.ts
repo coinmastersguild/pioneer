@@ -114,12 +114,14 @@ const test_service = async function () {
         console.timeEnd("appStart");
 
         //generate new key
-        const queryKey = uuidv4();
+        const queryKey = "sdk:pair-keepkey:"+uuidv4();
+        // const username = "user:pair-keepkey:"+uuidv4();
         assert(queryKey)
+        // assert(username)
 
         let config = {
             queryKey,
-            //username,
+            username,
             spec,
             wss
         }
@@ -142,10 +144,12 @@ const test_service = async function () {
         let resultInfo = await app.init(seedChains)
         console.timeEnd("sdkInit");
 
+        await app.updateContext()
+
         //sdk info
-        log.debug("* resultInfo: ",resultInfo)
-        log.debug("app pubkeys: ",app.pubkeys)
-        log.debug("app balances: ",app.balances)
+        log.info("* resultInfo: ",resultInfo)
+        log.info("app pubkeys: ",app.pubkeys)
+        log.info("app balances: ",app.balances)
         assert(app.pubkeys)
         assert(app.balances)
 
@@ -165,31 +169,47 @@ const test_service = async function () {
             await sleep(300)
         }
 
-        //assert sdk user
-        //get user
-        let user = await app.getUserParams()
-        log.debug("* user: ",user)
+        //sdk info
+        log.debug("app pubkeys: ",app.pubkeys)
+        log.debug("app balances: ",app.balances)
+        // log.debug("app balances: ",JSON.stringify(app.balances))
+        log.debug("app context: ",app.context)
+        assert(app.pubkeys)
+        assert(app.balances)
+        // assert(app.balances.length > 0)
+        assert(app.context)
+        log.debug("app balances: ",app.balances)
+        if(app.balances.length === 0) throw Error("Invalid balances! empty!")
 
+        log.notice("app balances: length",app.balances)
+        //TODO has at least 1 balance for every enabled blockchain
+        if(app.balances.length === 0) throw Error("Empty balances!")
+        //assert.equal(app.balances.length,8)
 
+        //verify icons
+        for(let i = 0; i < app.balances.length; i++){
+            let balance = app.balances[i]
 
-        log.debug("user: ",user)
-        log.debug("user: ",user.balances)
+            log.debug("balance: ",balance)
+            if(balance.symbol === 'undefined') throw Error('invalid pubkey! undefined!')
+            //
+            if(!balance.image){
+                log.error("Invalid image!: ",balance)
+            }
+            // if(!balance.balance){
+            //     log.error("Invalid balance!: ",balance)
+            // }
+            assert(balance.image)
+            assert(balance.pubkey)
+            //assert(balance.balance)
+            assert(balance.path)
+            assert(balance.symbol)
+            assert(balance.protocols)
 
-        assert(user.context)
-        //assert user clients
-        assert(user.clients[BLOCKCHAIN])
-
-        //intergration test asgard-exchange
-        let blockchains = Object.keys(user.clients)
-        log.debug("blockchains: ",blockchains)
-
-        let client = user.clients[BLOCKCHAIN]
-
-        //get master
-        let masterAddress = await client.getAddress()
-        log.debug(tag,"masterAddress: ",masterAddress)
-        assert(masterAddress)
-
+            if(balance.symbol === 'BTC'){
+                if(balance.protocols.indexOf('thorchain') === -1) throw Error('Missing proto flag thorchain!')
+            }
+        }
         /*
             3 ways to express balance
                 Sdk (x-chain compatible object type)
@@ -197,8 +217,8 @@ const test_service = async function () {
                 base (normal 0.001 ETH)
          */
 
-        let balanceSdk = await client.getBalance()
-        log.debug(" balanceSdk: ",balanceSdk)
+        let balanceSdk = await app.getBalance()
+        log.info(" balanceSdk: ",balanceSdk)
 
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)
@@ -206,22 +226,22 @@ const test_service = async function () {
         assert(balanceSdk[0].amount.amount().toString())
 
 
-        let balanceNative = balanceSdk[0].amount.amount().toString()
-        log.debug(tag,"balanceNative: ",balanceNative)
-        assert(balanceNative)
+        // let balanceNative = balanceSdk[0].amount.amount().toString()
+        // log.debug(tag,"balanceNative: ",balanceNative)
+        // assert(balanceNative)
 
-        let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
-        log.debug(tag,"balanceBase: ",balanceBase)
-        assert(balanceBase)
+        // let balanceBase = await nativeToBaseAmount(ASSET,balanceSdk[0].amount.amount().toString())
+        // log.debug(tag,"balanceBase: ",balanceBase)
+        // assert(balanceBase)
 
         //value USD
-        let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        assert(valueBalanceUsd)
+        // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
+        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
+        // assert(valueBalanceUsd)
 
-        if(balanceBase < TEST_AMOUNT){
-            throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
-        }
+        // if(balanceBase < TEST_AMOUNT){
+        //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
+        // }
 
         //estimate BCH fee? lol
         let asset = {
@@ -284,7 +304,7 @@ const test_service = async function () {
         //if monitor
         //let invocationId = "pioneer:invocation:v0.01:ETH:sKxuLRKdaCKHHKAJ1t4iYm"
 
-        let responseTransfer = await user.clients[BLOCKCHAIN].transfer(transfer,options)
+        let responseTransfer = await app.transfer(transfer,options)
         assert(responseTransfer)
         log.debug(tag,"responseTransfer: ",responseTransfer)
         let invocationId = responseTransfer
@@ -294,17 +314,14 @@ const test_service = async function () {
 
         let transaction = {
             invocationId,
-            context:user.context
+            context:app.context
         }
 
         //cancel transaction
         let cancelResult = await cancelTransaction(transaction)
-        log.debug(tag,"cancelResult: ",cancelResult)
+        log.test(tag,"cancelResult: ",cancelResult)
 
-        //
-
-
-        log.debug("****** TEST PASS 2 ******")
+        log.notice("****** TEST PASS 2 ******")
         //process
         process.exit(0)
     } catch (e) {

@@ -54,18 +54,20 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.getTransaction("5A94A8DC72D2A49330999BD704BD08D3228689DC27EF0297DAB96DF72048F7DC")
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
-
-//
-// let tx = ''
-// let tx = ''
-// let tx = {"tx":{"memo":"","fee":{"amount":[{"amount":"100","denom":"atom"}],"gas":"400000"},"signature": {"signature":"SpJvBlZLoVAujLKdOK6kxTnhMNMR91hYmrgY7m+XaQsrJoY2NfL623bepB2P7CI63EIoMnPdUs6Rit6Po3wBqA==","account_number": "88204", "sequence": "6", "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"Als8n0w91JK719dmWG4hbz/ppoA9pAmzVs0HRx28HEOS"}},"msg":[{"type":"cosmos-sdk/MsgTransfer","value":{"source_port":"transfer","source_channel":"channel-0","token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","amount":"1867.7941470811770446589"},"sender":"osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt","receiver":"cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e","timeout_height":{"revision_number":"4","revision_height":"8362088"}}}]},"mode":"sync"}
-// network.broadcast(tx)
+// network.getTransaction("6A55A7A5550C2EAD621A38B498E6D08E2A1F92518E4AA5CF560558212DA7652F\n")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
+
+//
+// let tx = ''
+// let tx = ''
+// let tx = '{"tx":{"fee":{"amount":[{"amount":"1000","denom":"uatom"}],"gas":"100000"},"memo":"foo:bar","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"1000","denom":"uatom"}],"from_address":"cosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3","to_address":"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj"}}],"signatures":[{"signature":"JCfVPdOQR8V/6Qd5d+NRvgQzu2FR38zwzPIfITGHjBc9TTV7hfhrUeM/jn6CA5i1qPT8/ilh5ZUXELYY04mN+g==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A8QCEd0Bv9jcopRKRwv3GdJX3JMxDdG8BZ/rpc0wGcxI"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+
+let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-141", "token":{"denom":"uatom", "amount":"10000"}, "sender":"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj", "receiver":"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq", "timeout_height":{"revision_number":"1", "revision_height":"2019339"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"FGGl2YoTl/fO+EFKuFgH7bi742KPfVbFKcL1/gSb1eBfbRscxz8YLRbfmTUQjObH7tOO3GUoUsnFXn6+WTNy8A=="}], "memo":"", "timeout_height":"0"}, "type":"cosmos-sdk/StdTx", "mode":"sync"}'
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })

@@ -628,7 +628,7 @@ let get_balance = async function(address:string){
         try{
             console.log("URL: ",URL_OSMO_LCD+'/bank/balances/'+address)
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){

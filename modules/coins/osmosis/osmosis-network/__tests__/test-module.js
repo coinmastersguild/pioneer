@@ -20,7 +20,7 @@ let network = require("../lib/index")
 //         //console.log("resp: ",resp.result.length)
 //     })
 
-let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
+// let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
@@ -90,12 +90,12 @@ let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 
 //https://lcd-osmosis.keplr.app/txs?tx.height=1891147&page=1
 
-network.getTransaction("CDC9A43FDFC0822D883B7663D751F6B00BF2535DD35C2628BD033576A9D415D4")
-    .then(function(resp){
-        // console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-        //console.log("resp: ",JSON.stringify(resp))
-    })
+// network.getTransaction("D4C9181D32727F8C17DDFC4ED36A1F28037A95B74AB193509AB0900CBE24D3D5")
+//     .then(function(resp){
+//         // console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.txs("osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9")
 //     .then(function(resp){
@@ -147,8 +147,18 @@ network.getTransaction("CDC9A43FDFC0822D883B7663D751F6B00BF2535DD35C2628BD033576
 
 
 //let tx = '{"tx":{"memo":"","fee":{"amount":[{"amount":"100","denom":"uosmo"}],"gas":"200000"},"msg":[{"type":"cosmos-sdk/MsgWithdrawDelegatorReward","value":{"delegator_address":"osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9","validator_address":"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n","amount":{"amount":"10","denom":"uosmo"}}}],"signatures":[{"signature":"LMhC6auKBRlSde8kUx+FjaqmOOgyS/L0eaLsSZBxr1J1VdCbHrskQbT147s7tAMzFXxSwK705CCMNbYVVmIrDw==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"AygtTy/nNZMzqH9BH+fxxVTtjejSow09LxpUcBcmhzkU"}}]},"mode":"sync","type":"cosmos-sdk/StdTx"}'
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+
+// let tx = '{"tx":{"type":"cosmos-sdk/StdTx", "value":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}},"mode":"sync","type":"cosmos-sdk/StdTx"}'
+
+//let tx = '{"type":"cosmos-sdk/StdTx", "value":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}}'
+
+// let tx = '{"tx":{"type":"cosmos-sdk/StdTx", "value":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}},"mode":"sync","type":"cosmos-sdk/StdTx"}'
+
+
+let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
+
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })
