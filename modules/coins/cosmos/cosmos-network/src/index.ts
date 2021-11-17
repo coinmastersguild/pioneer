@@ -221,7 +221,7 @@ let get_balance = async function(address:string){
         let output = 0
         //
         let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.debug(tag,"accountInfo: ",accountInfo)
+        log.info(tag,"accountInfo: ",accountInfo.data)
 
         if(accountInfo && accountInfo.data && accountInfo.data.result){
             for(let i = 0; i < accountInfo.data.result.length; i++){
@@ -724,14 +724,13 @@ let get_node_info_verbose = async function(){
         let lastBlockRemote = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
         log.debug(tag,"lastBlockRemote: ",lastBlockRemote.data)
 
-        //let hheight
+        //let height
         output.remoteHeight = lastBlockRemote.data.block_meta.header.height
 
         let lastBlock = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
         log.debug(tag,"lastBlock: ",lastBlock.data)
 
         //let height
-
         output.height = lastBlock.data.block_meta.header.height
 
         //estimate time till synced

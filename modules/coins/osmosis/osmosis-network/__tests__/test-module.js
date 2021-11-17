@@ -61,11 +61,28 @@ let network = require("../lib/index")
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
+
+
+let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
+
+network.getBalances(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
+
+let poolId = 'gamm/pool/1'
+
+// let voucher = '27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2'
+// network.getIbcTrace(voucher)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+
 
 // network.getDelegations(address,"osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n")
 //     .then(function(resp){
@@ -80,11 +97,16 @@ let network = require("../lib/index")
 //     })
 
 //get pools
+// network.getPool('')
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
 // network.getPools()
 //     .then(function(resp){
 //         // console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp.pools))
-//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
+//         // console.log("resp: ",JSON.stringify(resp.pools))
+//         console.log("resp: ",JSON.stringify(resp.pools[0]))
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
@@ -155,10 +177,10 @@ let network = require("../lib/index")
 // let tx = '{"tx":{"type":"cosmos-sdk/StdTx", "value":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}},"mode":"sync","type":"cosmos-sdk/StdTx"}'
 
 
-let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
-
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
+//
+// network.broadcast(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })

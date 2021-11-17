@@ -3,6 +3,9 @@
 
      https://api-osmosis.imperator.co/swagger/#/
 
+    OSMO version of cosmoSDK
+    https://v1.cosmos.network/rpc/v0.41.4
+
 
 https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/query
 
@@ -30,6 +33,11 @@ https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/
     `/ibc/core/channel/v1beta1/channels/${params.channelId}/ports/${params.portId}`
     `/ibc/core/channel/v1beta1/channels/${channelId}/ports/${portId}/client_state`
     "/cosmos/base/tendermint/v1beta1/node_info"
+
+    voucher denoum trace
+    /ibc/applications/transfer/v1beta1/denom_traces
+
+
 */
 const pjson = require("../package.json")
 const TAG = " | "+pjson.name.replace("@pioneer-platform/","")+" | "
@@ -90,6 +98,9 @@ module.exports = {
     getAccount:function (address:string) {
         return get_account_info(address);
     },
+    getIbcTrace:function (voucher:string) {
+        return get_voucher_info(voucher);
+    },
     getPools:function () {
         return get_pools();
     },
@@ -129,6 +140,21 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+let get_voucher_info = async function(voucher:string) {
+    let tag = TAG + " | get_voucher_info | "
+    try{
+        let url = URL_OSMO_LCD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
+        log.info(tag,"url: ",url)
+        let txInfo = await axios({method:'GET',url})
+        log.debug(tag,"txInfo: ",txInfo.data)
+
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
 
 let get_block = async function(height:string){
     let tag = TAG + " | get_block | "
@@ -204,6 +230,19 @@ let get_block_height = async function(){
         let height = resp.data.block.header.height
 
         return parseInt(height)
+    }catch(e){
+        throw e
+    }
+}
+
+let get_pool = async function(poolId:string){
+    let tag = TAG + " | get_pools | "
+    let output:any = {}
+    try{
+        let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pool/'+poolId})
+        log.debug(tag,"poolInfo: ",poolInfo.data)
+
+        return poolInfo.data
     }catch(e){
         throw e
     }
@@ -589,23 +628,115 @@ let get_txs_by_address = async function(address:string){
 let get_balances = async function(address:string){
     let tag = TAG + " | get_balances | "
     try{
-        let output = 0
+        let output = []
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
                 for(let i = 0; i < accountInfo.data.result.length; i++){
                     let entry = accountInfo.data.result[i]
                     if(entry.denom === 'uosmo'){
-                        output = entry.amount
+                        let balance = {
+                            type:'balance',
+                            asset:'OSMO',
+                            denom:'uosmo',
+                            balance:entry.amount
+                        }
+                        output.push(balance)
+                    }
+
+                    //if ibc channel, lookup
+                    if(entry.denom.indexOf('ibc/') >= 0){
+                        //lookup on each
+                        let voucher = entry.denom.replace('ibc/','')
+                        log.info(tag,"voucher: ",voucher)
+                        let voucherInfo = await get_voucher_info(voucher)
+                        log.info(tag,"voucherInfo: ",voucherInfo)
+                        if(voucherInfo.denom_trace.base_denom === 'uatom'){
+                            let balance = {
+                                type:'ibcChannel',
+                                ibc:true,
+                                voucherId: entry.denom,
+                                asset:'ATOM',
+                                denom:voucherInfo.denom_trace.base_denom,
+                                channel:voucherInfo.denom_trace.path,
+                                balance:entry.amount
+                            }
+                            output.push(balance)
+                        } else {
+                            //TODO lookup base_denum to asset
+                            //handle more assets
+                        }
+
+                    }
+
+                    //if LP pool
+                    if(entry.denom === 'gamm/pool/1'){
+                        //get pool info
+                        let poolInfo = await get_pools()
+                        poolInfo = poolInfo.pools[0]
+                        log.info(tag,"poolInfo: ",poolInfo)
+                        let totalShares = poolInfo.totalShares.amount / 1000000000000000000
+                        log.info(tag,"totalShares: ",totalShares)
+                        //total ATOM
+                        //total OSMO
+                        //percent of your LP to total
+                        //your balance is percent / total
+
+                        let poolAssets = poolInfo.poolAssets
+                        log.info(tag,"poolAssets: ",poolAssets)
+
+                        let assetAtom = poolAssets[0]
+                        log.info(tag,"assetAtom: ",assetAtom)
+
+                        let assetOsmo = poolAssets[1]
+                        log.info(tag,"assetOsmo: ",assetOsmo)
+
+                        //total ATOM in pool
+                        let totalAtom = assetAtom.token.amount / 10000000
+                        log.info(tag,"totalAtom: ",totalAtom)
+
+                        //total OSMO in pool
+                        let totalOsmo = assetOsmo.token.amount / 1000000
+                        log.info(tag,"totalOsmo: ",totalOsmo)
+
+                        //percent of your LP to total
+                        let yourLpTokens = entry.amount / 1000000000000000000
+                        log.info(tag,"yourLpTokens: ",yourLpTokens)
+
+                        let yourLpPercent = yourLpTokens / totalShares
+                        log.info(tag,"yourLpPercent: ",yourLpPercent)
+
+                        //your balance is percent / total
+                        let yourAtomInPool = totalAtom * yourLpPercent
+                        log.info(tag,"yourAtomInPool: ",yourAtomInPool)
+
+                        let yourOsmoInPool = totalOsmo * yourLpPercent
+                        log.info(tag,"yourOsmoInPool: ",yourOsmoInPool)
+
+
+                        //share out amount = (token in amount * total share) / pool asset
+                        // let atomAmount = (assetAtom.token.denom * totalShares ) /
+
+                        let balance = {
+                            type:'lptoken',
+                            lp:true,
+                            amountATOM:yourAtomInPool,
+                            amountOSMO:yourOsmoInPool,
+                            poolPercent:yourLpPercent,
+                            poolPair: "ATOM_OSMO",
+                            asset:'gamm/pool/1',
+                            balance:yourLpTokens
+                        }
+                        output.push(balance)
                     }
                 }
             }
 
-            output = output / BASE_OSMO
+
         }catch(e){
             //TODO stupid node 404's on new addresses!
             //if !404
