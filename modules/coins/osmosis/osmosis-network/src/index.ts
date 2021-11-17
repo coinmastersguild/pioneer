@@ -663,7 +663,7 @@ let get_balances = async function(address:string){
                                 asset:'ATOM',
                                 denom:voucherInfo.denom_trace.base_denom,
                                 channel:voucherInfo.denom_trace.path,
-                                balance:entry.amount
+                                balance:entry.amount / 1000000
                             }
                             output.push(balance)
                         } else {

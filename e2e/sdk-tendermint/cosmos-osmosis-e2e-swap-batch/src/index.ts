@@ -125,6 +125,11 @@ const test_service = async function () {
         let master = pubkey.master
         assert(master)
 
+        let osmosisAddy = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
+        log.test(tag,"osmosisAddy: ",osmosisAddy)
+        assert(osmosisAddy)
+        assert(osmosisAddy.pubkey)
+
         // //assert balance local
         log.debug(tag,"master: ",master)
         if(balance.balance < MIN_BALANCE){
@@ -140,6 +145,7 @@ const test_service = async function () {
 
         let config = {
             queryKey,
+            username,
             spec,
             wss
         }
@@ -196,18 +202,226 @@ const test_service = async function () {
         assert(usernameSdk,username)
 
         //get channel balance ATOM
+        //filter by channels
+        let ibcChannels = walletDescriptionContext.balances.filter((e:any) => e.type === 'ibcChannel')
+        log.info(tag,"ibcChannels: ",ibcChannels)
+
+        //filter channels by ATOM
+        let atomChannel = ibcChannels.filter((e:any) => e.asset === ASSET)[0]
+        log.info(tag,"atomChannel: ",atomChannel)
+
+        let channelNeedsLiquidity = true
+        let amountNeeded = 0
+        if(atomChannel){
+            let channelBalance = atomChannel.balance
+            if(channelBalance > TEST_AMOUNT){
+                channelNeedsLiquidity = false
+                amountNeeded = parseFloat(channelBalance) - parseFloat(TEST_AMOUNT)
+                log.notice(tag,"Channel needs more liquidity!: ",amountNeeded)
+            }
+        }
+
+
 
         //if balance AND balance > amount swap
             //skip
 
         //else deposit difference into channel
+        if(channelNeedsLiquidity){
+
+            //
+            let blockheight = await app.getBlockHeight(ASSET)
+            log.debug(tag,"blockheight: ",blockheight)
+            assert(blockheight)
+            //set expiration at +10000
+            let expiration =  blockheight + 10000
+            log.debug(tag,"expiration: ",expiration)
+            assert(expiration)
+
+            //get master
+            let masterAddress = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
+            masterAddress = masterAddress.pubkey
+            log.test(tag,"masterAddress: ",masterAddress)
+            assert(masterAddress)
+            log.debug(tag,"CHECKPOINT 4 master address")
 
 
-        //value USD
-        //TODO not in coincap yet!
-        // let valueBalanceUsd = await coincap.getValue(ASSET,balanceBase)
-        // log.debug(tag,"valueBalanceUsd: ",valueBalanceUsd)
-        // assert(valueBalanceUsd)
+            //TODO
+            //get osmosis channel id
+            //let poolInfo = await
+
+            //select first
+
+            //get ibc channels
+
+            let options:any = {
+                verbose: true,
+                txidOnResp: false, // txidOnResp is the output format
+            }
+
+            log.debug(tag,"osmosisAddy: ",osmosisAddy)
+            assert(osmosisAddy)
+
+            //TODO figure out source_channel
+            let source_channel = 'channel-141'
+            let source_port = 'transfer'
+
+            /*
+                Example
+              "value":{
+                 "msg":[
+                    {
+                       "type":"cosmos-sdk/MsgTransfer",
+                       "value":{
+                          "source_port":"transfer",
+                          "source_channel":"channel-141",
+                          "token":{
+                             "denom":"uatom",
+                             "amount":"200000"
+                          },
+                          "sender":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg",
+                          "receiver":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+                          "timeout_height":{
+                             "revision_number":"1",
+                             "revision_height":"841428"
+                          }
+                       }
+                    }
+                 ],
+
+             */
+
+            let customTx:any = {
+                context:app.context,
+                asset: ASSET,
+                network: ASSET,
+                memo: '',
+                sender:master,
+                receiver:osmosisAddy,
+                source_port,
+                source_channel,
+                token: {
+                    "denom":"uatom",
+                    "amount":"10000"
+                },
+                timeout_height: {
+                    "revision_number":"1", //TODO wtf is this?
+                    "revision_height":expiration.toString()
+                },
+                fee:{
+                    priority:5, //1-5 5 = highest
+                },
+                noBroadcast
+            }
+            log.debug(tag,"customTx: ",customTx)
+
+            let responseTransfer = await app.ibcDeposit(customTx,ASSET)
+            assert(responseTransfer)
+            log.debug(tag,"responseTransfer: ",responseTransfer)
+            let invocationId = responseTransfer
+            //do not continue without invocationId
+            assert(invocationId)
+
+            //wait until app get's invocation event
+            let invocationReceived = false
+            while(!invocationReceived){
+                await sleep(1000)
+                let invocations = await getInvocations()
+                log.debug(tag,"invocations: ",invocations)
+                let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+                log.debug(tag,"invocationEventValue: ",invocationEventValue)
+                if(invocationEventValue){
+                    assert(invocationEventValue.invocationId)
+                    invocationReceived = true
+                }
+            }
+
+            let transaction = {
+                invocationId,
+                context:app.context
+            }
+
+            //build
+            let unsignedTx = await buildTransaction(transaction)
+            log.debug(tag,"unsignedTx: ",unsignedTx)
+            assert(unsignedTx)
+
+            //get invocation
+            let invocationView1 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+            assert(invocationView1)
+            assert(invocationView1.state)
+            assert.equal(invocationView1.state,'builtTx')
+
+            //todo assert state
+
+            //sign transaction
+            let signedTx = await approveTransaction(transaction)
+            log.debug(tag,"signedTx: ",signedTx)
+            assert(signedTx)
+            // assert(signedTx.txid)
+
+            //get invocation
+            let invocationView2 = await app.getInvocation(invocationId)
+            assert(invocationView2)
+            assert(invocationView2.state)
+            assert.equal(invocationView2.state,'signedTx')
+            log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+
+            //broadcast transaction
+            let broadcastResult = await broadcastTransaction(transaction)
+            log.debug(tag,"broadcastResult: ",broadcastResult)
+
+            let invocationView3 = await app.getInvocation(invocationId)
+            assert(invocationView3)
+            assert(invocationView3.state)
+            assert.equal(invocationView3.state,'broadcasted')
+            log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+
+            //get invocation info
+            let isConfirmed = false
+            //wait for confirmation
+
+            if(!noBroadcast){
+                /*
+                    Status codes
+
+                    -1: errored
+                     0: unknown
+                     1: built
+                     2: broadcasted
+                     3: confirmed
+                     4: fullfilled (swap completed)
+                 */
+
+                //monitor tx lifecycle
+                let isConfirmed = false
+                let isFullfilled = false
+                let fullfillmentTxid = false
+                let currentStatus
+                let statusCode = 0
+
+                while(!isConfirmed){
+                    //get invocationInfo
+                    await sleep(6000)
+                    let invocationInfo = await app.getInvocation(invocationId)
+                    log.test(tag,"invocationInfo: ",invocationInfo.state)
+
+                    if(invocationInfo && invocationInfo.isConfirmed){
+                        log.test(tag,"Confirmed!")
+                        statusCode = 3
+                        isConfirmed = true
+                        console.timeEnd('timeToConfirmed')
+                        console.time('confirm2fullfillment')
+                    } else {
+                        log.test(tag,"Not Confirmed!")
+                    }
+
+                }
+            }
+        }
+
+        //verify balance
 
         // if(balanceBase < TEST_AMOUNT){
         //     throw Error(" YOUR ARE BROKE! send more test funds into test seed! address: ")
@@ -239,202 +453,199 @@ const test_service = async function () {
         // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
         // log.test(tag,"pubkey: ",pubkey.pubkey)
 
-        let osmosisAddy = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === OUTPUT_ASSET)[0]
-        log.test(tag,"osmosisAddy: ",osmosisAddy)
-        assert(osmosisAddy)
-        assert(osmosisAddy.pubkey)
 
-        // //TODO figure out source_channel
-        // let source_channel = 'channel-141'
-        // let source_port = 'transfer'
-        //
-        // /*
-        //     Example
-        //      "value":{
-        //      "msg":[
-        //         {
-        //            "type":"cosmos-sdk/MsgTransfer",
-        //            "value":{
-        //               "source_port":"transfer",
-        //               "source_channel":"channel-0",
-        //               "token":{
-        //                  "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-        //                  "amount":"100000"
-        //               },
-        //               "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
-        //               "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
-        //               "timeout_height":{
-        //                  "revision_number":"4",
-        //                  "revision_height":"8146033"
-        //               }
-        //            }
-        //         }
-        //      ],
-        //
-        //  */
-        //
-        // let customTx:any = {
-        //     context:app.context,
-        //     asset: ASSET,
-        //     network: ASSET,
-        //     memo: '',
-        //     sender:pubkey.pubkey,
-        //     receiver:osmosisAddy.pubkey,
-        //     source_port,
-        //     source_channel,
-        //     token: {
-        //         "denom":"uatom",
-        //         "amount":"10000"
-        //     },
-        //     timeout_height: {
-        //         "revision_number":"1", //TODO wtf is this?
-        //         "revision_height":expiration.toString()
-        //     },
-        //     fee:{
-        //         priority:5, //1-5 5 = highest
-        //     },
-        //     noBroadcast
-        // }
-        // log.debug(tag,"customTx: ",customTx)
-        //
-        // let responseTransfer = await app.ibcDeposit(customTx, {})
-        // assert(responseTransfer)
-        // log.test(tag,"responseTransfer: ",responseTransfer)
-        // let invocationId = responseTransfer
-        // //do not continue without invocationId
-        // assert(invocationId)
-        //
-        // //wait until app get's invocation event
-        // let invocationReceived = false
-        // while(!invocationReceived){
-        //     await sleep(1000)
-        //     let invocations = await getInvocations()
-        //     log.debug(tag,"invocations: ",invocations)
-        //     let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-        //     log.debug(tag,"invocationEventValue: ",invocationEventValue)
-        //     if(invocationEventValue){
-        //         assert(invocationEventValue.invocationId)
-        //         invocationReceived = true
-        //     }
-        // }
-        //
-        // let transaction = {
-        //     invocationId,
-        //     context:app.context
-        // }
-        //
-        // //build
-        // let unsignedTx = await buildTransaction(transaction)
-        // log.debug(tag,"unsignedTx: ",unsignedTx)
-        // assert(unsignedTx)
-        //
-        // //get invocation
-        // let invocationView1 = await app.getInvocation(invocationId)
-        // log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
-        // assert(invocationView1)
-        // assert(invocationView1.state)
-        // assert.equal(invocationView1.state,'builtTx')
-        //
-        // //todo assert state
-        //
-        // //sign transaction
-        // let signedTx = await approveTransaction(transaction)
-        // log.debug(tag,"signedTx: ",signedTx)
-        // assert(signedTx)
-        // // assert(signedTx.txid)
-        //
-        // //get invocation
-        // let invocationView2 = await app.getInvocation(invocationId)
-        // assert(invocationView2)
-        // assert(invocationView2.state)
-        // assert.equal(invocationView2.state,'signedTx')
-        // log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
-        //
-        // //broadcast transaction
-        // let broadcastResult = await broadcastTransaction(transaction)
-        // log.debug(tag,"broadcastResult: ",broadcastResult)
-        //
-        // let invocationView3 = await app.getInvocation(invocationId)
-        // assert(invocationView3)
-        // assert(invocationView3.state)
-        // assert.equal(invocationView3.state,'broadcasted')
-        // log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
-        //
-        // //get invocation info
-        // let isConfirmed = false
-        // //wait for confirmation
-        //
-        // if(!noBroadcast && false){
-        //     //TODO
-        //     /*
-        //         Status codes
-        //
-        //         -1: errored
-        //          0: unknown
-        //          1: built
-        //          2: broadcasted
-        //          3: confirmed
-        //          4: fullfilled (swap completed)
-        //      */
-        //
-        //     //monitor tx lifecycle
-        //     let currentStatus
-        //     let statusCode = 0
-        //     let txid
-        //
-        //     //wait till confirmed in block
-        //     while(!isConfirmed){
-        //         //get invocationInfo
-        //         let invocationInfo = await app.getInvocation(invocationId)
-        //         log.debug(tag,"invocationInfo: ",invocationInfo)
-        //
-        //         txid = invocationInfo.signedTx.txid
-        //         assert(txid)
-        //         if(!currentStatus) currentStatus = 'transaction built!'
-        //         if(statusCode <= 0) statusCode = 1
-        //
-        //         //lookup txid
-        //         let txInfo = await app.getTransactionData(txid)
-        //         log.debug(tag,"txInfo: ",txInfo)
-        //
-        //         if(txInfo && txInfo.blockNumber){
-        //             log.debug(tag,"Confirmed!")
-        //             statusCode = 3
-        //         } else {
-        //             log.debug(tag,"Not confirmed!")
-        //             //get gas price recomended
-        //
-        //             //get tx gas price
-        //         }
-        //
-        //         await sleep(6000)
-        //     }
-        //
-        //
-        //     let isFullfilled = false
-        //     //wait till swap is fullfilled
-        //     while(!isFullfilled){
-        //         //get midgard info
-        //         let txInfoMidgard = midgard.getTransaction(txid)
-        //         log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
-        //
-        //         //
-        //         if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-        //             let depositInfo = txInfoMidgard.actions[0].in
-        //             log.debug(tag,"deposit: ",depositInfo)
-        //
-        //             let fullfillmentInfo = txInfoMidgard.actions[0].out
-        //             log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-        //
-        //             if(fullfillmentInfo.status === 'success'){
-        //                 statusCode = 4
-        //                 isFullfilled = true
-        //             }
-        //         }
-        //
-        //         await sleep(6000)
-        //     }
-        // }
+
+        //TODO figure out source_channel
+        let source_channel = 'channel-141'
+        let source_port = 'transfer'
+
+        /*
+            Example
+             "value":{
+             "msg":[
+                {
+                   "type":"cosmos-sdk/MsgTransfer",
+                   "value":{
+                      "source_port":"transfer",
+                      "source_channel":"channel-0",
+                      "token":{
+                         "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                         "amount":"100000"
+                      },
+                      "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
+                      "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
+                      "timeout_height":{
+                         "revision_number":"4",
+                         "revision_height":"8146033"
+                      }
+                   }
+                }
+             ],
+
+         */
+
+        let customTx:any = {
+            context:app.context,
+            asset: ASSET,
+            network: ASSET,
+            memo: '',
+            sender:pubkey.pubkey,
+            receiver:osmosisAddy.pubkey,
+            source_port,
+            source_channel,
+            token: {
+                "denom":"uatom",
+                "amount":"10000"
+            },
+            timeout_height: {
+                "revision_number":"1", //TODO wtf is this?
+                "revision_height":expiration.toString()
+            },
+            fee:{
+                priority:5, //1-5 5 = highest
+            },
+            noBroadcast
+        }
+        log.debug(tag,"customTx: ",customTx)
+
+        let responseTransfer = await app.ibcDeposit(customTx, {})
+        assert(responseTransfer)
+        log.test(tag,"responseTransfer: ",responseTransfer)
+        let invocationId = responseTransfer
+        //do not continue without invocationId
+        assert(invocationId)
+
+        //wait until app get's invocation event
+        let invocationReceived = false
+        while(!invocationReceived){
+            await sleep(1000)
+            let invocations = await getInvocations()
+            log.debug(tag,"invocations: ",invocations)
+            let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
+            log.debug(tag,"invocationEventValue: ",invocationEventValue)
+            if(invocationEventValue){
+                assert(invocationEventValue.invocationId)
+                invocationReceived = true
+            }
+        }
+
+        let transaction = {
+            invocationId,
+            context:app.context
+        }
+
+        //build
+        let unsignedTx = await buildTransaction(transaction)
+        log.debug(tag,"unsignedTx: ",unsignedTx)
+        assert(unsignedTx)
+
+        //get invocation
+        let invocationView1 = await app.getInvocation(invocationId)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        assert(invocationView1)
+        assert(invocationView1.state)
+        assert.equal(invocationView1.state,'builtTx')
+
+        //todo assert state
+
+        //sign transaction
+        let signedTx = await approveTransaction(transaction)
+        log.debug(tag,"signedTx: ",signedTx)
+        assert(signedTx)
+        // assert(signedTx.txid)
+
+        //get invocation
+        let invocationView2 = await app.getInvocation(invocationId)
+        assert(invocationView2)
+        assert(invocationView2.state)
+        assert.equal(invocationView2.state,'signedTx')
+        log.debug(tag,"invocationView2: (VIEW) ",invocationView2)
+
+        //broadcast transaction
+        let broadcastResult = await broadcastTransaction(transaction)
+        log.debug(tag,"broadcastResult: ",broadcastResult)
+
+        let invocationView3 = await app.getInvocation(invocationId)
+        assert(invocationView3)
+        assert(invocationView3.state)
+        assert.equal(invocationView3.state,'broadcasted')
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+
+        //get invocation info
+        let isConfirmed = false
+        //wait for confirmation
+
+        if(!noBroadcast && false){
+            //TODO
+            /*
+                Status codes
+
+                -1: errored
+                 0: unknown
+                 1: built
+                 2: broadcasted
+                 3: confirmed
+                 4: fullfilled (swap completed)
+             */
+
+            //monitor tx lifecycle
+            let currentStatus
+            let statusCode = 0
+            let txid
+
+            //wait till confirmed in block
+            while(!isConfirmed){
+                //get invocationInfo
+                let invocationInfo = await app.getInvocation(invocationId)
+                log.debug(tag,"invocationInfo: ",invocationInfo)
+
+                txid = invocationInfo.signedTx.txid
+                assert(txid)
+                if(!currentStatus) currentStatus = 'transaction built!'
+                if(statusCode <= 0) statusCode = 1
+
+                //lookup txid
+                let txInfo = await app.getTransactionData(txid)
+                log.debug(tag,"txInfo: ",txInfo)
+
+                if(txInfo && txInfo.blockNumber){
+                    log.debug(tag,"Confirmed!")
+                    statusCode = 3
+                } else {
+                    log.debug(tag,"Not confirmed!")
+                    //get gas price recomended
+
+                    //get tx gas price
+                }
+
+                await sleep(6000)
+            }
+
+
+            let isFullfilled = false
+            //wait till swap is fullfilled
+            while(!isFullfilled){
+                //get midgard info
+                let txInfoMidgard = midgard.getTransaction(txid)
+                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
+
+                //
+                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
+                    let depositInfo = txInfoMidgard.actions[0].in
+                    log.debug(tag,"deposit: ",depositInfo)
+
+                    let fullfillmentInfo = txInfoMidgard.actions[0].out
+                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
+
+                    if(fullfillmentInfo.status === 'success'){
+                        statusCode = 4
+                        isFullfilled = true
+                    }
+                }
+
+                await sleep(6000)
+            }
+        }
 
         let result = await app.stopSocket()
         log.debug(tag,"result: ",result)
