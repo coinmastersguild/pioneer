@@ -653,10 +653,15 @@ let broadcast_transaction = async function(tx:string){
                 let logSend = result2.data.raw_log
                 log.debug(tag,"logSend: ",logSend)
             }
+            if(result2.data.code === 4){
+                output.success = false
+            } else {
+                output.success = true
+            }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
-            output.raw = result2.data
+            output.raw = result2.data.raw_log
         }catch(e){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
@@ -669,10 +674,6 @@ let broadcast_transaction = async function(tx:string){
             output.success = false
             output.error = e.response.data.error
 
-        }
-
-        if(output.txid){
-            output.success = true
         }
 
         return output

@@ -119,6 +119,11 @@ const test_service = async function () {
         let master = pubkey.master
         assert(master)
 
+        //let outputAsset
+        let osmosisAddy = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === 'OSMO')[0]
+        osmosisAddy = osmosisAddy.pubkey
+        assert(osmosisAddy)
+
         // //assert balance local
         log.debug(tag,"master: ",master)
         if(balance.balance < MIN_BALANCE){
@@ -135,6 +140,7 @@ const test_service = async function () {
 
         let config = {
             queryKey,
+            username,
             spec,
             wss
         }
@@ -231,7 +237,6 @@ const test_service = async function () {
             txidOnResp: false, // txidOnResp is the output format
         }
 
-        let osmosisAddy = master
         log.debug(tag,"osmosisAddy: ",osmosisAddy)
         assert(osmosisAddy)
 
@@ -349,14 +354,13 @@ const test_service = async function () {
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info
         let isConfirmed = false
         //wait for confirmation
 
-        if(!noBroadcast && false){
-            //TODO
+        if(!noBroadcast){
             /*
                 Status codes
 
@@ -392,24 +396,6 @@ const test_service = async function () {
                 }
 
             }
-
-            while(!isFullfilled){
-                //get invocationInfo
-                await sleep(6000)
-                let invocationInfo = await app.getInvocation(invocationId)
-                log.test(tag,"invocationInfo: ",invocationInfo.state)
-
-                if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-                    log.test(tag,"is fullfilled!")
-                    fullfillmentTxid = invocationInfo.fullfillmentTxid
-                    isFullfilled = true
-                    console.timeEnd('confirm2fullfillment')
-                    //get tx gas price
-                } else {
-                    log.test(tag,"unfullfilled!")
-                }
-            }
-            log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
 
         let result = await app.stopSocket()

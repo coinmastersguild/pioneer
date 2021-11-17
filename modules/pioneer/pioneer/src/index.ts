@@ -1266,7 +1266,7 @@ module.exports = class wallet {
                     masterInfo = masterInfo.data
                     log.debug(tag,"masterInfo: ",masterInfo.data)
 
-                    let sequence = masterInfo.result.value.sequence
+                    let sequence = masterInfo.result.value.sequence || 0
                     let account_number = masterInfo.result.value.account_number
                     sequence = parseInt(sequence)
                     sequence = sequence.toString()
