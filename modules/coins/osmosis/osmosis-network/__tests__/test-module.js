@@ -69,10 +69,10 @@ let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 //         console.log("resp: ",resp)
 //     })
 
-network.getBalances(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getBalances(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 let poolId = 'gamm/pool/1'
 
@@ -177,10 +177,10 @@ let poolId = 'gamm/pool/1'
 // let tx = '{"tx":{"type":"cosmos-sdk/StdTx", "value":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}},"mode":"sync","type":"cosmos-sdk/StdTx"}'
 
 
-// let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
-//
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+//let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
+let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"290000"},"memo":"","msg":[{"type":"osmosis/gamm/swap-exact-amount-in","value":{"sender":"osmo1yc6dftwdhgt96k8yty8djga88f3knhznply6vy","routes":[{"poolId":"1","tokenOutDenom":"uosmo"}],"tokenIn":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","amount":"1000"},"tokenOutMinAmount":"126"}}],"signatures":[{"signature":"mAY8uSVrtXO6xBwIhn03gxHb16HGqyLosrsR6J7GcVlpu1domDd3a4osp60uEMSQjQt2Yn98yq4zlBg+W64q/A==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A/SmJZVOYFbYd/Gr3he9k0I+oIbr5GSrOnwqR4KvLwzJ"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })

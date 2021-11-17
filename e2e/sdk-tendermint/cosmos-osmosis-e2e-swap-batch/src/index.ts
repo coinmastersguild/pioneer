@@ -27,6 +27,8 @@
 
  */
 
+import {baseAmountToNative} from "@pioneer-platform/pioneer-coins/lib";
+
 require("dotenv").config()
 require('dotenv').config({path:"../../.env"});
 require("dotenv").config({path:'../../../.env'})
@@ -175,7 +177,8 @@ const test_service = async function () {
         })
 
         let seedChains = ['ethereum','thorchain','bitcoin','osmosis','cosmos']
-        await app.init(seedChains)
+        let API = await app.init(seedChains)
+        assert(API)
 
         //pair sdk
         let code = await app.createPairingCode()
@@ -291,6 +294,15 @@ const test_service = async function () {
 
              */
 
+            //
+            log.info(tag,"amountNeeded: ",amountNeeded)
+
+            //convert to base
+            let amountNative = baseAmountToNative('OSMO',amountNeeded)
+            log.info(tag,"amountNative: ",amountNative)
+            assert(amountNative)
+
+
             let customTx:any = {
                 context:app.context,
                 asset: ASSET,
@@ -302,7 +314,7 @@ const test_service = async function () {
                 source_channel,
                 token: {
                     "denom":"uatom",
-                    "amount":"10000"
+                    "amount":amountNative
                 },
                 timeout_height: {
                     "revision_number":"1", //TODO wtf is this?
@@ -420,7 +432,7 @@ const test_service = async function () {
                 }
             }
         }
-
+        log.test("CHECKPOINT BUILD SWAP")
         //verify balance
 
         // if(balanceBase < TEST_AMOUNT){
@@ -436,123 +448,145 @@ const test_service = async function () {
         log.test(tag,"expiration: ",expiration)
         assert(expiration)
 
+        //test amount in native
+        let amountTestNative = baseAmountToNative("OSMO",parseFloat(TEST_AMOUNT))
+
+        //swap tokens
+        let TOKEN_IN = "ATOM"
+        let TOKEN_OUT = "OSMO"
+
+        //get pool
+        let poolInfo = await app.getPool(TOKEN_OUT)
+        //log.debug(tag,"poolInfo: ",poolInfo)
+        assert(poolInfo)
+
+        //TODO dont filter here
+        log.debug(tag,"poolInfo: ",poolInfo.pools[0])
+
+        //get route
+        let poolId = poolInfo.pools[0].id
+        let tokenInDenom = poolInfo.pools[0].poolAssets[0].token.denom
+        log.debug(tag,"poolId: ",poolId)
+        log.debug(tag,"tokenOutDenom: ",tokenInDenom)
+
+        //get rate
         //TODO
-        //get osmosis channel id
-        //let poolInfo = await
 
-        //select first
+        //get out MIN (slippage)
+        let tokenOutMinAmount = "126"
+        let tokenOutDenom = 'uosmo'
 
-        //get ibc channels
-
-        // let options:any = {
-        //     verbose: true,
-        //     txidOnResp: false, // txidOnResp is the output format
-        // }
-        //
-
-        // let pubkey = walletDescriptionContext.pubkeys.filter((e:any) => e.symbol === ASSET)[0]
-        // log.test(tag,"pubkey: ",pubkey.pubkey)
-
-
-
-        //TODO figure out source_channel
-        let source_channel = 'channel-141'
-        let source_port = 'transfer'
+        let options:any = {
+            verbose: true,
+            txidOnResp: false, // txidOnResp is the output format
+        }
 
         /*
-            Example
-             "value":{
-             "msg":[
-                {
-                   "type":"cosmos-sdk/MsgTransfer",
-                   "value":{
-                      "source_port":"transfer",
-                      "source_channel":"channel-0",
-                      "token":{
-                         "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-                         "amount":"100000"
-                      },
-                      "sender":"osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn",
-                      "receiver":"cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp",
-                      "timeout_height":{
-                         "revision_number":"4",
-                         "revision_height":"8146033"
-                      }
-                   }
-                }
-             ],
+            ATOM -> OSMO
+            {
+               "type":"osmosis/gamm/swap-exact-amount-in",
+               "value":{
+                  "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+                  "routes":[
+                     {
+                        "poolId":"1",
+                        "tokenOutDenom":"uosmo"
+                     }
+                  ],
+                  "tokenIn":{
+                     "denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+                     "amount":"100000"
+                  },
+                  "tokenOutMinAmount":"620317"
+               }
+            }
 
          */
 
-        let customTx:any = {
+        let swap:any = {
+            type:'osmosisswap',
+            addressFrom:osmosisAddy.pubkey,
             context:app.context,
-            asset: ASSET,
-            network: ASSET,
+            asset: OUTPUT_ASSET,
+            network: OUTPUT_ASSET,
             memo: '',
-            sender:pubkey.pubkey,
-            receiver:osmosisAddy.pubkey,
-            source_port,
-            source_channel,
-            token: {
-                "denom":"uatom",
-                "amount":"10000"
+            routes:[{
+                poolId,
+                tokenOutDenom
+            }],
+            tokenIn:{
+                denom:tokenInDenom,
+                amount:amountTestNative.toString()
             },
-            timeout_height: {
-                "revision_number":"1", //TODO wtf is this?
-                "revision_height":expiration.toString()
-            },
+            tokenOutMinAmount,
             fee:{
                 priority:5, //1-5 5 = highest
             },
             noBroadcast
         }
-        log.debug(tag,"customTx: ",customTx)
-
-        let responseTransfer = await app.ibcDeposit(customTx, {})
-        assert(responseTransfer)
-        log.test(tag,"responseTransfer: ",responseTransfer)
-        let invocationId = responseTransfer
-        //do not continue without invocationId
-        assert(invocationId)
-
-        //wait until app get's invocation event
-        let invocationReceived = false
-        while(!invocationReceived){
-            await sleep(1000)
-            let invocations = await getInvocations()
-            log.debug(tag,"invocations: ",invocations)
-            let invocationEventValue = invocations.filter((invocation: { invocationId: any; }) => invocation.invocationId === invocationId)[0]
-            log.debug(tag,"invocationEventValue: ",invocationEventValue)
-            if(invocationEventValue){
-                assert(invocationEventValue.invocationId)
-                invocationReceived = true
-            }
-        }
-
-        let transaction = {
-            invocationId,
-            context:app.context
-        }
+        log.info(tag,"swap: ",swap)
 
         //build
-        let unsignedTx = await buildTransaction(transaction)
-        log.debug(tag,"unsignedTx: ",unsignedTx)
-        assert(unsignedTx)
+        let responseTx = await app.buildTx(swap)
+        assert(responseTx)
+        assert(responseTx.HDwalletPayload)
+        log.debug(tag,"responseTx: ",responseTx)
+        console.timeEnd('start2build');
+
+        //invoke unsigned
+        let transaction:any = {
+            type:'pioneer',
+            fee:{
+                priority:3
+            },
+            unsignedTx:responseTx,
+            context:app.context,
+            network:ASSET
+        }
+
+        //get invocation
+        log.debug(tag,"transaction: ",transaction)
+
+        let responseInvoke = await app.invokeUnsigned(transaction,options,OUTPUT_ASSET)
+        assert(responseInvoke)
+        if(!responseInvoke.success){
+            assert(responseInvoke.invocationId)
+            log.error()
+        }
+        log.debug(tag,"responseInvoke: ",responseInvoke)
+        let invocationId = responseInvoke.invocationId
+        transaction.invocationId = invocationId
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
-        assert.equal(invocationView1.state,'builtTx')
+        // assert.equal(invocationView1.state,'builtTx')
 
+        //verify sequence
+        log.info(tag,"osmosisAddy: ",osmosisAddy.pubkey)
+        let masterInfo = await API.GetAccountInfo({network:'OSMO',address:osmosisAddy.pubkey})
+        masterInfo = masterInfo.data
+        log.info(tag,"masterInfo.result: ",masterInfo.result)
+        log.info(tag,"masterInfo.result: ",masterInfo.result.value)
+        log.info(tag,"masterInfo.result: ",masterInfo.result.value.sequence)
+        let sequenceVerify = masterInfo.result.value.sequence
+
+        assert(sequenceVerify)
+        assert(invocationView1.unsignedTx.HDwalletPayload.sequence)
+        assert.equal(sequenceVerify,invocationView1.unsignedTx.HDwalletPayload.sequence)
+        assert(masterInfo)
+
+        log.info(tag,"masterInfo: ",masterInfo)
         //todo assert state
 
         //sign transaction
         let signedTx = await approveTransaction(transaction)
         log.debug(tag,"signedTx: ",signedTx)
         assert(signedTx)
-        // assert(signedTx.txid)
+        assert(signedTx.txid)
+        log.test(tag,"signedTx.txid: ",signedTx.txid)
 
         //get invocation
         let invocationView2 = await app.getInvocation(invocationId)
@@ -571,13 +605,21 @@ const test_service = async function () {
         assert.equal(invocationView3.state,'broadcasted')
         log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
-        //get invocation info
-        let isConfirmed = false
+        //get invocation info EToC
         //wait for confirmation
 
-        if(!noBroadcast && false){
-            //TODO
+        if(!noBroadcast){
+
+            log.test(tag,"Broadcasting!")
+
+            let invocationView4 = await app.getInvocation(invocationId)
+            log.debug(tag,"invocationView4: (VIEW) ",invocationView4)
+            assert(invocationView4)
+            assert(invocationView4.state)
+            assert.equal(invocationView3.state,'broadcasted')
+
             /*
+
                 Status codes
 
                 -1: errored
@@ -586,64 +628,33 @@ const test_service = async function () {
                  2: broadcasted
                  3: confirmed
                  4: fullfilled (swap completed)
+
              */
 
+
             //monitor tx lifecycle
+            let isConfirmed = false
+            let isFullfilled = false
+            let fullfillmentTxid = false
             let currentStatus
             let statusCode = 0
-            let txid
 
-            //wait till confirmed in block
             while(!isConfirmed){
                 //get invocationInfo
+                await sleep(6000)
                 let invocationInfo = await app.getInvocation(invocationId)
-                log.debug(tag,"invocationInfo: ",invocationInfo)
+                log.test(tag,"invocationInfo: ",invocationInfo.state)
 
-                txid = invocationInfo.signedTx.txid
-                assert(txid)
-                if(!currentStatus) currentStatus = 'transaction built!'
-                if(statusCode <= 0) statusCode = 1
-
-                //lookup txid
-                let txInfo = await app.getTransactionData(txid)
-                log.debug(tag,"txInfo: ",txInfo)
-
-                if(txInfo && txInfo.blockNumber){
-                    log.debug(tag,"Confirmed!")
+                if(invocationInfo && invocationInfo.isConfirmed){
+                    log.test(tag,"Confirmed!")
                     statusCode = 3
+                    isConfirmed = true
+                    log.notice(" TXID fullfillment AND swap = ",invocationInfo.signedTx.txid)
+                    console.timeEnd('timeToConfirmed')
+                    console.time('confirm2fullfillment')
                 } else {
-                    log.debug(tag,"Not confirmed!")
-                    //get gas price recomended
-
-                    //get tx gas price
+                    log.test(tag,"Not Confirmed!")
                 }
-
-                await sleep(6000)
-            }
-
-
-            let isFullfilled = false
-            //wait till swap is fullfilled
-            while(!isFullfilled){
-                //get midgard info
-                let txInfoMidgard = midgard.getTransaction(txid)
-                log.debug(tag,"txInfoMidgard: ",txInfoMidgard)
-
-                //
-                if(txInfoMidgard && txInfoMidgard.actions && txInfoMidgard.actions[0]){
-                    let depositInfo = txInfoMidgard.actions[0].in
-                    log.debug(tag,"deposit: ",depositInfo)
-
-                    let fullfillmentInfo = txInfoMidgard.actions[0].out
-                    log.debug(tag,"fullfillmentInfo: ",fullfillmentInfo)
-
-                    if(fullfillmentInfo.status === 'success'){
-                        statusCode = 4
-                        isFullfilled = true
-                    }
-                }
-
-                await sleep(6000)
             }
         }
 

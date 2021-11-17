@@ -441,24 +441,6 @@ const test_service = async function () {
                     log.test(tag,"Not Confirmed!")
                 }
             }
-
-            // while(!isFullfilled){
-            //     //get invocationInfo
-            //     await sleep(6000)
-            //     let invocationInfo = await app.getInvocation(invocationId)
-            //     log.test(tag,"invocationInfo: ",invocationInfo.state)
-            //
-            //     if(invocationInfo && invocationInfo.isConfirmed && invocationInfo.isFullfilled) {
-            //         log.test(tag,"is fullfilled!")
-            //         fullfillmentTxid = invocationInfo.fullfillmentTxid
-            //         isFullfilled = true
-            //         console.timeEnd('confirm2fullfillment')
-            //         //get tx gas price
-            //     } else {
-            //         log.test(tag,"unfullfilled!")
-            //     }
-            // }
-            //log.notice("****** TEST Report: "+fullfillmentTxid+" ******")
         }
 
         let result = await app.stopSocket()
