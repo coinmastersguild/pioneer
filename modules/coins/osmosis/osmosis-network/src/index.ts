@@ -670,7 +670,6 @@ let get_balances = async function(address:string){
                             //TODO lookup base_denum to asset
                             //handle more assets
                         }
-
                     }
 
                     //if LP pool
