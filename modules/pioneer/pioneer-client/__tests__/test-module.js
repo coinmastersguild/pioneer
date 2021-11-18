@@ -55,7 +55,7 @@ let run_test = async function(){
         // // console.log("status: ",status.data.exchanges.thorchain.assets)
         // console.log("status: ",status.data.exchanges.osmosis.assets)
 
-        let invocation = 'pioneer:invocation:v0.01:ATOM:fwc1Uz1ZPBUkUDKV67TnBd'
+        let invocation = 'pioneer:invocation:v0.01:ATOM:dGqmfUJdFN5MwNWqc2mSHu'
         let txInfo = await pioneer.instance.Invocation(invocation)
         console.log("txInfo: ",txInfo.data)
 

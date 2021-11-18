@@ -905,7 +905,7 @@ module.exports = class wallet {
                     let txType = "cosmos-sdk/MsgSend"
 
                     //Osmosis is cheap, > 0 = max everything
-                    let gas = "290000"
+                    let gas = "350000"
                     let fee = "2800"
 
                     if(transaction.priority === 0){

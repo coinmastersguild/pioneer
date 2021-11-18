@@ -541,7 +541,7 @@ const test_service = async function () {
             },
             unsignedTx:responseTx,
             context:app.context,
-            network:ASSET
+            network:OUTPUT_ASSET //TODO catch when this is wrong, osmo/atom mixxed up
         }
 
         //get invocation
