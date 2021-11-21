@@ -664,6 +664,7 @@ let getTransaction = async function(txid:string){
             selected = ROUND_ROBIN_STATE.pop()
         }
 
+
         let txInfo = await axios({method:'GET',url:selected+'/api/v1/tx/'+txid+"?format=json"})
         log.debug(tag,"txInfo: ",txInfo.data)
 

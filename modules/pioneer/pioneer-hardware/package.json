@@ -13,6 +13,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
+    "@bithighlander/hdwallet-keepkey-nodehid": "^2.0.5",
     "@bithighlander/hdwallet-keepkey-nodewebusb": "2.0.7",
     "@pioneer-platform/loggerdog": "^8.1.17",
     "@pioneer-platform/pioneer-coins": "^8.1.39",
@@ -27,6 +28,7 @@
     "dotenv": "^8.2.0",
     "fiosdk-offline": "^1.2.21",
     "fs-extra": "^9.1.0",
+    "node-hid": "^2.1.1",
     "prettyjson": "^1.2.1",
     "prompt": "^1.1.0",
     "request": "^2.88.2",

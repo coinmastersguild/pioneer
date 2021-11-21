@@ -840,45 +840,50 @@ let get_txs_by_address = async function (address:string) {
     let output:any = {}
     try {
         log.debug(tag,"checkpoint: ",address)
-        let output = []
+        let output:any = []
 
         //sends
-        let url = URL_GAIAD+ '/txs?message.sender='+address
+        //events=tx.height=1890635
+        //transfer.recipient=cosmos13qhqwhzx74703avazhuf5hfxkwdx6wvsea4vgt
+        //event=transfer.recipient=cosmos1q9wtnlwdjrhwtcjmt2uq77jrgx7z3usrq2yz7z&pagination.offset=0&pagination.limit=30
+        // let url = URL_GAIAD+ '/cosmos/tx/v1beta1/txs?events=message.sender=%27'+address+'%27'
+        let url = URL_GAIAD+ '/cosmos/tx/v1beta1/txs?events=transfer.recipient=%27'+address+'%27&events=message.module=%27ibc_client%27'
         log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        log.debug('sends: ', sends)
+        // log.info('sends: ', sends)
+        console.log("resp: ",sends.tx_responses)
 
         // TODO//pagnation
         // let pagesSends = sends.page_number
         // for(let i = 0; i < pagesSends; i++){
         //
         // }
-        for(let i = 0; i < sends.txs.length; i++ ){
-            let tx = sends.txs[i]
-            //normalize
-            //tx = normalize_tx(tx,'send')
-            output.push(tx)
-        }
+        // for(let i = 0; i < sends.txs.length; i++ ){
+        //     let tx = sends.txs[i]
+        //     //normalize
+        //     //tx = normalize_tx(tx,'send')
+        //     output.push(tx)
+        // }
 
         //receives
-        url = URL_GAIAD+ '/txs?transfer.recipient='+address
-        let resultRecieves = await axios({
-            url: url,
-            method: 'GET'
-        })
-        let receives = resultRecieves.data
-        log.debug('receives: ', receives)
-
-        for(let i = 0; i < receives.txs.length; i++ ){
-            let tx = receives.txs[i]
-            //normalize
-            //tx = normalize_tx(tx,'receive')
-            output.push(tx)
-        }
+        // url = URL_GAIAD+ '/txs?transfer.recipient='+address
+        // let resultRecieves = await axios({
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // let receives = resultRecieves.data
+        // log.debug('receives: ', receives)
+        //
+        // for(let i = 0; i < receives.txs.length; i++ ){
+        //     let tx = receives.txs[i]
+        //     //normalize
+        //     //tx = normalize_tx(tx,'receive')
+        //     output.push(tx)
+        // }
 
         //staking tx's
         // let resultStaking = await axios({method:'GET',url: URL_GAIAD+'/txs?delegator='+address})

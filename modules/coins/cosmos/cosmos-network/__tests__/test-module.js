@@ -36,11 +36,12 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.txs("cosmos1dq8u50p3fdm5gcw9fx5xch39atyzfp0ss59g9f")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.txs("cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e")
+    .then(function(resp){
+        // console.log("resp: ",resp)
+        // console.log("resp: ",resp)
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.getAccount("cosmos1kyv3pn3mdk6q6yelhf4vyrza7a0lxgca077cze")
 //     .then(function(resp){
@@ -48,13 +49,13 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.getBalance("cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj")
-    .then(function(resp){
-        console.log("resp: ",resp)
-        //console.log("resp: ",JSON.stringify(resp))
-    })
+// network.getBalance("cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
-// network.getTransaction("6A55A7A5550C2EAD621A38B498E6D08E2A1F92518E4AA5CF560558212DA7652F\n")
+// network.getTransaction("94920F209DA7AAE23ED88A404B269C1EAEFCCD55AB9E3C5F0F483CB5906984CE\n")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         console.log("resp: ",JSON.stringify(resp))

@@ -15,6 +15,9 @@ const { NodeWebUSBKeepKeyAdapter } = require('@bithighlander/hdwallet-keepkey-no
 // import { TCPKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-tcp";
 // import { create as createHIDKeepKey } from "@bithighlander/hdwallet-keepkey";
 
+const { HIDKeepKeyAdapter } = require('@bithighlander/hdwallet-keepkey-nodehid')
+let webUsbAdapter, hidAdapter
+
 const log = require("@pioneer-platform/loggerdog")()
 const EventEmitter = require('events');
 const emitter = new EventEmitter();
@@ -102,6 +105,20 @@ module.exports = {
     load: function (mnemonic:string) {
         //TODO validate mnemonic
         return KEEPKEY_WALLET.loadDevice({mnemonic});
+    },
+    loadFirmware: async function (firmware:string) {
+        try{
+            let wallet = await createHidWallet()
+            log.info("wallet: ",wallet)
+
+            let resultWipe = await wallet.firmwareErase()
+            log.info("resultWipe: ",resultWipe)
+
+            const uploadResult = await wallet.firmwareUpload(firmware)
+            return uploadResult
+        }catch(e){
+            console.error(e)
+        }
     },
 };
 
@@ -723,20 +740,53 @@ let createWallet = async function () {
 // };
 
 // @ts-ignore
-// let createHidWallet = async function (attempts:any = 0) {
-//     let tag = " | createHidWallet | ";
-//     try {
-//
-//
-//     } catch (error) {
-//         if (attempts < 10) {
-//             await sleep(500)
-//             return await createHidWallet(attempts + 1)
-//         }
-//         console.log('error creating HID wallet: ', error)
-//         return null
-//     }
-// };
+let createHidWallet = async function (attempts:any = 0) {
+    let tag = " | createHidWallet | ";
+    try {
+        // log.info(tag,"HIDKeepKeyAdapter: ",HIDKeepKeyAdapter)
+
+        // @ts-ignore
+        // let hidAdapter = await HIDKeepKeyAdapter.useKeyring(keyring)
+        // log.info(tag,"hidAdapter: ",hidAdapter)
+        //
+        // let devices = await hidAdapter.delegate.getDevices()
+        // log.info(tag,"devices: ",devices)
+
+        // @ts-ignore
+        hidAdapter = await HIDKeepKeyAdapter.useKeyring(keyring)
+        let devices = await hidAdapter.delegate.getDevices()
+        log.info(tag,"devices: ",devices)
+        KEEPKEY_WALLET = await hidAdapter.pairDevice(devices[0].serialNumber)
+
+        // let wallet = await hidAdapter.pairDevice(devices[0].serialNumber, true);
+        // if (wallet) {
+        //     log.debug(tag,"Device found!")
+        //     log.debug(tag,"wallet: ",wallet)
+        // }
+
+        // let resultInit = await hidAdapter.initialize()
+        // log.info(tag,"resultInit: ",resultInit)
+
+        // let devices = await hidAdapter.delegate.inspectDevice()
+
+
+
+        //
+        // const wallet = keyring.get()
+        // log.info(tag,"wallet: ",wallet)
+        if (!KEEPKEY_WALLET) throw 'No wallet in the keyring'
+        return KEEPKEY_WALLET
+
+    } catch (error) {
+        console.error(error)
+        // if (attempts < 10) {
+        //     await sleep(500)
+        //     return await createHidWallet(attempts + 1)
+        // }
+        // console.log('error creating HID wallet: ', error)
+        // return null
+    }
+};
 
 // @ts-ignore
 let uploadToDevice = async function (binary:any) {
