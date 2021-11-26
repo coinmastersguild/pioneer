@@ -354,7 +354,7 @@ const test_service = async function () {
         assert(invocationView3)
         assert(invocationView3.state)
         assert.equal(invocationView3.state,'broadcasted')
-        log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+        log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
         //get invocation info
         let isConfirmed = false

@@ -160,7 +160,7 @@ const test_service = async function () {
 
         let app = new SDK.SDK(spec,config)
 
-        log.info("app: ",app.username)
+        log.debug("app: ",app.username)
         log.notice("username: ",username)
         assert(username)
         assert(app.username)
@@ -216,7 +216,7 @@ const test_service = async function () {
 
         //pair wallet
         let resultRegister2 = await app.pairWallet(pairWalletOnboard)
-        log.info("resultRegister2: ",resultRegister2)
+        log.debug("resultRegister2: ",resultRegister2)
 
 
         log.debug("app: ",app.username)
@@ -227,7 +227,7 @@ const test_service = async function () {
 
         //sdk info
         log.debug("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
+        log.debug("app balances: ",app.balances)
         // log.debug("app balances: ",JSON.stringify(app.balances))
         log.debug("app context: ",app.context)
         assert(app.pubkeys)

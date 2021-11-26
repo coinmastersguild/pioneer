@@ -221,7 +221,7 @@ let get_balance = async function(address:string){
         let output = 0
         //
         let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.info(tag,"accountInfo: ",accountInfo.data)
+        log.debug(tag,"accountInfo: ",accountInfo.data)
 
         if(accountInfo && accountInfo.data && accountInfo.data.result){
             for(let i = 0; i < accountInfo.data.result.length; i++){
@@ -854,7 +854,7 @@ let get_txs_by_address = async function (address:string) {
             method: 'GET'
         })
         let sends = resultSends.data
-        // log.info('sends: ', sends)
+        // log.debug('sends: ', sends)
         console.log("resp: ",sends.tx_responses)
 
         // TODO//pagnation

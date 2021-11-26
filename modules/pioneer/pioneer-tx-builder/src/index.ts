@@ -810,7 +810,7 @@ module.exports = class wallet {
                     }
                     let masterInfo = await this.pioneer.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
                     masterInfo = masterInfo.data
-                    log.info(tag,"masterInfo: ",masterInfo.data)
+                    log.debug(tag,"masterInfo: ",masterInfo.data)
 
                     let sequence = masterInfo.result.value.sequence
                     let account_number = masterInfo.result.value.account_number

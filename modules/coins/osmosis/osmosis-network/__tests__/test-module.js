@@ -69,10 +69,10 @@ let address = 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt'
 //         console.log("resp: ",resp)
 //     })
 
-network.getBalances(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getBalances(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 let poolId = 'gamm/pool/1'
 
@@ -119,11 +119,11 @@ let poolId = 'gamm/pool/1'
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.txs("osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.txs("osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt")
+    .then(function(resp){
+        console.log("resp: ",resp)
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.getRewards("osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9")
 //     .then(function(resp){

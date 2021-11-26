@@ -160,7 +160,7 @@ const test_service = async function () {
             wss
         }
 
-        log.info(tag,"config: ",config)
+        log.debug(tag,"config: ",config)
         let app = new SDK.SDK(spec,config)
 
         let seedChains = [
@@ -174,14 +174,14 @@ const test_service = async function () {
             'osmosis'
         ]
         let resultInit = await app.init(seedChains)
-        //log.info(tag,"resultInit: ",resultInit)
+        //log.debug(tag,"resultInit: ",resultInit)
 
 
 
         let events = await app.startSocket()
         let eventPairReceived = false
         events.on('message', async (message:any) => {
-            log.info(tag,"message: ",message)
+            log.debug(tag,"message: ",message)
 
 
             // assert(message.queryKey)
@@ -204,7 +204,7 @@ const test_service = async function () {
 
         //load pubkeys
         // let resultLoad = await app.loadPubkeys(pairWalletKeepKey)
-        // log.info(tag,"resultLoad: ",resultLoad)
+        // log.debug(tag,"resultLoad: ",resultLoad)
 
         //validate balances returned
 
@@ -212,7 +212,7 @@ const test_service = async function () {
 
         log.debug("pairWalletKeepKey: ",pairWalletKeepKey)
         let registerResult = await app.pairWallet(pairWalletKeepKey)
-        log.info("registerResult: ",registerResult)
+        log.debug("registerResult: ",registerResult)
 
         log.debug("app: ",app.username)
         log.notice("username: ",username)

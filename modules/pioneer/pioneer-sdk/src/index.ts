@@ -187,7 +187,7 @@ export class SDK {
                 //for each pubkey
                 for(let i = 0; i < wallet.pubkeys.length; i++){
                     let pubkey = wallet.pubkeys[i]
-                    log.info(tag,"pubkey: ",pubkey)
+                    log.debug(tag,"pubkey: ",pubkey)
                     //get db pubkey
                     this.dbPubkeys.insert(pubkey)
                         //if none save
@@ -247,12 +247,12 @@ export class SDK {
                 //TODO when to use cache?
                 // //read pubkeys from db
                 // let pubkeysDb = await this.dbPubkeys.find()
-                // log.info(tag,"pubkeysDb: ",pubkeysDb)
+                // log.debug(tag,"pubkeysDb: ",pubkeysDb)
                 // this.pubkeys = pubkeysDb
                 //
                 // //read balances from db
                 // let balancesDb = await this.dbBalances.find()
-                // log.info(tag,"balancesDb: ",balancesDb)
+                // log.debug(tag,"balancesDb: ",balancesDb)
                 // this.balances = balancesDb
 
                 //init blockchains
@@ -284,31 +284,31 @@ export class SDK {
                 //is api online
                 let health = await this.pioneerApi.Health()
                 health = health.data
-                log.info(tag,"health: ",health)
+                log.debug(tag,"health: ",health)
                 this.apiVersion = health.version
 
                 //market Status
                 let markets = await this.pioneerApi.Status()
                 markets = markets.data
-                log.info(tag,"markets: ",markets)
+                log.debug(tag,"markets: ",markets)
                 this.markets = markets
 
                 //get global info
                 let userInfo = await this.pioneerApi.User()
                 userInfo = userInfo.data
-                log.info(tag,"userInfo: ",userInfo)
+                log.debug(tag,"userInfo: ",userInfo)
 
                 //if success false register username
                 if(!userInfo.success){
                     //no wallets paired
-                    log.info(tag,"user not registered!")
+                    log.debug(tag,"user not registered!")
 
                     let userInfo = {
                         queryKey:this.queryKey,
                         username:this.username
                     }
                     let registerUserResp = await this.pioneerApi.RegisterUser(null,userInfo)
-                    log.info(tag,"registerUserResp: ",registerUserResp)
+                    log.debug(tag,"registerUserResp: ",registerUserResp)
                 }
                 this.isPaired = true
                 this.status = 'paired'
@@ -487,7 +487,7 @@ export class SDK {
                     if(!wallet.serialized.WALLET_ID) throw Error('invalid serialized wallet!')
                     this.context = wallet.serialized.WALLET_ID
 
-                    log.info(tag,"wallet: ",wallet)
+                    log.debug(tag,"wallet: ",wallet)
 
                     //set SDK to HDwallet
                     this.HDWallet = wallet.wallet
@@ -876,7 +876,7 @@ export class SDK {
             let tag = TAG + " | signTx | "
             try {
                 if(!this.HDWallet) throw Error('Can not not sign if a HDWwallet is not paired!')
-                log.info(tag,"unsignedTx: ",unsignedTx)
+                log.debug(tag,"unsignedTx: ",unsignedTx)
                 if(!unsignedTx.HDwalletPayload) throw Error('Invalid payload! missing: HDwalletPayload')
                 //TODO what if its not a swap?
                 let context = unsignedTx.swap.context
@@ -1011,8 +1011,8 @@ export class SDK {
         //         if(!tx.fee) throw Error("103: fee required!")
         //
         //         //context
-        //         log.info(tag,"currentContext: ",this.context)
-        //         log.info(tag,"txContext: ",tx.context)
+        //         log.debug(tag,"currentContext: ",this.context)
+        //         log.debug(tag,"txContext: ",tx.context)
         //         if(tx.context){
         //             if(this.context !== tx.context){
         //                 //TODO validate context is valid
@@ -1051,10 +1051,10 @@ export class SDK {
         //         }
         //         if(tx.noBroadcast) invocation.noBroadcast = true
         //
-        //         log.info(tag,"invocation: ",invocation)
+        //         log.debug(tag,"invocation: ",invocation)
         //         let result = await this.invoke.invoke(invocation)
         //         if(!result) throw Error("Failed to create invocation!")
-        //         log.info("result: ",result)
+        //         log.debug("result: ",result)
         //
         //         return result.invocationId
         //     } catch (e) {

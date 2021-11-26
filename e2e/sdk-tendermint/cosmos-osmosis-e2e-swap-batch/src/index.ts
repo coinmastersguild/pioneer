@@ -207,11 +207,11 @@ const test_service = async function () {
         //get channel balance ATOM
         //filter by channels
         let ibcChannels = walletDescriptionContext.balances.filter((e:any) => e.type === 'ibcChannel')
-        log.info(tag,"ibcChannels: ",ibcChannels)
+        log.debug(tag,"ibcChannels: ",ibcChannels)
 
         //filter channels by ATOM
         let atomChannel = ibcChannels.filter((e:any) => e.asset === ASSET)[0]
-        log.info(tag,"atomChannel: ",atomChannel)
+        log.debug(tag,"atomChannel: ",atomChannel)
 
         let channelNeedsLiquidity = true
         let amountNeeded = 0
@@ -295,11 +295,11 @@ const test_service = async function () {
              */
 
             //
-            log.info(tag,"amountNeeded: ",amountNeeded)
+            log.debug(tag,"amountNeeded: ",amountNeeded)
 
             //convert to base
             let amountNative = baseAmountToNative('OSMO',amountNeeded)
-            log.info(tag,"amountNative: ",amountNative)
+            log.debug(tag,"amountNative: ",amountNative)
             assert(amountNative)
 
 
@@ -388,7 +388,7 @@ const test_service = async function () {
             assert(invocationView3)
             assert(invocationView3.state)
             assert.equal(invocationView3.state,'broadcasted')
-            log.info(tag,"invocationView3: (VIEW) ",invocationView3)
+            log.debug(tag,"invocationView3: (VIEW) ",invocationView3)
 
             //get invocation info
             let isConfirmed = false
@@ -524,7 +524,7 @@ const test_service = async function () {
             },
             noBroadcast
         }
-        log.info(tag,"swap: ",swap)
+        log.debug(tag,"swap: ",swap)
 
         //build
         let responseTx = await app.buildTx(swap)
@@ -559,18 +559,18 @@ const test_service = async function () {
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)
-        log.info(tag,"invocationView1: (VIEW) ",invocationView1)
+        log.debug(tag,"invocationView1: (VIEW) ",invocationView1)
         assert(invocationView1)
         assert(invocationView1.state)
         // assert.equal(invocationView1.state,'builtTx')
 
         //verify sequence
-        log.info(tag,"osmosisAddy: ",osmosisAddy.pubkey)
+        log.debug(tag,"osmosisAddy: ",osmosisAddy.pubkey)
         let masterInfo = await API.GetAccountInfo({network:'OSMO',address:osmosisAddy.pubkey})
         masterInfo = masterInfo.data
-        log.info(tag,"masterInfo.result: ",masterInfo.result)
-        log.info(tag,"masterInfo.result: ",masterInfo.result.value)
-        log.info(tag,"masterInfo.result: ",masterInfo.result.value.sequence)
+        log.debug(tag,"masterInfo.result: ",masterInfo.result)
+        log.debug(tag,"masterInfo.result: ",masterInfo.result.value)
+        log.debug(tag,"masterInfo.result: ",masterInfo.result.value.sequence)
         let sequenceVerify = masterInfo.result.value.sequence
 
         assert(sequenceVerify)
@@ -578,7 +578,7 @@ const test_service = async function () {
         assert.equal(sequenceVerify,invocationView1.unsignedTx.HDwalletPayload.sequence)
         assert(masterInfo)
 
-        log.info(tag,"masterInfo: ",masterInfo)
+        log.debug(tag,"masterInfo: ",masterInfo)
         //todo assert state
 
         //sign transaction

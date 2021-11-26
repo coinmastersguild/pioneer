@@ -147,9 +147,9 @@ const test_service = async function () {
         await app.updateContext()
 
         //sdk info
-        log.info("* resultInfo: ",resultInfo)
-        log.info("app pubkeys: ",app.pubkeys)
-        log.info("app balances: ",app.balances)
+        log.debug("* resultInfo: ",resultInfo)
+        log.debug("app pubkeys: ",app.pubkeys)
+        log.debug("app balances: ",app.balances)
         assert(app.pubkeys)
         assert(app.balances)
 
@@ -218,7 +218,7 @@ const test_service = async function () {
          */
 
         let balanceSdk = await app.getBalance()
-        log.info(" balanceSdk: ",balanceSdk)
+        log.debug(" balanceSdk: ",balanceSdk)
 
         assert(balanceSdk[0])
         assert(balanceSdk[0].amount)

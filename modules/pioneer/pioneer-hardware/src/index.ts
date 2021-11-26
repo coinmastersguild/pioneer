@@ -109,10 +109,10 @@ module.exports = {
     loadFirmware: async function (firmware:string) {
         try{
             let wallet = await createHidWallet()
-            log.info("wallet: ",wallet)
+            log.debug("wallet: ",wallet)
 
             let resultWipe = await wallet.firmwareErase()
-            log.info("resultWipe: ",resultWipe)
+            log.debug("resultWipe: ",resultWipe)
 
             const uploadResult = await wallet.firmwareUpload(firmware)
             return uploadResult
@@ -743,19 +743,19 @@ let createWallet = async function () {
 let createHidWallet = async function (attempts:any = 0) {
     let tag = " | createHidWallet | ";
     try {
-        // log.info(tag,"HIDKeepKeyAdapter: ",HIDKeepKeyAdapter)
+        // log.debug(tag,"HIDKeepKeyAdapter: ",HIDKeepKeyAdapter)
 
         // @ts-ignore
         // let hidAdapter = await HIDKeepKeyAdapter.useKeyring(keyring)
-        // log.info(tag,"hidAdapter: ",hidAdapter)
+        // log.debug(tag,"hidAdapter: ",hidAdapter)
         //
         // let devices = await hidAdapter.delegate.getDevices()
-        // log.info(tag,"devices: ",devices)
+        // log.debug(tag,"devices: ",devices)
 
         // @ts-ignore
         hidAdapter = await HIDKeepKeyAdapter.useKeyring(keyring)
         let devices = await hidAdapter.delegate.getDevices()
-        log.info(tag,"devices: ",devices)
+        log.debug(tag,"devices: ",devices)
         KEEPKEY_WALLET = await hidAdapter.pairDevice(devices[0].serialNumber)
 
         // let wallet = await hidAdapter.pairDevice(devices[0].serialNumber, true);
@@ -765,7 +765,7 @@ let createHidWallet = async function (attempts:any = 0) {
         // }
 
         // let resultInit = await hidAdapter.initialize()
-        // log.info(tag,"resultInit: ",resultInit)
+        // log.debug(tag,"resultInit: ",resultInit)
 
         // let devices = await hidAdapter.delegate.inspectDevice()
 
@@ -773,7 +773,7 @@ let createHidWallet = async function (attempts:any = 0) {
 
         //
         // const wallet = keyring.get()
-        // log.info(tag,"wallet: ",wallet)
+        // log.debug(tag,"wallet: ",wallet)
         if (!KEEPKEY_WALLET) throw 'No wallet in the keyring'
         return KEEPKEY_WALLET
 

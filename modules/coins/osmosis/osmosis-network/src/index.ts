@@ -145,7 +145,7 @@ let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
     try{
         let url = URL_OSMO_LCD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let txInfo = await axios({method:'GET',url})
         log.debug(tag,"txInfo: ",txInfo.data)
 
@@ -582,8 +582,8 @@ let get_txs_by_address = async function(address:string){
         let output:any = []
 
         //sends
-        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?transfer.sender='+address
-        let url = URL_OSMO_LCD+ '/txs?message.sender='+address
+        let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=transfer.sender=%27'+address+'%27'
+        //let url = URL_OSMO_LCD+ '/txs?message.sender='+address
         log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
@@ -601,22 +601,24 @@ let get_txs_by_address = async function(address:string){
         }
 
         //receives
-        url = URL_OSMO_LCD+ '/txs?transfer.recipient='+address
-        //console.log("URL_OSMO_LCD: ",url)
-        let resultRecieves = await axios({
-            url: url,
-            method: 'GET'
-        })
-        let receives = resultRecieves.data
-        //log.debug('receives: ', receives)
-        if(receives.txs){
-            for(let i = 0; i < receives.txs.length; i++ ){
-                let tx = receives.txs[i]
-                //normalize
-                tx = normalize_tx(tx,address)
-                output.push(tx)
-            }
-        }
+        //url = URL_OSMO_LCD+ '/txs?transfer.recipient='+address
+        //
+        // url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=transfer.recipient=%27'+address+'%27'
+        // //console.log("URL_OSMO_LCD: ",url)
+        // let resultRecieves = await axios({
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // let receives = resultRecieves.data
+        // //log.debug('receives: ', JSON.stringify(receives.tx_responses))
+        // if(receives.tx_responses){
+        //     for(let i = 0; i < receives.txs.length; i++ ){
+        //         let tx = receives.txs[i]
+        //         //normalize
+        //         // tx = normalize_tx(tx,address)
+        //         output.push(tx)
+        //     }
+        // }
 
         return output
     }catch(e){
@@ -632,7 +634,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -652,9 +654,9 @@ let get_balances = async function(address:string){
                     if(entry.denom.indexOf('ibc/') >= 0){
                         //lookup on each
                         let voucher = entry.denom.replace('ibc/','')
-                        log.info(tag,"voucher: ",voucher)
+                        log.debug(tag,"voucher: ",voucher)
                         let voucherInfo = await get_voucher_info(voucher)
-                        log.info(tag,"voucherInfo: ",voucherInfo)
+                        log.debug(tag,"voucherInfo: ",voucherInfo)
                         if(voucherInfo.denom_trace.base_denom === 'uatom'){
                             let balance = {
                                 type:'ibcChannel',
@@ -677,44 +679,44 @@ let get_balances = async function(address:string){
                         //get pool info
                         let poolInfo = await get_pools()
                         poolInfo = poolInfo.pools[0]
-                        log.info(tag,"poolInfo: ",poolInfo)
+                        log.debug(tag,"poolInfo: ",poolInfo)
                         let totalShares = poolInfo.totalShares.amount / 1000000000000000000
-                        log.info(tag,"totalShares: ",totalShares)
+                        log.debug(tag,"totalShares: ",totalShares)
                         //total ATOM
                         //total OSMO
                         //percent of your LP to total
                         //your balance is percent / total
 
                         let poolAssets = poolInfo.poolAssets
-                        log.info(tag,"poolAssets: ",poolAssets)
+                        log.debug(tag,"poolAssets: ",poolAssets)
 
                         let assetAtom = poolAssets[0]
-                        log.info(tag,"assetAtom: ",assetAtom)
+                        log.debug(tag,"assetAtom: ",assetAtom)
 
                         let assetOsmo = poolAssets[1]
-                        log.info(tag,"assetOsmo: ",assetOsmo)
+                        log.debug(tag,"assetOsmo: ",assetOsmo)
 
                         //total ATOM in pool
                         let totalAtom = assetAtom.token.amount / 10000000
-                        log.info(tag,"totalAtom: ",totalAtom)
+                        log.debug(tag,"totalAtom: ",totalAtom)
 
                         //total OSMO in pool
                         let totalOsmo = assetOsmo.token.amount / 1000000
-                        log.info(tag,"totalOsmo: ",totalOsmo)
+                        log.debug(tag,"totalOsmo: ",totalOsmo)
 
                         //percent of your LP to total
                         let yourLpTokens = entry.amount / 1000000000000000000
-                        log.info(tag,"yourLpTokens: ",yourLpTokens)
+                        log.debug(tag,"yourLpTokens: ",yourLpTokens)
 
                         let yourLpPercent = yourLpTokens / totalShares
-                        log.info(tag,"yourLpPercent: ",yourLpPercent)
+                        log.debug(tag,"yourLpPercent: ",yourLpPercent)
 
                         //your balance is percent / total
                         let yourAtomInPool = totalAtom * yourLpPercent
-                        log.info(tag,"yourAtomInPool: ",yourAtomInPool)
+                        log.debug(tag,"yourAtomInPool: ",yourAtomInPool)
 
                         let yourOsmoInPool = totalOsmo * yourLpPercent
-                        log.info(tag,"yourOsmoInPool: ",yourOsmoInPool)
+                        log.debug(tag,"yourOsmoInPool: ",yourOsmoInPool)
 
 
                         //share out amount = (token in amount * total share) / pool asset
@@ -758,7 +760,7 @@ let get_balance = async function(address:string){
         try{
             console.log("URL: ",URL_OSMO_LCD+'/bank/balances/'+address)
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
