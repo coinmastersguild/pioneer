@@ -841,7 +841,7 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
     let tag = TAG + " | get_address_from_xpub | "
     try {
         let output
-        log.debug(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
+        log.info(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
         //if xpub get next unused
         if(!xpub) throw Error("xpub required! coin:"+coin)
         console.log("CHECKPOINT")
@@ -918,7 +918,9 @@ export async function get_address_from_xpub(xpub:string,scriptType:string,coin:s
                 output = createBech32Address(publicKey,'cosmos')
                 break;
             case 'OSMO':
-                output = createBech32Address(publicKey,'osmo')
+                console.log("publicKey: ",publicKey.toString('hex'))
+                let pubkeyOsmo = bitcoin.bip32.fromBase58(xpub).publicKey
+                output = createBech32Address(pubkeyOsmo,'osmo')
                 break;
             case 'BNB':
                 log.debug("pubkey: ",publicKey)

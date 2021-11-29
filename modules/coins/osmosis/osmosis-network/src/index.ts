@@ -554,9 +554,9 @@ let get_txs_at_height = async function(height:string){
         // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=blockHeight='+height
         //blockHeight=$FOO
         //let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?blockHeight='+height
-        // let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=block.height='+height
+        let url = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs?events=tx.height=%27'+height+'%27'
         // let url = URL_OSMO_LCD+ '/txs?block.height='+height
-        let url = URL_OSMO_LCD+ '/txs?tx.height='+height
+        // let url = URL_OSMO_LCD+ '/txs?tx.height='+height
         //tx.height=
         //?tx.height=1891147&page=1
         log.debug(tag,"url: ",url)

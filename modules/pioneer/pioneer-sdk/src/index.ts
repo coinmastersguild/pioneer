@@ -592,12 +592,24 @@ export class SDK {
                 log.error(tag, "e: ", e)
             }
         }
-        this.getAddress = function (asset:string) {
+        this.getAddress = async function (asset:string, showOnDevice?:boolean) {
             let tag = TAG + " | getAddress | "
             try {
                 //filter by address
                 let pubkey = this.info.pubkeys.filter((e:any) => e.symbol === asset)[0]
                 //prefure context
+
+                if(showOnDevice){
+                    //switch by asset
+                    let accountInfo = this.HDWallet.hdwallet.osmosisGetAccountPaths({ accountIdx: 0 })
+                    log.info(tag,"accountInfo: ",accountInfo)
+                    let addressNList = accountInfo.addressNList
+                    let result = await this.HDWallet.hdwallet.osmosisGetAddress({
+                        addressNList,
+                        showDisplay: true,
+                    });
+                    log.info(tag,"result: ",result)
+                }
 
                 return pubkey.master
             } catch (e) {
@@ -859,13 +871,14 @@ export class SDK {
             }
         }
 
-        //SDK
+        //SDK buildTx
         this.buildTx = async function (tx:any) {
             let tag = TAG + " | buildTx | "
             try {
                 if(!tx.addressFrom) throw Error("invalid swap input!")
-                let swapTx = await this.txBuilder.buildTx(tx)
-                return swapTx
+                if(!tx.type) throw Error("invalid tx input! type needed for classification")
+                let unsignedTx = await this.txBuilder.buildTx(tx)
+                return unsignedTx
             } catch (e) {
                 log.error(tag, "e: ", e)
             }
@@ -876,26 +889,63 @@ export class SDK {
             let tag = TAG + " | signTx | "
             try {
                 if(!this.HDWallet) throw Error('Can not not sign if a HDWwallet is not paired!')
-                log.debug(tag,"unsignedTx: ",unsignedTx)
+                log.info(tag,"unsignedTx: ",unsignedTx)
                 if(!unsignedTx.HDwalletPayload) throw Error('Invalid payload! missing: HDwalletPayload')
-                //TODO what if its not a swap?
-                let context = unsignedTx.swap.context
-                log.debug(tag,"context: ",context)
+
+                let context
+                //TODO fix this crap, normaize unsginedTx object
+                if(!unsignedTx.context && unsignedTx?.swap?.context){
+                    context = unsignedTx.swap.context
+                } else if(!unsignedTx.context && unsignedTx?.transaction.context){
+                    context = unsignedTx.transaction.context
+                }else if(unsignedTx.context){
+                    context = unsignedTx.context
+                }
+                log.info(tag,"context: ",context)
                 if(!context) throw Error('Invalid payload! missing: context')
                 log.debug(tag,"this.wallets: ",this.wallets)
 
                 //TODO validate payload
                 //TODO validate fee's
                 //TODO load EV data
+                //TODO validate recepiant from pioneer api
 
-                //invoke with unsigned
-                let signedTx = await this.HDWallet.ethSignTx(unsignedTx.HDwalletPayload)
-                log.debug(tag,"signedTx: ",signedTx)
+                let signedTx
+                switch(unsignedTx.network) {
+                    case 'ATOM':
+                        signedTx = await this.HDWallet.hdwallet.cosmosSignTx(unsignedTx.HDwalletPayload)
+                        log.info(tag,"signedTx: ",signedTx)
+                        break;
+                    case 'OSMO':
+                        signedTx = await this.HDWallet.hdwallet.osmosisSignTx(unsignedTx.HDwalletPayload)
+                        log.info(tag,"signedTx: ",signedTx)
 
-                //TODO do txid hashing in HDwallet
-                const txid = keccak256(signedTx.serialized).toString('hex')
-                log.debug(tag,"txid: ",txid)
-                signedTx.txid = txid
+                        let broadcastString = {
+                            tx:signedTx,
+                            type:"cosmos-sdk/StdTx",
+                            mode:"sync"
+                        }
+                        const buffer = Buffer.from(JSON.stringify(broadcastString), 'base64');
+                        //TODO
+                        //let txid = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+
+                        signedTx.serialized = JSON.stringify(broadcastString)
+                        break;
+                    case 'ETH':
+                        signedTx = await this.HDWallet.hdwallet.ethSignTx(unsignedTx.HDwalletPayload)
+                        log.debug(tag,"signedTx: ",signedTx)
+
+                        //TODO do txid hashing in HDwallet
+                        const txid = keccak256(signedTx.serialized).toString('hex')
+                        log.debug(tag,"txid: ",txid)
+                        signedTx.txid = txid
+
+                        break;
+                    default:
+                        throw Error("network not supported! "+unsignedTx.network)
+                }
+
+
 
                 return signedTx
             } catch (e) {
@@ -1482,7 +1532,7 @@ export class SDK {
                 this.context = userInfo.context
                 this.wallets = userInfo.wallets
                 if(userInfo.balances)this.balances = userInfo.balances
-                this.pubkeys = userInfo.pubkeys
+                if(userInfo.pubkeys && this.pubkeys.length < userInfo.pubkeys.length)this.pubkeys = userInfo.pubkeys
                 this.totalValueUsd = parseFloat(userInfo.totalValueUsd)
                 this.invocationContext = userInfo.invocationContext
                 this.assetContext = userInfo.assetContext

@@ -472,11 +472,20 @@ let get_txs_by_height = async function(height:string){
         // @ts-ignore
         if(nodeHeight < height) throw Error("102: unable to get block! ")
 
-        let txInfo = await axios({method:'GET',url: URL_GAIAD+'/txs?tx.height='+height})
-        log.debug(tag,"txInfo: ",txInfo.data)
+        //console.log("endpoint: ", URL_GAIAD+'/txs?tx.height='+height)
+        // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/txs?tx.height='+height})
+        // log.info(tag,"txInfo: ",txInfo.data)
 
-        return txInfo.data.txs
+        // console.log('endpoint: ',URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27')
+        // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27'})
+
+        let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=tx.height='+height})
+        log.info(tag,"txInfo: ",txInfo)
+        log.info(tag,"txInfo: ",txInfo.data)
+
+        return txInfo.data.tx_responses
     }catch(e){
+        console.error(e)
         throw e
     }
 }

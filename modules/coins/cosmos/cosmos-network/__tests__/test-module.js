@@ -30,18 +30,18 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.txsByHeight("5204363")
-//     .then(function(resp){
-//         console.log("resp: ",JSON.stringif(resp))
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
-
-network.txs("cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e")
+network.txsByHeight(8516982)
     .then(function(resp){
-        // console.log("resp: ",resp)
-        // console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
         //console.log("resp: ",JSON.stringify(resp))
     })
+
+// network.txs("cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e")
+//     .then(function(resp){
+//         // console.log("resp: ",resp)
+//         // console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.getAccount("cosmos1kyv3pn3mdk6q6yelhf4vyrza7a0lxgca077cze")
 //     .then(function(resp){
