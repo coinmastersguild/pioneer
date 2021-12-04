@@ -382,7 +382,7 @@ export async function metamaskMock(transaction:any) {
 }
 
 export async function updateInvocation(updateBody:any) {
-    let tag = " | approveTransaction | ";
+    let tag = " | updateInvocation | ";
     try {
 
         let resultUpdate = await App.updateInvocation(updateBody)

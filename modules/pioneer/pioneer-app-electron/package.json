@@ -51,5 +51,17 @@
     "typescript": "^3.9.9",
     "when": "^3.7.8"
   },
+  "devDependencies": {
+    "@pioneer-platform/pioneer-hardware": "^8.1.38",
+    "@types/jest": "^25.2.3",
+    "@types/node": "^13.13.50",
+    "@types/source-map-support": "^0.5.3",
+    "jest": "^26.6.3",
+    "onchange": "^7.1.0",
+    "serve": "^11.3.2",
+    "source-map-support": "^0.5.19",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.9.9"
+  },
   "gitHead": "8f73c8e6833f870784aca4690d4b5f4ce9ed62d9"
 }

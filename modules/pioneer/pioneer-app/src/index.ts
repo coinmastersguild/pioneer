@@ -1485,208 +1485,208 @@ let init_wallet = async function (config:AppConfig) {
                 let resultUpdate
                 let updateBody
 
-                switch(request.type) {
-                    //custom txs fio/tendermint
-                    case 'osmosislpadd':
-                    case 'osmosisswap':
-                    case 'redelegate':
-                    case 'undelegate':
-                    case 'ibcdeposit':
-                    case 'delegate':
-                        //thorchain deposit (native RUNE inputs to swaps)
-                        if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
-                        if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
-                        request.invocation.invocationId = request.invocationId
-
-                        if(request.invocation.context) context = request.invocation.context
-                        if(!context) context = WALLET_CONTEXT
-                        if(!WALLETS_LOADED[context]) {
-                            log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
-                            log.error(tag,"context: ",context)
-                            throw Error("Unable to build transaction! context not found!")
-                        }
-                        log.debug(tag,"Building transaction with context: ",context)
-                        log.debug(tag,"invocation: ",request.invocation)
-                        //TODO validate tx object to type delegate
-                        unsignedTx = await WALLETS_LOADED[context].buildTx(request.invocation)
-                        log.debug(tag,"txid: ", unsignedTx.txid)
-                        log.debug(tag,"unsignedTx: ", unsignedTx)
-
-                        //update invocation
-                        invocationId = request.invocation.invocationId
-                        unsignedTx.invocationId = invocationId
-                        updateBody = {
-                            invocationId,
-                            invocation:request.invocation,
-                            unsignedTx
-                        }
-
-                        //update invocation remote
-                        resultUpdate = await update_invocation(updateBody)
-                        log.debug(tag,"resultUpdate: ",resultUpdate)
-                        clientEvents.events.emit('unsignedTx',updateBody)
-
-                        break;
-                    case 'deposit':
-                        //thorchain deposit (native RUNE inputs to swaps)
-                        if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
-                        if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
-                        request.invocation.invocationId = request.invocationId
-
-                        if(request.invocation.context) context = request.invocation.context
-                        if(!context) context = WALLET_CONTEXT
-                        if(!WALLETS_LOADED[context]) {
-                            log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
-                            log.error(tag,"context: ",context)
-                            throw Error("Unable to build transaction! context not found!")
-                        }
-                        log.debug(tag,"Building transaction with context: ",context)
-                        log.debug(tag,"invocation: ",request.invocation)
-                        //TODO validate object to type Deposit
-                        unsignedTx = await WALLETS_LOADED[context].deposit(request.invocation)
-                        log.debug(tag,"txid: ", unsignedTx.txid)
-                        log.debug(tag,"unsignedTx: ", unsignedTx)
-
-                        //update invocation
-                        invocationId = request.invocation.invocationId
-                        unsignedTx.invocationId = invocationId
-                        updateBody = {
-                            invocationId,
-                            invocation:request.invocation,
-                            unsignedTx
-                        }
-
-                        //update invocation remote
-                        resultUpdate = await update_invocation(updateBody)
-                        log.debug(tag,"resultUpdate: ",resultUpdate)
-                        clientEvents.events.emit('unsignedTx',updateBody)
-
-                        break;
-                    case 'swap':
-                        if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
-                        if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
-                        request.invocation.invocationId = request.invocationId
-
-                        if(request.invocation.context) context = request.invocation.context
-                        if(!context) context = WALLET_CONTEXT
-                        if(!WALLETS_LOADED[context]) {
-                            log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
-                            log.error(tag,"context: ",context)
-                            throw Error("Unable to build transaction! context not found!")
-                        }
-                        log.debug(tag,"Building transaction with context: ",context)
-                        log.debug(tag,"invocation: ",request.invocation)
-                        unsignedTx = await WALLETS_LOADED[context].buildSwap(request.invocation)
-                        log.debug(tag,"txid: ", unsignedTx.txid)
-                        log.debug(tag,"unsignedTx: ", unsignedTx)
-
-                        //update invocation
-                        invocationId = request.invocation.invocationId
-                        updateBody = {
-                            invocationId,
-                            invocation:request.invocation,
-                            unsignedTx
-                        }
-
-                        //update invocation remote
-                        resultUpdate = await update_invocation(updateBody)
-                        log.debug(tag,"resultUpdate: ",resultUpdate)
-                        clientEvents.events.emit('unsignedTx',updateBody)
-
-                        break;
-                    case 'approve':
-                        if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
-                        if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
-                        request.invocation.invocationId = request.invocationId
-
-                        if(request.invocation.context) context = request.invocation.context
-                        if(!context) context = WALLET_CONTEXT
-                        if(!WALLETS_LOADED[context]) {
-                            log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
-                            log.error(tag,"context: ",context)
-                            throw Error("Unable to build transaction! context not found!")
-                        }
-                        log.debug(tag,"Building transaction with context: ",context)
-                        log.debug(tag,"invocation: ",request.invocation)
-
-                        unsignedTx = await WALLETS_LOADED[context].buildApproval(request.invocation)
-                        log.debug(tag,"txid: ", unsignedTx.txid)
-                        log.debug(tag,"unsignedTx: ", unsignedTx)
-
-                        //update invocation
-                        invocationId = request.invocation.invocationId
-                        updateBody = {
-                            invocationId,
-                            invocation:request.invocation,
-                            unsignedTx
-                        }
-
-                        //update invocation remote
-                        resultUpdate = await update_invocation(updateBody)
-                        log.debug(tag,"resultUpdate: ",resultUpdate)
-                        clientEvents.events.emit('unsignedTx',updateBody)
-
-                        break;
-                    case 'transfer':
-                        if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
-                        if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
-                        request.invocation.invocationId = request.invocationId
-
-                        if(request.invocation.context) {
-                            context = request.invocation.context
-                            //context specified
-                            log.debug(tag,"Context Specified: ",context)
-                            log.debug(tag,"Current Context: ",WALLET_CONTEXT)
-                            WALLET_CONTEXT = context
-                        }
-                        if(!context) context = WALLET_CONTEXT
-                        if(!WALLETS_LOADED[context]) {
-                            log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
-                            log.error(tag,"context: ",context)
-                            throw Error("Unable to build transaction! context not found!")
-                        }
-                        log.debug(tag,"Building transaction with context: ",context)
-                        //log.debug(tag,"invocation: ",request.invocation)
-
-                        unsignedTx = await WALLETS_LOADED[context].buildTransfer(request.invocation)
-                        log.debug(tag,"unsignedTx: ", unsignedTx)
-                        //update invocation
-                        invocationId = request.invocation.invocationId
-                        updateBody = {
-                            invocationId,
-                            invocation:request.invocation,
-                            unsignedTx
-                        }
-
-                        //update invocation remote
-                        resultUpdate = await update_invocation(updateBody)
-                        log.debug(tag,"resultUpdate: ",resultUpdate)
-                        clientEvents.events.emit('unsignedTx',updateBody)
-
-                        break;
-                    case 'context':
-                        log.debug(tag,"context event! event: ",request)
-                        //switch context
-                        if(WALLETS_LOADED[request.context]){
-                            WALLET_CONTEXT = request.context
-                            clientEvents.events.emit('context',request)
-
-                            // log.debug(tag,"wallet context is now: ",request.context)
-                            if(request.context !== WALLET_CONTEXT){
-                                WALLET_CONTEXT = request.context
-                                clientEvents.events.emit('context',request)
-                            }else{
-                                log.error("context already: ",request.context)
-                            }
-                        } else {
-                            log.error(tag,"Failed to switch! invalid context: ",request.context)
-                        }
-                        break;
-                    default:
-                        log.error("Unknown event: "+request.type)
-                    //push error
-                    // code block
-                }
+                // switch(request.type) {
+                //     //custom txs fio/tendermint
+                //     case 'osmosislpadd':
+                //     case 'osmosisswap':
+                //     case 'redelegate':
+                //     case 'undelegate':
+                //     case 'ibcdeposit':
+                //     case 'delegate':
+                //         //thorchain deposit (native RUNE inputs to swaps)
+                //         if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                //         if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                //         request.invocation.invocationId = request.invocationId
+                //
+                //         if(request.invocation.context) context = request.invocation.context
+                //         if(!context) context = WALLET_CONTEXT
+                //         if(!WALLETS_LOADED[context]) {
+                //             log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                //             log.error(tag,"context: ",context)
+                //             throw Error("Unable to build transaction! context not found!")
+                //         }
+                //         log.debug(tag,"Building transaction with context: ",context)
+                //         log.debug(tag,"invocation: ",request.invocation)
+                //         //TODO validate tx object to type delegate
+                //         unsignedTx = await WALLETS_LOADED[context].buildTx(request.invocation)
+                //         log.debug(tag,"txid: ", unsignedTx.txid)
+                //         log.debug(tag,"unsignedTx: ", unsignedTx)
+                //
+                //         //update invocation
+                //         invocationId = request.invocation.invocationId
+                //         unsignedTx.invocationId = invocationId
+                //         updateBody = {
+                //             invocationId,
+                //             invocation:request.invocation,
+                //             unsignedTx
+                //         }
+                //
+                //         //update invocation remote
+                //         resultUpdate = await update_invocation(updateBody)
+                //         log.debug(tag,"resultUpdate: ",resultUpdate)
+                //         clientEvents.events.emit('unsignedTx',updateBody)
+                //
+                //         break;
+                //     case 'deposit':
+                //         //thorchain deposit (native RUNE inputs to swaps)
+                //         if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                //         if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                //         request.invocation.invocationId = request.invocationId
+                //
+                //         if(request.invocation.context) context = request.invocation.context
+                //         if(!context) context = WALLET_CONTEXT
+                //         if(!WALLETS_LOADED[context]) {
+                //             log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                //             log.error(tag,"context: ",context)
+                //             throw Error("Unable to build transaction! context not found!")
+                //         }
+                //         log.debug(tag,"Building transaction with context: ",context)
+                //         log.debug(tag,"invocation: ",request.invocation)
+                //         //TODO validate object to type Deposit
+                //         unsignedTx = await WALLETS_LOADED[context].deposit(request.invocation)
+                //         log.debug(tag,"txid: ", unsignedTx.txid)
+                //         log.debug(tag,"unsignedTx: ", unsignedTx)
+                //
+                //         //update invocation
+                //         invocationId = request.invocation.invocationId
+                //         unsignedTx.invocationId = invocationId
+                //         updateBody = {
+                //             invocationId,
+                //             invocation:request.invocation,
+                //             unsignedTx
+                //         }
+                //
+                //         //update invocation remote
+                //         resultUpdate = await update_invocation(updateBody)
+                //         log.debug(tag,"resultUpdate: ",resultUpdate)
+                //         clientEvents.events.emit('unsignedTx',updateBody)
+                //
+                //         break;
+                //     case 'swap':
+                //         if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                //         if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                //         request.invocation.invocationId = request.invocationId
+                //
+                //         if(request.invocation.context) context = request.invocation.context
+                //         if(!context) context = WALLET_CONTEXT
+                //         if(!WALLETS_LOADED[context]) {
+                //             log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                //             log.error(tag,"context: ",context)
+                //             throw Error("Unable to build transaction! context not found!")
+                //         }
+                //         log.debug(tag,"Building transaction with context: ",context)
+                //         log.debug(tag,"invocation: ",request.invocation)
+                //         unsignedTx = await WALLETS_LOADED[context].buildSwap(request.invocation)
+                //         log.debug(tag,"txid: ", unsignedTx.txid)
+                //         log.debug(tag,"unsignedTx: ", unsignedTx)
+                //
+                //         //update invocation
+                //         invocationId = request.invocation.invocationId
+                //         updateBody = {
+                //             invocationId,
+                //             invocation:request.invocation,
+                //             unsignedTx
+                //         }
+                //
+                //         //update invocation remote
+                //         resultUpdate = await update_invocation(updateBody)
+                //         log.debug(tag,"resultUpdate: ",resultUpdate)
+                //         clientEvents.events.emit('unsignedTx',updateBody)
+                //
+                //         break;
+                //     case 'approve':
+                //         if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                //         if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                //         request.invocation.invocationId = request.invocationId
+                //
+                //         if(request.invocation.context) context = request.invocation.context
+                //         if(!context) context = WALLET_CONTEXT
+                //         if(!WALLETS_LOADED[context]) {
+                //             log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                //             log.error(tag,"context: ",context)
+                //             throw Error("Unable to build transaction! context not found!")
+                //         }
+                //         log.debug(tag,"Building transaction with context: ",context)
+                //         log.debug(tag,"invocation: ",request.invocation)
+                //
+                //         unsignedTx = await WALLETS_LOADED[context].buildApproval(request.invocation)
+                //         log.debug(tag,"txid: ", unsignedTx.txid)
+                //         log.debug(tag,"unsignedTx: ", unsignedTx)
+                //
+                //         //update invocation
+                //         invocationId = request.invocation.invocationId
+                //         updateBody = {
+                //             invocationId,
+                //             invocation:request.invocation,
+                //             unsignedTx
+                //         }
+                //
+                //         //update invocation remote
+                //         resultUpdate = await update_invocation(updateBody)
+                //         log.debug(tag,"resultUpdate: ",resultUpdate)
+                //         clientEvents.events.emit('unsignedTx',updateBody)
+                //
+                //         break;
+                //     case 'transfer':
+                //         if(!request.invocation) throw Error("103: invalid invocation! missing invocation!")
+                //         if(!request.invocationId) throw Error("102: invalid invocation! missing id!")
+                //         request.invocation.invocationId = request.invocationId
+                //
+                //         if(request.invocation.context) {
+                //             context = request.invocation.context
+                //             //context specified
+                //             log.debug(tag,"Context Specified: ",context)
+                //             log.debug(tag,"Current Context: ",WALLET_CONTEXT)
+                //             WALLET_CONTEXT = context
+                //         }
+                //         if(!context) context = WALLET_CONTEXT
+                //         if(!WALLETS_LOADED[context]) {
+                //             log.error(tag,"WALLETS_LOADED: ",WALLETS_LOADED)
+                //             log.error(tag,"context: ",context)
+                //             throw Error("Unable to build transaction! context not found!")
+                //         }
+                //         log.debug(tag,"Building transaction with context: ",context)
+                //         //log.debug(tag,"invocation: ",request.invocation)
+                //
+                //         unsignedTx = await WALLETS_LOADED[context].buildTransfer(request.invocation)
+                //         log.debug(tag,"unsignedTx: ", unsignedTx)
+                //         //update invocation
+                //         invocationId = request.invocation.invocationId
+                //         updateBody = {
+                //             invocationId,
+                //             invocation:request.invocation,
+                //             unsignedTx
+                //         }
+                //
+                //         //update invocation remote
+                //         resultUpdate = await update_invocation(updateBody)
+                //         log.debug(tag,"resultUpdate: ",resultUpdate)
+                //         clientEvents.events.emit('unsignedTx',updateBody)
+                //
+                //         break;
+                //     case 'context':
+                //         log.debug(tag,"context event! event: ",request)
+                //         //switch context
+                //         if(WALLETS_LOADED[request.context]){
+                //             WALLET_CONTEXT = request.context
+                //             clientEvents.events.emit('context',request)
+                //
+                //             // log.debug(tag,"wallet context is now: ",request.context)
+                //             if(request.context !== WALLET_CONTEXT){
+                //                 WALLET_CONTEXT = request.context
+                //                 clientEvents.events.emit('context',request)
+                //             }else{
+                //                 log.error("context already: ",request.context)
+                //             }
+                //         } else {
+                //             log.error(tag,"Failed to switch! invalid context: ",request.context)
+                //         }
+                //         break;
+                //     default:
+                //         log.error("Unknown event: "+request.type)
+                //     //push error
+                //     // code block
+                // }
 
                 //push txid to invocationId
 

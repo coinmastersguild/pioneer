@@ -276,12 +276,11 @@ const test_service = async function () {
 
         //get invocation
         log.info(tag,"transaction: ",transaction)
-
-
         let responseInvoke = await app.invokeUnsigned(transaction,options,ASSET)
         assert(responseInvoke)
         log.info(tag,"responseInvoke: ",responseInvoke)
         let invocationId = responseInvoke.invocationId
+        assert(invocationId)
 
         //get invocation
         let invocationView1 = await app.getInvocation(invocationId)

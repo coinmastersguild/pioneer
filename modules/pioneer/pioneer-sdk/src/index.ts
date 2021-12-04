@@ -1606,7 +1606,7 @@ export class SDK {
                 }
 
                 let invocation:any = {
-                    type:'unsignedHook',
+                    type:tx.type,
                     fee:tx.fee,
                     network:tx.network,
                     context:tx.context || this.context,

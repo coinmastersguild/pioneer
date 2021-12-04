@@ -264,7 +264,7 @@ module.exports = {
 
             let path = "m/44'/"+SLIP_44[coin]+"'/0'"
 
-            const {masterKey,xpub} = await deriveMasterKey(mnemonic,path)
+            const { masterKey, xpub } = await deriveMasterKey(mnemonic,path)
             //
             const { privateKey, publicKey } = deriveKeypair(masterKey,path)
             //const bnbAddress = createBNBAddress(publicKey)

@@ -19,6 +19,7 @@ prompt.start();
 let run_test = async function(){
     try{
 
+        console.log("loading seed: ",process.env['WALLET_MAIN'])
         let KEEPKEY = await Hardware.start()
         KEEPKEY.events.on('event', async function(event) {
             //console.log("EVENT: ",event)
@@ -33,7 +34,6 @@ let run_test = async function(){
 
         await Hardware.wipe()
 
-        console.log("loading seed: ",process.env['WALLET_MAIN'])
         Hardware.load(process.env['WALLET_MAIN'])
 
 
