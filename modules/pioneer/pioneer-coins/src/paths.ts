@@ -1,6 +1,7 @@
 
 
 
+
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
     if(!blockchains) blockchains = []
@@ -233,6 +234,30 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
     return output
 }
 
+export function getPathsKeepKey(blockchains?:any,isTestnet?:boolean) {
+    if(!blockchains) blockchains = []
+
+    let paths = getPaths(blockchains)
+
+    let pathsKeepkey:any = []
+    for(let i = 0; i < paths.length; i++){
+        let path = paths[i]
+        let pathForKeepkey:any = {}
+        //send coin as bitcoin
+        pathForKeepkey.symbol = path.symbol
+        pathForKeepkey.addressNList = path.addressNList
+        //why
+        pathForKeepkey.coin = 'Bitcoin'
+        pathForKeepkey.script_type = 'p2pkh'
+        //showDisplay
+        pathForKeepkey.showDisplay = false
+        pathsKeepkey.push(pathForKeepkey)
+    }
+
+    return pathsKeepkey
+}
+
+//Coins to add
 // {
 //     note:"",
 //     type:"address",

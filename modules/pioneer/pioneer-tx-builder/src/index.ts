@@ -51,7 +51,7 @@ const hdwallet = require("@bithighlander/hdwallet-core")
 // SS public TODO catch up public repo
 // const hdwallet = require("@shapeshiftoss/hdwallet-core")
 // const pioneer = require("@shapeshiftoss/hdwallet-native")
-
+// import { UtxoAccountType, BIP44Params } from '@shapeshiftoss/types'
 //global
 const keyring = new hdwallet.Keyring()
 
@@ -1210,7 +1210,43 @@ module.exports = class wallet {
                 log.debug(tag,"addressFrom: ",addressFrom)
                 let rawTx
 
-                if(UTXO_COINS.indexOf(network) >= 0){
+                //if unchained support use
+                let UNCHAINED_COINS = ['BTC']
+                //else use legacy
+
+                if(UNCHAINED_COINS.indexOf(network) >= 0){
+                    log.debug(tag,"Build UTXO tx! ",network)
+
+                    // const btcBip32Params: BIP44Params = {
+                    //     purpose: 84,
+                    //     coinType: 0,
+                    //     accountNumber: 0,
+                    //     isChange: false,
+                    //     index: 10
+                    // }
+
+                    // const txInput = {
+                    //     to: tx.recipient,
+                    //     value: tx.amount,
+                    //     wallet:this.HDWallet,
+                    //     bip32Params: btcBip32Params,
+                    //     chainSpecific: { accountType: UtxoAccountType.P2pkh, satoshiPerByte: '4' }
+                    // }
+                    //
+                    // const btcChainAdapter = this.chainAdapterManager.byChain('bitcoin')
+                    // const btcUnsignedTx = await btcChainAdapter.buildSendTransaction(txInput)
+                    // log.info(tag,"btcUnsignedTx: ",btcUnsignedTx)
+                    //
+                    // let output = {
+                    //     network:tx.network,
+                    //     asset:tx.network,
+                    //     transaction:tx,
+                    //     HDwalletPayload:btcUnsignedTx,
+                    //     verbal:"bitcoin transfer transaction"
+                    // }
+                    // output.HDwalletPayload = btcUnsignedTx
+
+                }else if(UTXO_COINS.indexOf(network) >= 0){
                     log.debug(tag,"Build UTXO tx! ",network)
 
                     // //list unspent

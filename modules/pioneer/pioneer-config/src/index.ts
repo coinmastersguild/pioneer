@@ -50,8 +50,10 @@ export async function innitConfig(languageSelected: string) {
         // //console.log(tag, " innit config checkpiont 2");
         //generate query key
         const queryKey = uuidv4();
+        const username = "user:"+uuidv4();
         let config: any = {};
         config.locale = "english";
+        config.username = username;
         config.localeSelected = true;
         config.queryKey = queryKey
         //config.version = finder.next().value.version;
