@@ -47,9 +47,9 @@ let pioneerApi = require("@pioneer-platform/pioneer-client")
 /*
     ShapeShiftOSS
  */
-// import { NativeAdapterArgs, NativeHDWallet } from '@shapeshiftoss/hdwallet-native'
-// import { ChainAdapterManager } from '@shapeshiftoss/chain-adapters'
-// import { UtxoAccountType, BIP44Params } from '@shapeshiftoss/types'
+import { NativeAdapterArgs, NativeHDWallet } from '@shapeshiftoss/hdwallet-native'
+import { ChainAdapterManager } from '@shapeshiftoss/chain-adapters'
+import { UtxoAccountType, BIP44Params } from '@shapeshiftoss/types'
 
 
 // import { caip2 } from '@shapeshiftoss/caip'
