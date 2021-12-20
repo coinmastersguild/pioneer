@@ -261,11 +261,11 @@ export async function buildTransaction(transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
         log.debug(tag,"invocation: ",invocation)
 
         let unsignedTx
@@ -357,11 +357,11 @@ export async function metamaskMock(transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //signTx manually outside hook
         let signedTx = await walletContext.signTransaction(transaction.unsignedTx)
@@ -418,11 +418,11 @@ export async function approveTransaction(transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //unsinged TX
         log.debug(tag,"invocation.unsignedTx: ",JSON.stringify(invocation.unsignedTx))
@@ -481,11 +481,11 @@ export async function broadcastTransaction(transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //TODO fix this tech debt
         //normalize

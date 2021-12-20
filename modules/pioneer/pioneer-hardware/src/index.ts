@@ -366,9 +366,9 @@ let get_pubkeys = async function (blockchains:any,isTestnet?:boolean) {
         log.debug(tag,"vender: ",features)
         log.debug(tag,"vender: ",features.deviceId)
 
-        let walletId = "keepkey-pubkeys-"+features.deviceId
+        let context = "keepkey-pubkeys-"+features.deviceId
         let watchWallet = {
-            "WALLET_ID": walletId,
+            "WALLET_ID": context,
             "TYPE": "watch",
             "CREATED": new Date().getTime(),
             "VERSION": "0.1.3",

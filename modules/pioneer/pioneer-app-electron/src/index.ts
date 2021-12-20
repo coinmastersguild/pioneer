@@ -97,8 +97,8 @@ export async function attemptUnlock(event:any, data:any) {
         log.debug(tag,"allWallets: ",allWallets)
 
         for(let i = 0; i < allWallets.length; i++){
-            let walletId = allWallets[i]
-            let wallet = getWallet(walletId)
+            let context = allWallets[i]
+            let wallet = getWallet(context)
             log.debug(tag,"wallet: ",wallet)
 
             let isValid = bcrypt.compareSync(data.password, wallet.hash); // true
@@ -1038,11 +1038,11 @@ export async function buildTransaction(event:any, transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         let unsignedTx
         switch(invocation.type) {
@@ -1141,11 +1141,11 @@ export async function approveTransaction(event:any, data:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //get
         //if(invocation.unsignedTx.HDwalletPayload.coin === 'BitcoinCash') invocation.unsignedTx.HDwalletPayload.coin = 'BCH'
@@ -1202,11 +1202,11 @@ export async function broadcastTransaction(event:any,transaction:any) {
             throw Error("103: could not find context in WALLETS_LOADED! "+context)
         }
         let walletContext = WALLETS_LOADED[context]
-        if(!walletContext.walletId){
-            walletContext.walletId = walletContext.context
+        if(!walletContext.context){
+            walletContext.context = walletContext.context
         }
-        if(!walletContext.walletId) throw Error("Invalid wallet! missing walletId!")
-        log.debug(tag,"walletContext: ",walletContext.walletId)
+        if(!walletContext.context) throw Error("Invalid wallet! missing context!")
+        log.debug(tag,"walletContext: ",walletContext.context)
 
         //TODO fix this tech debt
         //normalize

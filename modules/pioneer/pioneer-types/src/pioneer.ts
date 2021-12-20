@@ -87,6 +87,7 @@ export interface Pubkey {
     priceUsd: string,
     balance: string,
     valueUsd: string,
+    context: string,
     balances: [
         {
             balance: string,
@@ -120,7 +121,6 @@ export interface EventsConfig {
     tech debt
  */
 export interface Config {
-    walletId?:string
     context:string
     blockchains:any
     wss?:string,

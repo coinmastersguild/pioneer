@@ -15,7 +15,7 @@
     "lint": "prettier --write '**/**/*.ts'",
     "start": "npm run build && node lib/index.js",
     "shift": "npm run build && node lib/index.js shift --pair ETH_DAI --amount 0.003 --env=stage",
-    "export-wallet": "npm run build && node lib/index.js export --format citadel --walletId highlander-restore-7",
+    "export-wallet": "npm run build && node lib/index.js export --format citadel --context highlander-restore-7",
     "send-eth": "npm run build && node lib/index.ts send --yes --coin ETH --amount 0.001 --address 0x33b35c665496bA8E71B22373843376740401F106",
     "send-dai": "npm run build && node lib/index.ts send --yes --coin DAI --amount 0.01 --address 0x33b35c665496bA8E71B22373843376740401F106",
     "run-bridge": "npm run build && node lib/index.ts --auth",

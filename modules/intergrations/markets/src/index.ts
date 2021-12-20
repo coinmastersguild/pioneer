@@ -88,6 +88,7 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
         let hydratedPubkeys:any = []
         for(let i = 0; i < pubkeys.length; i++){
             let pubkey:Pubkey = pubkeys[i]
+            pubkey.context = context
             if(!pubkey.balances) { // @ts-ignore
                 pubkey.balances = []
             }
@@ -168,8 +169,13 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
 
                 let balance:any = JSON.parse(JSON.stringify(pubkey))
                 delete balance.balances
-                balance.context = context
                 balance = {...balance,...entry}
+                log.info(tag,"context: at (init):",context)
+                log.info(tag,"pubkey: at (init):",pubkey)
+                log.info(tag,"balance: (init):",balance)
+                if(!balance.context) {
+                    balance.context = context
+                }
 
                 if(coinInfoCoinCap){
                     balance.onCoinCap = true
