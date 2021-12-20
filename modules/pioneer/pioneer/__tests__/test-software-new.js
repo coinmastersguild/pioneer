@@ -41,7 +41,7 @@ let run_test = async function(){
             isTestnet:false,
             blockchains,
             mnemonic: process.env['FOUND_KEY'],
-            walletId:context,
+            context:context,
             username,
             pioneerApi:true,
             spec:urlSpec,

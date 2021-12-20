@@ -123,7 +123,7 @@ export async function initWallet(encryptedSeed: any, passwordHash: any) {
 }
 
 //backup Wallet
-export async function backupWallet(outDir: any, passwordHash: any,encryptedSeed: any, walletId:string) {
+export async function backupWallet(outDir: any, passwordHash: any,encryptedSeed: any, context:string) {
   let tag = TAG + " | backupWallet | ";
   try {
     log.debug(tag, "outDir: ", outDir);
@@ -137,7 +137,7 @@ export async function backupWallet(outDir: any, passwordHash: any,encryptedSeed:
     wallet.type = "seedwords";
     wallet.vault = encryptedSeed;
 
-    let result = fs.writeFileSync(outDir+"/"+walletId+".wallet.json", JSON.stringify(wallet));
+    let result = fs.writeFileSync(outDir+"/"+context+".wallet.json", JSON.stringify(wallet));
     //console.log("result: ", result);
 
     return result;

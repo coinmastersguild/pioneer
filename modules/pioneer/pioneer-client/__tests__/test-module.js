@@ -27,7 +27,7 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 // let username = process.env['TEST_USERNAME_1']
 // let queryKey = process.env['TEST_QUERY_KEY_1']
 
-// let walletId = 'keepkey-pubkeys-343733331147363327003800'
+// let context = 'keepkey-pubkeys-343733331147363327003800'
 
 
 let run_test = async function(){
