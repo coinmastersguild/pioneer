@@ -190,8 +190,9 @@ module.exports = {
         return b58.encode(data);
     },
     generateAddressZpub: async function (zpub:string,index:number,isChange:boolean,type:string) {
-        var account1 = new BIP84.fromZPub(zpub)
-        let address = account1.getAddress(index,isChange)
+        // var account1 = new BIP84.fromZPub(zpub)
+        // let address = account1.getAddress(index,isChange)
+        let address = 'lol'
         return address
     },
     generatePubkey: async function (xpub:string,index:number,isChange:boolean,type:string) {
@@ -288,13 +289,13 @@ module.exports = {
                 xpub
             }
 
-            if(coin === "BTC"){
-                let root = new BIP84.fromSeed(mnemonic)
-                let child0 = root.deriveAccount(0)
-                let account0 = new BIP84.fromZPrv(child0)
-                let zpub = account0.getAccountPublicKey()
-                coinInfo.zpub = zpub
-            }
+            // if(coin === "BTC"){
+            //     let root = new BIP84.fromSeed(mnemonic)
+            //     let child0 = root.deriveAccount(0)
+            //     let account0 = new BIP84.fromZPrv(child0)
+            //     let zpub = account0.getAccountPublicKey()
+            //     coinInfo.zpub = zpub
+            // }
 
             log.debug({coinInfo})
 

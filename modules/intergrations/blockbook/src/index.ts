@@ -1,6 +1,44 @@
 
 /*
 
+    Blockbooks
+
+    https://documenter.getpostman.com/view/13630829/TVmFkLwy
+
+    ada.nownodes.io
+    algo.nownodes.io
+    bch.nownodes.io
+    bsc.nownodes.io
+    bsv.nownodes.io
+    btc.nownodes.io
+    btg.nownodes.io
+    clo.nownodes.io
+    dash.nownodes.io
+    dcr.nownodes.io
+    dgb.nownodes.io
+    doge.nownodes.io
+    dot.nownodes.io
+    eos.nownodes.io
+    eth.nownodes.io
+    grs.nownodes.io
+    kmd.nownodes.io
+    ltc.nownodes.io
+    nano.nownodes.io
+    ont.nownodes.io
+    rdd.nownodes.io
+    trx.nownodes.io
+    usdt-omni.nownodes.io
+    vet.nownodes.io
+    xem.nownodes.io
+    xmr.nownodes.io
+    xtz.nownodes.io
+    xvg.nownodes.io
+    xzc.nownodes.io
+    zec.nownodes.io
+    zen.nownodes.io
+    zil.nownodes.io
+
+
 
  */
 
@@ -14,10 +52,15 @@ const https = require('https')
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
-    })
+    }),
+    headers: {
+        "api-key": process.env['NOW_NODES_API'] //the token is a variable which holds the token
+    }
 });
+// if(!process.env['NOW_NODES_API']) throw Error("invalid env missing NOW_NODES_API")
 const axiosRetry = require('axios-retry');
 
+//@ts-ignore
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
@@ -35,7 +78,15 @@ let BLOCKBOOK_URLS:any = {
     'BTC':process.env['BTC_BLOCKBOOK_URL'],
     'ETH':process.env['ETH_BLOCKBOOK_URL'],
     'BCH':process.env['BCH_BLOCKBOOK_URL'],
+    'LTC':process.env['LTC_BLOCKBOOK_URL'],
     'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
+    'DASH':process.env['DASH_BLOCKBOOK_URL'],
+    'DGB':process.env['DGB_BLOCKBOOK_URL'],
+    'KMD':process.env['KMD_BLOCKBOOK_URL'],
+    'RDD':process.env['RDD_BLOCKBOOK_URL'],
+    'BSV':process.env['BSV_BLOCKBOOK_URL'],
+    'BTG':process.env['BTG_BLOCKBOOK_URL'],
+    'ADA':process.env['ADA_BLOCKBOOK_URL'],
 }
 
 module.exports = {
@@ -78,7 +129,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey
         log.debug(tag,"url: ",url)
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {
@@ -104,7 +155,7 @@ let get_txids_by_address = async function(coin:string,address:string,page?:numbe
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?page="+page+"&details=all"
         log.debug(tag,"url: ",url)
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {
@@ -128,7 +179,7 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
         if(!filter) filter = "all"
         //let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?details=all"
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {
@@ -153,7 +204,7 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
         console.log("url: ",url)
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {
@@ -177,7 +228,7 @@ let broadcast_transaction = async function(coin:string,hex:string){
 
         let data = hex
 
-        let body = {
+        let body:any = {
             url,
             headers: {
                 'content-type': 'application/json',
@@ -201,7 +252,7 @@ let get_transaction = async function(coin:string,txid:string){
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/tx/"+txid
 
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {
@@ -225,7 +276,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
         console.log("url: ",url)
 
-        let body = {
+        let body:any = {
             method: 'GET',
             url,
             headers: {

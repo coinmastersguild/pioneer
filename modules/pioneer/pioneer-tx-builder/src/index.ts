@@ -44,8 +44,9 @@ import {
 } from "@pioneer-platform/pioneer-types";
 //Pioneer follows OpenAPI spec
 let pioneerApi = require("@pioneer-platform/pioneer-client")
-
-
+const coincap = require("@pioneer-platform/coincap")
+const coinSelect = require('coinselect')
+const bchaddr = require('bchaddrjs');
 /*
     ShapeShiftOSS
  */
@@ -430,7 +431,7 @@ module.exports = class wallet {
                 if(!fee) throw Error("105: Invalid transaction missing fee!")
                 let memo = transaction.memo
                 let addressFrom = transaction.addressFrom
-                if(!addressFrom) throw Error("102: unable to get master address! ")
+                if(!addressFrom && !transaction.pubkeyFrom) throw Error("102: unable to get from info! ")
                 log.debug(tag,"addressFrom: ",addressFrom)
                 let rawTx
 
@@ -471,239 +472,235 @@ module.exports = class wallet {
                     // output.HDwalletPayload = btcUnsignedTx
 
                 }else if(UTXO_COINS.indexOf(network) >= 0){
-                    // log.debug(tag,"Build UTXO tx! ",network)
-                    //
-                    // //list unspent
-                    // log.debug(tag,"network: ",network)
-                    // log.debug(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
-                    // log.debug(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
-                    // log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
-                    // let pubkeyInfo = this.PUBLIC_WALLET[network]
-                    // let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    // log.debug(tag,"input: ",input)
-                    //
-                    // let unspentInputs = await this.pioneer.instance.ListUnspent({network,xpub:input.xpub})
-                    // unspentInputs = unspentInputs.data
-                    // log.debug(tag,"unspentInputs: ",unspentInputs)
-                    //
-                    // let utxos = []
-                    // for(let i = 0; i < unspentInputs.length; i++){
-                    //     let input = unspentInputs[i]
-                    //     let utxo = {
-                    //         txId:input.txid,
-                    //         vout:input.vout,
-                    //         value:parseInt(input.value),
-                    //         nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
-                    //         hex: input.hex,
-                    //         tx: input.tx,
-                    //         path:input.path
-                    //         //TODO if segwit
-                    //         // witnessUtxo: {
-                    //         //     script: Buffer.from(input.hex, 'hex'),
-                    //         //     value: 10000 // 0.0001 BTC and is the exact same as the value above
-                    //         // }
-                    //     }
-                    //     utxos.push(utxo)
-                    // }
-                    //
-                    // //if no utxo's
-                    // if (utxos.length === 0){
-                    //     throw Error("101 YOUR BROKE! no UTXO's found! ")
-                    // }
-                    //
-                    // //TODO get fee level in sat/byte
-                    // // let feeRate = 1
-                    // let feeRateInfo = await this.pioneer.instance.GetFeeInfo({coin:network})
-                    // feeRateInfo = feeRateInfo.data
-                    // log.debug(tag,"feeRateInfo: ",feeRateInfo)
-                    // let feeRate
-                    // //TODO dynamic all the things
-                    // if(network === 'BTC'){
-                    //     feeRate = feeRateInfo
-                    // }else if(network === 'BCH'){
-                    //     feeRate = 2
-                    // } else if(network === 'LTC'){
-                    //     feeRate = 4
-                    // } else {
-                    //     throw Error("Fee's not configured for network:"+network)
-                    // }
-                    //
-                    // log.debug(tag,"feeRate: ",feeRate)
-                    // if(!feeRate) throw Error("Can not build TX without fee Rate!")
-                    // //buildTx
-                    //
-                    // //TODO input selection
-                    //
-                    // //use coinselect to select inputs
-                    // let amountSat = parseFloat(amount) * 100000000
-                    // amountSat = parseInt(amountSat.toString())
-                    // log.debug(tag,"amount satoshi: ",amountSat)
-                    // let targets = [
-                    //     {
-                    //         address,
-                    //         value: amountSat
-                    //     }
-                    // ]
-                    // // if(memo){
-                    // //     targets.push({ address: memo, value: 0 })
-                    // // }
-                    //
-                    // //Value of all inputs
-                    // let totalInSatoshi = 0
-                    // for(let i = 0; i < utxos.length; i++){
-                    //     let amountInSat = utxos[i].value
-                    //     totalInSatoshi = totalInSatoshi + amountInSat
-                    // }
-                    // log.debug(tag,"totalInSatoshi: ",totalInSatoshi)
-                    // log.debug(tag,"totalInBase: ",nativeToBaseAmount(network,totalInSatoshi))
-                    // let valueIn = await coincap.getValue(network,nativeToBaseAmount(network,totalInSatoshi))
-                    // log.debug(tag,"totalInValue: ",valueIn)
-                    //
-                    // //amount out
-                    // log.debug(tag,"amountOutSat: ",amountSat)
-                    // log.debug(tag,"amountOutBase: ",amount)
-                    // let valueOut = await coincap.getValue(network,nativeToBaseAmount(network,amountSat))
-                    // log.debug(tag,"valueOut: ",valueOut)
-                    //
-                    // if(valueOut < 1){
-                    //     if(network === 'BCH'){
-                    //         log.debug(tag," God bless you sir's :BCH:")
-                    //     } else {
-                    //         log.debug("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
-                    //     }
-                    //     //Expensive networks
-                    //     if(["BTC","ETH","RUNE"].indexOf(network) >= 0){
-                    //         throw Error("You dont want to do this! sending < 1usd on expensive network")
-                    //     }
-                    // }
-                    //
-                    // if(nativeToBaseAmount(network,totalInSatoshi) < amount){
-                    //     throw Error("Sum of input less than output! YOUR BROKE! ")
-                    // }
-                    //
-                    // log.debug(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
-                    // let selectedResults = coinSelect(utxos, targets, feeRate)
-                    // log.debug(tag,"result coinselect algo: ",selectedResults)
-                    //
-                    // //value of all outputs
-                    //
-                    // //amount fee in USD
-                    //
-                    // //if
-                    // if(!selectedResults.inputs){
-                    //     throw Error("Fee exceeded total available inputs!")
-                    // }
-                    //
-                    // //TODO get long name for coin
-                    //
-                    // let inputs = []
-                    // let outputs = []
-                    // for(let i = 0; i < selectedResults.inputs.length; i++){
-                    //     //get input info
-                    //     let inputInfo = selectedResults.inputs[i]
-                    //     log.debug(tag,"inputInfo: ",inputInfo)
-                    //     let input = {
-                    //         addressNList:support.bip32ToAddressNList(inputInfo.path),
-                    //         scriptType:pubkeyInfo.script_type,
-                    //         amount:String(inputInfo.value),
-                    //         vout:inputInfo.vout,
-                    //         txid:inputInfo.txId,
-                    //         segwit:false,
-                    //         hex:inputInfo.hex,
-                    //         tx:inputInfo.tx
-                    //     }
-                    //     inputs.push(input)
-                    // }
-                    //
-                    //
-                    // log.debug(tag,"pubkeyInfo: change: ",pubkeyInfo)
-                    // //getNewChange
-                    // let changeAddressIndex = await this.pioneer.instance.GetChangeAddress({network,xpub:input.xpub})
-                    // changeAddressIndex = changeAddressIndex.data.changeIndex
-                    // let xpub = input.xpub
-                    // let scriptType = pubkeyInfo.script_type
-                    // let coin = network
-                    // let account = 0 //TODO adjustable by pubkey data?
-                    // let index = changeAddressIndex
-                    // let isTestnet = false
-                    // log.debug(tag,"input: ",{xpub,scriptType,coin,account,index,isChange:true,isTestnet})
-                    // let changeAddress = await get_address_from_xpub(xpub,scriptType,coin,account,index,true,isTestnet)
-                    // log.debug(tag,"changeAddress: ",changeAddress)
-                    // if(!changeAddress) throw Error("103 Failed to get new change address!")
-                    //
-                    // //if bch convert format
-                    // if(network === 'BCH'){
-                    //     //if cashaddr convert to legacy
-                    //     let type = bchaddr.detectAddressFormat(changeAddress)
-                    //     log.debug(tag,"type: ",type)
-                    //     if(type === 'cashaddr'){
-                    //         changeAddress = bchaddr.toLegacyAddress(changeAddress)
-                    //     }
-                    // }
-                    //
-                    // for(let i = 0; i < selectedResults.outputs.length; i++){
-                    //     let outputInfo = selectedResults.outputs[i]
-                    //     if(outputInfo.address){
-                    //         //not change
-                    //         let output = {
-                    //             address,
-                    //             addressType:"spend",
-                    //             scriptType:pubkeyInfo.stript_type,//TODO more types
-                    //             amount:String(outputInfo.value),
-                    //             isChange: false,
-                    //         }
-                    //         outputs.push(output)
-                    //     } else {
-                    //         //change
-                    //         let output = {
-                    //             address:changeAddress,
-                    //             addressType:"spend",
-                    //             scriptType:pubkeyInfo.stript_type,//TODO more types
-                    //             amount:String(outputInfo.value),
-                    //             isChange: true,
-                    //         }
-                    //         outputs.push(output)
-                    //     }
-                    // }
-                    // let longName
-                    // if(network === 'BCH'){
-                    //     longName = 'BitcoinCash'
-                    // }else if(network === 'LTC'){
-                    //     longName = 'Litecoin'
-                    //     if(isTestnet){
-                    //         longName = 'Testnet'
-                    //     }
-                    // }else if(network === 'BTC'){
-                    //     longName = 'Bitcoin'
-                    //     if(isTestnet){
-                    //         longName = 'Testnet'
-                    //     }
-                    // }else {
-                    //     throw Error("UTXO coin: "+network+" Not supported yet! ")
-                    // }
-                    //
-                    // //hdwallet input
-                    // //TODO type this
-                    // let hdwalletTxDescription = {
-                    //     opReturnData:memo,
-                    //     coin: longName,
-                    //     inputs,
-                    //     outputs,
-                    //     version: 1,
-                    //     locktime: 0,
-                    // }
-                    //
-                    // let unsignedTx = {
-                    //     network,
-                    //     asset:network,
-                    //     transaction,
-                    //     HDwalletPayload:hdwalletTxDescription,
-                    //     verbal:"UTXO transaction"
-                    // }
-                    //
-                    // rawTx = unsignedTx
+                    log.info(tag,"Build UTXO tx! ",network)
+                    log.info(tag,"Build UTXO tx! ",transaction.pubkeyFrom)
+                    if(!transaction.pubkeyFrom) throw Error("pubkeyFrom required!")
+                    if(!transaction.pubkeyFrom.pubkey) throw Error("pubkeyFrom invalid!")
+                    //list unspent
+                    log.info(tag,"network: ",network)
 
-                    throw Error("TODO")
+                    let unspentInputs = await this.pioneer.instance.ListUnspent({network,xpub:transaction.pubkeyFrom.pubkey})
+                    unspentInputs = unspentInputs.data
+                    log.info(tag,"unspentInputs: ",unspentInputs)
+
+                    let utxos = []
+                    for(let i = 0; i < unspentInputs.length; i++){
+                        let input = unspentInputs[i]
+                        let utxo = {
+                            txId:input.txid,
+                            vout:input.vout,
+                            value:parseInt(input.value),
+                            nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
+                            hex: input.hex,
+                            tx: input.tx,
+                            path:input.path
+                            //TODO if segwit
+                            // witnessUtxo: {
+                            //     script: Buffer.from(input.hex, 'hex'),
+                            //     value: 10000 // 0.0001 BTC and is the exact same as the value above
+                            // }
+                        }
+                        utxos.push(utxo)
+                    }
+
+                    //if no utxo's
+                    if (utxos.length === 0){
+                        throw Error("101 YOUR BROKE! no UTXO's found! ")
+                    }
+
+                    //TODO get fee level in sat/byte
+                    // let feeRate = 1
+                    let feeRateInfo = await this.pioneer.instance.GetFeeInfo({coin:network})
+                    feeRateInfo = feeRateInfo.data
+                    log.debug(tag,"feeRateInfo: ",feeRateInfo)
+                    let feeRate
+                    //TODO dynamic all the things
+                    if(network === 'BTC'){
+                        feeRate = feeRateInfo
+                    }else if(network === 'BCH'){
+                        feeRate = 2
+                    } else if(network === 'LTC'){
+                        feeRate = 4
+                    } else {
+                        throw Error("Fee's not configured for network:"+network)
+                    }
+
+                    log.debug(tag,"feeRate: ",feeRate)
+                    if(!feeRate) throw Error("Can not build TX without fee Rate!")
+                    //buildTx
+
+                    //TODO input selection
+
+                    //use coinselect to select inputs
+                    let amountSat = parseFloat(amount) * 100000000
+                    amountSat = parseInt(amountSat.toString())
+                    log.debug(tag,"amount satoshi: ",amountSat)
+                    let targets = [
+                        {
+                            address,
+                            value: amountSat
+                        }
+                    ]
+                    // if(memo){
+                    //     targets.push({ address: memo, value: 0 })
+                    // }
+
+                    //Value of all inputs
+                    let totalInSatoshi = 0
+                    for(let i = 0; i < utxos.length; i++){
+                        let amountInSat = utxos[i].value
+                        totalInSatoshi = totalInSatoshi + amountInSat
+                    }
+                    log.debug(tag,"totalInSatoshi: ",totalInSatoshi)
+                    log.debug(tag,"totalInBase: ",nativeToBaseAmount(network,totalInSatoshi))
+                    let valueIn = await coincap.getValue(network,nativeToBaseAmount(network,totalInSatoshi))
+                    log.debug(tag,"totalInValue: ",valueIn)
+
+                    //amount out
+                    log.debug(tag,"amountOutSat: ",amountSat)
+                    log.debug(tag,"amountOutBase: ",amount)
+                    let valueOut = await coincap.getValue(network,nativeToBaseAmount(network,amountSat))
+                    log.debug(tag,"valueOut: ",valueOut)
+
+                    if(valueOut < 1){
+                        if(network === 'BCH'){
+                            log.debug(tag," God bless you sir's :BCH:")
+                        } else {
+                            log.debug("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
+                        }
+                        //Expensive networks
+                        if(["BTC","ETH","RUNE"].indexOf(network) >= 0){
+                            throw Error("You dont want to do this! sending < 1usd on expensive network")
+                        }
+                    }
+
+                    if(nativeToBaseAmount(network,totalInSatoshi) < amount){
+                        throw Error("Sum of input less than output! YOUR BROKE! ")
+                    }
+
+                    log.debug(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
+                    let selectedResults = coinSelect(utxos, targets, feeRate)
+                    log.debug(tag,"result coinselect algo: ",selectedResults)
+
+                    //value of all outputs
+
+                    //amount fee in USD
+
+                    //if
+                    if(!selectedResults.inputs){
+                        throw Error("Fee exceeded total available inputs!")
+                    }
+
+                    //TODO get long name for coin
+
+                    let inputs = []
+                    let outputs = []
+                    for(let i = 0; i < selectedResults.inputs.length; i++){
+                        //get input info
+                        let inputInfo = selectedResults.inputs[i]
+                        log.debug(tag,"inputInfo: ",inputInfo)
+                        let input = {
+                            addressNList:support.bip32ToAddressNList(inputInfo.path),
+                            scriptType:transaction.pubkeyFrom.script_type,
+                            amount:String(inputInfo.value),
+                            vout:inputInfo.vout,
+                            txid:inputInfo.txId,
+                            segwit:false,
+                            hex:inputInfo.hex,
+                            tx:inputInfo.tx
+                        }
+                        inputs.push(input)
+                    }
+
+
+                    log.debug(tag,"pubkeyInfo: change: ",transaction.pubkeyFrom)
+                    //getNewChange
+                    let changeAddressIndex = await this.pioneer.instance.GetChangeAddress({network,xpub:transaction.pubkeyFrom.pubkey})
+                    changeAddressIndex = changeAddressIndex.data.changeIndex
+                    let xpub = transaction.pubkeyFrom.pubkey
+                    let scriptType = transaction.pubkeyFrom.script_type
+                    let coin = network
+                    let account = 0 //TODO adjustable by pubkey data?
+                    let index = changeAddressIndex
+                    let isTestnet = false
+                    log.debug(tag,"input: ",{xpub,scriptType,coin,account,index,isChange:true,isTestnet})
+                    let changeAddress = await get_address_from_xpub(xpub,scriptType,coin,account,index,true,isTestnet)
+                    log.debug(tag,"changeAddress: ",changeAddress)
+                    if(!changeAddress) throw Error("103 Failed to get new change address!")
+
+                    //if bch convert format
+                    if(network === 'BCH'){
+                        //if cashaddr convert to legacy
+                        let type = bchaddr.detectAddressFormat(changeAddress)
+                        log.debug(tag,"type: ",type)
+                        if(type === 'cashaddr'){
+                            changeAddress = bchaddr.toLegacyAddress(changeAddress)
+                        }
+                    }
+
+                    for(let i = 0; i < selectedResults.outputs.length; i++){
+                        let outputInfo = selectedResults.outputs[i]
+                        if(outputInfo.address){
+                            //not change
+                            let output = {
+                                address,
+                                addressType:"spend",
+                                scriptType:transaction.pubkeyFrom.stript_type || 'p2pkh',//TODO more types
+                                amount:String(outputInfo.value),
+                                isChange: false,
+                            }
+                            outputs.push(output)
+                        } else {
+                            //change
+                            let output = {
+                                address:changeAddress,
+                                addressType:"spend",
+                                scriptType:transaction.pubkeyFrom.stript_type || 'p2pkh',//TODO more types
+                                amount:String(outputInfo.value),
+                                isChange: true,
+                            }
+                            outputs.push(output)
+                        }
+                    }
+                    let longName
+                    if(network === 'BCH'){
+                        longName = 'BitcoinCash'
+                    }else if(network === 'LTC'){
+                        longName = 'Litecoin'
+                        if(isTestnet){
+                            longName = 'Testnet'
+                        }
+                    }else if(network === 'BTC'){
+                        longName = 'Bitcoin'
+                        if(isTestnet){
+                            longName = 'Testnet'
+                        }
+                    }else {
+                        throw Error("UTXO coin: "+network+" Not supported yet! ")
+                    }
+
+                    //hdwallet input
+                    //TODO type this
+                    let hdwalletTxDescription = {
+                        opReturnData:memo,
+                        coin: longName,
+                        inputs,
+                        outputs,
+                        version: 1,
+                        locktime: 0,
+                    }
+
+                    let unsignedTx = {
+                        network,
+                        asset:network,
+                        transaction,
+                        HDwalletPayload:hdwalletTxDescription,
+                        verbal:"UTXO transaction"
+                    }
+
+                    rawTx = unsignedTx
+                    log.info(tag,"rawTx: ",JSON.stringify(rawTx))
+
 
                 }else if(network === 'ETH'){
 
@@ -821,7 +818,9 @@ module.exports = class wallet {
 
                     let sequence = masterInfo.result.value.sequence || 0
                     let account_number = masterInfo.result.value.account_number
+                    //@ts-ignore
                     sequence = parseInt(sequence)
+                    //@ts-ignore
                     sequence = sequence.toString()
 
                     let txType = "thorchain/MsgSend"

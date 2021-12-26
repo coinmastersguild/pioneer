@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-network",
-  "version": "8.1.38",
+  "version": "8.1.39",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
     "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
   },
   "dependencies": {
-    "@pioneer-platform/blockbook": "^8.1.38",
+    "@pioneer-platform/blockbook": "^8.1.39",
     "@pioneer-platform/loggerdog": "^8.1.17",
     "@types/request-promise-native": "^1.0.17",
     "@xchainjs/xchain-client": "^0.7.0",
