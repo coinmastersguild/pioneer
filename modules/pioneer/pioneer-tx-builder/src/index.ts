@@ -86,7 +86,9 @@ module.exports = class wallet {
     private pioneer: any;
     private buildTx: (transaction: any) => Promise<{}>;
     private buildTransfer: (transaction: Transaction) => Promise<any>;
+    ibcDeposit: (transaction: any) => Promise<{ network: any; asset: any; transaction: any; HDwalletPayload: { addressNList: any; chain_id: string; account_number: any; sequence: any; tx: { fee: { amount: { amount: string; denom: string }[]; gas: string }; memo: any; msg: any[]; signatures: null } }; verbal: string }>
     // private unchainedUrls: any;
+    private buildSwap: (swap: any) => Promise<any>;
     constructor(type:HDWALLETS,config:Config,isTestnet?:boolean) {
         this.isTestnet = false
         this.queryKey = config.queryKey
@@ -1253,6 +1255,56 @@ module.exports = class wallet {
             }
         }
         /*
+                //use chain adapter
+                // switch(tx.network) {
+                //     case "BTC":
+                //         //TODO get recommended fee
+                //
+                //         const btcBip32Params: BIP44Params = {
+                //             purpose: 84,
+                //             coinType: 0,
+                //             accountNumber: 0,
+                //             isChange: false,
+                //             index: 10
+                //         }
+                //
+                //         const txInput = {
+                //             to: tx.recipient,
+                //             value: tx.amount,
+                //             wallet:this.HDWallet,
+                //             bip32Params: btcBip32Params,
+                //             chainSpecific: { accountType: UtxoAccountType.P2pkh, satoshiPerByte: '4' }
+                //         }
+                //
+                //         const btcChainAdapter = this.chainAdapterManager.byChain('bitcoin')
+                //         const btcUnsignedTx = await btcChainAdapter.buildSendTransaction(txInput)
+                //         log.info(tag,"btcUnsignedTx: ",btcUnsignedTx)
+                //
+                //         let output = {
+                //             network:tx.network,
+                //             asset:tx.network,
+                //             transaction:tx,
+                //             HDwalletPayload:btcUnsignedTx,
+                //             verbal:"bitcoin transfer transaction"
+                //         }
+                //
+                //         output.HDwalletPayload = btcUnsignedTx
+                //         break;
+                //     case "ETH":
+                //         // eth
+                //         throw Error("Unsupported")
+                //         break;
+                //     case "OSMO":
+                //         // osmo
+                //         throw Error("Unsupported")
+                //         break;
+                //     default:
+                //     // code block
+                // }
+
+         */
+
+        /*
         let swap = {
             inboundAddress: {
                 chain: 'ETH',
@@ -1272,7 +1324,6 @@ module.exports = class wallet {
         }
         */
         //TODO type
-        // @ts-ignore
         this.buildSwap = async function (swap:any) {
             let tag = TAG + " | buildSwap | "
             try{
@@ -1468,6 +1519,127 @@ module.exports = class wallet {
                 throw e
             }
         }
+
+        this.ibcDeposit = async function (transaction:any) {
+            let tag = TAG + " | ibcDeposit | "
+            try{
+                let rawTx
+                log.info(tag,"creating an ibcdeposit! ")
+                if(!transaction.network) throw Error("103: network required!")
+                if(!transaction.asset) throw Error("104: asset required!")
+                //TODO dont assume cosmos dumbass
+                let amountNative = ATOM_BASE * parseFloat(transaction.amount)
+                amountNative = parseInt(amountNative.toString())
+                log.debug(tag,"amountNative: ",amountNative)
+
+                //get account number
+                let addressFrom
+                if(transaction.addressFrom){
+                    addressFrom = transaction.addressFrom
+                }
+                if(!addressFrom) throw Error("From address required!")
+
+                let masterInfo = await this.pioneer.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
+                log.info(tag,"masterInfo: ",masterInfo)
+                masterInfo = masterInfo.data
+                log.info(tag,"masterInfo: ",masterInfo)
+                log.info(tag,"masterInfo: ",masterInfo.result)
+                log.info(tag,"masterInfo: ",masterInfo.result.value)
+                log.info(tag,"masterInfo: ",masterInfo.result.value.sequence)
+                log.info(tag,"masterInfo: ",masterInfo.result.value.account_number)
+                let sequence = masterInfo.result.value.sequence
+                if(!sequence) sequence = 0
+                let account_number = masterInfo.result.value.account_number
+                if(!account_number) throw Error("can not build a transaction without an account_number (account never held funds!)")
+                sequence = parseInt(sequence)
+                sequence = sequence.toString()
+                let	chain_id = ATOM_CHAIN
+
+                let msg:any
+                switch(transaction.type) {
+                    case "ibcdeposit":
+                        if(!transaction.source_port) throw Error("Missing source_port !")
+                        if(!transaction.source_channel) throw Error("Missing source_channel!")
+                        if(!transaction.token) throw Error("Missing token!")
+                        if(!transaction.timeout_height) throw Error("Missing timeout_height!")
+
+                        msg = {
+                            "type":"cosmos-sdk/MsgTransfer",
+                            "value":{
+                                "sender":transaction.sender,
+                                "receiver":transaction.receiver,
+                                "source_port":transaction.source_port,
+                                "source_channel":transaction.source_channel,
+                                "token":transaction.token,
+                                "timeout_height":transaction.timeout_height,
+                            }
+                        }
+
+                        break;
+                    default:
+                        throw Error("unsupported IBC tx type: "+transaction.type)
+                    //code block
+                }
+                let txType = "cosmos-sdk/MsgSend"
+                let gas = "100000"
+                let fee = "1000"
+                let memo = transaction.memo || ""
+
+                if(!msg) throw Error('failed to make tx msg')
+
+                let unsigned = {
+                    "fee": {
+                        "amount": [
+                            {
+                                "amount": fee,
+                                "denom": "uatom"
+                            }
+                        ],
+                        "gas": gas
+                    },
+                    "memo": memo,
+                    "msg": [
+                        msg
+                    ],
+                    "signatures": null
+                }
+
+                if(!sequence) throw Error("112: Failed to get sequence")
+                if(!account_number) throw Error("113: Failed to get account_number")
+
+                log.debug(tag,"fromAddress: ",addressFrom)
+
+                log.debug("res: ",prettyjson.render({
+                    addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                    chain_id,
+                    account_number: account_number,
+                    sequence:sequence,
+                    tx: unsigned,
+                }))
+
+                //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
+                let atomTx = {
+                    addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
+                    chain_id:ATOM_CHAIN,
+                    account_number: account_number,
+                    sequence:sequence,
+                    tx: unsigned,
+                }
+
+                let unsignedTx = {
+                    network:transaction.network,
+                    asset:transaction.asset,
+                    transaction,
+                    HDwalletPayload:atomTx,
+                    verbal:"ibc transaction"
+                }
+                return unsignedTx
+            }catch(e){
+                log.error(e)
+                throw e
+            }
+        }
+
         /*
                 CatchAll for custom Tx's
          */
@@ -1478,123 +1650,16 @@ module.exports = class wallet {
 
                 switch(transaction.type) {
                     case 'ibcdeposit':
-                        log.info(tag,"creating an ibcdeposit! ")
-                        if(!transaction.network) throw Error("103: network required!")
-                        if(!transaction.asset) throw Error("104: asset required!")
-                        //TODO dont assume cosmos dumbass
-                        let amountNative = ATOM_BASE * parseFloat(transaction.amount)
-                        amountNative = parseInt(amountNative.toString())
-                        log.debug(tag,"amountNative: ",amountNative)
-
-                        //get account number
-                        let addressFrom
-                        if(transaction.addressFrom){
-                            addressFrom = transaction.addressFrom
-                        }
-                        if(!addressFrom) throw Error("From address required!")
-
-                        let masterInfo = await this.pioneer.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
-                        log.info(tag,"masterInfo: ",masterInfo)
-                        masterInfo = masterInfo.data
-                        log.info(tag,"masterInfo: ",masterInfo)
-                        log.info(tag,"masterInfo: ",masterInfo.result)
-                        log.info(tag,"masterInfo: ",masterInfo.result.value)
-                        log.info(tag,"masterInfo: ",masterInfo.result.value.sequence)
-                        log.info(tag,"masterInfo: ",masterInfo.result.value.account_number)
-                        let sequence = masterInfo.result.value.sequence
-                        if(!sequence) sequence = 0
-                        let account_number = masterInfo.result.value.account_number
-                        if(!account_number) throw Error("can not build a transaction without an account_number (account never held funds!)")
-                        sequence = parseInt(sequence)
-                        sequence = sequence.toString()
-                        let	chain_id = ATOM_CHAIN
-
-                        let msg:any
-                        switch(transaction.type) {
-                            case "ibcdeposit":
-                                if(!transaction.source_port) throw Error("Missing source_port !")
-                                if(!transaction.source_channel) throw Error("Missing source_channel!")
-                                if(!transaction.token) throw Error("Missing token!")
-                                if(!transaction.timeout_height) throw Error("Missing timeout_height!")
-
-                                msg = {
-                                    "type":"cosmos-sdk/MsgTransfer",
-                                    "value":{
-                                        "sender":transaction.sender,
-                                        "receiver":transaction.receiver,
-                                        "source_port":transaction.source_port,
-                                        "source_channel":transaction.source_channel,
-                                        "token":transaction.token,
-                                        "timeout_height":transaction.timeout_height,
-                                    }
-                                }
-
-                                break;
-                            default:
-                                throw Error("unsupported IBC tx type: "+transaction.type)
-                            //code block
-                        }
-                        let txType = "cosmos-sdk/MsgSend"
-                        let gas = "100000"
-                        let fee = "1000"
-                        let memo = transaction.memo || ""
-
-                        if(!msg) throw Error('failed to make tx msg')
-
-                        let unsigned = {
-                            "fee": {
-                                "amount": [
-                                    {
-                                        "amount": fee,
-                                        "denom": "uatom"
-                                    }
-                                ],
-                                "gas": gas
-                            },
-                            "memo": memo,
-                            "msg": [
-                                msg
-                            ],
-                            "signatures": null
-                        }
-
-                        if(!sequence) throw Error("112: Failed to get sequence")
-                        if(!account_number) throw Error("113: Failed to get account_number")
-
-                        log.debug(tag,"fromAddress: ",addressFrom)
-
-                        log.debug("res: ",prettyjson.render({
-                            addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                            chain_id,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                        }))
-
-                        //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-                        let atomTx = {
-                            addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                            chain_id:ATOM_CHAIN,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                        }
-
-                        let unsignedTx = {
-                            network:transaction.network,
-                            asset:transaction.asset,
-                            transaction,
-                            HDwalletPayload:atomTx,
-                            verbal:"ibc transaction"
-                        }
-
-                        rawTx = unsignedTx
+                        rawTx = await this.ibcDeposit(transaction)
+                        break;
+                    case 'swap':
+                        rawTx = this.buildSwap(transaction)
                         break;
                     case 'transfer':
                         rawTx = this.buildTransfer(transaction)
                         break;
                     default:
-                        throw Error("unHandled Tx type!")
+                        throw Error("unHandled Tx type! "+transaction.type)
                     // code block
                 }
                 return rawTx

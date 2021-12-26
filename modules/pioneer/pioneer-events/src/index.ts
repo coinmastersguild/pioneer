@@ -68,7 +68,7 @@ export class Events {
                 this.socket.on('blocks', (message: any) => {
                     //TODO only emit expected messages?
                     //if(message.type === "payment_request"){}
-                    this.events.emit('message',message)
+                    this.events.emit('blocks',message)
                 })
 
                 //sub to errors
@@ -77,9 +77,9 @@ export class Events {
                     if(message.code && message.code === 6) throw Error(" Failed to connect!")
                 });
 
-                this.socket.on('invocation', (message: any) => {
+                this.socket.on('invocations', (message: any) => {
                     log.debug('invocation: ',message);
-                    this.events.emit('message',message)
+                    this.events.emit('invocations',message)
                 });
 
                 //dont release to connect
