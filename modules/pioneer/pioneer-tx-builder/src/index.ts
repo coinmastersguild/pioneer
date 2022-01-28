@@ -1197,7 +1197,7 @@ module.exports = class wallet {
                 let fee = transaction.fee
 
                 //get paths
-                let paths = getPaths()
+                let paths = getPaths(this.blockchains)
                 log.debug(tag,"paths: ",paths)
                 if(!paths) throw Error("101: unable to get paths!")
                 if(!network) throw Error("102: Invalid transaction missing network!")
@@ -1513,8 +1513,9 @@ module.exports = class wallet {
                     if(!txParams) throw Error("tokens not supported")
 
                     //send FROM master
+                    log.debug(tag,"paths: ",paths)
                     let ethPathInfo = paths.filter((e:any) => e.network === 'ETH')
-                    log.debug(tag,"ethPathInfo: ",ethPathInfo)
+                    log.info(tag,"ethPathInfo: ",ethPathInfo)
                     if(!ethPathInfo[0]) throw Error("103: unable to get eth path info! ")
                     let masterPathEth = addressNListToBIP32(ethPathInfo[0].addressNListMaster)
                     log.debug(tag,"masterPathEth: ",masterPathEth)

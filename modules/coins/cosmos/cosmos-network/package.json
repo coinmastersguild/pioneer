@@ -9,6 +9,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
+    "@pioneer-platform/cosmos-tx-encoder": "^0.0.3",
     "@pioneer-platform/loggerdog": "^8.1.17",
     "@pioneer-platform/nodes": "^8.1.17",
     "axios": "^0.19.2",

@@ -78,6 +78,8 @@ const log = require('@pioneer-platform/loggerdog')()
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 
+//encoder
+const txEncoder = require('@pioneer-platform/cosmos-tx-encoder')
 
 const ASSET = "ATOM"
 
@@ -148,6 +150,9 @@ module.exports = {
     },
     getBlockHeightRemote:function () {
         return get_block_height_remote();
+    },
+    encode:function (tx:string) {
+        return encode_transaction(tx);
     },
     broadcast:function (tx:string) {
         return broadcast_transaction(tx);
@@ -565,6 +570,59 @@ let get_account_remote = async function(address:string){
     }
 }
 
+let encode_transaction = async function(tx:string){
+    let tag = TAG + " | encode_transaction | "
+    let output:any = {}
+    try{
+        log.debug(tag,"CHECKPOINT 1")
+
+        output.success = false
+
+
+        try{
+            // var encodedData = btoa(stringToEncode);
+            let payload = {
+                "tx_bytes": btoa(tx),
+                "mode": "BROADCAST_MODE_SYNC"
+            }
+
+            let urlRemote = URL_GAIAD+ '/txs/encode'
+            log.info(tag,"urlRemote: ",urlRemote)
+            let result2 = await axios({
+                url: urlRemote,
+                headers: {
+                    'api-key': process.env['NOW_NODES_API'],
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                data: payload,
+            })
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+
+        }catch(e){
+            //log.error(tag,"failed second broadcast e: ",e.response)
+            log.error(tag,e)
+            log.error(tag,e.response)
+            log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            //throw e
+
+            output.success = false
+            output.error = e.response.data.error
+
+        }
+
+        return output
+    }catch(e){
+
+        console.error(tag,"throw error: ",e)
+        return output
+
+    }
+}
+
+
 /*
 
 The tx must be a signed StdTx. The supported broadcast modes include "block"(return after tx commit), "sync"(return afer CheckTx) and "async"(return right away).
@@ -646,16 +704,59 @@ let broadcast_transaction = async function(tx:string){
 
 
         try{
-            //push to seed
-            let urlRemote = URL_GAIAD+ '/txs'
-            log.debug(tag,"urlRemote: ",urlRemote)
+            //convert sdtTx to proto
+            // let broadcastTx = await txEncoder.encodeTx(tx)
+            // log.info(tag,"broadcastTx: ",broadcastTx)
+
+            let payload = {
+                // "tx_bytes": btoa(tx),
+                // "tx_bytes":broadcastTx,
+                "tx_bytes":tx,
+                "mode": "BROADCAST_MODE_SYNC"
+            }
+
+            let urlRemote = URL_GAIAD+ '/cosmos/tx/v1beta1/txs'
+            // let urlRemote = URL_GAIAD+ '/txs'
+            log.info(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
+                headers: {
+                    'api-key': process.env['NOW_NODES_API'],
+                    'Content-Type': 'application/json'
+                },
                 method: 'POST',
-                data: tx,
+                data: payload,
             })
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             if(result2.data.txhash) output.txid = result2.data.txhash
+
+            //push to seed
+            // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync?tx='+tx
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'GET'
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // if(result2.data.txhash) output.txid = result2.data.txhash
+
+            // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync'
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'POST',
+            //     data: tx,
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // if(result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
             if(result2.data.raw_log){
@@ -676,8 +777,8 @@ let broadcast_transaction = async function(tx:string){
             log.error(tag,e)
             log.error(tag,e.response)
             log.error(tag,e.response.data)
-            log.error(tag,e.response.data.error)
-            log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
             //throw e
 
             output.success = false
@@ -718,29 +819,36 @@ let get_node_info_verbose = async function(){
         let output:any = {}
 
         //get syncing status
-        let syncInfo = await axios({method:'GET',url: URL_GAIAD+'/syncing'})
-        log.debug(tag,"syncInfo: ",syncInfo.data)
+        // let syncInfo = await axios({method:'GET',url: URL_GAIAD+'/syncing'})
+        // log.debug(tag,"syncInfo: ",syncInfo.data)
 
-        output.isSyncing = syncInfo.data
+        // output.isSyncing = syncInfo.data
 
         //gaiad abci_info
-        let nodeInfo = await axios({method:'GET',url: URL_GAIAD+'/node_info'})
-        log.debug(tag,"nodeInfo: ",nodeInfo.data)
+        let nodeInfo = await axios({
+            method:'GET',
+            headers: {
+                'api-key': process.env['NOW_NODES_API'],
+                'Content-Type': 'application/json'
+            },
+            url: URL_GAIAD+'/node_info'
+        })
+        log.info(tag,"nodeInfo: ",nodeInfo.data)
 
 
-        output = nodeInfo.data
-
-        let lastBlockRemote = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
-        log.debug(tag,"lastBlockRemote: ",lastBlockRemote.data)
-
-        //let height
-        output.remoteHeight = lastBlockRemote.data.block_meta.header.height
-
-        let lastBlock = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
-        log.debug(tag,"lastBlock: ",lastBlock.data)
-
-        //let height
-        output.height = lastBlock.data.block_meta.header.height
+        // output = nodeInfo.data
+        //
+        // let lastBlockRemote = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
+        // log.debug(tag,"lastBlockRemote: ",lastBlockRemote.data)
+        //
+        // //let height
+        // output.remoteHeight = lastBlockRemote.data.block_meta.header.height
+        //
+        // let lastBlock = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
+        // log.debug(tag,"lastBlock: ",lastBlock.data)
+        //
+        // //let height
+        // output.height = lastBlock.data.block_meta.header.height
 
         //estimate time till synced
         //get block height

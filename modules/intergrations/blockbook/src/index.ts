@@ -36,6 +36,7 @@ let BLOCKBOOK_URLS:any = {
     'ETH':process.env['ETH_BLOCKBOOK_URL'],
     'BCH':process.env['BCH_BLOCKBOOK_URL'],
     'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
+    'LTC':process.env['DOGE_BLOCKBOOK_URL'],
 }
 
 module.exports = {

@@ -395,7 +395,8 @@ let broadcast_transaction = async function(tx:string){
             // console.log("result: ",result)
 
             //push to rest
-            let urlRemote = URL_OSMO_LCD+ '/txs'
+            // let urlRemote = URL_OSMO_LCD+ '/txs'
+            let urlRemote = URL_OSMO_LCD+ '/cosmos/tx/v1beta1/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,

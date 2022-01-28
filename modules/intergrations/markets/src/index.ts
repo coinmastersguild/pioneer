@@ -170,9 +170,9 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
                 let balance:any = JSON.parse(JSON.stringify(pubkey))
                 delete balance.balances
                 balance = {...balance,...entry}
-                log.info(tag,"context: at (init):",context)
-                log.info(tag,"pubkey: at (init):",pubkey)
-                log.info(tag,"balance: (init):",balance)
+                log.debug(tag,"context: at (init):",context)
+                log.debug(tag,"pubkey: at (init):",pubkey)
+                log.debug(tag,"balance: (init):",balance)
                 if(!balance.context) {
                     balance.context = context
                 }
