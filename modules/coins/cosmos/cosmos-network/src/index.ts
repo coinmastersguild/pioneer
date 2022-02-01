@@ -579,6 +579,7 @@ let encode_transaction = async function(tx:string){
         output.success = false
 
 
+        // @ts-ignore
         try{
             // var encodedData = btoa(stringToEncode);
             let payload = {
@@ -599,11 +600,12 @@ let encode_transaction = async function(tx:string){
             })
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
 
-        }catch(e){
+        // @ts-ignore
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
-            log.error(tag,e.response)
-            log.error(tag,e.response.data)
+            // log.error(tag,e.response)
+            // log.error(tag,e.response.data)
             // log.error(tag,e.response.data.error)
             // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
             //throw e
@@ -728,6 +730,7 @@ let broadcast_transaction = async function(tx:string){
                 data: payload,
             })
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
 
             //push to seed
@@ -772,7 +775,9 @@ let broadcast_transaction = async function(tx:string){
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
             output.raw = result2.data.raw_log
-        }catch(e){
+
+            // @ts-ignore
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)

@@ -96,7 +96,7 @@ let encode_transaction = async function(tx:any){
                                         mode: "SIGN_MODE_LEGACY_AMINO_JSON"
                                     }
                                 },
-                                sequence:"16",
+                                sequence:"17",
                             }
                         default: throw new Error("wat")
                     }

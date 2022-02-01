@@ -5,6 +5,11 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
+    "@shapeshiftoss/caip": "^1.10.0",
+    "@shapeshiftoss/chain-adapters": "^1.31.0",
+    "@shapeshiftoss/swapper": "^1.15.1",
+    "@shapeshiftoss/types": "^1.21.0",
+    "@shapeshiftoss/unchained-tx-parser": "^5.1.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0"
   },
@@ -12,6 +17,7 @@
     "npm": "npm i",
     "test": "npm run build && node __tests__/test-module.js",
     "build": "tsc -p .",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
