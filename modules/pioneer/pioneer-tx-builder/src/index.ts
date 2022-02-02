@@ -743,6 +743,9 @@ module.exports = class wallet {
                     case 'transfer':
                         rawTx = this.buildTransfer(transaction)
                         break;
+                    case 'swap':
+                        rawTx = this.buildSwap(transaction)
+                        break;
                     default:
                         throw Error("unHandled Tx type!")
                     // code block

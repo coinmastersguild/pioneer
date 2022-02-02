@@ -2,12 +2,20 @@
     TX builder
         Normalizing tx building
 
+
+https://tutorials.cosmos.network/academy/4-my-own-chain/cosmjs.html
+
+
+https://github.com/cosmos/cosmjs/blob/main/packages/stargate/CUSTOM_PROTOBUF_CODECS.md
+
  */
 
-const TAG = " | kava-tx-builder | "
+const TAG = " | cosmos-tx-builder | "
 
 import { DirectSecp256k1HdWallet, Registry } from "@cosmjs/proto-signing";
-import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
+import { SigningStargateClient, StargateClient, GasPrice } from "@cosmjs/stargate";
+import { coins } from "@cosmjs/proto-signing";
+
 import { MsgSend as IMsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import { Field, Type } from "protobufjs";
 // import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
@@ -16,14 +24,6 @@ import { Keplr } from "@keplr-wallet/types";
 import { Tx, TxRaw, TxBody, AuthInfo } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys"
 import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx"
-
-import Long from "long";
-import protobuf from "protobufjs/minimal";
-
-protobuf.util.Long = Long;
-protobuf.configure();
-
-import {cosmos} from "tendermint-tx-codec";
 
 import {
     OfflineSigner,
@@ -41,7 +41,6 @@ import {
 //     TendermintTxTracer,
 // } from "@keplr-wallet/cosmos";
 
-import SignDoc = cosmos.tx.v1beta1.SignDoc;
 
 // A message type auto-generated from .proto files using ts-proto. @cosmjs/stargate ships some
 // common types but don't rely on those being available. You need to set up your own code generator
@@ -95,6 +94,94 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
     // @ts-ignore
     try{
         const chainId = "cosmoshub-4";
+
+        //online tx building
+        const rpcEndpoint = process.env['URL_GAIAD_RPC']
+        console.log("rpcEndpoint: ",rpcEndpoint)
+        const gasPrice = GasPrice.fromString("0.0025uatom");
+
+        // @ts-ignore
+        const client = await StargateClient.connect(rpcEndpoint);
+        let accountInfo = await client.getAccount(from)
+        log.info(tag,"accountInfo: ",accountInfo)
+
+        const msgSend: any = {
+            fromAddress: from,
+            toAddress: "cosmos19rvl6ja9h0erq9dc2xxfdzypc739ej8k5esnhg",
+            amount: coins(1234, "ucosm"),
+        };
+        const msg: any = {
+            typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+            value: msgSend,
+        };
+        const gasLimit = 200000;
+        const fee = {
+            amount: coins(2000, "ucosm"),
+            gas: gasLimit.toString(),
+        };
+
+
+        let txData:any = {
+            // @ts-ignore
+            accountNumber: accountInfo.accountNumber,
+            // @ts-ignore
+            sequence: accountInfo.sequence,
+            chainId: await client.getChainId(),
+            msgs: [msg],
+            fee: fee,
+            memo: "Use your tokens wisely",
+        }
+
+        const signerData: any = {
+            accountNumber: txData.accountNumber,
+            sequence: txData.sequence,
+            chainId: txData.chainId,
+        };
+
+
+        // //Offline Signing
+        const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed);
+        const clientOffline = await SigningStargateClient.offline(wallet);
+
+        const txRaw = await clientOffline.sign(
+            from,
+            txData.msgs,
+            txData.fee,
+            txData.memo,
+            signerData,
+        );
+
+        console.log("txRaw: ",txRaw)
+
+
+        //online broadcasting
+        // @ts-ignore
+        const txBytes = TxRaw.encode(txRaw).finish().toString("base64");
+        console.log("txBytes: ",txBytes)
+        // const serialized = txBytes.toString("base64")
+        //
+
+        //THIS WORKS
+        // const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed);
+        // const [firstAccount] = await wallet.getAccounts();
+        // log.info(tag,"firstAccount: ",firstAccount)
+        //
+        // const rpcEndpoint = process.env['URL_GAIAD_RPC']
+        // console.log("rpcEndpoint: ",rpcEndpoint)
+        // const gasPrice = GasPrice.fromString("0.0025uatom");
+        //
+        // // @ts-ignore
+        // // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
+        // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet, { gasPrice: gasPrice });
+        //
+        // const recipient = to;
+        // const amount = {
+        //     denom: "uatom",
+        //     amount: "3400",
+        // };
+        //
+        // const result = await client.sendTokens(firstAccount.address, recipient, [amount], "auto",);
+        // log.info(tag,"result: ",result)
 
 
         //base64
