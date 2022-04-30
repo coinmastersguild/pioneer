@@ -157,6 +157,9 @@ module.exports = {
     broadcast:function (tx:string) {
         return broadcast_transaction(tx);
     },
+    broadcastLegacy:function (tx:string) {
+        return broadcast_transaction_legacy(tx);
+    },
     getAccount:function (address:string) {
         return get_account(address);
     },
@@ -800,6 +803,65 @@ let broadcast_transaction = async function(tx:string){
     }
 }
 
+let broadcast_transaction_legacy = async function(tx:string){
+    let tag = TAG + " | broadcast_transaction | "
+    let output:any = {}
+    try{
+        log.debug(tag,"CHECKPOINT 1")
+
+        output.success = false
+
+
+        try{
+            //
+            //push to seed
+            let urlRemote = "https://atom.nownodes.io" + '/txs'
+            log.debug(tag,"urlRemote: ",urlRemote)
+            let result2 = await axios({
+                url: urlRemote,
+                method: 'POST',
+                data: tx,
+            })
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            if(result2.data.txhash) output.txid = result2.data.txhash
+
+            //verify success
+            if(result2.data.raw_log){
+                let logSend = result2.data.raw_log
+                log.debug(tag,"logSend: ",logSend)
+            }
+            if(result2.data.code === 4){
+                output.success = false
+            } else {
+                output.success = true
+            }
+            output.height = result2.height
+            output.gas_wanted = result2.gas_wanted
+            output.gas_used = result2.gas_used
+            output.raw = result2.data.raw_log
+            // @ts-ignore
+        }catch(e:any){
+            //log.error(tag,"failed second broadcast e: ",e.response)
+            log.error(tag,e)
+            log.error(tag,e.response)
+            log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            //throw e
+
+            output.success = false
+            output.error = e.response.data.error
+
+        }
+
+        return output
+    }catch(e){
+
+        console.error(tag,"throw error: ",e)
+        return output
+
+    }
+}
 
 let get_node_info = async function(){
     let tag = TAG + " | get_node_info | "

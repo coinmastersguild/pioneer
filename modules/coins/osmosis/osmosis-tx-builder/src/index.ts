@@ -10,7 +10,7 @@ https://github.com/cosmos/cosmjs/blob/main/packages/stargate/CUSTOM_PROTOBUF_COD
 
  */
 
-const TAG = " | cosmos-tx-builder | "
+const TAG = " | osmosis-tx-builder | "
 
 import { DirectSecp256k1HdWallet, Registry } from "@cosmjs/proto-signing";
 import { SigningStargateClient, StargateClient, GasPrice } from "@cosmjs/stargate";

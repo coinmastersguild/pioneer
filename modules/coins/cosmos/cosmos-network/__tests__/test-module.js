@@ -35,6 +35,12 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
+//getValidators
+// network.getValidators()
+//     .then(function(resp){
+//         console.log("resp: ",resp.result[1])
+//     })
+
 // network.txsByHeight("5204363")
 //     .then(function(resp){
 //         console.log("resp: ",JSON.stringify(resp))
@@ -98,11 +104,12 @@ let network = require("../lib/index")
 //no account number
 //let tx = 'CqkBCo0BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm0KLWNvc21vczE1Y2VueWEwdHI3bm0zdHoyd24zaDN6d2todDJyeHJxN3E3aDNkahItY29zbW9zMXFqd2R5bjU2ZWNhZ2s4cmpmN2Nycnp3Y3l6Njc3NWNqODluam4zGg0KBXVhdG9tEgQxMDAwEhdTZW50IGZyb20gdGhlIGNpdGFkZWwhIBJmClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDvuOvMOU6c/OKvFovzaxCbXsE63Ko69OwGZLi0gbiStgSBAoCCH8YEBISCgwKBXVhdG9tEgMxMDAQoI0GGkA5sq9qf3mY6bR3XrN3bDZ6/Tabn92zVtDczl32Ews/y3jRV+kT9BcC8+gLHSmt48A73wB46iJ4+ruA5/i9sohw'
 
-//
-let tx = 'CqgBCo0BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm0KLWNvc21vczFxandkeW41NmVjYWdrOHJqZjdjcnJ6d2N5ejY3NzVjajg5bmpuMxItY29zbW9zMTlydmw2amE5aDBlcnE5ZGMyeHhmZHp5cGM3MzllajhrNWVzbmhnGg0KBXVjb3NtEgQxMjM0EhZVc2UgeW91ciB0b2tlbnMgd2lzZWx5EmgKUQpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQPEAhHdAb/Y3KKUSkcL9xnSV9yTMQ3RvAWf66XNMBnMSBIECgIIARiuARITCg0KBXVjb3NtEgQyMDAwEMCaDBpA9sIkLbJJYLtPiociimgxP9wZYU/81XkoobJq4xqL+tMLygCa6PtFWtzk9bS/HpcNl6ysSeGn3Y5zL2eLHnEzdg=='
 
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = '{"tx":{"fee":{"amount":[{"amount":"1000","denom":"uatom"}],"gas":"100000"},"memo":"foo:bar","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"1000","denom":"uatom"}],"from_address":"acosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3","to_address":"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj"}}],"signatures":[{"signature":"JCfVPdOQR8V/6Qd5d+NRvgQzu2FR38zwzPIfITGHjBc9TTV7hfhrUeM/jn6CA5i1qPT8/ilh5ZUXELYY04mN+g==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A8QCEd0Bv9jcopRKRwv3GdJX3JMxDdG8BZ/rpc0wGcxI"}}]},"type":"cosmos-sdk/StdTx","mode":"async"}'
+
+
+// network.broadcastLegacy(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })

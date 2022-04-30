@@ -8,7 +8,7 @@ require("dotenv").config({path:'../../../../../.env'})
 let crypto = require("../lib/index")
 let assert = require('assert')
 
-let TEST_SEED = process.env['TEST_SEED'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
+let TEST_SEED = process.env['WALLET_MAIN'] || "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
 
 let TEST_SEED_MASTER_BTC_BECH32 = process.env['TEST_SEED_MASTER_BTC'] || 'bc1q7l333k7tzpxlg5txh8jar7l8j92v37f2nvk2aw'
 

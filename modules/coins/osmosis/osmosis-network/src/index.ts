@@ -52,6 +52,7 @@ const axios = Axios.create({
     })
 });
 import { marshalTx, unmarshalTx } from '@tendermint/amino-js';
+import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 
 const request = require("request-promise")
 const log = require('@pioneer-platform/loggerdog')()
@@ -122,11 +123,29 @@ module.exports = {
     getBlock: function (block:string) {
         return get_block(block);
     },
+    getEpochProvisions: function () {
+        return get_epoch_provisions();
+    },
     getTransaction: function (txid:string) {
         return get_transaction(txid);
     },
-    getStakingTxs: function (address:string) {
-        return get_staking_txs(address);
+    getMintParams: function () {
+        return get_mint_params();
+    },
+    getSupply: function (denom:string) {
+        return get_total_supply(denom);
+    },
+    getPoolInfo: function () {
+        return get_pool_info();
+    },
+    getDistrobution: function () {
+        return get_distrobution_params();
+    },
+    getAPR: function () {
+        return get_APR();
+    },
+    getEpochs: function () {
+        return get_epochs();
     },
     transaction: function (txid:string) {
         return get_transaction(txid);
@@ -140,6 +159,165 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+
+
+let get_APR = async function() {
+    let tag = TAG + " | get_APR | "
+    try{
+        //
+        let mintParams = await get_mint_params()
+        log.info(tag,"mintParams:",mintParams)
+        let distributionProportions = mintParams.params.distribution_proportions.staking
+        log.info(tag,"distributionProportions:",distributionProportions)
+
+        //
+        let getEpochs = await get_epochs()
+        log.info(tag,"getEpochs:",getEpochs)
+
+        // let epochProvisionInfo = getEpochs.epochs.filter('identifier')
+        let epochProvisionInfo = getEpochs.epochs.filter((e:any) => e.identifier === 'day');
+        epochProvisionInfo = epochProvisionInfo[0]
+        log.info(tag,"epochProvisionInfo:",epochProvisionInfo)
+        let durationSeconds = epochProvisionInfo.duration.replace("s","")
+        log.info(tag,"durationSeconds:",durationSeconds)
+
+        let epochProvision = await get_epoch_provisions()
+
+        //get bonded tokens
+        let poolInfo = await get_pool_info()
+        let bondedToken = poolInfo.pool.bonded_tokens
+        log.info(tag,"bondedToken:",bondedToken)
+
+        // mintingEpochProvision = epochProvision * distributionProportions
+        log.info(tag,"epochProvision:",epochProvision)
+        log.info(tag,"distributionProportions:",distributionProportions)
+        let mintingEpochProvision = epochProvision * distributionProportions
+        log.info(tag,"mintingEpochProvision:",mintingEpochProvision)
+
+        //yearMintingProvision = mintingEpochProvision * (365 * 24 * 3600) / epochDuration
+        let yearMintingProvision = mintingEpochProvision * ((365 * 24 * 3600) / durationSeconds)
+        log.info(tag,"yearMintingProvision:",yearMintingProvision)
+        //
+
+        //get total supply
+        //Assume total supple = 100mill
+        let totalSupply = 1000000000
+        // //let totalSupply = await get_total_supply('uosmo')
+        // log.info(tag,"totalSupply:",totalSupply)
+        // totalSupply = totalSupply.result.amount
+        // log.info(tag,"totalSupply:",totalSupply)
+
+        if(!totalSupply) throw Error("unable to calc APR: missing totalSupply")
+        if(!epochProvision) throw Error("unable to calc APR: missing epochProvision")
+
+        //ratio
+        let ratio = bondedToken / totalSupply
+        log.info(tag,"ratio:",ratio)
+
+        //total
+        let inflation = yearMintingProvision / totalSupply
+        log.info(tag,"inflation:",inflation)
+
+        //community tax
+
+
+        // staking APR is calculated as:
+        //   new_coins_per_year = inflation_pct * total_supply * (1 - community_pool_tax)
+        //   apr = new_coins_per_year / total_bonded_tokens
+
+
+        //new_coins_per_year = inflation_pct * total_supply * (1 - community_pool_tax)
+        let apr = inflation / ratio
+        log.info(tag,"apr:",apr)
+        apr = apr * 100
+
+        return apr
+    }catch(e){
+        throw e
+    }
+}
+
+let get_distrobution_params = async function(){
+    let tag = TAG + " | get_distrobution_params | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/distribution/v1beta1/params'})
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+
+let get_pool_info = async function(){
+    let tag = TAG + " | get_pool_info | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/staking/v1beta1/pool'})
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+
+let get_epoch_provisions = async function(){
+    let tag = TAG + " | get_total_supply | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/mint/v1beta1/epoch_provisions'})
+        return txInfo.data.epoch_provisions
+    }catch(e){
+        throw e
+    }
+}
+
+
+let get_total_supply = async function(denom:string){
+    let tag = TAG + " | get_total_supply | "
+    let output:any = {}
+    try{
+
+        log.info(tag,"url: ",URL_OSMO_LCD+'/bank/total/'+denom)
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/total/'+denom})
+
+
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+let get_mint_params = async function(){
+    let tag = TAG + " | get_mint_params | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/mint/v1beta1/params'})
+
+
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
+
+let get_epochs = async function(){
+    let tag = TAG + " | get_epochs | "
+    let output:any = {}
+    try{
+
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+"/osmosis/epochs/v1beta1/epochs"})
+
+        return txInfo.data
+    }catch(e){
+        throw e
+    }
+}
 
 let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
@@ -301,6 +479,7 @@ let get_delegations = async function(address:string,valAddress:string){
     }
 }
 
+
 let get_validators = async function(){
     let tag = TAG + " | get_validators | "
     let output:any = {}
@@ -344,55 +523,11 @@ let broadcast_transaction = async function(tx:string){
         log.debug(tag,"CHECKPOINT 1")
         output.success = false
         try{
-            //push to rpc
-            // let urlRemote = URL_OSMO_RPC
 
-            const txBytesBase64 = Buffer.from(tx, 'binary').toString('base64');
-
-            // let options = {
-            //     method : "POST",
-            //     url : URL_OSMO_RPC+'/BroadcastTx',
-            //     headers :{'content-type':'application/json'},
-            //     body :  {
-            //         "jsonrpc":"2.0",
-            //         "method" : "BROADCAST_MODE_SYNC",
-            //         "params": txBytesBase64,
-            //         "id": 1
-            //     }
-            // };
-            // //console.log("options: ",options)
-            // let result = await request(options);
-            // console.log("result: ",result)
-
-            // if(result2.data.txhash) output.txid = result2.data.txhash
-            //
-            // //verify success
-            // if(result2.data.raw_log){
-            //     let logSend = result2.data.raw_log
-            //     log.debug(tag,"logSend: ",logSend)
-            // }
-            // output.height = result2.height
-            // output.gas_wanted = result2.gas_wanted
-            // output.gas_used = result2.gas_used
-            // output.raw = result2.data
-
-            // console.log("tx: ",tx)
-            // let txInfo = await axios({method:'GET',url: URL_OSMO_RPC+'/broadcast_tx_sync?tx='+txBytesBase64})
-            // log.debug(tag,"txInfo: ",txInfo.data)
-
-            // const txBytesBase64 = Buffer.from(tx, 'binary').toString('base64');
-            //
-            // var options = {
-            //     method: 'POST',
-            //     url: URL_OSMO_LCD + '/tx/v1beta1/txs',
-            //     headers:
-            //         { 'Content-Type': 'application/json' },
-            //     body: { tx_bytes: txBytesBase64, mode: 'BROADCAST_MODE_SYNC' },
-            //     json: true
-            // };
-            //
-            // let result = await request(options);
-            // console.log("result: ",result)
+            let payload = {
+                "tx_bytes":tx,
+                "mode": "BROADCAST_MODE_SYNC"
+            }
 
             //push to rest
             // let urlRemote = URL_OSMO_LCD+ '/txs'
@@ -401,10 +536,14 @@ let broadcast_transaction = async function(tx:string){
             let result2 = await axios({
                 url: urlRemote,
                 method: 'POST',
-                data: tx,
+                data: payload,
             })
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            if(result2.data.txhash) output.txid = result2.data.txhash
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            if(result2.data.tx_response.txhash) {
+                output.txid = result2.data.tx_response.txhash
+                output.success = true
+
+            }
 
             //verify success
             if(result2.data.raw_log){

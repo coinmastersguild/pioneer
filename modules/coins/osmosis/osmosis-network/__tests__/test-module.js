@@ -1,5 +1,14 @@
 /*
     osmosis network
+
+
+    //price
+    https://api-osmosis.imperator.co/tokens/v2/price/osmo
+
+    //get Pool APR's
+    //apr/v2/all
+    https://api-osmosis.imperator.co/apr/v2/all
+
  */
 
 require("dotenv").config({path:'../../../../.env'})
@@ -18,6 +27,41 @@ let network = require("../lib/index")
 //         //console.log("resp: ",resp)
 //         console.log("resp: ",resp[0])
 //         //console.log("resp: ",resp.result.length)
+//     })
+
+// network.getEpochProvisions()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// network.getMintParams()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// network.getEpochs()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// network.getPoolInfo()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+// network.getDistrobution()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
+network.getAPR()
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
+
+// network.getSupply('uosmo')
+//     .then(function(resp){
+//         console.log("resp: ",resp)
 //     })
 
 let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
@@ -112,9 +156,9 @@ let poolId = 'gamm/pool/1'
 
 //https://lcd-osmosis.keplr.app/txs?tx.height=1891147&page=1
 
-// network.getTransaction("8F27020BF2E247F9D6C1394C54705BDC14EF589F0873CFC33C3CB75E2D1CF3B9")
+// network.getTransaction("93D6EDE11E6F330082EF7DE76AE3EE0A3A5D7A49E044F50E16A64686BB0240EA")
 //     .then(function(resp){
-//         // console.log("resp: ",resp)
+//         console.log("resp: ",resp)
 //         console.log("resp: ",JSON.stringify(resp))
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
@@ -128,6 +172,8 @@ let poolId = 'gamm/pool/1'
 // network.getRewards("osmo1nmkd2hxdw0qyxyfmvffplpq6fxtdy7fea746e9")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
+//         console.log("resp: ",resp.result)
+//         console.log("resp: ",resp.result.rewards[0])
 //         console.log("resp: ",JSON.stringify(resp))
 //     })
 
@@ -180,9 +226,11 @@ let poolId = 'gamm/pool/1'
 //let tx = '{"tx":{"msg":[{"type":"cosmos-sdk/MsgTransfer", "value":{"source_port":"transfer", "source_channel":"channel-0", "token":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2", "amount":"18557"}, "sender":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6", "receiver":"cosmos1a7xqkxa4wyjfllme9u3yztgsz363dalzey4myg", "timeout_height":{"revision_number":"4", "revision_height":"8373701"}}}], "fee":{"amount":[{"denom":"uosmo", "amount":"0"}], "gas":"1350000"}, "signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1", "value":"A6enCcw1NHqwuGmQTse6ve3iP6oIfJBeM9oJt/1g1l9B"}, "signature":"8j1r6/8ZpzX3yca7clqqPoQQBCExsYRMiWqgRGMuvfx9MhuFQk+RHVWBgPNYdsvsfDC8fbg+8a+fZ636XKJT+A=="}], "memo":"", "timeout_height":"0"}, "mode":"sync", "type":"cosmos-sdk/StdTx"}'
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"290000"},"memo":"","msg":[{"type":"osmosis/gamm/swap-exact-amount-in","value":{"sender":"osmo1yc6dftwdhgt96k8yty8djga88f3knhznply6vy","routes":[{"poolId":"1","tokenOutDenom":"uosmo"}],"tokenIn":{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","amount":"1000"},"tokenOutMinAmount":"126"}}],"signatures":[{"signature":"mAY8uSVrtXO6xBwIhn03gxHb16HGqyLosrsR6J7GcVlpu1domDd3a4osp60uEMSQjQt2Yn98yq4zlBg+W64q/A==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A/SmJZVOYFbYd/Gr3he9k0I+oIbr5GSrOnwqR4KvLwzJ"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'
 
-let tx = '{"tx_bytes":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100000000","denom":"uosmo"}],"from_address":"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq","to_address":"osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k"}}],"signatures":[{"signature":"WoJ/YiUx6DQKSyXsJxNvLsE8cx/wN9dQI4bxRjT8l1svnQ3fwgWYLknrznGVvFIQcCl5pKD+R3CfZmXzyP7V8A==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"}}]}","type":"cosmos-sdk/StdTx","mode":"BROADCAST_MODE_SYNC"}'
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = '{"tx_bytes":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100000000","denom":"uosmo"}],"from_address":"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq","to_address":"osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k"}}],"signatures":[{"signature":"WoJ/YiUx6DQKSyXsJxNvLsE8cx/wN9dQI4bxRjT8l1svnQ3fwgWYLknrznGVvFIQcCl5pKD+R3CfZmXzyP7V8A==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"}}]}","type":"cosmos-sdk/StdTx","mode":"BROADCAST_MODE_SYNC"}'
+
+// let tx = 'CosBCogBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmgKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISK29zbW8xYTd4cWt4YTR3eWpmbGxtZTl1M3l6dGdzejM2M2RhbHozbHh0ajYaDAoFdW9zbW8SAzEwMBJnClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDxAIR3QG/2NyilEpHC/cZ0lfckzEN0bwFn+ulzTAZzEgSBAoCCAEYBhITCg0KBXVvc21vEgQyODAwEIDxBBpAkhhxOO2/8HHuF0/Ffy3anBxZd+H1f/SCr7judFFFW/d+yzB0kA2aJOc8FvyxLCKDjAAGIS/mwSp/4RgLNeGpVg=='
+// network.broadcast(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })
