@@ -25,11 +25,24 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+const axiosRetry = require('axios-retry');
+axiosRetry(axios, {
+    retries: 3, // number of retries
+    retryDelay: (retryCount: number) => {
+        console.log(`retry attempt: ${retryCount}`);
+        return retryCount * 2000; // time interval between retries
+    },
+    retryCondition: (error: { response: { status: number; }; }) => {
+        console.error(error)
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 
 const log = require('@pioneer-platform/loggerdog')()
 
-let URL_THORNODE = process.env['URL_THORNODE'] || 'https://testnet.thornode.thorchain.info'
-let URL_MIDGARD = process.env['URL_THORNODE'] || 'https://testnet.midgard.thorchain.info/v2'
+let URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.ninerealms.com'
+//let URL_MIDGARD = process.env['URL_THORNODE'] || 'https://testnet.midgard.thorchain.info/v2'
 
 let BASE_THOR = 100000000
 
@@ -84,7 +97,6 @@ let get_transaction = async function(txid:string){
     }catch(e){
         // log.error(tag,e.response.data)
         // log.error(tag,e.response.data.error)
-
         if(e.response.status === 404){
             let output:any = {}
             output.success = false
@@ -106,6 +118,29 @@ let broadcast_transaction = async function(tx:string){
 
 
         try{
+            // let payload = {
+            //     // "tx_bytes": btoa(tx),
+            //     // "tx_bytes":broadcastTx,
+            //     "tx_bytes":tx,
+            //     "mode": "BROADCAST_MODE_SYNC"
+            // }
+            //
+            // let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'
+            // // let urlRemote = URL_GAIAD+ '/txs'
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'POST',
+            //     data: payload,
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            // if(result2.data.txhash) output.txid = result2.data.txhash
+
             //push to seed
             let urlRemote = URL_THORNODE+ '/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
@@ -115,17 +150,22 @@ let broadcast_transaction = async function(tx:string){
                 data: tx,
             })
             log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            if(result2.data.txhash) output.txid = result2.data.txhash
+            if(result2 && result2.data && result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
-            if(result2.data.raw_log){
+            if(result2.data.raw_log && result2.data.raw_log !== '[]'){
                 let logSend = result2.data.raw_log
-                log.debug(tag,"logSend: ",logSend)
+                log.info(tag,"logSend: ",logSend)
+                output.success = false
+                output.error = logSend
+            } else {
+                output.success = true
             }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
             output.raw = result2.data
+
         }catch(e){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
@@ -139,11 +179,6 @@ let broadcast_transaction = async function(tx:string){
             output.error = e.response.data.error
 
         }
-
-        if(output.txid){
-            output.success = true
-        }
-
         return output
     }catch(e){
 

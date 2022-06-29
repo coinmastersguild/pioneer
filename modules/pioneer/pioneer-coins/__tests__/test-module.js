@@ -42,7 +42,7 @@ let addressNlist = [
 //         0
 //     ]
 
-console.log(addressNListToBIP32(addressNlist))
+// console.log(addressNListToBIP32(addressNlist))
 
 //convert
 //console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
@@ -102,22 +102,22 @@ console.log(addressNListToBIP32(addressNlist))
 //     }
 // ]
 
-let result = [
-    {
-        xpub: 'xpub6GwgnAd4WBhEHue6mbEpii3T3muSUcHetMqpqdyTQNJJyLAD1m26N2cXTzcBVuzFQV7jJKhBCyCwy2SP1tKHJMJYPQV3x4zb5pRA9pudABE'
-    }
-]
-
-let run_test = async function(){
-    try{
-        console.log("expected pubkey: 03bee3af30e53a73f38abc5a2fcdac426d7b04eb72a8ebd3b01992e2d206e24ad8")
-        let pubkeys = await normalize_pubkeys('keepkey',result,paths)
-
-        console.log("pubkeys: ",pubkeys)
-    }catch(e){
-        console.error(e)
-    }
-}
+// let result = [
+//     {
+//         xpub: 'xpub6GwgnAd4WBhEHue6mbEpii3T3muSUcHetMqpqdyTQNJJyLAD1m26N2cXTzcBVuzFQV7jJKhBCyCwy2SP1tKHJMJYPQV3x4zb5pRA9pudABE'
+//     }
+// ]
+//
+// let run_test = async function(){
+//     try{
+//         console.log("expected pubkey: 03bee3af30e53a73f38abc5a2fcdac426d7b04eb72a8ebd3b01992e2d206e24ad8")
+//         let pubkeys = await normalize_pubkeys('keepkey',result,paths)
+//
+//         console.log("pubkeys: ",pubkeys)
+//     }catch(e){
+//         console.error(e)
+//     }
+// }
 // run_test()
 //
 //

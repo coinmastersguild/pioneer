@@ -39,6 +39,9 @@ export const getRangoBlockchainName = function(blockchain:string){
             case "cosmos":
                 rangoName = "COSMOS";
                 break;
+            case "thorchain":
+                rangoName = "THOR";
+                break;
             case "osmosis":
                 rangoName = "OSMOSIS";
                 break;

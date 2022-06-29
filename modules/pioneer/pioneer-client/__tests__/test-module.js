@@ -56,7 +56,7 @@ let run_test = async function(){
         //get config
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
-        //
+
         // let status = await pioneer.instance.Status()
         // console.log("status: ",status.data)
         // console.log("tokens: ",status.data.rango.tokens[0])
@@ -69,9 +69,10 @@ let run_test = async function(){
         // console.log("status: ",status.data.exchanges.thorchain.assets)
         // console.log("status: ",status.data.exchanges.osmosis.assets)
 
-        // let invocation = 'pioneer:invocation:v0.01:ATOM:dGqmfUJdFN5MwNWqc2mSHu'
-        // let txInfo = await pioneer.instance.Invocation(invocation)
-        // console.log("txInfo: ",txInfo.data)
+
+        let invocation = 'pioneer:invocation:v0.01:RUNE:wHvdY2dTBXEUQcMRTBef4M'
+        let txInfo = await pioneer.instance.Invocation(invocation)
+        console.log("invocation: ",txInfo.data)
 
         //get new address
         //
@@ -94,9 +95,9 @@ let run_test = async function(){
         // data = data.data
         // console.log("txData: ",data)
 
-        let data = await pioneer.instance.GetPubkeyBalance({asset:'ETH',pubkey:"0x33b35c665496bA8E71B22373843376740401F106"})
-        data = data.data
-        console.log("txData: ",data)
+        // let data = await pioneer.instance.GetPubkeyBalance({asset:'ETH',pubkey:"0x33b35c665496bA8E71B22373843376740401F106"})
+        // data = data.data
+        // console.log("txData: ",data)
 
         //get online
 
@@ -157,6 +158,16 @@ let run_test = async function(){
 
 
         //broadcast
+        // let broadcast = {
+        //     serialized: '{"tx":{"fee":{"amount":[{"amount":"0","denom":"rune"}],"gas":"650000"},"memo":"","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"50000","denom":"rune"}],"from_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5","to_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"}}],"signatures":[{"signature":"L/eTznyUAWZqMtH+wp4jYlmSZZkeL5/+EXUYha8BpcVqg14qjg4m0YcTrDkJ6kHBciC8jmU3GPhsEHyKBtbXAg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A9BnfoZvhOO8Y3RpeUFKi6bvTfObGZ0Altybt0wXABUC"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}',
+        //     txid: '',
+        //     network: 'RUNE',
+        //     invocationId: 'pioneer:invocation:v0.01:BTC:qUhYpSsKcohUXdC5598Rvt'
+        // }
+        // let data = await pioneer.instance.Broadcast(null, broadcast)
+        // data = data.data
+        // console.log("data: ",data)
+
         // let broadcast = {
         //     serialized: '0100000000010282b9a2adf7044c10b85ee9b420e92577110c2720674f64e555eb7e2214d724f90100000000ffffffffcd6b2ddaf07f62082bb0d0415c1576a53d9ba5827c12d375ee38968a046c8ace0000000000ffffffff01a086010000000000160014329035c39cb274eb9cdaa662a7ab0eaaae15612b02473044022066fa2b247a3fb5ddde75e70bc43ecc658faf4d40b5f46b469af07c88c43760cc022004ecafd4bd03cf04fef28461c1d44ef3f19661084dc18dfeeec48cce814836da012102a9b8564f53dde9db22c2775e56c24096f6f52019166b98e4116bbabdc7d20b1202473044022033fe9cdfcb038165ef118795ab0aaf881ef4a055a79af56d0548c26b172b3e64022037194e94eb7d414ba1e58816c327ca77c3b083e826203dfacafc332ebbbc5088012103fa044f4e622a9dc7a877155efad20816c6994f95bd1dc21c339a820395a32e0100000000',
         //     txid: '',

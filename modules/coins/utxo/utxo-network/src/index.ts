@@ -319,34 +319,79 @@ let get_fee = async function(coin:string){
 let broadcast_transaction = async function(coin:string,tx:string){
     let tag = TAG + " | broadcast_transaction | "
     try{
-        //use nodes
-        // let txid = await nodeMap[coin].sendRawTransaction(tx)
-        // return txid
 
         let output:any = {
             success:false
         }
-
+        log.info(tag,"coin: ",coin)
         try{
-            let responseBroadcast = await blockbook.broadcast(coin,tx)
-            log.info(tag,'responseBroadcast: ',responseBroadcast)
-            if(responseBroadcast.success){
-                output.success = true
-                if(responseBroadcast.txid){
-                    output.txid = responseBroadcast.txid
+            //TODO use for non-bitcoin? wtf why bitcoin blockbook broke?
+            let responseBroadcast
+            if(coin === 'BTC'){
+                log.info(tag,"BTC detected!")
+                let url = "https://api.bitcoin.shapeshift.com/api/v1/send"
+                let body = {
+                    url,
+                    method: 'POST',
+                    json:false,
+                    data:{hex:tx},
                 }
-            } else if(responseBroadcast.error) {
-                output.error = responseBroadcast.error
+                let output:any = {
+                    success:false
+                }
+                try{
+                    responseBroadcast = await axios(body)
+                    responseBroadcast = responseBroadcast.data
+                    log.info(tag,'responseBroadcast: ',responseBroadcast)
+                    output.txid = responseBroadcast
+                }catch(e){
+                    // log.info(tag,"error: ",e)
+                    // log.info(tag,"data0: ",e)
+                    // log.info(tag,"resp: ",resp)
+                    // log.info(tag,"data0: ",Object.keys(e))
+                    // log.info(tag,"data1: ",e.response.req)
+                    log.info(tag,"data2: ",e.response.data)
+                    log.info(tag,"data2: ",e.response.data.message)
+                    // log.info(tag,"error3: ",e.toJSON().request)
+                    // log.info(tag,"erro4: ",e.toJSON().data)
+                    // log.info(tag,"error5: ",e.toJSON().code)
+                    if(e.response.data.message){
+                        log.info(tag,"saving message! ")
+                        output.error = e.response.data.message
+                    }else{
+                        output.error = e
+                    }
+                }
+                log.info(tag,"output: ",output)
+                return output
             } else {
-                output.error = "unknown error"
-                output.debug = responseBroadcast
+                responseBroadcast = await blockbook.broadcast(coin,tx)
+                log.info(tag,'responseBroadcast: ',responseBroadcast)
+                if(responseBroadcast.success){
+                    output.success = true
+                    if(responseBroadcast.txid){
+                        output.txid = responseBroadcast.txid
+                    }
+                } else if(responseBroadcast.error) {
+                    output.error = responseBroadcast.error
+                } else {
+                    output.error = "unknown error"
+                    output.debug = responseBroadcast
+                }
+                return output
             }
+
+            //use nodes
+            // log.info(tag,'nodeMap: ',nodeMap)
+            // let responseBroadcast = await nodeMap[coin].sendRawTransaction(tx)
+            // log.info(tag,'responseBroadcast: ',responseBroadcast)
+
+
         }catch(e){
             //TODO handle errors
-            output.error = e
+            if(!output.error)output.error = e
+            return output
         }
-
-        return output
     }catch(e){
         console.error(tag,e)
         throw e
