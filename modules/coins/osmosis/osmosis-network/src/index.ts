@@ -41,6 +41,7 @@ https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/
 */
 const pjson = require("../package.json")
 const TAG = " | "+pjson.name.replace("@pioneer-platform/","")+" | "
+import { find } from 'lodash'
 
 require("dotenv").config({path:'../../../.env'})
 
@@ -104,6 +105,9 @@ module.exports = {
     },
     getPools:function () {
         return get_pools();
+    },
+    getPool:function (pair:string) {
+        return get_pool(pair);
     },
     getValidators:function () {
         return get_validators();
@@ -323,9 +327,9 @@ let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
     try{
         let url = URL_OSMO_LCD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
-        log.debug(tag,"url: ",url)
+        log.info(tag,"url: ",url)
         let txInfo = await axios({method:'GET',url})
-        log.debug(tag,"txInfo: ",txInfo.data)
+        log.info(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -413,14 +417,42 @@ let get_block_height = async function(){
     }
 }
 
-let get_pool = async function(poolId:string){
-    let tag = TAG + " | get_pools | "
+//get pools
+let get_pool = async function(pair:string){
+    let tag = TAG + " | get_pool | "
     let output:any = {}
     try{
-        let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pool/'+poolId})
-        log.debug(tag,"poolInfo: ",poolInfo.data)
+        if(pair.indexOf("_") === -1) throw Error("Pair needs to use _ example (ATOM_OSMO)")
+        let assets = pair.split("_")
 
-        return poolInfo.data
+        if(assets[0]==='ATOM') assets[0] = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+        if(assets[1]==='ATOM') assets[1] = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+
+        if(assets[0]==='OSMO') assets[0] = "uosmo"
+        if(assets[1]==='OSMO') assets[1] = "uosmo"
+
+
+        let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pools'})
+        // log.debug(tag,"poolInfo: ",poolInfo.data)
+
+
+        const sellAssetDenom = assets[0]
+        const buyAssetDenom = assets[1]
+
+        // log.info("sellAssetDenom: ",sellAssetDenom)
+        // log.info("buyAssetDenom: ",buyAssetDenom)
+        const foundPool = find(poolInfo.data.pools, (pool) => {
+            const token0Denom = pool.poolAssets[0].token.denom
+            const token1Denom = pool.poolAssets[1].token.denom
+            return (
+                (token0Denom === sellAssetDenom && token1Denom === buyAssetDenom) ||
+                (token0Denom === buyAssetDenom && token1Denom === sellAssetDenom)
+            )
+        })
+
+        if (!foundPool) throw new Error('Couldnt find pool')
+
+        return foundPool
     }catch(e){
         throw e
     }
@@ -774,7 +806,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -794,9 +826,9 @@ let get_balances = async function(address:string){
                     if(entry.denom.indexOf('ibc/') >= 0){
                         //lookup on each
                         let voucher = entry.denom.replace('ibc/','')
-                        log.debug(tag,"voucher: ",voucher)
+                        log.info(tag,"voucher: ",voucher)
                         let voucherInfo = await get_voucher_info(voucher)
-                        log.debug(tag,"voucherInfo: ",voucherInfo)
+                        log.info(tag,"voucherInfo: ",voucherInfo)
                         if(voucherInfo.denom_trace.base_denom === 'uatom'){
                             let balance = {
                                 type:'ibcChannel',

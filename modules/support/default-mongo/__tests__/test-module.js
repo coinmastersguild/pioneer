@@ -15,7 +15,7 @@ let connection = require('../index')
 
 //let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
-let conduit = connection.get('conduit')
+let attempts = connection.get('attempts')
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 
@@ -37,8 +37,8 @@ read
 let run_test = async function(){
     try{
         console.log("test")
-        // let resp = await conduit.findOne()
-        // console.log("resp: ",resp)
+        let resp = await attempts.findOne()
+        console.log("resp: ",resp)
 
         // let resp = await txsDB.findOne()
         // console.log(resp)

@@ -13,6 +13,8 @@ let {
     getPaths,
     classifyPubkey,
     get_address_from_xpub,
+    bip32ToAddressNList,
+    addressNListToBIP32,
     normalize_pubkeys,
     PoSchains,
     getNativeAssetForBlockchain
@@ -23,11 +25,31 @@ let network = 'osmosis'
 
 // console.log(PoSchains['Osmosis'])
 
+
+let addressNlist = [
+    2147483732,
+    2147483648,
+    2147483648,
+    1,
+    18
+]
+
+// let addressNlist = [
+//         2147483692,
+//         2147483648,
+//         2147483648,
+//         0,
+//         0
+//     ]
+
+console.log(addressNListToBIP32(addressNlist))
+
 //convert
-// console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
-//
+//console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
+//console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
+
 // let amountNative = "1206615928659277"
-// // console.log("base: ",baseAmountToNative("BTC",amountNative))
+// console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 //
 // let paths = getPaths(['osmosis'])
@@ -36,8 +58,9 @@ let network = 'osmosis'
 // let paths = getPaths(['terra'])
 // console.log("paths: ",paths)
 
-let paths = getPaths(['osmosis'])
-console.log("paths: ",paths)
+// let paths = getPaths(['osmosis'])
+// console.log("paths: ",paths)
+
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"
 // // let address = "SVyBFjLF4za7kmVDYvVNCiqRJAArJDe7pY"
 // console.log(classifyPubkey(address))
@@ -95,7 +118,7 @@ let run_test = async function(){
         console.error(e)
     }
 }
-run_test()
+// run_test()
 //
 //
 // let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"

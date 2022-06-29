@@ -36,10 +36,16 @@ let run_test = async function(){
 
 
         let config = {
-            queryKey:'sdk:2d0ec79c-6733-4235-9b09-9b87171edc16',
-            username,
+            queryKey:'key:66fefdd6-7ea9-48cf-8e69-fc74afb9c454',
+            username:"user:cfd27e74",
             spec
         }
+
+        // let config = {
+        //     queryKey:'sdk:pair-keepkey:test-1234',
+        //     username,
+        //     spec
+        // }
         // let config = {
         //     queryKey:"79d94b78-eb50-445d-b97f-e524dca80b58",
         //     username:'test-user-2',
@@ -50,11 +56,18 @@ let run_test = async function(){
         //get config
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
+        //
+        // let status = await pioneer.instance.Status()
+        // console.log("status: ",status.data)
+        // console.log("tokens: ",status.data.rango.tokens[0])
+        // console.log("blockchains: ",status.data.rango.blockchains)
+        // console.log("blockchains: ",status.data.rango.blockchains[0])
+        // console.log("swappers: ",status.data.rango.swappers)
+        // console.log("swappers: ",status.data.rango.swappers[0])
 
-        let status = await pioneer.instance.Status()
-        console.log("status: ",status.data.exchanges.thorchain)
-        console.log("status: ",status.data.exchanges.thorchain.assets)
-        console.log("status: ",status.data.exchanges.osmosis.assets)
+        // console.log("status: ",status.data.exchanges.thorchain)
+        // console.log("status: ",status.data.exchanges.thorchain.assets)
+        // console.log("status: ",status.data.exchanges.osmosis.assets)
 
         // let invocation = 'pioneer:invocation:v0.01:ATOM:dGqmfUJdFN5MwNWqc2mSHu'
         // let txInfo = await pioneer.instance.Invocation(invocation)
@@ -71,13 +84,19 @@ let run_test = async function(){
         //get change address
 
         // let xpub = ""
-        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"})
+        // console.log("pioneer.instance: ",pioneer.instance)
+        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
         // data = data.data
+        // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
 
         // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         // data = data.data
         // console.log("txData: ",data)
+
+        let data = await pioneer.instance.GetPubkeyBalance({asset:'ETH',pubkey:"0x33b35c665496bA8E71B22373843376740401F106"})
+        data = data.data
+        console.log("txData: ",data)
 
         //get online
 
@@ -86,6 +105,10 @@ let run_test = async function(){
         // let txid = "83fab6e9084fd3b99bc69221db5c923fa7a8ff1046845940105f88fc551e4d18"
         // let txInfo = await pioneer.instance.GetTransaction({coin,txid})
         // console.log("txInfo: ",txInfo)
+
+        // let refresh = await pioneer.instance.Refresh()
+        // refresh = refresh.data
+        // console.log("refresh: ",refresh)
 
         //if username not online abort
         // let onlineUsers = await pioneer.instance.Online()
@@ -115,6 +138,14 @@ let run_test = async function(){
         // let info = await pioneer.instance.Info(user.data.context)
         // console.log("info: ",info.data)
 
+        // let data = await pioneer.instance.Pool("ATOM_OSMO")
+        // data = data.data
+        // console.log("txData: ",data)
+
+        // let data = await pioneer.instance.QuoteSwap({pair:"OSMO_ATOM",amountIn:"0.001"})
+        // data = data.data
+        // console.log("txData: ",data)
+
         // let data = await pioneer.instance.GetThorchainMemoEncoded(null, {})
         // data = data.data
         // console.log("txData: ",data)
@@ -127,8 +158,20 @@ let run_test = async function(){
 
         //broadcast
         // let broadcast = {
-        //     serialized: 'c101f0625dee0a482a2c87fa0a200a1441a3320611caffc31d0148880077f71cfb6509fd12080a03424e4210904e12200a142023e508399b9f0ff4ff784c14bce6427e69a66812080a03424e4210904e12710a26eb5ae987210290916077c387b262a940380d250fd8151c42abf9d8072397797844fab14924c11240370d580aa0ce77496e0fa213e12027d9f635b7b4046369d58e5f2d5ae05d555110d751f1ffe70089ff126d9a9cec85f16f5fb092cb7314be07d5f74b7e3b9adf18eda111208d01',
-        //     coin: 'BNB'
+        //     serialized: '0100000000010282b9a2adf7044c10b85ee9b420e92577110c2720674f64e555eb7e2214d724f90100000000ffffffffcd6b2ddaf07f62082bb0d0415c1576a53d9ba5827c12d375ee38968a046c8ace0000000000ffffffff01a086010000000000160014329035c39cb274eb9cdaa662a7ab0eaaae15612b02473044022066fa2b247a3fb5ddde75e70bc43ecc658faf4d40b5f46b469af07c88c43760cc022004ecafd4bd03cf04fef28461c1d44ef3f19661084dc18dfeeec48cce814836da012102a9b8564f53dde9db22c2775e56c24096f6f52019166b98e4116bbabdc7d20b1202473044022033fe9cdfcb038165ef118795ab0aaf881ef4a055a79af56d0548c26b172b3e64022037194e94eb7d414ba1e58816c327ca77c3b083e826203dfacafc332ebbbc5088012103fa044f4e622a9dc7a877155efad20816c6994f95bd1dc21c339a820395a32e0100000000',
+        //     txid: '',
+        //     network: 'BTC',
+        //     invocationId: 'pioneer:invocation:v0.01:BTC:qUhYpSsKcohUXdC5598Rvt'
+        // }
+        // let data = await pioneer.instance.Broadcast(null, broadcast)
+        // data = data.data
+        // console.log("data: ",data)
+
+        // let broadcast = {
+        //     serialized: '0xf901538202e08505735cc7c883013880943624525075b88b24ecc29ce226b0cec1ffcb697687b1a2bc2ec50000b8e41fece7b4000000000000000000000000bbe73e0a74019059cf509bc0bcad4040ca9e7379000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b1a2bc2ec500000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000003b3d3a4254432e4254433a6263317178326772747375756b663677683878363565333230326377343268703263667463636d6170753a32383436353200000000001ba0d696d403614ae60229a275dd00bcf24cf63aa8ceefc03198b1797e279afd861fa020e25f8fabce696587917aab0f610f3f35b0eb72b4bcced306360a885474728f',
+        //     txid: '',
+        //     network: 'ETH',
+        //     invocationId: '95a8db44-bcc2-4a21-b970-7b3f7e172cd9'
         // }
         // let data = await pioneer.instance.Broadcast(null, broadcast)
         // data = data.data

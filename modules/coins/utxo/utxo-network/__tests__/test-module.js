@@ -33,21 +33,20 @@ network.init('full')
 //     })
 
 
-// let tx = "0100000001e9af69b3025c3bec173313a896be1d705cc3be312618c60d704e7f10ac2f9f1f010000006b483045022100d250cd8ee490400475052c5500ad670611191219335e89be8dab0fb052e0f43a0220127e1d830296063af7c14091d8acafbbb57e20703066c6ad5e01aef423568b3701210204a578639e5170104800fc90f770aa87abce475fd9646d252e2f824599f77259ffffffff04e803000000000000160014a065cde039a2f2eb96604b129253e8c49db626950000000000000000160014a065cde039a2f2eb96604b129253e8c49db62695b37d9901000000001976a914c01c70d30eb8be36083996800c7513cce1f8f3ec88ac0000000000000000366a343d3a4554482e4554483a30783365343835653243376466373132456331373043303837656366354331353031364130334639334600000000"
-//
-// network.broadcast("TEST",tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
-
-//get transaction
-let txid = "593c4c34aba1d90635e95018d4a9a0e4542ec35adacbb307e0f04901736ec1b9"
-network.getTransaction("BTC",txid)
+let tx = "0100000000010282b9a2adf7044c10b85ee9b420e92577110c2720674f64e555eb7e2214d724f90100000000ffffffffcd6b2ddaf07f62082bb0d0415c1576a53d9ba5827c12d375ee38968a046c8ace0000000000ffffffff01a086010000000000160014329035c39cb274eb9cdaa662a7ab0eaaae15612b02473044022066fa2b247a3fb5ddde75e70bc43ecc658faf4d40b5f46b469af07c88c43760cc022004ecafd4bd03cf04fef28461c1d44ef3f19661084dc18dfeeec48cce814836da012102a9b8564f53dde9db22c2775e56c24096f6f52019166b98e4116bbabdc7d20b1202473044022033fe9cdfcb038165ef118795ab0aaf881ef4a055a79af56d0548c26b172b3e64022037194e94eb7d414ba1e58816c327ca77c3b083e826203dfacafc332ebbbc5088012103fa044f4e622a9dc7a877155efad20816c6994f95bd1dc21c339a820395a32e0100000000"
+network.broadcast("BTC",tx)
     .then(function(resp){
         console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
+        //console.log("resp: ",JSON.stringify(resp))
     })
+
+//get transaction
+// let txid = "593c4c34aba1d90635e95018d4a9a0e4542ec35adacbb307e0f04901736ec1b9"
+// network.getTransaction("BTC",txid)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.getBlockHeight("BCH")
 //     .then(function(resp){
@@ -71,8 +70,8 @@ network.getTransaction("BTC",txid)
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// let xpub = ""
-// network.utxosByXpub("DOGE",xpub)
+// let xpub = "xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"
+// network.utxosByXpub("BTC",xpub)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         //console.log("resp: ",JSON.stringify(resp))

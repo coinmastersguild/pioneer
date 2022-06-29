@@ -229,7 +229,7 @@ let get_balance = async function(address:string){
         let output = 0
         //
         let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.debug(tag,"accountInfo: ",accountInfo.data)
+        log.info(tag,"accountInfo: ",accountInfo.data)
 
         if(accountInfo && accountInfo.data && accountInfo.data.result){
             for(let i = 0; i < accountInfo.data.result.length; i++){
@@ -246,67 +246,144 @@ let get_balance = async function(address:string){
     }
 }
 
-
-let get_balances = async function(address:string){
-    let tag = TAG + " | get_balances | "
-    let output:any = {}
+let get_voucher_info = async function(voucher:string) {
+    let tag = TAG + " | get_voucher_info | "
     try{
+        let url = URL_GAIAD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
+        log.debug(tag,"url: ",url)
+        let txInfo = await axios({method:'GET',url})
+        log.debug(tag,"txInfo: ",txInfo.data)
 
-        let accountInfo = await get_account(address)
-        log.debug(tag,"accountInfo: ",accountInfo)
-        log.debug(tag,"accountInfo.result.value: ",accountInfo.result.value.coins[0].amount)
-        if(accountInfo && accountInfo.result && accountInfo.result.value.coins[0]){
-            log.debug(tag,"accountInfo: ", accountInfo.result.value.coins[0].amount )
-            output.available = accountInfo.result.value.coins[0].amount / ATOM_BASE
-        } else {
-            output.available = 0
-        }
-
-
-        let rewards = await get_rewards(address)
-        log.debug(tag,"rewards: ",rewards)
-
-        if(rewards && rewards.result && rewards.result.total[0]){
-            log.debug(tag,"rewards: ",rewards.result.total[0].amount)
-            output.rewards = rewards.result.total[0].amount / ATOM_BASE
-        } else {
-            output.rewards = 0
-        }
-
-        //get current blockheight
-        //let lastBlock = await get_block_height()
-
-        let delegations = await get_delegations_by_address(address)
-        log.debug(tag,"delegations: ",delegations)
-        let totalDelegated = 0
-        for(let i = 0; i < delegations.length; i++){
-            let delegation = delegations[i]
-            log.debug(tag,"delegation: ",delegation)
-            totalDelegated = totalDelegated + parseFloat(delegation.balance)
-        }
-        // @ts-ignore
-        totalDelegated = totalDelegated / ATOM_BASE
-        log.debug(tag,"totalDelegated: ",totalDelegated)
-        output.delegated = totalDelegated
-
-        //TODO totalRewardsPerBlock
-        // let totalRewardsPerBlock = 0
-        // for(let i = 0; i < rewards.result.rewards.length; i++){
-        // 	let reward = rewards.result.rewards[i]
-        // 	log.debug(tag,"reward: ",reward)
-        // 	//get rewards per block
-        //
-        // }
-        output.totalRewardsPerBlock = 0
-        //output.rewardsPerBlock = rewardsPerBlock
-        //TODO unbonding
-        output.unbonding = 0
-
-        return output
+        return txInfo.data
     }catch(e){
         throw e
     }
 }
+
+let get_balances = async function(address:string){
+    let tag = TAG + " | get_balances | "
+    try{
+        let output = []
+
+        try{
+            let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
+            log.info(tag,"accountInfo: ",accountInfo.data)
+
+            //
+            if(accountInfo.data?.result){
+                for(let i = 0; i < accountInfo.data.result.length; i++){
+                    let entry = accountInfo.data.result[i]
+                    if(entry.denom === 'uosmo'){
+                        let balance = {
+                            type:'balance',
+                            asset:'OSMO',
+                            denom:'uosmo',
+                            balance:entry.amount
+                        }
+                        output.push(balance)
+                    }
+
+                    //if ibc channel, lookup
+                    if(entry.denom.indexOf('ibc/') >= 0){
+                        //lookup on each
+                        let voucher = entry.denom.replace('ibc/','')
+                        log.debug(tag,"voucher: ",voucher)
+                        let voucherInfo = await get_voucher_info(voucher)
+                        log.debug(tag,"voucherInfo: ",voucherInfo)
+                        if(voucherInfo.denom_trace.base_denom === 'uatom'){
+                            let balance = {
+                                type:'ibcChannel',
+                                ibc:true,
+                                voucherId: entry.denom,
+                                asset:'ATOM',
+                                denom:voucherInfo.denom_trace.base_denom,
+                                channel:voucherInfo.denom_trace.path,
+                                balance:entry.amount / 1000000
+                            }
+                            output.push(balance)
+                        } else {
+                            //TODO lookup base_denum to asset
+                            //handle more assets
+                        }
+                    }
+                }
+            }
+
+
+        }catch(e){
+            //TODO stupid node 404's on new addresses!
+            //if !404
+            //really thow
+        }
+
+
+        return output
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
+// let get_balances = async function(address:string){
+//     let tag = TAG + " | get_balances | "
+//     let output:any = {}
+//     try{
+//
+//         let accountInfo = await get_account(address)
+//         log.debug(tag,"accountInfo: ",accountInfo)
+//         log.debug(tag,"accountInfo.result.value: ",accountInfo.result.value.coins[0].amount)
+//         if(accountInfo && accountInfo.result && accountInfo.result.value.coins[0]){
+//             log.debug(tag,"accountInfo: ", accountInfo.result.value.coins[0].amount )
+//             output.available = accountInfo.result.value.coins[0].amount / ATOM_BASE
+//         } else {
+//             output.available = 0
+//         }
+//
+//
+//         let rewards = await get_rewards(address)
+//         log.debug(tag,"rewards: ",rewards)
+//
+//         if(rewards && rewards.result && rewards.result.total[0]){
+//             log.debug(tag,"rewards: ",rewards.result.total[0].amount)
+//             output.rewards = rewards.result.total[0].amount / ATOM_BASE
+//         } else {
+//             output.rewards = 0
+//         }
+//
+//         //get current blockheight
+//         //let lastBlock = await get_block_height()
+//
+//         let delegations = await get_delegations_by_address(address)
+//         log.debug(tag,"delegations: ",delegations)
+//         let totalDelegated = 0
+//         for(let i = 0; i < delegations.length; i++){
+//             let delegation = delegations[i]
+//             log.debug(tag,"delegation: ",delegation)
+//             totalDelegated = totalDelegated + parseFloat(delegation.balance)
+//         }
+//         // @ts-ignore
+//         totalDelegated = totalDelegated / ATOM_BASE
+//         log.debug(tag,"totalDelegated: ",totalDelegated)
+//         output.delegated = totalDelegated
+//
+//         //TODO totalRewardsPerBlock
+//         // let totalRewardsPerBlock = 0
+//         // for(let i = 0; i < rewards.result.rewards.length; i++){
+//         // 	let reward = rewards.result.rewards[i]
+//         // 	log.debug(tag,"reward: ",reward)
+//         // 	//get rewards per block
+//         //
+//         // }
+//         output.totalRewardsPerBlock = 0
+//         //output.rewardsPerBlock = rewardsPerBlock
+//         //TODO unbonding
+//         output.unbonding = 0
+//
+//         return output
+//     }catch(e){
+//         throw e
+//     }
+// }
 
 
 

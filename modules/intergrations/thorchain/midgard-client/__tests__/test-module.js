@@ -43,8 +43,10 @@ let run_test = async function(){
         //get transactions by address
 
         //get transaction by txid
-        let txid = "0x879c698d01cc10729109c36ff139aa0c498777ea8b9823f5af3b85d18b7b9b6a"
+        //0xc5c03ae2fb65dadb78da90bd3930b897908d0606c6b979c77799475eebd413c4
+        let txid = "0x8f5ed227743e671770708253737531627f66c4dc132938bc23dc6f968e37d285"
         txid = txid.toUpperCase()
+        txid = txid.replace("0X","")
         let txInfo = await midgard.getTransaction(txid)
         console.log("txInfo: ",JSON.stringify(txInfo))
 

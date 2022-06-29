@@ -66,11 +66,18 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.getBalance("cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e")
+let address = "cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp"
+// network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
+
+network.getBalances(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.getTransaction("94920F209DA7AAE23ED88A404B269C1EAEFCCD55AB9E3C5F0F483CB5906984CE\n")
 //     .then(function(resp){

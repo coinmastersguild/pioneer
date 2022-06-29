@@ -15,6 +15,43 @@ let {
     getPaths,
 } = require('./paths')
 
+
+/*
+    Rango Blockchain naming conventions
+
+    bitcoin -> BTC
+    ethereum -> ETH
+    cosmos -> COSMOS
+    osmosis -> OSMOSIS
+
+ */
+
+export const getRangoBlockchainName = function(blockchain:string){
+    try{
+        let rangoName
+        switch (blockchain) {
+            case "bitcoin":
+                rangoName = "BTC";
+                break;
+            case "ethereum":
+                rangoName = "ETH";
+                break;
+            case "cosmos":
+                rangoName = "COSMOS";
+                break;
+            case "osmosis":
+                rangoName = "OSMOSIS";
+                break;
+            default:
+                throw Error("Unknown rango name for blockchain"+blockchain)
+        }
+        return rangoName
+    }catch(e){
+        log.error(e)
+    }
+}
+
+
 /*
     Swap protocals
 

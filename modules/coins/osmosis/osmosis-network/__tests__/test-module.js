@@ -21,6 +21,11 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
+network.getPool("ATOM_OSMO")
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
+
 //get validators
 // network.getValidators()
 //     .then(function(resp){
@@ -44,7 +49,7 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-// network.getPoolInfo()
+// network.getGammPoolInfo()
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
@@ -54,17 +59,17 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-network.getAPR()
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getAPR()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.getSupply('uosmo')
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
 
-let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
+// let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
@@ -107,12 +112,12 @@ let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 
 
 
-// let address = 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt'
+// let address = 'osmo1qjwdyn56ecagk8rjf7crrzwcyz6775cj07qz9r'
 // network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
-
+//
 // network.getBalances(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
@@ -141,22 +146,22 @@ let poolId = 'gamm/pool/1'
 //     })
 
 //get pools
-// network.getPool('')
+// network.getPool('0')
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
 
 // network.getPools()
 //     .then(function(resp){
-//         // console.log("resp: ",resp)
-//         // console.log("resp: ",JSON.stringify(resp.pools))
-//         console.log("resp: ",JSON.stringify(resp.pools[0]))
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp.pools))
+//         // console.log("resp: ",JSON.stringify(resp.pools[0]))
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
 //https://lcd-osmosis.keplr.app/txs?tx.height=1891147&page=1
 
-// network.getTransaction("93D6EDE11E6F330082EF7DE76AE3EE0A3A5D7A49E044F50E16A64686BB0240EA")
+// network.getTransaction("208F7FDAD23C405261EAAB3BC6B8508B387375A8384812AF974046E600309B9B")
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //         console.log("resp: ",JSON.stringify(resp))
@@ -228,7 +233,9 @@ let poolId = 'gamm/pool/1'
 
 // let tx = '{"tx_bytes":{"fee":{"amount":[{"amount":"2800","denom":"uosmo"}],"gas":"80000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"100000000","denom":"uosmo"}],"from_address":"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq","to_address":"osmo1ayn76qwdd5l2d66nu64cs0f60ga7px8zmvng6k"}}],"signatures":[{"signature":"WoJ/YiUx6DQKSyXsJxNvLsE8cx/wN9dQI4bxRjT8l1svnQ3fwgWYLknrznGVvFIQcCl5pKD+R3CfZmXzyP7V8A==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"}}]}","type":"cosmos-sdk/StdTx","mode":"BROADCAST_MODE_SYNC"}'
 
-// let tx = 'CosBCogBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmgKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISK29zbW8xYTd4cWt4YTR3eWpmbGxtZTl1M3l6dGdzejM2M2RhbHozbHh0ajYaDAoFdW9zbW8SAzEwMBJnClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDxAIR3QG/2NyilEpHC/cZ0lfckzEN0bwFn+ulzTAZzEgSBAoCCAEYBhITCg0KBXVvc21vEgQyODAwEIDxBBpAkhhxOO2/8HHuF0/Ffy3anBxZd+H1f/SCr7judFFFW/d+yzB0kA2aJOc8FvyxLCKDjAAGIS/mwSp/4RgLNeGpVg=='
+// let tx = 'CowBCokBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmkKK29zbW8xZng0and2M2FhbHhxd21ycHltbjM0bDU4MmxuZWhyM2VnNDBqbnQSK29zbW8xZng0and2M2FhbHhxd21ycHltbjM0bDU4MmxuZWhyM2VnNDBqbnQaDQoFdW9zbW8SBDk5MDASZQpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAls8n0w91JK719dmWG4hbz/ppoA9pAmzVs0HRx28HEOSEgQKAggBGHISEQoLCgV1b3NtbxICMTAQkKEPGkCpZDEs4lU0nLx34ziq+TtQuF/iUy+uGK9bVdccvLmowF7o49tb93iSBkqiZMY/PTNLHg1ndp0NnSl0yFZoLP2P'
+// // let tx = 'CosBCogBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmgKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISK29zbW8xYTd4cWt4YTR3eWpmbGxtZTl1M3l6dGdzejM2M2RhbHozbHh0ajYaDAoFdW9zbW8SAzEwMBJnClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDxAIR3QG/2NyilEpHC/cZ0lfckzEN0bwFn+ulzTAZzEgSBAoCCAEYBhITCg0KBXVvc21vEgQyODAwEIDxBBpAkhhxOO2/8HHuF0/Ffy3anBxZd+H1f/SCr7judFFFW/d+yzB0kA2aJOc8FvyxLCKDjAAGIS/mwSp/4RgLNeGpVg=='
+// let tx = 'CsIBCr8BCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SkAEKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISSAgBEkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhoUCgV1b3NtbxILMTAwMDAwMDAwMDAiATESZgpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohA8QCEd0Bv9jcopRKRwv3GdJX3JMxDdG8BZ'
 // network.broadcast(tx)
 //     .then(function(resp){
 //         console.log("resp: ",resp)

@@ -323,10 +323,33 @@ let broadcast_transaction = async function(coin:string,tx:string){
         // let txid = await nodeMap[coin].sendRawTransaction(tx)
         // return txid
 
-        let txid = await blockbook.broadcast(coin,tx)
-        return txid
+        let output:any = {
+            success:false
+        }
+
+        try{
+            let responseBroadcast = await blockbook.broadcast(coin,tx)
+            log.info(tag,'responseBroadcast: ',responseBroadcast)
+            if(responseBroadcast.success){
+                output.success = true
+                if(responseBroadcast.txid){
+                    output.txid = responseBroadcast.txid
+                }
+            } else if(responseBroadcast.error) {
+                output.error = responseBroadcast.error
+            } else {
+                output.error = "unknown error"
+                output.debug = responseBroadcast
+            }
+        }catch(e){
+            //TODO handle errors
+            output.error = e
+        }
+
+        return output
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 

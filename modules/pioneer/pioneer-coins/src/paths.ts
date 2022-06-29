@@ -1,5 +1,5 @@
 
-
+export const blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
@@ -18,23 +18,23 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
                 addressNList: [0x80000000 + 84, 0x80000000 + 1, 0x80000000 + 0],
                 addressNListMaster: [0x80000000 + 84, 0x80000000 + 1, 0x80000000 + 0, 0, 0],
                 curve: 'secp256k1',
-                showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+                showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             })
         }else{
             //legacy  bip44
-            // output.push({
-            //     note:"Bitcoin account 0",
-            //     blockchain: 'bitcoin',
-            //     symbol: 'BTC',
-            //     network: 'BTC',
-            //     script_type:"p2pkh",
-            //     available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
-            //     type:"zpub",
-            //     addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0],
-            //     addressNListMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
-            //     curve: 'secp256k1',
-            //     showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            // })
+            output.push({
+                note:"Bitcoin account 0",
+                blockchain: 'bitcoin',
+                symbol: 'BTC',
+                network: 'BTC',
+                script_type:"p2pkh",
+                available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
+                type:"xpub",
+                addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0],
+                addressNListMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+                curve: 'secp256k1',
+                showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            })
             //TODO non-native segwit wraped p2sh
 
             //bech32 bip84
@@ -49,7 +49,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
                 addressNList: [0x80000000 + 84, 0x80000000 + 0, 0x80000000 + 0],
                 addressNListMaster: [0x80000000 + 84, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
                 curve: 'secp256k1',
-                showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+                showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             })
         }
     }
@@ -65,7 +65,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'ethereum'
         }
         if(isTestnet) entry.testnet = true
@@ -80,7 +80,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             script_type:"thorchain",
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
@@ -99,7 +99,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             script_type:"thorchain",
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'thorchain',
             symbol: 'RUNE',
             network: 'RUNE',
@@ -119,7 +119,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'cosmos',
             symbol: 'ATOM',
             network: 'ATOM',
@@ -139,7 +139,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'osmosis',
             symbol: 'OSMO',
             network: 'OSMO',
@@ -159,7 +159,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0 , 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'binance',
             symbol: 'BNB',
             network: 'BNB',
@@ -179,7 +179,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'bitcoincash',
             symbol: 'BCH',
             network: 'BCH',
@@ -199,7 +199,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'litecoin',
             symbol: 'LTC',
             network: 'LTC',
@@ -219,7 +219,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             addressNList: [0x80000000 + 44, 0x80000000 + 3, 0x80000000 + 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 3, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'dogecoin',
             symbol: 'DOGE',
             network: 'DOGE',
@@ -240,7 +240,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['binance'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0 , 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Binance',
 //     symbol: 'BNB',
 //     network: 'BNB',
@@ -252,7 +252,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['cosmos'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Cosmos',
 //     symbol: 'ATOM',
 //     network: 'ATOM',
@@ -271,7 +271,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 // //     type:"xpub",
 // //     addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 1],
 // //     curve: 'secp256k1',
-// //     showDisplay: true // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+// //     showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // // },
 // // {
 // //     note:"bitcoin segwit bip49",
@@ -283,7 +283,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 // //     type:"xpub",
 // //     addressNList: [0x80000000 + 49, 0x80000000 + 0, 0x80000000 + 0],
 // //     curve: 'secp256k1',
-// //     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+// //     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // //     scriptType: 'p2sh'
 // // },
 // {
@@ -293,7 +293,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['p2pkh'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 145, 0x80000000 + 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'BitcoinCash',
 //     symbol: 'BCH',
 //     network: 'BCH',
@@ -308,7 +308,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     type:"xpub",
 //     addressNList: [0x80000000 + 44, 0x80000000 + 2, 0x80000000 + 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // },
 // {
 //     note:"Default dogecoin path",
@@ -320,7 +320,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     type:"xpub",
 //     addressNList: [0x80000000 + 44, 0x80000000 + 3, 0x80000000 + 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // },
 // {
 //     note:"Default dash path",
@@ -332,7 +332,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     type:"xpub",
 //     addressNList: [0x80000000 + 44, 0x80000000 + 5, 0x80000000 + 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // },
 // {
 //     note:" ETH primary (default)",
@@ -343,7 +343,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     type:"address",
 //     addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0,0,0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Ethereum'
 // },
 // // {
@@ -355,7 +355,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 // //     type:"address",
 // //     addressNList: [0x80000000 + 44, 0x80000000 + 60, 0],
 // //     curve: 'secp256k1',
-// //     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+// //     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // //     coin: 'Ethereum'
 // // },
 // {
@@ -365,7 +365,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['fio'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 235, 0x80000000 + 0, 0, 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Fio',
 //     symbol: 'FIO',
 //     network: 'FIO',
@@ -377,7 +377,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['eos'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 194, 0x80000000 + 0, 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Eos',
 //     symbol: 'EOS',
 //     network: 'EOS',
@@ -389,7 +389,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['binance'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 714, 0x80000000 + 0, 0 , 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Binance',
 //     symbol: 'BNB',
 //     network: 'BNB',
@@ -401,7 +401,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['cosmos'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Cosmos',
 //     symbol: 'ATOM',
 //     network: 'ATOM',
@@ -413,7 +413,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 //     available_scripts_types:['tthor'],
 //     addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
 //     curve: 'secp256k1',
-//     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+//     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 //     coin: 'Thorchain',
 //     symbol: 'RUNE',
 //     network: 'RUNE',
@@ -423,7 +423,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
 // //     type:"address",
 // //     addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0x80000000 + 0],
 // //     curve: 'secp256k1',
-// //     showDisplay: true, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+// //     showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
 // //     coin: 'Cardano',
 // //     symbol: 'ADA'
 // // }

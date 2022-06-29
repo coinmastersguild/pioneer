@@ -24,10 +24,10 @@ let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 let tx = "0x02f872016184540ae4808516854be509825ac394fc0cc6e85dff3d75e3985e0cb83b090cfd498dd1871550f7dca7000080c080a047e3fa2bff82a1f800104f05b8d811e6d949d010df15a6d545bc9cd606c7a25da0132f570c1baf9778e9d308ef89c59ded1cbc8f221e0d8612efa219d12156ba20"
 
 //let tx = "0x02f86d01018204008204008256229412ec06288edd7ae2cc41a843fe089237fc7354f0872c68af0bb1400080c080a0abcd0d1d6c5792f5c6dca352f032e8012386fc2cb7f07245fe46c6bd7d26d23da06b63aab8cac33da3f028078393e87408aa0189f132ca395efcab4de7fa8795db"
-network.decodeTx(tx)
-    .then(function(resp){
-        console.log(JSON.stringify(resp))
-    })
+// network.decodeTx(tx)
+//     .then(function(resp){
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.checkAirdropClaim(address)
 //     .then(function(resp){
