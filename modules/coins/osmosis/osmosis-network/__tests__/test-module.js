@@ -21,10 +21,10 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-network.getPool("ATOM_OSMO")
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getPool("ATOM_OSMO")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 //get validators
 // network.getValidators()
@@ -236,8 +236,10 @@ let poolId = 'gamm/pool/1'
 // let tx = 'CowBCokBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmkKK29zbW8xZng0and2M2FhbHhxd21ycHltbjM0bDU4MmxuZWhyM2VnNDBqbnQSK29zbW8xZng0and2M2FhbHhxd21ycHltbjM0bDU4MmxuZWhyM2VnNDBqbnQaDQoFdW9zbW8SBDk5MDASZQpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAls8n0w91JK719dmWG4hbz/ppoA9pAmzVs0HRx28HEOSEgQKAggBGHISEQoLCgV1b3NtbxICMTAQkKEPGkCpZDEs4lU0nLx34ziq+TtQuF/iUy+uGK9bVdccvLmowF7o49tb93iSBkqiZMY/PTNLHg1ndp0NnSl0yFZoLP2P'
 // // let tx = 'CosBCogBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmgKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISK29zbW8xYTd4cWt4YTR3eWpmbGxtZTl1M3l6dGdzejM2M2RhbHozbHh0ajYaDAoFdW9zbW8SAzEwMBJnClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiEDxAIR3QG/2NyilEpHC/cZ0lfckzEN0bwFn+ulzTAZzEgSBAoCCAEYBhITCg0KBXVvc21vEgQyODAwEIDxBBpAkhhxOO2/8HHuF0/Ffy3anBxZd+H1f/SCr7judFFFW/d+yzB0kA2aJOc8FvyxLCKDjAAGIS/mwSp/4RgLNeGpVg=='
 // let tx = 'CsIBCr8BCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SkAEKK29zbW8xcWp3ZHluNTZlY2FnazhyamY3Y3JyendjeXo2Nzc1Y2owN3F6OXISSAgBEkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhoUCgV1b3NtbxILMTAwMDAwMDAwMDAiATESZgpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohA8QCEd0Bv9jcopRKRwv3GdJX3JMxDdG8BZ'
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+
+let tx = 'Cr4BCrsBCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SjAEKK29zbW8xaGQ3ZDltaDA2dW1xMmx4em1ubTN4dGU1eHA0cXRmdXI1ODl4cHcSSAgBEkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhoQCgV1b3NtbxIHMjAwMDAwMCIBMRJZClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED13f5y1BWmvlBsjHbXZWjTmLHEzyGgGlVYGHydAW1YvESBAoCCAEYiAESBBDgpxIaQH6pkb5Dfk+is0m0cXT8h91t/lzr5N6Frpgw83eQMxieZSJGi9A3NbuTSQyNTcF4kxQIXJDwq839X4knaeiVtVU='
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })
