@@ -6,8 +6,6 @@
 
  */
 
-
-
 const TAG = " | market-module | "
 const Axios = require('axios')
 const https = require('https')
@@ -39,6 +37,11 @@ import {
 } from "@pioneer-platform/pioneer-types";
 
 const log = require("@pioneer-platform/loggerdog")()
+let {
+    getExplorerAddressUrl,
+    needsMemoByNetwork,
+    COIN_MAP_LONG
+} = require("@pioneer-platform/pioneer-coins")
 
 const URL_COINCAP = "https://api.coincap.io/v2/"
 let URL_COINGECKO = "https://api.coingecko.com/api/v3/"
@@ -101,6 +104,18 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
                 //clone
                 log.debug(tag,"entry: ",entry)
                 let symbol = entry.asset
+
+                //network from asset
+                let network = COIN_MAP_LONG[symbol]
+                if(network){
+                    //address explorer URL
+                    entry.addressUrl = getExplorerAddressUrl(entry.address,network,symbol,false)
+                    // needsMemo
+                    let needsMemo = needsMemoByNetwork(network)
+                    if(needsMemo) entry.needsMemo = true
+                }
+
+
                 //log.debug(tag,"entry: ",entry)
                 //coinInfo
                 let coinInfoCoinCap = marketInfoCoinCap[symbol]

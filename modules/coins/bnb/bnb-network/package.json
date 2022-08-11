@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/binance-network",
-  "version": "8.1.18",
+  "version": "8.1.21",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",

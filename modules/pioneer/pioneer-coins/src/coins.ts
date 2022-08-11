@@ -33,6 +33,12 @@ export const getRangoBlockchainName = function(blockchain:string){
             case "bitcoin":
                 rangoName = "BTC";
                 break;
+            case "bitcoincash":
+                rangoName = "BCH";
+                break;
+            case "avalanche":
+                rangoName = "AVAX_CCHAIN";
+                break;
             case "ethereum":
                 rangoName = "ETH";
                 break;
@@ -155,6 +161,8 @@ export const COIN_MAP = {
     digibyte: "DGB",
     dogecoin: "DOGE",
     ethereum: "ETH",
+    avalanche: "AVAX",
+    poly: "MATIC",
     cardano: "ADA",
     binance: "BNB",
     thorchain: "RUNE",
@@ -174,6 +182,7 @@ export const COIN_MAP_LONG:any = {
     DOGE: "dogecoin",
     RUNE: "thorchain",
     ETH: "ethereum",
+    AVAX: "avalanche",
     ADA: "cardano",
     BNB: "binance",
     EOS: "eos",
@@ -212,6 +221,7 @@ export const COIN_MAP_KEEPKEY_LONG:any = {
     ETH: "Ethereum",
     ADA: "Cardano",
     BNB: "Binance",
+    AVAX: "Avalanche",
     EOS: "Eos",
     FIO: "Fio",
 };
@@ -227,6 +237,7 @@ export const SLIP_44_BY_LONG:any = {
     dogecoin: 3,
     bitcoinsv: 236,
     ethereum: 60,
+    avalanche: 60,
     cosmos: 118,
     osmosis: 118,
     binance: 714,
@@ -396,6 +407,11 @@ if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
 if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
     supportedBlockchains.push("Litecoin")
     supportedAssets.push("LTC")
+}
+
+if(process.env['FEATURE_AVALANCHE_BLOCKCHAIN']){
+    supportedBlockchains.push("Avalanche")
+    supportedAssets.push("AVAX")
 }
 
 // (only 1 native assets for each enabled blockchain)
@@ -652,6 +668,9 @@ export function getExplorerUrl(network:string,token:string, testnet:boolean){
             case 'binance':
                 href = 'https://explorer.binance.org'
                 break
+            case 'thorchain':
+                href = 'https://thorchain.net'
+                break
             case 'cosmos':
                 href = 'https://www.mintscan.io'
                 break
@@ -682,70 +701,91 @@ export function getExplorerAddressUrl(address:string,network:string,token:string
     }else{
         let href
         switch (network) {
-            //TODO
-            // case 'bitcoin':
-            //     href = 'https://www.blockchain.com/'
-            //     break
-            // case 'ethereum':
-            //     href = 'https://etherscan.io'
-            //     break
-            // case 'bitcoinCash':
-            //     href = 'https://blockchair.com/bitcoin-cash'
-            //     break
-            // case 'binance':
-            //     href = 'https://explorer.binance.org'
-            //     break
-            // case 'cosmos':
-            //     href = 'https://www.mintscan.io'
-            //     break
-            // case 'dash':
-            //     return `https://chainz.cryptoid.info/dash`
-            // case 'doge':
-            //     return `https://dogechain.info`
+            case 'bitcoin':
+                href = 'https://www.blockchain.com/'
+                break
+            case 'ethereum':
+                href = 'https://etherscan.io'
+                break
+            case 'bitcoinCash':
+                href = 'https://blockchair.com/bitcoin-cash'
+                break
+            case 'binance':
+                href = 'https://explorer.binance.org'
+                break
+            case 'cosmos':
+                href = 'https://www.mintscan.io'
+                break
+            case 'dash':
+                return `https://chainz.cryptoid.info/dash`
+            case 'doge':
+                return `https://dogechain.info`
         }
         return href
     }
 }
 
-export function getExplorerTxUrl(tx:string,network:string,token:string, testnet:boolean){
+export function needsMemoByNetwork(network:string){
+        let needsMemo = false
+        switch (network) {
+            case 'thorchain':
+                needsMemo = true
+                break
+            case 'osmosis':
+                needsMemo = true
+                break
+            case 'cosmos':
+                needsMemo = true
+                break
+        }
+        return needsMemo
+}
+
+export function getExplorerTxUrl(network:string,txid:string, testnet:boolean){
     if(testnet){
         let href
         switch (network) {
             case 'bitcoin':
-                href = 'https://blockstream.info/testnet/tx/'+tx
+                href = 'https://blockstream.info/testnet/tx/'+txid
                 break
             case 'ethereum':
-                href = 'https://ropsten.etherscan.io/tx/'+tx
+                href = 'https://ropsten.etherscan.io/tx/'+txid
                 break
         }
         return href
     }else{
         let href
         switch (network) {
-            //TODO
-            // case 'bitcoin':
-            //     href = 'https://www.blockchain.com/'
-            //     break
-            // case 'ethereum':
-            //     href = 'https://etherscan.io'
-            //     break
-            // case 'bitcoinCash':
-            //     href = 'https://blockchair.com/bitcoin-cash'
-            //     break
-            // case 'binance':
-            //     href = 'https://explorer.binance.org'
-            //     break
-            // case 'cosmos':
-            //     href = 'https://www.mintscan.io'
-            //     break
-            // case 'dash':
-            //     return `https://chainz.cryptoid.info/dash`
-            // case 'doge':
-            //     return `https://dogechain.info`
+            case 'bitcoin':
+                href = 'https://live.blockcypher.com/btc/tx/'+txid
+                break
+            case 'ethereum':
+                href = 'https://etherscan.io/tx/'+txid
+                break
+            case 'bitcoinCash':
+                href = 'https://blockchair.com/bitcoin-cash/tx/'+txid
+                break
+            case 'binance':
+                href = 'https://explorer.binance.org/tx/'+txid
+                break
+            case 'thorchain':
+                href = 'https://thorchain.net/tx/'+txid
+                break
+            case 'osmosis':
+                href = 'https://www.mintscan.io/osmosis/txs/'+txid
+                break
+            case 'cosmos':
+                href = 'https://www.mintscan.io/cosmos/txs/'+txid
+                break
+            case 'dash':
+                return `https://chainz.cryptoid.info/dash`+txid
+            case 'doge':
+                return `https://dogechain.info/tx/`+txid
         }
         return href
     }
 }
+
 
 
 function bech32ify(address:any, prefix:string) {

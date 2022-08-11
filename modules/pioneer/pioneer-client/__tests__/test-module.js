@@ -70,9 +70,9 @@ let run_test = async function(){
         // console.log("status: ",status.data.exchanges.osmosis.assets)
 
 
-        let invocation = 'pioneer:invocation:v0.01:RUNE:wHvdY2dTBXEUQcMRTBef4M'
-        let txInfo = await pioneer.instance.Invocation(invocation)
-        console.log("invocation: ",txInfo.data)
+        // let invocation = 'pioneer:invocation:v0.01:RUNE:wHvdY2dTBXEUQcMRTBef4M'
+        // let txInfo = await pioneer.instance.Invocation(invocation)
+        // console.log("invocation: ",txInfo.data)
 
         //get new address
         //
@@ -86,10 +86,22 @@ let run_test = async function(){
 
         // let xpub = ""
         // console.log("pioneer.instance: ",pioneer.instance)
+
+        let data = await pioneer.instance.ListUnspent({network:'LTC',xpub:"xpub6CaVVRYQmMfrGNjbREjgJG83zuS9AmSE4w3F3oTT1n3vjxc8KiUGz37ieXHGEtWEtfnYwUg6iHksGu5577kfVdQMCR6ZU4nAr6NkCMc6pcf"})
+        data = data.data
+        console.log("txData: ",data)
+        console.log("txData: ",JSON.stringify(data))
+
+
         // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
         // data = data.data
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
+
+        //bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw BNB
+        // let data = await pioneer.instance.GetAccountInfo({network:'BNB',address:"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"})
+        // data = data.data
+        // console.log("txData: ",data)
 
         // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         // data = data.data

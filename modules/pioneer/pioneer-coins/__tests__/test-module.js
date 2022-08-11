@@ -17,11 +17,24 @@ let {
     addressNListToBIP32,
     normalize_pubkeys,
     PoSchains,
-    getNativeAssetForBlockchain
+    getNativeAssetForBlockchain,
+    getExplorerTxUrl,
+    needsMemoByNetwork
 } = require('../lib/index.js')
 
-//
-let network = 'osmosis'
+//cosmos
+// let network = 'cosmos'
+// let txid = '44847A59D197E929D97F93A72723EE50929452F9F1F21B8A03BFD6D5E1C526A4'
+
+//thorchain
+let network = 'thorchain'
+let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
+
+// let explorerUrl = getExplorerTxUrl(network,txid,false)
+// console.log("explorerUrl: ",explorerUrl)
+
+let needsMemo = needsMemoByNetwork(network)
+console.log("needsMemo: ",needsMemo)
 
 // console.log(PoSchains['Osmosis'])
 

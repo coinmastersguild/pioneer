@@ -8,12 +8,18 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 
 
-
-let address = "bnb1nzx5sycdzpfa446u3nep6yn9z9x5xdnmn3hf7c"
-network.getBalance(address)
+let address = "bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"
+network.getAccount(address)
     .then(function(resp){
         console.log("resp: ",resp)
     })
+
+
+// let address = "bnb1nzx5sycdzpfa446u3nep6yn9z9x5xdnmn3hf7c"
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.info()
 //     .then(function(resp){

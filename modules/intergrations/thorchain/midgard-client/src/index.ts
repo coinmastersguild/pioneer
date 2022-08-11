@@ -30,6 +30,20 @@ log.debug("MIDGARD_API: ",MIDGARD_API)
 
 //http://174.138.103.9:8080/v1/doc
 
+import WebSocket from 'ws';
+
+const ws = new WebSocket('ws://www.host.com/path');
+// const ws = new WebSocket('ws://www.host.com/path');
+
+ws.on('open', function open() {
+    ws.send('something');
+});
+
+ws.on('message', function message(data) {
+    console.log('received: %s', data);
+});
+
+
 const Axios = require('axios')
 const https = require('https')
 const axios = Axios.create({

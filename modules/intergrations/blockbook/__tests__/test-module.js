@@ -61,15 +61,21 @@ network.init(servers)
 //         console.log(resp)
 //     })
 
+//xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv
+network.utxosByXpub("DOGE","xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv")
+    .then(function(resp){
+        console.log(resp)
+    })
+
 // network.utxosByXpub("BCH","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
 //     .then(function(resp){
 //         console.log(resp)
 //     })
 
-network.broadcast("BTC","010000000001010b7d1970f03be0fb1a7c5f8d4d6883fb92c074ce5d4ea844acc4d09bc66af1f90000000000ffffffff02bfd401000000000016001404b2d1dfb0f0851f15677952aad0d985dbe4f8917ce6010000000000160014d5912b6b45047455eb1d50d8743a17741b8d56b902483045022100d045b60037b15ec90cc230ff3b90b4f03c555ed20942ae5b55195f1e162260af022051feaf0ee49b8e2e6f8362a654caf1cf3c12c1dcc51dc0a7987c1c75914b938e012103910e3986b59c24876c3d89e14e184abaf6abc97ebf9e2d4f9f6bf6df83a613d100000000")
-    .then(function(resp){
-        console.log("txid: ",resp)
-    })
+// network.broadcast("BTC","010000000001010b7d1970f03be0fb1a7c5f8d4d6883fb92c074ce5d4ea844acc4d09bc66af1f90000000000ffffffff02bfd401000000000016001404b2d1dfb0f0851f15677952aad0d985dbe4f8917ce6010000000000160014d5912b6b45047455eb1d50d8743a17741b8d56b902483045022100d045b60037b15ec90cc230ff3b90b4f03c555ed20942ae5b55195f1e162260af022051feaf0ee49b8e2e6f8362a654caf1cf3c12c1dcc51dc0a7987c1c75914b938e012103910e3986b59c24876c3d89e14e184abaf6abc97ebf9e2d4f9f6bf6df83a613d100000000")
+//     .then(function(resp){
+//         console.log("txid: ",resp)
+//     })
 
 
 // network.init()

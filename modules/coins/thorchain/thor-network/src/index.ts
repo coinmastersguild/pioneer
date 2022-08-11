@@ -66,6 +66,12 @@ module.exports = {
     getAccount:function (address:string) {
         return get_account_info(address);
     },
+    getLastBlock:function () {
+        return get_last_block();
+    },
+    getBlockHeight:function () {
+        return get_block_height();
+    },
     getAccountInfo:function (address:string) {
         return get_account_info(address);
     },
@@ -87,6 +93,34 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+let get_last_block = async function(){
+    let tag = TAG + " | get_last_block | "
+    try{
+
+        let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
+        log.debug(tag,"lastBlock: ",lastBlock.data)
+
+        return lastBlock.data.block
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
+let get_block_height = async function(){
+    let tag = TAG + " | get_block_height | "
+    try{
+
+        let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
+        log.debug(tag,"lastBlock: ",lastBlock.data)
+
+        return lastBlock.data.block.header.height
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
 
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "

@@ -380,25 +380,33 @@ let get_account = async function(address:string){
     let output:any = {}
     try{
         log.debug(tag,"get_account: ",address)
-        //
 
-        // let txInfo = await network.getAccount(address)
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // if(!txInfo){
-        //     txInfo = {}
-        //     txInfo.balance = 0
-        // }
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // let pubkeyBuffer = new Buffer(txInfo.result.public_key)
-        // let pubkeyHex = pubkeyBuffer.toString('hex')
-        // txInfo.result.public_key = pubkeyHex
-        return "TODO"
+        let url = URL_DEX + '/api/v1/account/'+address
+
+        log.debug(tag,"url: ",url)
+        let result = await axios({
+            url: url,
+            method: 'GET'
+        })
+        let balanceInfo = result.data
+        log.info('balanceInfo: ', balanceInfo)
+
+
+        return balanceInfo
     }catch(e){
-        //log.error(tag,"e: ",{e})
-        output.success = false
-        output.error = e
+
+        let output = {
+            account_number: 0,
+            address,
+            balances: [
+            ],
+            flags: 0,
+            public_key: [
+            ],
+            sequence: 0
+        }
+
+
         return output
     }
 }

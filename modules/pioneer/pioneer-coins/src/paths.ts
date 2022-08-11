@@ -72,6 +72,24 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
+    if(blockchains.indexOf('avalanche') >= 0){
+        let entry:any = {
+            note:" AVAX primary (default)",
+            symbol: 'AVAX',
+            network: 'AVAX',
+            script_type:"avalanche",
+            available_scripts_types:['avalanche'],
+            type:"address",
+            addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            blockchain: 'avalanche'
+        }
+        if(isTestnet) entry.testnet = true
+        output.push(entry)
+    }
+
     if(blockchains.indexOf('thorchain') >= 0){
         let entry:any = {
             note:" Default RUNE path ",
