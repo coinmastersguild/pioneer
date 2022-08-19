@@ -8,11 +8,11 @@ require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 
 
-let address = "bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"
-network.getAccount(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// let address = "bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"
+// network.getAccount(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 
 // let address = "bnb1nzx5sycdzpfa446u3nep6yn9z9x5xdnmn3hf7c"
@@ -33,8 +33,8 @@ network.getAccount(address)
 //         console.log("resp: ",resp)
 //     })
 
-// let tx = "c101f0625dee0a482a2c87fa0a200a1441a3320611caffc31d0148880077f71cfb6509fd12080a03424e4210904e12200a142023e508399b9f0ff4ff784c14bce6427e69a66812080a03424e4210904e12710a26eb5ae987210290916077c387b262a940380d250fd8151c42abf9d8072397797844fab14924c11240370d580aa0ce77496e0fa213e12027d9f635b7b4046369d58e5f2d5ae05d555110d751f1ffe70089ff126d9a9cec85f16f5fb092cb7314be07d5f74b7e3b9adf18eda111208d01"
-// network.broadcast(tx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+let tx = "c101f0625dee0a4a2a2c87fa0a210a14c89f10d60d3fd253d30f5a2ff2b737eee9ad154212090a03424e4210a08d0612210a142023e508399b9f0ff4ff784c14bce6427e69a66812090a03424e4210a08d06126f0a26eb5ae98721024de5c45b971a7d0a417b8b8ad3d0dd1b4b56fb762b9bfefa618ec396b7babbe01240cfe0f12f9d32e616511f50d9aa89a6b0b172593d40d143591a97861f9586d6e212691a8ae6421fa3cf2126419c98461fb49c5318a44d4968d9df5ff83e9562bf18f8d3b703"
+network.broadcast(tx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })

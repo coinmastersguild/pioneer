@@ -8,36 +8,45 @@ require("dotenv").config({path:'../../../../../../.env'})
 //BSC
 
 let network = require("../lib/index")
+network.init()
+// let run_test = async function(){
+//     try{
+//         await network.init()
+//
+//         //check is address elgible
+//
+//         // network.getInfo()
+//         //     .then(function(resp){
+//         //         console.log(resp)
+//         //     })
+//
+//         let address = "0x33b35c665496bA8E71B22373843376740401F106"
+//
+//         network.getBalances(address)
+//             .then(function(resp){
+//                 console.log(resp)
+//             })
+//
+//     }catch(e){
+//
+//     }
+// }
+// run_test()
 
-let run_test = async function(){
-    try{
-        await network.init()
+//0x33b35c665496bA8E71B22373843376740401F106
+//0x2356A15042F98f0a53784F42237bd4b2873AADCF
+let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
 
-        //check is address elgible
-
-        // network.getInfo()
-        //     .then(function(resp){
-        //         console.log(resp)
-        //     })
-
-        let address = "0x33b35c665496bA8E71B22373843376740401F106"
-
-        network.getBalances(address)
-            .then(function(resp){
-                console.log(resp)
-            })
-
-    }catch(e){
-
-    }
-}
-run_test()
+network.getBalance(address)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 //already claimed
 // let address = "0x57e5551F5c9FB975C44Be80c27eA924c91701616"
 //elgable
 //let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
-let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
+//let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 
 //let tx = "0x02f86d01018204008204008256229412ec06288edd7ae2cc41a843fe089237fc7354f0872c68af0bb1400080c080a0abcd0d1d6c5792f5c6dca352f032e8012386fc2cb7f07245fe46c6bd7d26d23da06b63aab8cac33da3f028078393e87408aa0189f132ca395efcab4de7fa8795db"
 // network.decodeTx(tx)
@@ -219,10 +228,10 @@ let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
 //         console.log(resp)
 //     })
 
-// network.getInfo()
-//     .then(function(resp){
-//         console.log(resp)
-//     })
+network.getInfo()
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.getInfo()
 //     .then(function(resp){

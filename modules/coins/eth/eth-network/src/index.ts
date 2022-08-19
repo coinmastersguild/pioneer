@@ -1215,24 +1215,29 @@ let get_fees = async function(params: any){
 let broadcast_transaction = async function(tx:any){
 	let tag = TAG + " | broadcast_transaction | "
 	try{
+		let output:any = {}
+		output.success = false
+
 		log.debug(tag,"tx: ",tx)
 		if(!tx) throw Error("101: missing tx!")
 
 		//push node
-		web3.eth.sendSignedTransaction(tx)
+		// web3.eth.sendSignedTransaction(tx)
 
 		//push etherscan
 		//https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
-		// let resp = await axios({
-		// 	method:'GET',
-		// 	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
-		// })
-		// console.log(resp)
+		let resp = await axios({
+			method:'GET',
+			url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
+		})
+		resp = resp.data
+		console.log(resp)
+
 		//push blockbook
 
 
 		//TODO lifecycle hook?
-		// let resp = await web3.eth.sendSignedTransaction(tx)
+		// let resp2 = await web3.eth.sendSignedTransaction(tx)
 		// 	.on('transactionHash', function(hash:any){
 		// 		console.log("hash: ",hash)
 		// 	})
@@ -1245,14 +1250,9 @@ let broadcast_transaction = async function(tx:any){
 		// 	.on('error', console.error);
 
 		//console.log("resp: ",resp)
-
-		let output = {
-			success:true,
-			// blockIncluded:result.result,
-			// block:result.blockNumber,
-			// txid:result.transactionHash,
-			// gas:result.cumulativeGasUsed
-		}
+		if(!resp.error) output.success = true
+		if(resp.error) output.error = resp
+		if(resp.result) output.txid = resp.result
 
 		return output
 	}catch(e){

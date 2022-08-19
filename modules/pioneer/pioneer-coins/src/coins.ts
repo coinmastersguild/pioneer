@@ -657,7 +657,7 @@ export function getExplorerUrl(network:string,token:string, testnet:boolean){
         let href
         switch (network) {
             case 'bitcoin':
-                href = 'https://www.blockchain.com/'
+                href = 'https://blockstream.info'
                 break
             case 'ethereum':
                 href = 'https://etherscan.io'
@@ -757,7 +757,7 @@ export function getExplorerTxUrl(network:string,txid:string, testnet:boolean){
         let href
         switch (network) {
             case 'bitcoin':
-                href = 'https://live.blockcypher.com/btc/tx/'+txid
+                href = 'https://blockstream.info/tx/'+txid
                 break
             case 'ethereum':
                 href = 'https://etherscan.io/tx/'+txid

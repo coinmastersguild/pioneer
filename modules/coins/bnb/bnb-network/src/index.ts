@@ -25,6 +25,39 @@
 	//examples
 	https://github.com/binance-chain/javascript-sdk/wiki/API-Examples
 
+
+
+
+Available endpoints:
+
+Endpoints that require arguments:
+//dataseed1.binance.org/abci_info?
+//dataseed1.binance.org/abci_query?path=_&data=_&height=_&prove=_
+//dataseed1.binance.org/block?height=_
+//dataseed1.binance.org/block_by_hash?hash=_
+//dataseed1.binance.org/block_results?height=_
+//dataseed1.binance.org/blockchain?minHeight=_&maxHeight=_
+//dataseed1.binance.org/broadcast_evidence?evidence=_
+//dataseed1.binance.org/broadcast_tx_async?tx=_
+//dataseed1.binance.org/broadcast_tx_commit?tx=_
+//dataseed1.binance.org/broadcast_tx_sync?tx=_
+//dataseed1.binance.org/commit?height=_
+//dataseed1.binance.org/consensus_params?height=_
+//dataseed1.binance.org/consensus_state?
+//dataseed1.binance.org/dump_consensus_state?
+//dataseed1.binance.org/genesis?
+//dataseed1.binance.org/health?
+//dataseed1.binance.org/net_info?
+//dataseed1.binance.org/num_unconfirmed_txs?
+//dataseed1.binance.org/status?
+//dataseed1.binance.org/subscribe?query=_
+//dataseed1.binance.org/tx?hash=_&prove=_
+//dataseed1.binance.org/tx_search?query=_&prove=_&page=_&per_page=_
+//dataseed1.binance.org/unconfirmed_txs?limit=_
+//dataseed1.binance.org/unsubscribe?query=_
+//dataseed1.binance.org/unsubscribe_all?
+//dataseed1.binance.org/validators?height=_
+
  */
 
 
@@ -512,21 +545,40 @@ let broadcast_transaction = async function(rawTx:string){
         // let resultBroadcast = await axios({method:'GET',url:URL_DEX+'/api/v1/broadcast?sync=true'+tx})
         // log.debug("resultBroadcast: ",resultBroadcast)
 
+        // const buffer = Buffer.from(rawTx, 'hex');
+        // // @ts-ignore
+        // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+        // console.log("hash: ",hash)
+        //
+        // let url = URL_DEX_1 + '/api/v1/broadcast?sync=true'
+        // let result = await axios({
+        //     headers: {
+        //         'Content-Type': 'text/plain'
+        //     },
+        //     url: url,
+        //     method: 'POST',
+        //     data: rawTx,
+        // })
+        // log.debug('result: ', result.data)
+        //
+        // if(result.data[0].hash){
+        //     log.debug("success! ")
+        // }
+
         const buffer = Buffer.from(rawTx, 'hex');
         // @ts-ignore
         let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
         console.log("hash: ",hash)
 
-        let url = URL_DEX_1 + '/api/v1/broadcast?sync=true'
+        let url = URL_REMOTE + '/broadcast_tx_sync?tx='+rawTx
         let result = await axios({
             headers: {
                 'Content-Type': 'text/plain'
             },
             url: url,
-            method: 'POST',
-            data: rawTx,
+            method: 'GET'
         })
-        log.debug('result: ', result.data)
+        log.info('result: ', result.data)
 
         if(result.data[0].hash){
             log.debug("success! ")

@@ -12,7 +12,7 @@
 
 import {ETH_DECIMAL} from "@pioneer-platform/eth-network/lib/utils";
 
-const TAG = " | eth-network | "
+const TAG = " | avax-network | "
 let Web3 = require('web3');
 import { ethers, BigNumberish, BigNumber } from 'ethers'
 //
@@ -46,18 +46,18 @@ let NODE_URL:any
 //TODO precision module
 let BASE = 1000000000000000000;
 
-/* import moralis */
-const Moralis = require("moralis-v1/node");
-
-/* Moralis init code */
-const serverUrl = process.env['MORALIS_SERVER_URL'];
-const appId = process.env['MORALIS_APP_ID'];
-const masterKey = process.env['MORALIS_MASTER_KEY'];
-const moralisSecret = process.env['MORALIS_SECRET'];
-if(!serverUrl) throw Error("Missing MORALIS_SERVER_URL")
-if(!appId) throw Error("Missing MORALIS_APP_ID")
-if(!masterKey) throw Error("Missing MORALIS_MASTER_KEY")
-if(!moralisSecret) throw Error("Missing MORALIS_SECRET")
+// /* import moralis */
+// const Moralis = require("moralis-v1/node");
+//
+// /* Moralis init code */
+// const serverUrl = process.env['MORALIS_SERVER_URL'];
+// const appId = process.env['MORALIS_APP_ID'];
+// const masterKey = process.env['MORALIS_MASTER_KEY'];
+// const moralisSecret = process.env['MORALIS_SECRET'];
+// if(!serverUrl) throw Error("Missing MORALIS_SERVER_URL")
+// if(!appId) throw Error("Missing MORALIS_APP_ID")
+// if(!masterKey) throw Error("Missing MORALIS_MASTER_KEY")
+// if(!moralisSecret) throw Error("Missing MORALIS_SECRET")
 
 
 
@@ -68,13 +68,13 @@ global.window = {ethereum:{}}
 module.exports = {
 	init:async function (settings:any) {
 		// Enable web3 and get the initialized web3 instance from Web3.js
-		await Moralis.start({ serverUrl, appId, masterKey, moralisSecret });
+		//await Moralis.start({ serverUrl, appId, masterKey, moralisSecret });
 
 
 		//blockbook.init()
 		//log.debug("node: ",process.env['PARITY_ARCHIVE_NODE'])
 		//use default
-		//web3 = new Web3(process.env['AVAX_URL']);
+		web3 = new Web3(process.env['AVAX_URL']);
 		//PROVIDER = new ethers.providers.InfuraProvider('mainnet', process.env['INFURA_API_KEY'])
 		//NODE_URL = process.env['AVAX_URL']
 	},
@@ -144,9 +144,9 @@ module.exports = {
 	getBalance: function (address:string) {
 		return get_balance(address)
 	},
-	getBalances: function (addresses:string) {
-		return get_all_tokens(addresses)
-	},
+	// getBalances: function (addresses:string) {
+	// 	return get_all_tokens(addresses)
+	// },
 	// getBalanceAddress: function (address:string) {
 	// 	return get_balance(address)
 	// },
@@ -816,43 +816,46 @@ module.exports = {
 // }
 //
 
-const get_balance = async function(address:string){
-	let tag = TAG + " | get_balance | "
-	try{
-		let output:any = {}
 
-		// get BSC native balance for a given address
-		const options = {
-			chain: "avalanche",
-			address,
-			// to_block: "1234",
-		};
-		const balance = await Moralis.Web3API.account.getNativeBalance(options);
-		log.info(tag,"balance: ",balance)
-		return balance.balance / 1000000000000000000
-	}catch(e){
-		console.error(tag,e)
-	}
-}
 
-const get_all_tokens = async function(address:string){
-	let tag = TAG + " | get_all_tokens | "
-	try{
-		let output:any = {}
+// const get_balance = async function(address:string){
+// 	let tag = TAG + " | get_balance | "
+// 	try{
+// 		let output:any = {}
+//
+// 		// get BSC native balance for a given address
+// 		const options = {
+// 			chain: "avalanche",
+// 			address,
+// 			// to_block: "1234",
+// 		};
+// 		const balance = await Moralis.Web3API.account.getNativeBalance(options);
+// 		log.info(tag,"balance: ",balance)
+// 		return balance.balance / 1000000000000000000
+// 	}catch(e){
+// 		console.error(tag,e)
+// 	}
+// }
 
-		// get BSC native balance for a given address
-		const options = {
-			chain: "avalanche",
-			address,
-			// to_block: "1234",
-		};
-		const balance = await Moralis.Web3API.token.getAllTokenIds(options);
-		log.info(tag,"balance: ",balance)
-		return balance.balance / 1000000000000000000
-	}catch(e){
-		console.error(tag,e)
-	}
-}
+//moralis
+// const get_all_tokens = async function(address:string){
+// 	let tag = TAG + " | get_all_tokens | "
+// 	try{
+// 		let output:any = {}
+//
+// 		// get BSC native balance for a given address
+// 		const options = {
+// 			chain: "avalanche",
+// 			address,
+// 			// to_block: "1234",
+// 		};
+// 		const balance = await Moralis.Web3API.token.getAllTokenIds(options);
+// 		log.info(tag,"balance: ",balance)
+// 		return balance.balance / 1000000000000000000
+// 	}catch(e){
+// 		console.error(tag,e)
+// 	}
+// }
 
 // const get_transactions = async function(address:string,options:any){
 // 	let tag = TAG + " | get_transactions | "
@@ -889,11 +892,11 @@ let check_online_status = async function(){
 	try{
 		let output:any = {}
 
-		const options = { chain: "bsc", block_number_or_hash: "2" };
-
-		// get block content on BSC
-		const transactions = await Moralis.Web3API.native.getBlock(options);
-		log.info(transactions)
+		// const options = { chain: "bsc", block_number_or_hash: "2" };
+		//
+		// // get block content on BSC
+		// const transactions = await Moralis.Web3API.native.getBlock(options);
+		// log.info(transactions)
 
 		// const web3API = async () => {
 		// 	await Moralis.start({ serverUrl, appId, moralisSecret });
@@ -908,42 +911,59 @@ let check_online_status = async function(){
 		// web3API();
 
 		//isTestnet
-		// output.version = await web3.eth.getNodeInfo()
-		//
-		// output.chainId = await web3.eth.getChainId()
-		//
-		// output.height = await web3.eth.getBlockNumber()
-		//
-		// //TODO get peer count
+		output.version = await web3.eth.getNodeInfo()
+
+		output.chainId = await web3.eth.getChainId()
+
+		output.height = await web3.eth.getBlockNumber()
+
+		//TODO get peer count
 		// output.peers = await web3.eth.net.getPeerCount()
+
+		let networkName
+		switch (output.chainId.toString()) {
+			case "1":
+				networkName = "Main";
+				break;
+			case "2":
+				networkName = "Morden";
+				break;
+			case "3":
+				networkName = "Ropsten";
+				break;
+			case "4":
+				networkName = "Rinkeby";
+				break;
+			case "42":
+				networkName = "Kovan";
+				break;
+			case "43114":
+				networkName = "avalanche";
+				break;
+			default:
+				networkName = "Unknown";
+		}
+		output.networkName = networkName
+
 		//
-		// let networkName
-		// switch (output.chainId.toString()) {
-		// 	case "1":
-		// 		networkName = "Main";
-		// 		break;
-		// 	case "2":
-		// 		networkName = "Morden";
-		// 		break;
-		// 	case "3":
-		// 		networkName = "Ropsten";
-		// 		break;
-		// 	case "4":
-		// 		networkName = "Rinkeby";
-		// 		break;
-		// 	case "42":
-		// 		networkName = "Kovan";
-		// 		break;
-		// 	default:
-		// 		networkName = "Unknown";
-		// }
-		// output.networkName = networkName
+		output.gasPrice = await web3.eth.getGasPrice()
+
 		//
-		// //
-		// output.gasPrice = await web3.eth.getGasPrice()
-		//
-		// //
 		// output.syncing = await web3.eth.isSyncing()
+
+		return output
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+const get_balance = async function(address:string){
+	let tag = TAG + " | get_balance | "
+	try{
+		let output:any = {}
+
+		//normal tx info
+		output = (await web3.eth.getBalance(address))/BASE
 
 		return output
 	}catch(e){

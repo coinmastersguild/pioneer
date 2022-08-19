@@ -87,10 +87,10 @@ let run_test = async function(){
         // let xpub = ""
         // console.log("pioneer.instance: ",pioneer.instance)
 
-        let data = await pioneer.instance.ListUnspent({network:'LTC',xpub:"xpub6CaVVRYQmMfrGNjbREjgJG83zuS9AmSE4w3F3oTT1n3vjxc8KiUGz37ieXHGEtWEtfnYwUg6iHksGu5577kfVdQMCR6ZU4nAr6NkCMc6pcf"})
-        data = data.data
-        console.log("txData: ",data)
-        console.log("txData: ",JSON.stringify(data))
+        // let data = await pioneer.instance.ListUnspent({network:'LTC',xpub:"xpub6CaVVRYQmMfrGNjbREjgJG83zuS9AmSE4w3F3oTT1n3vjxc8KiUGz37ieXHGEtWEtfnYwUg6iHksGu5577kfVdQMCR6ZU4nAr6NkCMc6pcf"})
+        // data = data.data
+        // console.log("txData: ",data)
+        // console.log("txData: ",JSON.stringify(data))
 
 
         // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
@@ -167,9 +167,27 @@ let run_test = async function(){
         // let data = await pioneer.instance.Pair(null, {code})
         // data = data.data
         // console.log("txData: ",data)
+        let address = "0x2356a15042f98f0a53784f42237bd4b2873aadcf"
+        let data = await pioneer.instance.GetNonce(address)
+        data = data.data
+        console.log("txData: ",data)
 
+        // let data = await pioneer.instance.GetGasPrice()
+        // data = data.data
+        // console.log("txData: ",data)
 
         //broadcast
+
+        // let broadcast = {
+        //     "network":"BNB",
+        //     "serialized":"c101f0625dee0a4a2a2c87fa0a210a14c89f10d60d3fd253d30f5a2ff2b737eee9ad154212090a03424e4210a08d0612210a142023e508399b9f0ff4ff784c14bce6427e69a66812090a03424e4210a08d06126f0a26eb5ae98721024de5c45b971a7d0a417b8b8ad3d0dd1b4b56fb762b9bfefa618ec396b7babbe01240cfe0f12f9d32e616511f50d9aa89a6b0b172593d40d143591a97861f9586d6e212691a8ae6421fa3cf2126419c98461fb49c5318a44d4968d9df5ff83e9562bf18f8d3b703","txid":"EBA89DEDB4C58463C5A733CDEC6A65618EB06CE1A4092559B78EC4BE21445ABD",
+        //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
+        //     "noBroadcast":false
+        // }
+        // let data = await pioneer.instance.Broadcast(null, broadcast)
+        // data = data.data
+        // console.log("data: ",data)
+
         // let broadcast = {
         //     serialized: '{"tx":{"fee":{"amount":[{"amount":"0","denom":"rune"}],"gas":"650000"},"memo":"","msg":[{"type":"thorchain/MsgSend","value":{"amount":[{"amount":"50000","denom":"rune"}],"from_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5","to_address":"thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5"}}],"signatures":[{"signature":"L/eTznyUAWZqMtH+wp4jYlmSZZkeL5/+EXUYha8BpcVqg14qjg4m0YcTrDkJ6kHBciC8jmU3GPhsEHyKBtbXAg==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A9BnfoZvhOO8Y3RpeUFKi6bvTfObGZ0Altybt0wXABUC"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}',
         //     txid: '',
