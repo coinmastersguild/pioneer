@@ -1,6 +1,6 @@
 {
-  "name": "@pioneer-platform/thor-network",
-  "version": "8.1.38",
+  "name": "@pioneer-platform/ripple-network",
+  "version": "8.1.45",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -25,7 +25,8 @@
     "prettyjson": "^1.2.1",
     "secp256k1": "^3.8.0",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "xrpl": "^2.5.0"
   },
   "gitHead": "d0e74ea447175d6d7e9697793093f9155f0dab38"
 }

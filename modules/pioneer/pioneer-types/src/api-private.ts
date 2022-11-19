@@ -82,6 +82,7 @@ export interface RegisterBody {
     isTestnet?:boolean
     blockchains:any
     username:string
+    publicAddress:string
     data:RegisterBodyData,
     walletDescription:WalletDescription,
     context: string,

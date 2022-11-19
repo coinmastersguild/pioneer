@@ -344,6 +344,8 @@ let broadcast_transaction = async function(coin:string,tx:string){
                     responseBroadcast = responseBroadcast.data
                     log.info(tag,'responseBroadcast: ',responseBroadcast)
                     output.txid = responseBroadcast
+                    if(output.txid)output.success = true
+
                 }catch(e){
                     // log.info(tag,"error: ",e)
                     // log.info(tag,"data0: ",e)
@@ -367,6 +369,8 @@ let broadcast_transaction = async function(coin:string,tx:string){
             } else {
                 responseBroadcast = await blockbook.broadcast(coin,tx)
                 log.info(tag,'responseBroadcast: ',responseBroadcast)
+                output.txid = responseBroadcast
+                if(output.txid)output.success = true
                 if(responseBroadcast.success){
                     output.success = true
                     if(responseBroadcast.txid){

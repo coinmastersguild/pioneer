@@ -57,6 +57,11 @@ let addressNlist = [
 
 // console.log(addressNListToBIP32(addressNlist))
 
+let bip32 = `m/44'/144'/0'/0/0`
+
+console.log(bip32ToAddressNList(bip32))
+
+
 //convert
 //console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
 //console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))

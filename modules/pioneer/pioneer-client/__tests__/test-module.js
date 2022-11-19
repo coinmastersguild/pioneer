@@ -8,15 +8,18 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-
 let pioneerApi = require("../lib")
 
+let signer = require("eth_mnemonic_signer")
+
 //force
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
 
+//const mnemonic = 'all all all all all all all all all all all all'
+let mnemonic = process.env['WALLET_MAINNET_DEV']
 
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
@@ -34,10 +37,9 @@ let run_test = async function(){
     try{
         //get config
 
-
         let config = {
-            queryKey:'key:66fefdd6-7ea9-48cf-8e69-fc74afb9c454',
-            username:"user:cfd27e74",
+            queryKey:'key:public',
+            // username:"user:cfd27e74",
             spec
         }
 
@@ -57,8 +59,59 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
 
+        // console.log(signer)
+        // // let globals = await pioneer.instance.Globals()
+        // // console.log("globals: ",globals.data)
+        //
+        // let info = await pioneer.instance.Info()
+        // console.log("info: ",info.data)
+        //
+        // //get address
+        // let address = await signer.getAddress(mnemonic)
+        // console.log("address: ",address)
+        //
+        // //is address logged in?
+        // let user = await pioneer.instance.GetUser({publicAddress:address})
+        // console.log("user: ",user.data)
+        //
+        // let nonce = user.data.nonce
+
+        // //signup
+        // //get message to sign
+        // let message = `I am signing my one-time nonce: ${nonce}`
+        //
+        // //sign
+        // let signature = await signer.signMessage(message,mnemonic)
+        // console.log("signature: ",signature)
+
+        //login
+        // let loginResp = await pioneer.instance.Login("",{publicAddress:address,signature,message})
+        // let entry = {publicAddress:address,signature,message}
+        // console.log("entry: ",entry)
+        // let loginResp = await pioneer.instance.Login({},entry)
+        // console.log("loginResp: ",loginResp.data)
+
+        //signup
+        //get message to sign
+        // let message = `nonce: ${nonce} MOTD: Welcome to the Dapp store!`
+        //
+        // //sign
+        // let signature = await signer.signMessage(message,mnemonic)
+        // console.log("signature: ",signature)
+        //
+        // //update MOTD
+        // let updateResp = await pioneer.instance.UpdateMOTD({},{publicAddress:address,signature,message})
+        // console.log("updateResp: ",updateResp)
+
+
+        //add token to auth header
+
+        //see public info
+        //see public info + private
+
         // let status = await pioneer.instance.Status()
         // console.log("status: ",status.data)
+
         // console.log("tokens: ",status.data.rango.tokens[0])
         // console.log("blockchains: ",status.data.rango.blockchains)
         // console.log("blockchains: ",status.data.rango.blockchains[0])
@@ -70,9 +123,58 @@ let run_test = async function(){
         // console.log("status: ",status.data.exchanges.osmosis.assets)
 
 
-        // let invocation = 'pioneer:invocation:v0.01:RUNE:wHvdY2dTBXEUQcMRTBef4M'
+        // let invocation = '7dbdd41c-ce39-4e28-9493-08e3c56e5c5b'
         // let txInfo = await pioneer.instance.Invocation(invocation)
         // console.log("invocation: ",txInfo.data)
+
+        //Submit new dev
+        // let dev = {
+        //     username: 'highlander',
+        //     address:"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //     signature:"asfasdd"
+        // }
+        //
+        //
+        // let txInfo = await pioneer.instance.CreateDeveloper(dev)
+        // console.log("apps: ",txInfo.data)
+
+        //list developers
+
+        // let txInfo = await pioneer.instance.ListDevelopers()
+        // console.log("apps: ",txInfo.data)
+
+        //remove developer
+
+
+
+        //get dapps
+        let txInfo = await pioneer.instance.ListApps()
+        console.log("apps: ",txInfo.data)
+
+        //submit dapp
+        // let dapp = {
+        //     category: 'dapp',
+        //     id: 'a1ca5756d9a7b959a727aea7f3ae3d6223facb363403e9913e984f5868fede2b',
+        //     homepage: 'https://yup.io/',
+        //     name: 'Yup',
+        //     image: 'https://explorer-api.walletconnect.com/v3/logo/md/fa1ad282-9050-4bd6-9aba-53711c4e2a00?projectId=2f05ae7f1116030fde2d36508f472bfb',
+        //     whitelist: false,
+        //     blockchains: [ 'ethereum' ],
+        //     protocol: [ 'wallet-connect-v1' ],
+        //     version: 'wc-1',
+        //     description: 'app name is Yup'
+        // }
+        //
+        //
+        // let txInfo = await pioneer.instance.CreateApp("",dapp)
+        // console.log("apps: ",txInfo.data)
+
+        //search dapps
+
+
+        //delist dapp
+
+
 
         //get new address
         //
@@ -92,7 +194,6 @@ let run_test = async function(){
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
 
-
         // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
         // data = data.data
         // console.log("txData: ",data)
@@ -108,6 +209,14 @@ let run_test = async function(){
         // console.log("txData: ",data)
 
         // let data = await pioneer.instance.GetPubkeyBalance({asset:'ETH',pubkey:"0x33b35c665496bA8E71B22373843376740401F106"})
+        // data = data.data
+        // console.log("txData: ",data)
+
+        // let data = await pioneer.instance.GetPubkeyBalance({asset:'XRP',pubkey:"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"})
+        // data = data.data
+        // console.log("txData: ",data)
+
+        // let data = await pioneer.instance.GetAccountInfo({network:'XRP',address:"rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"})
         // data = data.data
         // console.log("txData: ",data)
 
@@ -167,16 +276,26 @@ let run_test = async function(){
         // let data = await pioneer.instance.Pair(null, {code})
         // data = data.data
         // console.log("txData: ",data)
-        let address = "0x2356a15042f98f0a53784f42237bd4b2873aadcf"
-        let data = await pioneer.instance.GetNonce(address)
-        data = data.data
-        console.log("txData: ",data)
+        // let address = "0x2356a15042f98f0a53784f42237bd4b2873aadcf"
+        // let data = await pioneer.instance.GetNonce(address)
+        // data = data.data
+        // console.log("txData: ",data)
 
         // let data = await pioneer.instance.GetGasPrice()
         // data = data.data
         // console.log("txData: ",data)
 
         //broadcast
+        // let broadcast = {
+        //     "network":"XRP",
+        //     "serialized":"120000228000000024000000032e499602d2201b000000006140000000000003e86840000000000003e873210288e51ae7a166f14d00437e921e3b2d8d637b331cadc3661cd5e596c9921e53da74473045022100c30b9d66d454a6f0110e9942f53a4a2f1f42e1b91c712f34977e1f3e3f4bfd1e02201af57afe965e51f39fcdfd2428361815bc650f5a09b6b8bc097d97eb6cb8135e81149e6e612f7fcf61394125ddb795bd1c9d7687bdef831480432e9a65fa02543c7d303322f86a53aa22d974",
+        //     "txid":"",
+        //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
+        //     "noBroadcast":false
+        // }
+        // let data = await pioneer.instance.Broadcast(null, broadcast)
+        // data = data.data
+        // console.log("data: ",data)
 
         // let broadcast = {
         //     "network":"BNB",

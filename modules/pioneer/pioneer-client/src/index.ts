@@ -15,7 +15,8 @@ const log = require("@pioneer-platform/loggerdog")()
 const Pioneer = require('openapi-client-axios').default;
 let pioneerApi:any
 
-module.exports = class wallet {
+module.exports = class Client {
+    public pioneer: any
     private init: (spec: string, config: any) => Promise<any>;
     private spec: string;
     private queryKey: any;
@@ -34,8 +35,8 @@ module.exports = class wallet {
                         },
                     }
                 });
-                await pioneerApi.init()
-                return pioneerApi
+                this.pioneer = await pioneerApi.init()
+                return await pioneerApi.init()
             }catch(e){
                 log.error(tag,e)
                 throw e
