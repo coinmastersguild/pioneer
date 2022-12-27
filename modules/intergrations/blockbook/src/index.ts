@@ -37,6 +37,12 @@ let BLOCKBOOK_URLS:any = {
     'BCH':process.env['BCH_BLOCKBOOK_URL'],
     'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
     'LTC':process.env['DOGE_BLOCKBOOK_URL'],
+    'DASH':process.env['DASH_BLOCKBOOK_URL'],
+    'DGB':process.env['DGB_BLOCKBOOK_URL'],
+    'ETHW':process.env['ETHW_BLOCKBOOK_URL'],
+    'BSC':process.env['BSC_BLOCKBOOK_URL'],
+    'ADA':process.env['ADA_BLOCKBOOK_URL'],
+    'GRS':process.env['GRS_BLOCKBOOK_URL']
 }
 
 module.exports = {

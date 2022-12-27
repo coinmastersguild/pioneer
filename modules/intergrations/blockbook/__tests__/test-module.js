@@ -7,7 +7,8 @@ let network = require("../lib/index")
 
 let servers = {
     'BTC':process.env['BTC_BLOCKBOOK_URL'],
-    'ETH':process.env['ETH_BLOCKBOOK_URL']
+    'ETH':process.env['ETH_BLOCKBOOK_URL'],
+    'DASH':process.env['DASH_BLOCKBOOK_URL']
 }
 
 console.log("servers: ",servers)
@@ -61,11 +62,16 @@ network.init(servers)
 //         console.log(resp)
 //     })
 
-//xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv
-network.utxosByXpub("DOGE","xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv")
+network.utxosByXpub("DASH","xpub6C8H3AP8ssoEyzZY42b7G7H6SC341757ASVbpsfDLf3U1Qdc6RP6rnutQ9W9Gk8NWdGR29BFQKP65dzvsf69QtiWe3YPGn4qBQwQCL3HuUV")
     .then(function(resp){
         console.log(resp)
     })
+
+//xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv
+// network.utxosByXpub("DOGE","xpub6Cr6W159pVE2uD81Wk9wSTKbV4mCmP4tVUoSEJYXpLG9gQEoX3drsmt2B8dgcdSfpXWL9bGjqoxECNumrt2w9ZKPCa4Gb4uHQ66N6QD5gTv")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.utxosByXpub("BCH","xpub6DQeaEQDZFKcrEucnZuzDsP4YPm9fdzNGEzRfwbeFNt5yWEvc2Eb2YMZMjmghJMnrMWT7iTevP2E1dTLUQfNrwk5mAycxXUfEqmJGpN1xFw")
 //     .then(function(resp){

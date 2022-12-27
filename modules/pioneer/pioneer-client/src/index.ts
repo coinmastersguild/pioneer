@@ -9,7 +9,6 @@
 
  */
 const TAG = " | Pioneer-client-ts | "
-const log = require("@pioneer-platform/loggerdog")()
 
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
@@ -38,7 +37,7 @@ module.exports = class Client {
                 this.pioneer = await pioneerApi.init()
                 return await pioneerApi.init()
             }catch(e){
-                log.error(tag,e)
+                console.error(e)
                 throw e
             }
         }

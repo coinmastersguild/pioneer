@@ -10,8 +10,6 @@ require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let pioneerApi = require("../lib")
 
-let signer = require("eth_mnemonic_signer")
-
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
@@ -32,16 +30,52 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 
 // let context = 'keepkey-pubkeys-343733331147363327003800'
 
+let asset = {
+    name: 'XRT Token',
+    symbol: 'XRT',
+    type: 'ERC20',
+    decimals: 18,
+    description: '-',
+    website: 'https://www.xrtfoundation.org/',
+    explorer: 'https://etherscan.io/token/0x37D404A072056EDA0Cd10Cb714D35552329F8500',
+    status: 'abandoned',
+    id: '0x37D404A072056EDA0Cd10Cb714D35552329F8500',
+    blockchain: 'ethereum'
+}
+
 
 let run_test = async function(){
     try{
         //get config
+        let config = {
+            queryKey:'key:cfd27e74asda',
+            username:"user:cfd27e74asd",
+            spec
+        }
+        console.log("config: ",config)
 
-        let config = { queryKey:'key:public', spec }
-        let Api = new pioneerApi(spec,config)
-        let api = await Api.init()
-        let info = await api.Globals()
-        console.log("info: ",info)
+        //get config
+        let pioneer = new pioneerApi(spec,config)
+        pioneer = await pioneer.init()
+
+        let globals = await pioneer.Globals()
+        console.log("globals: ",globals.data)
+
+        //list users current status
+        //developer
+        //pioneer (tester)
+
+        //wizzard
+
+        //list users currently pending discoveries
+        //assets/networks/dapps
+
+        //create asset listing
+
+        //update asset listing
+
+        //remove asset listing
+
 
 
 

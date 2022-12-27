@@ -10,8 +10,6 @@ require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let pioneerApi = require("../lib")
 
-let signer = require("eth_mnemonic_signer")
-
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
@@ -148,8 +146,8 @@ let run_test = async function(){
 
 
         //get dapps
-        let txInfo = await pioneer.instance.ListApps()
-        console.log("apps: ",txInfo.data)
+        // let txInfo = await pioneer.instance.ListApps()
+        // console.log("apps: ",txInfo.data)
 
         //submit dapp
         // let dapp = {
@@ -204,9 +202,15 @@ let run_test = async function(){
         // data = data.data
         // console.log("txData: ",data)
 
+
         // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         // data = data.data
         // console.log("txData: ",data)
+
+        let data = await pioneer.ListUnspent({network:'DASH',xpub:"xpub6C8H3AP8ssoEyzZY42b7G7H6SC341757ASVbpsfDLf3U1Qdc6RP6rnutQ9W9Gk8NWdGR29BFQKP65dzvsf69QtiWe3YPGn4qBQwQCL3HuUV"})
+        data = data.data
+        console.log("txData: ",data)
+
 
         // let data = await pioneer.instance.GetPubkeyBalance({asset:'ETH',pubkey:"0x33b35c665496bA8E71B22373843376740401F106"})
         // data = data.data
