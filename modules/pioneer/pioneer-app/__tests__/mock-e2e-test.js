@@ -17,7 +17,7 @@ let assert = require('assert')
 
 //test app
 let App = require("../lib")
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 
 //general dev envs
 let seed = process.env['WALLET_MAINNET_DEV_OLD']

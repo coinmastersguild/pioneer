@@ -1,11 +1,5 @@
 /*
-    ETH Wallet
 
-    //To be able to send you must BORROW ETH
-
-    (as you need large amounts of ETH to do anything on the network anymore)
-
-    15$ can borrow 3,500 ETH, and this was enable to make a couple transactions
 
  */
 const TAG = " | Pioneer-client-ts | "
@@ -23,7 +17,6 @@ module.exports = class Client {
         this.spec = spec
         this.queryKey = config.queryKey
         this.init = async function () {
-            let tag = TAG + " | init_wallet | "
             try{
                 if(!this.queryKey) throw Error(" You must create an api key! ")
                 pioneerApi = new Pioneer({

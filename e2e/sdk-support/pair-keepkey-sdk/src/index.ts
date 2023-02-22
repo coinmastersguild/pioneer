@@ -36,7 +36,7 @@ require("dotenv").config({path:'../../../../.env'})
 let BigNumber = require('@ethersproject/bignumber')
 let pjson = require("../package.json");
 let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const Datastore = require('nedb-promises')
 
 let assert = require('assert')

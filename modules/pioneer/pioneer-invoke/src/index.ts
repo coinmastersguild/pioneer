@@ -9,9 +9,8 @@
 
  */
 const TAG = " | Pioneer-invoke | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const short = require('short-uuid');
-let sign = require('@pioneer-platform/signing')
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;
 

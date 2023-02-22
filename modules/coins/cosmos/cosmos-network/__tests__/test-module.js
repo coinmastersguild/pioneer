@@ -115,10 +115,16 @@ network.getBalances(address)
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"1000","denom":"uatom"}],"gas":"100000"},"memo":"foo:bar","msg":[{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"1000","denom":"uatom"}],"from_address":"acosmos1qjwdyn56ecagk8rjf7crrzwcyz6775cj89njn3","to_address":"cosmos15cenya0tr7nm3tz2wn3h3zwkht2rxrq7q7h3dj"}}],"signatures":[{"signature":"JCfVPdOQR8V/6Qd5d+NRvgQzu2FR38zwzPIfITGHjBc9TTV7hfhrUeM/jn6CA5i1qPT8/ilh5ZUXELYY04mN+g==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A8QCEd0Bv9jcopRKRwv3GdJX3JMxDdG8BZ/rpc0wGcxI"}}]},"type":"cosmos-sdk/StdTx","mode":"async"}'
 
 
-let tx = 'Cr4BCrsBCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SjAEKK29zbW8xaGQ3ZDltaDA2dW1xMmx4em1ubTN4dGU1eHA0cXRmdXI1ODl4cHcSSAgBEkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhoQCgV1b3NtbxIHMjAwMDAwMCIBMRJZClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED13f5y1BWmvlBsjHbXZWjTmLHEzyGgGlVYGHydAW1YvESBAoCCAEYiAESBBDgpxIaQH6pkb5Dfk+is0m0cXT8h91t/lzr5N6Frpgw83eQMxieZSJGi9A3NbuTSQyNTcF4kxQIXJDwq839X4knaeiVtVU='
+let tx = 'CpABCo0BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm0KLWNvc21vczF5YzZkZnR3ZGhndDk2azh5dHk4ZGpnYTg4ZjNrbmh6bmZ5aDI2axItY29zbW9zMTdodGx2Y2U1eXM4aHFoeGxrYXR5dWh2OHF3dHg3MmF5cW5yY2tzGg0KBXVhdG9tEgQxMDAwEmcKUApGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQP0piWVTmBW2Hfxq94XvZNCPqCG6+Rkqzp8KkeCry8MyRIECgIIARgNEhMKDQoFdWF0b20SBDEwMDAQoI0GGkDW2fYGutl2sTw6JUMlC/LDBfB716TYKsq4K8yssQlVkSgWhaQ02Mvzm9qBXHo4gNFnQIAsj7DiWyKnPdfPeYS9'
 
-network.broadcastLegacy(tx)
+network.broadcast(tx)
     .then(function(resp){
         console.log("resp: ",resp)
         console.log("resp: ",JSON.stringify(resp))
     })
+
+// network.broadcastLegacy(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })

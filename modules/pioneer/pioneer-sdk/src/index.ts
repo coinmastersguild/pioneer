@@ -6,7 +6,7 @@
  */
 
 const TAG = " | Pioneer-sdk | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 
 //Pioneer follows OpenAPI spec
 const Pioneer = require('openapi-client-axios').default;

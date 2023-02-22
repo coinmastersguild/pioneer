@@ -7,7 +7,7 @@
 
  */
 
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const { subscriber, publisher, redis } = require('@pioneer-platform/default-redis')
 
 const QUEUE_INTERVAL_TIME:number = 10

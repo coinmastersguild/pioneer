@@ -18,9 +18,9 @@ let wallet_2_name = process.env['TEST_USERNAME_2']
 let TEST_QUERY_KEY_1 = process.env['TEST_QUERY_KEY_1']
 let TEST_QUERY_KEY_2 = process.env['TEST_QUERY_KEY_2']
 
-let password = process.env['WALLET_PASSWORD']
-let username = wallet_2_name
-console.log("password: ",password)
+// let password = process.env['WALLET_PASSWORD']
+// let username = wallet_2_name
+// console.log("password: ",password)
 
 let run_test = async function(){
     try{

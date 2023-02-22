@@ -36,7 +36,7 @@ import {
     Pubkey,
 } from "@pioneer-platform/pioneer-types";
 
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 let {
     getExplorerAddressUrl,
     needsMemoByNetwork,

@@ -36,7 +36,7 @@ require("dotenv").config({path:'../../../../.env'})
 
 let pjson = require("../package.json");
 let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 let BigNumber = require('@ethersproject/bignumber')
 let assert = require('assert')
 import {v4 as uuidv4} from 'uuid';

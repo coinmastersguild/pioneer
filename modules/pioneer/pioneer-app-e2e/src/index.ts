@@ -17,7 +17,7 @@ let assert = require('assert')
 
 //test app
 let App = require("@pioneer-platform/pioneer-app")
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const ethCrypto = require("@pioneer-platform/eth-crypto")
 
 //general dev envs

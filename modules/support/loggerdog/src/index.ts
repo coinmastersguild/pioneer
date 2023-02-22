@@ -38,7 +38,6 @@
 
  */
 
-let dog = require("./modules/datadog")
 const clc = require('cli-color')
 
 const LOG_LEVELS:any = {
@@ -154,20 +153,6 @@ class Logger {
             }else{
                 console.log(dt, color(label), ctx, ...args)
             }
-
-            if(process.env['DATADOG_REST_INTAKE']){
-                if(!process.env['DATADOG_API_KEY']) throw Error("102: cant intake without api key! DATADOG_API_KEY")
-                if(level <= 3 ){
-                    //Error
-                    dog.error(args[0],args[1],args[2])
-                }else{
-                    //info
-                    dog.debug(args[0],args[1],args[2])
-                }
-            } else {
-                //datadog API not enabled
-            }
-
         }
     }
 }

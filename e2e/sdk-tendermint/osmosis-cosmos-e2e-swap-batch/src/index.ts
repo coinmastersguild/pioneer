@@ -33,7 +33,7 @@ require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
 const TAG  = " | e2e-test | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const assert = require('assert')
 import {v4 as uuidv4} from 'uuid';
 const SDK = require('@pioneer-platform/pioneer-sdk')

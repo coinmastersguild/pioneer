@@ -35,7 +35,7 @@ require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let BigNumber = require('@ethersproject/bignumber')
 const TAG  = " | e2e-test | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 
 const Axios = require('axios')
 const https = require('https')

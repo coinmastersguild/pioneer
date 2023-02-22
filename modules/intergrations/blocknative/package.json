@@ -1,12 +1,13 @@
 {
   "name": "@pioneer-platform/blocknative-client",
-  "version": "8.1.17",
+  "version": "8.1.21",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
     "axios": "^0.21.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "micro-ftch": "^0.3.1"
   },
   "scripts": {
     "npm": "npm i",

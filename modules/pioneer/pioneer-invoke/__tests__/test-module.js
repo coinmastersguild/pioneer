@@ -184,8 +184,25 @@ let run_test = async function(){
         //     auth: 'key:2ec1460e-c460-41ce-99d1-c324c5a3b977'
         // }
 
+        // let invocation =  {
+        //     "type":"transfer",
+        //     "context":"0x9a3a6824340baa81e2b7095a4d9d1a2c850879a9.wallet.json",
+        //     "username":"testerconfigenv",
+        //     "coin":"OSMO",
+        //     "fee":{
+        //         "priority":5
+        //     },
+        //     "network":"OSMO",
+        //     "asset":"OSMO",
+        //     "amount":"0.04",
+        //     "address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+        //     "memo":"",
+        //     "noBroadcast":true,
+        //     "invocationId":"pioneer:invocation:v0.01:OSMO:9cPFW69QNmoSjmmHVdzy12"
+        // }
+
         let invocation =  {
-            "type":"transfer",
+            "type":"evm",
             "context":"0x9a3a6824340baa81e2b7095a4d9d1a2c850879a9.wallet.json",
             "username":"testerconfigenv",
             "coin":"OSMO",

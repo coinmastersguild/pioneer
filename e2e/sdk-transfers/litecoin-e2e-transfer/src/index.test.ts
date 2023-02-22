@@ -35,7 +35,7 @@ require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let pjson = require("../package.json");
 let TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 
 import {v4 as uuidv4} from 'uuid';
 let SDK = require('@pioneer-platform/pioneer-sdk')

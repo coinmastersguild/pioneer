@@ -13,10 +13,11 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
-const log = require("@pioneer-platform/loggerdog")()
+import fetchUrl, { FETCH_OPT } from 'micro-ftch'
 
 let URL_BLOCKNATIVE = "https://api.blocknative.com"
 let BLOCKNATIVE_API_KEY = process.env['BLOCKNATIVE_API_KEY']
+let BLOCKNATIVE_API_SECRET = process.env['BLOCKNATIVE_API_SECRET']
 
 module.exports = {
     init:function(settings:any){
@@ -30,8 +31,87 @@ module.exports = {
     },
     pushExample: function (url:string,coin:string,address:string,type:string) {
         return push_sample_tx(url,coin,address,type);
+    },
+    simulateTx: function (network:string,transaction:any) {
+        return simulate_tx(network,transaction);
     }
 }
+
+const simulate_tx = async function (network:string,transaction:any) {
+    let tag = TAG + " | simulate_tx | "
+    try {
+        const apiURL = `https://api.blocknative.com/simulate`
+        const fetchOptions = {
+            method: 'POST',
+            type: 'json',
+            full: true,
+            expectStatusCode: false,
+            headers: {
+                'Content-Type': 'application/json',
+                'credentials': BLOCKNATIVE_API_KEY+":"+BLOCKNATIVE_API_SECRET
+            },
+            data: {
+                system: "ethereum",
+                network: "main",
+                transaction: {
+                    to: transaction.to,
+                    from: transaction.from,
+                    gas: Number(600000),
+                    gasPrice: 0,
+                    input: transaction.input,
+                    value: 0
+                }
+            }
+        }
+
+        console.time('Simulate-shutdown')
+
+        // Fetch simulation via Blocknative RESTful endpoint
+        // @ts-ignore
+        const response = await fetchUrl(apiURL, fetchOptions)
+
+        if (response.status !== 200) {
+            console.log(`Simulation error code: ${response.status} - ${JSON.stringify(response.body)}`)
+            process.exit(1)
+        }
+
+        console.timeEnd('Simulate-shutdown')
+
+        return response.body
+    } catch (e) {
+        // console.error(tag, "e: ", e.response)
+        console.log(`Error response data parsed: ${JSON.stringify(e.response.data.msg)}`);
+        // console.error(tag, "e: ", e.toJSON())
+        return e.response.data
+    }
+}
+
+// const simulate_tx = async function (network:string,transaction:any) {
+//     let tag = TAG + " | simulate_tx | "
+//     try {
+//         const apiURL = `https://api.blocknative.com/simulate`
+//         const body = {
+//             "system":"ethereum",
+//             "network":"main",
+//             "transactions":[transaction]
+//         }
+//
+//         const headers = {
+//             headers: {
+//                 'credentials': BLOCKNATIVE_API_KEY+":"+BLOCKNATIVE_API_SECRET,
+//                 'Content-Type': 'application/json'
+//             }
+//         }
+//         const resp = await axios.post(apiURL, JSON.stringify(body), headers);
+//
+//         return resp.data
+//     } catch (e) {
+//         // console.error(tag, "e: ", e.response)
+//         console.log(`Error response data parsed: ${JSON.stringify(e.response.data.msg)}`);
+//         // console.error(tag, "e: ", e.toJSON())
+//         return e.response.data
+//     }
+// }
 
 const push_sample_tx = async function (url:string,coin:string,address:string,type:string) {
     let tag = TAG + " | push_sample_tx | "
@@ -115,7 +195,7 @@ const push_sample_tx = async function (url:string,coin:string,address:string,typ
 
         return output
     } catch (e) {
-        log.error(tag, "e: ", e)
+        console.error(tag, "e: ", e)
     }
 }
 
@@ -140,13 +220,10 @@ const submit_address = async function (coin:string,address:string) {
             method: 'POST',
             data,
         }
-
-        log.debug(tag,"body: ",body)
         let resp = await axios(body)
-        log.debug(tag,"resp: ",resp)
 
         return resp.data
     } catch (e) {
-        log.error(tag, "e: ", e)
+        console.error(tag, "e: ", e)
     }
 }

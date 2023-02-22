@@ -26,7 +26,7 @@
 
 
 const TAG = " | shapeshift | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 import { SwapperManager, ZrxSwapper, ThorchainSwapper } from '@shapeshiftoss/swapper'
 import { ChainAdapterManager } from '@shapeshiftoss/chain-adapters'
 import { SwapperType, Asset } from '@shapeshiftoss/types'

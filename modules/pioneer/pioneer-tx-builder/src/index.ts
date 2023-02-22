@@ -7,7 +7,7 @@
  */
 
 const TAG = " | pioneer | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")

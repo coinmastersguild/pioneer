@@ -11,7 +11,7 @@ const fetchJson = async (uri:string, opts = {}) => {
 }
 
 const TAG = " | fio-network | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 
 const Axios = require('axios')
 const https = require('https')

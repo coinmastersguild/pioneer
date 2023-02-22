@@ -36,7 +36,7 @@ require("dotenv").config({path:'../../../../.env'})
 
 const pjson = require("../package.json");
 const TAG = " | " + pjson.name.replace("@pioneer-platform/", "") + " | ";
-const log = require("@pioneer-platform/loggerdog")()
+const log = require("log")
 import {checkConfigs, getConfig, innitConfig, updateConfig} from "@pioneer-platform/pioneer-config";
 
 const assert = require('assert')

@@ -25,7 +25,7 @@ axiosRetry(axios, {
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
-        console.error(error)
+        //console.error(error)
         // if retry condition is not specified, by default idempotent requests are retried
         return error.response.status === 503;
     },
@@ -227,7 +227,8 @@ let broadcast_transaction = async function(coin:string,hex:string){
 
         return output
     }catch(e){
-        console.error(tag,e)
+        //console.error(tag,e)
+        throw e
     }
 }
 
@@ -338,7 +339,7 @@ let init_network = function (servers:any,runtime?:string) {
 
         return true
     } catch (e) {
-        console.error(tag, 'Error: ', e)
+        // console.error(tag, 'Error: ', e)
         throw e
     }
 }

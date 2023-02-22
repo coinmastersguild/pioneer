@@ -1,5 +1,4 @@
 const TAG = " | ws-client | ";
-const log = require("@pioneer-platform/loggerdog")()
 const EventEmitter = require('events');
 const io = require('socket.io-client');
 const wait = require('wait-promise');
@@ -43,7 +42,6 @@ export class Events {
 
                 //sub
                 this.socket.on('connect', () => {
-                    log.debug(tag,'Connected to '+this.wss);
                     this.isConnected = true
                     //rejoin
                     if(this.username){
@@ -54,7 +52,6 @@ export class Events {
                 });
 
                 this.socket.on('subscribedToUsername', (event:any) => {
-                    log.debug(tag,'subscribed to '+event.username," id: "+event.socketId);
                     this.isPaired = true
                     this.username = event.username
                 });
@@ -73,12 +70,10 @@ export class Events {
 
                 //sub to errors
                 this.socket.on('errorMessage', function (message:any) {
-                    log.error(tag,"error: ",message)
                     if(message.code && message.code === 6) throw Error(" Failed to connect!")
                 });
 
                 this.socket.on('invocation', (message: any) => {
-                    log.debug('invocation: ',message);
                     this.events.emit('message',message)
                 });
 
@@ -89,7 +84,7 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, e)
+                console.error(e)
                 throw e
             }
         }
@@ -98,7 +93,7 @@ export class Events {
             try {
                 this.username = username
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
             }
         }
         this.subscribeToInvocation = async function (invocationId:string) {
@@ -112,7 +107,7 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
                 throw e
             }
         }
@@ -127,7 +122,7 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
                 throw e
             }
         }
@@ -146,7 +141,7 @@ export class Events {
                 //TODO validate paired?
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
                 throw e
             }
         }
@@ -155,7 +150,7 @@ export class Events {
             try {
                 return this.socket.disconnect()
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
             }
         }
     }
