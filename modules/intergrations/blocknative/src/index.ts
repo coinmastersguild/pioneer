@@ -78,7 +78,7 @@ const simulate_tx = async function (network:string,transaction:any) {
         console.timeEnd('Simulate-shutdown')
 
         return response.body
-    } catch (e) {
+    } catch (e:any) {
         // console.error(tag, "e: ", e.response)
         console.log(`Error response data parsed: ${JSON.stringify(e.response.data.msg)}`);
         // console.error(tag, "e: ", e.toJSON())

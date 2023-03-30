@@ -11,8 +11,8 @@ require("dotenv").config({path:'../../../../.env'})
 let pioneerApi = require("../lib")
 
 //force
-// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
 
@@ -301,17 +301,17 @@ let run_test = async function(){
         // console.log("txData: ",data)
 
         //register developer
-        let developer = {
-            "developer": "0x2356a15042f98f0a53784f42237bd4b2873aadcf",
-            "username": "highlander",
-            "github": "bithighlander",
-            "signer": "0x2356a15042f98f0a53784f42237bd4b2873aadcf",
-            "payload": "{\"username\":\"highlander\",\"github\":\"bithighlander\",\"email\":\"bithighlander@gmail.com\"}",
-            "signature": "0x5410bc988d38dcf6b2a3b6763549b6f70d90542d1817af7af88f1066d961c0073aae0c67715bba3e5ee3b0dc24de46b538c3bd73f5e81de9b8cf1fa4906a9cde1c"
-        }
-        let data = await pioneer.RegisterDeveloper(null, developer)
-        data = data.data
-        console.log("data: ",data)
+        // let developer = {
+        //     "developer": "0x2356a15042f98f0a53784f42237bd4b2873aadcf",
+        //     "username": "highlander",
+        //     "github": "bithighlander",
+        //     "signer": "0x2356a15042f98f0a53784f42237bd4b2873aadcf",
+        //     "payload": "{\"username\":\"highlander\",\"github\":\"bithighlander\",\"email\":\"bithighlander@gmail.com\"}",
+        //     "signature": "0x5410bc988d38dcf6b2a3b6763549b6f70d90542d1817af7af88f1066d961c0073aae0c67715bba3e5ee3b0dc24de46b538c3bd73f5e81de9b8cf1fa4906a9cde1c"
+        // }
+        // let data = await pioneer.RegisterDeveloper(null, developer)
+        // data = data.data
+        // console.log("data: ",data)
 
         // let data = await pioneer.instance.QuoteSwap({pair:"OSMO_ATOM",amountIn:"0.001"})
         // data = data.data
@@ -333,6 +333,19 @@ let run_test = async function(){
         // let data = await pioneer.instance.GetGasPrice()
         // data = data.data
         // console.log("txData: ",data)
+
+        //01000000012f41db06261f9e3d5d82fcf678890b98d44ad2c1b86369038317702864bb4edd010000006b4830450221009991439747de3f4ce20f4e1485bf5ec73d3079de682f69d7bc282b785d4ed2b00220486f2079f0232a01c8acc8c870f50b41cc46fa2de04f15e2e7724458eaee5fb3012102b688067ad306bc9450a7f87f367ce969c86c98942544a3895f7a13e8b8a36333ffffffff0200e1f505000000001976a91437d2a8db142e2ca7fee6e7c76f22595b307711c788ac8ddc0538050000001976a9144b314591106de6e20e8632b7a3f8d250484da64288ac00000000
+        //broadcast
+        // let broadcast = {
+        //     "network":"DOGE",
+        //     "serialized":"0100000001ad3d30d90dec4024048bf72bfe4b24e35cb8e3e659d6f70c9f7071beb301ec5e010000006a473044022058b27cde3622da5c044d397425da775ee2b3aa13971b861d9e68382c069f8b3c0220796e993a90c80e6701405547b09ca9069b5f243e01b6d767c599e8ec4eea40a00121027b412766de9ad8ac9c7fea96bdaec771c29d73ddf9734949fff2c71863473555ffffffff0200e1f505000000001976a91437d2a8db142e2ca7fee6e7c76f22595b307711c788ac775504d1000000001976a9148c9f4603b71116441545b3719e80023e8b9f8bb888ac00000000",
+        //     "txid":"",
+        //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
+        //     "noBroadcast":false
+        // }
+        // let data = await pioneer.Broadcast(null, broadcast)
+        // data = data.data
+        // console.log("data: ",data)
 
         //broadcast
         // let broadcast = {

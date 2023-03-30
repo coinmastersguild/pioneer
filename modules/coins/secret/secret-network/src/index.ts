@@ -80,7 +80,7 @@ let get_transaction = async function(txid:string){
         let txInfo = await axios({method:'GET',url:  URL_SECRET_LCD+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
-    }catch(e){
+    }catch(e:any){
         throw Error(e)
     }
 }
@@ -115,7 +115,7 @@ let broadcast_transaction = async function(tx:string){
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
             output.raw = result2.data
-        }catch(e){
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)

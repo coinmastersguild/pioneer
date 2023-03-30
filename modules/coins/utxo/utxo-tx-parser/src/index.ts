@@ -8,6 +8,7 @@ const TAG = " | utxo-tx-parser | "
 
 const tinysecp = require('tiny-secp256k1');
 
+// @ts-ignore
 const ECPair = await import('ecpair')
 
 const ecp = ECPair.ECPairFactory(tinysecp);
@@ -43,6 +44,7 @@ let decode_psbt_to_tx = function(hex:string){
     try{
         let output:any = {}
 
+        // @ts-ignore
         const btcDecodedRawTx = ecp.decodePsbt(hex);
         log.debug(tag,"btcDecodedRawTx: ",btcDecodedRawTx)
 

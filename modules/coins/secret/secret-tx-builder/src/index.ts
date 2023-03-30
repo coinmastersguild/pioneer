@@ -50,7 +50,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         // console.log('sent', JSON.stringify(sent))
 
         return sent
-    }catch(e){
+    }catch(e:any){
         throw Error(e)
     }
 }

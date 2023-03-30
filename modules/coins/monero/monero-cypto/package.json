@@ -25,7 +25,7 @@
     "mymonero-core-js": "^17.0.0",
     "secp256k1": "^3.8.0",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "typescript": "^5.0.2"
   },
   "gitHead": "3a33a2397124f216e0287082b2dda2dd5366c0a6"
 }

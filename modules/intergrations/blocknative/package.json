@@ -5,7 +5,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.17",
-    "axios": "^0.21.1",
+    "axios": "^1.3.4",
     "dotenv": "^8.2.0",
     "micro-ftch": "^0.3.1"
   },
@@ -24,8 +24,8 @@
     "onchange": "^7.0.2",
     "serve": "^11.3.2",
     "source-map-support": "^0.5.19",
-    "ts-jest": "^25.4.0",
-    "typescript": "^3.9.7"
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.2"
   },
   "gitHead": "d0e74ea447175d6d7e9697793093f9155f0dab38"
 }

@@ -585,7 +585,7 @@ let broadcast_transaction = async function(rawTx:string){
         }
 
         return result.data[0].hash
-    }catch(e){
+    }catch(e:any){
         //log.error(tag,"e: ",{e})
         log.error(tag,e)
         log.error(tag,e.response)

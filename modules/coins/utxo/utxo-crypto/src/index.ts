@@ -303,6 +303,13 @@ module.exports = {
         }
         return output
     },
+    generateSeedFromHash: function (hash:string) {
+        let randomBytesFunc = standardRandomBytesFunc
+        const randomBytes = Buffer.from(randomBytesFunc(hash), `hex`)
+        if (randomBytes.length !== 32) throw Error(`Entropy has incorrect length`)
+        const mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`))
+        return mnemonic
+    },
     generateSeed: function () {
         let randomBytesFunc = standardRandomBytesFunc
         const randomBytes = Buffer.from(randomBytesFunc(32), `hex`)

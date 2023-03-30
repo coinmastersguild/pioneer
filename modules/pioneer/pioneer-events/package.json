@@ -18,8 +18,9 @@
     "log-node": "^8.0.3",
     "socket.io-client": "^4.5.4",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7",
-    "wait-promise": "^0.4.1"
+    "typescript": "^5.0.2",
+    "wait-promise": "^0.4.1",
+    "@types/node": "^18.15.11"
   },
   "gitHead": "d0e74ea447175d6d7e9697793093f9155f0dab38"
 }

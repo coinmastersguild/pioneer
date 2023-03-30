@@ -70,7 +70,6 @@ function _extractContext(stack: string, depth: number) {
 
         return { filename, line, pos }
     } catch (ex) {
-        console.error(`WARNING: unable to extract logging context`, {ex:ex.toString()})
         return { filename: 'unknown' }
     }
 }

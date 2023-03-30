@@ -128,7 +128,7 @@ let get_transaction = async function(txid:string){
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){
-        throw Error(e)
+        throw e
     }
 }
 
@@ -169,15 +169,15 @@ let broadcast_transaction = async function(tx:string,mode?:string){
             output.raw = result2.data
         }catch(e){
             //log.error(tag,"failed second broadcast e: ",e.response)
-            log.error(tag,e)
-            log.error(tag,e.response)
-            log.error(tag,e.response.data)
-            log.error(tag,e.response.data.error)
-            log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
-            //throw e
+            // log.error(tag,e)
+            // log.error(tag,e.response)
+            // log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            // //throw e
 
-            output.success = false
-            output.error = e.response.data.error
+            // output.success = false
+            // output.error = e.response.data.error
 
         }
 

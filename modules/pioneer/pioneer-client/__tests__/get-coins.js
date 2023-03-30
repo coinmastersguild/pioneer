@@ -15,7 +15,6 @@ const semver = require('semver')
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:4000/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
@@ -59,6 +58,18 @@ let run_test = async function(){
         // let info = await pioneer.Info()
         // console.log("info: ",info.data)
 
+        // let info = await pioneer.SearchBlockchainByChainId("43114")
+        // let info = await pioneer.SearchBlockchainByChainId("43114")
+        // // let info = await pioneer.SearchBlockchainByChainId({chainId:"43114"})
+        // console.log("info: ",info.data.length)
+        // console.log("info: ",info.data[0])
+        // console.log("info: ",info.data[1])
+        
+        //get node searchNodesByNetworkId
+        // let info = await pioneer.SearchNodesByNetworkId("43114")
+        // // let info = await pioneer.SearchBlockchainByChainId({chainId:"43114"})
+        // console.log("info: ",info.data)
+        
         // let info = await pioneer.SearchByNameNative("avalanche x-chain")
         // console.log("info: ",info.data.length)
         // console.log("info: ",info.data[0])
@@ -94,9 +105,18 @@ let run_test = async function(){
         // let info = await pioneer.SearchByBlockchainName("binance")
         // console.log("info: ",info.data)
 
-
-        let info = await pioneer.SearchByBlockchainName("binance-smart-chain")
+        // let info = await pioneer.SearchByBlockchainName("43114")
+        // console.log("info: ",info.data)
+        
+        // let info = await pioneer.SearchByBlockchainName("avalanche-c-chain")
+        // console.log("info: ",info.data)
+        //SearchByNetworkName
+        let info = await pioneer.SearchByNetworkName("avalanche-c-chain")
         console.log("info: ",info.data)
+
+        
+        // let info = await pioneer.SearchByBlockchainName("avalanche-c-chain")
+        // console.log("info: ",info.data)
         // console.log("info: ",info.data[0])
         // console.log("info: ",info.data[1])
 
@@ -111,16 +131,22 @@ let run_test = async function(){
         // console.log("info: ",info.data[1])
 
 
+        // let info = await pioneer.SearchByNetworkName("polygon")
+        // console.log("info: ",info.data)
+        // console.log("info: ",info.data[0])
+        // console.log("info: ",info.data[1])
+
+
         // let info = await pioneer.SearchByNetworkName("ethereum")
         // console.log("info: ",info.data)
         // console.log("info: ",info.data[0])
         // console.log("info: ",info.data[1])
 
         //SearchByNetworkId
-        // let info = await pioneer.SearchByNetworkId(1)
+        // let info = await pioneer.SearchByNetworkId(43114)
         // console.log("info: ",info.data)
         // console.log("info: ",info.data[0])
-        // console.log("info: ",info.data[1])
+        // // console.log("info: ",info.data[1])
 
         // let info = await pioneer.SearchByName("Bitcoin")
         // console.log("info: ",info.data)

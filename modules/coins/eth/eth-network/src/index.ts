@@ -947,7 +947,7 @@ const rpcCallBatch = async (actions:any)=>{
 		result = JSON.parse(result);
 		if(result.error) throw JSON.stringify(result.error)
 		return result;
-	}catch(err){
+	}catch(err:any){
 		throw new Error(err)
 	}
 };

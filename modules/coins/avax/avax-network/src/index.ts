@@ -9,7 +9,7 @@
 
  */
 
-
+//@ts-ignore
 import {ETH_DECIMAL} from "@pioneer-platform/eth-network/lib/utils";
 
 const TAG = " | avax-network | "

@@ -71,7 +71,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         log.debug(tag,"signedTx: ",JSON.stringify(signedTx))
 
         return signedTx
-    }catch(e){
+    }catch(e:any){
         throw Error(e)
     }
 }

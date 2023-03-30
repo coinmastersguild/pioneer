@@ -41,6 +41,7 @@ https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/
 */
 const pjson = require("../package.json")
 const TAG = " | "+pjson.name.replace("@pioneer-platform/","")+" | "
+// @ts-ignore
 import { find } from 'lodash'
 
 require("dotenv").config({path:'../../../.env'})
@@ -441,7 +442,7 @@ let get_pool = async function(pair:string){
 
         // log.info("sellAssetDenom: ",sellAssetDenom)
         // log.info("buyAssetDenom: ",buyAssetDenom)
-        const foundPool = find(poolInfo.data.pools, (pool) => {
+        const foundPool = find(poolInfo.data.pools, (pool:any) => {
             const token0Denom = pool.poolAssets[0].token.denom
             const token1Denom = pool.poolAssets[1].token.denom
             return (
@@ -544,7 +545,7 @@ let get_transaction = async function(txid:string){
         return txInfo.data
     }catch(e){
         //if not found
-        throw Error(e)
+        throw e
     }
 }
 
@@ -588,15 +589,15 @@ let broadcast_transaction = async function(tx:string){
             output.raw = result2.data
         }catch(e){
             //log.error(tag,"failed second broadcast e: ",e.response)
-            log.error(tag,e)
-            log.error(tag,e.response)
-            log.error(tag,e.response.data)
-            log.error(tag,e.response.data.error)
-            log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
-            //throw e
-
-            output.success = false
-            output.error = e.response.data.error
+            // log.error(tag,e)
+            // log.error(tag,e.response)
+            // log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            // //throw e
+            //
+            // output.success = false
+            // output.error = e.response.data.error
 
         }
 

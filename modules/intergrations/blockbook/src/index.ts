@@ -208,7 +208,7 @@ let broadcast_transaction = async function(coin:string,hex:string){
             output.resp = resp
             output.success = true
         }catch(e){
-            // log.info(tag,"error: ",e)
+            log.error(tag,"error: ",e)
             // log.info(tag,"data0: ",e)
             // log.info(tag,"resp: ",resp)
             // log.info(tag,"data0: ",Object.keys(e))
@@ -218,11 +218,11 @@ let broadcast_transaction = async function(coin:string,hex:string){
             // log.info(tag,"error3: ",e.toJSON().request)
             // log.info(tag,"erro4: ",e.toJSON().data)
             // log.info(tag,"error5: ",e.toJSON().code)
-            if(e.response.data.error){
-                output.error = e.response.data.error
-            }else{
-                output.error = e
-            }
+            // if(e.response.data.error){
+            //     output.error = e.response.data.error
+            // }else{
+            //     output.error = e
+            // }
         }
 
         return output

@@ -346,7 +346,7 @@ let broadcast_transaction = async function(coin:string,tx:string){
                     output.txid = responseBroadcast
                     if(output.txid)output.success = true
 
-                }catch(e){
+                }catch(e:any){
                     // log.info(tag,"error: ",e)
                     // log.info(tag,"data0: ",e)
                     // log.info(tag,"resp: ",resp)

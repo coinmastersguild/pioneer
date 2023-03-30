@@ -128,7 +128,7 @@ let get_transaction = async function(txid:string){
         let txInfo = await axios({method:'GET',url:  URL_THORNODE+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
-    }catch(e){
+    }catch(e:any){
         // log.error(tag,e.response.data)
         // log.error(tag,e.response.data.error)
         if(e.response.status === 404){
@@ -200,7 +200,7 @@ let broadcast_transaction = async function(tx:string){
             output.gas_used = result2.gas_used
             output.raw = result2.data
 
-        }catch(e){
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)
