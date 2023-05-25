@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/iota-crypto",
-  "version": "8.1.21",
+  "version": "8.1.22",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   "dependencies": {
     "@iota/iota.js": "^1.8.2",
     "@iota/util.js": "^1.8.2",
-    "@pioneer-platform/loggerdog": "^8.1.17",
+    "@pioneer-platform/loggerdog": "^8.1.22",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",

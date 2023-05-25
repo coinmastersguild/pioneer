@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-tx-parser",
-  "version": "8.1.17",
+  "version": "8.1.18",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.17",
+    "@pioneer-platform/loggerdog": "^8.1.22",
     "ecpair": "^2.0.1",
     "prettyjson": "^1.2.1",
     "psbt": "^2.0.1",

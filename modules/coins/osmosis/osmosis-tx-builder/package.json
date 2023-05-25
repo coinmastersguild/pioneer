@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-tx-builder",
-  "version": "8.1.17",
+  "version": "8.1.18",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -16,7 +16,7 @@
     "@cosmjs/stargate": "^0.27.0",
     "@keplr-wallet/cosmos": "0.9.10",
     "@keplr-wallet/types": "^0.9.10",
-    "@pioneer-platform/loggerdog": "^8.1.17",
+    "@pioneer-platform/loggerdog": "^8.1.22",
     "cosmjs-types": "^0.4.1",
     "long": "^5.2.0",
     "protobufjs": "^6.11.2",

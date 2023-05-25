@@ -1,11 +1,11 @@
 {
   "name": "@pioneer-platform/scamdb",
-  "version": "8.1.36",
+  "version": "8.1.37",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.17",
-    "@pioneer-platform/pioneer-types": "^8.1.48",
+    "@pioneer-platform/loggerdog": "^8.1.22",
+    "@pioneer-platform/pioneer-types": "^8.1.50",
     "axios": "^1.3.4",
     "axios-retry": "^3.2.0",
     "dotenv": "^8.2.0"
