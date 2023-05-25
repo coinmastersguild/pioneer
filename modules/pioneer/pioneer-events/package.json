@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "8.1.40",
+  "version": "8.1.41",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-types": "^8.1.50",
+    "@pioneer-platform/pioneer-types": "^8.1.51",
     "@types/node": "^18.15.11",
     "socket.io-client": "^4.5.4",
     "ts-node": "^8.10.2",

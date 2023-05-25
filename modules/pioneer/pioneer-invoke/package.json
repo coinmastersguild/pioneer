@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-invoke",
-  "version": "8.1.39",
+  "version": "8.1.40",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "8.1.24",
-    "@pioneer-platform/pioneer-client": "8.1.36",
-    "@pioneer-platform/pioneer-types": "^8.1.50",
+    "@pioneer-platform/pioneer-client": "^8.1.37",
+    "@pioneer-platform/pioneer-types": "^8.1.51",
     "@types/node": "^18.15.11",
     "dotenv": "^8.2.0",
     "openapi-client-axios": "^6.0.0",

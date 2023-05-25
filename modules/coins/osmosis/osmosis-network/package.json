@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-network",
-  "version": "8.1.37",
+  "version": "8.1.38",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@keplr-wallet/unit": "^0.10.2",
-    "@pioneer-platform/loggerdog": "^8.1.22",
+    "@pioneer-platform/loggerdog": "^8.1.26",
     "@tendermint/amino-js": "^0.6.2",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
