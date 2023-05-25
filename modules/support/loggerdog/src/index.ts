@@ -1,43 +1,3 @@
-/*
-            Logger-dog
-        A data-dog logger system
-
-    Set DEBUG log level
-        SET ENV
-
-            ***** NOTE *****
-
-         DEFAULT_LOG_LEVEL=DEBUG
-
-      ******************************
-
-    Notes:
-       Defaults to a basic logger if no ENV found
-
-       Publish to datadog if DATADOG_API_KEY found
-
-       Publish to redis if REDIS_CONNECTION found
-
-
-
-    *** PRODUCTION NOTES ****
-
-    STRUCTURED_LOGGING=true
-
-    *************************
-
-        Structured logging guarantees logs do not have line breaks in datadog intake
-
-    Turn on Datadog logs:
-        * DATADOG_REST_INTAKE = true
-        * DATADOG_API_KEY = "key**"
-
-    Note:
-    TODO
-        Log batching ?
-
- */
-
 const LOG_LEVELS:any = {
     TEST: { val: 0, label: 'TEST', color: 'color: cyan' },
     EMERG: { val: 0, label: 'EMERG', color: 'color: magenta' },
@@ -154,6 +114,6 @@ class Logger {
     }
 }
 
-module.exports = function() {
-    return new Logger()
+export default function() {
+    return new Logger();
 }

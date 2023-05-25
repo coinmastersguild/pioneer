@@ -1,6 +1,6 @@
 
 const TAG = " | coin tools | "
-const log = require("log")
+const log = require('@pioneer-platform/loggerdog')()
 // const bitcoin = require("bitcoinjs-lib");
 // const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
@@ -327,92 +327,31 @@ export function getNativeAssetForBlockchain(blockchain:string){
 export const supportedBlockchains:any = [];
 export const supportedAssets:any = [];
 
-if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']) {
-    supportedBlockchains.push("Bitcoin")
-    supportedAssets.push("BTC")
+function getFeature(featureName: string, blockchainName: string, assetName: string) {
+    // @ts-ignore
+    if (window[featureName] === undefined || window[featureName]) {
+        supportedBlockchains.push(blockchainName);
+        supportedAssets.push(assetName);
+    }
 }
 
-if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']) {
-    supportedBlockchains.push("Ethereum")
-    supportedAssets.push("ETH")
-    //TODO get token list from npm
-    //add all supported
-}
-
-if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
-    supportedBlockchains.push("Thorchain")
-    supportedAssets.push("RUNE")
-}
-
-if(process.env['FEATURE_SECRET_BLOCKCHAIN']){
-    supportedBlockchains.push("Secret")
-    supportedAssets.push("SCRT")
-}
-
-if(process.env['FEATURE_KAVA_BLOCKCHAIN']){
-    supportedBlockchains.push("Kava")
-    supportedAssets.push("KAVA")
-}
-
-if(process.env['FEATURE_TERRA_BLOCKCHAIN']){
-    supportedBlockchains.push("Terra")
-    supportedAssets.push("LUNA")
-}
-
-if(process.env['FEATURE_BSC_BLOCKCHAIN']){
-    supportedBlockchains.push("BinanceSmartChain")
-    supportedAssets.push("BNB")
-}
-
-if(process.env['FEATURE_CARDANO_BLOCKCHAIN']){
-    supportedBlockchains.push("Cardano")
-    supportedAssets.push("ADA")
-}
-
-if(process.env['FEATURE_BNB_BLOCKCHAIN']){
-    supportedBlockchains.push("Thorchain")
-    supportedAssets.push("RUNE")
-}
-
-if(process.env['FEATURE_EOS_BLOCKCHAIN']){
-    supportedBlockchains.push("Eos")
-    supportedAssets.push("EOS")
-}
-
-if(process.env['FEATURE_FIO_BLOCKCHAIN']){
-    supportedBlockchains.push("Fio")
-    supportedAssets.push("FIO")
-}
-
-if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
-    supportedBlockchains.push("Cosmos")
-    supportedAssets.push("ATOM")
-}
-
-if(process.env['FEATURE_OSMOSIS_BLOCKCHAIN']){
-    supportedBlockchains.push("Osmosis")
-    supportedAssets.push("OSMO")
-}
-
-if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
-    supportedBlockchains.push("Binance")
-    supportedAssets.push("BNB")
-}
-
-if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
-    supportedBlockchains.push("BitcoinCash")
-    supportedAssets.push("BCH")
-}
-
-if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
-    supportedBlockchains.push("Litecoin")
-    supportedAssets.push("LTC")
-}
-
-if(process.env['FEATURE_AVALANCHE_BLOCKCHAIN']){
-    supportedBlockchains.push("Avalanche")
-    supportedAssets.push("AVAX")
-}
+getFeature('FEATURE_BITCOIN_BLOCKCHAIN', 'Bitcoin', 'BTC');
+getFeature('FEATURE_ETHEREUM_BLOCKCHAIN', 'Ethereum', 'ETH');
+getFeature('FEATURE_THORCHAIN_BLOCKCHAIN', 'Thorchain', 'RUNE');
+getFeature('FEATURE_SECRET_BLOCKCHAIN', 'Secret', 'SCRT');
+getFeature('FEATURE_KAVA_BLOCKCHAIN', 'Kava', 'KAVA');
+getFeature('FEATURE_TERRA_BLOCKCHAIN', 'Terra', 'LUNA');
+getFeature('FEATURE_BSC_BLOCKCHAIN', 'BinanceSmartChain', 'BNB');
+getFeature('FEATURE_CARDANO_BLOCKCHAIN', 'Cardano', 'ADA');
+getFeature('FEATURE_BNB_BLOCKCHAIN', 'Thorchain', 'RUNE');
+getFeature('FEATURE_EOS_BLOCKCHAIN', 'Eos', 'EOS');
+getFeature('FEATURE_FIO_BLOCKCHAIN', 'Fio', 'FIO');
+getFeature('FEATURE_COSMOS_BLOCKCHAIN', 'Cosmos', 'ATOM');
+getFeature('FEATURE_OSMOSIS_BLOCKCHAIN', 'Osmosis', 'OSMO');
+getFeature('FEATURE_BINANCE_BLOCKCHAIN', 'Binance', 'BNB');
+getFeature('FEATURE_BITCOINCASH_BLOCKCHAIN', 'BitcoinCash', 'BCH');
+getFeature('FEATURE_LITECOIN_BLOCKCHAIN', 'Litecoin', 'LTC');
+getFeature('FEATURE_AVALANCHE_BLOCKCHAIN', 'Avalanche', 'AVAX');
 
 // (only 1 native assets for each enabled blockchain)
 export const COIN_ICONS_BY_SYMBOL = {
