@@ -17,17 +17,23 @@ network.init(servers)
 // network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
+//txidsByAddress
+network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
+    .then(function(resp){
+        console.log(resp)
+        console.log(JSON.stringify(resp))
+    })
 
 // network.broadcast("ETH","0xf86e8202ab85028fa6ae008301388094c3affff54122658b89c31183cec4f15514f34624870aa87bee5380008025a04cbf2dc700925319439ae86413eb50a82a7250eff94a2e6e82b223ff8873ca16a04f2745e71c811889ca6a1fdb36ff33486c0f7b7796638d757a3af1adb3ce1afa")
 //     .then(function(resp){
 //         console.log("txid: ",resp)
 //     })
 
-network.getAddressInfo('ETH',"0x33b35c665496bA8E71B22373843376740401F106")
-    .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
-    })
+// network.getAddressInfo('ETH',"0x33b35c665496bA8E71B22373843376740401F106")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // let address = ""
 // network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")

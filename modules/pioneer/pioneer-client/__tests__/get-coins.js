@@ -13,8 +13,8 @@ const semver = require('semver')
 // let signer = require("eth_mnemonic_signer")
 
 //force
-// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:4000/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
@@ -49,6 +49,10 @@ let run_test = async function(){
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
         // pioneer = await pioneer.Health()
+
+        let networks = await pioneer.AtlasNetwork({ start: 1, stop: 10, limit: 5 })
+        console.log("networks: ",networks.data)
+        console.log("networks: ",networks.data.length)
 
         // console.log(signer)
         // let globals = await pioneer.Globals()
@@ -107,13 +111,22 @@ let run_test = async function(){
 
         // let info = await pioneer.SearchByBlockchainName("43114")
         // console.log("info: ",info.data)
-        
+        // let info = await pioneer.SearchByBlockchainName("ethereum")
+        // console.log("info: ",info.data)        
         // let info = await pioneer.SearchByBlockchainName("avalanche-c-chain")
         // console.log("info: ",info.data)
         //SearchByNetworkName
-        let info = await pioneer.SearchByNetworkName("avalanche-c-chain")
-        console.log("info: ",info.data)
+        // let info = await pioneer.SearchByNetworkName("avalanche-c-chain")
+        // console.log("info: ",info.data)
+        // let info = await pioneer.SearchByNetworkName("avalan")
+        // console.log("info: ",info.data)
 
+        //atlasNetwork
+        // let info = await pioneer.AtlasNetwork({start:1,stop:10,limit:5})
+        // console.log("info: ",info.data.length)
+
+        // let info = await pioneer.SearchByNetworkName("gnosis")
+        // console.log("info: ",info.data)
         
         // let info = await pioneer.SearchByBlockchainName("avalanche-c-chain")
         // console.log("info: ",info.data)
@@ -143,6 +156,8 @@ let run_test = async function(){
         // console.log("info: ",info.data[1])
 
         //SearchByNetworkId
+        // let info = await pioneer.SearchByNetworkId(43114)
+        // console.log("info: ",info.data)
         // let info = await pioneer.SearchByNetworkId(43114)
         // console.log("info: ",info.data)
         // console.log("info: ",info.data[0])
@@ -217,6 +232,44 @@ let run_test = async function(){
         //     "skip": 0
         // }
 
+        // let asset = {
+        //     "assetId": "keepkey_BNB",
+        //     "chainId": "keepkey_BNB",
+        //     "color": "",
+        //     "explorer": "https://snowtrace.io/address/0x442F7f22b1EE2c842bEAFf52880d4573E9201158",
+        //     "icon": "https://pioneers.dev/coins/binance-coin-(portal).png",
+        //     "name": "binance coin (portal)",
+        //     "precision": 18,
+        //     "symbol": "BNB",
+        //     "rank": "",
+        //     "marketCap": "",
+        //     "geckoId": "binance coin (portal)",
+        //     "link": "https://snowtrace.io/address/0x442F7f22b1EE2c842bEAFf52880d4573E9201158"
+        // }
+        // let asset = {
+        //     "assetId": "keepkey_BNB",
+        //     "chainId": "keepkey_BNB",
+        //     "color": "",
+        //     "explorer": "https://etherscan.io/token/0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+        //     "icon": "https://pioneers.dev/coins/bnb.png",
+        //     "name": "bnb",
+        //     "precision": 18,
+        //     "symbol": "BNB",
+        //     "rank": "",
+        //     "marketCap": "",
+        //     "geckoId": "bnb",
+        //     "link": "https://etherscan.io/token/0xB8c77482e45F1F44dE1745F52C74426C631bDD52"
+        // }
+        // let dapps = await pioneer.ListAppsByVersionAndAsset({
+        //         "asset": asset.name,
+        //         "version": "2.0.2",
+        //         "limit": 1000,
+        //         "skip": 0
+        //     })
+        // // console.log("dapps: ",dapps)
+        // console.log("dapps: ",dapps.data)
+        // console.log("score: ",dapps.data[0].score)
+        
         // let asset = {
         //     "assetId": "keepkey_USDC",
         //     "chainId": "keepkey_USDC",

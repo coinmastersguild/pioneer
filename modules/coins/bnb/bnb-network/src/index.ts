@@ -528,9 +528,9 @@ let broadcast_transaction = async function(rawTx:string){
         //console.log(sdk)
         //let rawTx = sdk.amino.marshalBinary(tx)
         //rawTx = rawTx.toString("hex")
-        //let rawTxHex = Buffer.from(rawTx, "hex")
-
-
+        // let rawTxHex = Buffer.from(rawTx, "hex")
+        // log.info("rawTxHex: ",rawTxHex)
+        // let rawTxHexStr = rawTxHex.toString('hex');
 
 
         // let rawTxBufferCheck = "db01f0625dee0a65ce6dc0430a14b6561dcc104130059a7c08f48c64610c1f6f9064122b423635363144434331303431333030353941374330384634384336343631304331463646393036342d31311a0b4254432d3543345f424e42200228013080c2d72f3880989abc044001126e0a26eb5ae9872103baf53d1424f8ea83d03a82f6d157b5401c4ea57ffb8317872e15a19fc9b7ad7b1240e79a6606d28cf07b9cc6f566b524a5282b13beccc3162376c79f392620c95a447b19f64e761e22a7a3bc311a780e7d9fdd521e2f7edec25308c5bac6aa1c0a311801200a"
@@ -542,8 +542,26 @@ let broadcast_transaction = async function(rawTx:string){
 
         //tx: Buffer.from(encoded, "hex")
         ///broadcast_tx_sync?tx=
-        // let resultBroadcast = await axios({method:'GET',url:URL_DEX+'/api/v1/broadcast?sync=true'+tx})
-        // log.debug("resultBroadcast: ",resultBroadcast)
+        // let resultBroadcast = await axios({method:'GET',url:URL_REMOTE+'/broadcast_tx_sync?tx='+rawTxHexStr})
+        // log.info("resultBroadcast: ",resultBroadcast.data)
+
+
+        const url = 'https://dex.binance.org/api/v1/broadcast?sync=true';
+        const config = {
+            headers: {
+                'Content-Type': 'text/plain',
+            },
+        };
+        try {
+            const response = await axios.post(url, rawTx, config);
+            console.log(response.data);
+            let txid = response.data[0].hash
+            
+        } catch (error) {
+            console.error(error);
+        }
+        
+        // log.info("resultBroadcast: ",resultBroadcast)
 
         // const buffer = Buffer.from(rawTx, 'hex');
         // // @ts-ignore
@@ -565,26 +583,26 @@ let broadcast_transaction = async function(rawTx:string){
         //     log.debug("success! ")
         // }
 
-        const buffer = Buffer.from(rawTx, 'hex');
-        // @ts-ignore
-        let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-        console.log("hash: ",hash)
-
-        let url = URL_REMOTE + '/broadcast_tx_sync?tx='+rawTx
-        let result = await axios({
-            headers: {
-                'Content-Type': 'text/plain'
-            },
-            url: url,
-            method: 'GET'
-        })
-        log.info('result: ', result.data)
-
-        if(result.data[0].hash){
-            log.debug("success! ")
-        }
-
-        return result.data[0].hash
+        // const buffer = Buffer.from(rawTx, 'hex');
+        // // @ts-ignore
+        // // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+        // // console.log("hash: ",hash)
+        //
+        // let url = URL_REMOTE + '/broadcast_tx_sync?tx='+rawTx
+        // let result = await axios({
+        //     headers: {
+        //         'Content-Type': 'text/plain'
+        //     },
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // log.info('result: ', result.data)
+        //
+        // if(result.data[0].hash){
+        //     log.debug(" success! ")
+        // }
+        //
+        // return result.data[0].hash
     }catch(e:any){
         //log.error(tag,"e: ",{e})
         log.error(tag,e)

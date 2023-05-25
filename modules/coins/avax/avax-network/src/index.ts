@@ -156,9 +156,9 @@ module.exports = {
 	// getBalanceTokens: function (address:string) {
 	// 	return get_balance_tokens(address)
 	// },
-	// broadcast:function (tx:any) {
-	// 	return broadcast_transaction(tx);
-	// }
+	broadcast:function (tx:any) {
+		return broadcast_transaction(tx);
+	}
 }
 
 // const decode_tx = async function(tx:string){
@@ -688,56 +688,56 @@ module.exports = {
 // 		throw e
 // 	}
 // }
-//
-// let broadcast_transaction = async function(tx:any){
-// 	let tag = TAG + " | broadcast_transaction | "
-// 	try{
-// 		log.debug(tag,"tx: ",tx)
-// 		if(!tx) throw Error("101: missing tx!")
-//
-// 		//push node
-// 		web3.eth.sendSignedTransaction(tx)
-//
-// 		//push etherscan
-// 		//https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
-// 		// let resp = await axios({
-// 		// 	method:'GET',
-// 		// 	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
-// 		// })
-// 		// console.log(resp)
-// 		//push blockbook
-//
-//
-// 		//TODO lifecycle hook?
-// 		// let resp = await web3.eth.sendSignedTransaction(tx)
-// 		// 	.on('transactionHash', function(hash:any){
-// 		// 		console.log("hash: ",hash)
-// 		// 	})
-// 		// 	.on('receipt', function(receipt:any){
-// 		// 		console.log("receipt: ",receipt)
-// 		// 	})
-// 		// 	.on('confirmation', function(confirmationNumber:any, receipt:any){
-// 		// 		console.log(confirmationNumber,receipt)
-// 		// 	})
-// 		// 	.on('error', console.error);
-//
-// 		//console.log("resp: ",resp)
-//
-// 		let output = {
-// 			success:true,
-// 			// blockIncluded:result.result,
-// 			// block:result.blockNumber,
-// 			// txid:result.transactionHash,
-// 			// gas:result.cumulativeGasUsed
-// 		}
-//
-// 		return output
-// 	}catch(e){
-// 		log.error(tag,e)
-// 		throw e
-// 	}
-// }
-//
+
+let broadcast_transaction = async function(tx:any){
+	let tag = TAG + " | broadcast_transaction | "
+	try{
+		log.debug(tag,"tx: ",tx)
+		if(!tx) throw Error("101: missing tx!")
+
+		//push node
+		web3.eth.sendSignedTransaction(tx)
+
+		//push etherscan
+		//https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=0xf904808000831cfde080&apikey=YourApiKeyToken
+		// let resp = await axios({
+		// 	method:'GET',
+		// 	url: 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex='+tx+'&apikey='+process.env['ETHERSCAN_API_KEY']
+		// })
+		// console.log(resp)
+		//push blockbook
+
+
+		//TODO lifecycle hook?
+		// let resp = await web3.eth.sendSignedTransaction(tx)
+		// 	.on('transactionHash', function(hash:any){
+		// 		console.log("hash: ",hash)
+		// 	})
+		// 	.on('receipt', function(receipt:any){
+		// 		console.log("receipt: ",receipt)
+		// 	})
+		// 	.on('confirmation', function(confirmationNumber:any, receipt:any){
+		// 		console.log(confirmationNumber,receipt)
+		// 	})
+		// 	.on('error', console.error);
+
+		//console.log("resp: ",resp)
+
+		let output = {
+			success:true,
+			// blockIncluded:result.result,
+			// block:result.blockNumber,
+			// txid:result.transactionHash,
+			// gas:result.cumulativeGasUsed
+		}
+
+		return output
+	}catch(e){
+		log.error(tag,e)
+		throw e
+	}
+}
+
 // const get_balance_tokens = async function(address:string){
 // 	let tag = TAG + " | get_balance_tokens | "
 // 	try{

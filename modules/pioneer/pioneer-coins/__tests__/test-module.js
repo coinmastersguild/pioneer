@@ -3,6 +3,11 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
+var txDecoder = require('ethereum-tx-decoder');
+
+// let rawTx = "0x02f86d82a86a01846b49d200850e63912a0082520894a44c286ba83bb771cd0107b2c1df678435bd15358080c001a0179c2ffec1899376c3cbf0e489cd5ffada3248f06b621b48913dc8b546da8a04a03fa70e05d9244f8f23684004a938902652dfbbd3ece3bc7f0dacada9da5a0516"
+// var decodedTx = txDecoder.decodeTx(rawTx);
+
 // import * as config ""
 let {
     xpubConvert,
@@ -33,19 +38,19 @@ let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
 // let explorerUrl = getExplorerTxUrl(network,txid,false)
 // console.log("explorerUrl: ",explorerUrl)
 
-let needsMemo = needsMemoByNetwork(network)
-console.log("needsMemo: ",needsMemo)
+// let needsMemo = needsMemoByNetwork(network)
+// console.log("needsMemo: ",needsMemo)
 
 // console.log(PoSchains['Osmosis'])
 
 
-let addressNlist = [
-    2147483732,
-    2147483648,
-    2147483648,
-    1,
-    18
-]
+// let addressNlist = [
+//     2147483732,
+//     2147483648,
+//     2147483648,
+//     1,
+//     18
+// ]
 
 // let addressNlist = [
 //         2147483692,
@@ -55,10 +60,12 @@ let addressNlist = [
 //         0
 //     ]
 
+// let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
+//
 // console.log(addressNListToBIP32(addressNlist))
 
-let bip32 = `m/44'/144'/0'/0/0`
-
+// let bip32 = `m/44'/144'/0'/0/0`
+let bip32 = `m/44'/714'/0'/0/0`
 console.log(bip32ToAddressNList(bip32))
 
 

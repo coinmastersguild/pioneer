@@ -11,8 +11,8 @@ require("dotenv").config({path:'../../../../.env'})
 let pioneerApi = require("../lib")
 
 //force
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
-// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
 
@@ -56,6 +56,29 @@ let run_test = async function(){
         //get config
         let pioneer = new pioneerApi(spec,config)
         pioneer = await pioneer.init()
+
+        let redemptionBody = {
+            publicAddress:"addy",
+            signature:"sig",
+            message:"msg"
+        }
+
+        //redemption
+        // let redemption = await pioneer.Redemption("",redemptionBody)
+        // console.log("redemption: ",redemption.data)
+
+        let tx = {
+            from: 'eth',
+            to: 'btc',
+            address: '1PKYrd9CC4RFB65wBrvaAsTWnp8fXePuj',
+            amount: 10,
+            extraId: undefined
+        }
+        let txSwap = await pioneer.CreateTransactionChangelly("",tx);
+        console.log("txSwap: ",txSwap.data)
+
+        // let currencies = await pioneer.CurrenciesChangelly()
+        // console.log("currencies: ",currencies.data)
 
         // let user = await pioneer.User()
         // console.log("user: ",user.data)

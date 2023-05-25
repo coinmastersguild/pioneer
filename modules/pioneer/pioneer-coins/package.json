@@ -22,6 +22,7 @@
     "dash-regex": "^1.0.10",
     "dogecoin-regex": "^1.0.9",
     "ethereum-regex": "^1.1.12",
+    "ethereum-tx-decoder": "^3.0.0",
     "litecoin-regex": "^1.0.8",
     "monero-regex": "^1.0.8",
     "neo-regex": "^1.0.7",
