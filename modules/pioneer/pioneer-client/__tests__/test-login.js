@@ -64,40 +64,79 @@ let run_test = async function(){
         if(!user.data.username){
             //signup
             //register address
+            // let register = {
+            //     username:config.username,
+            //     blockchains:['ethereum'],
+            //     publicAddress:address,
+            //     context: address+".wallet.json",
+            //     walletDescription:{
+            //         context:address+".wallet.json",
+            //         type:'mnemonic'
+            //     },
+            //     data:{
+            //         pubkeys:[
+            //             {
+            //                 type:"address",
+            //                 xpub: false,
+            //                 blockchain:"ethereum",
+            //                 script_type:"ethereum",
+            //                 network:"ETH",
+            //                 symbol:"ETH",
+            //                 path:"",
+            //                 pathMaster:"",
+            //                 note:"auth user",
+            //                 pubkey:address,
+            //                 master:address,
+            //                 address
+            //             }
+            //         ]
+            //     },
+            //     queryKey:this.queryKey,
+            //     auth:'lol',
+            //     provider:'lol'
+            // }
+            // console.log("register: ",register)
+            // console.log("register: ",JSON.stringify(register))
+
+            //let register = {"username":"user:cfd27e74asd","blockchains":["ethereum"],"publicAddress":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8","context":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8.wallet.json","walletDescription":{"context":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8.wallet.json","type":"mnemonic"},"data":{"pubkeys":[{"type":"address","xpub":false,"blockchain":"ethereum","script_type":"ethereum","network":"ETH","symbol":"ETH","path":"","pathMaster":"","note":"auth user","pubkey":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8","master":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8","address":"0x73d0385f4d8e00c5e6504c6030f47bf6212736a8"}]},"auth":"lol","provider":"lol"}
+
             let register = {
-                username:config.username,
-                blockchains:['ethereum'],
-                publicAddress:address,
-                context: address+".wallet.json",
-                walletDescription:{
-                    context:address+".wallet.json",
-                    type:'mnemonic'
+                username: "user:cfd27e74asd",
+                blockchains: ["ethereum"],
+                publicAddress: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8",
+                context: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8.wallet.json",
+                walletDescription: {
+                    context: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8.wallet.json",
+                    type: "mnemonic"
                 },
-                data:{
-                    pubkeys:[
+                data: {
+                    pubkeys: [
                         {
-                            type:"address",
+                            type: "address",
                             xpub: false,
-                            blockchain:"ethereum",
-                            script_type:"ethereum",
-                            network:"ETH",
-                            symbol:"ETH",
-                            path:"",
-                            pathMaster:"",
-                            note:"auth user",
-                            pubkey:address,
-                            master:address,
-                            address
+                            blockchain: "ethereum",
+                            script_type: "ethereum",
+                            network: "ETH",
+                            symbol: "ETH",
+                            path: "",
+                            pathMaster: "",
+                            note: "auth user",
+                            pubkey: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8",
+                            master: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8",
+                            address: "0x73d0385f4d8e00c5e6504c6030f47bf6212736a8"
                         }
                     ]
                 },
-                queryKey:this.queryKey,
-                auth:'lol',
-                provider:'lol'
-            }
-            let result = await pioneer.Register(null, register)
-            console.log("result register: ",result.data)
-            nonce = parseInt(result.data.userInfo.nonce)
+                auth: "lol",
+                provider: "lol"
+            };
+
+            let result = await pioneer.Register(null, register);
+            console.log("result register: ", result.data);
+
+            // let result = await pioneer.Register(null, register)
+            // console.log("result register: ",result.data)
+            // nonce = parseInt(result.data.userInfo.nonce)
         } else {
             nonce = user.data
         }
@@ -124,24 +163,24 @@ let run_test = async function(){
         // console.log("userInfo: ",userInfo.data)
 
         //isDeveloper?
-        let devInfo = await pioneer.GetDevInfo()
-        console.log("devInfo: ",devInfo.data)
-        //apply to developer
-
-        if(!devInfo.data){
-            console.log("creating developer!")
-            //create dev
-            let dev = {
-                email:"highlander@keepkey.com",
-                github:"BitHighlander"
-            }
-            let devcreateResp = await pioneer.CreateDeveloper(null,dev)
-            console.log("devcreateResp: ",devcreateResp.data)
-        }
-
-        //isDeveloper?
-        let devInfo2 = await pioneer.GetDevInfo()
-        console.log("devInfo2: ",devInfo2.data)
+        // let devInfo = await pioneer.GetDevInfo()
+        // console.log("devInfo: ",devInfo.data)
+        // //apply to developer
+        //
+        // if(!devInfo.data){
+        //     console.log("creating developer!")
+        //     //create dev
+        //     let dev = {
+        //         email:"highlander@keepkey.com",
+        //         github:"BitHighlander"
+        //     }
+        //     let devcreateResp = await pioneer.CreateDeveloper(null,dev)
+        //     console.log("devcreateResp: ",devcreateResp.data)
+        // }
+        //
+        // //isDeveloper?
+        // let devInfo2 = await pioneer.GetDevInfo()
+        // console.log("devInfo2: ",devInfo2.data)
 
 
 

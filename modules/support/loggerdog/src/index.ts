@@ -114,6 +114,9 @@ class Logger {
     }
 }
 
-export default function() {
+const getLogger = function() {
     return new Logger();
 }
+
+exports.default = getLogger; // ES6 default export
+module.exports = getLogger;  // CommonJS

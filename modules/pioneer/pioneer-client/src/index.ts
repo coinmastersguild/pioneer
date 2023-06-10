@@ -1,40 +1,62 @@
-/*
+const Swagger = require('swagger-client');
 
 
- */
-const TAG = " | Pioneer-client-ts | "
+class Client {
+    queryKey: any;
+    client: any;
+    pioneer: any;
+    spec: any;
 
-//Pioneer follows OpenAPI spec
-const Pioneer = require('openapi-client-axios').default;
-let pioneerApi:any
+    constructor(spec: any, config: { queryKey: any; }) {
+        this.spec = spec;
+        this.queryKey = config.queryKey;
+        this.pioneer = {};
+    }
 
-module.exports = class Client {
-    public pioneer: any
-    private init: (spec: string, config: any) => Promise<any>;
-    private spec: string;
-    private queryKey: any;
-    constructor(spec:string,config:any) {
-        this.spec = spec
-        this.queryKey = config.queryKey
-        this.init = async function () {
-            try{
-                if(!this.queryKey) throw Error(" You must create an api key! ")
-                pioneerApi = new Pioneer({
-                    definition:spec,
-                    axiosConfigDefaults: {
-                        headers: {
-                            'Authorization': this.queryKey,
-                        },
-                    }
+    async init() {
+        try {
+            if (!this.queryKey) throw Error(" You must create an api key! ");
+
+            console.log("Creating Swagger client with Authorization key: " + this.queryKey);
+
+            this.client = await new Swagger({
+                url: this.spec,
+                requestInterceptor: (req: { headers: { Authorization: any; }; }) => {
+                    req.headers.Authorization = this.queryKey;
+                    console.log("Request interceptor set headers: ", req.headers);
+                    return req;
+                }
+            });
+
+            Object.keys(this.client.spec.paths).forEach((path) => {
+                Object.keys(this.client.spec.paths[path]).forEach((method) => {
+                    const operationId = this.client.spec.paths[path][method].operationId;
+
+                    this.pioneer[operationId] = async (parameters = {}) => {
+                        console.log("Executing operation " + operationId + " with parameters ", parameters);
+                        try {
+                            const result = await this.client.execute({
+                                operationId,
+                                parameters: {
+                                    ...parameters, // existing parameters
+                                    Authorization: this.queryKey
+                                },
+                                responseContentType: 'application/json'
+                            });
+                            return { data: result.body };
+                        } catch (e) {
+                            console.error(e);
+                            throw e;
+                        }
+                    };
                 });
-                this.pioneer = await pioneerApi.init()
-                return await pioneerApi.init()
-            }catch(e){
-                console.error(e)
-                throw e
-            }
+            });
+            return this.pioneer;
+        } catch (e) {
+            console.error(e);
+            throw e;
         }
     }
 }
 
-
+module.exports = Client;

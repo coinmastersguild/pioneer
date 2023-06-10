@@ -41,12 +41,12 @@ let run_test = async function(){
         let Pioneer = new pioneerApi(spec,config)
         let pioneer = await Pioneer.init()
 
-        console.log("pioneer: ", pioneer)
-        let globals = await pioneer.Globals();
-        console.log("globals: ",globals);
-        // console.log("pioneer: ",pioneer);
-        let result = await pioneer.Invocations()
-        console.log("result: ",result);
+        // console.log("pioneer: ", pioneer)
+        // let globals = await pioneer.Globals();
+        // console.log("globals: ",globals);
+        // // console.log("pioneer: ",pioneer);
+        // let result = await pioneer.Invocations()
+        // console.log("result: ",result);
         //
         // let redemptionBody = {
         //     publicAddress:"addy",

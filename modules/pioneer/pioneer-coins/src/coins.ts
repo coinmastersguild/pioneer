@@ -1,6 +1,5 @@
 
 const TAG = " | coin tools | "
-const log = require('@pioneer-platform/loggerdog')()
 // const bitcoin = require("bitcoinjs-lib");
 // const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
@@ -53,7 +52,7 @@ export const getRangoBlockchainName = function(blockchain:string){
         }
         return rangoName
     }catch(e){
-        log.error(e)
+        console.error(e)
     }
 }
 
@@ -80,7 +79,7 @@ export const getSwapProtocals = function(asset:string, network:string){
         }
         return output
     }catch(e){
-        log.error(e)
+        console.error(e)
     }
 }
 
@@ -121,7 +120,7 @@ export const parseThorchainAssetString = function(input:string){
             contract
         }
     }catch(e){
-        log.error(e)
+        console.error(e)
     }
 }
 
@@ -328,11 +327,8 @@ export const supportedBlockchains:any = [];
 export const supportedAssets:any = [];
 
 function getFeature(featureName: string, blockchainName: string, assetName: string) {
-    // @ts-ignore
-    if (window[featureName] === undefined || window[featureName]) {
-        supportedBlockchains.push(blockchainName);
-        supportedAssets.push(assetName);
-    }
+    supportedBlockchains.push(blockchainName);
+    supportedAssets.push(assetName);
 }
 
 getFeature('FEATURE_BITCOIN_BLOCKCHAIN', 'Bitcoin', 'BTC');

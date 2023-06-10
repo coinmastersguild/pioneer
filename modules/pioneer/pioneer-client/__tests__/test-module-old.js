@@ -3,11 +3,12 @@
 
  */
 
+
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let pioneerApi = require("../lib")
+let Client = require("../lib")
 
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
@@ -17,6 +18,7 @@ let spec = process.env['URL_PIONEER_SPEC']
 
 //const mnemonic = 'all all all all all all all all all all all all'
 let mnemonic = process.env['WALLET_MAINNET_DEV']
+
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
 
@@ -38,16 +40,20 @@ let run_test = async function(){
             // username:"user:cfd27e74",
             spec
         }
-        let Pioneer = new pioneerApi(spec,config)
-        let pioneer = await Pioneer.init()
 
-        console.log("pioneer: ", pioneer)
-        let globals = await pioneer.Globals();
-        console.log("globals: ",globals);
-        // console.log("pioneer: ",pioneer);
-        let result = await pioneer.Invocations()
-        console.log("result: ",result);
+        let client = new Client('http://127.0.0.1:9001/spec/swagger.json', { queryKey: 'key:public:2' });
+        await client.pioneer.Invocations();
+
+        // let Pioneer = new pioneerApi(spec,config)
+        // let pioneer = await Pioneer.init()
         //
+        // // console.log("pioneer: ", pioneer)
+        // // let globals = await pioneer.Globals();
+        // // console.log("globals: ",globals);
+        // console.log("pioneer: ",pioneer);
+        // let result = await pioneer.Invocations()
+        // console.log("result: ",result);
+
         // let redemptionBody = {
         //     publicAddress:"addy",
         //     signature:"sig",
