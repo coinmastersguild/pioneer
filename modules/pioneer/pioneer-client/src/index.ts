@@ -1,7 +1,8 @@
-const Swagger = require('swagger-client');
+// @ts-ignore
+import Swagger from 'swagger-client';
 
 
-class Client {
+class Pioneer {
     queryKey: any;
     client: any;
     pioneer: any;
@@ -30,19 +31,29 @@ class Client {
 
             Object.keys(this.client.spec.paths).forEach((path) => {
                 Object.keys(this.client.spec.paths[path]).forEach((method) => {
+                    
+
                     const operationId = this.client.spec.paths[path][method].operationId;
 
-                    this.pioneer[operationId] = async (parameters = {}) => {
+                    this.pioneer[operationId] = async (parameters:any) => {
                         console.log("Executing operation " + operationId + " with parameters ", parameters);
+                        console.log("path: ",path)
+                        console.log("method: ",method)
                         try {
-                            const result = await this.client.execute({
+                            
+                            let request:any = {
                                 operationId,
                                 parameters: {
                                     ...parameters, // existing parameters
                                     Authorization: this.queryKey
                                 },
                                 responseContentType: 'application/json'
-                            });
+                            }
+                            if(method === 'post'){
+                                request.requestBody = parameters
+                            }
+                            console.log("request: ",request)
+                            const result = await this.client.execute(request);
                             return { data: result.body };
                         } catch (e) {
                             console.error(e);
@@ -59,4 +70,5 @@ class Client {
     }
 }
 
-module.exports = Client;
+export default Pioneer;
+

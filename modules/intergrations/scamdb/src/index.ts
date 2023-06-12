@@ -18,7 +18,7 @@ const axios = Axios.create({
     })
 });
 
-const log = require("log")
+const log = require('@pioneer-platform/loggerdog')()
 
 // const axiosRetry = require('axios-retry');
 //

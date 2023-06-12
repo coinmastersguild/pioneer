@@ -12,7 +12,7 @@ http://174.138.103.9:8080/v1/doc
 
 const TAG = " | midgard network | "
 
-const log = require("log")
+const log = require('@pioneer-platform/loggerdog')()
 let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 
 //let MIDGARD_API = "https://chaosnet-midgard.bepswap.com/v1"

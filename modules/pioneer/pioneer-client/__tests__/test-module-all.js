@@ -3,12 +3,11 @@
 
  */
 
-
 require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let Client = require("../lib")
+let pioneerApi = require("../lib")
 
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
@@ -18,7 +17,6 @@ let spec = process.env['URL_PIONEER_SPEC']
 
 //const mnemonic = 'all all all all all all all all all all all all'
 let mnemonic = process.env['WALLET_MAINNET_DEV']
-
 let username = process.env['TEST_USERNAME_2']
 let queryKey = process.env['TEST_QUERY_KEY_2']
 
@@ -40,29 +38,25 @@ let run_test = async function(){
             // username:"user:cfd27e74",
             spec
         }
+        let Pioneer = new pioneerApi(spec,config)
+        let pioneer = await Pioneer.init()
 
-        let client = new Client('http://127.0.0.1:9001/spec/swagger.json', { queryKey: 'key:public:2' });
-        await client.pioneer.Invocations();
-
-        // let Pioneer = new pioneerApi(spec,config)
-        // let pioneer = await Pioneer.init()
-        //
-        // // console.log("pioneer: ", pioneer)
-        // // let globals = await pioneer.Globals();
-        // // console.log("globals: ",globals);
-        // console.log("pioneer: ",pioneer);
+        // console.log("pioneer: ", pioneer)
+        // let globals = await pioneer.Globals();
+        // console.log("globals: ",globals);
+        // // console.log("pioneer: ",pioneer);
         // let result = await pioneer.Invocations()
         // console.log("result: ",result);
 
-        // let redemptionBody = {
-        //     publicAddress:"addy",
-        //     signature:"sig",
-        //     message:"msg"
-        // }
+        let redemptionBody = {
+            publicAddress:"addy",
+            signature:"sig",
+            message:"msg"
+        }
 
         //redemption
-        // let redemption = await pioneer.Redemption("",redemptionBody)
-        // console.log("redemption: ",redemption.data)
+        let redemption = await pioneer.Redemption(redemptionBody)
+        console.log("redemption: ",redemption.data)
 
         // let tx = {
         //     from: 'eth',
@@ -77,8 +71,8 @@ let run_test = async function(){
         // let currencies = await pioneer.CurrenciesChangelly()
         // console.log("currencies: ",currencies.data)
 
-        // let user = await pioneer.User()
-        // console.log("user: ",user.data)
+        let user = await pioneer.User()
+        console.log("user: ",user.data)
 
         // console.log(signer)
         // // let globals = await pioneer.instance.Globals()

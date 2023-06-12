@@ -5,7 +5,7 @@
  */
 
 const TAG = " | REDIS-CONNECTION-MODULE | "
-//const log = require("log")
+//const log = require('@pioneer-platform/loggerdog')()
 
 //mock in tests
 let Redis
