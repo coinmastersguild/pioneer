@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-invoke",
-  "version": "8.1.43",
+  "version": "8.1.44",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,9 +14,9 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "8.1.27",
-    "@pioneer-platform/pioneer-client": "^9.0.6",
-    "@pioneer-platform/pioneer-types": "^8.1.51",
+    "@pioneer-platform/loggerdog": "^8.1.28",
+    "@pioneer-platform/pioneer-client": "^9.0.8",
+    "@pioneer-platform/pioneer-types": "^8.1.52",
     "@types/node": "^18.15.11",
     "dotenv": "^8.2.0",
     "openapi-client-axios": "^6.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/avax-network",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.1.0",
-    "@pioneer-platform/blockbook": "^8.1.47",
-    "@pioneer-platform/loggerdog": "^8.1.26",
+    "@pioneer-platform/blockbook": "^8.1.48",
+    "@pioneer-platform/loggerdog": "^8.1.28",
     "@xchainjs/xchain-util": "^0.2.6",
     "axios": "^1.3.4",
     "dotenv": "^8.2.0",
