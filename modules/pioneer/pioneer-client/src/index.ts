@@ -1,6 +1,15 @@
+/*
+      Pioneer Client
+      
+      swagger docs:
+        https://pioneers.dev/spec/swagger.json
+      
+                        -Highlander
+ */
 // @ts-ignore
 import Swagger from 'swagger-client';
-
+const log = require('@pioneer-platform/loggerdog')()
+const TAG = " | Client | "
 
 class Pioneer {
     queryKey: any;
@@ -15,16 +24,15 @@ class Pioneer {
     }
 
     async init() {
+        let tag = TAG + " | init | ";
         try {
             if (!this.queryKey) throw Error(" You must create an api key! ");
-
-            console.log("Creating Swagger client with Authorization key: " + this.queryKey);
-
+            log.debug("Creating Swagger client with Authorization key: " + this.queryKey);
             this.client = await new Swagger({
                 url: this.spec,
                 requestInterceptor: (req: { headers: { Authorization: any; }; }) => {
                     req.headers.Authorization = this.queryKey;
-                    console.log("Request interceptor set headers: ", req.headers);
+                    log.debug(tag,"Request interceptor set headers: ", req.headers);
                     return req;
                 }
             });
@@ -36,9 +44,9 @@ class Pioneer {
                     const operationId = this.client.spec.paths[path][method].operationId;
 
                     this.pioneer[operationId] = async (parameters:any) => {
-                        console.log("Executing operation " + operationId + " with parameters ", parameters);
-                        console.log("path: ",path)
-                        console.log("method: ",method)
+                        log.debug("Executing operation " + operationId + " with parameters ", parameters);
+                        log.debug(tag,"path: ",path)
+                        log.debug(tag,"method: ",method)
                         try {
                             
                             let request:any = {
@@ -52,7 +60,7 @@ class Pioneer {
                             if(method === 'post'){
                                 request.requestBody = parameters
                             }
-                            console.log("request: ",request)
+                            log.debug(tag,"request: ",request)
                             const result = await this.client.execute(request);
                             return { data: result.body };
                         } catch (e) {

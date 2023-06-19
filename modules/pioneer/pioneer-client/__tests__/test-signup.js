@@ -8,7 +8,7 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let pioneerApi = require("../lib")
+const Pioneer = require("../lib").default;
 
 let signer = require("eth_mnemonic_signer")
 
@@ -17,7 +17,7 @@ let signer = require("eth_mnemonic_signer")
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
-
+const log = require('@pioneer-platform/loggerdog')()
 const mnemonic = 'all all all all all all all all all all all all'
 //let mnemonic = process.env['WALLET_MAINNET_DEV']
 
@@ -54,100 +54,41 @@ let run_test = async function(){
         //     spec
         // }
         console.log("config: ",config)
-
-        //get config
-        let pioneer = new pioneerApi(spec,config)
-        pioneer = await pioneer.init()
-
+        
+        // Create an instance of the Pioneer class
+        let pioneer = new Pioneer(spec, config);
+        pioneer = await pioneer.init();
         //list developers
-        let txInfo = await pioneer.instance.ListDevelopers()
-        console.log("devs: ",txInfo.data)
+        console.log("pioneer: ",pioneer)
+        // let txInfo = await pioneer.ListDevelopers({limit:10,skip:0})
+        // log.debug("devs: ",txInfo.data)
 
         // console.log(signer)
-        // // let globals = await pioneer.instance.Globals()
-        // // console.log("globals: ",globals.data)
-        //
-        // let info = await pioneer.instance.Info()
-        // console.log("info: ",info.data)
-        //
-        // //get address
+        // let globals = await pioneer.instance.Globals()
+        // console.log("globals: ",globals.data)
 
-        // let address = await signer.getAddress(mnemonic)
-        // console.log("address: ",address)
-        //
-        // //is address logged in?
-        // let user = await pioneer.instance.GetUser({publicAddress:address})
-        // console.log("user: ",user.data)
-        //
-        // let nonce = user.data.nonce
-        //
-        // //signup
-        // //get message to sign
-        // let message = `I am signing my one-time nonce: ${nonce}`
-        //
-        // //sign
-        // let signature = await signer.signMessage(message,mnemonic)
-        // console.log("signature: ",signature)
-        //
-        // //login
-        // let loginResp = await pioneer.instance.Login({},{publicAddress:address,signature,message})
-        // console.log("loginResp: ",loginResp.data)
+        let address = await signer.getAddress(mnemonic)
+        console.log("address: ",address)
 
+        //is address logged in?
+        let user = await pioneer.GetUser({publicAddress:address})
+        console.log("user: ",user.data)
+
+        let nonce = user.data.nonce
 
         //signup
         //get message to sign
-        // let message = `nonce: ${nonce} MOTD: Welcome to the Dapp store!`
-        //
-        // //sign
-        // let signature = await signer.signMessage(message,mnemonic)
-        // console.log("signature: ",signature)
-        //
-        // //update MOTD
-        // let updateResp = await pioneer.instance.UpdateMOTD({},{publicAddress:address,signature,message})
-        // console.log("updateResp: ",updateResp)
+        let message = `I am signing my one-time nonce: ${nonce}`
 
+        //sign
+        let signature = await signer.signMessage(message,mnemonic)
+        log.info("signature: ",signature)
 
-        //add token to auth header
-
-        //see public info
-        //see public info + private
-
-        // let status = await pioneer.instance.Status()
-        // console.log("status: ",status.data)
-
-        // console.log("tokens: ",status.data.rango.tokens[0])
-        // console.log("blockchains: ",status.data.rango.blockchains)
-        // console.log("blockchains: ",status.data.rango.blockchains[0])
-        // console.log("swappers: ",status.data.rango.swappers)
-        // console.log("swappers: ",status.data.rango.swappers[0])
-
-        // console.log("status: ",status.data.exchanges.thorchain)
-        // console.log("status: ",status.data.exchanges.thorchain.assets)
-        // console.log("status: ",status.data.exchanges.osmosis.assets)
-
-
-        // let invocation = '7dbdd41c-ce39-4e28-9493-08e3c56e5c5b'
-        // let txInfo = await pioneer.instance.Invocation(invocation)
-        // console.log("invocation: ",txInfo.data)
-
-        //Submit new dev
-        // let dev = {
-        //     username: 'highlander',
-        //     address:"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
-        //     signature:"asfasdd"
-        // }
-        //
-        //
-        // let txInfo = await pioneer.instance.CreateDeveloper(dev)
-        // console.log("apps: ",txInfo.data)
-
-
-        //remove developer
-
-
-
-
-
+        //login
+        let loginInput = {publicAddress:address,signature,message}
+        log.info("loginInput: ",loginInput)        
+        let loginResp = await pioneer.Login(loginInput)
+        console.log("loginResp: ",loginResp.data)
 
 
     }catch(e){
