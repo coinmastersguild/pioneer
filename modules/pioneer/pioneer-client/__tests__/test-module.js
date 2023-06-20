@@ -18,10 +18,14 @@ const runTest = async () => {
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
 
-        let query = "How much ETH I got?"
-        let result = await pioneer.Query({query});
+        // let query = "How much ETH I got?"
+        // let result = await pioneer.Query({query});
+        // console.log("result: ",result.data)
+
+        let name = "shapeshift"
+        let result = await pioneer.ListAppVotesByName({name});
         console.log("result: ",result.data)
-        
+
         // // Access the Pioneer methods and execute the API calls
         // console.log("pioneer: ", pioneer);
         // const globals = await pioneer.Globals();
