@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/zapper-client",
-  "version": "8.1.21",
+  "version": "8.1.22",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.28",
+    "@pioneer-platform/loggerdog": "^8.1.29",
     "axios": "^1.3.4",
     "dotenv": "^8.2.0"
   },

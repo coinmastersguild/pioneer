@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-crypto",
-  "version": "8.1.24",
+  "version": "8.1.25",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.28",
+    "@pioneer-platform/loggerdog": "^8.1.29",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
