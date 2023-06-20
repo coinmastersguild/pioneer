@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-network",
-  "version": "8.1.60",
+  "version": "8.1.63",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.1.0",
-    "@pioneer-platform/blockbook": "^8.1.49",
+    "@pioneer-platform/blockbook": "8.1.52",
     "@pioneer-platform/loggerdog": "^8.1.29",
     "@xchainjs/xchain-util": "^0.2.6",
-    "axios": "^1.3.4",
+    "axios": "^0.21.4",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
     "request-promise": "^4.2.6",
@@ -37,5 +37,5 @@
   ],
   "author": "Bithighlander <pioneer@gmail.com>",
   "license": "GPL",
-  "gitHead": "f597e5ae9021d4f4be4fef03516e064a9bdd7af0"
+  "gitHead": "8c626a669f7045d1eb9c00252d9a81845a57fa50"
 }
