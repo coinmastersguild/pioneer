@@ -22,9 +22,18 @@ const runTest = async () => {
         // let result = await pioneer.Query({query});
         // console.log("result: ",result.data)
 
-        let name = "shapeshift"
-        let result = await pioneer.ListAppVotesByName({name});
+        // let name = "shapeshift"
+        // let result = await pioneer.ListAppVotesByName({name});
+        // console.log("result: ",result.data)
+
+        let result = await pioneer.ListDevelopers({limit:100,skip:0});
         console.log("result: ",result.data)
+
+        //public developer info
+        // let address = '0x141d9959cae3853b035000490c03991eb70fc4ac'
+        // let result = await pioneer.GetDevInfo({address});
+        // console.log("result: ",result.data)
+
 
         // // Access the Pioneer methods and execute the API calls
         // console.log("pioneer: ", pioneer);

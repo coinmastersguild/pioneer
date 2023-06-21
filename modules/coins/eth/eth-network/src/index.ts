@@ -97,7 +97,9 @@ import {
 	TCRopstenAbi,
 	ERC20ABI,
 	AIRDROP_ABI,
-	ERC721_ABI
+	ERC721_ABI,
+	METADATA_ABI,
+	PIONEER_METADATA_CONTRACT_ADDRESS
 } from './constant'; // Replace with your actual module file path
 
 
@@ -218,19 +220,32 @@ const get_all_pioneers = async function() {
 	let tag = TAG + " | get_all_pioneers | ";
 	try {
 		let output:any = {};
-		
-		const nftContract = new web3.eth.Contract(ERC721_ABI, PIONEER_CONTRACT_ADDRESS);
 
+		const nftContract = new web3.eth.Contract(ERC721_ABI, PIONEER_CONTRACT_ADDRESS);
+		const metadataContract = new web3.eth.Contract(METADATA_ABI, PIONEER_METADATA_CONTRACT_ADDRESS);
 		// Fetch the total supply of the NFTs
 		const totalSupply = await nftContract.methods.totalSupply().call();
 
 		output['totalSupply'] = totalSupply;
 		output['owners'] = []
+		output['images'] = [] // add an images array to output
 		for (let i = 0; i < totalSupply; i++) {
 			const owner = await nftContract.methods.ownerOf(i).call();
 			output['owners'].push(owner.toLowerCase())
-		}
+			//get images
+			const imageInfo = await metadataContract.methods.getAttributes(i).call();
+			//log.info(tag,"imageInfo: ",imageInfo)
 
+			// Parse the JSON string and get the image name
+			const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
+
+			// Build the full image URL by replacing the image name in the base URL
+			const baseImageUrl = "https://ipfs.io/ipfs/bafybeiezdzjofkcpiwy5hlvxwzkgcztxc6xtodh3q7eddfjmqsguqs47aa/0-backgrounds/";
+			const fullImageUrl = baseImageUrl + imageName + ".png";
+
+			// Add this image URL to the images array in output
+			output['images'].push({address:owner.toLowerCase(), image:fullImageUrl});
+		}
 		return output;
 	} catch(e) {
 		console.error(tag, e);
