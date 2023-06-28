@@ -60,8 +60,8 @@ module.exports = {
     getAssetsCoinCap: function () {
         return get_assets_coincap();
     },
-    getAssetsCoingecko: function () {
-        return get_assets_coingecko();
+    getAssetsCoingecko: function (limit:number,skip:number){
+        return get_assets_coingecko(limit,skip);
     },
     getPrice: function (asset:string) {
         return get_price(asset);
@@ -307,37 +307,39 @@ let get_assets_coincap = async function () {
     }
 }
 
-let get_assets_coingecko = async function () {
+const get_assets_coingecko = async function (limit?: number, skip?: number) {
     let tag = TAG + ' | get_assets_coingecko | '
     try {
-        let output:any =  {}
+        let output = {}
+        if(!limit) limit = 250
+        if(!skip) skip = 0
+        let url = URL_COINGECKO + `coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${skip}&sparkline=false`
+        log.debug(tag, "url: ", url)
 
-        let url = URL_COINGECKO + 'coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false'
-        log.debug(tag,"url: ",url)
         let result = await axios({
             url: url,
             method: 'GET'
         })
-        log.debug(tag,"result: ",result.data)
-        //parse into keys array off ticker
+
+        log.debug(tag, "result: ", result.data)
         let allCoinsArray = result.data
-        log.debug(tag,"allCoinsArray: ",allCoinsArray.length)
+        log.debug(tag, "allCoinsArray: ", allCoinsArray.length)
 
-        for(let i = 0; i < allCoinsArray.length; i++){
-            //
+        for (let i = 0; i < allCoinsArray.length; i++) {
             let coinInfo = allCoinsArray[i]
-            log.debug(tag,"coinInfo: ",coinInfo)
-
+            log.debug(tag, "coinInfo: ", coinInfo)
+            // @ts-ignore
             output[coinInfo.symbol.toUpperCase()] = coinInfo
         }
-        log.debug('result: ', output)
 
+        log.debug('result: ', output)
         return output
     } catch (e) {
         //handle error gracefully
         return {}
     }
 }
+
 
 
 const get_prices_in_quote = async function (assets:[any], quote:string) {

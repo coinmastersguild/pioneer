@@ -17,7 +17,10 @@ let run_test = async function(){
         }
 
         let result = await client.validateTransaction(tx.to,tx.from,tx.data)
-        console.log("result: ",result)
+        console.log("result: ",result.data)
+
+        // let result2 = await client.validateTransactionv2(tx.to,tx.from,tx.data)
+        // console.log("result2: ",result2.data)
     }   catch (e) {
         console.error(e)
     }

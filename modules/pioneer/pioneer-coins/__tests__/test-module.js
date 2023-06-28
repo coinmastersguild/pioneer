@@ -146,16 +146,16 @@ console.log(bip32ToAddressNList(bip32))
 // run_test()
 //
 //
-// let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
-// let scriptType = "legacy"
-// let coin = "BTC"
-// let account = 0
-// let index = 0
-// let isTestnet = false
-//
-// get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
-//     .then(function(address){
-//         console.log("address: ",address)
-//     })
+let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
+let scriptType = "legacy"
+let coin = "BTC"
+let account = 0
+let index = 0
+let isTestnet = false
+
+get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
+    .then(function(address){
+        console.log("address: ",address)
+    })
 
 
