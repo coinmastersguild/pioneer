@@ -15,13 +15,14 @@ const runTest = async () => {
         let pioneer = new Pioneer(spec, config);
         pioneer = await pioneer.init();
 
-        const user = await pioneer.User();
-        console.log("user: ", user.data);
+        // const user = await pioneer.User();
+        // console.log("user: ", user.data);
 
         //submit dapp
-        let url = "https://etherscan.io/"
+        let homepage = "https://etherscan.io/"
+        let app = homepage
         //
-        const dappInfo = await pioneer.SubmitUrl({url});
+        const dappInfo = await pioneer.SubmitUrl({homepage,app});
         console.log("dappInfo: ", dappInfo.data);
 
     } catch (e) {

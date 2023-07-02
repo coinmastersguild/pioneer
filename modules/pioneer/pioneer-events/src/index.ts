@@ -24,6 +24,7 @@ export class Events {
     private disconnect: () => Promise<void>;
     private subscribeToKey: () => Promise<boolean>;
     private subscribeToInvocation: (invocationId: string) => Promise<boolean>;
+    private send: (channel: string, event: any) => Promise<boolean>;
     constructor(config:EventsConfig) {
         this.wss = config.wss
         this.isConnected = false
@@ -112,6 +113,21 @@ export class Events {
             }
         }
         this.subscribeToKey = async function () {
+            let tag = TAG + " | subscribeToKey | "
+            try {
+
+                //attempt join
+                this.socket.emit('join',{
+                    queryKey:config.queryKey
+                })
+
+                return true
+            } catch (e) {
+                console.error(e)
+                throw e
+            }
+        }
+        this.send = async function (channel:string, event:any) {
             let tag = TAG + " | subscribeToKey | "
             try {
 

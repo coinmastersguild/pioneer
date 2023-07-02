@@ -2,7 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:39c95ff7-8b86-49bd-bd42-b30697a8d72c',
@@ -15,6 +16,9 @@ const runTest = async () => {
         // Initialize the Pioneer instance
         let pioneer = new Pioneer(spec, config);
         pioneer = await pioneer.init();
+
+        let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
+        console.log("info: ",info.data.length)
 
         // const user = await pioneer.User();
         // console.log("user: ", user.data);

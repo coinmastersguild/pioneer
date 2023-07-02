@@ -370,8 +370,8 @@ let run_test = async function(){
         // let info = await pioneer.SearchByBlockchainName('dash')
         // console.log("onStart: info: ",info.data[0])
 
-        // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
-        // console.log("info: ",info.data.length)
+        let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
+        console.log("info: ",info.data.length)
 
         // let info = await pioneer.SearchAssetsListByChainId({chainId:56,limit:10000,skip:0})
         // console.log("info: ",info.data)

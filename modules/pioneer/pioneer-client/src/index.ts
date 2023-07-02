@@ -8,7 +8,6 @@
  */
 // @ts-ignore
 import Swagger from 'swagger-client';
-const log = require('@pioneer-platform/loggerdog')()
 const TAG = " | Client | "
 
 class Pioneer {
@@ -27,12 +26,10 @@ class Pioneer {
         let tag = TAG + " | init | ";
         try {
             if (!this.queryKey) throw Error(" You must create an api key! ");
-            log.debug("Creating Swagger client with Authorization key: " + this.queryKey);
             this.client = await new Swagger({
                 url: this.spec,
                 requestInterceptor: (req: { headers: { Authorization: any; }; }) => {
                     req.headers.Authorization = this.queryKey;
-                    log.debug(tag,"Request interceptor set headers: ", req.headers);
                     return req;
                 }
             });
@@ -44,9 +41,6 @@ class Pioneer {
                     const operationId = this.client.spec.paths[path][method].operationId;
 
                     this.pioneer[operationId] = async (parameters:any) => {
-                        log.debug("Executing operation " + operationId + " with parameters ", parameters);
-                        log.debug(tag,"path: ",path)
-                        log.debug(tag,"method: ",method)
                         try {
                             
                             let request:any = {
@@ -60,7 +54,6 @@ class Pioneer {
                             if(method === 'post'){
                                 request.requestBody = parameters
                             }
-                            log.debug(tag,"request: ",request)
                             const result = await this.client.execute(request);
                             return { data: result.body };
                         } catch (e) {
