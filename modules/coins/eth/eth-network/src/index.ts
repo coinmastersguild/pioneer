@@ -160,6 +160,9 @@ module.exports = {
 	getSymbolFromContract:function (contract:string) {
 		return get_symbol_from_contract(contract);
 	},
+	getTransferData:function (toAddress:string, amount:string, contract?:string) {
+		return get_token_transfer_data(toAddress, amount, contract);
+	},
 	getPoolPositions:function (address:string) {
 		return get_pool_positions(address);
 	},
@@ -339,6 +342,55 @@ const check_airdrop_claim = async function(address:string){
 
 
 		return output
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+//get_token_transfer_data
+const get_token_transfer_data = async function(toAddress:string, amount:string, contract?:string){
+	let tag = TAG + " | get_token_transfer_data | "
+	try{
+		let minABI = [
+			// balanceOf
+			{
+				"constant":true,
+				"inputs":[{"name":"_owner","type":"address"}],
+				"name":"balanceOf",
+				"outputs":[{"name":"balance","type":"uint256"}],
+				"type":"function"
+			},
+			// decimals
+			{
+				"constant":true,
+				"inputs":[],
+				"name":"decimals",
+				"outputs":[{"name":"","type":"uint8"}],
+				"type":"function"
+			}
+		];
+		const newContract = new web3.eth.Contract(minABI, contract);
+		const decimals = await newContract.methods.decimals().call();
+		// @ts-ignore
+		let value = parseInt(amount / Math.pow(10, decimals))
+		
+		//parse to prescision?
+		let tokenData = await web3.eth.abi.encodeFunctionCall({
+			name: 'transfer',
+			type: 'function',
+			inputs: [
+				{
+					type: 'address',
+					name: '_to'
+				},
+				{
+					type: 'uint256',
+					name: '_value'
+				}
+			]
+		}, [toAddress, value])
+
+		return tokenData
 	}catch(e){
 		console.error(tag,e)
 	}

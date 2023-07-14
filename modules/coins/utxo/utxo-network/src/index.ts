@@ -306,7 +306,10 @@ let get_fee = async function(coin:string){
             output = output.data.fastestFee
         }else{
             //eh just send whatever, probally be fine
-            throw Error("unknown coin! "+coin)
+            //curl -X 'GET' \
+            //   'https://api.bitcoincash.shapeshift.com/api/v1/fees' \
+            //   -H 'accept: application/json'
+
         }
 
 

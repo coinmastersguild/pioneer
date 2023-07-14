@@ -25,6 +25,7 @@ let run_test = async function(){
         let address = '0x33b35c665496bA8E71B22373843376740401F106'
         let result = await client.isFoxOwner(address)
         console.log("result: ",result)
+        
         //get address info
 
 

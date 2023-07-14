@@ -2,11 +2,11 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
-    queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
+    queryKey:'key:5d1e5976-0697-4dbb-80a2-a3d842f45928',
     //queryKey: 'key:39c95ff7-8b86-49bd-bd42-b30697a8d72c',
 };
 
@@ -20,8 +20,8 @@ const runTest = async () => {
         // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // console.log("info: ",info.data.length)
 
-        // const user = await pioneer.User();
-        // console.log("user: ", user.data);
+        const user = await pioneer.User();
+        console.log("user: ", user.data);
 
         // let query = "How much ETH I got?"
         // let result = await pioneer.Query({query});
@@ -34,13 +34,6 @@ const runTest = async () => {
         // let result = await pioneer.ListDevelopers({limit:100,skip:0});
         // console.log("result: ",result.data)
 
-        // let result = await pioneer.SyncPubkeys({network:"ethereum"});
-        // console.log("result: ",result.data)
-
-        //GetFeeInfo
-        let result = await pioneer.GetFeeInfo({coin:"BCH"});
-        console.log("result: ",result)
-
         //submit review
         // let review = {
         //     app:'shapeshift',
@@ -48,14 +41,13 @@ const runTest = async () => {
         //     text: "This is a test review",
         //     testedBlockchains: ["ethereum"],
         // }
-
         // let body = {
         //     signer:"foobar",
         //     payload:"bvlablabla",
         //     signature:"sigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsigsig",
         //     review
         // }
-        
+
         // let body = {
         //     "signer": "0x33b35c665496ba8e71b22373843376740401f106",
         //     "payload": "{\"type\": \"revoke\", \"app\": \"shapeshift\"}",
@@ -71,7 +63,7 @@ const runTest = async () => {
         // let app = "shapeshift"
         // let result = await pioneer.ListReviewsByApp({app,limit:100,skip:0});
         // console.log("result: ",result.data)
-        
+
         // let assets = await pioneer.GetAssets({sortBy:'name',limit:100,skip:100,sortOrder:'asc',filterTags:['']});
         // console.log("assets: ",assets.data.total)
         // console.log("assets: ",assets.data.assets.length)
@@ -110,7 +102,7 @@ const runTest = async () => {
            for each blockchain get 3 nodes
 
          */
-        
+
         //get a tested node for eth chainId
         // let chainId = 1
         // let result = await pioneer.GetEvmNode({chainId});
@@ -164,7 +156,7 @@ const runTest = async () => {
         // }
         // let result = await pioneer.Register(register);
         // console.log("result: ",result.data)
-        
+
         //register keepkey
 
         // let register = {
@@ -482,9 +474,9 @@ const runTest = async () => {
             "auth": "lol",
             "provider": "lol"
         }
-        // let result2 = await pioneer.Register(register2);
-        // console.log("result2: ",result2.data)
-        
+        let result = await pioneer.Register(register2);
+        console.log("result: ",result.data)
+
         //public developer info
         // let address = '0x141d9959cae3853b035000490c03991eb70fc4ac'
         // let result = await pioneer.GetDevInfo({address});
@@ -510,7 +502,7 @@ const runTest = async () => {
         //
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
-        
+
         //get pioneers
         // const developers = await pioneer.ListDevelopers({limit:1000,skip:0});
         // console.log("developers: ", developers.data);

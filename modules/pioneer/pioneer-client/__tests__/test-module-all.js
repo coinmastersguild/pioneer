@@ -132,7 +132,7 @@ let run_test = async function(){
         //see public info
         //see public info + private
 
-        // let status = await pioneer.instance.Status()
+        // let status = await pioneer.Status()
         // console.log("status: ",status.data)
 
         // console.log("tokens: ",status.data.rango.tokens[0])
@@ -147,7 +147,7 @@ let run_test = async function(){
 
 
         // let invocation = '7dbdd41c-ce39-4e28-9493-08e3c56e5c5b'
-        // let txInfo = await pioneer.instance.Invocation(invocation)
+        // let txInfo = await pioneer.Invocation(invocation)
         // console.log("invocation: ",txInfo.data)
 
         //Submit new dev
@@ -163,7 +163,7 @@ let run_test = async function(){
 
         //list developers
 
-        // let txInfo = await pioneer.instance.ListDevelopers()
+        // let txInfo = await pioneer.ListDevelopers()
         // console.log("apps: ",txInfo.data)
 
         //remove developer
@@ -239,7 +239,7 @@ let run_test = async function(){
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
 
-        // let data = await pioneer.instance.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
+        // let data = await pioneer.ListUnspent({network:'BTC',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
         // data = data.data
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))

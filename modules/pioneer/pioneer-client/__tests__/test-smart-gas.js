@@ -73,6 +73,64 @@ let example = {
     }
 }
 
+let example_2 =  {
+    addressNList: [ 2147483692, 2147483708, 2147483648, 0, 0 ],
+    from: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+    chainId: 1,
+    data: '0x41f9b62c168041b76b57aaa8a81b105dc06c5f11db64c9325c5d3fa13a0df9be1c1a934c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000866206a6173706572000000000000000000000000000000000000000000000000',
+    gasPrice: '0xf22d45af6',
+    gasLimit: '0x13880',
+    to: '0xe0f821d6cc2ab0d0660023a10340dc267120c9d4',
+    value: '0x0',
+    nonce: '0x73',
+    maxPriorityFeePerGas: '0x42c1d80',
+    maxFeePerGas: '0x0'
+}
+
+let example_3 = {
+    "_id": {
+        "$oid": "64a607b010dbd70013d46696"
+    },
+    "invokeId": "invoke:tCmqawQu47tg6ZVV8DrjsY",
+    "success": true,
+    "isEIP1559": false,
+    "original": {
+        "to": "0xc770eefad204b5180df6a14ee197d99d808ee52d",
+        "from": "0x9d63dbed61abbbcc0c63b5bc10c4bcc44f05dc39",
+        "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "isError": false,
+    "recommended": {
+        "addressNList": null,
+        "from": "0x9d63dbed61abbbcc0c63b5bc10c4bcc44f05dc39",
+        "chainId": null,
+        "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "to": "0xc770eefad204b5180df6a14ee197d99d808ee52d",
+        "value": null,
+        "gasLimit": null,
+        "gas": null
+    }
+}
+
+let example_4 = {
+    "addressNList": [
+        2147483692,
+        2147483708,
+        2147483648,
+        0,
+        0
+    ],
+    "chainId": 1,
+    "from": "0x9d63dbed61abbbcc0c63b5bc10c4bcc44f05dc39",
+    "data": "0x659dd2b40000000000000000000000000000000000000000000000000000000000000004",
+    "gasLimit": "0x7a120",
+    "to": "0x360e2f3d92d23de8e5d8a461c2544aaf01eba549",
+    "value": "0x221b262dd8000",
+    "nonce": "0x7e",
+    "maxPriorityFeePerGas": "0x6fb754a",
+    "maxFeePerGas": "0x0"
+}
+
 // Define an async function to run the test
 const runTest = async () => {
     try {
@@ -80,7 +138,10 @@ const runTest = async () => {
         let pioneer = new Pioneer(spec, config);
         pioneer = await pioneer.init();
 
-        tx = example.original
+        // tx = example.original
+        // tx = example_2
+        // tx = example_3.original
+        tx = example_4
         let result = await pioneer.SmartInsight(tx);
         console.log("result: ",result.data)
 

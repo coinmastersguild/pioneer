@@ -31,20 +31,6 @@ axiosRetry(axios, {
     },
 });
 
-let BLOCKBOOK_URLS:any = {
-    'BTC':process.env['BTC_BLOCKBOOK_URL'],
-    'ETH':process.env['ETH_BLOCKBOOK_URL'],
-    'BCH':process.env['BCH_BLOCKBOOK_URL'],
-    'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
-    'LTC':process.env['DOGE_BLOCKBOOK_URL'],
-    'DASH':process.env['DASH_BLOCKBOOK_URL'],
-    'DGB':process.env['DGB_BLOCKBOOK_URL'],
-    'ETHW':process.env['ETHW_BLOCKBOOK_URL'],
-    'BSC':process.env['BSC_BLOCKBOOK_URL'],
-    'ADA':process.env['ADA_BLOCKBOOK_URL'],
-    'GRS':process.env['GRS_BLOCKBOOK_URL']
-}
-
 module.exports = {
     init:function (servers:any,runtime?:string) {
         return init_network(servers,runtime);
@@ -54,30 +40,6 @@ module.exports = {
     },
     getFees:function (coin:string) {
         return get_fees(coin);
-    },
-    getTransaction:function (coin:string,txid:string) {
-        return get_transaction(coin,txid);
-    },
-    getAddressInfo:function (coin:string,address:string,filter?:string) {
-        return get_info_by_address(coin,address,filter);
-    },
-    getPubkeyInfo:function (coin:string,pubkey:string,filter?:string | undefined) {
-        return get_info_by_pubkey(coin,pubkey,filter);
-    },
-    txidsByAddress:function (coin:string,address:string,page?:number) {
-        return get_txids_by_address(coin,address,page);
-    },
-    txsByXpub: function (coin:string,addresses:any) {
-        return get_txs_by_xpub(coin,addresses);
-    },
-    utxosByXpub: function (coin:string,xpub:any) {
-        return get_utxos_by_xpub(coin,xpub);
-    },
-    getBalanceByXpub: function (coin:string,xpub:any) {
-        return get_balance_by_xpub(coin,xpub);
-    },
-    broadcast: function (coin:string,hex:string) {
-        return broadcast_transaction(coin,hex);
     },
 }
 
@@ -339,31 +301,10 @@ let init_network = function (servers:any,runtime?:string) {
         log.debug(tag,"checkpoint: ")
         let output:any = []
 
-        //get networks from coins module
+        //get all Unchained nodes networks from pioneer
 
-
-
-        // let blockbooks = getBlockBooks()
-        // for(let i = 0; i < blockbooks.length; i++){
-        //     let coinInfo = blockbooks[i]
-        //     coinInfo.symbol = coinInfo.symbol.toUpperCase()
-        //     log.debug("coinInfo: ",coinInfo)
-        //     let blockbookurl = coinInfo.explorer.tx
-        //     blockbookurl = blockbookurl.replace("/tx/","")
-        //
-        //     if(servers && servers[coinInfo.symbol]){
-        //         //use configured
-        //         BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
-        //         log.debug(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
-        //     }else{
-        //         if(!runtime || runtime === 'public'){
-        //             //use public
-        //             BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
-        //             log.debug(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
-        //         }
-        //         //TODO use pioneer's
-        //     }
-        // }
+        //select a primary by ping time
+        
 
 
         return true

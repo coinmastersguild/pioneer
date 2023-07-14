@@ -17,12 +17,17 @@ network.init(servers)
 // network.init()
 //console.log("keepkeyPubkeys: ",process.env["TEST_BCH_XPUB"])
 
-//txidsByAddress
-network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
+network.getFees("BCH")
     .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
+        console.log("fees" ,resp)
     })
+
+//txidsByAddress
+// network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // network.broadcast("ETH","0xf86e8202ab85028fa6ae008301388094c3affff54122658b89c31183cec4f15514f34624870aa87bee5380008025a04cbf2dc700925319439ae86413eb50a82a7250eff94a2e6e82b223ff8873ca16a04f2745e71c811889ca6a1fdb36ff33486c0f7b7796638d757a3af1adb3ce1afa")
 //     .then(function(resp){
@@ -92,10 +97,10 @@ network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
 //     })
 
 //0x02f87482a86a028459682f00850bfda3a30082520894c3affff54122658b89c31183cec4f15514f3462487038d7ea4c6800080c080a0f4676ba535a3b30a860770addd9d528aceec7c3660c3b6230392d9df547d78a1a07352470b4ab95b2365d355e2992e133319fcde45a61ed31f3b501b8f9a0e824b
-network.broadcast("AVAX","0x02f87482a86a028459682f00850bfda3a30082520894c3affff54122658b89c31183cec4f15514f3462487038d7ea4c6800080c080a0f4676ba535a3b30a860770addd9d528aceec7c3660c3b6230392d9df547d78a1a07352470b4ab95b2365d355e2992e133319fcde45a61ed31f3b501b8f9a0e824b")
-    .then(function(resp){
-        console.log("txid: ",resp)
-    })
+// network.broadcast("AVAX","0x02f87482a86a028459682f00850bfda3a30082520894c3affff54122658b89c31183cec4f15514f3462487038d7ea4c6800080c080a0f4676ba535a3b30a860770addd9d528aceec7c3660c3b6230392d9df547d78a1a07352470b4ab95b2365d355e2992e133319fcde45a61ed31f3b501b8f9a0e824b")
+//     .then(function(resp){
+//         console.log("txid: ",resp)
+//     })
 
 
 //0100000001ff484916ddaeeef120e41d25f3ac706e6b0d10f21b55ed666313ac83b90d4c0b010000006b483045022100fd6aa378be066331d89fd45d987622b2835a85b6ce44497a57ce3a0c316b556b0220490e1162047307496cda8c34ade80cc2c7a854858c2c54dfcf6ada7ac46aaf8701210303a4b3e9810496902cc2333564a4768f3c74160e9178424068debe7b4e04ceacffffffff02b0c41200000000001976a914885e5acbe3d0198e5b3736095cc6bbd0b2c2349588acacc0cc07000000001976a914e2e74abdea3612eeb9def06e9c54bbb62b74daf688ac00000000

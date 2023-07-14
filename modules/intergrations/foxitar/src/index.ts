@@ -18,7 +18,6 @@ const FOX_CONTRACT_ABI = ""; // provide the ABI here
 const FOXITAR_CONTRACT_ADDRESS = "0x2e727C425a11Ce6b8819B3004dB332C12D2aF2a2"; // provide the contract address here
 //@TODO get from pioneer best node
 const NETWORK_PROVIDER = "https://polygon.llamarpc.com";
-
 const web3 = new Web3(new Web3.providers.HttpProvider(NETWORK_PROVIDER));
 
 module.exports = {

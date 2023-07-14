@@ -1,5 +1,5 @@
 const TAG = " | ws-client | ";
-const EventEmitter = require('events');
+import { EventEmitter } from 'events';
 const io = require('socket.io-client');
 const wait = require('wait-promise');
 const sleep = wait.sleep;
@@ -128,13 +128,11 @@ export class Events {
             }
         }
         this.send = async function (channel:string, event:any) {
-            let tag = TAG + " | subscribeToKey | "
+            let tag = TAG + " | send | "
             try {
 
                 //attempt join
-                this.socket.emit('join',{
-                    queryKey:config.queryKey
-                })
+                this.socket.emit(channel,event)
 
                 return true
             } catch (e) {

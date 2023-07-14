@@ -27,15 +27,15 @@ let run_test = async function(){
 
         let config = {
             // queryKey:TEST_QUERY_KEY_2,
-            username:"tester123",
-            queryKey:"12312312ssdasas",
+            username:"ALPHA_BANKLESS_1",
+            queryKey:"12312312ssdasaasdasdaasdasdsss",
             wss:"ws://127.0.0.1:9001"
         }
 
         //sub ALL events
         let clientEvents = new Events.Events(config)
         clientEvents.init()
-        clientEvents.setUsername(config.username)
+
         //let invocation = ""
 
         // clientEvents.subscribeToKey()
@@ -45,6 +45,17 @@ let run_test = async function(){
             console.log("message: ",request)
         })
 
+        let send_message = async function(){
+            console.log("sending message")
+            let event = {
+                actionId: '0x0',
+                sessionId: 'vn9QyWJAtfqSpUbtahmVuC',
+                address: '0xC3aFFff54122658b89C31183CeC4F15514F34624',
+                type: 'lpAddAsym'
+            }
+            clientEvents.send('message',event)
+        }
+        setTimeout(send_message,6000)
         //Filter
         //blocks
         //payments
