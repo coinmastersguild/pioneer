@@ -36,13 +36,9 @@ class Pioneer {
 
             Object.keys(this.client.spec.paths).forEach((path) => {
                 Object.keys(this.client.spec.paths[path]).forEach((method) => {
-                    
-
                     const operationId = this.client.spec.paths[path][method].operationId;
-
                     this.pioneer[operationId] = async (parameters:any) => {
                         try {
-                            
                             let request:any = {
                                 operationId,
                                 parameters: {

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-network",
-  "version": "8.1.57",
+  "version": "8.1.63",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -13,6 +13,7 @@
   "dependencies": {
     "@pioneer-platform/blockbook": "^8.1.49",
     "@pioneer-platform/loggerdog": "^8.1.29",
+    "@pioneer-platform/unchained": "8.1.57",
     "@types/request-promise-native": "^1.0.17",
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-util": "^0.2.6",

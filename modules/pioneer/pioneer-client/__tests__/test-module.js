@@ -37,9 +37,13 @@ const runTest = async () => {
         // let result = await pioneer.SyncPubkeys({network:"ethereum"});
         // console.log("result: ",result.data)
 
+        // let result = await pioneer.SearchNodesByType({type:"unchained"});
+        // result = result.data
+        // console.log("result: ",result)
+        //
         //GetFeeInfo
-        let result = await pioneer.GetFeeInfo({coin:"BCH"});
-        console.log("result: ",result)
+        // let result = await pioneer.GetFeeInfo({coin:"BTC"});
+        // console.log("result: ",result)
 
         //submit review
         // let review = {
@@ -325,163 +329,163 @@ const runTest = async () => {
         //     "provider": "lol"
         // }
 
-        let register2 = {
-            "username": "user:ebefe06c",
-            "blockchains": [
-                "bitcoin",
-                "ethereum",
-                "thorchain",
-                "bitcoincash",
-                "litecoin",
-                "binance",
-                "cosmos",
-                "dogecoin"
-            ],
-            "context": "0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
-            "publicAddress": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
-            "walletDescription": {
-                "context": "0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
-                "type": "keepkey"
-            },
-            "data": {
-                "pubkeys": [
-                    {
-                        "path": "m/44'/0'/0'",
-                        "pathMaster": "m/44'/0'/0'/0/0",
-                        "source": "keepkey",
-                        "type": "xpub",
-                        "xpub": true,
-                        "pubkey": "xpub6BxKtd6aAuz23XqtWXeSqxShJZn8yqiUmaTdvsPWS3riKkNRcXEPmn1CXmKM1M43mrWfN5QwjdLRghZLrgwMLCeRZqZNuYhVNXr6Pp7aDsH",
-                        "note": "Bitcoin account 0",
-                        "symbol": "BTC",
-                        "blockchain": "bitcoin",
-                        "network": "bitcoin",
-                        "script_type": "p2pkh",
-                        "master": "1JNYtQsc1pizKbn3ScbEPfQ7WcxNqeUHNB",
-                        "address": "1JNYtQsc1pizKbn3ScbEPfQ7WcxNqeUHNB"
-                    },
-                    {
-                        "path": "m/84'/0'/0'",
-                        "pathMaster": "m/84'/0'/0'/0/0",
-                        "source": "keepkey",
-                        "type": "zpub",
-                        "zpub": true,
-                        "pubkey": "xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS",
-                        "note": "Bitcoin account Native Segwit (Bech32)",
-                        "symbol": "BTC",
-                        "blockchain": "bitcoin",
-                        "network": "bitcoin",
-                        "script_type": "p2wpkh",
-                        "master": "bc1q8w2ypqgx39gucxcypqv2m90wz9rvhmmrcnpdjs",
-                        "address": "bc1q8w2ypqgx39gucxcypqv2m90wz9rvhmmrcnpdjs"
-                    },
-                    {
-                        "path": "m/44'/60'/0'",
-                        "pathMaster": "m/44'/60'/0'/0/0",
-                        "source": "keepkey",
-                        "note": " ETH primary (default)",
-                        "symbol": "ETH",
-                        "blockchain": "ethereum",
-                        "network": "ethereum",
-                        "script_type": "ethereum",
-                        "type": "address",
-                        "pubkey": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
-                        "master": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
-                        "address": "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
-                    },
-                    {
-                        "path": "m/44'/931'/0'/0/0",
-                        "pathMaster": "m/44'/931'/0'/0/0",
-                        "source": "keepkey",
-                        "note": " Default RUNE path ",
-                        "symbol": "RUNE",
-                        "blockchain": "thorchain",
-                        "network": "thorchain",
-                        "script_type": "thorchain",
-                        "type": "address",
-                        "pubkey": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx",
-                        "master": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx",
-                        "address": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx"
-                    },
-                    {
-                        "path": "m/44'/118'/0'/0/0",
-                        "pathMaster": "m/44'/118'/0'/0/0",
-                        "source": "keepkey",
-                        "note": " Default ATOM path ",
-                        "symbol": "ATOM",
-                        "blockchain": "cosmos",
-                        "network": "cosmos",
-                        "script_type": "bech32",
-                        "type": "address",
-                        "pubkey": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc",
-                        "master": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc",
-                        "address": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc"
-                    },
-                    {
-                        "path": "m/44'/714'/0'/0/0",
-                        "pathMaster": "m/44'/714'/0'/0/0",
-                        "source": "keepkey",
-                        "note": "Binance default path",
-                        "symbol": "BNB",
-                        "blockchain": "binance",
-                        "network": "binance",
-                        "script_type": "binance",
-                        "type": "address",
-                        "pubkey": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap",
-                        "master": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap",
-                        "address": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap"
-                    },
-                    {
-                        "path": "m/44'/145'/0'",
-                        "pathMaster": "m/44'/145'/0'/0/0",
-                        "source": "keepkey",
-                        "type": "xpub",
-                        "xpub": true,
-                        "pubkey": "xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL",
-                        "note": "Bitcoin Cash Default path",
-                        "symbol": "BCH",
-                        "blockchain": "bitcoincash",
-                        "network": "bitcoincash",
-                        "script_type": "p2pkh",
-                        "master": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
-                        "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"
-                    },
-                    {
-                        "path": "m/44'/2'/0'",
-                        "pathMaster": "m/44'/2'/0'/0/0",
-                        "source": "keepkey",
-                        "type": "xpub",
-                        "xpub": true,
-                        "pubkey": "xpub6CQaRj3ynJXpPXzx6tbRFXLqcUuVanKWkFusZ9P7cDYAAgMmdC89rq6aofxyp1fXvscxZF5HgWgZgD3VA6sYnJPKqWnCfUxCoD1YX9TpBkx",
-                        "note": "Litecoin Default path",
-                        "symbol": "LTC",
-                        "blockchain": "litecoin",
-                        "network": "litecoin",
-                        "script_type": "p2pkh",
-                        "master": "LeELKgiF1VLuMfZ5UnAnXBStD2RagrB7Eb",
-                        "address": "LeELKgiF1VLuMfZ5UnAnXBStD2RagrB7Eb"
-                    },
-                    {
-                        "path": "m/44'/3'/0'",
-                        "pathMaster": "m/44'/3'/0'/0/0",
-                        "source": "keepkey",
-                        "type": "xpub",
-                        "xpub": true,
-                        "pubkey": "xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs",
-                        "note": "Dogecoin Default path",
-                        "symbol": "DOGE",
-                        "blockchain": "dogecoin",
-                        "network": "dogecoin",
-                        "script_type": "p2pkh",
-                        "master": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54",
-                        "address": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54"
-                    }
-                ]
-            },
-            "queryKey": "key:337e39de-3f45-40ac-ace0-d60684d2b92f",
-            "auth": "lol",
-            "provider": "lol"
-        }
+        // let register2 = {
+        //     "username": "user:ebefe06c",
+        //     "blockchains": [
+        //         "bitcoin",
+        //         "ethereum",
+        //         "thorchain",
+        //         "bitcoincash",
+        //         "litecoin",
+        //         "binance",
+        //         "cosmos",
+        //         "dogecoin"
+        //     ],
+        //     "context": "0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+        //     "publicAddress": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //     "walletDescription": {
+        //         "context": "0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+        //         "type": "keepkey"
+        //     },
+        //     "data": {
+        //         "pubkeys": [
+        //             {
+        //                 "path": "m/44'/0'/0'",
+        //                 "pathMaster": "m/44'/0'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "type": "xpub",
+        //                 "xpub": true,
+        //                 "pubkey": "xpub6BxKtd6aAuz23XqtWXeSqxShJZn8yqiUmaTdvsPWS3riKkNRcXEPmn1CXmKM1M43mrWfN5QwjdLRghZLrgwMLCeRZqZNuYhVNXr6Pp7aDsH",
+        //                 "note": "Bitcoin account 0",
+        //                 "symbol": "BTC",
+        //                 "blockchain": "bitcoin",
+        //                 "network": "bitcoin",
+        //                 "script_type": "p2pkh",
+        //                 "master": "1JNYtQsc1pizKbn3ScbEPfQ7WcxNqeUHNB",
+        //                 "address": "1JNYtQsc1pizKbn3ScbEPfQ7WcxNqeUHNB"
+        //             },
+        //             {
+        //                 "path": "m/84'/0'/0'",
+        //                 "pathMaster": "m/84'/0'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "type": "zpub",
+        //                 "zpub": true,
+        //                 "pubkey": "xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS",
+        //                 "note": "Bitcoin account Native Segwit (Bech32)",
+        //                 "symbol": "BTC",
+        //                 "blockchain": "bitcoin",
+        //                 "network": "bitcoin",
+        //                 "script_type": "p2wpkh",
+        //                 "master": "bc1q8w2ypqgx39gucxcypqv2m90wz9rvhmmrcnpdjs",
+        //                 "address": "bc1q8w2ypqgx39gucxcypqv2m90wz9rvhmmrcnpdjs"
+        //             },
+        //             {
+        //                 "path": "m/44'/60'/0'",
+        //                 "pathMaster": "m/44'/60'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "note": " ETH primary (default)",
+        //                 "symbol": "ETH",
+        //                 "blockchain": "ethereum",
+        //                 "network": "ethereum",
+        //                 "script_type": "ethereum",
+        //                 "type": "address",
+        //                 "pubkey": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //                 "master": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //                 "address": "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //             },
+        //             {
+        //                 "path": "m/44'/931'/0'/0/0",
+        //                 "pathMaster": "m/44'/931'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "note": " Default RUNE path ",
+        //                 "symbol": "RUNE",
+        //                 "blockchain": "thorchain",
+        //                 "network": "thorchain",
+        //                 "script_type": "thorchain",
+        //                 "type": "address",
+        //                 "pubkey": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx",
+        //                 "master": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx",
+        //                 "address": "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx"
+        //             },
+        //             {
+        //                 "path": "m/44'/118'/0'/0/0",
+        //                 "pathMaster": "m/44'/118'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "note": " Default ATOM path ",
+        //                 "symbol": "ATOM",
+        //                 "blockchain": "cosmos",
+        //                 "network": "cosmos",
+        //                 "script_type": "bech32",
+        //                 "type": "address",
+        //                 "pubkey": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc",
+        //                 "master": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc",
+        //                 "address": "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc"
+        //             },
+        //             {
+        //                 "path": "m/44'/714'/0'/0/0",
+        //                 "pathMaster": "m/44'/714'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "note": "Binance default path",
+        //                 "symbol": "BNB",
+        //                 "blockchain": "binance",
+        //                 "network": "binance",
+        //                 "script_type": "binance",
+        //                 "type": "address",
+        //                 "pubkey": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap",
+        //                 "master": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap",
+        //                 "address": "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap"
+        //             },
+        //             {
+        //                 "path": "m/44'/145'/0'",
+        //                 "pathMaster": "m/44'/145'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "type": "xpub",
+        //                 "xpub": true,
+        //                 "pubkey": "xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL",
+        //                 "note": "Bitcoin Cash Default path",
+        //                 "symbol": "BCH",
+        //                 "blockchain": "bitcoincash",
+        //                 "network": "bitcoincash",
+        //                 "script_type": "p2pkh",
+        //                 "master": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+        //                 "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"
+        //             },
+        //             {
+        //                 "path": "m/44'/2'/0'",
+        //                 "pathMaster": "m/44'/2'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "type": "xpub",
+        //                 "xpub": true,
+        //                 "pubkey": "xpub6CQaRj3ynJXpPXzx6tbRFXLqcUuVanKWkFusZ9P7cDYAAgMmdC89rq6aofxyp1fXvscxZF5HgWgZgD3VA6sYnJPKqWnCfUxCoD1YX9TpBkx",
+        //                 "note": "Litecoin Default path",
+        //                 "symbol": "LTC",
+        //                 "blockchain": "litecoin",
+        //                 "network": "litecoin",
+        //                 "script_type": "p2pkh",
+        //                 "master": "LeELKgiF1VLuMfZ5UnAnXBStD2RagrB7Eb",
+        //                 "address": "LeELKgiF1VLuMfZ5UnAnXBStD2RagrB7Eb"
+        //             },
+        //             {
+        //                 "path": "m/44'/3'/0'",
+        //                 "pathMaster": "m/44'/3'/0'/0/0",
+        //                 "source": "keepkey",
+        //                 "type": "xpub",
+        //                 "xpub": true,
+        //                 "pubkey": "xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs",
+        //                 "note": "Dogecoin Default path",
+        //                 "symbol": "DOGE",
+        //                 "blockchain": "dogecoin",
+        //                 "network": "dogecoin",
+        //                 "script_type": "p2pkh",
+        //                 "master": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54",
+        //                 "address": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54"
+        //             }
+        //         ]
+        //     },
+        //     "queryKey": "key:337e39de-3f45-40ac-ace0-d60684d2b92f",
+        //     "auth": "lol",
+        //     "provider": "lol"
+        // }
         // let result2 = await pioneer.Register(register2);
         // console.log("result2: ",result2.data)
         

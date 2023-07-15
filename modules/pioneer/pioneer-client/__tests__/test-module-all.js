@@ -7,7 +7,7 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let pioneerApi = require("../lib")
+let pioneerApi = require("../lib").default
 
 //force
 // process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
@@ -48,15 +48,15 @@ let run_test = async function(){
         // let result = await pioneer.Invocations()
         // console.log("result: ",result);
 
-        let redemptionBody = {
-            publicAddress:"addy",
-            signature:"sig",
-            message:"msg"
-        }
-
-        //redemption
-        let redemption = await pioneer.Redemption(redemptionBody)
-        console.log("redemption: ",redemption.data)
+        // let redemptionBody = {
+        //     publicAddress:"addy",
+        //     signature:"sig",
+        //     message:"msg"
+        // }
+        //
+        // //redemption
+        // let redemption = await pioneer.Redemption(redemptionBody)
+        // console.log("redemption: ",redemption.data)
 
         // let tx = {
         //     from: 'eth',
@@ -71,8 +71,8 @@ let run_test = async function(){
         // let currencies = await pioneer.CurrenciesChangelly()
         // console.log("currencies: ",currencies.data)
 
-        let user = await pioneer.User()
-        console.log("user: ",user.data)
+        // let user = await pioneer.User()
+        // console.log("user: ",user.data)
 
         // console.log(signer)
         // // let globals = await pioneer.instance.Globals()
@@ -243,6 +243,11 @@ let run_test = async function(){
         // data = data.data
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
+
+        let data = await pioneer.ListUnspent({network:'BCH',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
+        data = data.data
+        console.log("txData: ",data)
+        console.log("txData: ",JSON.stringify(data))
 
         //bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw BNB
         // let data = await pioneer.instance.GetAccountInfo({network:'BNB',address:"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"})

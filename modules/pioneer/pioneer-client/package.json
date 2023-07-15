@@ -15,7 +15,6 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "eth_mnemonic_signer": "^1.0.9",
     "swagger-client": "^3.19.8"
   },
   "gitHead": "8c626a669f7045d1eb9c00252d9a81845a57fa50"

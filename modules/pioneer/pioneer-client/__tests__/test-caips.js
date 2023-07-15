@@ -20,22 +20,35 @@ const runTest = async () => {
         //Get an asset by symbol
         // let symbol = "BTC"
 
-        let symbol = "ETH"
-        let name = "ethereum"
-        let caip = "eip155:1/slip44:60"
-        
-        //fix
-        let name = "bitcoincash"
-        let name = "optimism"
-        let name = "bnbsmartchain"
-        
-        // let asset = await pioneer.GetAsset({symbol})
-        // console.log("asset: ",asset.data)
-        // console.log("asset: ",asset.data[0].caip)
+        //ETH
+        // let symbol = "ETH"
+        // let name = "ethereum"
+        // let caip = "eip155:1/slip44:60"
 
-        let asset = await pioneer.AssetByString({name})
+        //BCH
+        // let symbol = "BCH"
+        // let name = "ethereum"
+        let caip = "eip155:1/slip44:60"
+        //BTC
+        // let symbol = "DASH"
+        //DOGE
+        let symbol = "LTC"
+        //BNB
+
+        //LTC
+
+        //fix
+        // let name = "bitcoincash"
+        // let name = "optimism"
+        // let name = "bnbsmartchain"
+        
+        let asset = await pioneer.GetAsset({symbol})
         console.log("asset: ",asset.data)
         console.log("asset: ",asset.data[0].caip)
+
+        // let asset = await pioneer.AssetByString({name})
+        // console.log("asset: ",asset.data)
+        // console.log("asset: ",asset.data[0].caip)
         
         // let asset = await pioneer.AssetByCaip({caip})
         // console.log("asset: ",asset.data)
@@ -50,8 +63,8 @@ const runTest = async () => {
         // console.log("blockchain: ",blockchain.data)
         // console.log("blockchain: ",blockchain.data[0].caip)
 
-        let node = await pioneer.NodesByCaip({caip})
-        console.log("node: ",node.data)
+        // let node = await pioneer.NodesByCaip({caip})
+        // console.log("node: ",node.data)
         // console.log("node: ",node.data[0].caip)
 
         //get a blockchain by long name
