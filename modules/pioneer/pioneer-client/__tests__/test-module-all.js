@@ -244,10 +244,15 @@ let run_test = async function(){
         // console.log("txData: ",data)
         // console.log("txData: ",JSON.stringify(data))
 
-        let data = await pioneer.ListUnspent({network:'BCH',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
-        data = data.data
-        console.log("txData: ",data)
-        console.log("txData: ",JSON.stringify(data))
+        // let data = await pioneer.GetBalance({network:'DASH',xpub:"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe"})
+        // data = data.data
+        // console.log("txData: ",data)
+        // console.log("txData: ",JSON.stringify(data))
+
+        // let data = await pioneer.ListUnspent({network:'BCH',xpub:"xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4"})
+        // data = data.data
+        // console.log("txData: ",data)
+        // console.log("txData: ",JSON.stringify(data))
 
         //bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw BNB
         // let data = await pioneer.instance.GetAccountInfo({network:'BNB',address:"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"})

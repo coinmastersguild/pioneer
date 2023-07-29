@@ -25,6 +25,19 @@ let run_test = async function(){
     try{
         await network.init(servers)
 
+        //getPubkeyInfo
+        // network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
+
+        network.getFee("DASH")
+            .then(function(resp){
+                console.log("resp: ",resp)
+                //console.log("resp: ",JSON.stringify(resp))
+            })
+        
         // network.getFee("BCH")
         //     .then(function(resp){
         //         console.log("resp: ",resp)
@@ -39,13 +52,13 @@ let run_test = async function(){
         //         //console.log("resp: ",JSON.stringify(resp))
         //     })
 
-        let tx = "0100000001dda9f8b3d17320e49c493c079b7f40f1ed094d77ec0cf6001e55d393d5bcae6e010000006b483045022100af6d1500111e9939e4462ca94b33e77bba3086db5571d4616b4c60279cc9dec4022047ee9756dee2ec3ea34cc2c67526e03429701ca7ce605ba09cc55cb0981aed744121032d5a06210f5becb49cfe530735cb0dc04869fd8c3c74150335cb666af120fc89ffffffff0210270000000000001976a9148c179b1a64247e850526eb3acbf5a04865d830bf88ac18a09200000000001976a914922e5b61190e4aeda1d185ec1354cf50b75fb21388ac00000000"
+        // let tx = "0100000001dda9f8b3d17320e49c493c079b7f40f1ed094d77ec0cf6001e55d393d5bcae6e010000006b483045022100af6d1500111e9939e4462ca94b33e77bba3086db5571d4616b4c60279cc9dec4022047ee9756dee2ec3ea34cc2c67526e03429701ca7ce605ba09cc55cb0981aed744121032d5a06210f5becb49cfe530735cb0dc04869fd8c3c74150335cb666af120fc89ffffffff0210270000000000001976a9148c179b1a64247e850526eb3acbf5a04865d830bf88ac18a09200000000001976a914922e5b61190e4aeda1d185ec1354cf50b75fb21388ac00000000"
         // let tx = "0100000001ff484916ddaeeef120e41d25f3ac706e6b0d10f21b55ed666313ac83b90d4c0b010000006b483045022100fd6aa378be066331d89fd45d987622b2835a85b6ce44497a57ce3a0c316b556b0220490e1162047307496cda8c34ade80cc2c7a854858c2c54dfcf6ada7ac46aaf8701210303a4b3e9810496902cc2333564a4768f3c74160e9178424068debe7b4e04ceacffffffff02b0c41200000000001976a914885e5acbe3d0198e5b3736095cc6bbd0b2c2349588acacc0cc07000000001976a914e2e74abdea3612eeb9def06e9c54bbb62b74daf688ac00000000"
-        network.broadcast("BCH",tx)
-            .then(function(resp){
-                console.log("resp: ",resp)
-                //console.log("resp: ",JSON.stringify(resp))
-            })
+        // network.broadcast("DASH",tx)
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
 
         // let memo = "thisisjustatestbro"
         // network.getFeesWithRates("BCH",memo)

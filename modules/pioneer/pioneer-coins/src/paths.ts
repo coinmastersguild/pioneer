@@ -247,7 +247,27 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         }
         output.push(entry)
     }
+    
+    if(blockchains.indexOf('dash') >= 0){
 
+        let entry:any = {
+            note:"Default dash path",
+            type:"xpub",
+            coin: 'Dash',
+            symbol: 'DASH',
+            network: 'DASH',
+            blockchain: 'dash',
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 5, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 5, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+        }
+
+        output.push(entry)
+    }
+    
     return output
 }
 

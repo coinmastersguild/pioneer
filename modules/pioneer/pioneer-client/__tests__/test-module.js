@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -19,7 +19,11 @@ const runTest = async () => {
 
         // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // console.log("info: ",info.data.length)
-
+        let address = "0x33b35c665496bA8E71B22373843376740401F106"
+        const user = await pioneer.GetPortfolio({address});
+        // const user = await pioneer.GetNfts({address});
+        console.log("user: ", user.data);
+        
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
 
@@ -37,13 +41,20 @@ const runTest = async () => {
         // let result = await pioneer.SyncPubkeys({network:"ethereum"});
         // console.log("result: ",result.data)
 
+        // let result = await pioneer.SearchNodesByType({type:"blockbook"});
+        // result = result.data
+        // console.log("result: ",result)
+
         // let result = await pioneer.SearchNodesByType({type:"unchained"});
         // result = result.data
         // console.log("result: ",result)
-        //
+
         //GetFeeInfo
         // let result = await pioneer.GetFeeInfo({coin:"BTC"});
         // console.log("result: ",result)
+        //
+        // let result2 = await pioneer.GetFeeInfo({coin:"DASH"});
+        // console.log("result2: ",result2)
 
         //submit review
         // let review = {

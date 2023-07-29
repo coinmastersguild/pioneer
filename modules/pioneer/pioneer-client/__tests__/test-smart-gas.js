@@ -2,7 +2,7 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
@@ -131,6 +131,25 @@ let example_4 = {
     "maxFeePerGas": "0x0"
 }
 
+let example_5 = {
+    "addressNList": [
+        2147483692,
+        2147483708,
+        2147483648,
+        0,
+        0
+    ],
+    "from": "0x9d63dbed61abbbcc0c63b5bc10c4bcc44f05dc39",
+    "value": "0x2386f26fc10000",
+    "to": "0xC3aFFff54122658b89C31183CeC4F15514F34624",
+    "chainId": 100,
+    "data": "0x",
+    "nonce": "0x0",
+    "gasLimit": "0x5208",
+    "maxFeePerGas": "0x89231765",
+    "maxPriorityFeePerGas": "0x8923175e"
+}
+
 // Define an async function to run the test
 const runTest = async () => {
     try {
@@ -141,7 +160,8 @@ const runTest = async () => {
         // tx = example.original
         // tx = example_2
         // tx = example_3.original
-        tx = example_4
+        // tx = example_4
+        let tx = example_5
         let result = await pioneer.SmartInsight(tx);
         console.log("result: ",result.data)
 

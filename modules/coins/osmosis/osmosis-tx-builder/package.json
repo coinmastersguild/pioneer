@@ -22,5 +22,5 @@
     "protobufjs": "^6.11.2",
     "tendermint-tx-codec": "^1.0.0"
   },
-  "gitHead": "1a38cfcab2900f1dd2f3d422b5863c9a99a41289"
+  "gitHead": "974ddd872e4595ebc78a4f983811303b9623cf82"
 }

@@ -13,6 +13,10 @@
 const TAG = " | eth-network | "
 let Web3 = require('web3');
 import { ethers, BigNumberish, BigNumber } from 'ethers'
+// @ts-ignore
+const BigNumber = require('bignumber.js');
+
+
 //
 const Axios = require('axios')
 const https = require('https')
@@ -67,7 +71,8 @@ const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
 
 import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
-
+let wait = require('wait-promise');
+let sleep = wait.sleep;
 //
 let web3:any
 let ETHERSCAN:any
@@ -160,7 +165,7 @@ module.exports = {
 	getSymbolFromContract:function (contract:string) {
 		return get_symbol_from_contract(contract);
 	},
-	getTransferData:function (toAddress:string, amount:string, contract?:string) {
+	getTransferData:function (toAddress:string, amount:string, contract:string) {
 		return get_token_transfer_data(toAddress, amount, contract);
 	},
 	getPoolPositions:function (address:string) {
@@ -228,26 +233,33 @@ const get_all_pioneers = async function() {
 		const metadataContract = new web3.eth.Contract(METADATA_ABI, PIONEER_METADATA_CONTRACT_ADDRESS);
 		// Fetch the total supply of the NFTs
 		const totalSupply = await nftContract.methods.totalSupply().call();
-
+		log.info("totalSupply: ",totalSupply)
+		
 		output['totalSupply'] = totalSupply;
 		output['owners'] = []
 		output['images'] = [] // add an images array to output
 		for (let i = 0; i < totalSupply; i++) {
-			const owner = await nftContract.methods.ownerOf(i).call();
-			output['owners'].push(owner.toLowerCase())
-			//get images
-			const imageInfo = await metadataContract.methods.getAttributes(i).call();
-			//log.info(tag,"imageInfo: ",imageInfo)
+			//slow down
+			// await sleep(1000);
+			try{
+				const owner = await nftContract.methods.ownerOf(i).call();
+				log.info(tag,"owner: ",owner)
+				output['owners'].push(owner.toLowerCase())
+				//get images
+				const imageInfo = await metadataContract.methods.getAttributes(i).call();
+				//log.info(tag,"imageInfo: ",imageInfo)				
+				// Parse the JSON string and get the image name
+				const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
 
-			// Parse the JSON string and get the image name
-			const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
+				// Build the full image URL by replacing the image name in the base URL
+				const baseImageUrl = "https://ipfs.io/ipfs/bafybeiezdzjofkcpiwy5hlvxwzkgcztxc6xtodh3q7eddfjmqsguqs47aa/0-backgrounds/";
+				const fullImageUrl = baseImageUrl + imageName + ".png";
 
-			// Build the full image URL by replacing the image name in the base URL
-			const baseImageUrl = "https://ipfs.io/ipfs/bafybeiezdzjofkcpiwy5hlvxwzkgcztxc6xtodh3q7eddfjmqsguqs47aa/0-backgrounds/";
-			const fullImageUrl = baseImageUrl + imageName + ".png";
-
-			// Add this image URL to the images array in output
-			output['images'].push({address:owner.toLowerCase(), image:fullImageUrl});
+				// Add this image URL to the images array in output
+				output['images'].push({address:owner.toLowerCase(), image:fullImageUrl});
+			}catch(e){
+				log.info("no image for: ",i)
+			}
 		}
 		return output;
 	} catch(e) {
@@ -347,35 +359,154 @@ const check_airdrop_claim = async function(address:string){
 	}
 }
 
-//get_token_transfer_data
-const get_token_transfer_data = async function(toAddress:string, amount:string, contract?:string){
-	let tag = TAG + " | get_token_transfer_data | "
-	try{
-		let minABI = [
+// const get_token_transfer_data = async function(toAddress: string, amount: string, contract: string) {
+// 	const tag = TAG + " | get_token_transfer_data | ";
+// 	try {
+// 		const minABI = [
+// 			// balanceOf
+// 			{
+// 				"constant": true,
+// 				"inputs": [{ "name": "_owner", "type": "address" }],
+// 				"name": "balanceOf",
+// 				"outputs": [{ "name": "balance", "type": "uint256" }],
+// 				"type": "function"
+// 			},
+// 			// decimals
+// 			{
+// 				"constant": true,
+// 				"inputs": [],
+// 				"name": "decimals",
+// 				"outputs": [{ "name": "", "type": "uint8" }],
+// 				"type": "function"
+// 			}
+// 		];
+// 		const newContract = new web3.eth.Contract(minABI, contract);
+// 		const decimalPlaces = await newContract.methods.decimals().call();
+//
+// 		// Convert amount to the appropriate number of decimal places
+// 		const amountInSmallestUnit = web3.utils.toBN(amount).mul(web3.utils.toBN(10).pow(decimalPlaces));
+//
+// 		// Convert the amount to a hexadecimal string
+// 		const amountHex = amountInSmallestUnit.toString(16);
+//
+// 		// Pad the hexadecimal string with zeros to 64 characters
+// 		const amountHexPadded = amountHex.padStart(64, '0');
+//
+// 		// Parse the token data
+// 		const tokenData = web3.eth.abi.encodeFunctionCall({
+// 			name: 'transfer',
+// 			type: 'function',
+// 			inputs: [
+// 				{
+// 					type: 'address',
+// 					name: '_to'
+// 				},
+// 				{
+// 					type: 'uint256',
+// 					name: '_value'
+// 				}
+// 			]
+// 		}, [toAddress, amountInSmallestUnit.toString()]);
+//
+// 		return tokenData;
+// 	} catch (e) {
+// 		console.error(tag, e);
+// 	}
+// }
+
+// const get_token_transfer_data = async function(toAddress: string, amount: string, contract: string) {
+// 	const tag = TAG + " | get_token_transfer_data | ";
+// 	try {
+// 		const minABI = [
+// 			// balanceOf
+// 			{
+// 				"constant": true,
+// 				"inputs": [{ "name": "_owner", "type": "address" }],
+// 				"name": "balanceOf",
+// 				"outputs": [{ "name": "balance", "type": "uint256" }],
+// 				"type": "function"
+// 			},
+// 			// decimals
+// 			{
+// 				"constant": true,
+// 				"inputs": [],
+// 				"name": "decimals",
+// 				"outputs": [{ "name": "", "type": "uint8" }],
+// 				"type": "function"
+// 			}
+// 		];
+// 		const newContract = new web3.eth.Contract(minABI, contract);
+// 		const decimalPlaces = await newContract.methods.decimals().call();
+//
+// 		// Convert amount to the appropriate number of decimal places
+// 		const amountInWei = web3.utils.toWei(amount, 'ether');
+// 		const decimals = web3.utils.toBN(decimalPlaces);
+// 		const amountInSmallestUnit = web3.utils.toBN(amountInWei).mul(web3.utils.toBN(10).pow(decimals));
+//
+// 		// Convert the amount to a hexadecimal string
+// 		const amountHex = amountInSmallestUnit.toString(16);
+//
+// 		// Pad the hexadecimal string with zeros to 64 characters
+// 		const amountHexPadded = amountHex.padStart(64, '0');
+//
+// 		// Parse the token data
+// 		const tokenData = web3.eth.abi.encodeFunctionCall({
+// 			name: 'transfer',
+// 			type: 'function',
+// 			inputs: [
+// 				{
+// 					type: 'address',
+// 					name: '_to'
+// 				},
+// 				{
+// 					type: 'uint256',
+// 					name: '_value'
+// 				}
+// 			]
+// 		}, [toAddress, amountInSmallestUnit.toString()]);
+//
+// 		return tokenData;
+// 	} catch (e) {
+// 		console.error(tag, e);
+// 	}
+// }
+
+const get_token_transfer_data = async function(toAddress: string, amount: string, contract: string) {
+	const tag = TAG + " | get_token_transfer_data | ";
+	try {
+		const minABI = [
 			// balanceOf
 			{
-				"constant":true,
-				"inputs":[{"name":"_owner","type":"address"}],
-				"name":"balanceOf",
-				"outputs":[{"name":"balance","type":"uint256"}],
-				"type":"function"
+				"constant": true,
+				"inputs": [{ "name": "_owner", "type": "address" }],
+				"name": "balanceOf",
+				"outputs": [{ "name": "balance", "type": "uint256" }],
+				"type": "function"
 			},
 			// decimals
 			{
-				"constant":true,
-				"inputs":[],
-				"name":"decimals",
-				"outputs":[{"name":"","type":"uint8"}],
-				"type":"function"
+				"constant": true,
+				"inputs": [],
+				"name": "decimals",
+				"outputs": [{ "name": "", "type": "uint8" }],
+				"type": "function"
 			}
 		];
 		const newContract = new web3.eth.Contract(minABI, contract);
-		const decimals = await newContract.methods.decimals().call();
-		// @ts-ignore
-		let value = parseInt(amount / Math.pow(10, decimals))
-		
-		//parse to prescision?
-		let tokenData = await web3.eth.abi.encodeFunctionCall({
+		const decimalPlaces = await newContract.methods.decimals().call();
+
+		// Convert amount to the appropriate number of decimal places
+		// Note: we're assuming 'amount' is a string representing a decimal number
+		const amountInSmallestUnit = web3.utils.toBN(parseFloat(amount) * Math.pow(10, decimalPlaces));
+
+		// Convert the amount to a hexadecimal string
+		const amountHex = amountInSmallestUnit.toString(16);
+
+		// Pad the hexadecimal string with zeros to 64 characters
+		const amountHexPadded = amountHex.padStart(64, '0');
+
+		// Parse the token data
+		const tokenData = web3.eth.abi.encodeFunctionCall({
 			name: 'transfer',
 			type: 'function',
 			inputs: [
@@ -388,13 +519,78 @@ const get_token_transfer_data = async function(toAddress:string, amount:string, 
 					name: '_value'
 				}
 			]
-		}, [toAddress, value])
+		}, [toAddress, amountInSmallestUnit.toString()]);
 
-		return tokenData
-	}catch(e){
-		console.error(tag,e)
+		return tokenData;
+	} catch (e) {
+		console.error(tag, e);
 	}
 }
+
+// //get_token_transfer_data
+// const get_token_transfer_data = async function(toAddress:string, amount:string, contract:string){
+// 	let tag = TAG + " | get_token_transfer_data | "
+// 	try{
+//
+// 		let minABI = [
+// 			// balanceOf
+// 			{
+// 				"constant": true,
+// 				"inputs": [{ "name": "_owner", "type": "address" }],
+// 				"name": "balanceOf",
+// 				"outputs": [{ "name": "balance", "type": "uint256" }],
+// 				"type": "function"
+// 			},
+// 			// decimals
+// 			{
+// 				"constant": true,
+// 				"inputs": [],
+// 				"name": "decimals",
+// 				"outputs": [{ "name": "", "type": "uint8" }],
+// 				"type": "function"
+// 			}
+// 		];
+// 		const newContract = new web3.eth.Contract(minABI, contract);
+// 		const decimalPlaces = await newContract.methods.decimals().call();
+// 		//
+// 		// // @ts-ignore
+// 		// let value = parseInt(amount/Math.pow(10, decimals))
+// 		// //const adjustedValue = value.mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
+// 		//
+// 		// log.info(tag, "adjustedValue: ", value.toString());
+//
+// 		// Calculate the amount in the token's smallest unit
+// 		const amountInWei = web3.utils.toWei(amount, 'ether');
+// 		const decimals = web3.utils.toBN(decimalPlaces);
+// 		const amountInSmallestUnit = web3.utils.toBN(amountInWei).mul(web3.utils.toBN(10).pow(decimals));
+//
+// // Convert the amount to a hexadecimal string
+// 		const amountHex = amountInSmallestUnit.toString(16);
+//
+// // Pad the hexadecimal string with zeros to 64 characters
+// 		const amountHexPadded = amountHex.padStart(64, '0');
+//
+// 		//parse to prescision?
+// 		let tokenData = await web3.eth.abi.encodeFunctionCall({
+// 			name: 'transfer',
+// 			type: 'function',
+// 			inputs: [
+// 				{
+// 					type: 'address',
+// 					name: '_to'
+// 				},
+// 				{
+// 					type: 'uint256',
+// 					name: '_value'
+// 				}
+// 			]
+// 		}, [toAddress, amountInSmallestUnit]);
+//
+// 		return tokenData
+// 	}catch(e){
+// 		console.error(tag,e)
+// 	}
+// }
 
 const get_symbol_from_contract = async function(address:string){
 	let tag = TAG + " | get_symbol_from_contract | "

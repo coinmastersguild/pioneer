@@ -255,6 +255,7 @@ let get_fees_with_rates = async function(coin:string,memo?:string){
         return { fees, rates }
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -271,7 +272,12 @@ let get_fee = async function(coin:string){
             //console.log("result: ",result.data)
             output = result.data
         } else {
-            console.log("no unchained for coin: ",coin)
+            let fee = await get_fees_with_rates(coin)
+            console.log("fee: ",fee)
+            // console.log("fee.rates: ",fee.fees)
+            // console.log("fee.rates: ",fee.fees.rates)
+            if(fee && fee.rates)output = fee.rates
+
             //@TODO fall back to node
         }
 
@@ -312,10 +318,26 @@ let broadcast_transaction = async function(coin:string,tx:string){
             output.txid = result.data
             output.success = true
         } else {
-            console.log("no unchained for coin: ",coin)
-            //@TODO fall back to node
-            output.success = false
-            output.error = "no unchained for coin: "+coin
+            let responseBroadcast = await blockbook.broadcast(coin,tx)
+            log.info(tag,'responseBroadcast: ',responseBroadcast)
+            if(responseBroadcast.success && responseBroadcast.success !== false){
+                output.success = true
+                if(responseBroadcast.txid){
+                    output.txid = responseBroadcast.resp.data.result
+                }
+                if(responseBroadcast.resp.data.result){
+                    output.txid = responseBroadcast.resp.data.result
+                }
+            } else if(responseBroadcast.error) {
+                output.error = responseBroadcast.error
+            } else {
+                output.error = "unknown error"
+                output.debug = responseBroadcast
+            }
+            // console.log("no unchained for coin: ",coin)
+            // //@TODO fall back to node
+            // output.success = false
+            // output.error = "no unchained for coin: "+coin
         }
 
 
@@ -442,8 +464,6 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
     try{
         //
         let output:any = {}
-        // let output = await blockbook.utxosByXpub(coin,xpub)
-        // log.debug(tag,"output: ",output)
 
         if(unchained[SYMBOL_TO_CAIP[coin]]){
             // log.info("unchained[SYMBOL_TO_CAIP[coin]]: ",unchained[SYMBOL_TO_CAIP[coin]])
@@ -451,10 +471,13 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
             //console.log("result: ",result.data)
             output = result.data
         } else {
-            console.log("no unchained for coin: ",coin)
-            //@TODO fall back to node
-            output.success = false
-            output.error = "no unchained for coin: "+coin
+            try{
+                output = await blockbook.utxosByXpub(coin,xpub)
+                log.info(tag,"output: ",output)
+                //@TODO fall back to node                
+            }catch(e){
+                output.error = e
+            }
         }
 
         return output

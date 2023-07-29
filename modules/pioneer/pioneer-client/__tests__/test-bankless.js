@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:337e39de-3f45-40ac-ace0-d60684d2b92f',
@@ -20,14 +20,22 @@ const runTest = async () => {
         // let terminalInfo = await pioneer.BanklessInfo()
         // console.log("terminalInfo: ",terminalInfo.data)
 
-        // let terminalName = "ALPHA_BANKLESS_1"
-        // let terminalInfo = await pioneer.TerminalPrivate({terminalName})
-        // console.log("terminalInfo: ",terminalInfo.data)
-
         let terminalName = "ALPHA_BANKLESS_1"
-        let terminalInfo = await pioneer.TerminalPublic({terminalName})
+        let terminalInfo = await pioneer.TerminalPrivate({terminalName})
         console.log("terminalInfo: ",terminalInfo.data)
 
+        // let terminalName = "ALPHA_BANKLESS_1"
+        // let terminalInfo = await pioneer.TerminalPublic({terminalName})
+        // console.log("terminalInfo: ",terminalInfo.data)
+        
+        // let captable = [
+        //     {
+        //         address:"0x651982e85D5E43db682cD6153488083e1b810798",
+        //         lptokens:"1000000000000000000000000",
+        //         percent:"10"
+        //     }
+        // ]
+        //
         // let terminal = {
         //     terminalId:"terminal:1",
         //     terminalName:"test terminal",
@@ -35,9 +43,10 @@ const runTest = async () => {
         //     lastRate:"0.94",
         //     pubkey:"0x651982e85D5E43db682cD6153488083e1b810798",
         //     fact:"",
+        //     captable,
         //     location:[ 4.5981, -74.0758 ]
         // }
-        // let result = await pioneer.SubmitTerminal()
+        // let result = await pioneer.SubmitTerminal(terminal)
         // console.log("result: ",result)
 
         //create LP add

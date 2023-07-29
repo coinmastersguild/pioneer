@@ -42,13 +42,13 @@ const runTest = async () => {
         // let name = "optimism"
         // let name = "bnbsmartchain"
         
-        let asset = await pioneer.GetAsset({symbol})
-        console.log("asset: ",asset.data)
-        console.log("asset: ",asset.data[0].caip)
-
-        // let asset = await pioneer.AssetByString({name})
+        // let asset = await pioneer.GetAsset({symbol})
         // console.log("asset: ",asset.data)
         // console.log("asset: ",asset.data[0].caip)
+
+        let asset = await pioneer.AssetByString({name})
+        console.log("asset: ",asset.data)
+        console.log("asset: ",asset.data[0].caip)
         
         // let asset = await pioneer.AssetByCaip({caip})
         // console.log("asset: ",asset.data)

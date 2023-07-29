@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/blockbook",
-  "version": "8.1.52",
+  "version": "8.1.56",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -12,12 +12,14 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
+    "@altangent/lib-blockbook": "^0.12.9",
     "@pioneer-platform/loggerdog": "^8.1.29",
+    "@pioneer-platform/pioneer-client": "^9.0.11",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",
     "axios": "^0.21.4",
     "axios-retry": "^3.1.9",
-    "blockbook-client": "^0.4.3",
+    "blockbook-client": "^0.7.8",
     "fake-useragent": "^1.0.1"
   },
   "devDependencies": {

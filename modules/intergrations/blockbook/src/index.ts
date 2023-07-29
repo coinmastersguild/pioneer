@@ -6,6 +6,8 @@
 
 
 const TAG = " | blockbook-client | "
+let pioneerApi = require("@pioneer-platform/pioneer-client").default
+const { Blockbook } = require('blockbook-client')
 
 const log = require('@pioneer-platform/loggerdog')()
 const fakeUa = require('fake-useragent');
@@ -31,26 +33,113 @@ axiosRetry(axios, {
     },
 });
 
-let BLOCKBOOK_URLS:any = {
-    'BTC':process.env['BTC_BLOCKBOOK_URL'],
-    'ETH':process.env['ETH_BLOCKBOOK_URL'],
-    'BCH':process.env['BCH_BLOCKBOOK_URL'],
-    'DOGE':process.env['DOGE_BLOCKBOOK_URL'],
-    'LTC':process.env['DOGE_BLOCKBOOK_URL'],
-    'DASH':process.env['DASH_BLOCKBOOK_URL'],
-    'DGB':process.env['DGB_BLOCKBOOK_URL'],
-    'ETHW':process.env['ETHW_BLOCKBOOK_URL'],
-    'BSC':process.env['BSC_BLOCKBOOK_URL'],
-    'ADA':process.env['ADA_BLOCKBOOK_URL'],
-    'GRS':process.env['GRS_BLOCKBOOK_URL']
-}
+let BLOCKBOOK_URLS:any = {}
+let BLOCKBOOK_SOCKETS:any = {}
+let spec = process.env['PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
+
+let SERVERS_CONFIG = [
+    {
+        symbol:"MATIC",
+        blockchain:"polygon",
+        caip:"eip155:137/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.polygon.shapeshift.com",
+        websocket:"wss://indexer.polygon.shapeshift.com/websocket"
+    },
+    {
+        symbol:"ETH",
+        blockchain:"optimism",
+        caip:"eip155:10/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.optimism.shapeshift.com",
+        websocket:"wss://indexer.optimism.shapeshift.com/websocket"
+    },
+    {
+        symbol:"LTC",
+        blockchain:"litecoin",
+        caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+        type:"blockbook",
+        service:"https://indexer.litecoin.shapeshift.com",
+        websocket:"wss://indexer.litecoin.shapeshift.com/websocket"
+    },
+    {
+        symbol:"xDAI",
+        blockchain:"gnosis",
+        caip:"eip155:100/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.gnosis.shapeshift.com",
+        websocket:"wss://indexer.gnosis.shapeshift.com/websocket"
+    },
+    {
+        symbol:"ETH",
+        blockchain:"ethereum",
+        caip:"eip155:1/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.ethereum.shapeshift.com",
+        websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
+    },
+    {
+        symbol:"DOGE",
+        blockchain:"dogecoin",
+        caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+        type:"blockbook",
+        service:"https://indexer.dogecoin.shapeshift.com",
+        websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
+    },
+    {
+        symbol:"BNB",
+        blockchain:"bnbsmartchain",
+        caip:"eip155:56/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.bnbsmartchain.shapeshift.com",
+        websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
+    },
+    {
+        symbol:"BCH",
+        blockchain:"bitcoincash",
+        caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        type:"blockbook",
+        service:"https://indexer.bitcoincash.shapeshift.com",
+        websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
+    },
+    {
+        symbol:"BTC",
+        blockchain:"bitcoin",
+        caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
+        type:"blockbook",
+        service:"https://indexer.bitcoin.shapeshift.com",
+        websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
+    },
+    {
+        symbol:"AVAX",
+        blockchain:"avalanche",
+        caip:"eip155:43114/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.avalanche.shapeshift.com",
+        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
+    },
+    {
+        symbol:"AVAX",
+        blockchain:"avalanche",
+        caip:"eip155:43114/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.avalanche.shapeshift.com",
+        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
+    }
+]
 
 module.exports = {
-    init:function (servers:any,runtime?:string) {
-        return init_network(servers,runtime);
+    init:function (servers?:any) {
+        return init_network(servers);
     },
     getInfo:function () {
         return get_node_info();
+    },
+    getBlockbooks:function () {
+        return BLOCKBOOK_URLS;
+    },
+    getBlockbookSockets:function () {
+        return BLOCKBOOK_SOCKETS;
     },
     getFees:function (coin:string) {
         return get_fees(coin);
@@ -79,6 +168,57 @@ module.exports = {
     broadcast: function (coin:string,hex:string) {
         return broadcast_transaction(coin,hex);
     },
+}
+
+let init_network = async function (servers?:any) {
+    let tag = ' | get_txs_by_address | '
+    try {
+        log.debug(tag,"checkpoint: ")
+        
+        //get all live free blockbook urls from pioneer
+        let blockbooks:any = servers || []
+        try{
+            //get config
+            let config = {
+                queryKey:'unchained:npm',
+                spec
+            }
+            //console.log("config: ",config)
+            //get config
+            let pioneer = new pioneerApi(spec,config)
+            pioneer = await pioneer.init()
+            let allBlockbooksRemote = await pioneer.SearchNodesByType({type:"blockbook"});
+            allBlockbooksRemote = allBlockbooksRemote.data
+            log.info(tag,"allBlockbooksRemote: ",allBlockbooksRemote)
+            blockbooks(...allBlockbooksRemote)
+        }catch(e){
+            //console.error(tag,"e: ",e)
+        }
+        if(blockbooks.length === 0) blockbooks = SERVERS_CONFIG
+        log.info(tag,"blockbooks: ",blockbooks.length)
+        for(let i = 0; i < blockbooks.length; i++){
+            let blockbook = blockbooks[i]
+            //get swagger
+            if(blockbook && blockbook.service) BLOCKBOOK_URLS[blockbook.symbol.toUpperCase()] = blockbook.service
+            if(blockbook && blockbook.websocket){
+                let url = blockbook.websocket.replace("/websocket","")
+                url = blockbook.websocket.replace("wss://","https://")
+                BLOCKBOOK_SOCKETS[blockbook.symbol.toUpperCase()] = new Blockbook({
+                    nodes: [url],
+                    disableTypeValidation: true,
+                })
+            } else {
+                log.error(tag,"invalid unchained service: ",blockbook)
+                // throw Error("invalid unchained service!")
+            }
+        }
+        log.info(tag,"BLOCKBOOK_URLS: ",BLOCKBOOK_URLS)
+        log.info(tag,"BLOCKBOOK_SOCKETS: ",BLOCKBOOK_SOCKETS)
+        return true
+    } catch (e) {
+        // console.error(tag, 'Error: ', e)
+        throw e
+    }
 }
 
 let get_fees = async function (coin: string){
@@ -333,45 +473,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
 }
 
 
-let init_network = function (servers:any,runtime?:string) {
-    let tag = ' | get_txs_by_address | '
-    try {
-        log.debug(tag,"checkpoint: ")
-        let output:any = []
 
-        //get networks from coins module
-
-
-
-        // let blockbooks = getBlockBooks()
-        // for(let i = 0; i < blockbooks.length; i++){
-        //     let coinInfo = blockbooks[i]
-        //     coinInfo.symbol = coinInfo.symbol.toUpperCase()
-        //     log.debug("coinInfo: ",coinInfo)
-        //     let blockbookurl = coinInfo.explorer.tx
-        //     blockbookurl = blockbookurl.replace("/tx/","")
-        //
-        //     if(servers && servers[coinInfo.symbol]){
-        //         //use configured
-        //         BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
-        //         log.debug(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
-        //     }else{
-        //         if(!runtime || runtime === 'public'){
-        //             //use public
-        //             BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
-        //             log.debug(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
-        //         }
-        //         //TODO use pioneer's
-        //     }
-        // }
-
-
-        return true
-    } catch (e) {
-        // console.error(tag, 'Error: ', e)
-        throw e
-    }
-}
 
 let get_node_info = async function(){
     let tag = TAG + " | get_node_info | "
