@@ -5,7 +5,7 @@
 
 
 
-const TAG = " | blocknative | "
+const TAG = " | zapper | "
 const Axios = require('axios')
 const https = require('https')
 let API_KEY = process.env['ZAPPER_API_KEY']
@@ -14,9 +14,23 @@ const axios = Axios.create();
 const Authorization = `Basic ${Buffer.from(`${API_KEY}:`, "binary").toString(
     "base64"
 )}`;
-
+console.log(Authorization)
 let URL_SERVICE = "https://api.zapper.xyz"
 
+const axiosRetry = require('axios-retry');
+
+axiosRetry(axios, {
+    retries: 3, // number of retries
+    retryDelay: (retryCount: number) => {
+        console.log(`retry attempt: ${retryCount}`);
+        return retryCount * 2000; // time interval between retries
+    },
+    retryCondition: (error: { response: { status: number; }; }) => {
+        console.error(error)
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 
 
 module.exports = {

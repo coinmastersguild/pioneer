@@ -189,13 +189,13 @@ let init_network = async function (servers?:any) {
             pioneer = await pioneer.init()
             let allBlockbooksRemote = await pioneer.SearchNodesByType({type:"blockbook"});
             allBlockbooksRemote = allBlockbooksRemote.data
-            log.info(tag,"allBlockbooksRemote: ",allBlockbooksRemote)
+            log.debug(tag,"allBlockbooksRemote: ",allBlockbooksRemote)
             blockbooks(...allBlockbooksRemote)
         }catch(e){
             //console.error(tag,"e: ",e)
         }
         if(blockbooks.length === 0) blockbooks = SERVERS_CONFIG
-        log.info(tag,"blockbooks: ",blockbooks.length)
+        log.debug(tag,"blockbooks: ",blockbooks.length)
         for(let i = 0; i < blockbooks.length; i++){
             let blockbook = blockbooks[i]
             //get swagger
@@ -212,8 +212,8 @@ let init_network = async function (servers?:any) {
                 // throw Error("invalid unchained service!")
             }
         }
-        log.info(tag,"BLOCKBOOK_URLS: ",BLOCKBOOK_URLS)
-        log.info(tag,"BLOCKBOOK_SOCKETS: ",BLOCKBOOK_SOCKETS)
+        log.debug(tag,"BLOCKBOOK_URLS: ",BLOCKBOOK_URLS)
+        log.debug(tag,"BLOCKBOOK_SOCKETS: ",BLOCKBOOK_SOCKETS)
         return true
     } catch (e) {
         // console.error(tag, 'Error: ', e)
@@ -227,7 +227,7 @@ let get_fees = async function (coin: string){
 
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/fees"
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let body = {
             method: 'GET',
             url,
@@ -244,6 +244,7 @@ let get_fees = async function (coin: string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -270,6 +271,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -297,6 +299,7 @@ let get_txids_by_address = async function(coin:string,address:string,page?:numbe
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -322,6 +325,7 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -346,6 +350,7 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -422,6 +427,7 @@ let get_transaction = async function(coin:string,txid:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -446,6 +452,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -469,6 +476,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         return balance / 100000000
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -483,5 +491,6 @@ let get_node_info = async function(){
         return true
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }

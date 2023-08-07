@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -19,10 +19,10 @@ const runTest = async () => {
 
         // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // console.log("info: ",info.data.length)
-        let address = "0x33b35c665496bA8E71B22373843376740401F106"
-        const user = await pioneer.GetPortfolio({address});
-        // const user = await pioneer.GetNfts({address});
-        console.log("user: ", user.data);
+        // let address = "0x33b35c665496bA8E71B22373843376740401F106"
+        // const user = await pioneer.GetPortfolio({address});
+        // // // const user = await pioneer.GetNfts({address});
+        // console.log("user: ", user);
         
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
@@ -497,8 +497,11 @@ const runTest = async () => {
         //     "auth": "lol",
         //     "provider": "lol"
         // }
-        // let result2 = await pioneer.Register(register2);
-        // console.log("result2: ",result2.data)
+        
+        let register3 = {"username":"user:66fefdd6-7ea9-48cf-8e69-fc74afb9c45412","blockchains":["bitcoin","ethereum","thorchain","bitcoincash","litecoin","binance","cosmos","dogecoin"],"context":"0x33b35c665496ba8e71b22373843376740401f106.wallet","publicAddress":"0x33b35c665496ba8e71b22373843376740401f106","walletDescription":{"context":"0x33b35c665496ba8e71b22373843376740401f106.wallet","type":"metamask"},"data":{"pubkeys":[{"pubkey":"0x33b35c665496ba8e71b22373843376740401f106","blockchain":"ethereum","symbol":"ETH","asset":"ethereum","path":"m/44'/60'/0'","pathMaster":"m/44'/60'/0'/0/0","script_type":"ethereum","network":"ethereum","master":"0x33b35c665496ba8e71b22373843376740401f106","type":"address","address":"0x33b35c665496ba8e71b22373843376740401f106"},{"pubkey":"0x33b35c665496ba8e71b22373843376740401f106","blockchain":"ethereum","symbol":"ETH","asset":"ethereum","path":"m/44'/60'/0'","pathMaster":"m/44'/60'/0'/0/0","script_type":"ethereum","network":"ethereum","master":"0x33b35c665496ba8e71b22373843376740401f106","type":"address","address":"0x33b35c665496ba8e71b22373843376740401f106"},{"pubkey":"0xbda1b484152f32e215aa5457366ec537d0e35e4b","blockchain":"ethereum","symbol":"ETH","asset":"ethereum","path":"m/44'/60'/0'","pathMaster":"m/44'/60'/0'/0/0","script_type":"ethereum","network":"ethereum","master":"0xbda1b484152f32e215aa5457366ec537d0e35e4b","type":"address","address":"0xbda1b484152f32e215aa5457366ec537d0e35e4b"},{"pubkey":"0x651982e85d5e43db682cd6153488083e1b810798","blockchain":"ethereum","symbol":"ETH","asset":"ethereum","path":"m/44'/60'/0'","pathMaster":"m/44'/60'/0'/0/0","script_type":"ethereum","network":"ethereum","master":"0x651982e85d5e43db682cd6153488083e1b810798","type":"address","address":"0x651982e85d5e43db682cd6153488083e1b810798"},{"pubkey":"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9","blockchain":"ethereum","symbol":"ETH","asset":"ethereum","path":"m/44'/60'/0'","pathMaster":"m/44'/60'/0'/0/0","script_type":"ethereum","network":"ethereum","master":"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9","type":"address","address":"0xfeb8bf56e554fc47639e5ed9e1dae21dff69d6a9"}]},"queryKey":"sdk:pair-keepkey:0.8247915055974351"}
+        
+        let result = await pioneer.Register(register3);
+        console.log("result: ",result.data)
         
         //public developer info
         // let address = '0x141d9959cae3853b035000490c03991eb70fc4ac'

@@ -112,14 +112,18 @@ let run_test = async function(){
         //         console.log(resp)
         //         console.log(JSON.stringify(resp))
         //     })
+        
+        //
+        let utxos = await network.utxosByXpub('LTC',"zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj")
+        console.log(utxos)
 
-        let ALL_SOCKETS = network.getBlockbookSockets()
-        let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
-        let address2 = "0xc3affff54122658b89c31183cec4f15514f34624"
-        let ETH_SOCKET = ALL_SOCKETS["ETH"]
-        await ETH_SOCKET.connect()
-        ETH_SOCKET.subscribeAddresses([address1], ({ address, tx }) => console.log('new tx for address', address, tx))
-        ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
+        // let ALL_SOCKETS = network.getBlockbookSockets()
+        // let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
+        // let address2 = "0xc3affff54122658b89c31183cec4f15514f34624"
+        // let ETH_SOCKET = ALL_SOCKETS["ETH"]
+        // await ETH_SOCKET.connect()
+        // ETH_SOCKET.subscribeAddresses([address1], ({ address, tx }) => console.log('new tx for address', address, tx))
+        // ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
         //sub to address
         
 

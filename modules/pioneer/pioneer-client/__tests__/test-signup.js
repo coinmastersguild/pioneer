@@ -82,11 +82,11 @@ let run_test = async function(){
 
         //sign
         let signature = await signer.signMessage(message,mnemonic)
-        log.info("signature: ",signature)
+        log.debug("signature: ",signature)
 
         //login
         let loginInput = {publicAddress:address,signature,message}
-        log.info("loginInput: ",loginInput)        
+        log.debug("loginInput: ",loginInput)        
         let loginResp = await pioneer.Login(loginInput)
         console.log("loginResp: ",loginResp.data)
 

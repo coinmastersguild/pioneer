@@ -48,7 +48,7 @@ const check_address = async function (address:string) {
     let tag = " | check_address | "
     try{
         let url = URL_SCAMDB + "check/"+address
-        log.info(url)
+        log.debug(url)
         let result = await axios({
             url,
             method: 'GET'

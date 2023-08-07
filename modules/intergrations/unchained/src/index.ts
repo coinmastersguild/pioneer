@@ -21,7 +21,7 @@ const ALL_UNCHAINED_APIS:any = {}
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
-        log.info(TAG,`retry attempt: ${retryCount}`);
+        log.debug(TAG,`retry attempt: ${retryCount}`);
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {

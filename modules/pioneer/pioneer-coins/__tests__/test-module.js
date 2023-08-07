@@ -60,13 +60,14 @@ let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
 //         0
 //     ]
 
+let addressNlist = [2147483692, 2147483648, 2147483648, 0, 0]
 // let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
 //
-// console.log(addressNListToBIP32(addressNlist))
+console.log(addressNListToBIP32(addressNlist))
 
 // let bip32 = `m/44'/144'/0'/0/0`
-let bip32 = `m/44'/714'/0'/0/0`
-console.log(bip32ToAddressNList(bip32))
+// let bip32 = `m/44'/714'/0'/0/0`
+// console.log(bip32ToAddressNList(bip32))
 
 
 //convert
