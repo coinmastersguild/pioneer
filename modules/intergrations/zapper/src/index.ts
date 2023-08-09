@@ -6,6 +6,9 @@
 
 
 const TAG = " | zapper | "
+const log = require('@pioneer-platform/loggerdog')()
+//@ts-ignore
+import {evmCaips} from '@pioneer-platform/pioneer-caip'
 const Axios = require('axios')
 const https = require('https')
 let API_KEY = process.env['ZAPPER_API_KEY']
@@ -17,16 +20,18 @@ const Authorization = `Basic ${Buffer.from(`${API_KEY}:`, "binary").toString(
 console.log(Authorization)
 let URL_SERVICE = "https://api.zapper.xyz"
 
+
+
 const axiosRetry = require('axios-retry');
 
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
-        console.log(`retry attempt: ${retryCount}`);
+        log.info(TAG,`retry attempt: ${retryCount}`);
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
-        console.error(error)
+        log.error(TAG,error)
         // if retry condition is not specified, by default idempotent requests are retried
         return error.response.status === 503;
     },
@@ -88,6 +93,11 @@ const get_portfolio = async function (address:string) {
         if(tokens){
             tokens.forEach((token: any) => {
                 console.log("token: ",token)
+                let network = token.network
+                console.log("network: ",token)
+                let caip = evmCaips[network]
+                token.caip = caip;
+                
                 console.log("token.balanceUSD: ",token.token.balanceUSD)
                 totalBalanceUsdTokens += token.token.balanceUSD;
             });
@@ -189,6 +199,11 @@ const get_total_networth = async function (address:string) {
         // console.log("tokens: ",tokens)
         tokens.forEach((token: any) => {
             console.log("token: ",token)
+            let network = token.network
+            console.log("network: ",token)
+            let caip = evmCaips[network]
+            token.caip = caip;
+
             console.log("token.balanceUSD: ",token.token.balanceUSD)
             totalBalanceUsdTokens += token.token.balanceUSD;
         });

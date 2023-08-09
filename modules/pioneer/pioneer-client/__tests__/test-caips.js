@@ -21,10 +21,13 @@ const runTest = async () => {
         // let symbol = "BTC"
 
         //ETH
-        // let symbol = "ETH"
+        let symbol = "ETH"
         // let name = "ethereum"
         // let caip = "eip155:1/slip44:60"
-
+        
+        //avalanche
+        let name = "avalanche"
+        
         //BCH
         // let symbol = "BCH"
         // let name = "ethereum"
@@ -32,7 +35,7 @@ const runTest = async () => {
         //BTC
         // let symbol = "DASH"
         //DOGE
-        let symbol = "LTC"
+        // let symbol = "LTC"
         //BNB
 
         //LTC
@@ -41,19 +44,89 @@ const runTest = async () => {
         // let name = "bitcoincash"
         // let name = "optimism"
         // let name = "bnbsmartchain"
-        
-        // let asset = await pioneer.GetAsset({symbol})
-        // console.log("asset: ",asset.data)
-        // console.log("asset: ",asset.data[0].caip)
 
-        let asset = await pioneer.AssetByString({name})
+        //caip by chainId
+        // const ALL_CHAINS = [
+        //     { name: "ethereum", chain_id: 1, symbol: "ETH" },
+        //     { name: "polygon", chain_id: 137, symbol: "MATIC" },
+        //     { name: "pulsechain", chain_id: 369, symbol: "PLS" },
+        //     { name: "optimism", chain_id: 10, symbol: "ETH" },
+        //     { name: "gnosis", chain_id: 100, symbol: "xDAI" },
+        //     { name: "binance-smart-chain", chain_id: 56, symbol: "BNB" },
+        //     { name: "smart-bitcoin-cash", chain_id: 10000, symbol: "BCH" },
+        //     { name: "arbitrum", chain_id: 42161, symbol: "ARB" }, //TODO push node
+        //     { name: "fuse", chain_id: 122, symbol: "FUSE" },
+        //     { name: "bittorrent", chain_id: 199, symbol: "BTT" },//TODO push node
+        //     { name: "celo", chain_id: 42220, symbol: "CELO" },
+        //     { name: "avalanche-c-chain", chain_id: 43114, symbol: "AVAX" },
+        //     { name: "görli", chain_id: 5, symbol: "GOR" },
+        //     { name: "eos", chain_id: 59, symbol: "EOS" },
+        //     { name: "ethereum-classic", chain_id: 61, symbol: "ETC" }, //TODO push node
+        //     { name: "evmos", chain_id: 9001, symbol: "EVMOS" },
+        //     { name: "poa-core", chain_id: 99, symbol: "POA" }, //TODO push node
+        // ];
+        //
+        // let chainId_map = {}
+        // let name_map = {}
+        // for(let i = 0; i < ALL_CHAINS.length; i++){
+        //     let chainId = ALL_CHAINS[i].chain_id
+        //     console.log(chainId)
+        //
+        //     let blockchain = await pioneer.GetBlockchainByChainId({chainId})
+        //     // console.log("blockchain: ",blockchain.data)
+        //     console.log("blockchain: ",blockchain.data[0].caip)
+        //     console.log("blockchain: ",blockchain.data[0].name)
+        //     chainId_map[chainId] = blockchain.data[0].caip
+        //     name_map[blockchain.data[0].name] = blockchain.data[0].caip
+        // }
+        // console.log("chainId_map: ",chainId_map)
+        // console.log("name_map: ",name_map)
+
+        let asset = await pioneer.GetAsset({symbol:"USDT"})
         console.log("asset: ",asset.data)
         console.log("asset: ",asset.data[0].caip)
+
+        // let asset = await pioneer.AssetByString({name})
+        // console.log("asset: ",asset.data)
+        // console.log("asset: ",asset.data[0].caip)
         
         // let asset = await pioneer.AssetByCaip({caip})
         // console.log("asset: ",asset.data)
         // console.log("asset: ",asset.data[0].caip)
 
+        // let blockchain = await pioneer.GetCaipFromBlockchain({name})
+        // console.log("blockchain: ",blockchain.data)
+        // console.log("blockchain: ",blockchain.data[0].caip)
+
+        const COIN_MAP_LONG = {
+            BTC: "bitcoin",
+            ATOM: "cosmos",
+            OSMO: "osmosis",
+            // BTCT: "testnet",
+            BCH: "bitcoincash",
+            LTC: "litecoin",
+            DASH: "dash",
+            DGB: "digiByte",
+            DOGE: "dogecoin",
+            RUNE: "thorchain",
+            ETH: "ethereum",
+            AVAX: "avalanche",
+            ADA: "cardano",
+            BNB: "binance",
+            EOS: "eos",
+            FIO: "fio",
+        };
+        // let symbol_map = {}
+        // for(let i = 0; i < Object.keys(COIN_MAP_LONG).length; i++){
+        //     let name = Object.keys(COIN_MAP_LONG)[i]
+        //     console.log("name: ",name)
+        //     let asset = await pioneer.GetAsset({symbol:name})
+        //     console.log("asset: ",asset.data)
+        //     console.log("asset: ",asset.data[0].caip)
+        //     symbol_map[name] = asset.data[0].caip
+        // }
+        // console.log("symbol_map: ",symbol_map)
+        
         //get a blockchain by symbol
         // let blockchain = await pioneer.GetBlockchain({symbol})
         // console.log("blockchain: ",blockchain.data)

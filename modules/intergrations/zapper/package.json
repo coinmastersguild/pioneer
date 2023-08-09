@@ -5,6 +5,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.29",
+    "@pioneer-platform/pioneer-caip": "^8.1.72",
     "axios": "^1.3.4",
     "dotenv": "^8.2.0"
   },

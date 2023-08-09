@@ -7,6 +7,7 @@
     "npm": "npm i",
     "start": "node lib/index",
     "build": "tsc -p .",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "test": "npm run build && node __tests__/test-module.js",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"

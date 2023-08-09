@@ -6,13 +6,13 @@
 
 
 const TAG = " | blockbook-client | "
-let pioneerApi = require("@pioneer-platform/pioneer-client").default
 const { Blockbook } = require('blockbook-client')
 
 const log = require('@pioneer-platform/loggerdog')()
 const fakeUa = require('fake-useragent');
 const Axios = require('axios')
 const https = require('https')
+const nodes = require("@pioneer-platform/nodes")
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
@@ -23,110 +23,19 @@ const axiosRetry = require('axios-retry');
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
-        console.log(`retry attempt: ${retryCount}`);
+        log.error(TAG,`retry attempt: ${retryCount}`);
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
-        //console.error(error)
+        log.error(TAG,error)
+        //@TODO mark node offline, and punish
         // if retry condition is not specified, by default idempotent requests are retried
-        return error.response.status === 503;
+        return error?.response?.status === 503;
     },
 });
 
 let BLOCKBOOK_URLS:any = {}
 let BLOCKBOOK_SOCKETS:any = {}
-let spec = process.env['PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-
-let SERVERS_CONFIG = [
-    {
-        symbol:"MATIC",
-        blockchain:"polygon",
-        caip:"eip155:137/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.polygon.shapeshift.com",
-        websocket:"wss://indexer.polygon.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"optimism",
-        caip:"eip155:10/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.optimism.shapeshift.com",
-        websocket:"wss://indexer.optimism.shapeshift.com/websocket"
-    },
-    {
-        symbol:"LTC",
-        blockchain:"litecoin",
-        caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
-        type:"blockbook",
-        service:"https://indexer.litecoin.shapeshift.com",
-        websocket:"wss://indexer.litecoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"xDAI",
-        blockchain:"gnosis",
-        caip:"eip155:100/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.gnosis.shapeshift.com",
-        websocket:"wss://indexer.gnosis.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"ethereum",
-        caip:"eip155:1/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.ethereum.shapeshift.com",
-        websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
-    },
-    {
-        symbol:"DOGE",
-        blockchain:"dogecoin",
-        caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
-        type:"blockbook",
-        service:"https://indexer.dogecoin.shapeshift.com",
-        websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BNB",
-        blockchain:"bnbsmartchain",
-        caip:"eip155:56/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.bnbsmartchain.shapeshift.com",
-        websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BCH",
-        blockchain:"bitcoincash",
-        caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-        type:"blockbook",
-        service:"https://indexer.bitcoincash.shapeshift.com",
-        websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BTC",
-        blockchain:"bitcoin",
-        caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
-        type:"blockbook",
-        service:"https://indexer.bitcoin.shapeshift.com",
-        websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    }
-]
 
 module.exports = {
     init:function (servers?:any) {
@@ -170,31 +79,22 @@ module.exports = {
     },
 }
 
-let init_network = async function (servers?:any) {
+let init_network = async function (servers?: any[]) {
     let tag = ' | get_txs_by_address | '
     try {
         log.debug(tag,"checkpoint: ")
-        
-        //get all live free blockbook urls from pioneer
-        let blockbooks:any = servers || []
-        try{
-            //get config
-            let config = {
-                queryKey:'unchained:npm',
-                spec
-            }
-            //console.log("config: ",config)
-            //get config
-            let pioneer = new pioneerApi(spec,config)
-            pioneer = await pioneer.init()
-            let allBlockbooksRemote = await pioneer.SearchNodesByType({type:"blockbook"});
-            allBlockbooksRemote = allBlockbooksRemote.data
-            log.debug(tag,"allBlockbooksRemote: ",allBlockbooksRemote)
-            blockbooks(...allBlockbooksRemote)
-        }catch(e){
-            //console.error(tag,"e: ",e)
+
+        let SEED_NODES = await nodes.getBlockbooks()
+        log.info(tag,"SEED_NODES: ",SEED_NODES)
+
+        let blockbooks = []
+        if (servers && Array.isArray(servers)) { // Type checking for array
+            blockbooks = servers.concat(SEED_NODES); // Combine arrays
+        } else {
+            console.error("Invalid 'servers' parameter. Expected an array.");
+            blockbooks = SEED_NODES;
         }
-        if(blockbooks.length === 0) blockbooks = SERVERS_CONFIG
+
         log.debug(tag,"blockbooks: ",blockbooks.length)
         for(let i = 0; i < blockbooks.length; i++){
             let blockbook = blockbooks[i]
@@ -308,6 +208,7 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
     try{
         if(!filter) filter = "all"
         //let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
+        if(!BLOCKBOOK_URLS[coin.toUpperCase()]) throw Error("invalid coin: "+coin)
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?details=all"
         let body = {
             method: 'GET',
