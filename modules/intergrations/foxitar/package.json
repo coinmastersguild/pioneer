@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/foxitar-client",
-  "version": "8.1.28",
+  "version": "8.1.29",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
@@ -26,5 +26,5 @@
     "ts-jest": "^29.0.5",
     "typescript": "^5.0.2"
   },
-  "gitHead": "edaf466de90e7e36dad91eb3a92583c7ae9e4e06"
+  "gitHead": "373a6f6da99c8b5d74b82a44f1034b22bf331d99"
 }
