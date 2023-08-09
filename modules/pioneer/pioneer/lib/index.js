@@ -287,7 +287,8 @@ var get_pubkey_balances = function (pubkey) {
                     // Update balance
                     balances_1.push({
                         network: pubkey.symbol,
-                        caip: pubkey.caip,
+                        blockchainCaip: shortListSymbolToCaip(pubkey.symbol),
+                        assetCaip: shortListSymbolToCaip(pubkey.symbol),
                         asset: pubkey.symbol,
                         symbol: pubkey.symbol,
                         pubkey: pubkey.pubkey,
@@ -413,6 +414,7 @@ var get_pubkey_balances = function (pubkey) {
                                 var balanceInfo = {
                                     network: "ETH",
                                     blockchainCaip: 'eip155:1/slip44:60',
+                                    assetCaip: 'eip155:1/slip44:60:' + tokenInfo.contract,
                                     type: tokenInfo.type,
                                     asset: tokenInfo.symbol,
                                     symbol: tokenInfo.symbol,
@@ -464,6 +466,7 @@ var get_pubkey_balances = function (pubkey) {
                         asset: pubkey.symbol,
                         symbol: pubkey.symbol,
                         blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                        assetCaip: shortListSymbolToCaip[pubkey.symbol],
                         isToken: false,
                         lastUpdated: new Date().getTime(),
                         balance: balanceNetwork,
