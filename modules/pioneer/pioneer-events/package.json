@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-events",
-  "version": "8.1.45",
+  "version": "8.1.46",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,13 +14,13 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-types": "^8.1.53",
+    "@pioneer-platform/pioneer-types": "^8.1.54",
     "@types/node": "^18.15.11",
+    "events": "^3.3.0",
     "socket.io-client": "^4.5.4",
     "ts-node": "^8.10.2",
     "typescript": "^5.0.2",
-    "wait-promise": "^0.4.1",
-    "events": "^3.3.0"
+    "wait-promise": "^0.4.1"
   },
   "gitHead": "8c626a669f7045d1eb9c00252d9a81845a57fa50"
 }

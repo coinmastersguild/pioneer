@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-config",
-  "version": "8.1.27",
+  "version": "8.1.28",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cointools",
-  "version": "8.1.70",
+  "version": "8.1.71",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {

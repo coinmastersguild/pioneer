@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer",
-  "version": "8.1.21",
+  "version": "8.1.22",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,11 +20,11 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/blockbook": "^8.1.57",
-    "@pioneer-platform/blocknative-client": "^8.1.21",
-    "@pioneer-platform/loggerdog": "^8.1.29",
-    "@pioneer-platform/redis-queue": "^8.1.18",
-    "@pioneer-platform/zapper-client": "^8.1.23",
+    "@pioneer-platform/blockbook": "^8.1.58",
+    "@pioneer-platform/blocknative-client": "^8.1.26",
+    "@pioneer-platform/loggerdog": "^8.1.30",
+    "@pioneer-platform/redis-queue": "^8.1.23",
+    "@pioneer-platform/zapper-client": "^8.1.24",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
