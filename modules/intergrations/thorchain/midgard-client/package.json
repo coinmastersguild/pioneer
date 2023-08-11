@@ -1,10 +1,10 @@
 {
   "name": "@pioneer-platform/midgard-client",
-  "version": "8.1.19",
+  "version": "8.1.36",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/loggerdog": "^8.1.31",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.0",
     "bitcoinjs-lib": "^5.2.0",
@@ -29,8 +29,8 @@
     "onchange": "^7.0.2",
     "serve": "^11.3.2",
     "source-map-support": "^0.5.19",
-    "ts-jest": "^25.4.0",
-    "typescript": "^3.9.7"
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.2"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
 }

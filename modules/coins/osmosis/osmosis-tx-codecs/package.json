@@ -1,0 +1,17 @@
+{
+  "name": "@pioneer-platform/osmosis-tx-codecs",
+  "version": "8.1.25",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "create": "npm run build && npm run test",
+    "build": "tsc -p .",
+    "test": "npm run build && node __tests__/test-module.js",
+    "prepublish": "rm -rf lib && npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "protobufjs": "^6.11.2"
+  },
+  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
+}

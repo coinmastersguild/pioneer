@@ -11,10 +11,96 @@ export enum HDWALLETS {
     'metamask'
 }
 
+export interface Balance {
+    blockchain: string
+    symbol: string
+    asset: string
+    path: string
+    script_type: string
+    network: string
+    created: number,
+    tags: any,
+    pubkey: string,
+    xpub: string,
+    type: string,
+    master: string,
+    address: string,
+    context: string,
+    isToken: boolean,
+    lastUpdated: number,
+    balance: any,
+    priceUsd: string
+    valueUsd: string
+    onCoinCap: boolean
+    id_coincap: string
+    id_coingecko: string
+    rank_coincap: string
+    rank_coingecko: number
+    name_coincap: string
+    name_coingecko: string
+    supply: string
+    maxSupply: string
+    marketCapUsd: string
+    volumeUsd24Hr: string
+    changePercent24Hr: string
+    vwap24Hr: string
+    explorer: string
+    onCoinGecko: boolean
+    coinGeckoAgreeSymbol: boolean,
+    coinGeckoSymbol: string
+    image: string
+    current_price: string,
+    market_cap: string,
+    fully_diluted_valuation: string,
+    total_volume: string,
+    high_24h: string,
+    low_24h: string,
+    price_change_24h: string,
+    price_change_percentage_24h: string,
+    market_cap_change_24h: string,
+    market_cap_change_percentage_24h: string,
+    circulating_supply: string,
+    total_supply: string,
+    max_supply: string,
+    ath: string,
+    ath_change_percentage: string,
+    ath_date: string,
+    atl: string
+    atl_change_percentage: string,
+    atl_date: string,
+    roi: null,
+    last_updated: string
+}
+
+export interface Pubkey {
+    blockchain: string,
+    symbol: string,
+    asset: string,
+    path: string,
+    script_type: string,
+    network: string,
+    created: number,
+    tags: any,
+    pubkey: string,
+    master: string,
+    address: string
+    priceUsd: string,
+    balance: string,
+    valueUsd: string,
+    context: string,
+    balances: [
+        {
+            balance: string,
+            symbol: string,
+            network: string,
+        }
+    ]
+}
+
 export interface SDKConfig {
     service?: string;
     url?:string
-    username?:string
+    username:string
     queryKey:string
     spec:string,
     wss: string;
@@ -30,9 +116,33 @@ export interface EventsConfig {
     queryKey?:string
 }
 
+/*
+    TODO combine all configs?
+    tech debt
+ */
+export interface Config {
+    context:string
+    blockchains:any
+    wss?:string,
+    spec:string,
+    env:string,
+    mode:string,
+    username:string,
+    addresses?:[]
+    wallet?:any,
+    pubkeys?:any,
+    auth?:string,
+    paths?:any,
+    privWallet?:any,
+    mnemonic?:string,
+    queryKey?:string
+    offline?:boolean
+    pioneerApi?:boolean
+}
+
 export interface AppConfig {
     wss: string;
-    password?:string | undefined
+    password?:string
     spec: string;
     username:string
     queryKey:string
@@ -41,6 +151,7 @@ export interface AppConfig {
     localeSelected?:boolean
     isCli?:boolean
     temp?:string
+    pioneerApi:boolean
     blockchains:any
     created?:string
 }
@@ -63,6 +174,7 @@ export interface PioneerConfig {
     localeSelected?:boolean
     isCli?:boolean
     temp?:string
+    password?:string
     blockchains:any
     created?:string
     walletDescription?:any
@@ -84,6 +196,13 @@ export interface User {
 
 }
 
+export interface OnboardWallet {
+    name: string;
+    network: number;
+    initialized: string;
+    address:string
+}
+
 export interface Wallet {
     mnemonic: string;
     password: string;
@@ -96,7 +215,7 @@ export interface CitadelWallet {
     temp?:string
     masterAddress: string;
     TYPE: string;
-    seed_encrypted:string
+    seed_encrypted?:string
     hash:string
     filename:string
 }
@@ -162,6 +281,8 @@ export interface IBCdeposit {
     symbol?: string;
     nonce?:number
     fee?: any
+    sender:string
+    timeout_height:any
     receiver: string
     token: any
     source_port: string
@@ -267,25 +388,5 @@ export interface SendToAddress {
     noBroadcast?:boolean
 }
 
-export interface Config {
-    walletId?:string
-    context:string
-    blockchains:any
-    wss?:string,
-    spec:string,
-    env:string,
-    mode:string,
-    username:string,
-    addresses?:[]
-    wallet?:any,
-    pubkeys?:any,
-    auth?:string,
-    paths?:any,
-    privWallet?:any,
-    mnemonic?:string,
-    queryKey?:string
-    offline?:boolean
-    pioneerApi?:boolean
-}
 
 

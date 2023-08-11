@@ -78,6 +78,8 @@ const log = require('@pioneer-platform/loggerdog')()
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 
+//encoder
+const txEncoder = require('@pioneer-platform/cosmos-tx-encoder')
 
 const ASSET = "ATOM"
 
@@ -86,7 +88,7 @@ let publicNode = nodes.getNode('cosmos','gaiad')
 
 let ATOM_BASE = 1000000
 let URL_GAIAD = process.env['URL_GAIAD'] || publicNode
-log.info("URL_GAIAD: ",URL_GAIAD)
+log.debug("URL_GAIAD: ",URL_GAIAD)
 let RUNTIME:any
 
 module.exports = {
@@ -149,8 +151,14 @@ module.exports = {
     getBlockHeightRemote:function () {
         return get_block_height_remote();
     },
+    encode:function (tx:string) {
+        return encode_transaction(tx);
+    },
     broadcast:function (tx:string) {
         return broadcast_transaction(tx);
+    },
+    broadcastLegacy:function (tx:string) {
+        return broadcast_transaction_legacy(tx);
     },
     getAccount:function (address:string) {
         return get_account(address);
@@ -221,7 +229,7 @@ let get_balance = async function(address:string){
         let output = 0
         //
         let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.debug(tag,"accountInfo: ",accountInfo)
+        log.info(tag,"accountInfo: ",accountInfo.data)
 
         if(accountInfo && accountInfo.data && accountInfo.data.result){
             for(let i = 0; i < accountInfo.data.result.length; i++){
@@ -238,67 +246,144 @@ let get_balance = async function(address:string){
     }
 }
 
-
-let get_balances = async function(address:string){
-    let tag = TAG + " | get_pioneer_status | "
-    let output:any = {}
+let get_voucher_info = async function(voucher:string) {
+    let tag = TAG + " | get_voucher_info | "
     try{
+        let url = URL_GAIAD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
+        log.debug(tag,"url: ",url)
+        let txInfo = await axios({method:'GET',url})
+        log.debug(tag,"txInfo: ",txInfo.data)
 
-        let accountInfo = await get_account(address)
-        log.info(tag,"accountInfo: ",accountInfo)
-        log.info(tag,"accountInfo.result.value: ",accountInfo.result.value.coins[0].amount)
-        if(accountInfo && accountInfo.result && accountInfo.result.value.coins[0]){
-            log.debug(tag,"accountInfo: ", accountInfo.result.value.coins[0].amount )
-            output.available = accountInfo.result.value.coins[0].amount / ATOM_BASE
-        } else {
-            output.available = 0
-        }
-
-
-        let rewards = await get_rewards(address)
-        log.debug(tag,"rewards: ",rewards)
-
-        if(rewards && rewards.result && rewards.result.total[0]){
-            log.debug(tag,"rewards: ",rewards.result.total[0].amount)
-            output.rewards = rewards.result.total[0].amount / ATOM_BASE
-        } else {
-            output.rewards = 0
-        }
-
-        //get current blockheight
-        //let lastBlock = await get_block_height()
-
-        let delegations = await get_delegations_by_address(address)
-        log.debug(tag,"delegations: ",delegations)
-        let totalDelegated = 0
-        for(let i = 0; i < delegations.length; i++){
-            let delegation = delegations[i]
-            log.debug(tag,"delegation: ",delegation)
-            totalDelegated = totalDelegated + parseFloat(delegation.balance)
-        }
-        // @ts-ignore
-        totalDelegated = totalDelegated / ATOM_BASE
-        log.debug(tag,"totalDelegated: ",totalDelegated)
-        output.delegated = totalDelegated
-
-        //TODO totalRewardsPerBlock
-        // let totalRewardsPerBlock = 0
-        // for(let i = 0; i < rewards.result.rewards.length; i++){
-        // 	let reward = rewards.result.rewards[i]
-        // 	log.debug(tag,"reward: ",reward)
-        // 	//get rewards per block
-        //
-        // }
-        output.totalRewardsPerBlock = 0
-        //output.rewardsPerBlock = rewardsPerBlock
-        //TODO unbonding
-        output.unbonding = 0
-
-        return output
+        return txInfo.data
     }catch(e){
         throw e
     }
 }
+
+let get_balances = async function(address:string){
+    let tag = TAG + " | get_balances | "
+    try{
+        let output = []
+
+        try{
+            let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
+            log.info(tag,"accountInfo: ",accountInfo.data)
+
+            //
+            if(accountInfo.data?.result){
+                for(let i = 0; i < accountInfo.data.result.length; i++){
+                    let entry = accountInfo.data.result[i]
+                    if(entry.denom === 'uosmo'){
+                        let balance = {
+                            type:'balance',
+                            asset:'OSMO',
+                            denom:'uosmo',
+                            balance:entry.amount
+                        }
+                        output.push(balance)
+                    }
+
+                    //if ibc channel, lookup
+                    if(entry.denom.indexOf('ibc/') >= 0){
+                        //lookup on each
+                        let voucher = entry.denom.replace('ibc/','')
+                        log.debug(tag,"voucher: ",voucher)
+                        let voucherInfo = await get_voucher_info(voucher)
+                        log.debug(tag,"voucherInfo: ",voucherInfo)
+                        if(voucherInfo.denom_trace.base_denom === 'uatom'){
+                            let balance = {
+                                type:'ibcChannel',
+                                ibc:true,
+                                voucherId: entry.denom,
+                                asset:'ATOM',
+                                denom:voucherInfo.denom_trace.base_denom,
+                                channel:voucherInfo.denom_trace.path,
+                                balance:entry.amount / 1000000
+                            }
+                            output.push(balance)
+                        } else {
+                            //TODO lookup base_denum to asset
+                            //handle more assets
+                        }
+                    }
+                }
+            }
+
+
+        }catch(e){
+            //TODO stupid node 404's on new addresses!
+            //if !404
+            //really thow
+        }
+
+
+        return output
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
+// let get_balances = async function(address:string){
+//     let tag = TAG + " | get_balances | "
+//     let output:any = {}
+//     try{
+//
+//         let accountInfo = await get_account(address)
+//         log.debug(tag,"accountInfo: ",accountInfo)
+//         log.debug(tag,"accountInfo.result.value: ",accountInfo.result.value.coins[0].amount)
+//         if(accountInfo && accountInfo.result && accountInfo.result.value.coins[0]){
+//             log.debug(tag,"accountInfo: ", accountInfo.result.value.coins[0].amount )
+//             output.available = accountInfo.result.value.coins[0].amount / ATOM_BASE
+//         } else {
+//             output.available = 0
+//         }
+//
+//
+//         let rewards = await get_rewards(address)
+//         log.debug(tag,"rewards: ",rewards)
+//
+//         if(rewards && rewards.result && rewards.result.total[0]){
+//             log.debug(tag,"rewards: ",rewards.result.total[0].amount)
+//             output.rewards = rewards.result.total[0].amount / ATOM_BASE
+//         } else {
+//             output.rewards = 0
+//         }
+//
+//         //get current blockheight
+//         //let lastBlock = await get_block_height()
+//
+//         let delegations = await get_delegations_by_address(address)
+//         log.debug(tag,"delegations: ",delegations)
+//         let totalDelegated = 0
+//         for(let i = 0; i < delegations.length; i++){
+//             let delegation = delegations[i]
+//             log.debug(tag,"delegation: ",delegation)
+//             totalDelegated = totalDelegated + parseFloat(delegation.balance)
+//         }
+//         // @ts-ignore
+//         totalDelegated = totalDelegated / ATOM_BASE
+//         log.debug(tag,"totalDelegated: ",totalDelegated)
+//         output.delegated = totalDelegated
+//
+//         //TODO totalRewardsPerBlock
+//         // let totalRewardsPerBlock = 0
+//         // for(let i = 0; i < rewards.result.rewards.length; i++){
+//         // 	let reward = rewards.result.rewards[i]
+//         // 	log.debug(tag,"reward: ",reward)
+//         // 	//get rewards per block
+//         //
+//         // }
+//         output.totalRewardsPerBlock = 0
+//         //output.rewardsPerBlock = rewardsPerBlock
+//         //TODO unbonding
+//         output.unbonding = 0
+//
+//         return output
+//     }catch(e){
+//         throw e
+//     }
+// }
 
 
 
@@ -472,11 +557,20 @@ let get_txs_by_height = async function(height:string){
         // @ts-ignore
         if(nodeHeight < height) throw Error("102: unable to get block! ")
 
-        let txInfo = await axios({method:'GET',url: URL_GAIAD+'/txs?tx.height='+height})
-        log.debug(tag,"txInfo: ",txInfo.data)
+        //console.log("endpoint: ", URL_GAIAD+'/txs?tx.height='+height)
+        // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/txs?tx.height='+height})
+        // log.info(tag,"txInfo: ",txInfo.data)
 
-        return txInfo.data.txs
+        // console.log('endpoint: ',URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27')
+        // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27'})
+
+        let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=tx.height='+height})
+        log.info(tag,"txInfo: ",txInfo)
+        log.info(tag,"txInfo: ",txInfo.data)
+
+        return txInfo.data.tx_responses
     }catch(e){
+        console.error(e)
         throw e
     }
 }
@@ -532,7 +626,7 @@ let get_account = async function(address:string){
 
         //
         txInfo = await axios({method:'GET',url: URL_GAIAD+'/auth/accounts/'+address})
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
 
         return txInfo.data
@@ -555,6 +649,61 @@ let get_account_remote = async function(address:string){
         throw e
     }
 }
+
+let encode_transaction = async function(tx:string){
+    let tag = TAG + " | encode_transaction | "
+    let output:any = {}
+    try{
+        log.debug(tag,"CHECKPOINT 1")
+
+        output.success = false
+
+
+        // @ts-ignore
+        try{
+            // var encodedData = btoa(stringToEncode);
+            let payload = {
+                "tx_bytes": btoa(tx),
+                "mode": "BROADCAST_MODE_SYNC"
+            }
+
+            let urlRemote = URL_GAIAD+ '/txs/encode'
+            log.info(tag,"urlRemote: ",urlRemote)
+            let result2 = await axios({
+                url: urlRemote,
+                headers: {
+                    'api-key': process.env['NOW_NODES_API'],
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                data: payload,
+            })
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+
+        // @ts-ignore
+        }catch(e:any){
+            //log.error(tag,"failed second broadcast e: ",e.response)
+            log.error(tag,e)
+            // log.error(tag,e.response)
+            // log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            //throw e
+
+            output.success = false
+            output.error = e.response.data.error
+
+        }
+
+        return output
+    }catch(e){
+
+        console.error(tag,"throw error: ",e)
+        return output
+
+    }
+}
+
 
 /*
 
@@ -637,42 +786,89 @@ let broadcast_transaction = async function(tx:string){
 
 
         try{
-            //push to seed
-            let urlRemote = URL_GAIAD+ '/txs'
-            log.debug(tag,"urlRemote: ",urlRemote)
+            //convert sdtTx to proto
+            // let broadcastTx = await txEncoder.encodeTx(tx)
+            // log.info(tag,"broadcastTx: ",broadcastTx)
+
+            let payload = {
+                // "tx_bytes": btoa(tx),
+                // "tx_bytes":broadcastTx,
+                "tx_bytes":tx,
+                "mode": "BROADCAST_MODE_SYNC"
+            }
+
+            let urlRemote = URL_GAIAD+ '/cosmos/tx/v1beta1/txs'
+            // let urlRemote = URL_GAIAD+ '/txs'
+            log.info(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
+                headers: {
+                    'api-key': process.env['NOW_NODES_API'],
+                    'Content-Type': 'application/json'
+                },
                 method: 'POST',
-                data: tx,
+                data: payload,
             })
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
+
+            //push to seed
+            // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync?tx='+tx
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'GET'
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // if(result2.data.txhash) output.txid = result2.data.txhash
+
+            // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync'
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'POST',
+            //     data: tx,
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // if(result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
             if(result2.data.raw_log){
                 let logSend = result2.data.raw_log
-                log.info(tag,"logSend: ",logSend)
+                log.debug(tag,"logSend: ",logSend)
+            }
+            if(result2.data.code === 4){
+                output.success = false
+            } else {
+                output.success = true
             }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
-            output.raw = result2.data
-        }catch(e){
+            output.raw = result2.data.raw_log
+
+            // @ts-ignore
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)
             log.error(tag,e.response.data)
-            log.error(tag,e.response.data.error)
-            log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
             //throw e
 
             output.success = false
             output.error = e.response.data.error
 
-        }
-
-        if(output.txid){
-            output.success = true
         }
 
         return output
@@ -684,6 +880,65 @@ let broadcast_transaction = async function(tx:string){
     }
 }
 
+let broadcast_transaction_legacy = async function(tx:string){
+    let tag = TAG + " | broadcast_transaction | "
+    let output:any = {}
+    try{
+        log.debug(tag,"CHECKPOINT 1")
+
+        output.success = false
+
+
+        try{
+            //
+            //push to seed
+            let urlRemote = "https://atom.nownodes.io" + '/txs'
+            log.debug(tag,"urlRemote: ",urlRemote)
+            let result2 = await axios({
+                url: urlRemote,
+                method: 'POST',
+                data: tx,
+            })
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            if(result2.data.txhash) output.txid = result2.data.txhash
+
+            //verify success
+            if(result2.data.raw_log){
+                let logSend = result2.data.raw_log
+                log.debug(tag,"logSend: ",logSend)
+            }
+            if(result2.data.code === 4){
+                output.success = false
+            } else {
+                output.success = true
+            }
+            output.height = result2.height
+            output.gas_wanted = result2.gas_wanted
+            output.gas_used = result2.gas_used
+            output.raw = result2.data.raw_log
+            // @ts-ignore
+        }catch(e:any){
+            //log.error(tag,"failed second broadcast e: ",e.response)
+            log.error(tag,e)
+            log.error(tag,e.response)
+            log.error(tag,e.response.data)
+            // log.error(tag,e.response.data.error)
+            // log.error(tag,e.response.data.error.indexOf('RPC error -32603 - Internal error: Tx already exists in cache'))
+            //throw e
+
+            output.success = false
+            output.error = e.response.data.error
+
+        }
+
+        return output
+    }catch(e){
+
+        console.error(tag,"throw error: ",e)
+        return output
+
+    }
+}
 
 let get_node_info = async function(){
     let tag = TAG + " | get_node_info | "
@@ -708,30 +963,36 @@ let get_node_info_verbose = async function(){
         let output:any = {}
 
         //get syncing status
-        let syncInfo = await axios({method:'GET',url: URL_GAIAD+'/syncing'})
-        log.debug(tag,"syncInfo: ",syncInfo.data)
+        // let syncInfo = await axios({method:'GET',url: URL_GAIAD+'/syncing'})
+        // log.debug(tag,"syncInfo: ",syncInfo.data)
 
-        output.isSyncing = syncInfo.data
+        // output.isSyncing = syncInfo.data
 
         //gaiad abci_info
-        let nodeInfo = await axios({method:'GET',url: URL_GAIAD+'/node_info'})
-        log.debug(tag,"nodeInfo: ",nodeInfo.data)
+        let nodeInfo = await axios({
+            method:'GET',
+            headers: {
+                'api-key': process.env['NOW_NODES_API'],
+                'Content-Type': 'application/json'
+            },
+            url: URL_GAIAD+'/node_info'
+        })
+        log.info(tag,"nodeInfo: ",nodeInfo.data)
 
 
-        output = nodeInfo.data
-
-        let lastBlockRemote = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
-        log.debug(tag,"lastBlockRemote: ",lastBlockRemote.data)
-
-        //let hheight
-        output.remoteHeight = lastBlockRemote.data.block_meta.header.height
-
-        let lastBlock = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
-        log.debug(tag,"lastBlock: ",lastBlock.data)
-
-        //let height
-
-        output.height = lastBlock.data.block_meta.header.height
+        // output = nodeInfo.data
+        //
+        // let lastBlockRemote = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
+        // log.debug(tag,"lastBlockRemote: ",lastBlockRemote.data)
+        //
+        // //let height
+        // output.remoteHeight = lastBlockRemote.data.block_meta.header.height
+        //
+        // let lastBlock = await axios({method:'GET',url: URL_GAIAD+'/blocks/latest'})
+        // log.debug(tag,"lastBlock: ",lastBlock.data)
+        //
+        // //let height
+        // output.height = lastBlock.data.block_meta.header.height
 
         //estimate time till synced
         //get block height
@@ -840,45 +1101,50 @@ let get_txs_by_address = async function (address:string) {
     let output:any = {}
     try {
         log.debug(tag,"checkpoint: ",address)
-        let output = []
+        let output:any = []
 
         //sends
-        let url = URL_GAIAD+ '/txs?message.sender='+address
+        //events=tx.height=1890635
+        //transfer.recipient=cosmos13qhqwhzx74703avazhuf5hfxkwdx6wvsea4vgt
+        //event=transfer.recipient=cosmos1q9wtnlwdjrhwtcjmt2uq77jrgx7z3usrq2yz7z&pagination.offset=0&pagination.limit=30
+        // let url = URL_GAIAD+ '/cosmos/tx/v1beta1/txs?events=message.sender=%27'+address+'%27'
+        let url = URL_GAIAD+ '/cosmos/tx/v1beta1/txs?events=transfer.recipient=%27'+address+'%27&events=message.module=%27ibc_client%27'
         log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        log.info('sends: ', sends)
+        // log.debug('sends: ', sends)
+        console.log("resp: ",sends.tx_responses)
 
         // TODO//pagnation
         // let pagesSends = sends.page_number
         // for(let i = 0; i < pagesSends; i++){
         //
         // }
-        for(let i = 0; i < sends.txs.length; i++ ){
-            let tx = sends.txs[i]
-            //normalize
-            //tx = normalize_tx(tx,'send')
-            output.push(tx)
-        }
+        // for(let i = 0; i < sends.txs.length; i++ ){
+        //     let tx = sends.txs[i]
+        //     //normalize
+        //     //tx = normalize_tx(tx,'send')
+        //     output.push(tx)
+        // }
 
         //receives
-        url = URL_GAIAD+ '/txs?transfer.recipient='+address
-        let resultRecieves = await axios({
-            url: url,
-            method: 'GET'
-        })
-        let receives = resultRecieves.data
-        log.debug('receives: ', receives)
-
-        for(let i = 0; i < receives.txs.length; i++ ){
-            let tx = receives.txs[i]
-            //normalize
-            //tx = normalize_tx(tx,'receive')
-            output.push(tx)
-        }
+        // url = URL_GAIAD+ '/txs?transfer.recipient='+address
+        // let resultRecieves = await axios({
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // let receives = resultRecieves.data
+        // log.debug('receives: ', receives)
+        //
+        // for(let i = 0; i < receives.txs.length; i++ ){
+        //     let tx = receives.txs[i]
+        //     //normalize
+        //     //tx = normalize_tx(tx,'receive')
+        //     output.push(tx)
+        // }
 
         //staking tx's
         // let resultStaking = await axios({method:'GET',url: URL_GAIAD+'/txs?delegator='+address})
@@ -964,7 +1230,9 @@ let getTransaction = async function(txid:string){
 
         log.debug("gaiacli get tx")
 
-        txInfo = await axios({method:'GET',url:  URL_GAIAD+'/txs/'+txid})
+        log.debug(tag,"URL_GAIAD: ",URL_GAIAD)
+
+        txInfo = await axios({method:'GET',url:  URL_GAIAD+'/cosmos/tx/v1beta1/txs/'+txid})
 
 
         log.debug(tag,"txInfo: ",txInfo.data)

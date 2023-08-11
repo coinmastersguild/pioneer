@@ -1,2777 +1,967 @@
 /*
 
-    Pioneer Wallet v2
+    Pioneer API
+      A High Availability blockchain api
 
-    Class based wallet development
+    Goals:
+      v1 compatibility with watchtower with 0 change
+      Multi-asset support
 
- */
+    V2 goals:
+      Treat Xpubs as passwords
+      encrypt long term data storage
+      maintain hash table to detect and cache payments
+
+
+
+    getTransactions:
+
+    Data: example
+
+    { success: true,
+      pagination: { page: 1, total_objects: 88, total_pages: 9 },
+      data:
+        [ { txid:
+          '',
+          status: 'confirmed',
+          type: 'send',
+          amount: -78602,
+          date: '2019-05-10T21:01:23Z',
+          confirmations: 1055,
+          network: 'BTC',
+          xpub:
+            '' },
+         }
+       ]
+      }
+     }
+
+*/
 
 const TAG = " | Pioneer | "
-const log = require("@pioneer-platform/loggerdog")()
-const cryptoTools = require('crypto');
-const ripemd160 = require("crypto-js/ripemd160")
-const CryptoJS = require("crypto-js")
-const sha256 = require("crypto-js/sha256")
-const bech32 = require(`bech32`)
-const bitcoin = require("bitcoinjs-lib");
-const ethUtils = require('ethereumjs-util');
-const prettyjson = require('prettyjson');
-const coinSelect = require('coinselect')
-const keccak256 = require('keccak256')
-const bchaddr = require('bchaddrjs');
-const ethCrypto = require("@pioneer-platform/eth-crypto")
-const coincap = require("@pioneer-platform/coincap")
-const {
+const queue = require('@pioneer-platform/redis-queue');
+const uuid = require('short-uuid');
+let blocknative = require("@pioneer-platform/blocknative-client")
+blocknative.init()
+const blockbook = require('@pioneer-platform/blockbook')
+// const foxitar = require("@pioneer-platform/foxitar-client")
+let zapper = require("@pioneer-platform/zapper-client")
+//@ts-ignore
+let {shortListSymbolToCaip,evmCaips} = require("@pioneer-platform/pioneer-caip")
+
+
+
+const networks:any = {
+    'ETH' : require('@pioneer-platform/eth-network'),
+    'ATOM': require('@pioneer-platform/cosmos-network'),
+    'OSMO': require('@pioneer-platform/osmosis-network'),
+    'BNB' : require('@pioneer-platform/binance-network'),
+    // 'EOS' : require('@pioneer-platform/eos-network'),
+    'FIO' : require('@pioneer-platform/fio-network'),
+    'ANY' : require('@pioneer-platform/utxo-network'),
+    'RUNE' : require('@pioneer-platform/thor-network'),
+}
+
+let {
+    supportedBlockchains,
+    supportedAssets,
     getPaths,
-    nativeToBaseAmount,
-    baseAmountToNative,
-    UTXO_COINS,
-    COIN_MAP_KEEPKEY_LONG,
-    COIN_MAP_LONG,
-    getNativeAssetForBlockchain,
-    addressNListToBIP32,
-    bip32ToAddressNList
-} = require('@pioneer-platform/pioneer-coins')
+    get_address_from_xpub,
+    getNativeAssetForBlockchain
+} = require('@pioneer-platform/cointools')
 
-//support
-import { ethers } from 'ethers'
-import * as support from './support'
-import { numberToHex } from 'web3-utils'
-import { FioActionParameters } from "fiosdk-offline";
-import {
-    UnsignedTransaction,
-    Transaction,
-    SendToAddress,
-    Config,
-    BroadcastBody,
-    Approval,
-    Invocation,
-    Balance,
-    Deposit,
-    HDWALLETS
-} from "@pioneer-platform/pioneer-types";
-//Pioneer follows OpenAPI spec
-let network = require("@pioneer-platform/pioneer-client")
+//const bcrypt = require('bcryptjs');
+var numbro = require("numbro");
 
-//Highlander fork
-const hdwallet = require("@bithighlander/hdwallet-core")
-const pioneer = require("@bithighlander/hdwallet-native")
-// SS public TODO catch up public repo
-// const hdwallet = require("@shapeshiftoss/hdwallet-core")
-// const pioneer = require("@shapeshiftoss/hdwallet-native")
+const log = require('@pioneer-platform/loggerdog')()
+const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
+let connection  = require("@pioneer-platform/default-mongo")
 
-//global
-const keyring = new hdwallet.Keyring()
 
-const HD_RUNE_KEYPATH="m/44'/931'/0'/0/0"
-const RUNE_CHAIN="thorchain"
-const RUNE_BASE=100000000
-const HD_ATOM_KEYPATH="m/44'/118'/0'/0/0"
-const ATOM_CHAIN="cosmoshub-4"
-const ATOM_BASE=1000000
-let GIG =  1000000000
+let wait = require('wait-promise');
+let sleep = wait.sleep;
 
-const OSMO_CHAIN="osmosis-1"
 
-function bech32ify(address:any, prefix:string) {
-    const words = bech32.toWords(address)
-    return bech32.encode(prefix, words)
+let usersDB = connection.get('users')
+let txsDB = connection.get('transactions')
+let pubkeysDB = connection.get('pubkeys')
+let inputsDB = connection.get('unspent')
+let assetsDB = connection.get('assets')
+let nodesDB = connection.get('nodes')
+usersDB.createIndex({id: 1}, {unique: true})
+txsDB.createIndex({txid: 1}, {unique: true})
+inputsDB.createIndex({txid: 1}, {unique: true})
+pubkeysDB.createIndex({pubkey: 1}, {unique: true})
+pubkeysDB.createIndex({ tags: 1 })
+
+const BALANCE_ON_REGISTER = true
+
+let onStart = async function(){
+    let tag = TAG + " | onStart | "
+    try{
+        log.info(tag,"starting...")
+        //get servers
+        let servers = await nodesDB.find({type:'blockbook'})
+        log.info(tag,"servers: ",servers.length)
+        await blockbook.init(servers)
+        // networks.ANY.init('full')
+        await networks.ETH.init()
+        return true
+    }catch(e){
+        log.error(e)
+    }
+}
+//onStart()
+
+module.exports = {
+    init: async function () {
+        return onStart();
+    },
+    refresh: async function (username:string) {
+        return get_and_rescan_pubkeys(username);
+    },
+    register: async function (username:string, pubkeys:any, context:string) {
+        return register_pubkeys(username, pubkeys, context);
+    },
+    getPubkeys: async function (username:string, context?:string) {
+        return get_and_verify_pubkeys(username, context);
+    },
+    update: async function (username:string, xpubs:any, context:string) {
+        return update_pubkeys(username, xpubs, context);
+    },
+    balances: async function (pubkey:any) {
+        return get_pubkey_balances(pubkey);
+    },
 }
 
-function createBech32Address(publicKey:any,prefix:string) {
-    const message = CryptoJS.enc.Hex.parse(publicKey.toString(`hex`))
-    const hash = ripemd160(sha256(message)).toString()
-    const address = Buffer.from(hash, `hex`)
-    const cosmosAddress = bech32ify(address, prefix)
-    return cosmosAddress
-}
-
-module.exports = class wallet {
-    private PUBLIC_WALLET:any = {};
-    private paths: (format?: string) => any;
-    private forget: () => any;
-    private getBalance: (coin: string, address?:string) => any;
-    private getBalanceRemote: (coin: string, address?:string) => Promise<any>;
-    private getFioPubkey: () => Promise<any>;
-    private getFioAccountsByPubkey: (pubkey: string) => Promise<void>;
-    private getPaymentRequests: (pubkey: string) => Promise<void>;
-    private fioEncryptRequestContent: (content: any) => Promise<void>;
-    private fioDecryptRequestContent: (content: any) => Promise<void>;
-    private getFioAccountInfo: (username: string) => Promise<void>;
-    private getMaster: (coin: string) => Promise<any>;
-    private getMasterOfSeed: (seed: string) => Promise<any>;
-    private getAddress: (coin: string, account: number, index: number, isChange: boolean) => Promise<any>;
-    private buildTx: (transaction: any) => Promise<any>;
-    private bip32ToAddressNList: (path: string) => number[];
-    private sendToAddress: (intent: SendToAddress) => Promise<any>;
-    private buildTransfer: (transaction: Transaction) => Promise<any>;
-    private broadcastTransaction: (coin: string, signedTx: BroadcastBody) => Promise<any>;
-    private mode: string;
-    private queryKey: string | undefined;
-    private username: string;
-    private type: HDWALLETS;
-    private offline: boolean;
-    private isTestnet: boolean | null;
-    private init: (type: string, config: Config) => Promise<any>;
-    private mnemonic: string | undefined;
-    private auth: string | undefined;
-    private spec: string;
-    private pioneerApi: boolean | undefined;
-    private WALLET: any;
-    private pubkeys: any;
-    private getInfo: (context: string) => any;
-    private pioneer: any;
-    private pioneerClient: any;
-    private WALLET_BALANCES: any;
-    private setMnemonic: () => string | undefined;
-    private buildSwap: (transaction: any) => Promise<string>;
-    private blockchains: any;
-    private addLiquidity: (addLiquidity: any) => Promise<any>;
-    private buildApproval: (swap: any) => Promise<any>;
-    private sendApproval: (intent: Approval) => Promise<any>;
-    private signTransaction: (transaction: UnsignedTransaction) => Promise<any>;
-    private getApproveQueue: () => any;
-    private getPendingQueue: () => any;
-    private getNextReview: () => any;
-    private addUnsigned: (unsigned: any) => any;
-    private addBroadcasted: (signed: any) => any;
-    private APPROVE_QUEUE: any[];
-    private PENDING_QUEUE: any[];
-    private context: string
-    private deposit: (swap: any) => Promise<any>;
-    constructor(type:HDWALLETS,config:Config,isTestnet?:boolean) {
-        //if(config.isTestnet) isTestnet = true
-        this.APPROVE_QUEUE = []
-        this.PENDING_QUEUE = []
-        this.isTestnet = false
-        this.offline = false //TODO supportme
-        this.mode = config.mode
-        this.context = config.context
-        this.queryKey = config.queryKey
-        this.username = config.username
-        this.pioneerApi = config.pioneerApi
-        this.blockchains = config.blockchains
-        this.WALLET_BALANCES = {}
-        this.type = type
-        this.spec = config.spec
-        this.mnemonic = config.mnemonic
-        this.auth = config.auth
-        this.bip32ToAddressNList = function (path:string) {
-            return bip32ToAddressNList(path);
-        }
-        this.setMnemonic = function () {
-            return this.mnemonic;
-        }
-        this.init = async function (wallet?:any) {
-            let tag = TAG + " | init_wallet | "
-            try{
-                if(!this.blockchains && !wallet.blockchains) throw Error("102: Must Specify blockchain support! ")
-                if(!this.spec) throw Error("103: Must init a pioneer server spec")
-                log.debug(tag,"checkpoint")
-                let paths = getPaths(this.blockchains)
-                switch (+HDWALLETS[this.type]) {
-                    case HDWALLETS.pioneer:
-                        if(!this.context && config.mnemonic){
-                            //calculate
-                            let walletEth = await ethCrypto.generateWalletFromSeed(config.mnemonic)
-                            log.debug(tag,"walletEth:",walletEth)
-                            log.debug(tag,"walletEth:",walletEth.masterAddress)
-                            log.debug(tag,"walletEth:",walletEth.masterAddress+".wallet.json")
-                            this.context = walletEth.masterAddress+".wallet.json"
-                        }
-                        if(!this.context) throw Error("102: unable to determine correct context!")
-                        log.debug(tag,"context: ",this.context)
-                        const pioneerAdapter = pioneer.NativeAdapter.useKeyring(keyring)
-                        log.debug(tag,"checkpoint"," pioneer wallet detected! ")
-                        if(!config.mnemonic && !wallet && !config.context) throw Error("102: mnemonic or wallet file or context required! ")
-                        if(config.mnemonic && config.wallet) throw Error("103: wallet collision! invalid config! ")
-
-                        log.debug(tag,"isTestnet: ",this.isTestnet)
-                        //pair
-                        this.WALLET = await pioneerAdapter.pairDevice(config.username)
-                        await this.WALLET.loadDevice({ mnemonic: config.mnemonic })
-
-                        //verify testnet
-                        const isTestnet = false
-                        log.debug(tag,"hdwallet isTestnet: ",isTestnet)
-                        log.debug(tag,"paths: ",paths.length)
-                        log.debug(tag,"blockchains: ",this.blockchains)
-                        //verify paths for each enabled blockchain
-                        for(let i = 0; i < this.blockchains.length; i++){
-                            let blockchain = this.blockchains[i]
-                            log.debug(tag,"blockchain: ",blockchain)
-                            //find blockchain in path
-                            let isFound = paths.find((path: { blockchain: string; }) => {
-                                return path.blockchain === blockchain
-                            })
-                            if(!isFound){
-                                throw Error("Failed to find path for blockchain: "+blockchain)
-                            }
-                        }
-                        log.debug(tag,"Checkpoint valid paths ** ")
-                        this.pubkeys = await this.WALLET.getPublicKeys(paths)
-                        log.debug("pubkeys ",JSON.stringify(this.pubkeys))
-
-                        //verify pubkey for each blockchain
-                        for(let i = 0; i < this.blockchains.length; i++){
-                            let blockchain = this.blockchains[i]
-                            //find blockchain in path
-                            let isFound = this.pubkeys.find((pubkey: { blockchain: any; }) => {
-                                return pubkey.blockchain == blockchain
-                            })
-                            if(!isFound){
-                                throw Error("Failed to find path for blockchain: "+blockchain)
-                            }
-                        }
-                        log.debug(tag,"Checkpoint valid pubkeys ** ")
-                        //TODO verify hdwallet init successfull
-
-                        log.debug("pubkeys ",this.pubkeys)
-                        log.debug("pubkeys.length ",this.pubkeys.length)
-                        log.debug("paths.length ",paths.length)
-                        log.debug("blockchainsEnabled: ",this.blockchains.length)
-                        let blockchainsEnabled = this.blockchains.length
-
-                        for(let i = 0; i < this.pubkeys.length; i++){
-                            let pubkey = this.pubkeys[i]
-                            log.debug(tag,"pubkey: ",pubkey)
-                            if(!pubkey) throw Error("empty pubkey!")
-                            if(!pubkey.symbol){
-                                let nativeAsset = getNativeAssetForBlockchain(pubkey.blockchain)
-                                if(!nativeAsset) throw Error("102: blockchain not supported by coins module!  "+pubkey.blockchain)
-                                pubkey.symbol = nativeAsset
-                            }
-                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey
-                        }
-                        break;
-                    case HDWALLETS.keepkey:
-                        log.debug(tag," Keepkey mode! ")
-                        log.debug(tag,"**** wallet: ",wallet)
-                        if(!config.wallet) throw Error("102: Config is missing watch wallet!")
-                        if(!config.wallet.WALLET_PUBLIC) throw Error("103: Config watch wallet missing WALLET_PUBLIC!")
-                        if(!config.wallet.pubkeys) throw Error("104: Config watch wallet missing pubkeys!")
-                        if(!wallet.features.deviceId) throw Error("105: invalid wallet! missing wallet.features.deviceId")
-                        this.context = wallet.features.deviceId + ".wallet.json"
-                        //load wallet from keepkey
-                        this.WALLET = wallet
-
-                        log.debug(tag,"IN paths: ",paths)
-                        //TODO why this no worky
-                        // this.pubkeys = await this.WALLET.getPublicKeys(paths)
-                        this.pubkeys = config.wallet.pubkeys
-
-                        log.debug("pubkeys ",JSON.stringify(this.pubkeys))
-                        log.debug("pubkeys.length ",this.pubkeys.length)
-                        log.debug("paths.length ",paths.length)
-                        //if paths !== pubkeys throw? missing symbol?
-
-                        for(let i = 0; i < this.pubkeys.length; i++){
-                            let pubkey = this.pubkeys[i]
-                            log.debug(tag,"pubkey: ",pubkey)
-                            if(!pubkey) throw Error("empty pubkey!")
-                            if(!pubkey.symbol){
-                                log.debug("pubkey: ",pubkey)
-                                throw Error("Invalid pubkey!")
-                            }
-                            this.PUBLIC_WALLET[pubkey.symbol] = pubkey
-                        }
-                        log.debug("this.PUBLIC_WALLET",this.PUBLIC_WALLET)
-
-                        break;
-                    case HDWALLETS.metamask:
-                        log.debug(tag," metamask mode! ")
-                        if(!config.wallet) throw Error("Config is missing watch wallet!")
-                        if(!config.wallet.WALLET_PUBLIC) throw Error("Config watch wallet missing WALLET_PUBLIC!")
-                        this.PUBLIC_WALLET = config.wallet.WALLET_PUBLIC
-                        if(!config.pubkeys) throw Error("Config watch wallet missing pubkeys!")
-                        this.pubkeys = config.pubkeys
-                        break;
-                    default:
-                        throw Error("108: WALLET not yet supported! "+type+" valid: "+HDWALLETS)
-                        break;
-                }
-                if(!this.pubkeys) throw Error("103: failed to init wallet! missing pubkeys!")
-                if(this.pioneerApi){
-                    if(!this.spec) throw Error("102:  Api spec required! ")
-                    if(!this.queryKey) throw Error("102:  queryKey required! ")
-                    this.pioneer = new network(config.spec,{
-                        queryKey:config.queryKey
-                    })
-                    this.pioneerClient = await this.pioneer.init(config.spec,{
-                        queryKey:config.queryKey
-                    });
-                    log.debug("baseUrl: ",await this.pioneerClient.getBaseURL())
-
-                    //get user status
-                    let userInfo = await this.pioneerClient.instance.User()
-                    userInfo = userInfo.data
-                    log.debug(tag,"userInfo: ",userInfo)
-
-                    if(!userInfo || !userInfo.success){
-                        log.debug(tag,"registering new user! ")
-                        //API
-                        let register = {
-                            username:this.username,
-                            blockchains:this.blockchains,
-                            context:this.context,
-                            walletDescription:{
-                                context:this.context,
-                                type:this.type
-                            },
-                            data:{
-                                pubkeys:this.pubkeys
-                            },
-                            queryKey:this.queryKey,
-                            auth:this.auth,
-                            provider:'bitcoin'
-                        }
-                        log.debug("registerBody: ",register)
-                        log.debug("this.pioneerClient: ",this.pioneerClient)
-                        if(!register.context) throw Error("102: missing context Can not register!")
-                        let regsiterResponse = await this.pioneerClient.instance.Register(null,register)
-                        if(regsiterResponse.code === 104){
-                            //request change of queryKey
-                        }
-                        log.debug("registerResponse: ",regsiterResponse)
-
-                        //if register success
-
-                        //emitter.info = walletInfo
-                    }else{
-                        //user found! syncronize
-                        if(!userInfo.blockchains) throw Error("104: invalid user!")
-                        log.debug(tag,"userInfo: ",userInfo)
-                        log.debug(tag,"userInfo: ",userInfo.blockchains)
-                        log.debug(tag,"userInfo: ",userInfo.blockchains.length)
-
-                        log.debug(tag,"blockchains: ",this.blockchains)
-                        log.debug(tag,"blockchains: ",this.blockchains.length)
-
-                        //count blockchains
-
-                        //count pubkeys
-
-                        //if missing register key
-
-                        //if incomplete
-
-                        //register missing pubkeys
-
-                        if(userInfo.blockchains.length !== this.blockchains.length){
-                            log.error(tag,"Pubkeys OUT OF SYNC!")
-                            log.error(tag,"blockchains remote: ",userInfo.blockchains)
-                            log.error(tag,"blockchains configured: ",this.blockchains)
-                            //TODO register pubkey 1 by 1 with async on
-                            //if failure give reason
-                        }
-                    }
-
-                    //if success get info
-
-                    //else return failed to init
-
-                    let output:any = {}
-
-                    log.debug(tag,"getting info on context: ",this.context)
-                    let walletInfo = await this.getInfo(this.context)
-                    log.debug(tag,"walletInfo: ",walletInfo)
-
-                    //validate info
-                    log.debug("walletInfo: ",walletInfo)
-
-                    if(walletInfo && walletInfo.balances){
-                        let coins = Object.keys(walletInfo.balances)
-                        for(let i = 0; i < coins.length; i++){
-                            let coin = coins[i]
-                            let balance = walletInfo.balances[coin]
-                            this.WALLET_BALANCES[coin] = balance
-                        }
-                    }
-
-                    if(walletInfo && walletInfo.balances) this.WALLET_BALANCES = walletInfo.balances
-
-                    return walletInfo
-                } else {
-                    log.debug(tag,"Offline mode!")
-                }
-            }catch(e){
-                log.error(tag,e)
-                throw e
-            }
-        }
-        this.paths = function (format?:string) {
-            let tag = TAG + " | get_paths | "
-            try {
-                let output:any = []
-                if(format === 'keepkey'){
-                    let paths = getPaths(this.blockchains)
-                    for(let i = 0; i < paths.length; i++){
-                        let path = paths[i]
-                        let pathForKeepkey:any = {}
-                        //send coin as bitcoin
-                        pathForKeepkey.symbol = path.symbol
-                        pathForKeepkey.addressNList = path.addressNList
-                        //why
-                        pathForKeepkey.coin = 'Bitcoin'
-                        pathForKeepkey.script_type = 'p2pkh'
-
-                        output.push(pathForKeepkey)
-                    }
-                } else {
-                    let paths = getPaths(this.blockchains)
-                    output = paths
-                }
-                return output
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.forget = async function () {
-            let resp = await this.pioneerClient.instance.Forget()
-            return resp.data;
-        }
-        this.getInfo = async function (context) {
-            let tag = TAG + " | getInfo | "
-            try {
-                let walletInfo:any = {}
-                if(!this.offline){
-                    //query api
-                    walletInfo = await this.pioneerClient.instance.Info(context)
-                    log.debug(tag,"walletInfo: ",walletInfo)
-                }
-                return walletInfo.data
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getBalance = function (coin:string) {
-            return this.WALLET_BALANCES[coin] || 0;
-        }
-        this.getMasterOfSeed = async function (mnemonic:string,coin?:string) {
-            //master is ETH
-            let wallet = await ethCrypto.generateWalletFromSeed(mnemonic)
-            return wallet.masterAddress;
-        }
-        this.getBalanceRemote = async function (coin:string,address?:string) {
-            let tag = TAG + " | getBalance | "
-            try {
-                log.debug("coin detected: ",coin)
-
-                //TODO
-            } catch (e) {
-                log.error(tag, "e: ", e)
-                throw e
-            }
-        }
-        this.getApproveQueue = function () {
-            return this.APPROVE_QUEUE;
-        }
-        this.getPendingQueue = function () {
-            return this.PENDING_QUEUE;
-        }
-        this.getNextReview = function () {
-            return this.APPROVE_QUEUE.shift();
-        }
-        this.addUnsigned = function (unsigned:any) {
-            return this.APPROVE_QUEUE.push(unsigned);
-        }
-        this.addBroadcasted = function (signed:any) {
-            return this.PENDING_QUEUE.push(signed);
-        }
-        /*
-        FIO commands
-         */
-        this.getFioPubkey = function () {
-            return this.PUBLIC_WALLET['FIO'].pubkey;
-        }
-        this.getFioAccountInfo = async function (username:string) {
-            let result = await this.pioneerClient.instance.GetFioAccountInfo(username);
-            return result.data
-        }
-        this.getFioAccountsByPubkey = async function (pubkey:string) {
-            let accounts = await this.pioneerClient.instance.AccountsFromFioPubkey(pubkey)
-            return accounts.data
-        }
-        //getPaymentRequests
-        this.getPaymentRequests = async function () {
-            let accounts = await this.pioneerClient.instance.GetPaymentRequests(this.PUBLIC_WALLET['FIO'].pubkey)
-            return accounts.data
-        }
-        this.fioEncryptRequestContent = async function (content:any) {
-            let result = await this.WALLET.fioEncryptRequestContent(content)
-            return result
-        }
-        //fioDecryptRequestContent
-        this.fioDecryptRequestContent = async function (content:any) {
-            let result = await this.WALLET.fioDecryptRequestContent(content)
-            return result
-        }
-        this.getMaster = async function (network:string) {
-            let tag = TAG + " | get_address_master | "
-            try {
-                if(!network) throw Error("101: must pass network!")
-                if(this.PUBLIC_WALLET[network]){
-                    let output = this.PUBLIC_WALLET[network].address
-
-                    //verify
-                    let address
-                    let paths = this.paths()
-                    let pathInfo = paths.filter((e:any) => e.network === network)
-                    log.debug(tag,"pathInfo: ",pathInfo)
-                    if(!pathInfo[0]) throw Error("103: unable to get path info! ")
-                    let masterPath = addressNListToBIP32(pathInfo[0].addressNListMaster)
-
-                    switch(network) {
-                        case 'BCH':
-                            address = await this.WALLET.btcGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                coin: "BitcoinCash",
-                                //script types
-                                //p2pkh/cashaddr
-                                scriptType:'p2pkh',
-                                showDisplay: false,
-                            });
-                            address = bchaddr.toCashAddress(address)
-                            //convert
-                            break;
-                        case 'LTC':
-                            address = await this.WALLET.btcGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                coin: "Litecoin",
-                                //script types
-                                //p2wpkh/p2pkh/cashaddr
-                                scriptType:'p2pkh', //bech32
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'DOGE':
-                            address = await this.WALLET.btcGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                coin: "Dogecoin",
-                                //script types
-                                //p2wpkh/p2pkh/cashaddr
-                                scriptType:'p2pkh', //bech32
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'BTC':
-                            address = await this.WALLET.btcGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                coin: "Bitcoin",
-                                //script types
-                                //p2wpkh/p2pkh/cashaddr
-                                scriptType:'p2wpkh', //bech32
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'ETH':
-                            address = await this.WALLET.ethGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'RUNE':
-                            address = await this.WALLET.thorchainGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'OSMO':
-                            address = await this.WALLET.osmosisGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'ATOM':
-                            address = await this.WALLET.cosmosGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                showDisplay: false,
-                            });
-                            break;
-                        case 'BNB':
-                            address = await this.WALLET.binanceGetAddress({
-                                addressNList: bip32ToAddressNList(masterPath),
-                                showDisplay: false,
-                            });
-                            break;
-                        default:
-                            throw Error("coin not yet implemented ! ")
-                        // code block
-                    }
-                    log.debug(tag,"address (HDwallet): ",address)
-                    log.debug(tag,"address (private): ",output)
-                    if(address !== output) {
-                        throw Error("unable to verify address in HDwallet!")
-                    }
-                    return output
-                }else{
-                    log.error(tag,"PUBLIC_WALLET: ",this.PUBLIC_WALLET)
-                    log.error(tag,"network: ",network)
-                    throw Error("master Not Found!")
-                }
-
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        this.getAddress = function (coin:string,account:number, index:number, isChange:boolean) {
-            let tag = TAG + " | get_address | "
-            try {
-                let output
-                //TODO do this with coin.js?
-                //from xpub?
-
-                //if token use ETH pubkey
-                //TODO
-                // if(tokenData.tokens.indexOf(coin) >=0 && coin !== 'EOS'){
-                //     coin = 'ETH'
-                // }
-
-
-                //if xpub get next unused
-                if(!this.PUBLIC_WALLET[coin]) {
-                    log.error(tag,"PUBLIC_WALLET: ",this.PUBLIC_WALLET)
-                    throw Error("102: coin not in this.PUBLIC_WALLET! coin:"+coin)
-                }
-                if(this.PUBLIC_WALLET[coin].type === 'xpub'){
-
-                    //get pubkey at path
-                    let publicKey = bitcoin.bip32.fromBase58(this.PUBLIC_WALLET[coin].pubkey).derive(account).derive(index).publicKey
-                    log.debug("publicKey: ********* ",publicKey)
-
-
-                    switch(coin) {
-                        case 'ETH':
-                            output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
-                            break;
-                        case 'RUNE':
-                            // code block
-                            if(this.isTestnet){
-                                output = createBech32Address(publicKey,'tthor')
-                            } else {
-                                output = createBech32Address(publicKey,'thor')
-                            }
-                            break;
-                        case 'OSMO':
-                            // code block
-                            output = createBech32Address(publicKey,'osmosis')
-                            break;
-                        case 'ATOM':
-                            // code block
-                            output = createBech32Address(publicKey,'cosmos')
-                            break;
-                        case 'BNB':
-                            // code block
-                            output = createBech32Address(publicKey,'bnb')
-                            break;
-                        case 'EOS':
-                            // log.debug(tag,"pubkey: ",publicKey)
-                            //
-                            // let account = this.pioneerClient.instance.Balance(null,publicKey)
-                            // log.debug(tag,"account: ",account)
-                            // //get accounts for pubkey
-                            // output = 'fixmebro'
-                            // break;
-                        case 'FIO':
-                            log.debug(tag,"pubkey: ",publicKey)
-
-                            let accountFio = this.pioneerClient.instance.GetFioAccount(publicKey)
-                            log.debug(tag,"accountFio: ",accountFio)
-                            //get accounts for pubkey
-                            output = accountFio
-                            break;
-                        default:
-                            throw Error("coin not yet implemented ! ")
-                        // code block
-                    }
-
-                    log.debug(tag,"output: ",output)
-
-                } else {
-                    output = this.PUBLIC_WALLET[coin].master || this.PUBLIC_WALLET[coin].pubkey
-                }
-
-                return output
-            } catch (e) {
-                log.error(tag, "e: ", e)
-            }
-        }
-        /*
-        let swap = {
-            inboundAddress: {
-                chain: 'ETH',
-                pub_key: 'tthorpub1addwnpepqvuy8vh6yj4h28xp6gfpjsztpj6p46y2rs0763t6uw9f6lkky0ly5uvwla6',
-                address: '0x36286e570c412531aad366154eea9867b0e71755',
-                router: '0x9d496De78837f5a2bA64Cb40E62c19FBcB67f55a',
-                halted: false
-            },
-            asset: {
-                chain: 'ETH',
-                symbol: 'ETH',
-                ticker: 'ETH',
-                iconPath: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/ETH-1C9/logo.png'
-            },
-            memo: '=:THOR.RUNE:tthor1veu9u5h4mtdq34fjgu982s8pympp6w87ag58nh',
-            amount: "0.1"
-        }
-        */
-        // @ts-ignore
-        this.addLiquidity = async function (addLiquidity:any) {
-            let tag = TAG + " | addLiquidity | "
-            try{
-                let rawTx
-
-                let UTXOcoins = [
-                    'BTC',
-                    'BCH',
-                    'LTC'
-                ]
-
-                //supported tokens
-                //USDT SUSHI
-
-                if(addLiquidity.inboundAddress.chain === 'ETH'){
-                    //get tx inputs
-                    let addressFrom
-                    if(addLiquidity.addressFrom){
-                        addressFrom = addLiquidity.addressFrom
-                    } else {
-                        addressFrom = await this.getMaster('ETH')
-                    }
-                    if(!addressFrom) throw Error("102: unable to get master address! ")
-
-                    let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,addLiquidity)
-                    data = data.data
-                    log.debug(tag,"txData: ",data)
-
-                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                    nonceRemote = nonceRemote.data
-                    let nonce = addLiquidity.nonce || nonceRemote
-                    let gas_limit = 80000 //TODO dynamic gas limit?
-                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
-                    gas_price = gas_price.data
-                    log.debug(tag,"gas_price: ",gas_price)
-                    gas_price = parseInt(gas_price)
-                    gas_price = gas_price + 1000000000
-
-                    //sign
-                    //send FROM master
-                    let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
-
-                    //if eth
-                    let amountNative = parseFloat(addLiquidity.amount) * support.getBase('ETH')
-                    amountNative = Number(parseInt(String(amountNative)))
-                    log.debug("amountNative: ",amountNative)
-                    log.debug("nonce: ",nonce)
-
-                    //TODO if token
-
-                    let ethTx = {
-                        // addressNList: support.bip32ToAddressNList(masterPathEth),
-                        "addressNList":[
-                            2147483692,
-                            2147483708,
-                            2147483648,
-                            0,
-                            0
-                        ],
-                        nonce: numberToHex(nonce),
-                        gasPrice: numberToHex(gas_price),
-                        gasLimit: numberToHex(gas_limit),
-                        value: numberToHex(amountNative),
-                        to: addLiquidity.inboundAddress.router,
-                        data,
-                        // chainId: 1,//TODO testnet
-                    }
-
-                    log.debug("unsignedTxETH: ",ethTx)
-                    //send to hdwallet
-                    rawTx = await this.WALLET.ethSignTx(ethTx)
-                    rawTx.params = ethTx
-
-                    const txid = keccak256(rawTx.serialized).toString('hex')
-                    log.debug(tag,"txid: ",txid)
-                    rawTx.txid = txid
-
-                } else if(UTXOcoins.indexOf(addLiquidity.inboundAddress.chain) >= 0){
-                    if(!addLiquidity.memo) throw Error("Memo required for swaps!")
-                    //UTXO coins
-                    let coin = addLiquidity.inboundAddress.chain
-                    let addressFrom = await this.getMaster(coin) //TODO this silly in utxo
-                    //build transfer with memo
-                    let transfer:Transaction = {
-                        coin:"BTC",
-                        asset:"BTC",
-                        network:"BTC",
-                        addressTo:addLiquidity.inboundAddress.address,
-                        addressFrom,
-                        amount:addLiquidity.amount,
-                        feeLevel:addLiquidity.feeLevel,
-                        memo:addLiquidity.memo
-                    }
-
-                    rawTx = await this.buildTransfer(transfer)
-                    console.log("rawTx: ",rawTx)
-
-                } else {
-                    throw Error("Chain not supported! "+addLiquidity.inboundAddress.chain)
-                }
-
-                return rawTx
-            }catch(e){
-                log.error(e)
-                throw e
-            }
-        },
-        this.buildApproval = async function (approval:any) {
-            let tag = TAG + " | buildApproval | "
-            try{
-                let rawTx
-
-                let addressFrom = await this.getMaster('ETH')
-
-                let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                nonceRemote = nonceRemote.data
-                let nonce = approval.nonce || nonceRemote
-                let gas_limit = 80000 //TODO dynamic gas limit?
-                let gas_price = await this.pioneerClient.instance.GetGasPrice()
-                gas_price = gas_price.data
-                log.debug(tag,"gas_price: ",gas_price)
-                gas_price = parseInt(gas_price)
-                gas_price = gas_price + 1000000000
-
-                log.debug(tag,"approval.tokenAddress: ",approval.tokenAddress)
-                log.debug(tag,"approval.amount: ",approval.amount)
-
-                let data =
-                    "0x" +
-                    "095ea7b3" + // ERC-20 contract approve function identifier
-                    (approval.contract).replace("0x", "").padStart(64, "0") +
-                    (approval.amount).toString(16).padStart(64, "0");
-
-                log.debug(tag,"data: ",data)
-
-                let ethTx = {
-                    // addressNList: support.bip32ToAddressNList(masterPathEth),
-                    "addressNList":[
-                        2147483692,
-                        2147483708,
-                        2147483648,
-                        0,
-                        0
-                    ],
-                    nonce: numberToHex(nonce),
-                    gasPrice: numberToHex(gas_price),
-                    gasLimit: numberToHex(gas_limit),
-                    value: numberToHex(0),
-                    to: approval.tokenAddress,
-                    data,
-                    // chainId: 1,//TODO testnet
-                }
-                log.debug("unsignedTxETH: ",ethTx)
-
-                return ethTx
-            }catch(e){
-                log.error(e)
-                throw e
-            }
-        },
-        this.deposit = async function (deposit:Deposit) {
-                let tag = TAG + " | deposit | "
-                try{
-                    let rawTx
-                    log.debug(tag,"deposit: ",deposit)
-
-                    if(deposit.network === 'RUNE') {
-                        //use msgDeposit
-                        //get amount native
-                        let amountNative = RUNE_BASE * parseFloat(deposit.amount)
-                        amountNative = parseInt(amountNative.toString())
-
-                        let addressFrom
-                        if(deposit.addressFrom){
-                            addressFrom = deposit.addressFrom
-                        } else {
-                            addressFrom = await this.getMaster('RUNE')
-                        }
-
-                        //get account number
-                        log.debug(tag,"addressFrom: ",addressFrom)
-                        let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
-                        masterInfo = masterInfo.data
-                        log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                        let sequence = masterInfo.result.value.sequence || 0
-                        let account_number = masterInfo.result.value.account_number
-                        sequence = parseInt(sequence)
-                        sequence = sequence.toString()
-
-                        let txType = "thorchain/MsgDeposit"
-                        let gas = "250000"
-                        let fee = "2000000"
-                        if(!deposit.memo) throw Error("103: invalid swap! missing memo")
-                        let memo = deposit.memo
-
-                        //sign tx
-                        let unsigned = {
-                            "fee": {
-                                "amount": [
-                                    {
-                                        "amount": fee,
-                                        "denom": "rune"
-                                    }
-                                ],
-                                "gas": gas
-                            },
-                            "memo": memo,
-                            "msg": [
-                                {
-                                    "type": txType,
-                                    "value": {
-                                        "amount": [
-                                            {
-                                                "amount": "50994000",
-                                                "asset": "THOR.RUNE"
-                                            }
-                                        ],
-                                        "memo": memo,
-                                        "signer": addressFrom
-                                    }
-                                }
-                            ],
-                            "signatures": null
-                        }
-
-                        let	chain_id = RUNE_CHAIN
-
-                        if(!sequence) throw Error("112: Failed to get sequence")
-                        if(!account_number) account_number = 0
-
-                        //TODO double check? this broke?
-                        // //verify from address
-                        // let fromAddress = await this.WALLET.thorchainGetAddress({
-                        //     addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        //     showDisplay: false,
-                        // });
-                        // log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                        // log.debug(tag,"fromAddress: ",addressFrom)
-                        let fromAddress = addressFrom
-
-                        log.debug("res: ",prettyjson.render({
-                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                            chain_id,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                        }))
-
-                        if(fromAddress !== addressFrom) {
-                            log.error(tag,"fromAddress context WALLET: ",fromAddress)
-                            log.error(tag,"fromAddress DEPOSIT: ",addressFrom)
-                            throw Error("Can not sign, address mismatch")
-                        }
-
-                        log.debug(tag,"******* signTx: ",JSON.stringify({
-                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                            chain_id,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                        }))
-
-                        let runeTx = {
-                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                            chain_id,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                        }
-
-                        //
-                        let unsignedTx:UnsignedTransaction = {
-                            invocationId:deposit.invocationId,
-                            network:deposit.network,
-                            deposit,
-                            HDwalletPayload:runeTx,
-                            verbal:"Thorchain transaction"
-                        }
-
-                        rawTx = unsignedTx
-
-                    } else {
-                        throw Error("Chain not supported! "+deposit.inboundAddress.chain)
-                    }
-
-                    return rawTx
-                }catch(e){
-                    log.error(e)
-                    throw e
-                }
-            },
-        //@ts-ignore
-        this.buildSwap = async function (swap:any) {
-            let tag = TAG + " | buildSwap | "
-            try{
-                let rawTx
-                log.debug(tag,"swap: ",swap)
-
-                let UTXOcoins = [
-                    'BTC',
-                    'BCH',
-                    'LTC'
-                ]
-
-                //TODO supported tokens
-                //USDT SUSHI
-
-                if(swap.inboundAddress.chain === 'ETH'){
-                    //get tx inputs
-                    let addressFrom
-                    if(swap.addressFrom){
-                        addressFrom = swap.addressFrom
-                    } else {
-                        addressFrom = await this.getMaster('ETH')
-                    }
-                    if(!addressFrom) throw Error("102: unable to get master address! ")
-
-                    let data = await this.pioneerClient.instance.GetThorchainMemoEncoded(null,swap)
-                    data = data.data
-                    log.debug(tag,"txData: ",data)
-
-                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                    nonceRemote = nonceRemote.data
-                    let nonce = swap.nonce || nonceRemote
-                    let gas_limit = 80000 //TODO dynamic gas limit?
-                    let gas_price = await this.pioneerClient.instance.GetGasPrice()
-                    gas_price = gas_price.data
-                    log.debug(tag,"gas_price: ",gas_price)
-                    gas_price = parseInt(gas_price)
-                    gas_price = gas_price + 1000000000
-
-                    //sign
-                    //send FROM master
-                    let masterPathEth  = "m/44'/60'/0'/0/0" //TODO moveme to support
-
-                    //if eth
-                    let amountNative = parseFloat(swap.amount) * support.getBase('ETH')
-                    amountNative = Number(parseInt(String(amountNative)))
-                    log.debug("amountNative: ",amountNative)
-                    log.debug("nonce: ",nonce)
-
-                    //TODO if token
-                    let ethTx = {
-                        // addressNList: support.bip32ToAddressNList(masterPathEth),
-                        "addressNList":[
-                            2147483692,
-                            2147483708,
-                            2147483648,
-                            0,
-                            0
-                        ],
-                        nonce: numberToHex(nonce),
-                        gasPrice: numberToHex(gas_price),
-                        gasLimit: numberToHex(gas_limit),
-                        value: numberToHex(amountNative),
-                        to: swap.inboundAddress.router,
-                        data,
-                        chainId: 1
-                    }
-                    log.debug("unsignedTxETH: ",ethTx)
-                    rawTx = {
-                        network:'ETH',
-                        asset:'ETH',
-                        swap,
-                        HDwalletPayload:ethTx,
-                        verbal:"Ethereum transaction"
-                    }
-
-                } else if(swap.inboundAddress.chain === 'RUNE') {
-                    //use msgDeposit
-                    //get amount native
-                    let amountNative = RUNE_BASE * parseFloat(swap.amount)
-                    amountNative = parseInt(amountNative.toString())
-
-                    let addressFrom
-                    if(swap.addressFrom){
-                        addressFrom = swap.addressFrom
-                    } else {
-                        addressFrom = await this.getMaster('ETH')
-                    }
-
-                    //get account number
-                    log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence || 0
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-
-                    let txType = "thorchain/MsgSend"
-                    let gas = "250000"
-                    let fee = "2000000"
-                    if(!swap.memo) throw Error("103: invalid swap! missing memo")
-                    let memo = swap.memo
-
-                    if(!swap.inboundAddress.address) throw Error("104: invalid inboundAddress on swap")
-                    //sign tx
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "rune"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            {
-                                "type": txType,
-                                "value": {
-                                    "amount": [
-                                        {
-                                            "amount": amountNative.toString(),
-                                            "denom": "rune"
-                                        }
-                                    ],
-                                    "from_address": addressFrom,
-                                    "to_address": swap.inboundAddress.address
-                                }
-                            }
-                        ],
-                        "signatures": null
-                    }
-
-                    let	chain_id = RUNE_CHAIN
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) account_number = 0
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.thorchainGetAddress({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    if(fromAddress !== addressFrom) {
-                        log.error(tag,"fromAddress: ",fromAddress)
-                        log.error(tag,"addressFrom: ",addressFrom)
-                        throw Error("Can not sign, address mismatch")
-                    }
-
-                    log.debug(tag,"******* signTx: ",JSON.stringify({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    let runeTx = {
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }
-
-                    //
-                    let unsignedTx = {
-                        network:'ETH',
-                        asset:'ETH',
-                        swap,
-                        HDwalletPayload:runeTx,
-                        verbal:"Thorchain transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(UTXOcoins.indexOf(swap.inboundAddress.chain) >= 0){
-                    throw Error("NOT SUPPORTED! Use transfer with memo!")
-
-                } else {
-                    throw Error("Chain not supported! "+swap.inboundAddress.chain)
-                }
-
-                return rawTx
-            }catch(e){
-                log.error(e)
-                throw e
-            }
-        },
-        /*
-                CatchAll for custom Tx's
-         */
-        this.buildTx = async function (transaction:any) {
-            let tag = TAG + " | buildTx | "
-            try{
-                let rawTx = {}
-
-                //if ibc
-                //TODO flag of ibc?
-                if(transaction.type === 'ibcdeposit'){
-
-                    //TODO dont assume cosmos dumbass
-                    let amountNative = ATOM_BASE * parseFloat(transaction.amount)
-                    amountNative = parseInt(amountNative.toString())
-                    log.debug(tag,"amountNative: ",amountNative)
-
-                    //get account number
-                    let addressFrom
-                    if(transaction.addressFrom){
-                        addressFrom = transaction.addressFrom
-                    } else {
-                        addressFrom = await this.getMaster('ATOM')
-                    }
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-                    let	chain_id = ATOM_CHAIN
-
-                    let msg:any
-                    switch(transaction.type) {
-                        case "ibcdeposit":
-                            if(!transaction.source_port) throw Error("Missing source_port !")
-                            if(!transaction.source_channel) throw Error("Missing source_channel!")
-                            if(!transaction.token) throw Error("Missing token!")
-                            if(!transaction.timeout_height) throw Error("Missing timeout_height!")
-
-                            msg = {
-                                "type":"cosmos-sdk/MsgTransfer",
-                                "value":{
-                                    "sender":transaction.sender,
-                                    "receiver":transaction.receiver,
-                                    "source_port":transaction.source_port,
-                                    "source_channel":transaction.source_channel,
-                                    "token":transaction.token,
-                                    "timeout_height":transaction.timeout_height,
-                                }
-                            }
-
-                            break;
-                        default:
-                            throw Error("unsupported IBC tx type: "+transaction.type)
-                        //code block
-                    }
-                    let txType = "cosmos-sdk/MsgSend"
-                    let gas = "100000"
-                    let fee = "1000"
-                    let memo = transaction.memo || ""
-
-                    if(!msg) throw Error('failed to make tx msg')
-
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "uatom"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            msg
-                        ],
-                        "signatures": null
-                    }
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.cosmosGetAddress({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-                    let atomTx = {
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id:ATOM_CHAIN,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:atomTx,
-                        verbal:"ibc transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(transaction.network === 'FIO'){
-
-                    //types
-                    let tx:any
-                    let signTx:any
-                    let res:any
-                    switch(transaction.type) {
-                        case "fioSignAddPubAddressTx":
-                            tx = transaction.tx
-                            signTx = {
-                                addressNList: bip32ToAddressNList("m/44'/235'/0'/0/0"),
-                                actions: [
-                                    {
-                                        account: FioActionParameters.FioAddPubAddressActionAccount,
-                                        name: FioActionParameters.FioAddPubAddressActionName,
-                                        data:tx,
-                                    },
-                                ],
-                            }
-                            log.debug(tag,"signTx: ",JSON.stringify(signTx))
-                            res = await this.WALLET.fioSignTx(signTx);
-                            res.coin = "FIO"
-                            res.type = transaction.type
-                            rawTx = res
-                            // code block
-                            break;
-                        case "fioSignRegisterDomainTx":
-                            // code block
-                            break;
-                        case "fioSignRegisterFioAddressTx":
-                            // code block
-                            break;
-                        case "fioSignNewFundsRequestTx":
-                            tx = transaction.tx
-                            signTx = {
-                                addressNList: bip32ToAddressNList("m/44'/235'/0'/0/0"),
-                                actions: [
-                                    {
-                                        account: FioActionParameters.FioNewFundsRequestActionAccount,
-                                        name: FioActionParameters.FioNewFundsRequestActionName,
-                                        data:tx,
-                                    },
-                                ],
-                            }
-                            log.debug(tag,"signTx: ",JSON.stringify(signTx))
-                            res = await this.WALLET.fioSignTx(signTx);
-                            res.coin = "FIO"
-                            res.type = transaction.type
-                            rawTx = res
-                            break;
-                        default:
-                        //code block
-                    }
-
-
-                } else if(transaction.network === 'osmosis' || transaction.network === 'OSMO'){
-                    log.debug(tag,"transaction: ",transaction)
-
-                    //types
-                    let tx:any
-                    let signTx:any
-                    let res:any
-
-                    //common
-                    //get amount native
-
-                    let amountNative = ATOM_BASE * parseFloat(transaction.amount)
-                    amountNative = parseInt(amountNative.toString())
-                    log.debug(tag,"amountNative: ",amountNative)
-
-                    //get account number
-                    let addressFrom
-                    if(transaction.addressFrom){
-                        addressFrom = transaction.addressFrom
-                    } else {
-                        addressFrom = await this.getMaster('OSMO')
-                    }
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-                    let	chain_id = OSMO_CHAIN
-
-                    let msg:any
-                    switch(transaction.type) {
-                        case "delegate":
-                            if(!transaction.validator) throw Error("Missing validator address!")
-
-                            msg = {
-                                "type":"cosmos-sdk/MsgDelegate",
-                                "value":{
-                                    "delegator_address":addressFrom,
-                                    "validator_address":transaction.validator,
-                                    "amount":
-                                        {
-                                            "denom":"uosmo",
-                                            "amount":amountNative.toString()
-                                        }
-
-                                }
-                            }
-
-                            break;
-                        case "redelegate":
-                            if(!transaction.validatorOld) throw Error("102: Missing validatorOld!")
-                            if(!transaction.validator) throw Error("103: Missing validator!")
-
-                            msg = {
-                                "type":"cosmos-sdk/MsgBeginRedelegate",
-                                "value":{
-                                    "delegator_address":addressFrom,
-                                    "validator_src_address":transaction.validatorOld,
-                                    "validator_dst_address":transaction.validator,
-                                    "amount":
-                                        {
-                                            "denom":"uosmo",
-                                            "amount":amountNative.toString()
-                                        }
-                                }
-                            }
-
-                            break;
-                        case "osmosislpadd":
-                            if(!transaction.poolId) throw Error("102: Missing poolId!")
-                            if(!transaction.shareOutAmount) throw Error("103: Missing shareOutAmount!")
-                            if(!transaction.tokenInMaxs) throw Error("104: Missing tokenInMaxs!")
-
-                            msg = {
-                                "type":"osmosis/gamm/join-pool",
-                                "value":{
-                                    "sender":addressFrom,
-                                    "poolId":transaction.poolId,
-                                    "shareOutAmount":transaction.shareOutAmount,
-                                    "tokenInMaxs":transaction.tokenInMaxs
-                                }
-                            }
-
-                            break;
-                        case "osmosisswap":
-                            if(!transaction.routes) throw Error("102: Missing routes!")
-                            if(!transaction.tokenIn) throw Error("103: Missing tokenIn!")
-                            if(!transaction.tokenOutMinAmount) throw Error("104: Missing tokenOutMinAmount!")
-
-                            msg = {
-                                "type":"osmosis/gamm/swap-exact-amount-in",
-                                "value":{
-                                    "sender":addressFrom,
-                                    "routes":transaction.routes,
-                                    "tokenIn":transaction.tokenIn,
-                                    "tokenOutMinAmount":transaction.tokenOutMinAmount.toString()
-                                }
-                            }
-
-                            break;
-                       case "ibcWithdrawal":
-                            //TODO
-                            throw Error("TODO")
-                            break;
-                        case "ibcWithdrawal":
-                            //TODO
-                            throw Error("TODO")
-                            break;
-                        default:
-                            throw Error("unsupported osmosis tx type: "+transaction.type)
-                            //code block
-                    }
-                    let txType = "cosmos-sdk/MsgSend"
-
-                    //Osmosis is cheap, > 0 = max everything
-                    let gas = "290000"
-                    let fee = "2800"
-
-                    if(transaction.priority === 0){
-                        gas = "0"
-                        fee = "0"
-                    }
-
-                    let memo = transaction.memo || ""
-
-                    if(!msg) throw Error('failed to make tx msg')
-
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "uosmo"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            msg
-                        ],
-                        "signatures": null
-                    }
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.osmosisGetAddress({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-                    let atomTx = {
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id:'osmosis-1',
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:atomTx,
-                        verbal:"osmosis transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                } else {
-                    log.error(tag,"network not supported! ",transaction.network)
-                }
-
-
-                return rawTx
-            }catch(e){
-                log.error(e)
-                throw e
-            }
-        }
-        // this.encrypt = function (msg:FioActionParameters.FioRequestContent,payerPubkey:string) {
-        //     return encrypt_message(msg,payerPubkey);
-        // }
-        this.sendApproval = async function (intent:Approval) {
-            let tag = TAG+" | sendApproval | "
-            try{
-                let invocationId
-                if(!intent.invocationId) {
-                    invocationId = "notset"
-                } else {
-                    invocationId = intent.invocationId
-                }
-                if(intent.coin && intent.coin !== 'ETH') throw Error("approvals are ETH only!")
-                intent.coin = "ETH"
-
-                if(!intent.contract) throw Error("102: contract required!")
-                if(!intent.tokenAddress) throw Error("103: tokenAddress required!")
-                if(!intent.amount) throw Error("104: amount required!")
-                //TODO max approval
-                //if(!intent.amount) intent.amount = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
-
-                let approval = {
-                    contract:intent.contract,
-                    tokenAddress:intent.tokenAddress,
-                    amount:intent.amount
-                }
-
-                let signedTx = await this.buildApproval(approval)
-                log.debug(tag,"signedTx: ",signedTx)
-
-                if(invocationId) signedTx.invocationId = invocationId
-                log.debug(tag,"invocationId: ",invocationId)
-
-                signedTx.broadcasted = false
-                let broadcast_hook = async () =>{
-                    try{
-                        log.debug(tag,"signedTx: ",signedTx)
-                        //TODO flag for async broadcast
-                        let broadcastResult = await this.broadcastTransaction('ETH',signedTx)
-                        log.debug(tag,"broadcastResult: ",broadcastResult)
-
-                        //push to invoke api
-                    }catch(e){
-                        log.error(tag,"Failed to broadcast transaction!")
-                    }
-                }
-                //broadcast hook
-                if(!intent.noBroadcast){
-                    signedTx.broadcasted = true
-                } else {
-                    signedTx.noBroadcast = true
-                }
-                //if noBroadcast we MUST still release the inovation
-                //notice we pass noBroadcast to the broadcast post request
-                //also Notice NO asyc here! tx lifecycle hooks bro!
-                broadcast_hook()
-
-                signedTx.invocationId = invocationId
-                //
-                if(!signedTx.txid) throw Error("103: Pre-broadcast txid hash not implemented!")
-                return signedTx
-            }catch(e){
-                log.error(tag,e)
-                throw Error(e)
-            }
-        }
-        this.sendToAddress = async function (intent:SendToAddress) {
-            let tag = TAG+" | sendToAddress | "
-            try{
-                let invocationId
-                if(!intent.invocationId) {
-                    invocationId = "notset"
-                } else {
-                    invocationId = intent.invocationId
-                }
-                intent.asset = intent.asset.toUpperCase()
-                log.debug(tag,"params: ",intent)
-                if(!intent.amount) throw Error("Amount required!")
-                if(!intent.address) throw Error("address required!")
-                //TODO verify input params
-
-                let addressFrom = await this.getMaster(intent.asset)
-                log.debug(tag,"addressFrom: ",addressFrom)
-
-                if(intent.amount === 'all'){
-                    //get balance
-                    let balance = await this.getBalance(intent.asset)
-                    log.debug(tag,"balance: ",balance)
-
-                    //subtract fees
-                    intent.amount = String(parseFloat(balance) - 0.08)
-                    log.debug(tag,"ALL amount: ",intent.amount)
-
-                    if(parseFloat(intent.amount) < 0) {
-                        throw Error("Balance lower then expected fee!")
-                    }
-
-                    //set amount
-                }
-
-                let transaction:Transaction = {
-                    network:intent.network,
-                    asset:intent.asset,
-                    addressTo:intent.address,
-                    addressFrom,
-                    amount:intent.amount,
-                }
-                if(intent.memo) transaction.memo = intent.memo
-                if(intent.noBroadcast) transaction.noBroadcast = intent.noBroadcast
-
-                //build transfer
-                let unSignedTx = await this.buildTransfer(transaction)
-                log.debug(tag,"unSignedTx: ",unSignedTx)
-
-                if(invocationId) unSignedTx.invocationId = invocationId
-                log.debug(tag,"transaction: ",transaction)
-
-                unSignedTx.broadcasted = false
-                if(!intent.noBroadcast){
-                    unSignedTx.broadcasted = true
-                } else {
-                    unSignedTx.noBroadcast = true
-                }
-
-                unSignedTx.invocationId = invocationId
-                return unSignedTx
-            }catch(e){
-                log.error(tag,e)
-                throw Error(e)
-            }
-        }
-        this.signTransaction = async function (unsignedTx:UnsignedTransaction) {
-            let tag = TAG + " | signTransaction | "
-            try {
-                log.debug(tag,"unsignedTx: ",unsignedTx)
-                let signedTx:any = {}
-                if(!unsignedTx.network && unsignedTx.transaction) unsignedTx.network = unsignedTx.transaction.network
-                let network = unsignedTx.network
-                if(!network) throw Error("102: invalid unsinged tx! missing network!")
-                //TODO is token?
-
-                if(UTXO_COINS.indexOf(network) >= 0){
-
-                    log.debug(tag,"HDwalletPayload: ",unsignedTx.HDwalletPayload)
-                    if(UTXO_COINS.indexOf(unsignedTx.HDwalletPayload.network) >= 0){
-                        //opps convert
-                        unsignedTx.HDwalletPayload.network = COIN_MAP_KEEPKEY_LONG[unsignedTx.HDwalletPayload.network]
-                    }
-                    const res = await this.WALLET.btcSignTx(unsignedTx.HDwalletPayload);
-                    log.debug(tag,"res: ",res)
-
-                    //
-                    signedTx = {
-                        txid:res.txid,
-                        network,
-                        serialized:res.serializedTx
-                    }
-                }else if(network === 'ETH'){
-
-                    //TODO fix tokens
-                    log.debug("unsignedTxETH: ",unsignedTx)
-                    signedTx = await this.WALLET.ethSignTx(unsignedTx.HDwalletPayload)
-                    //debug https://flightwallet.github.io/decode-eth-tx/
-
-                    //verify from address correct
-                    const decoded = ethers.utils.parseTransaction(signedTx.serialized)
-                    signedTx.decoded = decoded
-
-                    log.debug(tag,"decoded: ",decoded)
-                    log.debug(tag,"decoded.from: ",decoded.from)
-                    log.debug(tag,"addressFrom: ",unsignedTx?.transaction?.addressFrom)
-                    // let addressFromUnsignedTx
-                    // if(unsignedTx?.swap){
-                    //     //TODO fixme (add from address to swap payload)
-                    //     addressFromUnsignedTx =
-                    // }
-                    // if(unsignedTx?.transaction?.addressFrom !== decoded.from){
-                    //     throw Error("Invalid transaction! from address mismatch!")
-                    // }
-
-                    //TODO verify more
-                    //verify amounts sane
-
-                    //txid
-                    //const txHash = await web3.utils.sha3(signed.rawTransaction);
-                    if(!signedTx.serialized) throw Error("Failed to sign!")
-
-                    let txid = keccak256(signedTx.serialized).toString('hex')
-                    txid = "0x"+txid
-                    log.debug(tag,"txid: ",txid)
-
-                    signedTx.txid = txid
-                    signedTx.params = unsignedTx.transaction //input
-                } else if(network === 'RUNE'){
-
-                    let res = await this.WALLET.thorchainSignTx(unsignedTx.HDwalletPayload);
-
-                    log.debug("res: ",prettyjson.render(res))
-                    log.debug("res*****: ",res)
-
-                    let txFinal:any
-                    txFinal = res
-                    txFinal.signatures = res.signatures
-
-                    log.debug("FINAL: ****** ",txFinal)
-
-                    let broadcastString = {
-                        tx:txFinal,
-                        type:"cosmos-sdk/StdTx",
-                        mode:"sync"
-                    }
-
-                    // @ts-ignore
-                    const buffer = Buffer.from(JSON.stringify(txFinal), 'base64');
-                    let hash = sha256(buffer).toString().toUpperCase()
-
-
-                    signedTx = {
-                        txid:hash,
-                        network,
-                        serialized:JSON.stringify(broadcastString)
-                    }
-                }else if(network === 'ATOM'){
-                    let res = await this.WALLET.cosmosSignTx(unsignedTx.HDwalletPayload);
-
-                    log.debug("res: ",prettyjson.render(res))
-                    log.debug("res*****: ",res)
-
-                    let txFinal:any
-                    txFinal = res
-                    txFinal.signatures = res.signatures
-
-                    log.debug("FINAL: ****** ",txFinal)
-
-                    let broadcastString = {
-                        tx:txFinal,
-                        type:"cosmos-sdk/StdTx",
-                        mode:"sync"
-                    }
-                    const buffer = Buffer.from(JSON.stringify(broadcastString), 'base64');
-                    let txid = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
-                    signedTx = {
-                        txid,
-                        network,
-                        serialized:JSON.stringify(broadcastString)
-                    }
-                }else if(network === 'OSMO'){
-                    let res = await this.WALLET.osmosisSignTx(unsignedTx.HDwalletPayload);
-
-                    log.debug("res: ",prettyjson.render(res))
-                    log.debug("res*****: ",res)
-
-                    let txFinal:any
-                    txFinal = res
-                    txFinal.signatures = res.signatures
-
-                    log.debug("FINAL: ****** ",txFinal)
-
-                    let broadcastString = {
-                        tx:txFinal,
-                        type:"cosmos-sdk/StdTx",
-                        mode:"sync"
-                    }
-                    const buffer = Buffer.from(JSON.stringify(broadcastString), 'base64');
-                    let txid = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
-                    signedTx = {
-                        txid,
-                        network,
-                        serialized:JSON.stringify(broadcastString)
-                    }
-                } else if(network === 'BNB'){
-                    const signedTxResponse = await this.WALLET.binanceSignTx(unsignedTx.HDwalletPayload)
-                    log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
-                    log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
-
-                    // this is undefined at first tx
-                    // let pubkeyHex = pubkey.toString('hex')
-                    // log.debug(tag,"pubkeyHex: ",pubkeyHex)
-
-                    let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
-                    log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
-
-                    const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
-                    let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-
-                    signedTx = {
-                        txid:hash,
-                        serialized:signedTxResponse.serialized
-                    }
-                }else{
-                    //TODO EOS
-                    //FIO
-                    throw Error("network not supported! "+network)
-                }
-
-                //carry over unsigned params to signed
-                if(unsignedTx.transaction && unsignedTx.transaction.noBroadcast) signedTx.noBroadcast = true
-                if(unsignedTx.invocationId) signedTx.invocationId = unsignedTx.invocationId
-
-                return signedTx
-            } catch (e) {
-                log.error(tag, "e: ", e)
-                throw e
-            }
-        }
-        this.buildTransfer = async function (transaction:Transaction) {
-            let tag = TAG + " | build_transfer | "
-            try {
-                log.debug(tag,"transaction: ",transaction)
-                let network = transaction.network.toUpperCase()
-                let asset = transaction.asset.toUpperCase()
-                let address = transaction.address
-                if(!address) address = transaction.addressTo
-                let amount = transaction.amount
-                let fee = transaction.fee
-
-                //get paths
-                let paths = this.paths()
-                log.debug(tag,"paths: ",paths)
-                if(!paths) throw Error("101: unable to get paths!")
-                if(!network) throw Error("102: Invalid transaction missing address!")
-                if(!address) throw Error("103: Invalid transaction missing address!")
-                if(!amount) throw Error("104: Invalid transaction missing amount!")
-                if(!fee) throw Error("105: Invalid transaction missing fee!")
-                let memo = transaction.memo
-                let addressFrom
-                if(transaction.addressFrom){
-                    addressFrom = transaction.addressFrom
-                } else {
-                    addressFrom = await this.getMaster(network)
-                }
-                if(!addressFrom) throw Error("102: unable to get master address! ")
-                log.debug(tag,"addressFrom: ",addressFrom)
-                transaction.addressFrom = addressFrom
-                let rawTx
-
-                if(UTXO_COINS.indexOf(network) >= 0){
-                    log.debug(tag,"Build UTXO tx! ",network)
-
-                    //list unspent
-                    log.debug(tag,"network: ",network)
-                    log.debug(tag,"xpub: ",this.PUBLIC_WALLET[network].xpub)
-                    log.debug(tag,"zpub: ",this.PUBLIC_WALLET[network].zpub)
-                    log.debug(tag,"pubkey: ",this.PUBLIC_WALLET[network].pubkey)
-
-                    let input = {network,xpub:this.PUBLIC_WALLET[network].pubkey}
-                    log.debug(tag,"input: ",input)
-
-                    let unspentInputs = await this.pioneerClient.instance.ListUnspent({network:'BTC',xpub:input})
-                    unspentInputs = unspentInputs.data
-                    log.debug(tag,"unspentInputs: ",unspentInputs)
-
-                    let utxos = []
-                    for(let i = 0; i < unspentInputs.length; i++){
-                        let input = unspentInputs[i]
-                        let utxo = {
-                            txId:input.txid,
-                            vout:input.vout,
-                            value:parseInt(input.value),
-                            nonWitnessUtxo: Buffer.from(input.hex, 'hex'),
-                            hex: input.hex,
-                            tx: input.tx,
-                            path:input.path
-                            //TODO if segwit
-                            // witnessUtxo: {
-                            //     script: Buffer.from(input.hex, 'hex'),
-                            //     value: 10000 // 0.0001 BTC and is the exact same as the value above
-                            // }
-                        }
-                        utxos.push(utxo)
-                    }
-
-                    //if no utxo's
-                    if (utxos.length === 0){
-                        throw Error("101 YOUR BROKE! no UTXO's found! ")
-                    }
-
-                    //TODO get fee level in sat/byte
-                    // let feeRate = 1
-                    let feeRateInfo = await this.pioneerClient.instance.GetFeeInfo({coin:network})
-                    feeRateInfo = feeRateInfo.data
-                    log.debug(tag,"feeRateInfo: ",feeRateInfo)
-                    let feeRate
-                    //TODO dynamic all the things
-                    if(network === 'BTC'){
-                        feeRate = feeRateInfo
-                    }else if(network === 'BCH'){
-                        feeRate = 2
-                    } else if(network === 'LTC'){
-                        feeRate = 4
-                    } else {
-                        throw Error("Fee's not configured for network:"+network)
-                    }
-
-                    log.debug(tag,"feeRate: ",feeRate)
-                    if(!feeRate) throw Error("Can not build TX without fee Rate!")
-                    //buildTx
-
-                    //TODO input selection
-
-                    //use coinselect to select inputs
-                    let amountSat = parseFloat(amount) * 100000000
-                    amountSat = parseInt(amountSat.toString())
-                    log.debug(tag,"amount satoshi: ",amountSat)
-                    let targets = [
-                        {
-                            address,
-                            value: amountSat
-                        }
-                    ]
-                    // if(memo){
-                    //     targets.push({ address: memo, value: 0 })
-                    // }
-
-                    //Value of all inputs
-                    let totalInSatoshi = 0
-                    for(let i = 0; i < utxos.length; i++){
-                        let amountInSat = utxos[i].value
-                        totalInSatoshi = totalInSatoshi + amountInSat
-                    }
-                    log.debug(tag,"totalInSatoshi: ",totalInSatoshi)
-                    log.debug(tag,"totalInBase: ",nativeToBaseAmount(network,totalInSatoshi))
-                    let valueIn = await coincap.getValue(network,nativeToBaseAmount(network,totalInSatoshi))
-                    log.debug(tag,"totalInValue: ",valueIn)
-
-                    //amount out
-                    log.debug(tag,"amountOutSat: ",amountSat)
-                    log.debug(tag,"amountOutBase: ",amount)
-                    let valueOut = await coincap.getValue(network,nativeToBaseAmount(network,amountSat))
-                    log.debug(tag,"valueOut: ",valueOut)
-
-                    if(valueOut < 1){
-                        if(network === 'BCH'){
-                            log.debug(tag," God bless you sir's :BCH:")
-                        } else {
-                            log.debug("ALERT DUST! sending less that 1usd. (hope you know what you are doing)")
-                        }
-                        //Expensive networks
-                        if(["BTC","ETH","RUNE"].indexOf(network) >= 0){
-                            throw Error("You dont want to do this! sending < 1usd on expensive network")
-                        }
-                    }
-
-                    if(nativeToBaseAmount(network,totalInSatoshi) < amount){
-                        throw Error("Sum of input less than output! YOUR BROKE! ")
-                    }
-
-                    log.debug(tag,"inputs coinselect algo: ",{ utxos, targets, feeRate })
-                    let selectedResults = coinSelect(utxos, targets, feeRate)
-                    log.debug(tag,"result coinselect algo: ",selectedResults)
-
-                    //value of all outputs
-
-                    //amount fee in USD
-
-                    //if
-                    if(!selectedResults.inputs){
-                        throw Error("Fee exceeded total available inputs!")
-                    }
-
-                    //TODO get long name for coin
-
-                    let inputs = []
-                    let outputs = []
-                    for(let i = 0; i < selectedResults.inputs.length; i++){
-                        //get input info
-                        let inputInfo = selectedResults.inputs[i]
-                        log.debug(tag,"inputInfo: ",inputInfo)
-                        let input = {
-                            addressNList:support.bip32ToAddressNList(inputInfo.path),
-                            scriptType:"p2sh-p2wpkh",
-                            amount:String(inputInfo.value),
-                            vout:inputInfo.vout,
-                            txid:inputInfo.txId,
-                            segwit:false,
-                            hex:inputInfo.hex,
-                            tx:inputInfo.tx
-                        }
-                        inputs.push(input)
-                    }
-
-                    //TODO get new change address
-                    //hack send all change to master (address reuse bad, stop dis)
-                    //let changeAddress = await this.getMaster(network)
-                    let changeAddress = 'bc1qxzsgclsnyerfn2why242em5zd5pjy9yx6qy20n'
-
-                    //if bch convert format
-                    if(network === 'BCH'){
-                        //if cashaddr convert to legacy
-                        let type = bchaddr.detectAddressFormat(changeAddress)
-                        log.debug(tag,"type: ",type)
-                        if(type === 'cashaddr'){
-                            changeAddress = bchaddr.toLegacyAddress(changeAddress)
-                        }
-                    }
-
-                    for(let i = 0; i < selectedResults.outputs.length; i++){
-                        let outputInfo = selectedResults.outputs[i]
-                        if(outputInfo.address){
-                            //not change
-                            let output = {
-                                address,
-                                addressType:"spend",
-                                scriptType:"p2wpkh",//TODO more types
-                                amount:String(outputInfo.value),
-                                isChange: false,
-                            }
-                            outputs.push(output)
-                        } else {
-                            //change
-                            let output = {
-                                address:changeAddress,
-                                addressType:"spend",
-                                scriptType:"p2pkh",//TODO more types
-                                amount:String(outputInfo.value),
-                                isChange: true,
-                            }
-                            outputs.push(output)
-                        }
-                    }
-                    let longName
-                    if(network === 'BCH'){
-                        longName = 'BitcoinCash'
-                    }else if(network === 'LTC'){
-                        longName = 'Litecoin'
-                        if(isTestnet){
-                            longName = 'Testnet'
-                        }
-                    }else if(network === 'BTC'){
-                        longName = 'Bitcoin'
-                        if(isTestnet){
-                            longName = 'Testnet'
-                        }
-                    }else {
-                        throw Error("UTXO coin: "+network+" Not supported yet! ")
-                    }
-
-                    //hdwallet input
-                    //TODO type this
-
-                    let hdwalletTxDescription = {
-                        opReturnData:memo,
-                        coin: longName,
-                        inputs,
-                        outputs,
-                        version: 1,
-                        locktime: 0,
-                    }
-
-                    let unsignedTx = {
-                        network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:hdwalletTxDescription,
-                        verbal:"UTXO transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(network === 'ETH'){
-
-                    //TODO fix tokens
-                    log.debug(tag,"checkpoint")
-                    let balanceEth = await this.getBalance('ETH')
-                    log.debug(tag,"balanceEth: ",balanceEth)
-
-                    let nonceRemote = await this.pioneerClient.instance.GetNonce(addressFrom)
-                    nonceRemote = nonceRemote.data
-                    let nonce = transaction.nonce || nonceRemote
-                    log.debug(tag,"nonce: ",nonce)
-
-                    let gas_limit = 80000
-                    let gas_price
-
-                    //overrides
-                    log.debug(tag,"transaction.fee: ",transaction.fee)
-                    if(transaction.fee){
-                        if(transaction.fee.priority){
-                            log.debug(tag,"Selecting fee based on priority")
-                            //get gas recomendations
-                            gas_price = await this.pioneerClient.instance.GetGasPrice()
-                            gas_price = gas_price.data
-
-                            log.debug(tag,"gas_price: ",gas_price)
-                            if(transaction.fee.priority === 2){
-                                log.debug(tag,"setting priority 2 ")
-                                gas_price = gas_price * 0.5
-                                gas_price = parseInt(String(gas_price))
-                                log.debug(tag,"gas_price: ",gas_price)
-                            }
-                        } else {
-                            log.debug(tag,"Selecting fee based on hard coded value")
-                            //TODO other units?
-                            if(transaction.fee.value && transaction.fee.units === 'gwei'){
-                                log.debug(tag,"setting fee value: ",transaction.fee.value)
-                                gas_price = transaction.fee.value * GIG
-                            }
-                            if(transaction.fee.gasLimit){
-                                gas_limit = transaction.fee.gasLimit
-                            }
-                        }
-                    }
-                    if(!gas_price) {
-                        log.debug(tag,"Getting Fee Level from remote!")
-                        gas_price = await this.pioneerClient.instance.GetGasPrice()
-                        gas_price = gas_price.data
-                    }
-
-                    log.debug(tag,"gas_price: ",gas_price)
-                    gas_price = parseInt(String(gas_price))
-
-                    let txParams
-                    if(asset === "ETH"){
-                        let amountNative = parseFloat(amount) * support.getBase('ETH')
-                        amountNative = Number(parseInt(String(amountNative)))
-                        txParams = {
-                            nonce: nonce,
-                            to: address,
-                            gasPrice: gas_price,
-                            gasLimit : gas_limit,
-                            value: amountNative,
-                            data:memo
-                        }
-                        log.debug(tag,"txParams: ",txParams)
-                    } else {
-                        throw Error("103: tokens incomplete!")
-                        //TODO tokens
-                    }
-                    if(!txParams) throw Error("tokens not supported")
-
-                    //send FROM master
-                    let ethPathInfo = paths.filter((e:any) => e.network === 'ETH')
-                    log.debug(tag,"ethPathInfo: ",ethPathInfo)
-                    if(!ethPathInfo[0]) throw Error("103: unable to get eth path info! ")
-                    let masterPathEth = addressNListToBIP32(ethPathInfo[0].addressNListMaster)
-                    log.debug(tag,"masterPathEth: ",masterPathEth)
-                    log.debug(tag,"masterPathEth: ","m/44'/60'/0'/0/0")
-                    log.debug(tag,"txParams: ",txParams)
-
-                    //verify from address
-                    let fromAddressHDwallet = await this.WALLET.ethGetAddress({
-                        addressNList: bip32ToAddressNList(masterPathEth),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddressHDwallet)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    if(addressFrom !== fromAddressHDwallet){
-                        throw Error("666: Address mismatch! refusing to sign!")
-                    }
-
-                    let chainId = 1
-                    if(this.isTestnet){
-                        chainId = 3 //ropsten
-                    }
-
-                    let ethTx = {
-                        addressNList: bip32ToAddressNList(masterPathEth),
-                        nonce: numberToHex(txParams.nonce),
-                        gasPrice: numberToHex(txParams.gasPrice),
-                        gasLimit: numberToHex(txParams.gasLimit),
-                        value: numberToHex(txParams.value || 0),
-                        to: txParams.to,
-                        data:txParams.data,
-                        chainId
-                    }
-                    log.debug("TX: ",JSON.stringify(ethTx))
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:ethTx,
-                        verbal:"Ethereum transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                } else if(network === 'RUNE'){
-                    //get amount native
-                    let amountNative = RUNE_BASE * parseFloat(amount)
-                    amountNative = parseInt(amountNative.toString())
-
-                    //get account number
-                    log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'RUNE',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence || 0
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-
-                    let txType = "thorchain/MsgSend"
-                    let gas = "650000"
-                    let fee = "0"
-                    let memo = transaction.memo || ""
-
-                    //sign tx
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "rune"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            {
-                                "type": txType,
-                                "value": {
-                                    "amount": [
-                                        {
-                                            "amount": amountNative.toString(),
-                                            "denom": "rune"
-                                        }
-                                    ],
-                                    "from_address": addressFrom,
-                                    "to_address": address
-                                }
-                            }
-                        ],
-                        "signatures": null
-                    }
-
-                    let	chain_id = RUNE_CHAIN
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) account_number = 0
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.thorchainGetAddress({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    if(fromAddress !== addressFrom) {
-                        log.error(tag,"fromAddress: ",fromAddress)
-                        log.error(tag,"addressFrom: ",addressFrom)
-                        throw Error("Can not sign, address mismatch")
-                    }
-
-                    let runeTx = {
-                            addressNList: bip32ToAddressNList(HD_RUNE_KEYPATH),
-                            chain_id,
-                            account_number: account_number,
-                            sequence:sequence,
-                            tx: unsigned,
-                    }
-
-                    //
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:runeTx,
-                        verbal:"Thorchain transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(network === 'ATOM'){
-                    //get amount native
-                    let amountNative = ATOM_BASE * parseFloat(amount)
-                    amountNative = parseInt(amountNative.toString())
-
-                    //get account number
-                    log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'ATOM',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-
-                    let txType = "cosmos-sdk/MsgSend"
-                    let gas = "100000"
-                    let fee = "1000"
-                    let memo = transaction.memo || ""
-
-                    //sign tx
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "uatom"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            {
-                                "type": txType,
-                                "value": {
-                                    "amount": [
-                                        {
-                                            "amount": amountNative.toString(),
-                                            "denom": "uatom"
-                                        }
-                                    ],
-                                    "from_address": addressFrom,
-                                    "to_address": address
-                                }
-                            }
-                        ],
-                        "signatures": null
-                    }
-
-                    let	chain_id = ATOM_CHAIN
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.cosmosGetAddress({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-                    let atomTx = {
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:atomTx,
-                        verbal:"Thorchain transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(network === 'OSMO'){
-                    //get amount native
-                    let amountNative = ATOM_BASE * parseFloat(amount)
-                    amountNative = parseInt(amountNative.toString())
-
-                    //get account number
-                    log.debug(tag,"addressFrom: ",addressFrom)
-                    let masterInfo = await this.pioneerClient.instance.GetAccountInfo({network:'OSMO',address:addressFrom})
-                    masterInfo = masterInfo.data
-                    log.debug(tag,"masterInfo: ",masterInfo.data)
-
-                    let sequence = masterInfo.result.value.sequence
-                    let account_number = masterInfo.result.value.account_number
-                    sequence = parseInt(sequence)
-                    sequence = sequence.toString()
-
-                    let txType = "cosmos-sdk/MsgSend"
-                    let gas = "80000"
-                    let fee = "2800"
-                    let memo = transaction.memo || ""
-
-                    //sign tx
-                    let unsigned = {
-                        "fee": {
-                            "amount": [
-                                {
-                                    "amount": fee,
-                                    "denom": "uosmo"
-                                }
-                            ],
-                            "gas": gas
-                        },
-                        "memo": memo,
-                        "msg": [
-                            {
-                                "type": txType,
-                                "value": {
-                                    "amount": [
-                                        {
-                                            "amount": amountNative.toString(),
-                                            "denom": "uosmo"
-                                        }
-                                    ],
-                                    "from_address": addressFrom,
-                                    "to_address": address
-                                }
-                            }
-                        ],
-                        "signatures": null
-                    }
-
-                    let	chain_id = OSMO_CHAIN
-
-                    if(!sequence) throw Error("112: Failed to get sequence")
-                    if(!account_number) throw Error("113: Failed to get account_number")
-
-                    //verify from address
-                    let fromAddress = await this.WALLET.osmosisGetAddress({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        showDisplay: false,
-                    });
-                    log.debug(tag,"fromAddressHDwallet: ",fromAddress)
-                    log.debug(tag,"fromAddress: ",addressFrom)
-
-                    log.debug("res: ",prettyjson.render({
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id,
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }))
-
-                    //if(fromAddress !== addressFrom) throw Error("Can not sign, address mismatch")
-                    let atomTx = {
-                        addressNList: bip32ToAddressNList(HD_ATOM_KEYPATH),
-                        chain_id:'osmosis-1',
-                        account_number: account_number,
-                        sequence:sequence,
-                        tx: unsigned,
-                    }
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:atomTx,
-                        verbal:"osmosis transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                }else if(network === "BNB"){
-                    //TODO move to tx builder module
-                    //get account info
-                    log.debug("addressFrom: ",addressFrom)
-                    let accountInfo = await this.pioneerClient.instance.GetAccountInfo({network,address:addressFrom})
-                    accountInfo = accountInfo.data
-                    log.debug("accountInfo: ",prettyjson.render(accountInfo))
-                    let sequence
-                    let account_number
-                    let pubkey
-                    if(!accountInfo.result){
-                        //assume new account
-                        sequence = "0"
-                        account_number = "0"
-                        pubkey = null
-                    } else {
-                        sequence = transaction.nonce || accountInfo.result.sequence
-                        account_number = accountInfo.result.account_number
-                        pubkey = accountInfo.result.public_key
-                    }
-
-                    if(!address) throw Error("Missing TO address! ")
-                    //simple transfer
-                    //build tx
-                    //TODO type from this from hdwallet
-                    let bnbTx = {
-                        "account_number": account_number,
-                        "chain_id": "Binance-Chain-Nile",
-                        "data": null,
-                        "memo": transaction.memo,
-                        "msgs": [
-                            {
-                                "inputs": [
-                                    {
-                                        "address": addressFrom,
-                                        "coins": [
-                                            {
-                                                "amount": amount,
-                                                "denom": "BNB"
-                                            }
-                                        ]
-                                    }
-                                ],
-                                "outputs": [
-                                    {
-                                        "address": address,
-                                        "coins": [
-                                            {
-                                                "amount": amount,
-                                                "denom": "BNB"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ],
-                        "sequence": sequence,
-                        "source": "1"
-                    }
-
-                    log.debug(tag,"bnbTx: ",prettyjson.render(bnbTx))
-                    // log.debug(tag,"bnbTx: ",JSON.stringify(bnbTx))
-                    //bip32ToAddressNList(`m/44'/714'/0'/0/0`)
-
-                    let binanceTx = {
-                        addressNList: bip32ToAddressNList(`m/44'/714'/0'/0/0`),
-                        chain_id: "Binance-Chain-Nile",
-                        account_number: account_number,
-                        sequence: sequence,
-                        tx: bnbTx,
-                     }
-
-                    let unsignedTx = {
-                        network:network,
-                        asset:network,
-                        transaction,
-                        HDwalletPayload:binanceTx,
-                        verbal:"Thorchain transaction"
-                    }
-
-                    rawTx = unsignedTx
-
-                    //TODO verify addressFrom path
-                    // const signedTxResponse = await this.WALLET.binanceSignTx({
-                    //     addressNList: bip32ToAddressNList(`m/44'/714'/0'/0/0`),
-                    //     chain_id: "Binance-Chain-Nile",
-                    //     account_number: account_number,
-                    //     sequence: sequence,
-                    //     tx: bnbTx,
-                    // })
-                    // log.debug(tag,"**** signedTxResponse: ",signedTxResponse)
-                    // log.debug(tag,"**** signedTxResponse: ",JSON.stringify(signedTxResponse))
-                    //
-                    // // this is undefined at first tx
-                    // // let pubkeyHex = pubkey.toString('hex')
-                    // // log.debug(tag,"pubkeyHex: ",pubkeyHex)
-                    //
-                    // let pubkeySigHex = signedTxResponse.signatures.pub_key.toString('hex')
-                    // log.debug(tag,"pubkeySigHex: ",pubkeySigHex)
-                    //
-                    // const buffer = Buffer.from(signedTxResponse.serialized, 'base64');
-                    // let hash = cryptoTools.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-                    //
-                    // rawTx = {
-                    //     txid:hash,
-                    //     serialized:signedTxResponse.serialized
-                    // }
-                }else if(network === "EOS"){
-                    throw Error ("666: EOS not supported yet!")
-                    // amount = getEosAmount(amount)
-                    // //EOS transfer
-                    // let unsigned_main = {
-                    //     expiration: "2020-04-30T22:00:00.000",
-                    //     ref_block_num: 54661,
-                    //     ref_block_prefix: 2118672142,
-                    //     max_net_usage_words: 0,
-                    //     max_cpu_usage_ms: 0,
-                    //     delay_sec: 0,
-                    //     context_free_actions: [],
-                    //     actions: [
-                    //         {
-                    //             account: "eosio.token",
-                    //             name: "transfer",
-                    //             authorization: [
-                    //                 {
-                    //                     actor: addressFrom,
-                    //                     permission: "active",
-                    //                 },
-                    //             ],
-                    //             data: {
-                    //                 from: addressFrom,
-                    //                 to: address,
-                    //                 quantity: amount+" EOS",
-                    //                 memo: memo,
-                    //             },
-                    //         },
-                    //     ],
-                    // };
-                    //
-                    // log.debug(tag,"unsigned_main: ",JSON.stringify(unsigned_main))
-                    //
-                    // let chainid_main =
-                    //     "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906";
-                    // let res = await this.WALLET.eosSignTx({
-                    //     addressNList:[ 0x80000000 + 44, 0x80000000 + 194, 0x80000000 + 0 , 0, 0 ],
-                    //     chain_id: chainid_main,
-                    //     tx: unsigned_main,
-                    // });
-                    //
-                    // log.debug(tag,"**** res: ",res)
-                    //
-                    // // let broadcastForm = {
-                    // //     serializedTransaction:Uint8Array.from(Buffer.from(res.serialized, 'hex')),
-                    // //     signatures: [res.eosFormSig]
-                    // // }
-                    //
-                    // let broadcastForm = {
-                    //     serializedTransaction:res.serialized,
-                    //     signatures: res.eosFormSig
-                    // }
-                    //
-                    // // output.serializedTransaction =  Uint8Array.from(Buffer.from(res.serialized, 'hex'));
-                    // // output.signatures = [res.eosFormSig]
-                    // // log.debug(tag,"res: ",res)
-                    // rawTx = {
-                    //     txid:"",
-                    //     serialized:res.serialized,
-                    //     broadcastBody:broadcastForm
-                    // }
-                    // log.debug(tag,"rawTx: ",rawTx)
-                }else if(network === "FIO"){
-                    throw Error ("666: FIO not supported yet!")
-                    // //if name
-                    // if(address.indexOf("@") >= 0){
-                    //     address = await network.getFioPubkeyFromUsername(address)
-                    // }
-                    //
-                    // //
-                    // log.debug(tag,"address: ",address)
-                    //
-                    // let amountNative = parseFloat(amount) * 100000000
-                    // amountNative = parseInt(String(amountNative))
-                    // //
-                    // log.debug(tag,"fiotx: ",transaction)
-                    // const data: FioActionParameters.FioTransferTokensPubKeyActionData = {
-                    //     payee_public_key: address,
-                    //     amount: String(amountNative),
-                    //     max_fee: 2000000000,
-                    //     tpid: "",
-                    // };
-                    //
-                    // const res = await WALLET.fioSignTx({
-                    //     addressNList: bip32ToAddressNList("m/44'/235'/0'/0/0"),
-                    //     actions: [
-                    //         {
-                    //             account: FioActionParameters.FioTransferTokensPubKeyActionAccount,
-                    //             name: FioActionParameters.FioTransferTokensPubKeyActionName,
-                    //             data,
-                    //         },
-                    //     ],
-                    // });
-                    // log.debug(tag,"res: ",res)
-                    //
-                    // rawTx = res
-                }else  {
-                    throw Error("109: network not yet implemented! network: "+network)
-                }
-
-
-
-                return rawTx
-            } catch (e) {
-                log.error(tag, "e: ", e)
-                throw e
-            }
-        }
-        this.broadcastTransaction = async function (network:string, signedTx:BroadcastBody) {
-            let tag = TAG + " | broadcastTransaction | "
-            if(this.isTestnet && network === 'BTC'){
-                signedTx.network = "TEST"
-            }else{
-                signedTx.network = network
-            }
-            log.debug(tag,"signedTx: ",signedTx)
-            let resultBroadcast = await this.pioneerClient.instance.Broadcast(null,signedTx)
-            log.debug(tag,"resultBroadcast: ",resultBroadcast.data)
-            return resultBroadcast.data;
-        }
+async function getFromCache(key:any) {
+    try {
+        const data = await redis.get(key);
+        return data;
+    } catch (err) {
+        throw err;
     }
 }
 
+async function setInCache(key:any, data:any, expiration:any) {
+    try {
+        await redis.setex(key, expiration, data);
+    } catch (err) {
+        throw err;
+    }
+}
+
+let get_pubkey_balances = async function (pubkey: any) {
+    let tag = TAG + " | get_pubkey_balances | ";
+    try {
+        let output: any = {};
+        if (!pubkey.symbol && pubkey.asset) pubkey.symbol = pubkey.asset;
+        if (!pubkey.type && pubkey.address) pubkey.type = "address";
+        if (!pubkey.context) throw Error("100: invalid pubkey! missing context");
+        if (!pubkey.symbol) throw Error("101: invalid pubkey! missing symbol");
+        if (!pubkey.username) throw Error("102: invalid pubkey! missing username");
+        if (!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey");
+        if (!pubkey.type) throw Error("105: invalid pubkey! missing type");
+        // if(!pubkey.queueId) throw Error("106: invalid pubkey! missing queueId");
+        if (pubkey.type !== 'address' && pubkey.type !== 'xpub' && pubkey.type !== 'zpub' && pubkey.type !== 'contract') throw Error("Unknown type! " + pubkey.type);
+        let balances: any = [];
+        let nfts: any = [];
+        let positions: any = [];
+        log.info(tag," scanning pubkey: ",pubkey.pubkey)
+        // By type
+        if (pubkey.type === "xpub" || pubkey.type === "zpub") {
+            let cacheKey = `balances:blockbook:getBalanceByXpub:${pubkey.symbol}:${pubkey.pubkey}`;
+            let cachedData = await getFromCache(cacheKey);
+            let balance: any;
+            if (cachedData) {
+                balance = JSON.parse(cachedData);
+            } else {
+                balance = await blockbook.getBalanceByXpub(pubkey.symbol, pubkey.pubkey);
+                log.debug(tag, pubkey.username + " Balance (" + pubkey.symbol + "): ", balance);
+                await setInCache(cacheKey, JSON.stringify(balance), 60 * 60 * 1);
+            }
+            //
+            
+            // Update balance
+            balances.push({
+                network: pubkey.symbol,
+                blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                assetCaip: shortListSymbolToCaip[pubkey.symbol],
+                asset: pubkey.symbol,
+                symbol: pubkey.symbol,
+                pubkey: pubkey.pubkey,
+                context: pubkey.context,
+                isToken: false,
+                lastUpdated: new Date().getTime(),
+                balance
+            });
+        } else if (pubkey.type === "address") {
+            switch (pubkey.symbol) {
+                case "ETH":
+                    let cacheKeyZapper = `balances:zapperInfo:getPortfolio:${pubkey.pubkey}`;
+                    let cachedDataZapper = await getFromCache(cacheKeyZapper);
+                    let zapperInfo;
+                    if (cachedDataZapper) {
+                        zapperInfo = JSON.parse(cachedDataZapper);
+                    } else {
+                        zapperInfo = await zapper.getPortfolio(pubkey.pubkey);
+                        log.debug(tag, "zapperInfo: ", zapperInfo);
+                        await setInCache(cacheKeyZapper, JSON.stringify(zapperInfo), 60 * 60 * 1);
+                    }
+
+                    if (zapperInfo?.tokens?.length > 0) {
+                        zapperInfo.tokens.forEach((token:any) => {
+                            let balanceInfo = token.token;
+                            balanceInfo.network = token.network;
+                            //get caip for network
+                            balanceInfo.blockchainCaip = token.blockchainCaip || 'caip:placeholder:'+token.network;
+                            balanceInfo.assetCaip = token.assetCaip || 'caip:placeholder:'+token.network+":"+token.token.symbol;
+                            balanceInfo.asset = token.token.symbol;
+                            balanceInfo.symbol = token.token.symbol
+                            balanceInfo.pubkey = pubkey.pubkey;
+                            balanceInfo.context = pubkey.context;
+                            balanceInfo.contract = token.token.address;
+                            balanceInfo.source = 'zapper';
+                            if (token.token.address !== '0x0000000000000000000000000000000000000000') {
+                                balanceInfo.isToken = true;
+                                balanceInfo.protocal = 'erc20';
+                            }
+                            balanceInfo.lastUpdated = new Date().getTime();
+                            balanceInfo.price = token.token.price.toString();
+                            balanceInfo.coingeckoId = token.token.coingeckoId;
+                            balanceInfo.dailyVolume = token.token.price.toString();
+                            balanceInfo.marketCap = token.token.marketCap.toString();
+                            balanceInfo.balance = token.token.balance.toString();
+                            balanceInfo.balanceUSD = token.token.balanceUSD.toString();
+                            balanceInfo.balanceRaw = token.token.balanceRaw.toString();
+                            balances.push(balanceInfo);
+                        });
+                    }
+
+                    if (zapperInfo?.nfts?.length > 0) {
+                        nfts = zapperInfo.nfts;
+                    }
+
+                    let cacheKeyAllPioneers = 'balances:getAllPioneers:ETH';
+                    let cachedAllPioneers = await getFromCache(cacheKeyAllPioneers);
+                    let allPioneers;
+                    if (cachedAllPioneers) {
+                        allPioneers = JSON.parse(cachedAllPioneers);
+                    } else {
+                        allPioneers = await networks['ETH'].getAllPioneers();
+                        await setInCache(cacheKeyAllPioneers, JSON.stringify(allPioneers), 60 * 60 * 1);
+                    }
+                    log.debug(tag, "allPioneers: ", allPioneers);
+                    if(!allPioneers || allPioneers.owners) allPioneers = { owners: [], images: [] };
+                    let isPioneer = allPioneers.owners.includes(pubkey.pubkey.toLowerCase());
+                    if (isPioneer) {
+                        log.debug("Pioneer detected!");
+                        let updatedUsername = await usersDB.update({ username: pubkey.username }, { $set: { isPioneer: true } }, { multi: true });
+                        log.debug("Updated username PIONEER: ", updatedUsername);
+
+                        const pioneerImage = allPioneers.images.find((image:any) => image.address.toLowerCase() === pubkey.pubkey.toLowerCase());
+                        if (pioneerImage) {
+                            let updatedUsername2 = await usersDB.update({ username: pubkey.username }, { $set: { pioneerImage: pioneerImage.image } }, { multi: true });
+                            log.debug("updatedUsername2 PIONEER: ", updatedUsername2);
+                            nfts.push({
+                                name: "Pioneer",
+                                description: "Pioneer",
+                                source: "pioneer",
+                                blockchainCaip: 'eip155:1/slip44:60',
+                                assetCaip: 'eip155:1/slip44:60:'+"0x25EF864904d67e912B9eC491598A7E5A066B102F",
+                                pubkey: pubkey.pubkey,
+                                context: pubkey.context,
+                                number: allPioneers.owners.indexOf(pubkey.pubkey.toLowerCase()),
+                                image: pioneerImage.image
+                            });
+                        }
+                    }
+
+                    let cacheKeyBlockbookInfo = `balances:blockbook:getAddressInfo:ETH:${pubkey.pubkey}`;
+                    let cachedBlockbookInfo = await getFromCache(cacheKeyBlockbookInfo);
+                    let blockbookInfo;
+                    if (cachedBlockbookInfo) {
+                        blockbookInfo = JSON.parse(cachedBlockbookInfo);
+                    } else {
+                        blockbookInfo = await blockbook.getAddressInfo('ETH', pubkey.pubkey);
+                        await setInCache(cacheKeyBlockbookInfo, JSON.stringify(blockbookInfo), 60 * 60 * 1);
+                    }
+                    log.debug(tag, 'blockbookInfo: ', blockbookInfo);
+
+                    if (blockbookInfo?.tokens) {
+                        blockbookInfo.tokens.forEach((tokenInfo:any) => {
+                            if (tokenInfo.symbol && tokenInfo.symbol !== 'ETH') {
+                                let balanceInfo: any = {
+                                    network: "ETH",
+                                    blockchainCaip: 'eip155:1/slip44:60',
+                                    assetCaip: 'eip155:1/slip44:60:'+tokenInfo.contract,
+                                    type: tokenInfo.type,
+                                    asset: tokenInfo.symbol,
+                                    symbol: tokenInfo.symbol,
+                                    name: tokenInfo.name,
+                                    contract: tokenInfo.contract,
+                                    pubkey: pubkey.pubkey,
+                                    context: pubkey.context,
+                                    image: "https://pioneers.dev/coins/ethereum.png",
+                                    isToken: true,
+                                    protocal: 'erc20',
+                                    lastUpdated: new Date().getTime(),
+                                    decimals: tokenInfo.decimals,
+                                    balance: tokenInfo.balance / Math.pow(10, Number(tokenInfo.decimals)),
+                                    balanceNative: tokenInfo.balance / Math.pow(10, Number(tokenInfo.decimals)),
+                                    source: "blockbook"
+                                };
+
+                                if (tokenInfo.holdersCount === 1) {
+                                    balanceInfo.nft = true;
+                                }
+
+                                if (balanceInfo.balance > 0) {
+                                    balances.push(balanceInfo);
+                                }
+                            }
+                        });
+                    }
+
+                    break;
+                default:
+                    let cacheKeyNetwork = `balances:${pubkey.symbol}:getBalance:${pubkey.pubkey}`;
+                    let cachedDataNetwork = await getFromCache(cacheKeyNetwork);
+                    let balanceNetwork;
+                    if (cachedDataNetwork) {
+                        balanceNetwork = JSON.parse(cachedDataNetwork);
+                    } else {
+                        balanceNetwork = await networks[pubkey.symbol].getBalance(pubkey.pubkey);
+                        log.debug(tag, "balance: ", balanceNetwork);
+                        await setInCache(cacheKeyNetwork, JSON.stringify(balanceNetwork), 60 * 60 * 1);
+                    }
+
+                    if (!balanceNetwork) balanceNetwork = 0;
+                    balances.push({
+                        network: pubkey.symbol,
+                        asset: pubkey.symbol,
+                        symbol: pubkey.symbol,
+                        blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                        assetCaip: shortListSymbolToCaip[pubkey.symbol],
+                        isToken: false,
+                        lastUpdated: new Date().getTime(), //TODO use block heights
+                        balance: balanceNetwork,
+                        context: pubkey.context,
+                        source: "pioneer-network-"+pubkey.symbol
+                    });
+                    break;
+            }
+        }
+
+        let pubkeyInfo = await pubkeysDB.findOne({ pubkey: pubkey.pubkey });
+        if (!pubkeyInfo || !pubkeyInfo.balances) {
+            pubkeyInfo = {
+                balances: []
+            };
+        }
+        if (!pubkeyInfo.nfts) pubkeyInfo.nfts = [];
+        log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
+        log.debug(tag, "pubkeyInfo.balances: ", pubkeyInfo.balances.length);
+        log.debug(tag, "nfts: ", pubkeyInfo.nfts.length);
+
+        log.debug(tag, "balances: ", balances);
+        log.debug(tag, "balances: ", balances.length);
+
+        let saveActions = [];
+        for (let i = 0; i < balances.length; i++) {
+            let balance = balances[i];
+            let balanceIndex = pubkeyInfo.balances.findIndex((e:any) => e.symbol === balance.symbol);
+
+            // Get asset info
+            let assetInfo = await assetsDB.findOne({ symbol: balance.symbol });
+            log.debug(tag,"assetInfo: ", assetInfo);
+
+            if (assetInfo) {
+                balance.caip = assetInfo.caip;
+                balance.image = assetInfo.image;
+                balance.assetCaip = assetInfo.caip;
+                balance.description = assetInfo.description;
+                balance.website = assetInfo.website;
+                balance.explorer = assetInfo.explorer;
+                balance.context = pubkey.context
+            }
+
+            if (balanceIndex !== -1 && pubkeyInfo.balances[balanceIndex].balance !== balance.balance) {
+                saveActions.push({
+                    updateOne: {
+                        filter: { pubkey: pubkey.pubkey },
+                        update: {
+                            $set: { [`balances.${balanceIndex}`]: balance },
+                        },
+                    },
+                });
+            } else {
+                log.debug(tag,pubkey.context + ": balance not changed! ", balance.symbol);
+            }
+        }
+
+        for (let i = 0; i < nfts.length; i++) {
+            let nft = nfts[i];
+            log.debug(tag, "pubkeyInfo.nfts: ", pubkeyInfo.nfts.length);
+            let existingNft = pubkeyInfo.nfts.find((e: any) => e.name === nft.name);
+
+            if (!existingNft) {
+                saveActions.push({
+                    updateOne: {
+                        filter: { pubkey: pubkey.pubkey },
+                        update: {
+                            $addToSet: { nfts: nft }
+                        }
+                    }
+                });
+            }
+        }
+
+        if (saveActions.length > 0) {
+            let updateSuccess = await pubkeysDB.bulkWrite(saveActions, { ordered: false });
+            log.info(tag, "updateSuccess: ", updateSuccess);
+            output.dbUpdate = updateSuccess;
+        }
+
+        //@TODO save transactions
+
+        // Build output
+        output.pubkeys = [pubkeyInfo]
+        output.balances = balances;
+        output.nfts = nfts;
+        output.success = true;
+        return output;
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e;
+    }
+};
+
+let get_and_rescan_pubkeys = async function (username:string) {
+    let tag = TAG + " | get_and_rescan_pubkeys | "
+    try {
+        //get pubkeys from mongo with context tagged
+        let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [username]}})
+        log.debug(tag,"pubkeysMongo: ",pubkeysMongo.length)
+
+        //get user info from mongo
+        let userInfo = await usersDB.findOne({username})
+        if(!userInfo) throw Error("get_and_rescan_pubkeys user not found!")
+        log.debug(tag,"userInfo: ",userInfo)
+        let blockchains = userInfo.blockchains
+        if(!blockchains) blockchains = []
+        // if(!userInfo.blockchains) throw Error("Invalid user!")
+
+        //reformat
+        let pubkeys:any = []
+        let masters:any = {}
+        for(let i = 0; i < pubkeysMongo.length; i++){
+            let pubkeyInfo = pubkeysMongo[i]
+            delete pubkeyInfo._id
+
+            //for each wallet by user
+            for(let j = 0; j < userInfo.wallets.length; j++){
+                let context = userInfo.wallets[i]
+                if(pubkeyInfo.type === 'zpub'){
+                    //if context found in tags
+                    let match = pubkeyInfo.tags.filter((e: any) => e === context)
+                    if(match.length > 0){
+                        register_zpub(username,pubkeyInfo,context)
+                    }
+                }else if(pubkeyInfo.type === 'xpub'){
+                    let match = pubkeyInfo.tags.filter((e: any) => e === context)
+                    if(match.length > 0){
+                        register_xpub(username,pubkeyInfo,context)
+                    }
+                }else if(pubkeyInfo.type === 'address'){
+                    let match = pubkeyInfo.tags.filter((e: any) => e === context)
+                    if(match.length > 0){
+                        register_address(username,pubkeyInfo,context)
+                    }
+                }
+            }
+        }
+
+
+
+        return {pubkeys,masters}
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let get_and_verify_pubkeys = async function (username:string, context?:string) {
+    let tag = TAG + " | get_and_verify_pubkeys | "
+    try {
+
+        //get pubkeys from mongo with context tagged
+        if(!context) context = username
+        let pubkeysMongo = await pubkeysDB.find({tags:{ $all: [context]}})
+        log.debug(tag,"pubkeysMongo: ",pubkeysMongo.length)
+
+        //get user info from mongo
+        let userInfo = await usersDB.findOne({username})
+        if(!userInfo) throw Error("get_and_verify_pubkeys User not found!")
+        log.debug(tag,"userInfo: ",userInfo)
+        let blockchains = userInfo.blockchains
+        log.debug(tag,"userInfo: ",userInfo)
+        if(!blockchains) blockchains = []
+        //if(!userInfo.blockchains) throw Error("Invalid user!")
+
+        //reformat
+        let pubkeys:any = []
+        let allBalances:any = []
+        let synced:any = []
+        // let masters:any = {}
+        for(let i = 0; i < userInfo.pubkeys.length; i++){
+            let pubkeyInfo = userInfo.pubkeys[i]
+            delete pubkeyInfo._id
+            //TODO validate pubkeys?
+            pubkeyInfo.username = username
+            //if no balances, get balances
+            if(!pubkeyInfo.balances || pubkeyInfo.balances.length === 0){
+                log.debug(tag,"no balances, getting balances...")
+                let balances = await get_pubkey_balances(pubkeyInfo)
+                if(balances.success) synced.push(pubkeyInfo.blockchain)
+                // log.debug(tag,"balances: ",balances)
+                log.debug(tag,pubkeyInfo.symbol+" balances: ",balances)
+                log.info(tag,context+": "+pubkeyInfo.symbol+" balances: ",balances.balances.length)
+                if(balances && balances.balances) {
+                    pubkeyInfo.balances = balances.balances
+                    allBalances = allBalances.concat(balances.balances)
+                    log.info(tag,context+": "+pubkeyInfo.symbol+" allBalances: ",allBalances.length)
+                }
+                if(balances && balances.nfts) pubkeys.nfts = balances.nfts
+            } else {
+                log.debug(tag,"balances already exist! count: ",pubkeyInfo.balances.length)
+            }
+
+            // if(!masters[pubkeyInfo.symbol] && pubkeyInfo.master)masters[pubkeyInfo.symbol] = pubkeyInfo.master
+            pubkeyInfo.context = context
+            pubkeys.push(pubkeyInfo)
+        }
+
+        //validate isSynced
+        let isSynced = false
+        for(let i = 0; i < blockchains.length; i++){
+            let blockchain = blockchains[i]
+            if(synced.indexOf(blockchain) === -1){
+                log.info(tag,context+ " blockchain not synced: ",blockchain)
+                isSynced = false
+                break
+            }
+        }
+
+        return { pubkeys, balances: allBalances }
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_zpub = async function (username:string, pubkey:any, context:string) {
+    let tag = TAG + " | register_zpub | "
+    try {
+        if(!context) throw Error("101: context required!")
+        if(!pubkey.zpub) throw Error("102: invalid pubkey! missing zpub!")
+        if(!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey!")
+        if(pubkey.pubkey == true) throw Error("104:(zpub) invalid pubkey! == true wtf!")
+        if(!pubkey.symbol) throw Error("105: invalid pubkey! missing pubkey!")
+        log.debug(tag,"pubkey: ",pubkey)
+        //if zpub add zpub
+        let queueId = uuid.generate()
+
+        //get master
+        let account = 0
+        let index = 0
+        let address = await get_address_from_xpub(pubkey.zpub,pubkey.scriptType,pubkey.symbol,account,index,false,false)
+        log.debug(tag,"Master(Local): ",address)
+        log.debug(tag,"Master(hdwallet): ",pubkey.master)
+        if(address !== pubkey.master){
+            log.error(tag,"Local Master NOT VALID!!")
+            log.error(tag,"Local Master: ",address)
+            log.error(tag,"hdwallet Master: ",pubkey.master)
+            //revert to pubkey (assume hdwallet right)
+            address = pubkey.master
+        }
+        let work = {
+            type:'zpub',
+            blockchain:pubkey.blockchain,
+            pubkey:pubkey.pubkey,
+            master:pubkey.master,
+            network:pubkey.blockchain,
+            asset:pubkey.symbol,
+            queueId,
+            username,
+            context,
+            zpub:pubkey.pubkey,
+            inserted: new Date().getTime()
+        }
+        log.debug(tag,"Creating work! ",work)
+        queue.createWork("pioneer:pubkey:ingest",work)
+        let result = await get_pubkey_balances(work)
+        log.debug(result)
+
+        return queueId
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_xpub = async function (username:string, pubkey:any, context:string) {
+    let tag = TAG + " | register_xpub | "
+    try {
+        if(!pubkey.pubkey) throw Error("102: invalid pubkey! missing pubkey!")
+        if(pubkey.pubkey == true) throw Error("103:(xpub) invalid pubkey! === true wtf!")
+        if(!pubkey.symbol) throw Error("104: invalid pubkey! missing symbol!")
+        //log.debug(tag,"pubkey: ",pubkey)
+        //if zpub add zpub
+        let queueId = uuid.generate()
+
+        //get master
+        let account = 0
+        let index = 0
+        let address = await get_address_from_xpub(pubkey.pubkey,pubkey.scriptType,pubkey.symbol,account,index,false,false)
+        log.debug(tag,"Master(Local): ",address)
+        log.debug(tag,"Master(hdwallet): ",pubkey.master)
+        if(address !== pubkey.master){
+            log.error(tag,"Local Master NOT VALID!!")
+            //revert to pubkey (assume hdwallet right)
+            address = pubkey.master
+        }
+        let work = {
+            context,
+            type:'xpub',
+            blockchain:pubkey.blockchain,
+            pubkey:pubkey.pubkey,
+            master:pubkey.master,
+            network:pubkey.blockchain,
+            asset:pubkey.symbol,
+            queueId,
+            username,
+            xpub:pubkey.xpub,
+            inserted: new Date().getTime()
+        }
+        log.debug(tag,"Creating work! ",work)
+        queue.createWork("pioneer:pubkey:ingest",work)
+        let {pubkeys, balances} = await get_pubkey_balances(work)
+        log.debug(tag, "pubkeys: ",pubkeys.length)
+        log.debug(tag, "balances: ",balances.length)
+
+        return {pubkeys, balances}
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let register_address = async function (username:string, pubkey:any, context:string) {
+    let tag = TAG + " | register_address | "
+    try {
+        let address = pubkey.pubkey
+        let queueId = uuid.generate()
+
+        //add to work
+        let work = {
+            type:'address',
+            pubkey:address,
+            symbol:pubkey.symbol,
+            blockchain:pubkey.blockchain,
+            network:pubkey.network,
+            asset:pubkey.symbol,
+            context,
+            queueId,
+            username,
+            address,
+            master:address,
+            inserted: new Date().getTime()
+        }
+        log.debug("adding work: ",work)
+
+        queue.createWork("pioneer:pubkey:ingest",work)
+        let result = await get_pubkey_balances(work)
+        log.info(tag,"result: ",result)
+
+        return queueId
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+let update_pubkeys = async function (username:string, pubkeys:any, context:string) {
+    let tag = TAG + " | update_pubkeys | "
+    try {
+        log.debug(tag,"input: ",{username,pubkeys,context})
+        let saveActions = []
+        //generate addresses
+        let output:any = {}
+        output.pubkeys = []
+        let allPubkeys:any = []
+        let PubkeyMap:any = {}
+        for (let i = 0; i < pubkeys.length; i++) {
+            let pubkeyInfo = pubkeys[i]
+            allPubkeys.push(pubkeyInfo.pubkey)
+            PubkeyMap[pubkeyInfo.pubkey] = pubkeyInfo
+        }
+        //remove duplicates
+        allPubkeys = Array.from(new Set(allPubkeys))
+        let allBalances = []
+        //get pubkeys from mongo
+        log.debug(tag,"allPubkeys: ",allPubkeys)
+        let allKnownPubkeys = await pubkeysDB.find({"pubkey" : {"$in" : allPubkeys}})
+        log.debug(tag,"allKnownPubkeys: ",allKnownPubkeys.length)
+
+        //
+        let knownPubkeys:any = []
+        for(let i = 0; i < allKnownPubkeys.length; i++){
+            knownPubkeys.push(allKnownPubkeys[i].pubkey)
+        }
+        log.debug(tag,"allKnownPubkeys: ",allKnownPubkeys.length)
+        log.debug(tag,"allPubkeys: ",allPubkeys.length)
+        if(allPubkeys.length > allKnownPubkeys.length){
+            //build diff array known
+            //@ts-ignore
+            let unknown = allPubkeys.filter(x => !knownPubkeys.includes(x));
+            log.debug(tag,"unknown: ",unknown)
+            log.debug(tag,"Registering pubkeys : ",unknown.length)
+
+            //if(BALANCE_ON_REGISTER){} //TODO dont return till work complete
+            for(let i = 0; i < unknown.length; i++){
+                let pubkey:any = unknown[i]
+                let pubkeyInfo = PubkeyMap[pubkey]
+                log.debug(tag,"pubkeyInfo: ",pubkeyInfo)
+                if(!pubkeyInfo.pubkey) throw Error("102: invalid pubkey! missing pubkey")
+                if(!pubkeyInfo.master) throw Error("102: invalid pubkey! missing master")
+                if(!pubkeyInfo.blockchain) throw Error("103: invalid pubkey! missing blockchain")
+                if(pubkey.pubkey === true) throw Error("104: invalid pubkey! === true wtf!")
+                let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain)
+                if(!nativeAsset) throw Error("105: invalid pubkey! unsupported by coins module!")
+                //hack
+                if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset
+
+                //hack clean up tags
+                if(typeof(context) !== 'string') {
+                    //
+                    log.error("invalid context!",context)
+                    throw Error("Bad walletID!")
+                }
+
+                //save to mongo
+                let entryMongo:any = {
+                    blockchain:pubkeyInfo.blockchain,
+                    symbol:nativeAsset,
+                    asset:nativeAsset,
+                    path:pubkeyInfo.path,
+                    pathMaster:pubkeyInfo.pathMaster,
+                    master:pubkeyInfo.master,
+                    pubkey:pubkeyInfo.pubkey,
+                    script_type:pubkeyInfo.script_type,
+                    network:pubkeyInfo.network,
+                    created:new Date().getTime(),
+                    tags:[username,pubkeyInfo.blockchain,pubkeyInfo.network,context],
+                }
+
+                if(pubkeyInfo.type === "xpub" || pubkeyInfo.xpub){
+                    if(pubkeyInfo.xpub){
+                        entryMongo.pubkey = pubkeyInfo.pubkey
+                    } else {
+                        log.errro(tag,"pubkey: ",pubkeyInfo)
+                        throw Error("102: Invalid xpub pubkey!")
+                    }
+                    saveActions.push({insertOne:entryMongo})
+                    let result = await register_xpub(username,pubkeyInfo,context)
+                    entryMongo.balances = result.balances
+                    allBalances.push(...result.balances);
+                    output.pubkeys.push(...result.pubkeys)
+                } else if(pubkeyInfo.type === "zpub" || pubkeyInfo.zpub){
+                    if(pubkeyInfo.zpub){
+                        entryMongo.pubkey = pubkeyInfo.pubkey
+                    } else {
+                        log.errro(tag,"pubkey: ",pubkeyInfo)
+                        throw Error("102: Invalid zpub pubkey!")
+                    }
+                    saveActions.push({insertOne:entryMongo})
+                    let result = await register_zpub(username,pubkeyInfo,context)
+                    entryMongo.balances = result.balances
+                    allBalances.push(...result.balances);
+                    output.pubkeys.push(...result.pubkeys)
+                } else if(pubkeyInfo.type === "address"){
+                    entryMongo.pubkey = pubkeyInfo.pubkey
+                    let result = await register_address(username,pubkeyInfo,context)
+                    entryMongo.balances = result.balances
+                    allBalances.push(...result.balances);
+                    output.pubkeys.push(...result.pubkeys)
+                } else {
+                    log.error("Unhandled type: ",pubkeyInfo.type)
+                }
+
+
+                //verify write
+                log.debug(tag,"entryMongo: ",entryMongo)
+                //check exists
+                let keyExists = await pubkeysDB.findOne({pubkey:entryMongo.pubkey})
+                if(keyExists){
+                    log.debug(tag,"Key already registered! key: ",entryMongo)
+                    //push wallet to tags
+                    //add to tags
+                    let pushTagMongo = await pubkeysDB.update({pubkey:entryMongo.pubkey},
+                        { $addToSet: { tags: { $each:[context,username] } } })
+                    log.debug(tag,"pushTagMongo: ",pushTagMongo)
+                }else{
+                    // saveActions.push({insertOne: entryMongo})
+
+                    //final check
+                    if(!entryMongo.pubkey || entryMongo.pubkey == true){
+                        log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** pubkeyInfo: ",pubkeyInfo)
+                        log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** entryMongo: ",entryMongo)
+                        throw Error("105: unable to save invalid pubkey!")
+                    } else {
+                        let resultSave = await pubkeysDB.insert(entryMongo)
+                        log.debug(tag,"resultSave: ",resultSave)
+                        //TODO throw if error (better get error then not fail fast)
+                    }
+
+                }
+            }
+
+
+        } else {
+            log.debug(tag," No new pubkeys! ")
+        }
+
+        log.debug(tag,"output: ",output)
+        if(allBalances.length === 0){
+            log.error(tag,"No balances found! allBalances: ",allBalances)
+            // throw Error("No balances found!")
+        }
+        output.balances = allBalances
+
+        log.debug(tag," return object: ",output)
+        return output
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+const register_pubkeys = async function (username: string, pubkeys: any, context: string) {
+    let tag = TAG + " | register_pubkeys | ";
+    try {
+        log.debug(tag, "input: ", { username, pubkeys, context });
+        let saveActions = [];
+        let allBalances = [];
+        //generate addresses
+        let output: any = {};
+        output.pubkeys = [];
+        output.balances = [];
+        for (let i = 0; i < pubkeys.length; i++) {
+            let pubkeyInfo = pubkeys[i];
+            log.info(tag, "pubkeyInfo: ", pubkeyInfo);
+            let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain);
+            if (!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!");
+            if (!pubkeyInfo.pubkey) throw Error("104: invalid pubkey! missing pubkey!");
+            if (!pubkeyInfo.type) throw Error("104: invalid pubkey! missing type!");
+            //TODO verify type is in enums
+            //hack
+            if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset;
+
+            log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
+            if (!pubkeyInfo.blockchain) throw Error("Invalid pubkey required field: blockchain");
+            if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.blockchain);
+            if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.blockchain);
+            if (!pubkeyInfo.master) throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.blockchain);
+
+            //save to mongo
+            let entryMongo: any = {
+                pubkey: pubkeyInfo.pubkey,
+                type: pubkeyInfo.type,
+                blockchain: pubkeyInfo.blockchain,
+                symbol: nativeAsset,
+                asset: pubkeyInfo.blockchain,
+                path: pubkeyInfo.path,
+                pathMaster: pubkeyInfo.pathMaster,
+                script_type: pubkeyInfo.script_type,
+                network: pubkeyInfo.blockchain,
+                created: new Date().getTime(),
+                tags: [username, pubkeyInfo.blockchain, pubkeyInfo.symbol, pubkeyInfo.network, context],
+            };
+
+            if (pubkeyInfo.type === "xpub") {
+                log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
+                let xpub = pubkeyInfo.pubkey;
+                log.debug(tag, "xpub: ", xpub);
+
+                entryMongo.pubkey = xpub;
+                entryMongo.xpub = xpub;
+                entryMongo.type = 'xpub';
+                entryMongo.master = pubkeyInfo.address;
+                entryMongo.address = pubkeyInfo.address;
+                let result = await register_xpub(username, pubkeyInfo, context);
+                allBalances.push(...result.balances);
+                output.pubkeys.push(...result.pubkeys);
+
+            } else if (pubkeyInfo.type === "zpub") {
+                let zpub = pubkeyInfo.pubkey;
+
+                entryMongo.pubkey = zpub;
+                entryMongo.zpub = zpub;
+                entryMongo.type = 'zpub';
+                entryMongo.master = pubkeyInfo.address;
+                entryMongo.address = pubkeyInfo.address;
+
+                let result = await register_xpub(username, pubkeyInfo, context);
+                allBalances.push(...result.balances);
+                output.pubkeys.push(...result.pubkeys);
+
+            } else if (pubkeyInfo.type === "address") {
+                entryMongo.pubkey = pubkeyInfo.pubkey;
+                entryMongo.master = pubkeyInfo.pubkey;
+                entryMongo.type = pubkeyInfo.type;
+                entryMongo.address = pubkeyInfo.address;
+                let result = await register_address(username, pubkeyInfo, context);
+                allBalances.push(...result.balances);
+                output.pubkeys.push(...result.pubkeys);
+            } else {
+                log.error("Unhandled type: ", pubkeyInfo.type);
+            }
+
+            //verify write
+            log.debug(tag, "entryMongo: ", entryMongo);
+            if (!entryMongo.pubkey) throw Error("103: Invalid pubkey! can not save!");
+            //check exists
+            let keyExists = await pubkeysDB.findOne({ pubkey: entryMongo.pubkey });
+            if (keyExists) {
+                log.debug(tag, "Key already registered! key: ", entryMongo);
+                //push wallet to tags
+                //add to tags
+                let pushTagMongo = await pubkeysDB.update(
+                    { pubkey: entryMongo.pubkey },
+                    { $addToSet: { tags: { $each: [context, username] } } }
+                );
+
+                log.debug(tag, "pushTagMongo: ", pushTagMongo);
+            } else {
+                if (!entryMongo.pubkey || entryMongo.pubkey == true) {
+                    log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** pubkeyInfo: ", pubkeyInfo);
+                    log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** entryMongo: ", entryMongo);
+                    throw Error("105: unable to save invalid pubkey!");
+                } else {
+                    let saveMongo = await pubkeysDB.insert(entryMongo);
+                    log.debug(tag, "saveMongo: ", saveMongo);
+                    //TODO throw if error (better get error than not fail fast)
+                }
+
+            }
+
+        }
+        output.balances = allBalances;
+        log.debug(tag, "return object: ", output);
+        return output;
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e;
+    }
+};

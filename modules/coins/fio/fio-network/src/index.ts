@@ -11,7 +11,7 @@ const fetchJson = async (uri:string, opts = {}) => {
 }
 
 const TAG = " | fio-network | "
-const log = require("@pioneer-platform/loggerdog")()
+const log = require('@pioneer-platform/loggerdog')()
 
 const Axios = require('axios')
 const https = require('https')
@@ -147,7 +147,7 @@ let get_account_info_from_account = async function(account:string){
         let output:any = {}
         output.account = account
 
-        log.info(tag,"account: ",account)
+        log.debug(tag,"account: ",account)
 
         //TODO is valid?
         output.isValid = true
@@ -266,9 +266,9 @@ let broadcast_new_funds_request_tx = async function(tx:any){
         });
 
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -311,9 +311,9 @@ let broadcast_payment_request = async function(tx:any){
 
         // return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -356,9 +356,9 @@ let broadcast_register_address = async function(tx:any){
 
         // return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -392,9 +392,9 @@ let broadcast_add_pub_address_tx = async function(tx:any){
         });
 
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -438,9 +438,9 @@ let broadcast_tx_bundle = async function(tx:any){
 
         // return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -484,9 +484,9 @@ let broadcast_tx = async function(tx:any){
 
         // return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
-        log.error(tag,"e: ",e.response.data.error)
-        log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data.error)
+        // log.error(tag,"e: ",e.response.data.error)
         output.success = false
         output.error = e
         return output
@@ -512,7 +512,7 @@ let get_block = async function(height:string){
         output = resp.data
         return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data)
         output.success = false
         output.error = e
         return output
@@ -532,7 +532,7 @@ let get_latest_block_height = async function(){
         output = resp.data
         return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data)
         output.success = false
         output.error = e
         return output
@@ -577,7 +577,7 @@ let get_txs = async function(account:string){
 
         return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data)
         output.success = false
         output.error = e
         return output
@@ -605,7 +605,7 @@ let get_obt_data = async function(fio_public_key:string){
 
         return output
     }catch(e){
-        log.error(tag,"e: ",e.response.data)
+        // log.error(tag,"e: ",e.response.data)
         output.success = false
         output.error = e
         return output
@@ -701,7 +701,7 @@ let get_actor = async function(pubkey:string){
 //         let body = {method:'POST',url: fioNode+'/chain/get_fio_names',data}
 //         log.debug(body)
 //         let resp = await axios(body)
-//         log.info(tag,"resp: ",resp.data)
+//         log.debug(tag,"resp: ",resp.data)
 //
 //         //if more then 1
 //         for(let i =0; i < resp.data.fio_addresses.length; i++){
@@ -808,16 +808,17 @@ let get_accounts_from_pubkey = async function(pubkey:string){
         return output
     }catch(e){
         //if 404 :rabble"
-        if(e.response.status === 404){
-            //NOT AN ERROR!!!!
-            output = []
-            return output
-        } else {
-            //REALLY AN ERROR
-            log.error(tag,"e: ",JSON.stringify(e))
-            log.error(tag,"e: ",e)
-            throw e
-        }
+        //throw e
+        // if(e.response.status === 404){
+        //     //NOT AN ERROR!!!!
+        //     output = []
+        //     return output
+        // } else {
+        //     //REALLY AN ERROR
+        //     // log.error(tag,"e: ",JSON.stringify(e))
+        //     // log.error(tag,"e: ",e)
+        //     throw e
+        // }
     }
 }
 
@@ -836,7 +837,7 @@ let get_node_info_verbose = async function(){
 
         return output
     }catch(e){
-        log.error(tag,"e: ",e)
+        // log.error(tag,"e: ",e)
         output.success = false
         output.error = e
         return output

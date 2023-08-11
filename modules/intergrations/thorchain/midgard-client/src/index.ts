@@ -12,7 +12,7 @@ http://174.138.103.9:8080/v1/doc
 
 const TAG = " | midgard network | "
 
-const log = require("@pioneer-platform/loggerdog")()
+const log = require('@pioneer-platform/loggerdog')()
 let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 
 //let MIDGARD_API = "https://chaosnet-midgard.bepswap.com/v1"
@@ -29,6 +29,20 @@ log.debug("URL_THORNODE: ",URL_THORNODE)
 log.debug("MIDGARD_API: ",MIDGARD_API)
 
 //http://174.138.103.9:8080/v1/doc
+
+import WebSocket from 'ws';
+
+const ws = new WebSocket('ws://www.host.com/path');
+// const ws = new WebSocket('ws://www.host.com/path');
+
+ws.on('open', function open() {
+    ws.send('something');
+});
+
+ws.on('message', function message(data) {
+    console.log('received: %s', data);
+});
+
 
 const Axios = require('axios')
 const https = require('https')
@@ -73,7 +87,7 @@ const get_transaction = async function (txid:string) {
             txid = txid.replace('0x','')
         }
         txid = txid.toUpperCase()
-        log.info(tag,"txid formatted: ",txid)
+        log.debug(tag,"txid formatted: ",txid)
 
         //params
         let params = {
@@ -107,7 +121,7 @@ const get_new_addresses = async function () {
             headers: {'content-type': 'application/json'},
         };
 
-        log.info(body)
+        log.debug(body)
         let resp = await axios(body)
 
 
@@ -159,7 +173,7 @@ const get_pool_addresses = async function () {
             // json: true
         };
 
-        log.info(body)
+        log.debug(body)
         let resp = await axios(body)
 
 
@@ -182,7 +196,7 @@ const get_info = async function () {
             // json: true
         };
 
-        log.info(body.url)
+        log.debug(body.url)
         let resp = await axios(body)
 
 
@@ -196,7 +210,7 @@ const get_info = async function () {
 
         log.debug(bodyStats)
         let respStats = await axios(bodyStats)
-        log.info(tag,"respStats: ",respStats.data)
+        log.debug(tag,"respStats: ",respStats.data)
 
         output.stats = respStats.data
         output.health = resp.data

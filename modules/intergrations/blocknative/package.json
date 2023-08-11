@@ -1,12 +1,13 @@
 {
   "name": "@pioneer-platform/blocknative-client",
-  "version": "8.1.8",
+  "version": "8.1.27",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
-    "axios": "^0.21.1",
-    "dotenv": "^8.2.0"
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "axios": "^1.3.4",
+    "dotenv": "^8.2.0",
+    "micro-ftch": "^0.3.1"
   },
   "scripts": {
     "npm": "npm i",
@@ -23,8 +24,8 @@
     "onchange": "^7.0.2",
     "serve": "^11.3.2",
     "source-map-support": "^0.5.19",
-    "ts-jest": "^25.4.0",
-    "typescript": "^3.9.7"
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.2"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
 }

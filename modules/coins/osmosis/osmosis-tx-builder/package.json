@@ -1,0 +1,26 @@
+{
+  "name": "@pioneer-platform/osmosis-tx-builder",
+  "version": "8.1.23",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "create": "npm run build && npm run test",
+    "build": "tsc -p .",
+    "test": "npm run build && node __tests__/test-module.js",
+    "prepublish": "rm -rf lib && npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "@cosmjs/launchpad": "^0.27.0",
+    "@cosmjs/proto-signing": "^0.27.0",
+    "@cosmjs/stargate": "^0.27.0",
+    "@keplr-wallet/cosmos": "0.9.10",
+    "@keplr-wallet/types": "^0.9.10",
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "cosmjs-types": "^0.4.1",
+    "long": "^5.2.0",
+    "protobufjs": "^6.11.2",
+    "tendermint-tx-codec": "^1.0.0"
+  },
+  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+}

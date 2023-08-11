@@ -25,6 +25,39 @@
 	//examples
 	https://github.com/binance-chain/javascript-sdk/wiki/API-Examples
 
+
+
+
+Available endpoints:
+
+Endpoints that require arguments:
+//dataseed1.binance.org/abci_info?
+//dataseed1.binance.org/abci_query?path=_&data=_&height=_&prove=_
+//dataseed1.binance.org/block?height=_
+//dataseed1.binance.org/block_by_hash?hash=_
+//dataseed1.binance.org/block_results?height=_
+//dataseed1.binance.org/blockchain?minHeight=_&maxHeight=_
+//dataseed1.binance.org/broadcast_evidence?evidence=_
+//dataseed1.binance.org/broadcast_tx_async?tx=_
+//dataseed1.binance.org/broadcast_tx_commit?tx=_
+//dataseed1.binance.org/broadcast_tx_sync?tx=_
+//dataseed1.binance.org/commit?height=_
+//dataseed1.binance.org/consensus_params?height=_
+//dataseed1.binance.org/consensus_state?
+//dataseed1.binance.org/dump_consensus_state?
+//dataseed1.binance.org/genesis?
+//dataseed1.binance.org/health?
+//dataseed1.binance.org/net_info?
+//dataseed1.binance.org/num_unconfirmed_txs?
+//dataseed1.binance.org/status?
+//dataseed1.binance.org/subscribe?query=_
+//dataseed1.binance.org/tx?hash=_&prove=_
+//dataseed1.binance.org/tx_search?query=_&prove=_&page=_&per_page=_
+//dataseed1.binance.org/unconfirmed_txs?limit=_
+//dataseed1.binance.org/unsubscribe?query=_
+//dataseed1.binance.org/unsubscribe_all?
+//dataseed1.binance.org/validators?height=_
+
  */
 
 
@@ -162,7 +195,7 @@ let get_balance = async function(address:string,token:string){
             method: 'GET'
         })
         let balanceInfo = result.data
-        log.info('balanceInfo: ', balanceInfo)
+        log.debug('balanceInfo: ', balanceInfo)
 
         if(!balanceInfo || !balanceInfo.balances || balanceInfo.balances.length === 0){
             output = 0
@@ -178,10 +211,8 @@ let get_balance = async function(address:string,token:string){
 
         return output
     }catch(e){
-        //log.error(tag,"e: ",{e})
-        output.success = false
-        output.error = e
-        return output
+        //node 404's on fresh addresses like an asshole
+        return 0
     }
 }
 
@@ -382,25 +413,33 @@ let get_account = async function(address:string){
     let output:any = {}
     try{
         log.debug(tag,"get_account: ",address)
-        //
 
-        // let txInfo = await network.getAccount(address)
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // if(!txInfo){
-        //     txInfo = {}
-        //     txInfo.balance = 0
-        // }
-        // log.debug(tag,"txInfo: ",txInfo)
-        //
-        // let pubkeyBuffer = new Buffer(txInfo.result.public_key)
-        // let pubkeyHex = pubkeyBuffer.toString('hex')
-        // txInfo.result.public_key = pubkeyHex
-        return "TODO"
+        let url = URL_DEX + '/api/v1/account/'+address
+
+        log.debug(tag,"url: ",url)
+        let result = await axios({
+            url: url,
+            method: 'GET'
+        })
+        let balanceInfo = result.data
+        log.info('balanceInfo: ', balanceInfo)
+
+
+        return balanceInfo
     }catch(e){
-        //log.error(tag,"e: ",{e})
-        output.success = false
-        output.error = e
+
+        let output = {
+            account_number: 0,
+            address,
+            balances: [
+            ],
+            flags: 0,
+            public_key: [
+            ],
+            sequence: 0
+        }
+
+
         return output
     }
 }
@@ -489,45 +528,82 @@ let broadcast_transaction = async function(rawTx:string){
         //console.log(sdk)
         //let rawTx = sdk.amino.marshalBinary(tx)
         //rawTx = rawTx.toString("hex")
-        //let rawTxHex = Buffer.from(rawTx, "hex")
-
-
+        // let rawTxHex = Buffer.from(rawTx, "hex")
+        // log.info("rawTxHex: ",rawTxHex)
+        // let rawTxHexStr = rawTxHex.toString('hex');
 
 
         // let rawTxBufferCheck = "db01f0625dee0a65ce6dc0430a14b6561dcc104130059a7c08f48c64610c1f6f9064122b423635363144434331303431333030353941374330384634384336343631304331463646393036342d31311a0b4254432d3543345f424e42200228013080c2d72f3880989abc044001126e0a26eb5ae9872103baf53d1424f8ea83d03a82f6d157b5401c4ea57ffb8317872e15a19fc9b7ad7b1240e79a6606d28cf07b9cc6f566b524a5282b13beccc3162376c79f392620c95a447b19f64e761e22a7a3bc311a780e7d9fdd521e2f7edec25308c5bac6aa1c0a311801200a"
         // log.debug("EXPECTED: ",rawTxBufferCheck)
-        // log.debug("*****GOT: ",rawTx)
+        // log.notice("*****GOT: ",rawTx)
 
         //
         //ca01f0625dee0a482a2c87fa0a200a1441a3320611caffc31d0148880077f71cfb6509fd12080a03424e4210904e12200a147df3840550a997c5e264402642b761958169470f12080a03424e4210904e12700a26eb5ae987210290916077c387b262a940380d250fd8151c42abf9d8072397797844fab14924c1124041afd12e00d126d51f066a331fbb3b99d9f622392c0f5c9023136c396946d0002b9c9a5fa5f37668bdc5ebe626b758862f0ce6ca61d5d154efd0c933572b3ea918eda11120311a08746573746d656d6f
 
         //tx: Buffer.from(encoded, "hex")
         ///broadcast_tx_sync?tx=
-        // let resultBroadcast = await axios({method:'GET',url:URL_DEX+'/api/v1/broadcast?sync=true'+tx})
-        // log.debug("resultBroadcast: ",resultBroadcast)
+        // let resultBroadcast = await axios({method:'GET',url:URL_REMOTE+'/broadcast_tx_sync?tx='+rawTxHexStr})
+        // log.info("resultBroadcast: ",resultBroadcast.data)
 
-        const buffer = Buffer.from(rawTx, 'hex');
-        // @ts-ignore
-        let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
-        console.log("hash: ",hash)
 
-        let url = URL_DEX_1 + '/api/v1/broadcast?sync=true'
-        let result = await axios({
+        const url = 'https://dex.binance.org/api/v1/broadcast?sync=true';
+        const config = {
             headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'text/plain',
             },
-            url: url,
-            method: 'POST',
-            data: rawTx,
-        })
-        log.debug('result: ', result.data)
-
-        if(result.data[0].hash){
-            log.info("success! ")
+        };
+        try {
+            const response = await axios.post(url, rawTx, config);
+            console.log(response.data);
+            let txid = response.data[0].hash
+            
+        } catch (error) {
+            console.error(error);
         }
+        
+        // log.info("resultBroadcast: ",resultBroadcast)
 
-        return result.data[0].hash
-    }catch(e){
+        // const buffer = Buffer.from(rawTx, 'hex');
+        // // @ts-ignore
+        // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+        // console.log("hash: ",hash)
+        //
+        // let url = URL_DEX_1 + '/api/v1/broadcast?sync=true'
+        // let result = await axios({
+        //     headers: {
+        //         'Content-Type': 'text/plain'
+        //     },
+        //     url: url,
+        //     method: 'POST',
+        //     data: rawTx,
+        // })
+        // log.debug('result: ', result.data)
+        //
+        // if(result.data[0].hash){
+        //     log.debug("success! ")
+        // }
+
+        // const buffer = Buffer.from(rawTx, 'hex');
+        // // @ts-ignore
+        // // let hash = crypto.createHash('sha256').update(buffer).digest('hex').toUpperCase()
+        // // console.log("hash: ",hash)
+        //
+        // let url = URL_REMOTE + '/broadcast_tx_sync?tx='+rawTx
+        // let result = await axios({
+        //     headers: {
+        //         'Content-Type': 'text/plain'
+        //     },
+        //     url: url,
+        //     method: 'GET'
+        // })
+        // log.info('result: ', result.data)
+        //
+        // if(result.data[0].hash){
+        //     log.debug(" success! ")
+        // }
+        //
+        // return result.data[0].hash
+    }catch(e:any){
         //log.error(tag,"e: ",{e})
         log.error(tag,e)
         log.error(tag,e.response)
@@ -665,6 +741,7 @@ let getTransaction = async function(txid:string){
             //pop at random
             selected = ROUND_ROBIN_STATE.pop()
         }
+
 
         let txInfo = await axios({method:'GET',url:selected+'/api/v1/tx/'+txid+"?format=json"})
         log.debug(tag,"txInfo: ",txInfo.data)

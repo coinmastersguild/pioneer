@@ -1,19 +1,129 @@
 
 const TAG = " | coin tools | "
-const log = require("@pioneer-platform/loggerdog")()
-const bitcoin = require("bitcoinjs-lib");
-const ethUtils = require('ethereumjs-util');
+const log = require('@pioneer-platform/loggerdog')()
+// const bitcoin = require("bitcoinjs-lib");
+// const ethUtils = require('ethereumjs-util');
 const ripemd160 = require("crypto-js/ripemd160")
 const CryptoJS = require("crypto-js")
 const sha256 = require("crypto-js/sha256")
 const bech32 = require(`bech32`)
 //import BigNumber from 'bignumber.js'
 const b58 = require('bs58check');
-const BIP84 = require('bip84')
 import { getNetwork } from "./networks";
 let {
     getPaths,
 } = require('./paths')
+
+/*
+    Rango Blockchain naming conventions
+    bitcoin -> BTC
+    ethereum -> ETH
+    cosmos -> COSMOS
+    osmosis -> OSMOSIS
+
+ */
+
+export const getRangoBlockchainName = function(blockchain:string){
+    try{
+        let rangoName
+        switch (blockchain) {
+            case "bitcoin":
+                rangoName = "BTC";
+                break;
+            case "bitcoincash":
+                rangoName = "BCH";
+                break;
+            case "avalanche":
+                rangoName = "AVAX_CCHAIN";
+                break;
+            case "ethereum":
+                rangoName = "ETH";
+                break;
+            case "cosmos":
+                rangoName = "COSMOS";
+                break;
+            case "thorchain":
+                rangoName = "THOR";
+                break;
+            case "osmosis":
+                rangoName = "OSMOSIS";
+                break;
+            default:
+                throw Error("Unknown rango name for blockchain"+blockchain)
+        }
+        return rangoName
+    }catch(e){
+        log.error(e)
+    }
+}
+
+
+
+/*
+    Swap protocals
+
+ */
+
+export const getSwapProtocals = function(asset:string, network:string){
+    try{
+        let output = []
+        if(network === 'ETH'){
+            output.push('0x')
+        }
+        let thorchainAssets = [ 'BCH', 'BNB', 'BTC', 'ETH', 'LTC' ]
+        if(thorchainAssets.indexOf(asset) >= 0){
+            output.push('thorchain')
+        }
+        let osmoAssets = [ 'OSMO', 'ATOM' ]
+        if(osmoAssets.indexOf(asset) >= 0){
+            output.push('osmosis')
+        }
+        return output
+    }catch(e){
+        log.error(e)
+    }
+}
+
+
+/*
+    TODO SS caip decoder
+
+ */
+
+
+/*
+    Thorchain string parser
+
+ */
+
+export const parseThorchainAssetString = function(input:string){
+    try{
+        let parts = input.split(".")
+        let network = parts[0]
+        let asset
+        let symbol
+        let contract
+        if(parts[1].indexOf("-") >= 0){
+            //is Token
+            let parts2 = parts[1].split("-")
+            contract = parts2[1]
+            asset = parts2[0]
+            symbol = parts2[0]
+        }else{
+            //is Native asset
+            asset = parts[0]
+            symbol = parts[0]
+        }
+        return {
+            asset,
+            symbol,
+            network,
+            contract
+        }
+    }catch(e){
+        log.error(e)
+    }
+}
 
 export enum HDWALLETS {
     'pioneer',
@@ -30,6 +140,8 @@ export enum HDWALLETS {
 export const UTXO_COINS = [
     'BTC',
     'BCH',
+    'DASH',
+    'DGB',
     'DOGE',
     'LTC',
     'TEST'
@@ -49,6 +161,8 @@ export const COIN_MAP = {
     digibyte: "DGB",
     dogecoin: "DOGE",
     ethereum: "ETH",
+    avalanche: "AVAX",
+    poly: "MATIC",
     cardano: "ADA",
     binance: "BNB",
     thorchain: "RUNE",
@@ -62,6 +176,25 @@ export const COIN_MAP_LONG:any = {
     OSMO: "osmosis",
     BTCT: "testnet",
     BCH: "bitcoincash",
+    LTC: "litecoin",
+    DASH: "dash",
+    DGB: "digiByte",
+    DOGE: "dogecoin",
+    RUNE: "thorchain",
+    ETH: "ethereum",
+    AVAX: "avalanche",
+    ADA: "cardano",
+    BNB: "binance",
+    EOS: "eos",
+    FIO: "fio",
+};
+
+export const COIN_MAP_LONG_XCHAIN:any = {
+    BTC: "bitcoin",
+    ATOM: "cosmos",
+    OSMO: "osmosis",
+    BTCT: "testnet",
+    BCH: "bitcoinCash",
     LTC: "litecoin",
     DASH: "dash",
     DGB: "digiByte",
@@ -88,6 +221,7 @@ export const COIN_MAP_KEEPKEY_LONG:any = {
     ETH: "Ethereum",
     ADA: "Cardano",
     BNB: "Binance",
+    AVAX: "Avalanche",
     EOS: "Eos",
     FIO: "Fio",
 };
@@ -103,6 +237,7 @@ export const SLIP_44_BY_LONG:any = {
     dogecoin: 3,
     bitcoinsv: 236,
     ethereum: 60,
+    avalanche: 60,
     cosmos: 118,
     osmosis: 118,
     binance: 714,
@@ -272,6 +407,29 @@ if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
 if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
     supportedBlockchains.push("Litecoin")
     supportedAssets.push("LTC")
+}
+
+if(process.env['FEATURE_AVALANCHE_BLOCKCHAIN']){
+    supportedBlockchains.push("Avalanche")
+    supportedAssets.push("AVAX")
+}
+
+// (only 1 native assets for each enabled blockchain)
+export const COIN_ICONS_BY_SYMBOL = {
+    BTC:"https://assets.coingecko.com/coins/images/1/small/bitcoin.png?1547033579",
+    ETH:"https://assets.coingecko.com/coins/images/279/large/ethereum.png?1595348880",
+    LTC:"https://assets.coingecko.com/coins/images/16724/thumb/ltc.png",
+    BNB:"https://assets.coingecko.com/coins/images/825/thumb/binance-coin-logo.png?1547034615",
+    BCH:"https://assets.coingecko.com/coins/images/780/thumb/bitcoin-cash-circle.png?1594689492",
+    OSMO:"https://assets.coingecko.com/coins/images/16724/thumb/osmo.png",
+    ATOM:"https://assets.coingecko.com/coins/images/16724/thumb/atom.png",
+    FIO:"https://assets.coingecko.com/coins/images/16724/thumb/fio.png",
+    EOS:"https://assets.coingecko.com/coins/images/16724/thumb/eos.png",
+    RUNE:"https://assets.coingecko.com/coins/images/6595/thumb/RUNE.png",
+    ADA:"https://assets.coingecko.com/coins/images/16724/thumb/ada.png",
+    LUNA:"https://assets.coingecko.com/coins/images/8284/thumb/luna1557227471663.png?1567147072",
+    KAVA:"https://assets.coingecko.com/coins/images/16724/thumb/kava.png",
+    SCRT:"https://assets.coingecko.com/coins/images/16724/thumb/scrt.png",
 }
 
 //TODO add more flags by networks
@@ -499,7 +657,7 @@ export function getExplorerUrl(network:string,token:string, testnet:boolean){
         let href
         switch (network) {
             case 'bitcoin':
-                href = 'https://www.blockchain.com/'
+                href = 'https://blockstream.info'
                 break
             case 'ethereum':
                 href = 'https://etherscan.io'
@@ -509,6 +667,9 @@ export function getExplorerUrl(network:string,token:string, testnet:boolean){
                 break
             case 'binance':
                 href = 'https://explorer.binance.org'
+                break
+            case 'thorchain':
+                href = 'https://thorchain.net'
                 break
             case 'cosmos':
                 href = 'https://www.mintscan.io'
@@ -540,70 +701,91 @@ export function getExplorerAddressUrl(address:string,network:string,token:string
     }else{
         let href
         switch (network) {
-            //TODO
-            // case 'bitcoin':
-            //     href = 'https://www.blockchain.com/'
-            //     break
-            // case 'ethereum':
-            //     href = 'https://etherscan.io'
-            //     break
-            // case 'bitcoinCash':
-            //     href = 'https://blockchair.com/bitcoin-cash'
-            //     break
-            // case 'binance':
-            //     href = 'https://explorer.binance.org'
-            //     break
-            // case 'cosmos':
-            //     href = 'https://www.mintscan.io'
-            //     break
-            // case 'dash':
-            //     return `https://chainz.cryptoid.info/dash`
-            // case 'doge':
-            //     return `https://dogechain.info`
+            case 'bitcoin':
+                href = 'https://www.blockchain.com/'
+                break
+            case 'ethereum':
+                href = 'https://etherscan.io'
+                break
+            case 'bitcoinCash':
+                href = 'https://blockchair.com/bitcoin-cash'
+                break
+            case 'binance':
+                href = 'https://explorer.binance.org'
+                break
+            case 'cosmos':
+                href = 'https://www.mintscan.io'
+                break
+            case 'dash':
+                return `https://chainz.cryptoid.info/dash`
+            case 'doge':
+                return `https://dogechain.info`
         }
         return href
     }
 }
 
-export function getExplorerTxUrl(tx:string,network:string,token:string, testnet:boolean){
+export function needsMemoByNetwork(network:string){
+        let needsMemo = false
+        switch (network) {
+            case 'thorchain':
+                needsMemo = true
+                break
+            case 'osmosis':
+                needsMemo = true
+                break
+            case 'cosmos':
+                needsMemo = true
+                break
+        }
+        return needsMemo
+}
+
+export function getExplorerTxUrl(network:string,txid:string, testnet:boolean){
     if(testnet){
         let href
         switch (network) {
             case 'bitcoin':
-                href = 'https://blockstream.info/testnet/tx/'+tx
+                href = 'https://blockstream.info/testnet/tx/'+txid
                 break
             case 'ethereum':
-                href = 'https://ropsten.etherscan.io/tx/'+tx
+                href = 'https://ropsten.etherscan.io/tx/'+txid
                 break
         }
         return href
     }else{
         let href
         switch (network) {
-            //TODO
-            // case 'bitcoin':
-            //     href = 'https://www.blockchain.com/'
-            //     break
-            // case 'ethereum':
-            //     href = 'https://etherscan.io'
-            //     break
-            // case 'bitcoinCash':
-            //     href = 'https://blockchair.com/bitcoin-cash'
-            //     break
-            // case 'binance':
-            //     href = 'https://explorer.binance.org'
-            //     break
-            // case 'cosmos':
-            //     href = 'https://www.mintscan.io'
-            //     break
-            // case 'dash':
-            //     return `https://chainz.cryptoid.info/dash`
-            // case 'doge':
-            //     return `https://dogechain.info`
+            case 'bitcoin':
+                href = 'https://blockstream.info/tx/'+txid
+                break
+            case 'ethereum':
+                href = 'https://etherscan.io/tx/'+txid
+                break
+            case 'bitcoinCash':
+                href = 'https://blockchair.com/bitcoin-cash/tx/'+txid
+                break
+            case 'binance':
+                href = 'https://explorer.binance.org/tx/'+txid
+                break
+            case 'thorchain':
+                href = 'https://thorchain.net/tx/'+txid
+                break
+            case 'osmosis':
+                href = 'https://www.mintscan.io/osmosis/txs/'+txid
+                break
+            case 'cosmos':
+                href = 'https://www.mintscan.io/cosmos/txs/'+txid
+                break
+            case 'dash':
+                return `https://chainz.cryptoid.info/dash`+txid
+            case 'doge':
+                return `https://dogechain.info/tx/`+txid
         }
         return href
     }
 }
+
 
 
 function bech32ify(address:any, prefix:string) {
@@ -656,212 +838,216 @@ export function xpubConvert(xpub:string,target:string){
     return b58.encode(data);
 }
 
-export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
-    let tag = TAG + " | normalize_pubkeys | "
-    try {
-        log.info(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
-        if(!isTestnet) isTestnet = false
+// export async function normalize_pubkeys(format:string,pubkeys:any,pathsIn:any, isTestnet?:boolean) {
+//     let tag = TAG + " | normalize_pubkeys | "
+//     try {
+//         log.debug(tag,"input: ",{format,pubkeys,pathsIn,isTestnet})
+//         if(!isTestnet) isTestnet = false
+//
+//         if(pathsIn.length !== pubkeys.length){
+//             log.error(tag,"pubkeys: ",pubkeys.length)
+//             log.error(tag,"pathsIn: ",pathsIn.length)
+//             throw Error("102: invalid input, paths dont match!")
+//         }
+//
+//         let output:any = []
+//         if(format === 'keepkey'){
+//             for(let i = 0; i < pubkeys.length; i++){
+//                 let pubkey:any = pathsIn[i]
+//                 log.debug(tag,"pubkey: ",pubkey)
+//                 let normalized:any = {}
+//                 normalized.path = addressNListToBIP32(pathsIn[i].addressNList)
+//                 normalized.pathMaster = addressNListToBIP32(pathsIn[i].addressNListMaster)
+//
+//                 log.debug(tag,"pubkey: ",pubkey)
+//                 normalized.source = format
+//                 if(pubkey.type === 'xpub'){
+//                     normalized.type = 'xpub'
+//                     normalized.xpub = true
+//                     normalized.pubkey = pubkeys[i].xpub
+//                     pubkey.pubkey = pubkeys[i].xpub
+//                 }
+//                 if(pubkey.type === 'zpub'){
+//                     normalized.type = 'zpub'
+//                     normalized.zpub = true
+//                     //convert to zpub
+//                     let zpub = await xpubConvert(pubkeys[i].xpub,'zpub')
+//                     normalized.pubkey = zpub
+//                     pubkey.pubkey = zpub
+//                 }
+//                 //TODO get this from supported coins? DRY
+//                 if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM' || pubkey.symbol === 'OSMO'){
+//                     pubkey.pubkey = pubkeys[i].xpub
+//                 }
+//                 normalized.note = pubkey.note
+//                 normalized.symbol = pubkey.symbol
+//                 normalized.blockchain = COIN_MAP_LONG[pubkey.symbol]
+//                 normalized.network = COIN_MAP_LONG[pubkey.symbol]
+//                 //normalized.path = addressNListToBIP32(pubkey.addressNList)
+//
+//                 //get master address
+//                 let address = await get_address_from_xpub(pubkey.pubkey,pubkey.script_type,pubkey.symbol,0,0,false)
+//                 if(!address){
+//                     log.error("Failed to get address for pubkey: ",pubkey)
+//                     throw Error("address master required for valid pubkey")
+//                 }
+//                 normalized.script_type = pubkey.script_type //TODO select script type?
+//                 if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM' || pubkey.symbol === 'OSMO'){
+//                     normalized.type = "address"
+//                     normalized.pubkey = address
+//                 }
+//                 if(isTestnet && pubkey.symbol === 'BTC'){
+//                     //tpub
+//                     normalized.tpub = await xpubConvert(pubkey.xpub,'tpub')
+//                 }
+//                 normalized.master = address
+//                 normalized.address = address
+//
+//                 output.push(normalized)
+//             }
+//
+//         } else {
+//             throw Error(" unknown format! ")
+//         }
+//
+//         return output
+//     } catch (e) {
+//         log.error(tag, "e: ", e)
+//         throw e
+//     }
+// }
 
-        if(pathsIn.length !== pubkeys.length){
-            log.error(tag,"pubkeys: ",pubkeys)
-            log.error(tag,"pathsIn: ",pathsIn)
-            throw Error("102: invalid input, paths dont match!")
-        }
-
-        let output:any = []
-        if(format === 'keepkey'){
-            for(let i = 0; i < pubkeys.length; i++){
-                let pubkey:any = pathsIn[i]
-                log.info(tag,"pubkey: ",pubkey)
-                let normalized:any = {}
-                normalized.path = addressNListToBIP32(pathsIn[i].addressNList)
-                normalized.pathMaster = addressNListToBIP32(pathsIn[i].addressNListMaster)
-
-                log.debug(tag,"pubkey: ",pubkey)
-                normalized.source = format
-                if(pubkey.type === 'xpub'){
-                    normalized.type = 'xpub'
-                    normalized.xpub = true
-                    normalized.pubkey = pubkeys[i].xpub
-                    pubkey.pubkey = pubkeys[i].xpub
-                }
-                if(pubkey.type === 'zpub'){
-                    normalized.type = 'zpub'
-                    normalized.zpub = true
-                    //convert to zpub
-                    let zpub = await xpubConvert(pubkeys[i].xpub,'zpub')
-                    normalized.pubkey = zpub
-                    pubkey.pubkey = zpub
-                }
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB' || pubkey.symbol === 'ATOM'){
-                    pubkey.pubkey = pubkeys[i].xpub
-                }
-                normalized.note = pubkey.note
-                normalized.symbol = pubkey.symbol
-                normalized.blockchain = COIN_MAP_LONG[pubkey.symbol]
-                normalized.network = COIN_MAP_LONG[pubkey.symbol]
-                //normalized.path = addressNListToBIP32(pubkey.addressNList)
-
-                //get master address
-                let address = await get_address_from_xpub(pubkey.pubkey,pubkey.script_type,pubkey.symbol,0,0,false)
-                if(!address){
-                    log.error("Failed to get address for pubkey: ",pubkey)
-                    throw Error("address master required for valid pubkey")
-                }
-                normalized.script_type = pubkey.script_type //TODO select script type?
-                if(pubkey.symbol === 'ETH' || pubkey.symbol === 'RUNE' || pubkey.symbol === 'BNB'){
-                    normalized.type = "address"
-                    normalized.pubkey = address
-                }
-                if(isTestnet && pubkey.symbol === 'BTC'){
-                    //tpub
-                    normalized.tpub = await xpubConvert(pubkey.xpub,'tpub')
-                }
-                normalized.master = address
-                normalized.address = address
-
-                output.push(normalized)
-            }
-
-        } else {
-            throw Error(" unknown format! ")
-        }
-
-        return output
-    } catch (e) {
-        log.error(tag, "e: ", e)
-        throw e
-    }
-}
-
-export async function get_address_from_xpub(xpub:string,scriptType:string,coin:string,account:number,index:number,isChange:boolean, isTestnet?:boolean) {
-    let tag = TAG + " | get_address_from_xpub | "
-    try {
-        let output
-        log.info(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
-        //if xpub get next unused
-        if(!xpub) throw Error("xpub required! coin:"+coin)
-        console.log("CHECKPOINT")
-        //TODO is clone?
-        //get pubkey at path
-        let publicKey
-        if(coin !== 'BTC'){
-            publicKey = bitcoin.bip32.fromBase58(xpub).derive(account).derive(index).publicKey
-        }
-
-        let response:any
-        switch(coin) {
-            case 'BTC':
-                //TODO more types
-                console.log("CHECKPOINT1")
-                if(scriptType === 'bech32' || 'p2wpkh'){
-                    let account0 = new BIP84.fromZPub(xpub)
-                    output = account0.getAddress(0)
-                } else if(scriptType === 'legacy' || 'p2pkh'){
-                    publicKey = bitcoin.bip32.fromBase58(xpub).derive(account).derive(index).publicKey
-                    publicKey = publicKey.toString(`hex`)
-                    const { address } = bitcoin.payments.p2pkh({
-                        pubkey: Buffer.from(publicKey,'hex'),
-                        network: NETWORKS[coin.toLowerCase()]
-                    });
-                    output = address
-                }
-                console.log("CHECKPOINT2 : ",output)
-                break;
-            case 'BCH':
-                publicKey = publicKey.toString(`hex`)
-                response = bitcoin.payments.p2pkh({
-                    pubkey: Buffer.from(publicKey,'hex'),
-                    network: NETWORKS[coin.toLowerCase()]
-                })
-                output = response.address
-                break;
-            case 'DOGE':
-                publicKey = publicKey.toString(`hex`)
-                response = bitcoin.payments.p2pkh({
-                    pubkey: Buffer.from(publicKey,'hex'),
-                    network: NETWORKS[coin.toLowerCase()]
-                })
-                output = response.address
-                break;
-            case 'DASH':
-                publicKey = publicKey.toString(`hex`)
-                response = bitcoin.payments.p2pkh({
-                    pubkey: Buffer.from(publicKey,'hex'),
-                    network: NETWORKS[coin.toLowerCase()]
-                })
-                output = response.address
-                break;
-            case 'LTC':
-                publicKey = publicKey.toString(`hex`)
-                response = bitcoin.payments.p2pkh({
-                    pubkey: Buffer.from(publicKey,'hex'),
-                    network: NETWORKS[coin.toLowerCase()]
-                })
-                output = response.address
-                break;
-            case 'ETH':
-                output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
-                break;
-            case 'RUNE':
-                if(!isTestnet){
-                    output = createBech32Address(publicKey,'thor')
-                } else {
-                    output = createBech32Address(publicKey,'tthor')
-                }
-                break;
-            case 'ATOM':
-                output = createBech32Address(publicKey,'cosmos')
-                break;
-            case 'OSMO':
-                output = createBech32Address(publicKey,'osmo')
-                break;
-            case 'BNB':
-                log.debug("pubkey: ",publicKey)
-                if(!isTestnet){
-                    output = createBech32Address(publicKey,'bnb')
-                } else {
-                    output = createBech32Address(publicKey,'tbnb')
-                }
-                break;
-            // case 'FIO':
-            //     log.debug(tag,"pubkey: ",publicKey)
-            //
-            //     try{
-            //         //get accounts for pubkey
-            //         let account = networks['FIO'].getAccountsFromPubkey(publicKey)
-            //         log.debug(tag,"account: ",account)
-            //     }catch(e){
-            //         //no accounts
-            //         //return pubkey
-            //         output = {unregistered:true,pubkey:publicKey}
-            //     }
-            //
-            //     break;
-            // case 'EOS':
-            //     log.debug(tag,"pubkey: ",publicKey)
-            //
-            //     try{
-            //         //get accounts for pubkey
-            //         let account = networks['EOS'].getAccountsFromPubkey(publicKey)
-            //         log.debug(tag,"account: ",account)
-            //     }catch(e){
-            //         //no accounts
-            //         //return pubkey
-            //         output = {unregistered:true,pubkey:publicKey}
-            //     }
-            //
-            //     break;
-            default:
-                throw Error("coin not yet implemented ! coin: "+coin)
-            // code block
-        }
-
-        log.debug(tag,"output: ",output)
-
-
-        return output
-    } catch (e) {
-        log.error(tag, "e: ", e)
-    }
-}
+// export async function get_address_from_xpub(xpub:string,scriptType:string,coin:string,account:number,index:number,isChange:boolean, isTestnet?:boolean) {
+//     let tag = TAG + " | get_address_from_xpub | "
+//     try {
+//         let output
+//         log.debug(tag,"Input: ",{xpub,scriptType,coin,account,index,isChange,isTestnet})
+//         //if xpub get next unused
+//         if(!xpub) throw Error("xpub required! coin:"+coin)
+//         console.log("CHECKPOINT")
+//         //TODO is clone?
+//         //get pubkey at path
+//         let publicKey
+//         if(coin !== 'BTC'){
+//             publicKey = bitcoin.bip32.fromBase58(xpub).derive(account).derive(index).publicKey
+//         }
+//
+//         let response:any
+//         switch(coin) {
+//             case 'BTC':
+//                 //TODO more types
+//                 console.log("CHECKPOINT1")
+//                 if(scriptType === 'bech32' || scriptType === 'p2wpkh'){
+//                     if(xpub[0] !== 'z') throw Error("103: not a Zpub")
+//                     let account0 = new BIP84.fromZPub(xpub)
+//                     output = account0.getAddress(0)
+//                 } else if(scriptType === 'legacy' || 'p2pkh'){
+//                     publicKey = bitcoin.bip32.fromBase58(xpub).derive(account).derive(index).publicKey
+//                     publicKey = publicKey.toString(`hex`)
+//                     const { address } = bitcoin.payments.p2pkh({
+//                         pubkey: Buffer.from(publicKey,'hex'),
+//                         network: NETWORKS[coin.toLowerCase()]
+//                     });
+//                     output = address
+//                 }
+//                 console.log("CHECKPOINT2 : ",output)
+//                 break;
+//             case 'BCH':
+//                 publicKey = publicKey.toString(`hex`)
+//                 response = bitcoin.payments.p2pkh({
+//                     pubkey: Buffer.from(publicKey,'hex'),
+//                     network: NETWORKS[coin.toLowerCase()]
+//                 })
+//                 output = response.address
+//                 break;
+//             case 'DOGE':
+//                 publicKey = publicKey.toString(`hex`)
+//                 response = bitcoin.payments.p2pkh({
+//                     pubkey: Buffer.from(publicKey,'hex'),
+//                     network: NETWORKS[coin.toLowerCase()]
+//                 })
+//                 output = response.address
+//                 break;
+//             case 'DASH':
+//                 publicKey = publicKey.toString(`hex`)
+//                 response = bitcoin.payments.p2pkh({
+//                     pubkey: Buffer.from(publicKey,'hex'),
+//                     network: NETWORKS[coin.toLowerCase()]
+//                 })
+//                 output = response.address
+//                 break;
+//             case 'LTC':
+//                 publicKey = publicKey.toString(`hex`)
+//                 response = bitcoin.payments.p2pkh({
+//                     pubkey: Buffer.from(publicKey,'hex'),
+//                     network: NETWORKS[coin.toLowerCase()]
+//                 })
+//                 output = response.address
+//                 break;
+//             case 'ETH':
+//                 output = ethUtils.bufferToHex(ethUtils.pubToAddress(publicKey,true))
+//                 break;
+//             case 'RUNE':
+//                 if(!isTestnet){
+//                     output = createBech32Address(publicKey,'thor')
+//                 } else {
+//                     output = createBech32Address(publicKey,'tthor')
+//                 }
+//                 break;
+//             case 'ATOM':
+//                 output = createBech32Address(publicKey,'cosmos')
+//                 break;
+//             case 'OSMO':
+//                 console.log("publicKey: ",publicKey.toString('hex'))
+//                 let pubkeyOsmo = bitcoin.bip32.fromBase58(xpub).publicKey
+//                 output = createBech32Address(pubkeyOsmo,'osmo')
+//                 break;
+//             case 'BNB':
+//                 log.debug("pubkey: ",publicKey)
+//                 if(!isTestnet){
+//                     output = createBech32Address(publicKey,'bnb')
+//                 } else {
+//                     output = createBech32Address(publicKey,'tbnb')
+//                 }
+//                 break;
+//             // case 'FIO':
+//             //     log.debug(tag,"pubkey: ",publicKey)
+//             //
+//             //     try{
+//             //         //get accounts for pubkey
+//             //         let account = networks['FIO'].getAccountsFromPubkey(publicKey)
+//             //         log.debug(tag,"account: ",account)
+//             //     }catch(e){
+//             //         //no accounts
+//             //         //return pubkey
+//             //         output = {unregistered:true,pubkey:publicKey}
+//             //     }
+//             //
+//             //     break;
+//             // case 'EOS':
+//             //     log.debug(tag,"pubkey: ",publicKey)
+//             //
+//             //     try{
+//             //         //get accounts for pubkey
+//             //         let account = networks['EOS'].getAccountsFromPubkey(publicKey)
+//             //         log.debug(tag,"account: ",account)
+//             //     }catch(e){
+//             //         //no accounts
+//             //         //return pubkey
+//             //         output = {unregistered:true,pubkey:publicKey}
+//             //     }
+//             //
+//             //     break;
+//             default:
+//                 throw Error("coin not yet implemented ! coin: "+coin)
+//             // code block
+//         }
+//
+//         log.debug(tag,"output: ",output)
+//
+//
+//         return output
+//     } catch (e) {
+//         log.error(tag, "e: ", e)
+//     }
+// }

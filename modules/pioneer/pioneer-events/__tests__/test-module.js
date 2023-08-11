@@ -18,15 +18,16 @@ let wallet_2_name = process.env['TEST_USERNAME_2']
 let TEST_QUERY_KEY_1 = process.env['TEST_QUERY_KEY_1']
 let TEST_QUERY_KEY_2 = process.env['TEST_QUERY_KEY_2']
 
-let password = process.env['WALLET_PASSWORD']
-let username = wallet_2_name
-console.log("password: ",password)
+// let password = process.env['WALLET_PASSWORD']
+// let username = wallet_2_name
+// console.log("password: ",password)
 
 let run_test = async function(){
     try{
 
         let config = {
             // queryKey:TEST_QUERY_KEY_2,
+            username:"tester123",
             queryKey:"12312312ssdasas",
             wss:"ws://127.0.0.1:9001"
         }
@@ -34,7 +35,7 @@ let run_test = async function(){
         //sub ALL events
         let clientEvents = new Events.Events(config)
         clientEvents.init()
-
+        clientEvents.setUsername(config.username)
         //let invocation = ""
 
         // clientEvents.subscribeToKey()

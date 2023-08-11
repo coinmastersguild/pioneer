@@ -12,11 +12,44 @@ network.init()
 
 //check is address elgible
 
+//getTransferData
+// let toAddress = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
+// let contract = "0x6b175474e89094c44da98b954eedeac495271d0f"
+// let amount = '10.000001'
+// network.getTransferData(toAddress,amount,contract)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //already claimed
 // let address = "0x57e5551F5c9FB975C44Be80c27eA924c91701616"
 //elgable
-let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
+//let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
+// let address = "0x9e6316f44baeeee5d41a1070516cc5fa47baf227"
+
+// let tx = "0x02f8740181878459682f008506ab795d5c8301388094c3affff54122658b89c31183cec4f15514f346248701c6bf5263400080c001a05493c19e6ee6ec1ae67a64bf73e1949cf68754a1c304cc3b3e617546bd87e371a062e3570beeedbf069f8102bd41381359762c370489b63922cbe0d7b1e0424a7e"
+// //let tx = "0x02f8b20181818459682f0085069f0c71a08301388094c3affff54122658b89c31183cec4f15514f3462480b844a9059cbb000000000000000000000000c3affff54122658b89c31183cec4f15514f346240000000000000000000000000000000000000000000000000000000000000001c001a040b68e78b2cc4111fa6d1f6fd019168bcd04c265c30c8e58e132e6344112831ea02899fc7dbc5a476761f768ee4c227b6ac35688876cc3f09a7476e46e60743d45"
+// //
+// // // let tx = "0x02f872016184540ae4808516854be509825ac394fc0cc6e85dff3d75e3985e0cb83b090cfd498dd1871550f7dca7000080c080a047e3fa2bff82a1f800104f05b8d811e6d949d010df15a6d545bc9cd606c7a25da0132f570c1baf9778e9d308ef89c59ded1cbc8f221e0d8612efa219d12156ba20"
+// // let tx = "0x02f87201098459682f00850bfda3a30082520894c3affff54122658b89c31183cec4f15514f3462487038d7ea4c6800080c001a0f45bdb474b46c8c483028bd1dd7c7135dd683d50052660e6ba060c05a624d8f0a02f79d3c34c522391d8a791d07061db79f17d4ff9ef6b344d6988615250f8689a"
+// // //let tx = "0x02f86d01018204008204008256229412ec06288edd7ae2cc41a843fe089237fc7354f0872c68af0bb1400080c080a0abcd0d1d6c5792f5c6dca352f032e8012386fc2cb7f07245fe46c6bd7d26d23da06b63aab8cac33da3f028078393e87408aa0189f132ca395efcab4de7fa8795db"
+// network.decodeTx(tx)
+//     .then(function(resp){
+//         console.log("decodeTx: ", resp)
+//         console.log(JSON.stringify(resp))
+//     })
+
+//get pioneers
+network.getAllPioneers()
+    .then(function(resp){
+        console.log(resp)
+    })
+
+let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+network.getNonce(address)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 // network.checkAirdropClaim(address)
 //     .then(function(resp){
@@ -65,7 +98,8 @@ let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
 //         console.log(resp)
 //     })
 
-// let rawTx = "0xf86c3c8506e44c2800830138809433b35c665496ba8e71b22373843376740401f106870aa87bee5380008025a03a90ca4a262624725e05da416293b7aa6e1faa611b064f30561123d005db9ec9a020ad66b84f4f3ad6354182cc14030d60f05ff8bc80286b33e9c3ed8af8176db7"
+//let rawTx = "0xf901511a85022f9bd6d08301388094d37bbe5744d730a1d98d8dc97c42f0ca46ad7146872386f26fc10000b8e41fece7b40000000000000000000000008ad2aa7f6a1be0bd66a8e64b78e99b687dd5abef0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000003a3d3a4254432e4254433a626331717370706a61786e396c677039673072617871656a393772323277347a396b74356668386a6a323a36353434320000000000001ba01ead04f2eb4f731b42042c402b7acd7c4c8cf71c6090000f965104301fa69cf7a03d608f1e8220a95f47ce438dd1f5c4212d6d3e51b1e6cd86c18fe01073752bff"
+// let rawTx = "0x02f87201098459682f00850bfda3a30082520894c3affff54122658b89c31183cec4f15514f3462487038d7ea4c6800080c001a0f45bdb474b46c8c483028bd1dd7c7135dd683d50052660e6ba060c05a624d8f0a02f79d3c34c522391d8a791d07061db79f17d4ff9ef6b344d6988615250f8689a"
 // network.broadcast(rawTx)
 //     .then(function(resp){
 //         console.log(resp)
@@ -192,10 +226,10 @@ let address = "0xc8bD3e67E3963B149B02b028511789f0Cc6A502E"
 //         console.log(resp)
 //     })
 
-network.getInfo()
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getInfo()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.getInfo()
 //     .then(function(resp){
@@ -209,11 +243,9 @@ network.getInfo()
 //         console.log(resp)
 //     })
 //
-// network.getNonce(address)
-//     .then(function(resp){
-//         console.log(resp)
-//     })
-//
+
+
+
 // network.getGasPrice()
 //     .then(function(resp){
 //         console.log(resp)
@@ -227,7 +259,7 @@ network.getInfo()
 //     })
 
 //getBalanceToken
-// network.getBalanceToken(address,"0xc770eefad204b5180df6a14ee197d99d808ee52d")
+// network.getBalanceToken(address,"0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7")
 //     .then(function(resp){
 //         console.log(resp)
 //     })

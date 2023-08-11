@@ -25,11 +25,24 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
+const axiosRetry = require('axios-retry');
+axiosRetry(axios, {
+    retries: 3, // number of retries
+    retryDelay: (retryCount: number) => {
+        console.log(`retry attempt: ${retryCount}`);
+        return retryCount * 2000; // time interval between retries
+    },
+    retryCondition: (error: { response: { status: number; }; }) => {
+        console.error(error)
+        // if retry condition is not specified, by default idempotent requests are retried
+        return error.response.status === 503;
+    },
+});
 
 const log = require('@pioneer-platform/loggerdog')()
 
-let URL_THORNODE = process.env['URL_THORNODE'] || 'https://testnet.thornode.thorchain.info'
-let URL_MIDGARD = process.env['URL_THORNODE'] || 'https://testnet.midgard.thorchain.info/v2'
+let URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.ninerealms.com'
+//let URL_MIDGARD = process.env['URL_THORNODE'] || 'https://testnet.midgard.thorchain.info/v2'
 
 let BASE_THOR = 100000000
 
@@ -53,6 +66,12 @@ module.exports = {
     getAccount:function (address:string) {
         return get_account_info(address);
     },
+    getLastBlock:function () {
+        return get_last_block();
+    },
+    getBlockHeight:function () {
+        return get_block_height();
+    },
     getAccountInfo:function (address:string) {
         return get_account_info(address);
     },
@@ -75,16 +94,43 @@ module.exports = {
  // Lib
  //**********************************/
 
+let get_last_block = async function(){
+    let tag = TAG + " | get_last_block | "
+    try{
+
+        let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
+        log.debug(tag,"lastBlock: ",lastBlock.data)
+
+        return lastBlock.data.block
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
+let get_block_height = async function(){
+    let tag = TAG + " | get_block_height | "
+    try{
+
+        let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
+        log.debug(tag,"lastBlock: ",lastBlock.data)
+
+        return lastBlock.data.block.header.height
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "
     try{
         let txInfo = await axios({method:'GET',url:  URL_THORNODE+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
-    }catch(e){
+    }catch(e:any){
         // log.error(tag,e.response.data)
         // log.error(tag,e.response.data.error)
-
         if(e.response.status === 404){
             let output:any = {}
             output.success = false
@@ -106,6 +152,29 @@ let broadcast_transaction = async function(tx:string){
 
 
         try{
+            // let payload = {
+            //     // "tx_bytes": btoa(tx),
+            //     // "tx_bytes":broadcastTx,
+            //     "tx_bytes":tx,
+            //     "mode": "BROADCAST_MODE_SYNC"
+            // }
+            //
+            // let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'
+            // // let urlRemote = URL_GAIAD+ '/txs'
+            // log.info(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     headers: {
+            //         'api-key': process.env['NOW_NODES_API'],
+            //         'Content-Type': 'application/json'
+            //     },
+            //     method: 'POST',
+            //     data: payload,
+            // })
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            // if(result2.data.txhash) output.txid = result2.data.txhash
+
             //push to seed
             let urlRemote = URL_THORNODE+ '/txs'
             log.debug(tag,"urlRemote: ",urlRemote)
@@ -114,19 +183,24 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: tx,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            if(result2.data.txhash) output.txid = result2.data.txhash
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            if(result2 && result2.data && result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
-            if(result2.data.raw_log){
+            if(result2.data.raw_log && result2.data.raw_log !== '[]'){
                 let logSend = result2.data.raw_log
                 log.info(tag,"logSend: ",logSend)
+                output.success = false
+                output.error = logSend
+            } else {
+                output.success = true
             }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
             output.raw = result2.data
-        }catch(e){
+
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)
@@ -139,11 +213,6 @@ let broadcast_transaction = async function(tx:string){
             output.error = e.response.data.error
 
         }
-
-        if(output.txid){
-            output.success = true
-        }
-
         return output
     }catch(e){
 
@@ -159,7 +228,7 @@ let get_account_info = async function(address:string){
         //
         console.log("URL ",URL_THORNODE+'/auth/accounts/'+address)
         let txInfo = await axios({method:'GET',url: URL_THORNODE+'/auth/accounts/'+address})
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -180,7 +249,7 @@ let normalize_tx = function(tx:any,address?:string){
 
         let rawlog = JSON.parse(tx.raw_log)
         rawlog = rawlog
-        //log.info("rawlog: ",rawlog)
+        //log.debug("rawlog: ",rawlog)
 
         //txTypes
         let txTypes = [
@@ -194,24 +263,24 @@ let normalize_tx = function(tx:any,address?:string){
         for(let i = 0; i < rawlog.length; i++){
             let txEvents = rawlog[i]
 
-            //log.info(tag,"txEvents: ",txEvents)
+            //log.debug(tag,"txEvents: ",txEvents)
             txEvents = txEvents.events
 
             for(let j = 0; j < txEvents.length; j++){
                 let event = txEvents[j]
 
                 //
-                //log.info(tag,"event: ",event)
-                //log.info(tag,"attributes: ",prettyjson.render(event.attributes))
+                //log.debug(tag,"event: ",event)
+                //log.debug(tag,"attributes: ",prettyjson.render(event.attributes))
 
                 //detect event type
-                log.info(tag,"type: ",event.type)
+                log.debug(tag,"type: ",event.type)
                 switch(event.type) {
                     case 'message':
                         // ignore
                         break;
                     case 'transfer':
-                        log.info(tag,"attributes: ",event.attributes)
+                        log.debug(tag,"attributes: ",event.attributes)
                         for(let k = 0; k < event.attributes.length; k++){
                             let attribute = event.attributes[k]
                             if(attribute.key === 'recipient'){
@@ -253,13 +322,13 @@ let get_txs_by_address = async function(address:string){
 
         //sends
         let url = URL_THORNODE+ '/txs?message.sender='+address
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let resultSends = await axios({
             url: url,
             method: 'GET'
         })
         let sends = resultSends.data
-        log.info('sends: ', sends)
+        log.debug('sends: ', sends)
         if(!sends.txs) sends.txs = []
         // TODO//pagnation
         for(let i = 0; i < sends?.txs.length; i++ ){
@@ -281,7 +350,7 @@ let get_txs_by_address = async function(address:string){
         })
         let receives = resultRecieves.data
         if(!receives.txs) receives.txs = []
-        log.info('receives: ', receives)
+        log.debug('receives: ', receives)
 
         for(let i = 0; i < receives?.txs.length; i++ ){
             let tx = receives.txs[i]
@@ -305,7 +374,7 @@ let get_balance = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_THORNODE+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -339,7 +408,7 @@ let get_node_info_verbose = async function(){
 
         //get syncing status
         let syncInfo = await axios({method:'GET',url: URL_THORNODE+'/syncing'})
-        log.info(tag,"syncInfo: ",syncInfo.data)
+        log.debug(tag,"syncInfo: ",syncInfo.data)
 
         output.isSyncing = syncInfo.data
 
@@ -354,7 +423,7 @@ let get_node_info_verbose = async function(){
 
 
         let lastBlock = await axios({method:'GET',url: URL_THORNODE+'/blocks/latest'})
-        log.info(tag,"lastBlock: ",lastBlock.data)
+        log.debug(tag,"lastBlock: ",lastBlock.data)
 
         //let height
         output.height = lastBlock.data.block.header.height

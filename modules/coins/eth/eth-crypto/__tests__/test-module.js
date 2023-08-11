@@ -13,11 +13,11 @@ let crypto = require("../lib/index")
 
 // let test_seed = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
 
-let test_seed = process.env['WALLET_MILLS_SEED']
+// let test_seed = process.env['WALLET_MILLS_SEED']
 // let test_seed = process.env['WALLET_TESTNET_DEV']
 // let test_seed = process.env['WALLET_MAINNET_DEV_OLD']
 // let test_seed = process.env['WALLET_TEST_SEED']
-// let test_seed = process.env['WALLET_MAIN']
+let test_seed = process.env['WALLET_MAIN']
 // let test_seed = process.env['WALLET_MAINNET_DEV_NEW']
 // let test_seed = process.env['WALLET_MAINNET_DEV_OLD']
 //console.log("test_seed: ",test_seed)

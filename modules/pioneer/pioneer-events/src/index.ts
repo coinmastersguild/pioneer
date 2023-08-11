@@ -1,6 +1,5 @@
 const TAG = " | ws-client | ";
-const log = require("@pioneer-platform/loggerdog")()
-const EventEmitter = require('events');
+import { EventEmitter } from 'events';
 const io = require('socket.io-client');
 const wait = require('wait-promise');
 const sleep = wait.sleep;
@@ -25,6 +24,7 @@ export class Events {
     private disconnect: () => Promise<void>;
     private subscribeToKey: () => Promise<boolean>;
     private subscribeToInvocation: (invocationId: string) => Promise<boolean>;
+    private send: (channel: string, event: any) => Promise<boolean>;
     constructor(config:EventsConfig) {
         this.wss = config.wss
         this.isConnected = false
@@ -43,7 +43,6 @@ export class Events {
 
                 //sub
                 this.socket.on('connect', () => {
-                    log.info(tag,'Connected to '+this.wss);
                     this.isConnected = true
                     //rejoin
                     if(this.username){
@@ -54,7 +53,6 @@ export class Events {
                 });
 
                 this.socket.on('subscribedToUsername', (event:any) => {
-                    log.info(tag,'subscribed to '+event.username," id: "+event.socketId);
                     this.isPaired = true
                     this.username = event.username
                 });
@@ -73,12 +71,10 @@ export class Events {
 
                 //sub to errors
                 this.socket.on('errorMessage', function (message:any) {
-                    log.error(tag,"error: ",message)
                     if(message.code && message.code === 6) throw Error(" Failed to connect!")
                 });
 
                 this.socket.on('invocation', (message: any) => {
-                    log.debug('invocation: ',message);
                     this.events.emit('message',message)
                 });
 
@@ -89,7 +85,7 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, e)
+                console.error(e)
                 throw e
             }
         }
@@ -98,7 +94,7 @@ export class Events {
             try {
                 this.username = username
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
             }
         }
         this.subscribeToInvocation = async function (invocationId:string) {
@@ -112,7 +108,7 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
                 throw e
             }
         }
@@ -127,7 +123,20 @@ export class Events {
 
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
+                throw e
+            }
+        }
+        this.send = async function (channel:string, event:any) {
+            let tag = TAG + " | send | "
+            try {
+
+                //attempt join
+                this.socket.emit(channel,event)
+
+                return true
+            } catch (e) {
+                console.error(e)
                 throw e
             }
         }
@@ -146,7 +155,7 @@ export class Events {
                 //TODO validate paired?
                 return true
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
                 throw e
             }
         }
@@ -155,7 +164,7 @@ export class Events {
             try {
                 return this.socket.disconnect()
             } catch (e) {
-                log.error(tag, "e: ", e)
+                console.error(e)
             }
         }
     }

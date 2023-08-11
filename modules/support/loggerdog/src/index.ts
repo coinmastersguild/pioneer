@@ -1,61 +1,19 @@
-/*
-            Logger-dog
-        A data-dog logger system
-
-    Set DEBUG log level
-        SET ENV
-
-            ***** NOTE *****
-
-         DEFAULT_LOG_LEVEL=DEBUG
-
-      ******************************
-
-    Notes:
-       Defaults to a basic logger if no ENV found
-
-       Publish to datadog if DATADOG_API_KEY found
-
-       Publish to redis if REDIS_CONNECTION found
-
-
-
-    *** PRODUCTION NOTES ****
-
-    STRUCTURED_LOGGING=true
-
-    *************************
-
-        Structured logging guarantees logs do not have line breaks in datadog intake
-
-    Turn on Datadog logs:
-        * DATADOG_REST_INTAKE = true
-        * DATADOG_API_KEY = "key**"
-
-    Note:
-    TODO
-        Log batching ?
-
- */
-
-let dog = require("./modules/datadog")
-const clc = require('cli-color')
-
 const LOG_LEVELS:any = {
-    EMERG: { val: 0, label: 'EMERG', color: clc.magentaBright },
-    ALERT: { val: 1, label: 'ALERT', color: clc.magentaBright },
-    CRIT: { val:  2, label: 'CRIT', color: clc.redBright },
-    ERROR: { val: 3, label: 'ERROR', color: clc.redBright },
-    WARN: { val:  4, label: 'WARN', color: clc.xterm(208) }, // orange
-    NOTICE: { val: 5, label: 'NOTICE', color: clc.yellowBright },
-    VERBOSE: { val: 6, label: 'VERBOSE', color: clc.cyanBright },
-    INFO: { val: 6, label: 'INFO', color: clc.cyanBright },
-    DEBUG: { val: 7, label: 'DEBUG', color: clc.greenBright },
-    DEBUGV: { val: 8, label: 'DEBUG', color: clc.greenBright },
-    DEBUGVV: { val: 9, label: 'DEBUG', color: clc.greenBright }
+    TEST: { val: 0, label: 'TEST', color: 'color: cyan' },
+    EMERG: { val: 0, label: 'EMERG', color: 'color: magenta' },
+    ALERT: { val: 1, label: 'ALERT', color: 'color: magenta' },
+    CRIT: { val:  2, label: 'CRIT', color: 'color: red' },
+    ERROR: { val: 3, label: 'ERROR', color: 'color: red' },
+    WARN: { val:  4, label: 'WARN', color: 'color: orange' },
+    NOTICE: { val: 5, label: 'NOTICE', color: 'color: yellow' },
+    VERBOSE: { val: 6, label: 'VERBOSE', color: 'color: cyan' },
+    INFO: { val: 6, label: 'INFO', color: 'color: cyan' },
+    DEBUG: { val: 7, label: 'DEBUG', color: 'color: green' },
+    DEBUGV: { val: 8, label: 'DEBUG', color: 'color: green' },
+    DEBUGVV: { val: 9, label: 'DEBUG', color: 'color: green' }
 }
 
-const DEFAULT_LOG_LEVEL = process.env['DEFAULT_LOG_LEVEL'] || 'INFO'
+const DEFAULT_LOG_LEVEL = typeof process !== 'undefined' ? (process.env['DEFAULT_LOG_LEVEL'] || 'INFO') : 'INFO';
 
 function _extractContext(stack: string, depth: number) {
     try {
@@ -70,7 +28,6 @@ function _extractContext(stack: string, depth: number) {
 
         return { filename, line, pos }
     } catch (ex) {
-        console.error(`WARNING: unable to extract logging context`, {ex:ex.toString()})
         return { filename: 'unknown' }
     }
 }
@@ -104,7 +61,7 @@ class Logger {
         let tag = this._tag.split('.')[0] // strip out suffix
         tag = tag.toUpperCase().replace('-', '_') // CAPITALS_AND_UNDERSCORES
 
-        let level = process.env['LOG_LEVEL_'+tag]
+        let level = typeof process !== 'undefined' ? (process.env['LOG_LEVEL_'+tag] || null) : null;
         //console.log("level: ",level)
 
         // @ts-ignore
@@ -128,7 +85,7 @@ class Logger {
             let color = LOG_LEVELS[level].color
 
             let message:any
-            if(process.env['STRUCTURED_LOGGING']){
+            if(typeof process !== 'undefined' && process.env['STRUCTURED_LOGGING']){
                 message = {}
                 //console.log(args)
                 let tag = args[0]
@@ -149,28 +106,17 @@ class Logger {
                     message.raw = args
                 }
 
-                console.log(dt, color(label), ctx, message)
+                console.log('%c ' + dt, color, label, ctx, message)
             }else{
-                console.log(dt, color(label), ctx, ...args)
+                console.log('%c ' + dt, color, label, ctx, ...args)
             }
-
-            if(process.env['DATADOG_REST_INTAKE']){
-                if(!process.env['DATADOG_API_KEY']) throw Error("102: cant intake without api key! DATADOG_API_KEY")
-                if(level <= 3 ){
-                    //Error
-                    dog.error(args[0],args[1],args[2])
-                }else{
-                    //info
-                    dog.debug(args[0],args[1],args[2])
-                }
-            } else {
-                //datadog API not enabled
-            }
-
         }
     }
 }
 
-module.exports = function() {
-    return new Logger()
+const getLogger = function() {
+    return new Logger();
 }
+
+exports.default = getLogger; // ES6 default export
+module.exports = getLogger;  // CommonJS

@@ -33,11 +33,11 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         // kava.setPath("m/44'/459'/0'/0/0"); 		// new: m/44'/459'/0'/0/0, legacy: m/44'/118'/0'/0/0
         // const address = kava.getAddress(seed);
 
-        //log.info(tag,"address: ",address)
+        //log.debug(tag,"address: ",address)
 
         const ecpairPriv = kava.getECPairPriv(seed);
 
-        log.info(tag,"ecpairPriv: ",ecpairPriv)
+        log.debug(tag,"ecpairPriv: ",ecpairPriv)
 
         let accountInfo = await kava.getAccounts(from)
 
@@ -64,14 +64,14 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
             sequence: String(accountInfo.result.value.sequence)					// If the address is a vesting account, use sequence of base_vesting_account
         });
 
-        //log.info(tag,"stdSignMsg: ",stdSignMsg)
+        //log.debug(tag,"stdSignMsg: ",stdSignMsg)
 
         const signedTx = kava.sign(stdSignMsg, ecpairPriv);
-        log.info(tag,"signedTx: ",signedTx)
-        log.info(tag,"signedTx: ",JSON.stringify(signedTx))
+        log.debug(tag,"signedTx: ",signedTx)
+        log.debug(tag,"signedTx: ",JSON.stringify(signedTx))
 
         return signedTx
-    }catch(e){
+    }catch(e:any){
         throw Error(e)
     }
 }

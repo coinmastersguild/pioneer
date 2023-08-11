@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-types",
-  "version": "8.1.32",
+  "version": "8.1.55",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,13 +20,13 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/pioneer-types": "^8.1.32"
+    "@pioneer-platform/pioneer-types": "^8.1.55"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
     "@types/node": "^13.13.51",
     "@types/source-map-support": "^0.5.3",
-    "typescript": "^3.9.9"
+    "typescript": "^5.0.2"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
 }

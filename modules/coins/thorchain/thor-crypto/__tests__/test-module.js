@@ -12,7 +12,8 @@ let crypto = require("../lib/index")
 let seed = crypto.generateSeed()
 // console.log("seed: ",seed)
 
-let test_seed = process.env['WALLET_MAIN']
+let test_seed = process.env['WALLET_MAINNET_DEV']
+// let test_seed = process.env['WALLET_MAIN']
 console.log("test_seed: ",test_seed)
 
 let isTestnet = null

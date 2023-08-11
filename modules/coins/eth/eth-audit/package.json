@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-audit",
-  "version": "8.1.23",
+  "version": "8.1.38",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,8 @@
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@types/node": "^18.15.11",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
@@ -24,8 +25,8 @@
     "hdkey": "^1.1.2",
     "secp256k1": "^3.8.0",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5",
+    "typescript": "^5.0.2",
     "web3": "^1.5.1"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
 }

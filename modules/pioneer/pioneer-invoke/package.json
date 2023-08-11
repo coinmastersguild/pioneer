@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-invoke",
-  "version": "8.1.24",
+  "version": "8.1.47",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,21 +14,14 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
-    "@pioneer-platform/pioneer-types": "^8.1.32",
-    "@pioneer-platform/signing": "^8.1.8",
-    "@types/node": "^13.13.14",
-    "axios": "^0.19.2",
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@pioneer-platform/pioneer-client": "^9.0.13",
+    "@pioneer-platform/pioneer-types": "^8.1.55",
+    "@types/node": "^18.15.11",
     "dotenv": "^8.2.0",
-    "fs-extra": "^9.0.1",
-    "open": "^8.0.6",
-    "openapi-client-axios": "^3.6.1",
-    "request": "^2.88.2",
-    "short-uuid": "^4.1.0",
-    "socket.io-client": "^2.3.0",
+    "openapi-client-axios": "^6.0.0",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7",
-    "when": "^3.7.8"
+    "typescript": "^5.0.2"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
 }

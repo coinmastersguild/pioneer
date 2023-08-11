@@ -1,0 +1,22 @@
+{
+  "name": "@pioneer-platform/signing-eth",
+  "version": "8.1.23",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "test": "npm run build && node __tests__/test-module.js",
+    "lint": "prettier --write '**/**/*.ts'",
+    "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
+    "build": "tsc -p .",
+    "prepublish": "npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@types/node": "^18.15.11",
+    "ts-node": "^8.10.2",
+    "typescript": "^5.0.2"
+  },
+  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+}

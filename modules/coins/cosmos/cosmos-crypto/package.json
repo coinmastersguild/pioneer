@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/cosmos-crypto",
-  "version": "8.1.8",
+  "version": "8.1.23",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,7 +12,8 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.8",
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@types/node": "^18.15.11",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
@@ -23,8 +24,8 @@
     "dotenv": "^8.2.0",
     "hdkey": "^1.1.2",
     "secp256k1": "^3.8.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
   },
-  "gitHead": "eadd1169a2c7f7270f627f158983e53048de9167"
+  "gitHead": "373a6f6da99c8b5d74b82a44f1034b22bf331d99"
 }

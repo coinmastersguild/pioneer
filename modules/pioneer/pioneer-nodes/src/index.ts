@@ -18,63 +18,14 @@
 
 const TAG = " | Pioneer Nodes | "
 const log = require('@pioneer-platform/loggerdog')()
-
-//TODO move to seeds
-
-//
-/*
-                 "rpc":"https://rpc-cosmoshub.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-cosmoshub.keplr.app",
-
-            "rpc":"https://rpc-kava.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-kava.keplr.app",
+let {shortListNameToCaip,shortListSymbolToCaip,evmCaips} = require("@pioneer-platform/pioneer-caip")
+import {
+  blockbooks,
+  shapeshift,
+  CURRENT_CONTEXT_NODE_MAP
+} from './seeds'
 
 
-            "rpc":"https://rpc-secret.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-secret.keplr.app",
-
-            "rpc":"https://rpc-akash.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-akash.keplr.app",
-
-            "rpc":"https://rpc-iov.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-iov.keplr.app",
-
-            "rpc":"https://rpc-sifchain.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-sifchain.keplr.app",
-
-            "rpc":"https://rpc-certik.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-certik.keplr.app",
-
-            "rpc":"https://rpc-iris.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-iris.keplr.app",
-
-            "rpc":"https://rpc-cyber.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-cyber.keplr.app",
-
-            "rpc":"https://rpc-straightedge.keplr.app",
-      "rpcConfig":void 0,
-      "rest":"https://lcd-straightedge.keplr.app",
- */
-
-let TIER_ONE_SEED = {
-    "COSMOS":{
-        "GAIAD":"https://lcd-cosmoshub.keplr.app"
-        //"GAIAD":"https://45.79.249.253"
-        // "GAIAD":"https://3.87.179.235:26656"
-    }
-}
-
-//TODO dynamic context setting based on health
-let CURRENT_CONTEXT_NODE_MAP = TIER_ONE_SEED
 
 
 module.exports = {
@@ -84,7 +35,67 @@ module.exports = {
     getNode: function (network:string,serviceId:string) {
         return get_node(network,serviceId);
     },
+    getBlockbooks: function () {
+        return blockbooks;
+    },
+    getUnchaineds: function () {
+        return get_unchaineds();
+    }
 }
+
+const get_unchaineds = function () {
+    let tag = TAG + " | get_unchaineds | ";
+    try {
+        // unchaineds filter
+        let unchaineds = shapeshift.filter(node => node.type === "unchained");
+        console.log(tag, "unchaineds: ", unchaineds);
+
+        //all networks
+        let allNetworks:any = []
+        let swaggersByNetwork:any = {}
+        let servicesByNetwork:any = {}
+        let wssByNetwork:any = {}
+        for(let i = 0; i < unchaineds.length; i++){
+            let unchaind = unchaineds[i];
+            log.info(tag,"unchaind: ",unchaind.network)
+
+            if (!allNetworks.includes(unchaind.network)) allNetworks.push(unchaind.network);
+            if(unchaind.swagger) swaggersByNetwork[unchaind.network] = unchaind.swagger;
+            if(unchaind.value && unchaind.protocol == 'http') servicesByNetwork[unchaind.network] = unchaind.value;
+            if(unchaind.protocol == 'websocket') wssByNetwork[unchaind.network] = unchaind.value;
+        }
+        let output = []
+        for(let i = 0; i < allNetworks.length; i++){
+            let network = allNetworks[i];
+            let caip = shortListNameToCaip[network];
+            log.info(tag,"caip: ",caip)
+
+            //build unchaineds
+            let unchainedEntry = {
+                caip,
+                swagger:swaggersByNetwork[network],
+                service:servicesByNetwork[network],
+                wss:wssByNetwork[network],
+                type:'unchained',
+                blockchain:network,
+            }
+            output.push(unchainedEntry)
+        }
+
+        return output;
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e;
+    }
+};
+
+
+
+
+
+
+
+
 
 const get_node = function (network:string,serviceId:string) {
     let tag = TAG + " | get_node | "

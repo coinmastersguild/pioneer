@@ -31,8 +31,8 @@ let run_test = async function(){
         // console.log("poolInfo: ",poolInfo)
 
         //compair to
-        let addresses = await midgard.getPoolAddress()
-        console.log("addresses: ",addresses)
+        // let addresses = await midgard.getPoolAddress()
+        // console.log("addresses: ",addresses)
 
         // let addresses = await midgard.getNewAddress()
         // console.log("addresses: ",addresses)
@@ -43,11 +43,10 @@ let run_test = async function(){
         //get transactions by address
 
         //get transaction by txid
-        let txid = "A98CABC4E4471B7464C1E35A2C640A7A00014EE516F36C0A1BC7421663B4D119"
-        // let txid = '2873A1AF23427931F40BFC0B09D0587B00E7A58E3669B84782F0F24988776D06'
-        // //let txid = 'A2BCC716691C2DD4C748456F9BF4C4E862F6A3E7E3D3E820658067B0FA2568DE'
-        // let txid = "e932b905e2d19f2a5cce24041cab9d6930faa789a25da391b05b5e51058f3bdb"
-        // txid = txid.toUpperCase()
+        //0xc5c03ae2fb65dadb78da90bd3930b897908d0606c6b979c77799475eebd413c4
+        let txid = "0x8f5ed227743e671770708253737531627f66c4dc132938bc23dc6f968e37d285"
+        txid = txid.toUpperCase()
+        txid = txid.replace("0X","")
         let txInfo = await midgard.getTransaction(txid)
         console.log("txInfo: ",JSON.stringify(txInfo))
 

@@ -15,6 +15,22 @@ brew install doctl
 
 login:
 
+```
+doctl auth init
+```
+(get token from API section in digital ocean)
+
+get k8 cluster ID
+
+configure kubectl for your cluster
+```
+doctl kubernetes cluster kubeconfig save 799c*****-********-******
+```
+
+verify live
+```
+kubectl get pods
+```
 
 ## create resources
 
@@ -44,6 +60,12 @@ pulumi config set digitalocean:token YOUR_TOKEN_HERE --secret
 
 ## use pulumi cli to deploy
 
+
+## login and push image
+
+```
+doctl registry login
+```
 
 
 

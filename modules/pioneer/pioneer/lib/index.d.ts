@@ -1,0 +1,42 @@
+declare const TAG = " | Pioneer | ";
+declare const queue: any;
+declare const uuid: any;
+declare let blocknative: any;
+declare const blockbook: any;
+declare let zapper: any;
+declare let shortListSymbolToCaip: any, evmCaips: any;
+declare const networks: any;
+declare let supportedBlockchains: any, supportedAssets: any, getPaths: any, get_address_from_xpub: any, getNativeAssetForBlockchain: any;
+declare var numbro: any;
+declare const log: any;
+declare const subscriber: any, publisher: any, redis: any, redisQueue: any;
+declare let connection: any;
+declare let wait: any;
+declare let sleep: any;
+declare let usersDB: any;
+declare let txsDB: any;
+declare let pubkeysDB: any;
+declare let inputsDB: any;
+declare let assetsDB: any;
+declare let nodesDB: any;
+declare const BALANCE_ON_REGISTER = true;
+declare let onStart: () => Promise<true | undefined>;
+declare function getFromCache(key: any): Promise<any>;
+declare function setInCache(key: any, data: any, expiration: any): Promise<void>;
+declare let get_pubkey_balances: (pubkey: any) => Promise<any>;
+declare let get_and_rescan_pubkeys: (username: string) => Promise<{
+    pubkeys: any;
+    masters: any;
+}>;
+declare let get_and_verify_pubkeys: (username: string, context?: string) => Promise<{
+    pubkeys: any;
+    balances: any;
+}>;
+declare let register_zpub: (username: string, pubkey: any, context: string) => Promise<any>;
+declare let register_xpub: (username: string, pubkey: any, context: string) => Promise<{
+    pubkeys: any;
+    balances: any;
+}>;
+declare let register_address: (username: string, pubkey: any, context: string) => Promise<any>;
+declare let update_pubkeys: (username: string, pubkeys: any, context: string) => Promise<any>;
+declare const register_pubkeys: (username: string, pubkeys: any, context: string) => Promise<any>;

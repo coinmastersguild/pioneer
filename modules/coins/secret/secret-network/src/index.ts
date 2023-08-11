@@ -80,7 +80,7 @@ let get_transaction = async function(txid:string){
         let txInfo = await axios({method:'GET',url:  URL_SECRET_LCD+'/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
-    }catch(e){
+    }catch(e:any){
         throw Error(e)
     }
 }
@@ -103,19 +103,19 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: tx,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             if(result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
             if(result2.data.raw_log){
                 let logSend = result2.data.raw_log
-                log.info(tag,"logSend: ",logSend)
+                log.debug(tag,"logSend: ",logSend)
             }
             output.height = result2.height
             output.gas_wanted = result2.gas_wanted
             output.gas_used = result2.gas_used
             output.raw = result2.data
-        }catch(e){
+        }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)
             log.error(tag,e.response)
@@ -148,7 +148,7 @@ let get_account_info = async function(address:string){
         //
         console.log("URL ",URL_SECRET_LCD+'/auth/accounts/'+address)
         let txInfo = await axios({method:'GET',url: URL_SECRET_LCD+'/auth/accounts/'+address})
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -169,7 +169,7 @@ let normalize_tx = function(tx:any,address?:string){
 
         let rawlog = JSON.parse(tx.raw_log)
         rawlog = rawlog
-        //log.info("rawlog: ",rawlog)
+        //log.debug("rawlog: ",rawlog)
 
         //txTypes
         let txTypes = [
@@ -183,24 +183,24 @@ let normalize_tx = function(tx:any,address?:string){
         for(let i = 0; i < rawlog.length; i++){
             let txEvents = rawlog[i]
 
-            //log.info(tag,"txEvents: ",txEvents)
+            //log.debug(tag,"txEvents: ",txEvents)
             txEvents = txEvents.events
 
             for(let j = 0; j < txEvents.length; j++){
                 let event = txEvents[j]
 
                 //
-                //log.info(tag,"event: ",event)
-                //log.info(tag,"attributes: ",prettyjson.render(event.attributes))
+                //log.debug(tag,"event: ",event)
+                //log.debug(tag,"attributes: ",prettyjson.render(event.attributes))
 
                 //detect event type
-                log.info(tag,"type: ",event.type)
+                log.debug(tag,"type: ",event.type)
                 switch(event.type) {
                     case 'message':
                         // ignore
                         break;
                     case 'transfer':
-                        log.info(tag,"attributes: ",event.attributes)
+                        log.debug(tag,"attributes: ",event.attributes)
                         for(let k = 0; k < event.attributes.length; k++){
                             let attribute = event.attributes[k]
                             if(attribute.key === 'recipient'){
@@ -248,7 +248,7 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let sends = resultSends.data
-        //log.info('sends: ', sends)
+        //log.debug('sends: ', sends)
 
         // TODO//pagnation
         // let pagesSends = sends.page_number
@@ -273,7 +273,7 @@ let get_txs_by_address = async function(address:string){
             method: 'GET'
         })
         let receives = resultRecieves.data
-        log.info('receives: ', receives)
+        log.debug('receives: ', receives)
 
         for(let i = 0; i < receives.txs.length; i++ ){
             let tx = receives.txs[i]
@@ -297,7 +297,7 @@ let get_balance = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_SECRET_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -331,7 +331,7 @@ let get_node_info_verbose = async function(){
 
         //get syncing status
         let syncInfo = await axios({method:'GET',url: URL_SECRET_LCD+'/syncing'})
-        log.info(tag,"syncInfo: ",syncInfo.data)
+        log.debug(tag,"syncInfo: ",syncInfo.data)
 
         output.isSyncing = syncInfo.data
 
@@ -342,7 +342,7 @@ let get_node_info_verbose = async function(){
 
 
         // let lastBlock = await axios({method:'GET',url: URL_SECRET_LCD+'/blocks/latest'})
-        // log.info(tag,"lastBlock: ",lastBlock.data)
+        // log.debug(tag,"lastBlock: ",lastBlock.data)
 
         //let height
 

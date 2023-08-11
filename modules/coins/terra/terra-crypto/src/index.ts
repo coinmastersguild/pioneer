@@ -22,6 +22,7 @@ const log = require('@pioneer-platform/loggerdog')()
  // Module
  //**********************************/
 
+
 // NOTE: this only works with a compressed public key (33 bytes)
 function createAddress(publicKey:string,prefix:string) {
     // @ts-ignore
@@ -47,6 +48,8 @@ module.exports = {
             let mk = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //log.debug(mk.publicExtendedKey)
 
+            // mk = mk.derive(hdPath)
+
             //get correct address with xpub
             let xpub = mk.publicExtendedKey
             let xpriv = mk.privateExtendedKey
@@ -59,7 +62,6 @@ module.exports = {
             //
             let mkAccount = new HDKey.fromMasterSeed(Buffer.from(seed, 'hex'))
             //get master key
-            //console.log("hdPathAtom: ",hdPathAtom)
             mkAccount = mkAccount.derive(hdPath)
             log.debug(mkAccount.publicExtendedKey)
 

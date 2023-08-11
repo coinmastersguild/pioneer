@@ -1,5 +1,6 @@
-//TODO typescript BS, jest/mocha errors
-//https://stackoverflow.com/questions/55680391/typescript-error-ts2403-subsequent-variable-declarations-must-have-the-same-typ
+export {}
+// //TODO typescript BS, jest/mocha errors
+// //https://stackoverflow.com/questions/55680391/typescript-error-ts2403-subsequent-variable-declarations-must-have-the-same-typ
 // /*
 //     TX builder
 //         Normalizing tx building
@@ -14,10 +15,6 @@
 // import {
 //     StdFee,
 //     StdSignMsg
-// } from '@terra-money/terra.js';
-//
-// import {
-//     Key
 // } from '@terra-money/terra.js';
 //
 // module.exports = {
@@ -70,7 +67,7 @@
 //             [send],
 //             memo
 //         );
-//         log.info(tag,"tx: ",tx)
+//         log.debug(tag,"tx: ",tx)
 //
 //         let signed = await mk.signTx(tx);
 //

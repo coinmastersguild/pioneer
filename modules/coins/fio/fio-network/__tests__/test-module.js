@@ -96,7 +96,7 @@ let run_test = async function(){
         //
         let getBalance = await fio.getBalance('FIO7Jpu6RnKt6URTaQfXfdzZBFtoXdbXuQMiVPVyrM913ES6wzFvo')
         log("getBalance: ",getBalance)
-        //
+
         // // let accountFioAddress = await fio.getAccountAddress('highlander@scatter','FIO')
         // // log("accountFioAddress: ",accountFioAddress)
         //

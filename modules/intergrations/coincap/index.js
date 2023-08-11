@@ -20,6 +20,7 @@ const symbolIDMap = require('./symbolIDMap');
 const graphql = new GraphQLClient('https://graphql.coincap.io/',{
     headers: {
         "x-coincap-bypass-limit": process.env['BYPASS_RATE_LIMIT_KEY'],
+        "Authorization": "Bearer "+process.env['COINCAP_API_KEY'],
     }
 });
 
@@ -111,7 +112,7 @@ let get_asset_price = async function (asset) {
     let tag = TAG + ' | get_asset_history | '
     try {
         let id = await getIDForSymbol(asset)
-        log.info(tag,"id: ",id)
+        log.debug(tag,"id: ",id)
 
         let marketInfo = await getMarketDataForIDs([id])
 
@@ -204,7 +205,7 @@ getHistoryForSymbol = async (symbol) => {
 
 
 /****************************************************
- // Coincap Endpoints
+ // CoinCap Endpoints
  //****************************************************/
 
 
@@ -222,7 +223,7 @@ let get_assets = async function () {
 
         //parse into keys array off ticker
         let allCoinsArray = result.data.data
-        log.info(tag,"allCoinsArray: ",allCoinsArray.length)
+        log.debug(tag,"allCoinsArray: ",allCoinsArray.length)
 
         for(let i = 0; i < allCoinsArray.length; i++){
             //

@@ -1,47 +1,71 @@
 /*
-    ETH Wallet
-
-    //To be able to send you must BORROW ETH
-
-    (as you need large amounts of ETH to do anything on the network anymore)
-
-    15$ can borrow 3,500 ETH, and this was enable to make a couple transactions
-
+      Pioneer Client
+      
+      swagger docs:
+        https://pioneers.dev/spec/swagger.json
+      
+                        -Highlander
  */
-const TAG = " | Pioneer-client-ts | "
-const log = require("@pioneer-platform/loggerdog")()
+// @ts-ignore
+import Swagger from 'swagger-client';
+const TAG = " | Client | "
 
-//Pioneer follows OpenAPI spec
-const Pioneer = require('openapi-client-axios').default;
-let pioneerApi:any
+class Pioneer {
+    queryKey: any;
+    client: any;
+    pioneer: any;
+    spec: any;
 
-module.exports = class wallet {
-    private init: (type: string, config: any) => Promise<any>;
-    private spec: string;
-    private queryKey: any;
-    constructor(spec:string,config:any) {
-        this.spec = spec
-        this.queryKey = config.queryKey
-        this.init = async function () {
-            let tag = TAG + " | init_wallet | "
-            try{
-                if(!this.queryKey) throw Error(" You must create an api key! ")
-                pioneerApi = new Pioneer({
-                    definition:spec,
-                    axiosConfigDefaults: {
-                        headers: {
-                            'Authorization': this.queryKey,
-                        },
-                    }
+    constructor(spec: any, config: { queryKey: any; }) {
+        this.spec = spec;
+        this.queryKey = config.queryKey;
+        this.pioneer = {};
+    }
+
+    async init() {
+        let tag = TAG + " | init | ";
+        try {
+            if (!this.queryKey) throw Error(" You must create an api key! ");
+            this.client = await new Swagger({
+                url: this.spec,
+                requestInterceptor: (req: { headers: { Authorization: any; }; }) => {
+                    req.headers.Authorization = this.queryKey;
+                    return req;
+                }
+            });
+
+            Object.keys(this.client.spec.paths).forEach((path) => {
+                Object.keys(this.client.spec.paths[path]).forEach((method) => {
+                    const operationId = this.client.spec.paths[path][method].operationId;
+                    this.pioneer[operationId] = async (parameters:any) => {
+                        try {
+                            let request:any = {
+                                operationId,
+                                parameters: {
+                                    ...parameters, // existing parameters
+                                    Authorization: this.queryKey
+                                },
+                                responseContentType: 'application/json'
+                            }
+                            if(method === 'post'){
+                                request.requestBody = parameters
+                            }
+                            const result = await this.client.execute(request);
+                            return { data: result.body };
+                        } catch (e) {
+                            console.error(e);
+                            throw e;
+                        }
+                    };
                 });
-                await pioneerApi.init()
-                return pioneerApi
-            }catch(e){
-                log.error(tag,e)
-                throw e
-            }
+            });
+            return this.pioneer;
+        } catch (e) {
+            console.error(e);
+            throw e;
         }
     }
 }
 
+export default Pioneer;
 

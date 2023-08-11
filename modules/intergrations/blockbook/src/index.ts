@@ -6,11 +6,13 @@
 
 
 const TAG = " | blockbook-client | "
+const { Blockbook } = require('blockbook-client')
 
 const log = require('@pioneer-platform/loggerdog')()
 const fakeUa = require('fake-useragent');
 const Axios = require('axios')
 const https = require('https')
+const nodes = require("@pioneer-platform/nodes")
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
@@ -21,29 +23,44 @@ const axiosRetry = require('axios-retry');
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
-        console.log(`retry attempt: ${retryCount}`);
+        log.error(TAG,`retry attempt: ${retryCount}`);
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
+        log.error(TAG,error)
+        //@TODO mark node offline, and punish
         // if retry condition is not specified, by default idempotent requests are retried
-        return error.response.status === 503;
+        return error?.response?.status === 503;
     },
 });
 
 let BLOCKBOOK_URLS:any = {}
+let BLOCKBOOK_SOCKETS:any = {}
 
 module.exports = {
-    init:function (servers:any,runtime?:string) {
-        return init_network(servers,runtime);
+    init:function (servers?:any) {
+        return init_network(servers);
     },
     getInfo:function () {
         return get_node_info();
+    },
+    getBlockbooks:function () {
+        return BLOCKBOOK_URLS;
+    },
+    getBlockbookSockets:function () {
+        return BLOCKBOOK_SOCKETS;
+    },
+    getFees:function (coin:string) {
+        return get_fees(coin);
     },
     getTransaction:function (coin:string,txid:string) {
         return get_transaction(coin,txid);
     },
     getAddressInfo:function (coin:string,address:string,filter?:string) {
         return get_info_by_address(coin,address,filter);
+    },
+    getPubkeyInfo:function (coin:string,pubkey:string,filter?:string | undefined) {
+        return get_info_by_pubkey(coin,pubkey,filter);
     },
     txidsByAddress:function (coin:string,address:string,page?:number) {
         return get_txids_by_address(coin,address,page);
@@ -62,17 +79,115 @@ module.exports = {
     },
 }
 
+let init_network = async function (servers?: any[]) {
+    let tag = ' | get_txs_by_address | '
+    try {
+        log.debug(tag,"checkpoint: ")
+
+        let SEED_NODES = await nodes.getBlockbooks()
+        log.debug(tag,"SEED_NODES: ",SEED_NODES)
+
+        let blockbooks = []
+        if (servers && Array.isArray(servers)) { // Type checking for array
+            blockbooks = servers.concat(SEED_NODES); // Combine arrays
+        } else {
+            console.error("Invalid 'servers' parameter. Expected an array.");
+            blockbooks = SEED_NODES;
+        }
+
+        log.debug(tag,"blockbooks: ",blockbooks.length)
+        for(let i = 0; i < blockbooks.length; i++){
+            let blockbook = blockbooks[i]
+            //get swagger
+            if(blockbook && blockbook.service) BLOCKBOOK_URLS[blockbook.symbol.toUpperCase()] = blockbook.service
+            if(blockbook && blockbook.websocket){
+                let url = blockbook.websocket.replace("/websocket","")
+                url = blockbook.websocket.replace("wss://","https://")
+                BLOCKBOOK_SOCKETS[blockbook.symbol.toUpperCase()] = new Blockbook({
+                    nodes: [url],
+                    disableTypeValidation: true,
+                })
+            } else {
+                log.error(tag,"invalid unchained service: ",blockbook)
+                // throw Error("invalid unchained service!")
+            }
+        }
+        log.debug(tag,"BLOCKBOOK_URLS: ",BLOCKBOOK_URLS)
+        log.debug(tag,"BLOCKBOOK_SOCKETS: ",BLOCKBOOK_SOCKETS)
+        return true
+    } catch (e) {
+        // console.error(tag, 'Error: ', e)
+        throw e
+    }
+}
+
+let get_fees = async function (coin: string){
+    let tag = TAG + " | get_fees | "
+    try{
+
+
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/fees"
+        log.debug(tag,"url: ",url)
+        let body = {
+            method: 'GET',
+            url,
+            headers: {
+                'api-key': process.env['NOW_NODES_API'],
+                'content-type': 'application/json',
+                'User-Agent': fakeUa()
+            },
+        };
+        let resp = await axios(body)
+        //log.info(tag,"resp: ",resp)
+        //TODO paginate?
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+        throw e
+    }
+}
+
+let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: string | undefined){
+    let tag = TAG + " | get_info_by_pubkey | "
+    try{
+        if(!page) page = "1"
+
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+pubkey
+        log.debug(tag,"url: ",url)
+        let body = {
+            method: 'GET',
+            url,
+            headers: {
+                'api-key': process.env['NOW_NODES_API'],
+                'content-type': 'application/json',
+                'User-Agent': fakeUa()
+            },
+        };
+        let resp = await axios(body)
+        log.debug(tag,"resp: ",resp)
+        //TODO paginate?
+
+        return resp.data
+    }catch(e){
+        console.error(tag,e)
+        throw e
+    }
+}
+
+
 let get_txids_by_address = async function(coin:string,address:string,page?:number){
     let tag = TAG + " | get_txids_by_address | "
     try{
         if(!page) page = 1
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?page="+page+"&details=all"
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let body = {
             method: 'GET',
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -84,6 +199,7 @@ let get_txids_by_address = async function(coin:string,address:string,page?:numbe
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -92,11 +208,13 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
     try{
         if(!filter) filter = "all"
         //let url = ETH_BLOCKBOOK_URL+"/api/v2/address/"+address+"?="+filter
+        if(!BLOCKBOOK_URLS[coin.toUpperCase()]) throw Error("invalid coin: "+coin)
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/address/"+address+"?details=all"
         let body = {
             method: 'GET',
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -108,6 +226,7 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -117,11 +236,12 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
-        console.log("url: ",url)
+        //console.log("url: ",url)
         let body = {
             method: 'GET',
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -131,6 +251,7 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -145,6 +266,7 @@ let broadcast_transaction = async function(coin:string,hex:string){
         let body = {
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -152,11 +274,36 @@ let broadcast_transaction = async function(coin:string,hex:string){
             json:false,
             data,
         }
-        let resp = await axios(body)
+        let output:any = {
+            success:false
+        }
+        let resp
+        try{
+            resp = await axios(body)
+            output.resp = resp
+            output.success = true
+        }catch(e){
+            log.error(tag,"error: ",e)
+            //log.info(tag,"data0: ",e)
+            //log.info(tag,"resp: ",resp)
+            //log.info(tag,"data0: ",Object.keys(e))
+            //log.info(tag,"data1: ",e.response.req)
+            //log.info(tag,"data2: ",e.response.data)
+            //log.info(tag,"data2: ",e.response.data.error)
+            //log.info(tag,"error3: ",e.toJSON().request)
+            //log.info(tag,"erro4: ",e.toJSON().data)
+            //log.info(tag,"error5: ",e.toJSON().code)
+            // if(e.response.data.error){
+            //     output.error = e.response.data.error
+            // }else{
+            //     output.error = e
+            // }
+        }
 
-        return resp.data
+        return output
     }catch(e){
-        console.error(tag,e)
+        //console.error(tag,e)
+        throw e
     }
 }
 
@@ -170,6 +317,7 @@ let get_transaction = async function(coin:string,txid:string){
             method: 'GET',
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -180,6 +328,7 @@ let get_transaction = async function(coin:string,txid:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -188,12 +337,13 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
-        console.log("url: ",url)
+        //console.log("url: ",url)
 
         let body = {
             method: 'GET',
             url,
             headers: {
+                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -203,6 +353,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         return resp.data
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -212,7 +363,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         log.debug(tag,"coin: ",coin)
         log.debug(tag,"xpub: ",xpub)
         let output = await get_utxos_by_xpub(coin,xpub)
-        log.info(tag,"output: ",output)
+        log.debug(tag,"output: ",output)
 
         let balance = 0
 
@@ -226,49 +377,12 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
         return balance / 100000000
     }catch(e){
         console.error(tag,e)
-    }
-}
-
-
-let init_network = function (servers:any,runtime?:string) {
-    let tag = ' | get_txs_by_address | '
-    try {
-        log.debug(tag,"checkpoint: ")
-        let output:any = []
-
-        //get networks from coins module
-
-
-
-        // let blockbooks = getBlockBooks()
-        // for(let i = 0; i < blockbooks.length; i++){
-        //     let coinInfo = blockbooks[i]
-        //     coinInfo.symbol = coinInfo.symbol.toUpperCase()
-        //     log.debug("coinInfo: ",coinInfo)
-        //     let blockbookurl = coinInfo.explorer.tx
-        //     blockbookurl = blockbookurl.replace("/tx/","")
-        //
-        //     if(servers && servers[coinInfo.symbol]){
-        //         //use configured
-        //         BLOCKBOOK_URLS[coinInfo.symbol] = servers[coinInfo.symbol]
-        //         log.info(coinInfo.symbol+ " blockbookurl: ",servers[coinInfo.symbol])
-        //     }else{
-        //         if(!runtime || runtime === 'public'){
-        //             //use public
-        //             BLOCKBOOK_URLS[coinInfo.symbol] = blockbookurl
-        //             log.info(coinInfo.symbol+ " blockbookurl: ",blockbookurl)
-        //         }
-        //         //TODO use pioneer's
-        //     }
-        // }
-
-
-        return true
-    } catch (e) {
-        console.error(tag, 'Error: ', e)
         throw e
     }
 }
+
+
+
 
 let get_node_info = async function(){
     let tag = TAG + " | get_node_info | "
@@ -278,5 +392,6 @@ let get_node_info = async function(){
         return true
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }

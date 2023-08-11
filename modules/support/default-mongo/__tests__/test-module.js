@@ -15,7 +15,7 @@ let connection = require('../index')
 
 //let usersDB = connection.get('users')
 let txsDB = connection.get('transactions')
-let conduit = connection.get('conduit')
+let attempts = connection.get('attempts')
 let usersDB = connection.get('users')
 let pubkeysDB = connection.get('pubkeys')
 
@@ -37,8 +37,8 @@ read
 let run_test = async function(){
     try{
         console.log("test")
-        // let resp = await conduit.findOne()
-        // console.log("resp: ",resp)
+        let resp = await attempts.findOne()
+        console.log("resp: ",resp)
 
         // let resp = await txsDB.findOne()
         // console.log(resp)
@@ -52,17 +52,17 @@ let run_test = async function(){
         // console.log(respPush)
 
 
-        // let walletId = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
-        // let walletId2 = '0xc3affff54122658b89c31183cec4f15514f34624.wallet.json'
+        // let context = '0x33b35c665496ba8e71b22373843376740401f106.wallet.json'
+        // let context2 = '0xc3affff54122658b89c31183cec4f15514f34624.wallet.json'
         //
         // //get pubkeys by user
-        // let resp = await pubkeysDB.find({tags:{$all:[walletId]}})
+        // let resp = await pubkeysDB.find({tags:{$all:[context]}})
         // for(let i = 0; i < resp.length; i++){
         //     let pubkey = resp[i]
         //     console.log("pubkey: ",pubkey.network)
         // }
 
-        // let resp2 = await pubkeysDB.find({tags:{$all:[walletId2]}})
+        // let resp2 = await pubkeysDB.find({tags:{$all:[context2]}})
         // console.log(resp2.length)
         // for(let i = 0; i < resp2.length; i++){
         //     let pubkey = resp2[i]

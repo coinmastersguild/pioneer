@@ -2,104 +2,27 @@
 /*
     Anycoin Nodes:
 
-    BTC BCH DOGE LTC DASH DGB
+    Types of nodes
 
+    Daemons: raw coin nodes
 
-    Tier 0:
-        cointainers
+    Blockbook: blockbook indexed nodes (address index)
 
-
-    Tier 1
-
-    https://www.blockchain.com/explorer
-    BTC: BCH ETH
-        https://www.blockchain.com/api/q
-
-
-    Indexers
-
-    Tier 0
-        * coinquery
-
-        Blockbook
-            *   nodes: ['btc1.trezor.io', 'btc2.trezor.io'],
-
-        electrumx
+    Unchained: shapeshift custom API nodes
 
 
 
-    Tier 1
-
-    (no segwit)
-       * Bitpay
-            https://insight.bitpay.com/api
-
-        https://chain.api.btc.com/v3/block/latest/tx?verbose=2
-
-    (segwit)
-        https://api.smartbit.com.au/v1/blockchain/tx/
-
-
-    Notes on batching jsonrpc
-    https://bitcoin.stackexchange.com/questions/89066/how-to-scale-json-rpc
-
-
-    Blockbook docs
-    https://www.npmjs.com/package/blockbook-client
-
-
-
-    electrum  server lists
-
-    BTC:
-        More: https://uasf.saltylemon.org/electrum
-
-
-    'erbium1.sytes.net':DEFAULT_PORTS,                  # core, e-x
-    'ecdsa.net':{'t':'50001', 's':'110'},               # core, e-x
-    'gh05.geekhosters.com':DEFAULT_PORTS,               # core, e-s
-    'VPS.hsmiths.com':DEFAULT_PORTS,                    # core, e-x
-    'electrum.anduck.net':DEFAULT_PORTS,                # core, e-s; banner with version pending
-    'electrum.no-ip.org':DEFAULT_PORTS,                 # core, e-s
-    'electrum.be':DEFAULT_PORTS,                        # core, e-x
-    'helicarrier.bauerj.eu':DEFAULT_PORTS,              # core, e-x
-    'elex01.blackpole.online':DEFAULT_PORTS,            # core, e-x
-    'electrumx.not.fyi':DEFAULT_PORTS,                  # core, e-x
-    'node.xbt.eu':DEFAULT_PORTS,                        # core, e-x
-    'kirsche.emzy.de':DEFAULT_PORTS,                    # core, e-x
-    'electrum.villocq.com':DEFAULT_PORTS,               # core?, e-s; banner with version recommended
-    'us11.einfachmalnettsein.de':DEFAULT_PORTS,         # core, e-x
-    'electrum.trouth.net':DEFAULT_PORTS,                # BU, e-s
-    'Electrum.hsmiths.com':{'t':'8080', 's':'995'},     # core, e-x
-    'electrum3.hachre.de':DEFAULT_PORTS,                # core, e-x
-    'b.1209k.com':DEFAULT_PORTS,                        # XT, jelectrum
-    'elec.luggs.co':{ 's':'443'},                       # core, e-x
-    'btc.smsys.me':{'t':'110', 's':'995'},              # BU, e-x
-
-    BTC (testnet)
-
-    'testnetnode.arihanc.com': DEFAULT_PORTS,
-    'testnet1.bauerj.eu': DEFAULT_PORTS,
-    '14.3.140.101': DEFAULT_PORTS,
-    'testnet.hsmiths.com': {'t':'53011', 's':'53012'},
-    'electrum.akinbo.org': DEFAULT_PORTS,
-    'ELEX05.blackpole.online': {'t':'52011', 's':'52002'},
-
-
-    LTC:
-
-
-
-    BCH:
-
-
-
-    DOGE:
-
-
-
-    DASH:
-
+    Uncchained Spec
+    {
+      GetInfo: [Function (anonymous)],
+      GetAccount: [Function (anonymous)],
+      GetTxHistory: [Function (anonymous)],
+      GetUtxos: [Function (anonymous)],
+      GetTransaction: [Function (anonymous)],
+      GetRawTransaction: [Function (anonymous)],
+      SendTx: [Function (anonymous)],
+      GetNetworkFees: [Function (anonymous)]
+    }
 
 
  */
@@ -122,6 +45,7 @@ import {
 const BitcoinRpc = require('bitcoin-rpc-promise');
 // import { Blockbook } from 'blockbook-client'
 
+let Unchained = require("@pioneer-platform/unchained")
 const blockbook = require('@pioneer-platform/blockbook')
 import * as sochain from './sochain-api'
 import { FeeRates } from './types/client-types'
@@ -145,16 +69,25 @@ const URL_BLOCKCHAIN_INFO = "http://blockchain.info"
 
 const URL_BLOCKBOOK_BTC = ""
 
+let SYMBOL_TO_CAIP:any = {
+    "BCH":"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+    // "ETH":"eip155:1/slip44:60",
+    "BTC":"bip122:000000000019d6689c085ae165831e93/slip44:0",
+    "DASH":"bip122:dash-hash/slip44:5",
+    "DOGE":"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+    "LTC":"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+}
 
 let RUNTIME = 'pioneer'
 
 const ONLINE = []
 const OFFLINE = []
 
+let unchained:any
 
 module.exports = {
-    init:function (runtime:string,servers:any) {
-    	return init_network(runtime,servers);
+    init:function (servers:any) {
+    	return init_network(servers);
     },
     getInfo:function (coin:string) {
         return get_node_info(coin);
@@ -176,6 +109,9 @@ module.exports = {
     },
     utxosByXpub: function (coin:string,xpub:any) {
         return get_utxos_by_xpub(coin,xpub);
+    },
+    getPubkeyInfo: function (coin:string,xpub:any) {
+        return get_pubkey_info(coin,xpub);
     },
     getBalanceByXpub: function (coin:string,xpub:any) {
         return get_balance_by_xpub(coin,xpub);
@@ -239,6 +175,52 @@ module.exports = {
     // }
 }
 
+
+let init_network = async function (servers:any) {
+    let tag = ' | init_network | '
+    try {
+        log.debug(tag,"checkpoint: ")
+        let output:any = []
+
+        // @TODO
+        // const blockbooks = servers.filter((server: { type: string; }) => server.type === 'blockbook');
+        // log.debug(tag,"blockbooks: ",blockbooks)
+        
+        await blockbook.init()
+        
+        // @TODO
+        //load daemon servers
+
+        //load unchained servers
+        const unchainedServers = servers.filter((server: { type: string; }) => server.type === 'unchained');
+        //log.info(tag,"unchainedServers: ",unchainedServers)
+        unchained = await Unchained.init(unchainedServers)
+        //log.info("unchained: ",unchained)
+
+        //figure out what is online, and if can meet blockchain requirements
+
+        //return online servers
+
+        return true
+    } catch (e) {
+        console.error(tag, 'Error: ', e)
+        throw e
+    }
+}
+
+let get_pubkey_info = async function(coin:string,xpub:string){
+    let tag = TAG + " | get_pubkey_info | "
+    try{
+        let output = await blockbook.getPubkeyInfo(coin,xpub)
+        log.debug(tag,"output: ",output)
+
+        return output
+    }catch(e){
+        console.error(tag,e)
+    }
+}
+
+
 let get_fees_with_memo = async function(coin:string,memo?:string){
     let tag = TAG + " | get_fees_with_memo | "
     try{
@@ -273,6 +255,7 @@ let get_fees_with_rates = async function(coin:string,memo?:string){
         return { fees, rates }
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -280,18 +263,23 @@ let get_fee = async function(coin:string){
     let tag = TAG + " | get_fee | "
     try{
         let output:any = {}
-        if(coin === 'BTC'){
-            //
-            let query = "https://bitcoinfees.earn.com/api/v1/fees/recommended"
+        log.info(tag,"coin: ",coin)
+        log.info(tag,"caip: ",SYMBOL_TO_CAIP[coin])
+        //get caip for symbol
+        // @ts-ignore
+        if(unchained[SYMBOL_TO_CAIP[coin]]){
+            let result = await unchained[SYMBOL_TO_CAIP[coin]].GetNetworkFees()
+            //console.log("result: ",result.data)
+            output = result.data
+        } else {
+            let fee = await get_fees_with_rates(coin)
+            console.log("fee: ",fee)
+            // console.log("fee.rates: ",fee.fees)
+            // console.log("fee.rates: ",fee.fees.rates)
+            if(fee && fee.rates)output = fee.rates
 
-            output = await axios({method:'GET',url:query})
-            log.info(tag,"output: ",output.data)
-            output = output.data.fastestFee
-        }else{
-            //eh just send whatever, probally be fine
-            throw Error("unknown coin! "+coin)
+            //@TODO fall back to node
         }
-
 
         return output
     }catch(e){
@@ -299,17 +287,138 @@ let get_fee = async function(coin:string){
     }
 }
 
+/*
+    TODO - this is a mess
+    
+    - need to figure out how to handle unchained vs node
+    
+    We should broadcast many nodes
+    
+    - unchained
+    - daemon
+    - blockbook
+    
+    shotgun approach
+    push too all
+    first txid returns success
+ */
+
 let broadcast_transaction = async function(coin:string,tx:string){
     let tag = TAG + " | broadcast_transaction | "
     try{
-        //use nodes
-        // let txid = await nodeMap[coin].sendRawTransaction(tx)
-        // return txid
 
-        let txid = await blockbook.broadcast(coin,tx)
-        return txid
+        let output:any = {
+            success:false
+        }
+        log.info(tag,"coin: ",coin)
+        if(unchained[SYMBOL_TO_CAIP[coin]]){
+            // log.info("unchained[SYMBOL_TO_CAIP[coin]]: ",unchained[SYMBOL_TO_CAIP[coin]])
+            let result = await unchained[SYMBOL_TO_CAIP[coin]].SendTx({hex:tx})
+            log.info(tag,"result.data: ",result.data)
+            output.txid = result.data
+            output.success = true
+        } else {
+            let responseBroadcast = await blockbook.broadcast(coin,tx)
+            log.info(tag,'responseBroadcast: ',responseBroadcast)
+            if(responseBroadcast.success && responseBroadcast.success !== false){
+                output.success = true
+                if(responseBroadcast.txid){
+                    output.txid = responseBroadcast.resp.data.result
+                }
+                if(responseBroadcast.resp.data.result){
+                    output.txid = responseBroadcast.resp.data.result
+                }
+            } else if(responseBroadcast.error) {
+                output.error = responseBroadcast.error
+            } else {
+                output.error = "unknown error"
+                output.debug = responseBroadcast
+            }
+            // console.log("no unchained for coin: ",coin)
+            // //@TODO fall back to node
+            // output.success = false
+            // output.error = "no unchained for coin: "+coin
+        }
+
+
+        //Jesus fuck
+        // try{
+        //     //TODO use for non-bitcoin? wtf why bitcoin blockbook broke?
+        //     let responseBroadcast
+        //     if(coin === 'BTC'){
+        //         log.info(tag,"BTC detected!")
+        //         let url = "https://api.bitcoin.shapeshift.com/api/v1/send"
+        //         let body = {
+        //             url,
+        //             method: 'POST',
+        //             json:false,
+        //             data:{hex:tx},
+        //         }
+        //         let output:any = {
+        //             success:false
+        //         }
+        //         try{
+        //             responseBroadcast = await axios(body)
+        //             responseBroadcast = responseBroadcast.data
+        //             log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //             output.txid = responseBroadcast
+        //             if(output.txid)output.success = true
+        //
+        //         }catch(e:any){
+        //             // log.info(tag,"error: ",e)
+        //             // log.info(tag,"data0: ",e)
+        //             // log.info(tag,"resp: ",resp)
+        //             // log.info(tag,"data0: ",Object.keys(e))
+        //             // log.info(tag,"data1: ",e.response.req)
+        //             log.info(tag,"data2: ",e.response.data)
+        //             log.info(tag,"data2: ",e.response.data.message)
+        //             // log.info(tag,"error3: ",e.toJSON().request)
+        //             // log.info(tag,"erro4: ",e.toJSON().data)
+        //             // log.info(tag,"error5: ",e.toJSON().code)
+        //             if(e.response.data.message){
+        //                 log.info(tag,"saving message! ")
+        //                 output.error = e.response.data.message
+        //             }else{
+        //                 output.error = e
+        //             }
+        //         }
+        //         log.info(tag,"output: ",output)
+        //         return output
+        //     } else {
+        //         responseBroadcast = await blockbook.broadcast(coin,tx)
+        //         log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //         if(responseBroadcast.success && responseBroadcast.success !== false){
+        //             output.success = true
+        //             if(responseBroadcast.txid){
+        //                 output.txid = responseBroadcast.resp.data.result
+        //             }
+        //             if(responseBroadcast.resp.data.result){
+        //                 output.txid = responseBroadcast.resp.data.result
+        //             }
+        //         } else if(responseBroadcast.error) {
+        //             output.error = responseBroadcast.error
+        //         } else {
+        //             output.error = "unknown error"
+        //             output.debug = responseBroadcast
+        //         }
+        //         return output
+        //     }
+        //
+        //     //use nodes
+        //     // log.info(tag,'nodeMap: ',nodeMap)
+        //     // let responseBroadcast = await nodeMap[coin].sendRawTransaction(tx)
+        //     // log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //
+        //
+        // }catch(e){
+        //     //TODO handle errors
+        //     if(!output.error)output.error = e
+        //     return output
+        // }
+        return output
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -353,12 +462,28 @@ let get_balance_by_address = async function(coin:string,address:string){
 let get_utxos_by_xpub = async function(coin:string,xpub:string){
     let tag = TAG + " | get_utxos_by_xpub | "
     try{
-        let output = await blockbook.utxosByXpub(coin,xpub)
-        log.debug(tag,"output: ",output)
+        //
+        let output:any = {}
+
+        if(unchained[SYMBOL_TO_CAIP[coin]]){
+            // log.info("unchained[SYMBOL_TO_CAIP[coin]]: ",unchained[SYMBOL_TO_CAIP[coin]])
+            let result = await unchained[SYMBOL_TO_CAIP[coin]].GetUtxos({pubkey:xpub})
+            //console.log("result: ",result.data)
+            output = result.data
+        } else {
+            try{
+                output = await blockbook.utxosByXpub(coin,xpub)
+                log.info(tag,"output: ",output)
+                //@TODO fall back to node                
+            }catch(e){
+                output.error = e
+            }
+        }
 
         return output
     }catch(e){
         console.error(tag,e)
+        throw e
     }
 }
 
@@ -394,26 +519,6 @@ let get_block_hash = async function(coin:string,height:number){
     }
 }
 
-
-let init_network = async function (runtime:string,servers:any) {
-    let tag = ' | get_txs_by_address | '
-    try {
-        log.debug(tag,"checkpoint: ")
-        let output:any = []
-
-        RUNTIME = runtime
-
-        await blockbook.init()
-
-
-        return true
-    } catch (e) {
-        console.error(tag, 'Error: ', e)
-        throw e
-    }
-}
-
-
 let get_transaction = async function (coin:string,txid:string,format?:string) {
     let tag = ' | get_transaction | '
     try {
@@ -431,9 +536,8 @@ let get_transaction = async function (coin:string,txid:string,format?:string) {
     }
 }
 
-
 let get_txs_by_xpub = async function (coin:string,xpub:string) {
-    let tag = ' | get_txs_by_address | '
+    let tag = ' | get_txs_by_xpub | '
     try {
         log.debug(tag,"checkpoint: ",xpub)
         let output:any = []
@@ -504,7 +608,7 @@ let get_txs_by_addresses = async function (coin:string,addresses:any) {
 }
 
 let get_txs_by_xpubs = async function (coin:string,xpub:string) {
-    let tag = ' | get_txs_by_address | '
+    let tag = ' | get_txs_by_xpubs | '
     try {
         log.debug(tag,"checkpoint: ",xpub)
         let output:any = []
@@ -604,7 +708,7 @@ let get_block = async function(coin:string,height:number){
 let get_node_info = async function(coin:string){
     let tag = TAG + " | get_node_info | "
     try{
-        log.info(nodeMap)
+        log.debug(nodeMap)
         //
         //let results = await nodeMap[coin].getBlockchainInfo()
         // let results = await nodeMap[coin].getBlockchainInfo()
