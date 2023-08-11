@@ -157,7 +157,7 @@ export const shapeshift = [
     {
         key: "REACT_APP_UNCHAINED_ETHEREUM_HTTP_URL",
         value: "https://api.ethereum.shapeshift.com",
-        swagger: "https://api.osmosis.shapeshift.com/swagger.json",
+        swagger: "https://api.ethereum.shapeshift.com/swagger.json",
         network: "ethereum",
         protocol: "http",
         type: "unchained"
@@ -172,7 +172,7 @@ export const shapeshift = [
     {
         key: "REACT_APP_UNCHAINED_AVALANCHE_HTTP_URL",
         value: "https://api.avalanche.shapeshift.com",
-        swagger: "https://api.osmosis.shapeshift.com/swagger.json",
+        swagger: "https://api.avalanche.shapeshift.com/swagger.json",
         network: "avalanche",
         protocol: "http",
         type: "unchained"
@@ -187,7 +187,7 @@ export const shapeshift = [
     {
         key: "REACT_APP_UNCHAINED_OPTIMISM_HTTP_URL",
         value: "https://api.optimism.shapeshift.com",
-        swagger: "https://api.osmosis.shapeshift.com/swagger.json",
+        swagger: "https://api.optimism.shapeshift.com/swagger.json",
         network: "optimism",
         protocol: "http",
         type: "unchained"
@@ -202,7 +202,7 @@ export const shapeshift = [
     {
         key: "REACT_APP_UNCHAINED_BNBSMARTCHAIN_HTTP_URL",
         value: "https://api.bnbsmartchain.shapeshift.com",
-        swagger: "https://api.osmosis.shapeshift.com/swagger",
+        swagger: "https://api.bnbsmartchain.shapeshift.com/swagger.json",
         network: "bnbsmartchain",
         protocol: "http",
         type: "unchained"
@@ -356,13 +356,13 @@ export const shapeshift = [
         nodeType: "eth-node",
         type: "daemon"
     },
-    {
-        key: "REACT_APP_ETHEREUM_INFURA_URL",
-        value: "https://mainnet.infura.io/v3/6e2f28ff4f5340fdb0db5da3baec0af2",
-        network: "ethereum",
-        nodeType: "infura",
-        type: "unchained"
-    },
+    // {
+    //     key: "REACT_APP_ETHEREUM_INFURA_URL",
+    //     value: "https://mainnet.infura.io/v3/6e2f28ff4f5340fdb0db5da3baec0af2",
+    //     network: "ethereum",
+    //     nodeType: "infura",
+    //     type: "unchained"
+    // },
     {
         key: "REACT_APP_AVALANCHE_NODE_URL",
         value: "https://daemon.avalanche.shapeshift.com/ext/bc/C/rpc",
@@ -419,12 +419,12 @@ export const shapeshift = [
         nodeType: "thorchain-node",
         type: "daemon"
     },
-    {
-        key: "REACT_APP_MIDGARD_URL",
-        value: "https://indexer.thorchain.shapeshift.com/v2",
-        network: "thorchain",
-        service: "midgard",
-        type: "unchained"
-    },
+    // {
+    //     key: "REACT_APP_MIDGARD_URL",
+    //     value: "https://indexer.thorchain.shapeshift.com/v2",
+    //     network: "thorchain",
+    //     service: "midgard",
+    //     type: "unchained"
+    // },
     //
 ];

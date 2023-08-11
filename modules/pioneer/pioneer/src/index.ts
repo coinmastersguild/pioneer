@@ -48,6 +48,9 @@ const blockbook = require('@pioneer-platform/blockbook')
 let zapper = require("@pioneer-platform/zapper-client")
 //@ts-ignore
 let {shortListSymbolToCaip,evmCaips} = require("@pioneer-platform/pioneer-caip")
+
+
+
 const networks:any = {
     'ETH' : require('@pioneer-platform/eth-network'),
     'ATOM': require('@pioneer-platform/cosmos-network'),
@@ -182,8 +185,8 @@ let get_pubkey_balances = async function (pubkey: any) {
             // Update balance
             balances.push({
                 network: pubkey.symbol,
-                blockchainCaip: shortListSymbolToCaip(pubkey.symbol),
-                assetCaip: shortListSymbolToCaip(pubkey.symbol),
+                blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                assetCaip: shortListSymbolToCaip[pubkey.symbol],
                 asset: pubkey.symbol,
                 symbol: pubkey.symbol,
                 pubkey: pubkey.pubkey,
@@ -211,7 +214,8 @@ let get_pubkey_balances = async function (pubkey: any) {
                             let balanceInfo = token.token;
                             balanceInfo.network = token.network;
                             //get caip for network
-                            balanceInfo.blockchainCaip = token.caip || 'caip:placeholder:'+token.network;
+                            balanceInfo.blockchainCaip = token.blockchainCaip || 'caip:placeholder:'+token.network;
+                            balanceInfo.assetCaip = token.assetCaip || 'caip:placeholder:'+token.network+":"+token.token.symbol;
                             balanceInfo.asset = token.token.symbol;
                             balanceInfo.symbol = token.token.symbol
                             balanceInfo.pubkey = pubkey.pubkey;
@@ -223,7 +227,13 @@ let get_pubkey_balances = async function (pubkey: any) {
                                 balanceInfo.protocal = 'erc20';
                             }
                             balanceInfo.lastUpdated = new Date().getTime();
+                            balanceInfo.price = token.token.price.toString();
+                            balanceInfo.coingeckoId = token.token.coingeckoId;
+                            balanceInfo.dailyVolume = token.token.price.toString();
+                            balanceInfo.marketCap = token.token.marketCap.toString();
                             balanceInfo.balance = token.token.balance.toString();
+                            balanceInfo.balanceUSD = token.token.balanceUSD.toString();
+                            balanceInfo.balanceRaw = token.token.balanceRaw.toString();
                             balances.push(balanceInfo);
                         });
                     }
@@ -258,6 +268,7 @@ let get_pubkey_balances = async function (pubkey: any) {
                                 description: "Pioneer",
                                 source: "pioneer",
                                 blockchainCaip: 'eip155:1/slip44:60',
+                                assetCaip: 'eip155:1/slip44:60:'+"0x25EF864904d67e912B9eC491598A7E5A066B102F",
                                 pubkey: pubkey.pubkey,
                                 context: pubkey.context,
                                 number: allPioneers.owners.indexOf(pubkey.pubkey.toLowerCase()),
@@ -335,6 +346,7 @@ let get_pubkey_balances = async function (pubkey: any) {
                         isToken: false,
                         lastUpdated: new Date().getTime(), //TODO use block heights
                         balance: balanceNetwork,
+                        context: pubkey.context,
                         source: "pioneer-network-"+pubkey.symbol
                     });
                     break;
@@ -371,6 +383,7 @@ let get_pubkey_balances = async function (pubkey: any) {
                 balance.description = assetInfo.description;
                 balance.website = assetInfo.website;
                 balance.explorer = assetInfo.explorer;
+                balance.context = pubkey.context
             }
 
             if (balanceIndex !== -1 && pubkeyInfo.balances[balanceIndex].balance !== balance.balance) {

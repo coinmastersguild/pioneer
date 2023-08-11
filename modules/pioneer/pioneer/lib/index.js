@@ -287,8 +287,8 @@ var get_pubkey_balances = function (pubkey) {
                     // Update balance
                     balances_1.push({
                         network: pubkey.symbol,
-                        blockchainCaip: shortListSymbolToCaip(pubkey.symbol),
-                        assetCaip: shortListSymbolToCaip(pubkey.symbol),
+                        blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                        assetCaip: shortListSymbolToCaip[pubkey.symbol],
                         asset: pubkey.symbol,
                         symbol: pubkey.symbol,
                         pubkey: pubkey.pubkey,
@@ -328,7 +328,8 @@ var get_pubkey_balances = function (pubkey) {
                             var balanceInfo = token.token;
                             balanceInfo.network = token.network;
                             //get caip for network
-                            balanceInfo.blockchainCaip = token.caip || 'caip:placeholder:' + token.network;
+                            balanceInfo.blockchainCaip = token.blockchainCaip || 'caip:placeholder:' + token.network;
+                            balanceInfo.assetCaip = token.assetCaip || 'caip:placeholder:' + token.network + ":" + token.token.symbol;
                             balanceInfo.asset = token.token.symbol;
                             balanceInfo.symbol = token.token.symbol;
                             balanceInfo.pubkey = pubkey.pubkey;
@@ -340,7 +341,13 @@ var get_pubkey_balances = function (pubkey) {
                                 balanceInfo.protocal = 'erc20';
                             }
                             balanceInfo.lastUpdated = new Date().getTime();
+                            balanceInfo.price = token.token.price.toString();
+                            balanceInfo.coingeckoId = token.token.coingeckoId;
+                            balanceInfo.dailyVolume = token.token.price.toString();
+                            balanceInfo.marketCap = token.token.marketCap.toString();
                             balanceInfo.balance = token.token.balance.toString();
+                            balanceInfo.balanceUSD = token.token.balanceUSD.toString();
+                            balanceInfo.balanceRaw = token.token.balanceRaw.toString();
                             balances_1.push(balanceInfo);
                         });
                     }
@@ -384,6 +391,7 @@ var get_pubkey_balances = function (pubkey) {
                         description: "Pioneer",
                         source: "pioneer",
                         blockchainCaip: 'eip155:1/slip44:60',
+                        assetCaip: 'eip155:1/slip44:60:' + "0x25EF864904d67e912B9eC491598A7E5A066B102F",
                         pubkey: pubkey.pubkey,
                         context: pubkey.context,
                         number: allPioneers.owners.indexOf(pubkey.pubkey.toLowerCase()),
@@ -470,6 +478,7 @@ var get_pubkey_balances = function (pubkey) {
                         isToken: false,
                         lastUpdated: new Date().getTime(),
                         balance: balanceNetwork,
+                        context: pubkey.context,
                         source: "pioneer-network-" + pubkey.symbol
                     });
                     return [3 /*break*/, 33];
@@ -508,6 +517,7 @@ var get_pubkey_balances = function (pubkey) {
                                         balance.description = assetInfo.description;
                                         balance.website = assetInfo.website;
                                         balance.explorer = assetInfo.explorer;
+                                        balance.context = pubkey.context;
                                     }
                                     if (balanceIndex !== -1 && pubkeyInfo.balances[balanceIndex].balance !== balance.balance) {
                                         saveActions.push({

@@ -13,7 +13,7 @@ let nodes = require('../lib/index.js')
 let run_test = async function(){
     try{
         //
-        let nodeUrl = nodes.getNode('cosmos','gaiad')
+        let nodeUrl = nodes.getUnchaineds()
         console.log(nodeUrl)
 
 

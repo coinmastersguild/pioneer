@@ -9,6 +9,7 @@ const TAG = " | unchained-client | "
 let pioneerApi = require("@pioneer-platform/pioneer-client").default
 const log = require('@pioneer-platform/loggerdog')()
 const fakeUa = require('fake-useragent');
+const nodes = require("@pioneer-platform/nodes")
 const Axios = require('axios')
 const https = require('https')
 const axios = Axios.create({
@@ -46,31 +47,25 @@ module.exports = {
 let init_network = async function (servers?: any){
     let tag = TAG + " | init_network | "
     try{
-        let spec = process.env['PIONEER_SPEC'] || 'https://pioneers.dev/spec/swagger.json'
-        // let spec = 'https://pioneers.dev/spec/swagger.json'
-
         let allUnchaineds:any = []
-        if(servers){
-            allUnchaineds = servers
+        if (Array.isArray(servers)) {
+            allUnchaineds = servers;
+        } else {
+            // Handle the case when 'servers' is not an array
+            log.error(tag,"'servers' is not an array!",servers)
         }
         
-        try{
-            //get config
-            let config = {
-                queryKey:'unchained:npm',
-                spec
-            }
-            //console.log("config: ",config)
-            //get config
-            let pioneer = new pioneerApi(spec,config)
-            pioneer = await pioneer.init()
-            let allUnchainedsRemote = await pioneer.SearchNodesByType({type:"unchained"});
-            allUnchainedsRemote = allUnchainedsRemote.data
-            allUnchaineds(...allUnchainedsRemote)
-        }catch(e){
-            //console.error(tag,"e: ",e)
-        }
-        
+        //get seed nodes
+        let SEED_NODES = await nodes.getUnchaineds()
+        log.info(tag,"SEED_NODES: ",SEED_NODES)
+        log.info(tag,"SEED_NODES: ",SEED_NODES.length)
+        // Create a Set to store unique values
+        const combinedSet = new Set<any>([...allUnchaineds, ...SEED_NODES]);
+
+        // Convert the Set back to an array
+        allUnchaineds = Array.from(combinedSet);
+        log.info(tag,"allUnchaineds: ",allUnchaineds)
+        log.info(tag,"allUnchaineds: ",allUnchaineds.length)
         for(let i = 0; i < allUnchaineds.length; i++){
             let unchainedInfo = allUnchaineds[i]
             //get swagger

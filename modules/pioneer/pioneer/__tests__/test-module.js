@@ -21,7 +21,6 @@ let run_test = async function(){
         //let pubkey = "0x33b35c665496bA8E71B22373843376740401F106"
         
         //get all caips for pubkey?
-        
         let pubkey = {
             username: 'user:41922b63',
             queueId: 'lol',
@@ -40,6 +39,17 @@ let run_test = async function(){
         
         let result = await pioneer.balances(pubkey)
         console.log(result)
+
+        let balances = result.balances
+        log.info("balances",balances.length)
+        for(let i = 0; i < balances.length; i++){
+            let balance = balances[i]
+            //log.info(balance)
+            if(!balance.balance) throw Error("Missing balance! "+balance.symbol)
+            if(!balance.context) throw Error("Missing context! "+balance.symbol)
+            if(!balance.assetCaip) throw Error("Missing assetCaip! "+balance.symbol)
+            if(!balance.blockchainCaip) throw Error("Missing assetCaip! "+balance.symbol)
+        }
 
     }catch(e){
         console.error(e)

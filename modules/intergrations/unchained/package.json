@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/unchained",
-  "version": "8.1.59",
+  "version": "8.1.61",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.30",
+    "@pioneer-platform/nodes": "^8.1.30",
     "@pioneer-platform/pioneer-client": "^9.0.12",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",

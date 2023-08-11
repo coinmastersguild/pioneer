@@ -27,7 +27,7 @@ const axiosRetry = require('axios-retry');
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
-        log.info(TAG,`retry attempt: ${retryCount}`);
+        log.debug(TAG,`retry attempt: ${retryCount}`);
         return retryCount * 2000; // time interval between retries
     },
     retryCondition: (error: { response: { status: number; }; }) => {
@@ -84,21 +84,21 @@ const get_portfolio = async function (address:string) {
                 },
             }
         );
-        // console.log("tokensResponse: ",tokensResponse.data)
+        //console.log("tokensResponse: ",tokensResponse.data)
         let tokens = tokensResponse.data;
         let totalBalanceUsdTokens = 0;
         tokens = tokens[address.toLowerCase()]
         output.tokens = tokens
-        console.log("tokens: ",tokens)
+        log.debug(tag,"tokens: ",tokens.length)
         if(tokens){
             tokens.forEach((token: any) => {
-                console.log("token: ",token)
+                log.debug(tag,"token: ",token)
                 let network = token.network
-                console.log("network: ",token)
+                log.debug(tag,"network: ",token)
                 let caip = evmCaips[network]
-                token.caip = caip;
-                
-                console.log("token.balanceUSD: ",token.token.balanceUSD)
+                token.blockchainCaip = caip;
+                token.assetCaip = caip + ":" +token.token.address
+                log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
                 totalBalanceUsdTokens += token.token.balanceUSD;
             });
         }
@@ -121,7 +121,7 @@ const get_portfolio = async function (address:string) {
                     },
                 });
                 const tokens = response.data;
-                console.log("tokens: ",tokens)
+                //console.log("tokens: ",tokens)
                 allTokens = allTokens.concat(tokens.items);
                 cursor = response.data.cursor;
                 if (!cursor) {
@@ -132,7 +132,7 @@ const get_portfolio = async function (address:string) {
             }
         }
         output.nfts = allTokens
-        // console.log("nfts: ",output.nfts);
+        //console.log("nfts: ",output.nfts);
 
         // Call the '/net-worth' endpoint to get the net worth in USD for NFTs
         const nftResponse = await Axios.get(
@@ -148,19 +148,19 @@ const get_portfolio = async function (address:string) {
         output.nftUsdNetWorth = nftUsdNetWorth
         output.totalBalanceUsdTokens = totalBalanceUsdTokens
         output.totalBalanceUSDApp = totalBalanceUSDApp
-        // console.log("totalBalanceUsdTokens: ",totalBalanceUsdTokens);
-        // console.log("totalBalanceUSDApp: ",totalBalanceUSDApp);
-        // Sum up the total balance in USD for apps, tokens, and NFTs
+        //console.log("totalBalanceUsdTokens: ",totalBalanceUsdTokens);
+        //console.log("totalBalanceUSDApp: ",totalBalanceUSDApp);
+        //Sum up the total balance in USD for apps, tokens, and NFTs
         const totalNetWorth =
             totalBalanceUSDApp + totalBalanceUsdTokens + parseFloat(nftUsdNetWorth[address.toLowerCase()]);
-        // console.log("totalNetWorth: ",totalNetWorth);
+        //console.log("totalNetWorth: ",totalNetWorth);
         output.totalNetWorth = totalNetWorth
         return output
     } catch (e) {
         console.error(tag, "e: ", e)
-        // console.error(tag, "e: ", e?.response)
-        // console.error(tag, "e: ", e?.response?.status)
-        // console.error(tag, "e: ", JSON.stringify(e.data))
+        //console.error(tag, "e: ", e?.response)
+        //console.error(tag, "e: ", e?.response?.status)
+        //console.error(tag, "e: ", JSON.stringify(e.data))
     }
 }
 
@@ -192,19 +192,19 @@ const get_total_networth = async function (address:string) {
                 },
             }
         );
-        console.log("tokensResponse: ",tokensResponse.data)
+        log.debug("tokensResponse: ",tokensResponse.data)
         let tokens = tokensResponse.data;
         let totalBalanceUsdTokens = 0;
         tokens = tokens[address.toLowerCase()]
-        // console.log("tokens: ",tokens)
+        // log.debug("tokens: ",tokens)
         tokens.forEach((token: any) => {
-            console.log("token: ",token)
+            log.debug("token: ",token)
             let network = token.network
-            console.log("network: ",token)
+            log.debug("network: ",token)
             let caip = evmCaips[network]
             token.caip = caip;
 
-            console.log("token.balanceUSD: ",token.token.balanceUSD)
+            log.debug("token.balanceUSD: ",token.token.balanceUSD)
             totalBalanceUsdTokens += token.token.balanceUSD;
         });
         // Call the '/net-worth' endpoint to get the net worth in USD for NFTs
@@ -218,13 +218,13 @@ const get_total_networth = async function (address:string) {
             }
         );
         const nftUsdNetWorth = nftResponse.data;
-        console.log("nftUsdNetWorth: ",nftUsdNetWorth);
-        console.log("totalBalanceUsdTokens: ",totalBalanceUsdTokens);
-        console.log("totalBalanceUSDApp: ",totalBalanceUSDApp);
+        log.debug("nftUsdNetWorth: ",nftUsdNetWorth);
+        log.debug("totalBalanceUsdTokens: ",totalBalanceUsdTokens);
+        log.debug("totalBalanceUSDApp: ",totalBalanceUSDApp);
         // Sum up the total balance in USD for apps, tokens, and NFTs
         const totalNetWorth =
             totalBalanceUSDApp + totalBalanceUsdTokens + parseFloat(nftUsdNetWorth[address.toLowerCase()]);
-        console.log("totalNetWorth: ",totalNetWorth);
+        log.debug("totalNetWorth: ",totalNetWorth);
         return totalNetWorth
     } catch (e) {
         console.error(tag, "e: ", e)
@@ -239,7 +239,7 @@ const get_tokens = async function (address:string) {
     try {
         const apiKey = API_KEY;
 
-        console.log(Authorization)
+        log.debug(Authorization)
         // const appsResponse = await Axios.get(
         //     `https://api.zapper.xyz/v2/balances/apps?addresses%5B%5D=${address}`);
 

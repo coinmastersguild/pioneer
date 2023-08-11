@@ -85,7 +85,7 @@ let init_network = async function (servers?: any[]) {
         log.debug(tag,"checkpoint: ")
 
         let SEED_NODES = await nodes.getBlockbooks()
-        log.info(tag,"SEED_NODES: ",SEED_NODES)
+        log.debug(tag,"SEED_NODES: ",SEED_NODES)
 
         let blockbooks = []
         if (servers && Array.isArray(servers)) { // Type checking for array
@@ -236,7 +236,7 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/xpub/"+xpub+"?details=all"
-        console.log("url: ",url)
+        //console.log("url: ",url)
         let body = {
             method: 'GET',
             url,
@@ -284,15 +284,15 @@ let broadcast_transaction = async function(coin:string,hex:string){
             output.success = true
         }catch(e){
             log.error(tag,"error: ",e)
-            // log.info(tag,"data0: ",e)
-            // log.info(tag,"resp: ",resp)
-            // log.info(tag,"data0: ",Object.keys(e))
-            // log.info(tag,"data1: ",e.response.req)
-            // log.info(tag,"data2: ",e.response.data)
-            // log.info(tag,"data2: ",e.response.data.error)
-            // log.info(tag,"error3: ",e.toJSON().request)
-            // log.info(tag,"erro4: ",e.toJSON().data)
-            // log.info(tag,"error5: ",e.toJSON().code)
+            //log.info(tag,"data0: ",e)
+            //log.info(tag,"resp: ",resp)
+            //log.info(tag,"data0: ",Object.keys(e))
+            //log.info(tag,"data1: ",e.response.req)
+            //log.info(tag,"data2: ",e.response.data)
+            //log.info(tag,"data2: ",e.response.data.error)
+            //log.info(tag,"error3: ",e.toJSON().request)
+            //log.info(tag,"erro4: ",e.toJSON().data)
+            //log.info(tag,"error5: ",e.toJSON().code)
             // if(e.response.data.error){
             //     output.error = e.response.data.error
             // }else{
@@ -337,7 +337,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
-        console.log("url: ",url)
+        //console.log("url: ",url)
 
         let body = {
             method: 'GET',

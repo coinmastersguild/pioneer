@@ -18,8 +18,7 @@
 
 const TAG = " | Pioneer Nodes | "
 const log = require('@pioneer-platform/loggerdog')()
-
-
+let {shortListNameToCaip,shortListSymbolToCaip,evmCaips} = require("@pioneer-platform/pioneer-caip")
 import {
   blockbooks,
   shapeshift,
@@ -38,8 +37,65 @@ module.exports = {
     },
     getBlockbooks: function () {
         return blockbooks;
+    },
+    getUnchaineds: function () {
+        return get_unchaineds();
     }
 }
+
+const get_unchaineds = function () {
+    let tag = TAG + " | get_unchaineds | ";
+    try {
+        // unchaineds filter
+        let unchaineds = shapeshift.filter(node => node.type === "unchained");
+        console.log(tag, "unchaineds: ", unchaineds);
+
+        //all networks
+        let allNetworks:any = []
+        let swaggersByNetwork:any = {}
+        let servicesByNetwork:any = {}
+        let wssByNetwork:any = {}
+        for(let i = 0; i < unchaineds.length; i++){
+            let unchaind = unchaineds[i];
+            log.info(tag,"unchaind: ",unchaind.network)
+
+            if (!allNetworks.includes(unchaind.network)) allNetworks.push(unchaind.network);
+            if(unchaind.swagger) swaggersByNetwork[unchaind.network] = unchaind.swagger;
+            if(unchaind.value && unchaind.protocol == 'http') servicesByNetwork[unchaind.network] = unchaind.value;
+            if(unchaind.protocol == 'websocket') wssByNetwork[unchaind.network] = unchaind.value;
+        }
+        let output = []
+        for(let i = 0; i < allNetworks.length; i++){
+            let network = allNetworks[i];
+            let caip = shortListNameToCaip[network];
+            log.info(tag,"caip: ",caip)
+
+            //build unchaineds
+            let unchainedEntry = {
+                caip,
+                swagger:swaggersByNetwork[network],
+                service:servicesByNetwork[network],
+                wss:wssByNetwork[network],
+                type:'unchained',
+                blockchain:network,
+            }
+            output.push(unchainedEntry)
+        }
+
+        return output;
+    } catch (e) {
+        console.error(tag, "e: ", e);
+        throw e;
+    }
+};
+
+
+
+
+
+
+
+
 
 const get_node = function (network:string,serviceId:string) {
     let tag = TAG + " | get_node | "
