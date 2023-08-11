@@ -830,7 +830,7 @@ let broadcast_transaction = async function(tx:any){
 // 			// to_block: "1234",
 // 		};
 // 		const balance = await Moralis.Web3API.account.getNativeBalance(options);
-// 		log.info(tag,"balance: ",balance)
+// 		log.debug(tag,"balance: ",balance)
 // 		return balance.balance / 1000000000000000000
 // 	}catch(e){
 // 		console.error(tag,e)
@@ -850,7 +850,7 @@ let broadcast_transaction = async function(tx:any){
 // 			// to_block: "1234",
 // 		};
 // 		const balance = await Moralis.Web3API.token.getAllTokenIds(options);
-// 		log.info(tag,"balance: ",balance)
+// 		log.debug(tag,"balance: ",balance)
 // 		return balance.balance / 1000000000000000000
 // 	}catch(e){
 // 		console.error(tag,e)
@@ -896,7 +896,7 @@ let check_online_status = async function(){
 		//
 		// // get block content on BSC
 		// const transactions = await Moralis.Web3API.native.getBlock(options);
-		// log.info(transactions)
+		// log.debug(transactions)
 
 		// const web3API = async () => {
 		// 	await Moralis.start({ serverUrl, appId, moralisSecret });

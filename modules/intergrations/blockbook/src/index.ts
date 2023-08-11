@@ -138,7 +138,7 @@ let get_fees = async function (coin: string){
             },
         };
         let resp = await axios(body)
-        //log.info(tag,"resp: ",resp)
+        //log.debug(tag,"resp: ",resp)
         //TODO paginate?
 
         return resp.data
@@ -284,15 +284,15 @@ let broadcast_transaction = async function(coin:string,hex:string){
             output.success = true
         }catch(e){
             log.error(tag,"error: ",e)
-            //log.info(tag,"data0: ",e)
-            //log.info(tag,"resp: ",resp)
-            //log.info(tag,"data0: ",Object.keys(e))
-            //log.info(tag,"data1: ",e.response.req)
-            //log.info(tag,"data2: ",e.response.data)
-            //log.info(tag,"data2: ",e.response.data.error)
-            //log.info(tag,"error3: ",e.toJSON().request)
-            //log.info(tag,"erro4: ",e.toJSON().data)
-            //log.info(tag,"error5: ",e.toJSON().code)
+            //log.debug(tag,"data0: ",e)
+            //log.debug(tag,"resp: ",resp)
+            //log.debug(tag,"data0: ",Object.keys(e))
+            //log.debug(tag,"data1: ",e.response.req)
+            //log.debug(tag,"data2: ",e.response.data)
+            //log.debug(tag,"data2: ",e.response.data.error)
+            //log.debug(tag,"error3: ",e.toJSON().request)
+            //log.debug(tag,"erro4: ",e.toJSON().data)
+            //log.debug(tag,"error5: ",e.toJSON().code)
             // if(e.response.data.error){
             //     output.error = e.response.data.error
             // }else{

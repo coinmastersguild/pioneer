@@ -103,7 +103,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         // @ts-ignore
         const client = await StargateClient.connect(rpcEndpoint);
         let accountInfo = await client.getAccount(from)
-        log.info(tag,"accountInfo: ",accountInfo)
+        log.debug(tag,"accountInfo: ",accountInfo)
 
         const msgSend: any = {
             fromAddress: from,
@@ -161,7 +161,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         //THIS WORKS
         // const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed);
         // const [firstAccount] = await wallet.getAccounts();
-        // log.info(tag,"firstAccount: ",firstAccount)
+        // log.debug(tag,"firstAccount: ",firstAccount)
         //
         // const rpcEndpoint = process.env['URL_GAIAD_RPC']
         // console.log("rpcEndpoint: ",rpcEndpoint)
@@ -178,7 +178,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         // };
         //
         // const result = await client.sendTokens(firstAccount.address, recipient, [amount], "auto",);
-        // log.info(tag,"result: ",result)
+        // log.debug(tag,"result: ",result)
 
 
         //base64
@@ -217,7 +217,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         //
         // const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed);
         // const [firstAccount] = await wallet.getAccounts();
-        // log.info(tag,"firstAccount: ",firstAccount)
+        // log.debug(tag,"firstAccount: ",firstAccount)
         //
         // const rpcEndpoint = "https://rpc-cosmoshub.keplr.app";
         // const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
@@ -229,7 +229,7 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         // };
         //
         // const result = await client.sendTokens(firstAccount.address, recipient, [amount], "auto");
-        // log.info(tag,"result: ",result)
+        // log.debug(tag,"result: ",result)
 
         // Please install and use rest server separately. (https://hub.cosmos.network/master/resources/service-providers.html#setting-up-the-rest-server)
         // const kava = cosmosjs.network("https://lcd-kava.keplr.app", chainId);
@@ -243,10 +243,10 @@ let sign_transaction = async function(to:string,from:string,amount:number,memo:s
         //
         // const ecpairPriv = cosmo.getECPairPriv(seed);
         //
-        // log.info(tag,"ecpairPriv: ",ecpairPriv)
+        // log.debug(tag,"ecpairPriv: ",ecpairPriv)
         //
         // let accountInfo = await cosmo.getAccounts(from)
-        // log.info(tag,"accountInfo: ",accountInfo)
+        // log.debug(tag,"accountInfo: ",accountInfo)
 
         // let stdSignMsg = cosmo.newStdMsg({
         //     msgs: [

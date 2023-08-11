@@ -57,20 +57,20 @@ let init_network = async function (servers?: any){
         
         //get seed nodes
         let SEED_NODES = await nodes.getUnchaineds()
-        log.info(tag,"SEED_NODES: ",SEED_NODES)
-        log.info(tag,"SEED_NODES: ",SEED_NODES.length)
+        log.debug(tag,"SEED_NODES: ",SEED_NODES)
+        log.debug(tag,"SEED_NODES: ",SEED_NODES.length)
         // Create a Set to store unique values
         const combinedSet = new Set<any>([...allUnchaineds, ...SEED_NODES]);
 
         // Convert the Set back to an array
         allUnchaineds = Array.from(combinedSet);
-        log.info(tag,"allUnchaineds: ",allUnchaineds)
-        log.info(tag,"allUnchaineds: ",allUnchaineds.length)
+        log.debug(tag,"allUnchaineds: ",allUnchaineds)
+        log.debug(tag,"allUnchaineds: ",allUnchaineds.length)
         for(let i = 0; i < allUnchaineds.length; i++){
             let unchainedInfo = allUnchaineds[i]
             //get swagger
             if(unchainedInfo.service && unchainedInfo.caip && unchainedInfo.swagger){
-                //log.info("unchainedInfo.swagger: ",unchainedInfo.swagger)
+                //log.debug("unchainedInfo.swagger: ",unchainedInfo.swagger)
                 let config = { queryKey:"foobaz", spec:unchainedInfo.swagger}
                 let Unchained = new pioneerApi(unchainedInfo.swagger,config)
                 try {
@@ -95,7 +95,7 @@ let init_network = async function (servers?: any){
 let get_fees = async function (caip: string){
     let tag = TAG + " | get_fees | "
     try{
-        //log.info(ALL_UNCHAINED_APIS[caip])
+        //log.debug(ALL_UNCHAINED_APIS[caip])
         let output
         if(ALL_UNCHAINED_APIS[caip].GetNetworkFees){
             output = await ALL_UNCHAINED_APIS[caip].GetNetworkFees()

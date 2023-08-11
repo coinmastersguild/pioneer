@@ -12,9 +12,9 @@ let pioneer = require('../lib/index.js')
 
 let run_test = async function(){
     try{
-        log.info("run test")
+        log.debug("run test")
         let success = await pioneer.init()
-        log.info("onStart: ",success)
+        log.debug("onStart: ",success)
         //username
 
         //pubkeys
@@ -41,10 +41,10 @@ let run_test = async function(){
         console.log(result)
 
         let balances = result.balances
-        log.info("balances",balances.length)
+        log.debug("balances",balances.length)
         for(let i = 0; i < balances.length; i++){
             let balance = balances[i]
-            //log.info(balance)
+            //log.debug(balance)
             if(!balance.balance) throw Error("Missing balance! "+balance.symbol)
             if(!balance.context) throw Error("Missing context! "+balance.symbol)
             if(!balance.assetCaip) throw Error("Missing assetCaip! "+balance.symbol)

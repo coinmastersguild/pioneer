@@ -99,10 +99,10 @@ const BALANCE_ON_REGISTER = true
 let onStart = async function(){
     let tag = TAG + " | onStart | "
     try{
-        log.info(tag,"starting...")
+        log.debug(tag,"starting...")
         //get servers
         let servers = await nodesDB.find({type:'blockbook'})
-        log.info(tag,"servers: ",servers.length)
+        log.debug(tag,"servers: ",servers.length)
         await blockbook.init(servers)
         // networks.ANY.init('full')
         await networks.ETH.init()
@@ -167,7 +167,7 @@ let get_pubkey_balances = async function (pubkey: any) {
         let balances: any = [];
         let nfts: any = [];
         let positions: any = [];
-        log.info(tag," scanning pubkey: ",pubkey.pubkey)
+        log.debug(tag," scanning pubkey: ",pubkey.pubkey)
         // By type
         if (pubkey.type === "xpub" || pubkey.type === "zpub") {
             let cacheKey = `balances:blockbook:getBalanceByXpub:${pubkey.symbol}:${pubkey.pubkey}`;
@@ -419,7 +419,7 @@ let get_pubkey_balances = async function (pubkey: any) {
 
         if (saveActions.length > 0) {
             let updateSuccess = await pubkeysDB.bulkWrite(saveActions, { ordered: false });
-            log.info(tag, "updateSuccess: ", updateSuccess);
+            log.debug(tag, "updateSuccess: ", updateSuccess);
             output.dbUpdate = updateSuccess;
         }
 
@@ -526,11 +526,11 @@ let get_and_verify_pubkeys = async function (username:string, context?:string) {
                 if(balances.success) synced.push(pubkeyInfo.blockchain)
                 // log.debug(tag,"balances: ",balances)
                 log.debug(tag,pubkeyInfo.symbol+" balances: ",balances)
-                log.info(tag,context+": "+pubkeyInfo.symbol+" balances: ",balances.balances.length)
+                log.debug(tag,context+": "+pubkeyInfo.symbol+" balances: ",balances.balances.length)
                 if(balances && balances.balances) {
                     pubkeyInfo.balances = balances.balances
                     allBalances = allBalances.concat(balances.balances)
-                    log.info(tag,context+": "+pubkeyInfo.symbol+" allBalances: ",allBalances.length)
+                    log.debug(tag,context+": "+pubkeyInfo.symbol+" allBalances: ",allBalances.length)
                 }
                 if(balances && balances.nfts) pubkeys.nfts = balances.nfts
             } else {
@@ -547,7 +547,7 @@ let get_and_verify_pubkeys = async function (username:string, context?:string) {
         for(let i = 0; i < blockchains.length; i++){
             let blockchain = blockchains[i]
             if(synced.indexOf(blockchain) === -1){
-                log.info(tag,context+ " blockchain not synced: ",blockchain)
+                log.debug(tag,context+ " blockchain not synced: ",blockchain)
                 isSynced = false
                 break
             }
@@ -682,7 +682,7 @@ let register_address = async function (username:string, pubkey:any, context:stri
 
         queue.createWork("pioneer:pubkey:ingest",work)
         let result = await get_pubkey_balances(work)
-        log.info(tag,"result: ",result)
+        log.debug(tag,"result: ",result)
 
         return queueId
     } catch (e) {
@@ -859,7 +859,7 @@ const register_pubkeys = async function (username: string, pubkeys: any, context
         output.balances = [];
         for (let i = 0; i < pubkeys.length; i++) {
             let pubkeyInfo = pubkeys[i];
-            log.info(tag, "pubkeyInfo: ", pubkeyInfo);
+            log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
             let nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain);
             if (!nativeAsset) throw Error("104: invalid pubkey! unsupported by coins module!");
             if (!pubkeyInfo.pubkey) throw Error("104: invalid pubkey! missing pubkey!");

@@ -124,11 +124,11 @@ var onStart = function () {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
-                    log.info(tag, "starting...");
+                    log.debug(tag, "starting...");
                     return [4 /*yield*/, nodesDB.find({ type: 'blockbook' })];
                 case 2:
                     servers = _a.sent();
-                    log.info(tag, "servers: ", servers.length);
+                    log.debug(tag, "servers: ", servers.length);
                     return [4 /*yield*/, blockbook.init(servers)
                         // networks.ANY.init('full')
                     ];
@@ -264,7 +264,7 @@ var get_pubkey_balances = function (pubkey) {
                     balances_1 = [];
                     nfts = [];
                     positions = [];
-                    log.info(tag, " scanning pubkey: ", pubkey.pubkey);
+                    log.debug(tag, " scanning pubkey: ", pubkey.pubkey);
                     if (!(pubkey.type === "xpub" || pubkey.type === "zpub")) return [3 /*break*/, 7];
                     cacheKey = "balances:blockbook:getBalanceByXpub:".concat(pubkey.symbol, ":").concat(pubkey.pubkey);
                     return [4 /*yield*/, getFromCache(cacheKey)];
@@ -570,7 +570,7 @@ var get_pubkey_balances = function (pubkey) {
                     return [4 /*yield*/, pubkeysDB.bulkWrite(saveActions, { ordered: false })];
                 case 39:
                     updateSuccess = _d.sent();
-                    log.info(tag, "updateSuccess: ", updateSuccess);
+                    log.debug(tag, "updateSuccess: ", updateSuccess);
                     output.dbUpdate = updateSuccess;
                     _d.label = 40;
                 case 40:
@@ -702,11 +702,11 @@ var get_and_verify_pubkeys = function (username, context) {
                         synced.push(pubkeyInfo.blockchain);
                     // log.debug(tag,"balances: ",balances)
                     log.debug(tag, pubkeyInfo.symbol + " balances: ", balances);
-                    log.info(tag, context + ": " + pubkeyInfo.symbol + " balances: ", balances.balances.length);
+                    log.debug(tag, context + ": " + pubkeyInfo.symbol + " balances: ", balances.balances.length);
                     if (balances && balances.balances) {
                         pubkeyInfo.balances = balances.balances;
                         allBalances = allBalances.concat(balances.balances);
-                        log.info(tag, context + ": " + pubkeyInfo.symbol + " allBalances: ", allBalances.length);
+                        log.debug(tag, context + ": " + pubkeyInfo.symbol + " allBalances: ", allBalances.length);
                     }
                     if (balances && balances.nfts)
                         pubkeys.nfts = balances.nfts;
@@ -727,7 +727,7 @@ var get_and_verify_pubkeys = function (username, context) {
                     for (i = 0; i < blockchains.length; i++) {
                         blockchain = blockchains[i];
                         if (synced.indexOf(blockchain) === -1) {
-                            log.info(tag, context + " blockchain not synced: ", blockchain);
+                            log.debug(tag, context + " blockchain not synced: ", blockchain);
                             isSynced = false;
                             break;
                         }
@@ -897,7 +897,7 @@ var register_address = function (username, pubkey, context) {
                     return [4 /*yield*/, get_pubkey_balances(work)];
                 case 2:
                     result = _a.sent();
-                    log.info(tag, "result: ", result);
+                    log.debug(tag, "result: ", result);
                     return [2 /*return*/, queueId];
                 case 3:
                     e_7 = _a.sent();
@@ -1105,7 +1105,7 @@ var register_pubkeys = function (username, pubkeys, context) {
                 case 2:
                     if (!(i < pubkeys.length)) return [3 /*break*/, 16];
                     pubkeyInfo = pubkeys[i];
-                    log.info(tag, "pubkeyInfo: ", pubkeyInfo);
+                    log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
                     nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain);
                     if (!nativeAsset)
                         throw Error("104: invalid pubkey! unsupported by coins module!");

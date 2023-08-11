@@ -69,15 +69,7 @@ const URL_BLOCKCHAIN_INFO = "http://blockchain.info"
 
 const URL_BLOCKBOOK_BTC = ""
 
-let SYMBOL_TO_CAIP:any = {
-    "BCH":"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-    // "ETH":"eip155:1/slip44:60",
-    "BTC":"bip122:000000000019d6689c085ae165831e93/slip44:0",
-    "DASH":"bip122:dash-hash/slip44:5",
-    "DOGE":"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
-    "LTC":"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
-}
-
+let {shortListNameToCaip,shortListSymbolToCaip,evmCaips} = require("@pioneer-platform/pioneer-caip")
 let RUNTIME = 'pioneer'
 
 const ONLINE = []
@@ -193,9 +185,9 @@ let init_network = async function (servers:any) {
 
         //load unchained servers
         const unchainedServers = servers.filter((server: { type: string; }) => server.type === 'unchained');
-        //log.info(tag,"unchainedServers: ",unchainedServers)
+        //log.debug(tag,"unchainedServers: ",unchainedServers)
         unchained = await Unchained.init(unchainedServers)
-        //log.info("unchained: ",unchained)
+        //log.debug("unchained: ",unchained)
 
         //figure out what is online, and if can meet blockchain requirements
 
@@ -263,12 +255,12 @@ let get_fee = async function(coin:string){
     let tag = TAG + " | get_fee | "
     try{
         let output:any = {}
-        log.info(tag,"coin: ",coin)
-        log.info(tag,"caip: ",SYMBOL_TO_CAIP[coin])
+        log.debug(tag,"coin: ",coin)
+        log.debug(tag,"caip: ",shortListSymbolToCaip[coin])
         //get caip for symbol
         // @ts-ignore
-        if(unchained[SYMBOL_TO_CAIP[coin]]){
-            let result = await unchained[SYMBOL_TO_CAIP[coin]].GetNetworkFees()
+        if(unchained[shortListSymbolToCaip[coin]]){
+            let result = await unchained[shortListSymbolToCaip[coin]].GetNetworkFees()
             //console.log("result: ",result.data)
             output = result.data
         } else {
@@ -310,16 +302,16 @@ let broadcast_transaction = async function(coin:string,tx:string){
         let output:any = {
             success:false
         }
-        log.info(tag,"coin: ",coin)
-        if(unchained[SYMBOL_TO_CAIP[coin]]){
-            // log.info("unchained[SYMBOL_TO_CAIP[coin]]: ",unchained[SYMBOL_TO_CAIP[coin]])
-            let result = await unchained[SYMBOL_TO_CAIP[coin]].SendTx({hex:tx})
-            log.info(tag,"result.data: ",result.data)
+        log.debug(tag,"coin: ",coin)
+        if(unchained[shortListSymbolToCaip[coin]]){
+            // log.debug("unchained[shortListSymbolToCaip[coin]]: ",unchained[shortListSymbolToCaip[coin]])
+            let result = await unchained[shortListSymbolToCaip[coin]].SendTx({hex:tx})
+            log.debug(tag,"result.data: ",result.data)
             output.txid = result.data
             output.success = true
         } else {
             let responseBroadcast = await blockbook.broadcast(coin,tx)
-            log.info(tag,'responseBroadcast: ',responseBroadcast)
+            log.debug(tag,'responseBroadcast: ',responseBroadcast)
             if(responseBroadcast.success && responseBroadcast.success !== false){
                 output.success = true
                 if(responseBroadcast.txid){
@@ -346,7 +338,7 @@ let broadcast_transaction = async function(coin:string,tx:string){
         //     //TODO use for non-bitcoin? wtf why bitcoin blockbook broke?
         //     let responseBroadcast
         //     if(coin === 'BTC'){
-        //         log.info(tag,"BTC detected!")
+        //         log.debug(tag,"BTC detected!")
         //         let url = "https://api.bitcoin.shapeshift.com/api/v1/send"
         //         let body = {
         //             url,
@@ -360,33 +352,33 @@ let broadcast_transaction = async function(coin:string,tx:string){
         //         try{
         //             responseBroadcast = await axios(body)
         //             responseBroadcast = responseBroadcast.data
-        //             log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //             log.debug(tag,'responseBroadcast: ',responseBroadcast)
         //             output.txid = responseBroadcast
         //             if(output.txid)output.success = true
         //
         //         }catch(e:any){
-        //             // log.info(tag,"error: ",e)
-        //             // log.info(tag,"data0: ",e)
-        //             // log.info(tag,"resp: ",resp)
-        //             // log.info(tag,"data0: ",Object.keys(e))
-        //             // log.info(tag,"data1: ",e.response.req)
-        //             log.info(tag,"data2: ",e.response.data)
-        //             log.info(tag,"data2: ",e.response.data.message)
-        //             // log.info(tag,"error3: ",e.toJSON().request)
-        //             // log.info(tag,"erro4: ",e.toJSON().data)
-        //             // log.info(tag,"error5: ",e.toJSON().code)
+        //             // log.debug(tag,"error: ",e)
+        //             // log.debug(tag,"data0: ",e)
+        //             // log.debug(tag,"resp: ",resp)
+        //             // log.debug(tag,"data0: ",Object.keys(e))
+        //             // log.debug(tag,"data1: ",e.response.req)
+        //             log.debug(tag,"data2: ",e.response.data)
+        //             log.debug(tag,"data2: ",e.response.data.message)
+        //             // log.debug(tag,"error3: ",e.toJSON().request)
+        //             // log.debug(tag,"erro4: ",e.toJSON().data)
+        //             // log.debug(tag,"error5: ",e.toJSON().code)
         //             if(e.response.data.message){
-        //                 log.info(tag,"saving message! ")
+        //                 log.debug(tag,"saving message! ")
         //                 output.error = e.response.data.message
         //             }else{
         //                 output.error = e
         //             }
         //         }
-        //         log.info(tag,"output: ",output)
+        //         log.debug(tag,"output: ",output)
         //         return output
         //     } else {
         //         responseBroadcast = await blockbook.broadcast(coin,tx)
-        //         log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //         log.debug(tag,'responseBroadcast: ',responseBroadcast)
         //         if(responseBroadcast.success && responseBroadcast.success !== false){
         //             output.success = true
         //             if(responseBroadcast.txid){
@@ -405,9 +397,9 @@ let broadcast_transaction = async function(coin:string,tx:string){
         //     }
         //
         //     //use nodes
-        //     // log.info(tag,'nodeMap: ',nodeMap)
+        //     // log.debug(tag,'nodeMap: ',nodeMap)
         //     // let responseBroadcast = await nodeMap[coin].sendRawTransaction(tx)
-        //     // log.info(tag,'responseBroadcast: ',responseBroadcast)
+        //     // log.debug(tag,'responseBroadcast: ',responseBroadcast)
         //
         //
         // }catch(e){
@@ -465,15 +457,15 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         //
         let output:any = {}
 
-        if(unchained[SYMBOL_TO_CAIP[coin]]){
-            // log.info("unchained[SYMBOL_TO_CAIP[coin]]: ",unchained[SYMBOL_TO_CAIP[coin]])
-            let result = await unchained[SYMBOL_TO_CAIP[coin]].GetUtxos({pubkey:xpub})
+        if(unchained[shortListSymbolToCaip[coin]]){
+            // log.debug("unchained[SYMBOL_TshortListSymbolToCaipO_CAIP[coin]]: ",unchained[shortListSymbolToCaip[coin]])
+            let result = await unchained[shortListSymbolToCaip[coin]].GetUtxos({pubkey:xpub})
             //console.log("result: ",result.data)
             output = result.data
         } else {
             try{
                 output = await blockbook.utxosByXpub(coin,xpub)
-                log.info(tag,"output: ",output)
+                log.debug(tag,"output: ",output)
                 //@TODO fall back to node                
             }catch(e){
                 output.error = e
