@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/unchained",
-  "version": "8.1.61",
+  "version": "8.1.62",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -12,9 +12,9 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.1.30",
-    "@pioneer-platform/nodes": "^8.1.30",
-    "@pioneer-platform/pioneer-client": "^9.0.12",
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@pioneer-platform/nodes": "^8.1.31",
+    "@pioneer-platform/pioneer-client": "^9.0.13",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",
     "axios": "^0.21.4",
