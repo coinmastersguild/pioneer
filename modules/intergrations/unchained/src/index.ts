@@ -48,9 +48,9 @@ let init_network = async function (servers?: any){
     let tag = TAG + " | init_network | "
     try{
         let allUnchaineds:any = []
-        if (Array.isArray(servers)) {
+        if (servers && Array.isArray(servers)) {
             allUnchaineds = servers;
-        } else {
+        } else if(servers) {
             // Handle the case when 'servers' is not an array
             log.error(tag,"'servers' is not an array!",servers)
         }

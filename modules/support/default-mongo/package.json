@@ -1,9 +1,10 @@
 {
   "name": "@pioneer-platform/default-mongo",
-  "version": "8.1.23",
+  "version": "8.1.25",
   "dependencies": {
+    "bson": "4.7.2",
     "dotenv": "^8.0.0",
-    "monk": "latest"
+    "monk": "^7.3.4"
   },
   "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
 }

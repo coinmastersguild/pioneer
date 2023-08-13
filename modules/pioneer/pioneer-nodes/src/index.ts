@@ -48,7 +48,7 @@ const get_unchaineds = function () {
     try {
         // unchaineds filter
         let unchaineds = shapeshift.filter(node => node.type === "unchained");
-        console.log(tag, "unchaineds: ", unchaineds);
+        //console.log(tag, "unchaineds: ", unchaineds);
 
         //all networks
         let allNetworks:any = []

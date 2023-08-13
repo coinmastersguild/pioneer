@@ -63,12 +63,9 @@ const networks:any = {
 }
 
 let {
-    supportedBlockchains,
-    supportedAssets,
-    getPaths,
     get_address_from_xpub,
     getNativeAssetForBlockchain
-} = require('@pioneer-platform/cointools')
+} = require('@pioneer-platform/pioneer-coins')
 
 //const bcrypt = require('bcryptjs');
 var numbro = require("numbro");

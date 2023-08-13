@@ -94,7 +94,7 @@ var networks = {
     'ANY': require('@pioneer-platform/utxo-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
 };
-var _b = require('@pioneer-platform/cointools'), supportedBlockchains = _b.supportedBlockchains, supportedAssets = _b.supportedAssets, getPaths = _b.getPaths, get_address_from_xpub = _b.get_address_from_xpub, getNativeAssetForBlockchain = _b.getNativeAssetForBlockchain;
+var _b = require('@pioneer-platform/pioneer-coins'), get_address_from_xpub = _b.get_address_from_xpub, getNativeAssetForBlockchain = _b.getNativeAssetForBlockchain;
 //const bcrypt = require('bcryptjs');
 var numbro = require("numbro");
 var log = require('@pioneer-platform/loggerdog')();

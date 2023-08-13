@@ -184,9 +184,14 @@ let init_network = async function (servers:any) {
         //load daemon servers
 
         //load unchained servers
-        const unchainedServers = servers.filter((server: { type: string; }) => server.type === 'unchained');
-        //log.debug(tag,"unchainedServers: ",unchainedServers)
-        unchained = await Unchained.init(unchainedServers)
+        if(servers){
+            const unchainedServers = servers.filter((server: { type: string; }) => server.type === 'unchained');
+            //log.debug(tag,"unchainedServers: ",unchainedServers)
+            unchained = await Unchained.init(unchainedServers)            
+        } else {
+            unchained = await Unchained.init()
+        }
+
         //log.debug("unchained: ",unchained)
 
         //figure out what is online, and if can meet blockchain requirements
@@ -195,7 +200,7 @@ let init_network = async function (servers:any) {
 
         return true
     } catch (e) {
-        console.error(tag, 'Error: ', e)
+        log.error(tag, 'Error: ', e)
         throw e
     }
 }

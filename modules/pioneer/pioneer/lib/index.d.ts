@@ -6,7 +6,7 @@ declare const blockbook: any;
 declare let zapper: any;
 declare let shortListSymbolToCaip: any, evmCaips: any;
 declare const networks: any;
-declare let supportedBlockchains: any, supportedAssets: any, getPaths: any, get_address_from_xpub: any, getNativeAssetForBlockchain: any;
+declare let get_address_from_xpub: any, getNativeAssetForBlockchain: any;
 declare var numbro: any;
 declare const log: any;
 declare const subscriber: any, publisher: any, redis: any, redisQueue: any;
