@@ -6,14 +6,15 @@ yarn add @pioneer-platform/utxo-network @pioneer-platform/eth-network @pioneer-p
 
 const TAG = " | pioneer network | ";
 
-let utxo = require('@pioneer-platform/utxo-network')
-let ethereum = require('@pioneer-platform/eth-network')
+const utxo = require('@pioneer-platform/utxo-network')
+const ethereum = require('@pioneer-platform/eth-network')
 // let eos = require('@pioneer-platform/eos-network')
-let ripple = require('@pioneer-platform/ripple-network')
-let cosmos = require('@pioneer-platform/cosmos-network')
-let binance = require('@pioneer-platform/binance-network')
-let thor = require('@pioneer-platform/thor-network')
-let osmosis = require('@pioneer-platform/osmosis-network')
+const ripple = require('@pioneer-platform/ripple-network')
+const cosmos = require('@pioneer-platform/cosmos-network')
+const binance = require('@pioneer-platform/binance-network')
+const thor = require('@pioneer-platform/thor-network')
+const osmosis = require('@pioneer-platform/osmosis-network')
+const midgard = require("@pioneer-platform/midgard-client")
 
 export class Network {
     private blockchains: [];
@@ -29,7 +30,8 @@ export class Network {
             cosmos,
             binance,
             thor,
-            osmosis
+            osmosis,
+            midgard
         }
         this.init = async function () {
             let tag = TAG + " | init_network | "
@@ -46,6 +48,7 @@ export class Network {
                 await binance.init()
                 await thor.init()
                 await osmosis.init()
+                // await midgard.init() //TODO add init
 
                 return true
             } catch (e) {

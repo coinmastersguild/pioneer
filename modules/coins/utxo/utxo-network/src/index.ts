@@ -187,7 +187,7 @@ let init_network = async function (servers:any) {
         if(servers){
             const unchainedServers = servers.filter((server: { type: string; }) => server.type === 'unchained');
             //log.debug(tag,"unchainedServers: ",unchainedServers)
-            unchained = await Unchained.init(unchainedServers)            
+            unchained = await Unchained.init()            
         } else {
             unchained = await Unchained.init()
         }

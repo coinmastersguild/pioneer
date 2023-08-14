@@ -15,11 +15,13 @@ class Pioneer {
     client: any;
     pioneer: any;
     spec: any;
+    private timeout: number;
 
-    constructor(spec: any, config: { queryKey: any; }) {
+    constructor(spec: any, config: { queryKey: any, timeout: number } ) {
         this.spec = spec;
         this.queryKey = config.queryKey;
         this.pioneer = {};
+        this.timeout = config.queryKey || 45000;
     }
 
     async init() {
@@ -31,6 +33,9 @@ class Pioneer {
                 requestInterceptor: (req: { headers: { Authorization: any; }; }) => {
                     req.headers.Authorization = this.queryKey;
                     return req;
+                },    
+                http: {
+                    timeout: 10000 // 10 seconds
                 }
             });
 
@@ -61,7 +66,7 @@ class Pioneer {
             });
             return this.pioneer;
         } catch (e) {
-            console.error(e);
+            console.error(TAG+ 'error: ',e);
             throw e;
         }
     }

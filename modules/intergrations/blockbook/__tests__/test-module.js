@@ -105,7 +105,7 @@ let servers = [
 let run_test = async function(){
     try{
         //
-        await network.init(servers)
+        await network.init()
 
         // network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
         //     .then(function(resp){

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-network",
-  "version": "8.1.47",
+  "version": "8.1.51",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -17,7 +17,9 @@
     "@pioneer-platform/binance-network": "^8.1.28",
     "@pioneer-platform/cosmos-network": "^8.1.26",
     "@pioneer-platform/eth-network": "^8.1.76",
+    "@pioneer-platform/midgard-client": "^8.1.37",
     "@pioneer-platform/osmosis-network": "^8.1.43",
+    "@pioneer-platform/pioneer-caip": "^8.1.79",
     "@pioneer-platform/pioneer-types": "^8.1.55",
     "@pioneer-platform/ripple-network": "^8.1.52",
     "@pioneer-platform/thor-network": "^8.1.45",
