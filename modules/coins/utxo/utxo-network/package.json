@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/utxo-network",
-  "version": "8.1.79",
+  "version": "8.1.80",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -32,5 +32,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
   },
-  "gitHead": "b4866513eb6aac99bf1e4ce6b567c1e7339415ad"
+  "gitHead": "f5821b1f9f7a046d20b51046c93b0c0c2513f48b"
 }
