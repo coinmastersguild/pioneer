@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/osmosis-tx-builder",
-  "version": "8.1.26",
+  "version": "8.1.27",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -22,5 +22,5 @@
     "protobufjs": "^6.11.2",
     "tendermint-tx-codec": "^1.0.0"
   },
-  "gitHead": "214d5ad80185eb1369c9c09353272a51c8772579"
+  "gitHead": "8330383b5c83967ab5ec4d135b50d5e3be504215"
 }
