@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/ripple-network",
-  "version": "8.1.54",
+  "version": "8.1.55",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
