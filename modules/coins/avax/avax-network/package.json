@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/avax-network",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -38,5 +38,5 @@
   ],
   "author": "Bithighlander <pioneer@gmail.com>",
   "license": "GPL",
-  "gitHead": "a87c5aa08606ed45ca55c2bb3586a7617efe3b2d"
+  "gitHead": "214d5ad80185eb1369c9c09353272a51c8772579"
 }
