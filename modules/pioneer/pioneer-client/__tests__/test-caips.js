@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -82,9 +82,11 @@ const runTest = async () => {
         // console.log("chainId_map: ",chainId_map)
         // console.log("name_map: ",name_map)
 
-        let asset = await pioneer.GetAsset({symbol:"USDT"})
-        console.log("asset: ",asset.data)
-        console.log("asset: ",asset.data[0].caip)
+
+
+        // let asset = await pioneer.GetAsset({symbol:"USDT"})
+        // console.log("asset: ",asset.data)
+        // console.log("asset: ",asset.data[0].caip)
 
         // let asset = await pioneer.AssetByString({name})
         // console.log("asset: ",asset.data)
@@ -98,43 +100,50 @@ const runTest = async () => {
         // console.log("blockchain: ",blockchain.data)
         // console.log("blockchain: ",blockchain.data[0].caip)
 
-        const COIN_MAP_LONG = {
-            BTC: "bitcoin",
-            ATOM: "cosmos",
-            OSMO: "osmosis",
-            // BTCT: "testnet",
-            BCH: "bitcoincash",
-            LTC: "litecoin",
-            DASH: "dash",
-            DGB: "digiByte",
-            DOGE: "dogecoin",
-            RUNE: "thorchain",
-            ETH: "ethereum",
-            AVAX: "avalanche",
-            ADA: "cardano",
-            BNB: "binance",
-            EOS: "eos",
-            FIO: "fio",
-        };
-        let symbol_map = {}
-        let long_map = {}
-        for(let i = 0; i < Object.keys(COIN_MAP_LONG).length; i++){
-            let name = Object.keys(COIN_MAP_LONG)[i]
-            let long = COIN_MAP_LONG[name]
-            console.log("name: ",name)
-            let asset = await pioneer.GetAsset({symbol:name})
-            console.log("asset: ",asset.data)
-            console.log("asset: ",asset.data[0].caip)
-            symbol_map[name] = asset.data[0].caip
-            long_map[long] = asset.data[0].caip
-        }
-        console.log("symbol_map: ",symbol_map)
-        console.log("long_map: ",long_map)
-        
+        // const COIN_MAP_LONG = {
+        //     BTC: "bitcoin",
+        //     ATOM: "cosmos",
+        //     OSMO: "osmosis",
+        //     // BTCT: "testnet",
+        //     BCH: "bitcoincash",
+        //     LTC: "litecoin",
+        //     DASH: "dash",
+        //     DGB: "digiByte",
+        //     DOGE: "dogecoin",
+        //     RUNE: "thorchain",
+        //     ETH: "ethereum",
+        //     AVAX: "avalanche",
+        //     ADA: "cardano",
+        //     BNB: "binance",
+        //     EOS: "eos",
+        //     FIO: "fio",
+        // };
+        // let symbol_map = {}
+        // let long_map = {}
+        // for(let i = 0; i < Object.keys(COIN_MAP_LONG).length; i++){
+        //     let name = Object.keys(COIN_MAP_LONG)[i]
+        //     let long = COIN_MAP_LONG[name]
+        //     console.log("name: ",name)
+        //     let asset = await pioneer.GetAsset({symbol:name})
+        //     console.log("asset: ",asset.data)
+        //     console.log("asset: ",asset.data[0].caip)
+        //     symbol_map[name] = asset.data[0].caip
+        //     long_map[long] = asset.data[0].caip
+        // }
+        // console.log("symbol_map: ",symbol_map)
+        // console.log("long_map: ",long_map)
+        //
         //get a blockchain by symbol
         // let blockchain = await pioneer.GetBlockchain({symbol})
         // console.log("blockchain: ",blockchain.data)
         // console.log("blockchain: ",blockchain.data[0].caip)
+        // caip = "placeholder:caip:binance:native:bnb-beacon-chain"
+
+        console.log(caip)
+
+        //assetByCaip
+        let asset = await pioneer.AssetByCaip({caip})
+        console.log("asset: ",asset.data)
 
         // let blockchain = await pioneer.BlockchainByCaip({caip})
         // console.log("blockchain: ",blockchain.data)

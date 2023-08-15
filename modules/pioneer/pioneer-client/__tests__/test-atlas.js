@@ -40,17 +40,38 @@ const runTest = async () => {
         // console.log("info: ",info.data.total)
 
         //searchBlockchains
+        // let search = {
+        //     limit:1000,
+        //     skip:0,
+        //     collection:"blockchains",
+        // }
+        
+        /*
+            collection: string;
+            limit: number;
+            skip: number;
+            sortBy?: string;
+            sortOrder?: string;
+            filterTags?: string[];
+            isWhitelisted?: boolean;
+            blockchain?: string;
+         */
+        
         let search = {
-            limit:1000,
+            limit:100,
             skip:0,
-            collection:"blockchains",
+            collection:"assets",
+            searchQuery:"ether",
+            searchFields:["symbol"],
         }
+
         let info = await pioneer.SearchAtlas(search)
-        console.log("info: ",info.data)
-        console.log("info: ",info.data.results[0].score)
-        console.log("info: ",info.data.results[1].score)
-        console.log("info: ",info.data.results[100].score)
-        console.log("info: ",info.data.total)
+        // console.log("info: ",info.data)
+        console.log("info: ",info.data.results)
+        console.log("info: ",info.data.results[0].name)
+        console.log("info: ",info.data.results[1].name)
+        console.log("info: ",info.data.results[99].name)
+        console.log("total: ",info.data.total)
     } catch (e) {
         console.error(e);
     }
