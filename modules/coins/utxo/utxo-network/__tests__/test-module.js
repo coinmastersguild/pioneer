@@ -26,17 +26,17 @@ let run_test = async function(){
         await network.init(servers)
 
         //getPubkeyInfo
-        // network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
-        //     .then(function(resp){
-        //         console.log("resp: ",resp)
-        //         //console.log("resp: ",JSON.stringify(resp))
-        //     })
-
-        network.getFee("DASH")
+        network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
             .then(function(resp){
                 console.log("resp: ",resp)
                 //console.log("resp: ",JSON.stringify(resp))
             })
+
+        // network.getFee("DASH")
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
         
         // network.getFee("BCH")
         //     .then(function(resp){

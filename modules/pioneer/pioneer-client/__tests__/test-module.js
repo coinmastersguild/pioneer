@@ -127,9 +127,13 @@ const runTest = async () => {
          */
         
         //get a tested node for eth chainId
-        let chainId = 100
-        let result = await pioneer.GetEvmNode({chainId});
-        console.log("result: ",result.data)
+        // let chainId = 100
+        // let result = await pioneer.GetEvmNode({chainId});
+        // console.log("result: ",result.data)
+
+        let xpub = "xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe"
+        let newAddyIndex = await pioneer.GetChangeAddress({network:'DASH',xpub})
+        console.log("newAddyIndex: ",newAddyIndex)
 
         //search asset
         // let asset = "Ethereum Mainnet"

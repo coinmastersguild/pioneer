@@ -16,10 +16,14 @@ const nodes = require("@pioneer-platform/nodes")
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
-    })
+    }),
+    timeout: 30000 // 10 seconds
 });
 const axiosRetry = require('axios-retry');
-
+let NOW_NODES_API = process.env['NOW_NODES_API']
+if(!NOW_NODES_API) throw Error("NOW_NODES_API is required")
+    
+    
 axiosRetry(axios, {
     retries: 3, // number of retries
     retryDelay: (retryCount: number) => {
@@ -335,18 +339,19 @@ let get_transaction = async function(coin:string,txid:string){
 let get_utxos_by_xpub = async function(coin:string,xpub:string){
     let tag = TAG + " | FA get_utxos_by_xpub | "
     try{
-
-        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
-        //console.log("url: ",url)
-
+        log.info(tag,"get_utxos_by_xpub: ",BLOCKBOOK_URLS)
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/"+NOW_NODES_API+"/api/v2/utxo/"+xpub+"?confirmed=false"
+        console.log("url: ",url)
+        
+        
         let body = {
             method: 'GET',
             url,
-            headers: {
-                'api-key': process.env['NOW_NODES_API'],
-                'content-type': 'application/json',
-                'User-Agent': fakeUa()
-            },
+            // headers: {
+            //     'api-key': NOW_NODES_API,
+            //     'content-type': 'application/json',
+            //     'User-Agent': fakeUa()
+            // },
         };
         let resp = await axios(body)
 
