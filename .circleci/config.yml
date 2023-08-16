@@ -18,15 +18,21 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "make && make bump && make publish"
+          name: Install dependencies
+          command: npm i
+      - run:
+          command: "make && make bump"
+      - run:
+          name: Publish on master branch
+          command: |
+            if [ "$CIRCLE_BRANCH" == "master" ]; then
+              make publish
+            fi
 
 workflows:
   version: 2.1
-  build-master:
+  build:
     jobs:
       - make:
           name: make
           env: prod
-          filters:
-            branches:
-              only: master
