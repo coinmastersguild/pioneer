@@ -18,12 +18,15 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          command: "make && make test"
+          command: "make && make bump && make publish"
 
 workflows:
-  version: 2
+  version: 2.1
   build-master:
     jobs:
       - make:
           name: make
           env: prod
+          filters:
+            branches:
+              only: master

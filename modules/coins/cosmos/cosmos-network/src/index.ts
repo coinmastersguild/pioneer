@@ -229,7 +229,7 @@ let get_balance = async function(address:string){
         let output = 0
         //
         let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.info(tag,"accountInfo: ",accountInfo.data)
+        log.debug(tag,"accountInfo: ",accountInfo.data)
 
         if(accountInfo && accountInfo.data && accountInfo.data.result){
             for(let i = 0; i < accountInfo.data.result.length; i++){
@@ -267,7 +267,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -559,14 +559,14 @@ let get_txs_by_height = async function(height:string){
 
         //console.log("endpoint: ", URL_GAIAD+'/txs?tx.height='+height)
         // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/txs?tx.height='+height})
-        // log.info(tag,"txInfo: ",txInfo.data)
+        // log.debug(tag,"txInfo: ",txInfo.data)
 
         // console.log('endpoint: ',URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27')
         // let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=block.height=%27'+height+'%27'})
 
         let txInfo = await axios({method:'GET',url: URL_GAIAD+'/cosmos/tx/v1beta1/txs?events=tx.height='+height})
-        log.info(tag,"txInfo: ",txInfo)
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data.tx_responses
     }catch(e){
@@ -668,7 +668,7 @@ let encode_transaction = async function(tx:string){
             }
 
             let urlRemote = URL_GAIAD+ '/txs/encode'
-            log.info(tag,"urlRemote: ",urlRemote)
+            log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
                 headers: {
@@ -678,7 +678,7 @@ let encode_transaction = async function(tx:string){
                 method: 'POST',
                 data: payload,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
 
         // @ts-ignore
         }catch(e:any){
@@ -788,7 +788,7 @@ let broadcast_transaction = async function(tx:string){
         try{
             //convert sdtTx to proto
             // let broadcastTx = await txEncoder.encodeTx(tx)
-            // log.info(tag,"broadcastTx: ",broadcastTx)
+            // log.debug(tag,"broadcastTx: ",broadcastTx)
 
             let payload = {
                 // "tx_bytes": btoa(tx),
@@ -799,7 +799,7 @@ let broadcast_transaction = async function(tx:string){
 
             let urlRemote = URL_GAIAD+ '/cosmos/tx/v1beta1/txs'
             // let urlRemote = URL_GAIAD+ '/txs'
-            log.info(tag,"urlRemote: ",urlRemote)
+            log.debug(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
                 headers: {
@@ -809,13 +809,13 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: payload,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
 
             //push to seed
             // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync?tx='+tx
-            // log.info(tag,"urlRemote: ",urlRemote)
+            // log.debug(tag,"urlRemote: ",urlRemote)
             // let result2 = await axios({
             //     url: urlRemote,
             //     headers: {
@@ -824,11 +824,11 @@ let broadcast_transaction = async function(tx:string){
             //     },
             //     method: 'GET'
             // })
-            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             // if(result2.data.txhash) output.txid = result2.data.txhash
 
             // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync'
-            // log.info(tag,"urlRemote: ",urlRemote)
+            // log.debug(tag,"urlRemote: ",urlRemote)
             // let result2 = await axios({
             //     url: urlRemote,
             //     headers: {
@@ -838,7 +838,7 @@ let broadcast_transaction = async function(tx:string){
             //     method: 'POST',
             //     data: tx,
             // })
-            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             // if(result2.data.txhash) output.txid = result2.data.txhash
 
             //verify success
@@ -977,7 +977,7 @@ let get_node_info_verbose = async function(){
             },
             url: URL_GAIAD+'/node_info'
         })
-        log.info(tag,"nodeInfo: ",nodeInfo.data)
+        log.debug(tag,"nodeInfo: ",nodeInfo.data)
 
 
         // output = nodeInfo.data

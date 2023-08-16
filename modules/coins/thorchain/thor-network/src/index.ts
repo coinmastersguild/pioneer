@@ -161,7 +161,7 @@ let broadcast_transaction = async function(tx:string){
             //
             // let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'
             // // let urlRemote = URL_GAIAD+ '/txs'
-            // log.info(tag,"urlRemote: ",urlRemote)
+            // log.debug(tag,"urlRemote: ",urlRemote)
             // let result2 = await axios({
             //     url: urlRemote,
             //     headers: {
@@ -171,8 +171,8 @@ let broadcast_transaction = async function(tx:string){
             //     method: 'POST',
             //     data: payload,
             // })
-            // log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            // log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            // log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             // if(result2.data.txhash) output.txid = result2.data.txhash
 
             //push to seed
@@ -189,7 +189,7 @@ let broadcast_transaction = async function(tx:string){
             //verify success
             if(result2.data.raw_log && result2.data.raw_log !== '[]'){
                 let logSend = result2.data.raw_log
-                log.info(tag,"logSend: ",logSend)
+                log.debug(tag,"logSend: ",logSend)
                 output.success = false
                 output.error = logSend
             } else {

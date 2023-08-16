@@ -6,7 +6,7 @@ declare const blockbook: any;
 declare let zapper: any;
 declare let shortListSymbolToCaip: any, evmCaips: any;
 declare const networks: any;
-declare let supportedBlockchains: any, supportedAssets: any, getPaths: any, get_address_from_xpub: any, getNativeAssetForBlockchain: any;
+declare let get_address_from_xpub: any, getNativeAssetForBlockchain: any;
 declare var numbro: any;
 declare const log: any;
 declare const subscriber: any, publisher: any, redis: any, redisQueue: any;
@@ -34,9 +34,9 @@ declare let get_and_verify_pubkeys: (username: string, context?: string) => Prom
 }>;
 declare let register_zpub: (username: string, pubkey: any, context: string) => Promise<any>;
 declare let register_xpub: (username: string, pubkey: any, context: string) => Promise<{
-    pubkeys: any;
+    nfts: any;
     balances: any;
 }>;
 declare let register_address: (username: string, pubkey: any, context: string) => Promise<any>;
 declare let update_pubkeys: (username: string, pubkeys: any, context: string) => Promise<any>;
-declare const register_pubkeys: (username: string, pubkeys: any, context: string) => Promise<any>;
+declare const register_pubkeys: (username: string, pubkeys: any) => Promise<any>;

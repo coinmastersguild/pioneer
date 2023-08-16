@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/ripple-network",
-  "version": "8.1.51",
+  "version": "8.1.55",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -28,5 +28,5 @@
     "typescript": "^5.0.2",
     "xrpl": "^2.5.0"
   },
-  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

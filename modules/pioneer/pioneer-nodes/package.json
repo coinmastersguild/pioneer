@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/nodes",
-  "version": "8.1.31",
+  "version": "8.1.38",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -34,5 +34,5 @@
     "ts-jest": "^29.0.5",
     "typescript": "^5.0.2"
   },
-  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

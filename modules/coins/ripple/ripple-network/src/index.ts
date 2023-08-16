@@ -156,7 +156,7 @@ let broadcast_transaction = async function(tx:string){
     let tag = TAG + " | broadcast_transaction | "
     let output:any = {}
     try{
-        log.info(tag,"CHECKPOINT 1")
+        log.debug(tag,"CHECKPOINT 1")
 
         const buffer = Buffer.from(tx, 'base64');
         const bufString = buffer.toString('hex');
@@ -175,7 +175,7 @@ let broadcast_transaction = async function(tx:string){
         }
 
         let urlRemote = URL_NODE+ '/'
-        log.info(tag,"urlRemote: ",urlRemote)
+        log.debug(tag,"urlRemote: ",urlRemote)
         let result = await axios({
             url: urlRemote,
             headers: {
@@ -183,8 +183,8 @@ let broadcast_transaction = async function(tx:string){
             method: 'POST',
             data,
         })
-        log.info(tag,'** Broadcast ** REMOTE: result: ', result.data)
-        log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result.data))
+        log.debug(tag,'** Broadcast ** REMOTE: result: ', result.data)
+        log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result.data))
 
         //submit payment
         // let payload = {

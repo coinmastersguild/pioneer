@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/unchained",
-  "version": "8.1.62",
+  "version": "8.1.66",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.1.31",
-    "@pioneer-platform/nodes": "^8.1.31",
-    "@pioneer-platform/pioneer-client": "^9.0.13",
+    "@pioneer-platform/nodes": "^8.1.37",
+    "@pioneer-platform/pioneer-client": "^9.0.18",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",
     "axios": "^0.21.4",
@@ -28,5 +28,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
   },
-  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

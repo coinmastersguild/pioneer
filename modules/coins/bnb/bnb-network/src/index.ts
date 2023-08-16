@@ -422,7 +422,7 @@ let get_account = async function(address:string){
             method: 'GET'
         })
         let balanceInfo = result.data
-        log.info('balanceInfo: ', balanceInfo)
+        log.debug('balanceInfo: ', balanceInfo)
 
 
         return balanceInfo
@@ -529,7 +529,7 @@ let broadcast_transaction = async function(rawTx:string){
         //let rawTx = sdk.amino.marshalBinary(tx)
         //rawTx = rawTx.toString("hex")
         // let rawTxHex = Buffer.from(rawTx, "hex")
-        // log.info("rawTxHex: ",rawTxHex)
+        // log.debug("rawTxHex: ",rawTxHex)
         // let rawTxHexStr = rawTxHex.toString('hex');
 
 
@@ -543,7 +543,7 @@ let broadcast_transaction = async function(rawTx:string){
         //tx: Buffer.from(encoded, "hex")
         ///broadcast_tx_sync?tx=
         // let resultBroadcast = await axios({method:'GET',url:URL_REMOTE+'/broadcast_tx_sync?tx='+rawTxHexStr})
-        // log.info("resultBroadcast: ",resultBroadcast.data)
+        // log.debug("resultBroadcast: ",resultBroadcast.data)
 
 
         const url = 'https://dex.binance.org/api/v1/broadcast?sync=true';
@@ -561,7 +561,7 @@ let broadcast_transaction = async function(rawTx:string){
             console.error(error);
         }
         
-        // log.info("resultBroadcast: ",resultBroadcast)
+        // log.debug("resultBroadcast: ",resultBroadcast)
 
         // const buffer = Buffer.from(rawTx, 'hex');
         // // @ts-ignore
@@ -596,7 +596,7 @@ let broadcast_transaction = async function(rawTx:string){
         //     url: url,
         //     method: 'GET'
         // })
-        // log.info('result: ', result.data)
+        // log.debug('result: ', result.data)
         //
         // if(result.data[0].hash){
         //     log.debug(" success! ")

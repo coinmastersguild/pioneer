@@ -94,7 +94,7 @@ var networks = {
     'ANY': require('@pioneer-platform/utxo-network'),
     'RUNE': require('@pioneer-platform/thor-network'),
 };
-var _b = require('@pioneer-platform/cointools'), supportedBlockchains = _b.supportedBlockchains, supportedAssets = _b.supportedAssets, getPaths = _b.getPaths, get_address_from_xpub = _b.get_address_from_xpub, getNativeAssetForBlockchain = _b.getNativeAssetForBlockchain;
+var _b = require('@pioneer-platform/cointools'), get_address_from_xpub = _b.get_address_from_xpub, getNativeAssetForBlockchain = _b.getNativeAssetForBlockchain;
 //const bcrypt = require('bcryptjs');
 var numbro = require("numbro");
 var log = require('@pioneer-platform/loggerdog')();
@@ -124,11 +124,11 @@ var onStart = function () {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
-                    log.info(tag, "starting...");
+                    log.debug(tag, "starting...");
                     return [4 /*yield*/, nodesDB.find({ type: 'blockbook' })];
                 case 2:
                     servers = _a.sent();
-                    log.info(tag, "servers: ", servers.length);
+                    log.debug(tag, "servers: ", servers.length);
                     return [4 /*yield*/, blockbook.init(servers)
                         // networks.ANY.init('full')
                     ];
@@ -165,10 +165,10 @@ module.exports = {
             });
         });
     },
-    register: function (username, pubkeys, context) {
+    register: function (username, pubkeys) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, register_pubkeys(username, pubkeys, context)];
+                return [2 /*return*/, register_pubkeys(username, pubkeys)];
             });
         });
     },
@@ -235,14 +235,14 @@ function setInCache(key, data, expiration) {
 var get_pubkey_balances = function (pubkey) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function () {
-        var tag, output, balances_1, nfts, positions, cacheKey, cachedData, balance, _c, cacheKeyZapper, cachedDataZapper, zapperInfo, cacheKeyAllPioneers, cachedAllPioneers, allPioneers, isPioneer, updatedUsername, pioneerImage, updatedUsername2, cacheKeyBlockbookInfo, cachedBlockbookInfo, blockbookInfo, cacheKeyNetwork, cachedDataNetwork, balanceNetwork, pubkeyInfo, saveActions, _loop_1, i, _loop_2, i, updateSuccess, e_2;
+        var tag, output, balances_1, nfts, positions, cacheKey, cachedData, balance, _c, cacheKeyZapper, cachedDataZapper, zapperInfo, cacheKeyAllPioneers, cachedAllPioneers, allPioneers, isPioneer, updatedUsername, pioneerImage, updatedUsername2, cacheKeyBlockbookInfo, cachedBlockbookInfo, blockbookInfo, cacheKeyNetwork, cachedDataNetwork, balanceNetwork, pubkeyInfo, _loop_1, i, e_2;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
                     tag = TAG + " | get_pubkey_balances | ";
                     _d.label = 1;
                 case 1:
-                    _d.trys.push([1, 41, , 42]);
+                    _d.trys.push([1, 35, , 36]);
                     output = {};
                     if (!pubkey.symbol && pubkey.asset)
                         pubkey.symbol = pubkey.asset;
@@ -264,7 +264,7 @@ var get_pubkey_balances = function (pubkey) {
                     balances_1 = [];
                     nfts = [];
                     positions = [];
-                    log.info(tag, " scanning pubkey: ", pubkey.pubkey);
+                    log.debug(tag, " scanning pubkey: ", pubkey.pubkey);
                     if (!(pubkey.type === "xpub" || pubkey.type === "zpub")) return [3 /*break*/, 7];
                     cacheKey = "balances:blockbook:getBalanceByXpub:".concat(pubkey.symbol, ":").concat(pubkey.pubkey);
                     return [4 /*yield*/, getFromCache(cacheKey)];
@@ -497,102 +497,30 @@ var get_pubkey_balances = function (pubkey) {
                     log.debug(tag, "nfts: ", pubkeyInfo.nfts.length);
                     log.debug(tag, "balances: ", balances_1);
                     log.debug(tag, "balances: ", balances_1.length);
-                    saveActions = [];
                     _loop_1 = function (i) {
-                        var balance, balanceIndex, assetInfo;
-                        var _e;
-                        return __generator(this, function (_f) {
-                            switch (_f.label) {
-                                case 0:
-                                    balance = balances_1[i];
-                                    balanceIndex = pubkeyInfo.balances.findIndex(function (e) { return e.symbol === balance.symbol; });
-                                    return [4 /*yield*/, assetsDB.findOne({ symbol: balance.symbol })];
-                                case 1:
-                                    assetInfo = _f.sent();
-                                    log.debug(tag, "assetInfo: ", assetInfo);
-                                    if (assetInfo) {
-                                        balance.caip = assetInfo.caip;
-                                        balance.image = assetInfo.image;
-                                        balance.assetCaip = assetInfo.caip;
-                                        balance.description = assetInfo.description;
-                                        balance.website = assetInfo.website;
-                                        balance.explorer = assetInfo.explorer;
-                                        balance.context = pubkey.context;
-                                    }
-                                    if (balanceIndex !== -1 && pubkeyInfo.balances[balanceIndex].balance !== balance.balance) {
-                                        saveActions.push({
-                                            updateOne: {
-                                                filter: { pubkey: pubkey.pubkey },
-                                                update: {
-                                                    $set: (_e = {}, _e["balances.".concat(balanceIndex)] = balance, _e),
-                                                },
-                                            },
-                                        });
-                                    }
-                                    else {
-                                        log.debug(tag, pubkey.context + ": balance not changed! ", balance.symbol);
-                                    }
-                                    return [2 /*return*/];
-                            }
-                        });
-                    };
-                    i = 0;
-                    _d.label = 35;
-                case 35:
-                    if (!(i < balances_1.length)) return [3 /*break*/, 38];
-                    return [5 /*yield**/, _loop_1(i)];
-                case 36:
-                    _d.sent();
-                    _d.label = 37;
-                case 37:
-                    i++;
-                    return [3 /*break*/, 35];
-                case 38:
-                    _loop_2 = function (i) {
                         var nft = nfts[i];
                         log.debug(tag, "pubkeyInfo.nfts: ", pubkeyInfo.nfts.length);
                         var existingNft = pubkeyInfo.nfts.find(function (e) { return e.name === nft.name; });
-                        if (!existingNft) {
-                            saveActions.push({
-                                updateOne: {
-                                    filter: { pubkey: pubkey.pubkey },
-                                    update: {
-                                        $addToSet: { nfts: nft }
-                                    }
-                                }
-                            });
-                        }
                     };
                     for (i = 0; i < nfts.length; i++) {
-                        _loop_2(i);
+                        _loop_1(i);
                     }
-                    if (!(saveActions.length > 0)) return [3 /*break*/, 40];
-                    return [4 /*yield*/, pubkeysDB.bulkWrite(saveActions, { ordered: false })];
-                case 39:
-                    updateSuccess = _d.sent();
-                    log.info(tag, "updateSuccess: ", updateSuccess);
-                    output.dbUpdate = updateSuccess;
-                    _d.label = 40;
-                case 40:
-                    //@TODO save transactions
-                    // Build output
-                    output.pubkeys = [pubkeyInfo];
                     output.balances = balances_1;
                     output.nfts = nfts;
                     output.success = true;
                     return [2 /*return*/, output];
-                case 41:
+                case 35:
                     e_2 = _d.sent();
                     console.error(tag, "e: ", e_2);
                     throw e_2;
-                case 42: return [2 /*return*/];
+                case 36: return [2 /*return*/];
             }
         });
     });
 };
 var get_and_rescan_pubkeys = function (username) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, pubkeysMongo, userInfo, blockchains, pubkeys, masters, i, pubkeyInfo, _loop_3, j, e_3;
+        var tag, pubkeysMongo, userInfo, blockchains, pubkeys, masters, i, pubkeyInfo, _loop_2, j, e_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -618,7 +546,7 @@ var get_and_rescan_pubkeys = function (username) {
                     for (i = 0; i < pubkeysMongo.length; i++) {
                         pubkeyInfo = pubkeysMongo[i];
                         delete pubkeyInfo._id;
-                        _loop_3 = function (j) {
+                        _loop_2 = function (j) {
                             var context = userInfo.wallets[i];
                             if (pubkeyInfo.type === 'zpub') {
                                 //if context found in tags
@@ -642,7 +570,7 @@ var get_and_rescan_pubkeys = function (username) {
                         };
                         //for each wallet by user
                         for (j = 0; j < userInfo.wallets.length; j++) {
-                            _loop_3(j);
+                            _loop_2(j);
                         }
                     }
                     return [2 /*return*/, { pubkeys: pubkeys, masters: masters }];
@@ -702,11 +630,11 @@ var get_and_verify_pubkeys = function (username, context) {
                         synced.push(pubkeyInfo.blockchain);
                     // log.debug(tag,"balances: ",balances)
                     log.debug(tag, pubkeyInfo.symbol + " balances: ", balances);
-                    log.info(tag, context + ": " + pubkeyInfo.symbol + " balances: ", balances.balances.length);
+                    log.debug(tag, context + ": " + pubkeyInfo.symbol + " balances: ", balances.balances.length);
                     if (balances && balances.balances) {
                         pubkeyInfo.balances = balances.balances;
                         allBalances = allBalances.concat(balances.balances);
-                        log.info(tag, context + ": " + pubkeyInfo.symbol + " allBalances: ", allBalances.length);
+                        log.debug(tag, context + ": " + pubkeyInfo.symbol + " allBalances: ", allBalances.length);
                     }
                     if (balances && balances.nfts)
                         pubkeys.nfts = balances.nfts;
@@ -727,7 +655,7 @@ var get_and_verify_pubkeys = function (username, context) {
                     for (i = 0; i < blockchains.length; i++) {
                         blockchain = blockchains[i];
                         if (synced.indexOf(blockchain) === -1) {
-                            log.info(tag, context + " blockchain not synced: ", blockchain);
+                            log.debug(tag, context + " blockchain not synced: ", blockchain);
                             isSynced = false;
                             break;
                         }
@@ -797,7 +725,7 @@ var register_zpub = function (username, pubkey, context) {
                 case 3:
                     result = _a.sent();
                     log.debug(result);
-                    return [2 /*return*/, queueId];
+                    return [2 /*return*/, result];
                 case 4:
                     e_5 = _a.sent();
                     console.error(tag, "e: ", e_5);
@@ -809,7 +737,7 @@ var register_zpub = function (username, pubkey, context) {
 };
 var register_xpub = function (username, pubkey, context) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, queueId, account, index, address, work, _a, pubkeys, balances, e_6;
+        var tag, queueId, account, index, address, work, _a, balances, nfts, e_6;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -853,10 +781,9 @@ var register_xpub = function (username, pubkey, context) {
                     queue.createWork("pioneer:pubkey:ingest", work);
                     return [4 /*yield*/, get_pubkey_balances(work)];
                 case 3:
-                    _a = _b.sent(), pubkeys = _a.pubkeys, balances = _a.balances;
-                    log.debug(tag, "pubkeys: ", pubkeys.length);
-                    log.debug(tag, "balances: ", balances.length);
-                    return [2 /*return*/, { pubkeys: pubkeys, balances: balances }];
+                    _a = _b.sent(), balances = _a.balances, nfts = _a.nfts;
+                    log.info(tag, "balances: ", balances.length);
+                    return [2 /*return*/, { nfts: nfts, balances: balances }];
                 case 4:
                     e_6 = _b.sent();
                     console.error(tag, "e: ", e_6);
@@ -897,8 +824,8 @@ var register_address = function (username, pubkey, context) {
                     return [4 /*yield*/, get_pubkey_balances(work)];
                 case 2:
                     result = _a.sent();
-                    log.info(tag, "result: ", result);
-                    return [2 /*return*/, queueId];
+                    log.debug(tag, "result: ", result);
+                    return [2 /*return*/, result];
                 case 3:
                     e_7 = _a.sent();
                     console.error(tag, "e: ", e_7);
@@ -911,14 +838,13 @@ var register_address = function (username, pubkey, context) {
 var update_pubkeys = function (username, pubkeys, context) {
     return __awaiter(this, void 0, void 0, function () {
         var tag, saveActions, output, allPubkeys, PubkeyMap, i, pubkeyInfo, allBalances, allKnownPubkeys, knownPubkeys_1, i, unknown, i, pubkey, pubkeyInfo, nativeAsset, entryMongo, result, result, result, keyExists, pushTagMongo, resultSave, e_8;
-        var _a, _b, _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     tag = TAG + " | update_pubkeys | ";
-                    _d.label = 1;
+                    _a.label = 1;
                 case 1:
-                    _d.trys.push([1, 20, , 21]);
+                    _a.trys.push([1, 20, , 21]);
                     log.debug(tag, "input: ", { username: username, pubkeys: pubkeys, context: context });
                     saveActions = [];
                     output = {};
@@ -937,7 +863,7 @@ var update_pubkeys = function (username, pubkeys, context) {
                     log.debug(tag, "allPubkeys: ", allPubkeys);
                     return [4 /*yield*/, pubkeysDB.find({ "pubkey": { "$in": allPubkeys } })];
                 case 2:
-                    allKnownPubkeys = _d.sent();
+                    allKnownPubkeys = _a.sent();
                     log.debug(tag, "allKnownPubkeys: ", allKnownPubkeys.length);
                     knownPubkeys_1 = [];
                     for (i = 0; i < allKnownPubkeys.length; i++) {
@@ -950,7 +876,7 @@ var update_pubkeys = function (username, pubkeys, context) {
                     log.debug(tag, "unknown: ", unknown);
                     log.debug(tag, "Registering pubkeys : ", unknown.length);
                     i = 0;
-                    _d.label = 3;
+                    _a.label = 3;
                 case 3:
                     if (!(i < unknown.length)) return [3 /*break*/, 17];
                     pubkey = unknown[i];
@@ -1000,10 +926,9 @@ var update_pubkeys = function (username, pubkeys, context) {
                     saveActions.push({ insertOne: entryMongo });
                     return [4 /*yield*/, register_xpub(username, pubkeyInfo, context)];
                 case 4:
-                    result = _d.sent();
+                    result = _a.sent();
                     entryMongo.balances = result.balances;
                     allBalances.push.apply(allBalances, result.balances);
-                    (_a = output.pubkeys).push.apply(_a, result.pubkeys);
                     return [3 /*break*/, 10];
                 case 5:
                     if (!(pubkeyInfo.type === "zpub" || pubkeyInfo.zpub)) return [3 /*break*/, 7];
@@ -1017,35 +942,33 @@ var update_pubkeys = function (username, pubkeys, context) {
                     saveActions.push({ insertOne: entryMongo });
                     return [4 /*yield*/, register_zpub(username, pubkeyInfo, context)];
                 case 6:
-                    result = _d.sent();
+                    result = _a.sent();
                     entryMongo.balances = result.balances;
                     allBalances.push.apply(allBalances, result.balances);
-                    (_b = output.pubkeys).push.apply(_b, result.pubkeys);
                     return [3 /*break*/, 10];
                 case 7:
                     if (!(pubkeyInfo.type === "address")) return [3 /*break*/, 9];
                     entryMongo.pubkey = pubkeyInfo.pubkey;
                     return [4 /*yield*/, register_address(username, pubkeyInfo, context)];
                 case 8:
-                    result = _d.sent();
+                    result = _a.sent();
                     entryMongo.balances = result.balances;
                     allBalances.push.apply(allBalances, result.balances);
-                    (_c = output.pubkeys).push.apply(_c, result.pubkeys);
                     return [3 /*break*/, 10];
                 case 9:
                     log.error("Unhandled type: ", pubkeyInfo.type);
-                    _d.label = 10;
+                    _a.label = 10;
                 case 10:
                     //verify write
                     log.debug(tag, "entryMongo: ", entryMongo);
                     return [4 /*yield*/, pubkeysDB.findOne({ pubkey: entryMongo.pubkey })];
                 case 11:
-                    keyExists = _d.sent();
+                    keyExists = _a.sent();
                     if (!keyExists) return [3 /*break*/, 13];
                     log.debug(tag, "Key already registered! key: ", entryMongo);
                     return [4 /*yield*/, pubkeysDB.update({ pubkey: entryMongo.pubkey }, { $addToSet: { tags: { $each: [context, username] } } })];
                 case 12:
-                    pushTagMongo = _d.sent();
+                    pushTagMongo = _a.sent();
                     log.debug(tag, "pushTagMongo: ", pushTagMongo);
                     return [3 /*break*/, 16];
                 case 13:
@@ -1055,16 +978,16 @@ var update_pubkeys = function (username, pubkeys, context) {
                     throw Error("105: unable to save invalid pubkey!");
                 case 14: return [4 /*yield*/, pubkeysDB.insert(entryMongo)];
                 case 15:
-                    resultSave = _d.sent();
+                    resultSave = _a.sent();
                     log.debug(tag, "resultSave: ", resultSave);
-                    _d.label = 16;
+                    _a.label = 16;
                 case 16:
                     i++;
                     return [3 /*break*/, 3];
                 case 17: return [3 /*break*/, 19];
                 case 18:
                     log.debug(tag, " No new pubkeys! ");
-                    _d.label = 19;
+                    _a.label = 19;
                 case 19:
                     log.debug(tag, "output: ", output);
                     if (allBalances.length === 0) {
@@ -1075,7 +998,7 @@ var update_pubkeys = function (username, pubkeys, context) {
                     log.debug(tag, " return object: ", output);
                     return [2 /*return*/, output];
                 case 20:
-                    e_8 = _d.sent();
+                    e_8 = _a.sent();
                     console.error(tag, "e: ", e_8);
                     throw e_8;
                 case 21: return [2 /*return*/];
@@ -1083,29 +1006,40 @@ var update_pubkeys = function (username, pubkeys, context) {
         });
     });
 };
-var register_pubkeys = function (username, pubkeys, context) {
+/*
+    Rules:
+
+    only go to network if no pubkey exists
+
+    do not sync balances here (we only sync balances on context change)
+
+ */
+var register_pubkeys = function (username, pubkeys) {
     return __awaiter(this, void 0, void 0, function () {
-        var tag, saveActions, allBalances, output, i, pubkeyInfo, nativeAsset, entryMongo, xpub, result, zpub, result, result, keyExists, pushTagMongo, saveMongo, e_9;
-        var _a, _b, _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var tag, saveActions, allBalances, output, i, pubkeyInfo, nativeAsset, pubkeyExists, entryMongo, xpub, result, zpub, result, result, action, pushTagMongo, saveMongoBulk, e_9, allPubkeys, i, pubkeyInfo, e_10;
+        var _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
                     tag = TAG + " | register_pubkeys | ";
-                    _d.label = 1;
+                    _c.label = 1;
                 case 1:
-                    _d.trys.push([1, 17, , 18]);
-                    log.debug(tag, "input: ", { username: username, pubkeys: pubkeys, context: context });
+                    _c.trys.push([1, 20, , 21]);
+                    log.debug(tag, "input: ", { username: username, pubkeys: pubkeys });
                     saveActions = [];
                     allBalances = [];
                     output = {};
                     output.pubkeys = [];
                     output.balances = [];
+                    output.nfts = [];
                     i = 0;
-                    _d.label = 2;
+                    _c.label = 2;
                 case 2:
-                    if (!(i < pubkeys.length)) return [3 /*break*/, 16];
+                    if (!(i < pubkeys.length)) return [3 /*break*/, 14];
                     pubkeyInfo = pubkeys[i];
-                    log.info(tag, "pubkeyInfo: ", pubkeyInfo);
+                    log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
+                    if (!pubkeyInfo.blockchain)
+                        throw Error("Invalid pubkey required field: blockchain");
                     nativeAsset = getNativeAssetForBlockchain(pubkeyInfo.blockchain);
                     if (!nativeAsset)
                         throw Error("104: invalid pubkey! unsupported by coins module!");
@@ -1113,19 +1047,23 @@ var register_pubkeys = function (username, pubkeys, context) {
                         throw Error("104: invalid pubkey! missing pubkey!");
                     if (!pubkeyInfo.type)
                         throw Error("104: invalid pubkey! missing type!");
-                    //TODO verify type is in enums
-                    //hack
                     if (!pubkeyInfo.symbol)
                         pubkeyInfo.symbol = nativeAsset;
-                    log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
-                    if (!pubkeyInfo.blockchain)
-                        throw Error("Invalid pubkey required field: blockchain");
                     if (!pubkeyInfo.script_type)
                         throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.blockchain);
                     if (!pubkeyInfo.network)
                         throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.blockchain);
                     if (!pubkeyInfo.master)
                         throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.blockchain);
+                    if (!pubkeyInfo.path)
+                        throw Error("Invalid pubkey required field: path coin:" + pubkeyInfo.blockchain);
+                    if (!pubkeyInfo.context)
+                        throw Error("Invalid pubkey required field: context:" + pubkeyInfo.blockchain);
+                    return [4 /*yield*/, pubkeysDB.findOne({ pubkey: pubkeyInfo.pubkey })];
+                case 3:
+                    pubkeyExists = _c.sent();
+                    log.info(tag, "pubkeyExists: ", pubkeyExists);
+                    if (!!pubkeyExists) return [3 /*break*/, 11];
                     entryMongo = {
                         pubkey: pubkeyInfo.pubkey,
                         type: pubkeyInfo.type,
@@ -1137,9 +1075,9 @@ var register_pubkeys = function (username, pubkeys, context) {
                         script_type: pubkeyInfo.script_type,
                         network: pubkeyInfo.blockchain,
                         created: new Date().getTime(),
-                        tags: [username, pubkeyInfo.blockchain, pubkeyInfo.symbol, pubkeyInfo.network, context],
+                        tags: [username, pubkeyInfo.blockchain, pubkeyInfo.symbol, pubkeyInfo.network, pubkeyInfo.context],
                     };
-                    if (!(pubkeyInfo.type === "xpub")) return [3 /*break*/, 4];
+                    if (!(pubkeyInfo.type === "xpub")) return [3 /*break*/, 5];
                     log.debug(tag, "pubkeyInfo: ", pubkeyInfo);
                     xpub = pubkeyInfo.pubkey;
                     log.debug(tag, "xpub: ", xpub);
@@ -1148,78 +1086,100 @@ var register_pubkeys = function (username, pubkeys, context) {
                     entryMongo.type = 'xpub';
                     entryMongo.master = pubkeyInfo.address;
                     entryMongo.address = pubkeyInfo.address;
-                    return [4 /*yield*/, register_xpub(username, pubkeyInfo, context)];
-                case 3:
-                    result = _d.sent();
-                    allBalances.push.apply(allBalances, result.balances);
-                    (_a = output.pubkeys).push.apply(_a, result.pubkeys);
-                    return [3 /*break*/, 9];
+                    return [4 /*yield*/, register_xpub(username, pubkeyInfo, pubkeyInfo.context)];
                 case 4:
-                    if (!(pubkeyInfo.type === "zpub")) return [3 /*break*/, 6];
+                    result = _c.sent();
+                    entryMongo.balances = result.balances;
+                    allBalances.push.apply(allBalances, result.balances);
+                    return [3 /*break*/, 10];
+                case 5:
+                    if (!(pubkeyInfo.type === "zpub")) return [3 /*break*/, 7];
                     zpub = pubkeyInfo.pubkey;
                     entryMongo.pubkey = zpub;
                     entryMongo.zpub = zpub;
                     entryMongo.type = 'zpub';
                     entryMongo.master = pubkeyInfo.address;
                     entryMongo.address = pubkeyInfo.address;
-                    return [4 /*yield*/, register_xpub(username, pubkeyInfo, context)];
-                case 5:
-                    result = _d.sent();
-                    allBalances.push.apply(allBalances, result.balances);
-                    (_b = output.pubkeys).push.apply(_b, result.pubkeys);
-                    return [3 /*break*/, 9];
+                    return [4 /*yield*/, register_xpub(username, pubkeyInfo, pubkeyInfo.context)];
                 case 6:
-                    if (!(pubkeyInfo.type === "address")) return [3 /*break*/, 8];
+                    result = _c.sent();
+                    entryMongo.balances = result.balances;
+                    allBalances.push.apply(allBalances, result.balances);
+                    return [3 /*break*/, 10];
+                case 7:
+                    if (!(pubkeyInfo.type === "address")) return [3 /*break*/, 9];
                     entryMongo.pubkey = pubkeyInfo.pubkey;
                     entryMongo.master = pubkeyInfo.pubkey;
                     entryMongo.type = pubkeyInfo.type;
                     entryMongo.address = pubkeyInfo.address;
-                    return [4 /*yield*/, register_address(username, pubkeyInfo, context)];
-                case 7:
-                    result = _d.sent();
-                    allBalances.push.apply(allBalances, result.balances);
-                    (_c = output.pubkeys).push.apply(_c, result.pubkeys);
-                    return [3 /*break*/, 9];
+                    return [4 /*yield*/, register_address(username, pubkeyInfo, pubkeyInfo.context)];
                 case 8:
-                    log.error("Unhandled type: ", pubkeyInfo.type);
-                    _d.label = 9;
+                    result = _c.sent();
+                    entryMongo.balances = result.balances;
+                    allBalances.push.apply(allBalances, result.balances);
+                    return [3 /*break*/, 10];
                 case 9:
+                    log.error(tag, "Unhandled type: ", pubkeyInfo.type);
+                    _c.label = 10;
+                case 10:
                     //verify write
-                    log.debug(tag, "entryMongo: ", entryMongo);
+                    log.info(tag, "entryMongo: ", entryMongo);
                     if (!entryMongo.pubkey)
                         throw Error("103: Invalid pubkey! can not save!");
-                    return [4 /*yield*/, pubkeysDB.findOne({ pubkey: entryMongo.pubkey })];
-                case 10:
-                    keyExists = _d.sent();
-                    if (!keyExists) return [3 /*break*/, 12];
-                    log.debug(tag, "Key already registered! key: ", entryMongo);
-                    return [4 /*yield*/, pubkeysDB.update({ pubkey: entryMongo.pubkey }, { $addToSet: { tags: { $each: [context, username] } } })];
+                    if (!entryMongo.balances)
+                        throw Error("103: Invalid pubkey! no balances set!");
+                    action = {
+                        insertOne: entryMongo
+                    };
+                    log.info(tag, "action: ", action);
+                    saveActions.push(action);
+                    return [3 /*break*/, 13];
                 case 11:
-                    pushTagMongo = _d.sent();
-                    log.debug(tag, "pushTagMongo: ", pushTagMongo);
-                    return [3 /*break*/, 15];
+                    //add tag for username
+                    log.info(tag, "pubkeyExists.tags: ", pubkeyExists.tags);
+                    if (!(pubkeyExists.tags.indexOf(username) === -1)) return [3 /*break*/, 13];
+                    return [4 /*yield*/, pubkeysDB.update({ pubkey: pubkeyInfo.pubkey }, { $addToSet: { tags: { $each: [username] } } })];
                 case 12:
-                    if (!(!entryMongo.pubkey || entryMongo.pubkey == true)) return [3 /*break*/, 13];
-                    log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** pubkeyInfo: ", pubkeyInfo);
-                    log.error(" **** ERROR INVALID PUBKEY ENTRY! ***** entryMongo: ", entryMongo);
-                    throw Error("105: unable to save invalid pubkey!");
-                case 13: return [4 /*yield*/, pubkeysDB.insert(entryMongo)];
-                case 14:
-                    saveMongo = _d.sent();
-                    log.debug(tag, "saveMongo: ", saveMongo);
-                    _d.label = 15;
-                case 15:
+                    pushTagMongo = _c.sent();
+                    log.info(tag, "pushTagMongo: ", pushTagMongo);
+                    _c.label = 13;
+                case 13:
                     i++;
                     return [3 /*break*/, 2];
+                case 14:
+                    //bulk write to mongo
+                    log.info(tag, "saveActions: ", saveActions);
+                    if (!(saveActions.length > 0)) return [3 /*break*/, 18];
+                    _c.label = 15;
+                case 15:
+                    _c.trys.push([15, 17, , 18]);
+                    return [4 /*yield*/, pubkeysDB.bulkWrite(saveActions, { ordered: false })];
                 case 16:
-                    output.balances = allBalances;
-                    log.debug(tag, "return object: ", output);
-                    return [2 /*return*/, output];
+                    saveMongoBulk = _c.sent();
+                    log.info(tag, "saveMongoBulk: ", saveMongoBulk);
+                    return [3 /*break*/, 18];
                 case 17:
-                    e_9 = _d.sent();
-                    console.error(tag, "e: ", e_9);
-                    throw e_9;
-                case 18: return [2 /*return*/];
+                    e_9 = _c.sent();
+                    log.error("Failed to update in bulk!");
+                    return [3 /*break*/, 18];
+                case 18: return [4 /*yield*/, pubkeysDB.find({ tags: { $in: [username] } })];
+                case 19:
+                    allPubkeys = _c.sent();
+                    log.info(tag, "allPubkeys: ", allPubkeys.length);
+                    //get all balances for username
+                    for (i = 0; i < allPubkeys.length; i++) {
+                        pubkeyInfo = allPubkeys[i];
+                        if (pubkeyInfo.balances)
+                            (_a = output.balances).push.apply(_a, pubkeyInfo.balances);
+                        if (pubkeyInfo.nfts)
+                            (_b = output.nfts).push.apply(_b, pubkeyInfo.nfts);
+                    }
+                    return [2 /*return*/, output];
+                case 20:
+                    e_10 = _c.sent();
+                    console.error(tag, "e: ", e_10);
+                    throw e_10;
+                case 21: return [2 /*return*/];
             }
         });
     });
