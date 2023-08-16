@@ -21,11 +21,12 @@ jobs:
           name: Install dependencies
           command: npm i
       - run:
-          command: "make && make bump"
+          command: "make"
       - run:
-          name: Publish on master branch
+          name: Bump version and publish on master branch
           command: |
             if [ "$CIRCLE_BRANCH" == "master" ]; then
+              make bump
               make publish
             fi
 
