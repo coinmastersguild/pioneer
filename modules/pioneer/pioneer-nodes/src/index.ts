@@ -48,7 +48,7 @@ const get_unchaineds = function () {
     try {
         // unchaineds filter
         let unchaineds = shapeshift.filter(node => node.type === "unchained");
-        console.log(tag, "unchaineds: ", unchaineds);
+        //console.log(tag, "unchaineds: ", unchaineds);
 
         //all networks
         let allNetworks:any = []
@@ -57,7 +57,7 @@ const get_unchaineds = function () {
         let wssByNetwork:any = {}
         for(let i = 0; i < unchaineds.length; i++){
             let unchaind = unchaineds[i];
-            log.info(tag,"unchaind: ",unchaind.network)
+            log.debug(tag,"unchaind: ",unchaind.network)
 
             if (!allNetworks.includes(unchaind.network)) allNetworks.push(unchaind.network);
             if(unchaind.swagger) swaggersByNetwork[unchaind.network] = unchaind.swagger;
@@ -68,7 +68,7 @@ const get_unchaineds = function () {
         for(let i = 0; i < allNetworks.length; i++){
             let network = allNetworks[i];
             let caip = shortListNameToCaip[network];
-            log.info(tag,"caip: ",caip)
+            log.debug(tag,"caip: ",caip)
 
             //build unchaineds
             let unchainedEntry = {

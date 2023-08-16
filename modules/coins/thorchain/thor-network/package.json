@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/thor-network",
-  "version": "8.1.44",
+  "version": "8.1.48",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -27,5 +27,5 @@
     "ts-node": "^8.10.2",
     "typescript": "^5.0.2"
   },
-  "gitHead": "4e125fc566bffddabfad7fcc74b9a02f63db7932"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

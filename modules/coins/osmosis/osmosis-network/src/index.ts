@@ -172,57 +172,57 @@ let get_APR = async function() {
     try{
         //
         let mintParams = await get_mint_params()
-        log.info(tag,"mintParams:",mintParams)
+        log.debug(tag,"mintParams:",mintParams)
         let distributionProportions = mintParams.params.distribution_proportions.staking
-        log.info(tag,"distributionProportions:",distributionProportions)
+        log.debug(tag,"distributionProportions:",distributionProportions)
 
         //
         let getEpochs = await get_epochs()
-        log.info(tag,"getEpochs:",getEpochs)
+        log.debug(tag,"getEpochs:",getEpochs)
 
         // let epochProvisionInfo = getEpochs.epochs.filter('identifier')
         let epochProvisionInfo = getEpochs.epochs.filter((e:any) => e.identifier === 'day');
         epochProvisionInfo = epochProvisionInfo[0]
-        log.info(tag,"epochProvisionInfo:",epochProvisionInfo)
+        log.debug(tag,"epochProvisionInfo:",epochProvisionInfo)
         let durationSeconds = epochProvisionInfo.duration.replace("s","")
-        log.info(tag,"durationSeconds:",durationSeconds)
+        log.debug(tag,"durationSeconds:",durationSeconds)
 
         let epochProvision = await get_epoch_provisions()
 
         //get bonded tokens
         let poolInfo = await get_pool_info()
         let bondedToken = poolInfo.pool.bonded_tokens
-        log.info(tag,"bondedToken:",bondedToken)
+        log.debug(tag,"bondedToken:",bondedToken)
 
         // mintingEpochProvision = epochProvision * distributionProportions
-        log.info(tag,"epochProvision:",epochProvision)
-        log.info(tag,"distributionProportions:",distributionProportions)
+        log.debug(tag,"epochProvision:",epochProvision)
+        log.debug(tag,"distributionProportions:",distributionProportions)
         let mintingEpochProvision = epochProvision * distributionProportions
-        log.info(tag,"mintingEpochProvision:",mintingEpochProvision)
+        log.debug(tag,"mintingEpochProvision:",mintingEpochProvision)
 
         //yearMintingProvision = mintingEpochProvision * (365 * 24 * 3600) / epochDuration
         let yearMintingProvision = mintingEpochProvision * ((365 * 24 * 3600) / durationSeconds)
-        log.info(tag,"yearMintingProvision:",yearMintingProvision)
+        log.debug(tag,"yearMintingProvision:",yearMintingProvision)
         //
 
         //get total supply
         //Assume total supple = 100mill
         let totalSupply = 1000000000
         // //let totalSupply = await get_total_supply('uosmo')
-        // log.info(tag,"totalSupply:",totalSupply)
+        // log.debug(tag,"totalSupply:",totalSupply)
         // totalSupply = totalSupply.result.amount
-        // log.info(tag,"totalSupply:",totalSupply)
+        // log.debug(tag,"totalSupply:",totalSupply)
 
         if(!totalSupply) throw Error("unable to calc APR: missing totalSupply")
         if(!epochProvision) throw Error("unable to calc APR: missing epochProvision")
 
         //ratio
         let ratio = bondedToken / totalSupply
-        log.info(tag,"ratio:",ratio)
+        log.debug(tag,"ratio:",ratio)
 
         //total
         let inflation = yearMintingProvision / totalSupply
-        log.info(tag,"inflation:",inflation)
+        log.debug(tag,"inflation:",inflation)
 
         //community tax
 
@@ -234,7 +234,7 @@ let get_APR = async function() {
 
         //new_coins_per_year = inflation_pct * total_supply * (1 - community_pool_tax)
         let apr = inflation / ratio
-        log.info(tag,"apr:",apr)
+        log.debug(tag,"apr:",apr)
         apr = apr * 100
 
         return apr
@@ -287,7 +287,7 @@ let get_total_supply = async function(denom:string){
     let output:any = {}
     try{
 
-        log.info(tag,"url: ",URL_OSMO_LCD+'/bank/total/'+denom)
+        log.debug(tag,"url: ",URL_OSMO_LCD+'/bank/total/'+denom)
         let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/total/'+denom})
 
 
@@ -328,9 +328,9 @@ let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
     try{
         let url = URL_OSMO_LCD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
-        log.info(tag,"url: ",url)
+        log.debug(tag,"url: ",url)
         let txInfo = await axios({method:'GET',url})
-        log.info(tag,"txInfo: ",txInfo.data)
+        log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -440,8 +440,8 @@ let get_pool = async function(pair:string){
         const sellAssetDenom = assets[0]
         const buyAssetDenom = assets[1]
 
-        // log.info("sellAssetDenom: ",sellAssetDenom)
-        // log.info("buyAssetDenom: ",buyAssetDenom)
+        // log.debug("sellAssetDenom: ",sellAssetDenom)
+        // log.debug("buyAssetDenom: ",buyAssetDenom)
         const foundPool = find(poolInfo.data.pools, (pool:any) => {
             const token0Denom = pool.poolAssets[0].token.denom
             const token1Denom = pool.poolAssets[1].token.denom
@@ -571,7 +571,7 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: payload,
             })
-            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             if(result2.data.tx_response.txhash) {
                 output.txid = result2.data.tx_response.txhash
                 output.success = true
@@ -807,7 +807,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -827,9 +827,9 @@ let get_balances = async function(address:string){
                     if(entry.denom.indexOf('ibc/') >= 0){
                         //lookup on each
                         let voucher = entry.denom.replace('ibc/','')
-                        log.info(tag,"voucher: ",voucher)
+                        log.debug(tag,"voucher: ",voucher)
                         let voucherInfo = await get_voucher_info(voucher)
-                        log.info(tag,"voucherInfo: ",voucherInfo)
+                        log.debug(tag,"voucherInfo: ",voucherInfo)
                         if(voucherInfo.denom_trace.base_denom === 'uatom'){
                             let balance = {
                                 type:'ibcChannel',

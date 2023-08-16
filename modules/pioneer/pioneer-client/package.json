@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-client",
-  "version": "9.0.13",
+  "version": "9.0.18",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -17,5 +17,5 @@
   "dependencies": {
     "swagger-client": "^3.19.8"
   },
-  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

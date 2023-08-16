@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/eth-network",
-  "version": "8.1.75",
+  "version": "8.1.79",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -39,5 +39,5 @@
   ],
   "author": "Bithighlander <pioneer@gmail.com>",
   "license": "GPL",
-  "gitHead": "6b6e8cf1e369479b9e7e977d0e4990cefe607a89"
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

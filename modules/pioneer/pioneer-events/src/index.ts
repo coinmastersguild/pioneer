@@ -38,7 +38,8 @@ export class Events {
             try {
                 this.socket = io.connect(this.wss, {
                     reconnect: true,
-                    rejectUnauthorized: false
+                    rejectUnauthorized: false,
+                    transports: ['websocket'],
                 });
 
                 //sub

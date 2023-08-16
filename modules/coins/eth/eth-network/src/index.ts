@@ -233,7 +233,7 @@ const get_all_pioneers = async function() {
 		const metadataContract = new web3.eth.Contract(METADATA_ABI, PIONEER_METADATA_CONTRACT_ADDRESS);
 		// Fetch the total supply of the NFTs
 		const totalSupply = await nftContract.methods.totalSupply().call();
-		log.info("totalSupply: ",totalSupply)
+		log.debug("totalSupply: ",totalSupply)
 		
 		output['totalSupply'] = totalSupply;
 		output['owners'] = []
@@ -243,11 +243,11 @@ const get_all_pioneers = async function() {
 			// await sleep(1000);
 			try{
 				const owner = await nftContract.methods.ownerOf(i).call();
-				log.info(tag,"owner: ",owner)
+				log.debug(tag,"owner: ",owner)
 				output['owners'].push(owner.toLowerCase())
 				//get images
 				const imageInfo = await metadataContract.methods.getAttributes(i).call();
-				//log.info(tag,"imageInfo: ",imageInfo)				
+				//log.debug(tag,"imageInfo: ",imageInfo)				
 				// Parse the JSON string and get the image name
 				const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
 
@@ -258,7 +258,7 @@ const get_all_pioneers = async function() {
 				// Add this image URL to the images array in output
 				output['images'].push({address:owner.toLowerCase(), image:fullImageUrl});
 			}catch(e){
-				log.info("no image for: ",i)
+				log.debug("no image for: ",i)
 			}
 		}
 		return output;
@@ -557,7 +557,7 @@ const get_token_transfer_data = async function(toAddress: string, amount: string
 // 		// let value = parseInt(amount/Math.pow(10, decimals))
 // 		// //const adjustedValue = value.mul(web3.utils.toBN(10).pow(web3.utils.toBN(decimals)));
 // 		//
-// 		// log.info(tag, "adjustedValue: ", value.toString());
+// 		// log.debug(tag, "adjustedValue: ", value.toString());
 //
 // 		// Calculate the amount in the token's smallest unit
 // 		const amountInWei = web3.utils.toWei(amount, 'ether');

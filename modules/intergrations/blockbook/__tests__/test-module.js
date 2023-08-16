@@ -5,107 +5,11 @@ require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 let network = require("../lib/index")
 
-// let servers = {
-//     'BTC':process.env['BTC_BLOCKBOOK_URL'],
-//     'ETH':process.env['ETH_BLOCKBOOK_URL'],
-//     'DASH':process.env['DASH_BLOCKBOOK_URL']
-// }
-
-let servers = [
-    {
-        symbol:"MATIC",
-        blockchain:"polygon",
-        caip:"eip155:137/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.polygon.shapeshift.com",
-        websocket:"wss://indexer.polygon.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"optimism",
-        caip:"eip155:10/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.optimism.shapeshift.com",
-        websocket:"wss://indexer.optimism.shapeshift.com/websocket"
-    },
-    {
-        symbol:"LTC",
-        blockchain:"litecoin",
-        caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
-        type:"blockbook",
-        service:"https://indexer.litecoin.shapeshift.com",
-        websocket:"wss://indexer.litecoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"xDAI",
-        blockchain:"gnosis",
-        caip:"eip155:100/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.gnosis.shapeshift.com",
-        websocket:"wss://indexer.gnosis.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"ethereum",
-        caip:"eip155:1/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.ethereum.shapeshift.com",
-        websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
-    },
-    {
-        symbol:"DOGE",
-        blockchain:"dogecoin",
-        caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
-        type:"blockbook",
-        service:"https://indexer.dogecoin.shapeshift.com",
-        websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BNB",
-        blockchain:"bnbsmartchain",
-        caip:"eip155:56/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.bnbsmartchain.shapeshift.com",
-        websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BCH",
-        blockchain:"bitcoincash",
-        caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-        type:"blockbook",
-        service:"https://indexer.bitcoincash.shapeshift.com",
-        websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
-    },
-    {
-        symbol:"BTC",
-        blockchain:"bitcoin",
-        caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
-        type:"blockbook",
-        service:"https://indexer.bitcoin.shapeshift.com",
-        websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    }
-]
 // console.log("servers: ",servers)
 let run_test = async function(){
     try{
         //
-        await network.init(servers)
+        await network.init()
 
         // network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
         //     .then(function(resp){
@@ -114,8 +18,8 @@ let run_test = async function(){
         //     })
         
         //
-        let utxos = await network.utxosByXpub('LTC',"zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj")
-        console.log(utxos)
+        // let utxos = await network.utxosByXpub('LTC',"zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj")
+        // console.log(utxos)
 
         // let ALL_SOCKETS = network.getBlockbookSockets()
         // let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
@@ -125,8 +29,9 @@ let run_test = async function(){
         // ETH_SOCKET.subscribeAddresses([address1], ({ address, tx }) => console.log('new tx for address', address, tx))
         // ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
         //sub to address
-        
 
+        let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+        console.log(utxos)
     }catch(e){
         console.error(e)
     }
