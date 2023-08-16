@@ -26,7 +26,6 @@
     "dotenv": "^8.2.0",
     "json-beautify": "^1.1.1",
     "json-colorizer": "^2.2.2",
-    "openapi-client-axios": "^3.6.1",
     "request": "^2.88.2",
     "socket.io-client": "^2.3.0",
     "ts-node": "^8.10.2",
