@@ -135,13 +135,6 @@ export const blockbooks = [
         type:"blockbook",
         service:"arb-blockbook.nownodes.io"
     },
-    {
-        symbol:"ARB",
-        blockchain:"Arbitrum",
-        caip:"eip155:42161/slip44:60",
-        type:"blockbook",
-        service:"arb-blockbook.nownodes.io"
-    },
     //SHAPESHIFT
     {
         symbol:"MATIC",

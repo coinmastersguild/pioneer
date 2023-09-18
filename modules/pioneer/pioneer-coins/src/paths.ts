@@ -1,4 +1,4 @@
-
+const log = require('@pioneer-platform/loggerdog')()
 export const blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
 
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
@@ -132,8 +132,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         let entry:any = {
             note:" Default ATOM path ",
             type:"address",
-            script_type:"bech32",
-            available_scripts_types:['bech32'],
+            script_type:"cosmos",
+            available_scripts_types:['cosmos'],
             addressNList: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 118, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
@@ -226,6 +226,22 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             entry.testnet = true
         }
         output.push(entry)
+
+        //bech32 bip84
+        output.push({
+            note:"Litecoin account Native Segwit (Bech32)",
+            blockchain: 'litecoin',
+            symbol: 'LTC',
+            network: 'LTC',
+            script_type:"p2wpkh", //bech32
+            available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
+            type:"zpub",
+            addressNList: [0x80000000 + 84, 0x80000000 + 2, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 84, 0x80000000 + 2, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+        })
+        output.push(entry)
     }
 
     if(blockchains.indexOf('dogecoin') >= 0){
@@ -270,6 +286,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
     
     return output
 }
+
 
 // {
 //     note:"",

@@ -69,6 +69,7 @@ const get_portfolio = async function (address:string) {
                 },
             }
         );
+        log.info(tag,"appsResponse: ",appsResponse.data)
         const apps = appsResponse.data;
         let totalBalanceUSDApp = 0;
         apps.forEach((app: { balanceUSD: number }) => {
@@ -84,24 +85,31 @@ const get_portfolio = async function (address:string) {
                 },
             }
         );
-        //console.log("tokensResponse: ",tokensResponse.data)
-        let tokens = tokensResponse.data;
-        let totalBalanceUsdTokens = 0;
-        tokens = tokens[address.toLowerCase()]
-        output.tokens = tokens
-        log.debug(tag,"tokens: ",tokens.length)
-        if(tokens){
-            tokens.forEach((token: any) => {
-                log.debug(tag,"token: ",token)
-                let network = token.network
-                log.debug(tag,"network: ",token)
-                let caip = evmCaips[network]
-                token.blockchainCaip = caip;
-                token.assetCaip = caip + ":" +token.token.address
-                log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
-                totalBalanceUsdTokens += token.token.balanceUSD;
-            });
+        console.log("tokensResponse: ",tokensResponse.data)
+        let totalBalanceUsdTokens:any
+        if(tokensResponse.data && tokensResponse.data[address]){
+            let tokens = tokensResponse.data[address];
+            totalBalanceUsdTokens = 0;
+            tokens = tokens[address.toLowerCase()]
+            output.tokens = tokens
+            log.debug(tag,"tokens: ",tokens.length)
+            if(tokens){
+                tokens.forEach((token: any) => {
+                    log.debug(tag,"token: ",token)
+                    let network = token.network
+                    log.debug(tag,"network: ",token)
+                    let caip = evmCaips[network]
+                    token.blockchainCaip = caip;
+                    token.assetCaip = caip + ":" +token.token.address
+                    log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
+                    totalBalanceUsdTokens += token.token.balanceUSD;
+                });
+            }            
+        } else {
+            output.tokens = []
+            totalBalanceUsdTokens = 0
         }
+
 
         // Call the '/net-worth' endpoint to get the net worth in USD for NFTs
         let limit = 100

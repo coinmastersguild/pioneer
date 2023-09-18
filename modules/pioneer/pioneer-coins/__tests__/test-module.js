@@ -24,16 +24,43 @@ let {
     PoSchains,
     getNativeAssetForBlockchain,
     getExplorerTxUrl,
-    needsMemoByNetwork
+    needsMemoByNetwork,
+    addressInfoForCoin,
 } = require('../lib/index.js')
+
+//addressInfo
+// let coin = 'ETH'
+// let coin = 'BTC'
+let coin = 'LTC'
+// let coin = 'DOGE'
+// let coin = 'DASH'
+// let coin = 'RUNE'
+// let coin = 'THOR'
+// let coin = 'GAIA'
+// let coin = 'ARB'
+let addressInfo = addressInfoForCoin(coin, false, 'p2wpkh')
+// let addressInfo = addressInfoForCoin(coin, false)
+console.log("addressInfo: ",addressInfo)
+
+// let addressNList = [
+//     2147483692,
+//     2147483708,
+//     2147483648,
+//     0,
+//     0
+// ]
+// let addressNList = [2147483732, 2147483648, 2147483648, 0, 0]
+// let addressNList = [2147483692, 2147483648, 2147483648, 0, 0]
+// let path = addressNListToBIP32(addressNList)
+// console.log(path)
 
 //cosmos
 // let network = 'cosmos'
 // let txid = '44847A59D197E929D97F93A72723EE50929452F9F1F21B8A03BFD6D5E1C526A4'
 
 //thorchain
-let network = 'thorchain'
-let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
+// let network = 'thorchain'
+// let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
 
 // let explorerUrl = getExplorerTxUrl(network,txid,false)
 // console.log("explorerUrl: ",explorerUrl)
@@ -60,10 +87,10 @@ let txid = 'DA5917E7AC958E8592B15E92810A2DE6BEF75ACE409FA3EF7C11ACFFFE3D1DCF'
 //         0
 //     ]
 
-let addressNlist = [2147483692, 2147483648, 2147483648, 0, 0]
-// let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
-//
-console.log(addressNListToBIP32(addressNlist))
+// let addressNlist = [2147483692, 2147483648, 2147483648, 0, 0]
+// // let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
+// //
+// console.log(addressNListToBIP32(addressNlist))
 
 // let bip32 = `m/44'/144'/0'/0/0`
 // let bip32 = `m/44'/714'/0'/0/0`
@@ -147,16 +174,5 @@ console.log(addressNListToBIP32(addressNlist))
 // run_test()
 //
 //
-let xpub = "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
-let scriptType = "legacy"
-let coin = "BTC"
-let account = 0
-let index = 0
-let isTestnet = false
-
-get_address_from_xpub(xpub,scriptType,coin,account,index,false,isTestnet)
-    .then(function(address){
-        console.log("address: ",address)
-    })
 
 

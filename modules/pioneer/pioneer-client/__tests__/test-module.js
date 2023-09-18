@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -19,10 +19,10 @@ const runTest = async () => {
 
         // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // console.log("info: ",info.data.length)
-        // let address = "0x33b35c665496bA8E71B22373843376740401F106"
-        // const user = await pioneer.GetPortfolio({address});
-        // // // const user = await pioneer.GetNfts({address});
-        // console.log("user: ", user);
+        let address = "0xC8FFf0D944406A40475a0A8264328AAC8D64927B"
+        const user = await pioneer.GetPortfolio({address});
+        // // const user = await pioneer.GetNfts({address});
+        console.log("user: ", user);
         
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
@@ -131,9 +131,9 @@ const runTest = async () => {
         // let result = await pioneer.GetEvmNode({chainId});
         // console.log("result: ",result.data)
 
-        let xpub = "xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe"
-        let newAddyIndex = await pioneer.GetChangeAddress({network:'DASH',xpub})
-        console.log("newAddyIndex: ",newAddyIndex)
+        // let xpub = "xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe"
+        // let newAddyIndex = await pioneer.GetChangeAddress({network:'DASH',xpub})
+        // console.log("newAddyIndex: ",newAddyIndex)
 
         //search asset
         // let asset = "Ethereum Mainnet"

@@ -57,6 +57,39 @@ export const getRangoBlockchainName = function(blockchain:string){
     }
 }
 
+export const getThorswapBlockchainName = function(blockchain:string){
+    try{
+        let rangoName
+        switch (blockchain) {
+            case "bitcoin":
+                rangoName = "BTC";
+                break;
+            case "bitcoincash":
+                rangoName = "BCH";
+                break;
+            case "avalanche":
+                rangoName = "AVAX_CCHAIN";
+                break;
+            case "ethereum":
+                rangoName = "ETH";
+                break;
+            case "cosmos":
+                rangoName = "COSMOS";
+                break;
+            case "thorchain":
+                rangoName = "THOR";
+                break;
+            case "osmosis":
+                rangoName = "OSMOSIS";
+                break;
+            default:
+                throw Error("Unknown rango name for blockchain"+blockchain)
+        }
+        return rangoName
+    }catch(e){
+        log.error(e)
+    }
+}
 
 
 /*
@@ -209,7 +242,8 @@ export const COIN_MAP_LONG_XCHAIN:any = {
 
 export const COIN_MAP_KEEPKEY_LONG:any = {
     BTC: "Bitcoin",
-    ATOM: "cosmos",
+    ATOM: "Cosmos",
+    GAIA: "Cosmos",
     OSMO: "osmosis",
     BTCT: "testnet",
     BCH: "BitcoinCash",
@@ -218,6 +252,7 @@ export const COIN_MAP_KEEPKEY_LONG:any = {
     DGB: "DigiByte",
     DOGE: "Dogecoin",
     RUNE: "Thorchain",
+    THOR: "Thorchain",
     ETH: "Ethereum",
     ADA: "Cardano",
     BNB: "Binance",
