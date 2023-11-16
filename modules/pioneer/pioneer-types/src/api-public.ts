@@ -12,13 +12,14 @@ export interface ThorchainMemoEncodedBody {
 }
 export interface BroadcastBody {
     coin?:string
-    network:string,
+    caip?:string,
+    network?:string,
     asset?:string,
     isTestnet?:boolean,
     serialized:string
     signature?:string
     type?:string
-    txid:string
+    txid?:string
     noBroadcast?:boolean
     description?:any
     invocationId:string

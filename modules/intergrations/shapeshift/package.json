@@ -1,0 +1,32 @@
+{
+  "name": "@pioneer-platform/shapeshift",
+  "version": "8.1.66",
+  "main": "./lib/index.js",
+  "types": "./lib/main.d.ts",
+  "scripts": {
+    "npm": "npm i",
+    "start": "node lib/index",
+    "build": "tsc -p .",
+    "test": "npm run build && node __tests__/test-module.js",
+    "prepublish": "npm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "dependencies": {
+    "@pioneer-platform/loggerdog": "^8.1.31",
+    "@pioneer-platform/nodes": "^8.1.37",
+    "@pioneer-platform/pioneer-client": "^9.0.18",
+    "@types/request-promise-native": "^1.0.17",
+    "@types/ws": "^7.4.2",
+    "axios": "^0.21.4",
+    "axios-retry": "^3.1.9",
+    "fake-useragent": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/node": "^13.13.48",
+    "nodemon": "^2.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
+}

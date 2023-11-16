@@ -57,7 +57,7 @@ const networks:any = {
     'OSMO': require('@pioneer-platform/osmosis-network'),
     'BNB' : require('@pioneer-platform/binance-network'),
     // 'EOS' : require('@pioneer-platform/eos-network'),
-    'FIO' : require('@pioneer-platform/fio-network'),
+    // 'FIO' : require('@pioneer-platform/fio-network'),
     'ANY' : require('@pioneer-platform/utxo-network'),
     'RUNE' : require('@pioneer-platform/thor-network'),
 }
@@ -814,10 +814,10 @@ const register_pubkeys = async function (username: string, pubkeys: any) {
             if (!pubkeyInfo.pubkey) throw Error("104: invalid pubkey! missing pubkey!");
             if (!pubkeyInfo.type) throw Error("104: invalid pubkey! missing type!");
             if (!pubkeyInfo.symbol) pubkeyInfo.symbol = nativeAsset;
-            if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.blockchain);
+            //if (!pubkeyInfo.script_type) throw Error("Invalid pubkey required field: script_type coin:" + pubkeyInfo.blockchain);
             if (!pubkeyInfo.network) throw Error("Invalid pubkey required field: network coin:" + pubkeyInfo.blockchain);
             if (!pubkeyInfo.master) throw Error("Invalid pubkey required field: master coin:" + pubkeyInfo.blockchain);
-            if (!pubkeyInfo.path) throw Error("Invalid pubkey required field: path coin:" + pubkeyInfo.blockchain);
+            //if (!pubkeyInfo.path) throw Error("Invalid pubkey required field: path coin:" + pubkeyInfo.blockchain);
             if (!pubkeyInfo.context) throw Error("Invalid pubkey required field: context:" + pubkeyInfo.blockchain);
 
             //is pubkey known to mongo

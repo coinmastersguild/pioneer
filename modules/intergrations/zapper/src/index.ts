@@ -85,14 +85,14 @@ const get_portfolio = async function (address:string) {
                 },
             }
         );
-        console.log("tokensResponse: ",tokensResponse.data)
+        // console.log("tokensResponse: ",tokensResponse.data)
         let totalBalanceUsdTokens:any
-        if(tokensResponse.data && tokensResponse.data[address]){
-            let tokens = tokensResponse.data[address];
+        if(tokensResponse.data && tokensResponse.data[address.toLowerCase()]){
+            let tokens = tokensResponse.data
             totalBalanceUsdTokens = 0;
             tokens = tokens[address.toLowerCase()]
             output.tokens = tokens
-            log.debug(tag,"tokens: ",tokens.length)
+            log.info(tag,"tokens: ",tokens.length)
             if(tokens){
                 tokens.forEach((token: any) => {
                     log.debug(tag,"token: ",token)

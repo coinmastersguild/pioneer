@@ -7,6 +7,36 @@ const log = require('@pioneer-platform/loggerdog')()
 import { getPaths, blockchains } from './paths'
 import { COIN_MAP_KEEPKEY_LONG, addressNListToBIP32 } from './coins'
 
+export enum Coin {
+    BTC = "Bitcoin",
+    ATOM = "Cosmos",
+    ARB = "Arbitrum",
+    OSMO = "Osmosis",
+    TEST = "Testnet",
+    BCH = "BitcoinCash",
+    LTC = "Litecoin",
+    DASH = "Dash",
+    DGB = "DigiByte",
+    DOGE = "Dogecoin",
+    RUNE = "Thorchain",
+    ETH = "Ethereum",
+    ADA = "Cardano",
+    MATIC = "Polygon",
+    BNB = "Binance",
+    AVAX = "Avalanche",
+    EOS = "Eos",
+    FIO = "Fio",
+}
+
+export interface AddressInfo {
+    address_n: number[];
+    path: string;
+    coin: Coin; // Using enum type here
+    script_type: string;
+    curve: string;
+    show_display: boolean;
+}
+
 export const addressInfoForCoin = (symbol: string, isTestnet?: boolean, scriptType?:string, showDisplay?:boolean, path?:any): any => {
     if(!isTestnet) isTestnet = false
     if(!showDisplay) showDisplay = false
@@ -34,6 +64,7 @@ export const addressInfoForCoin = (symbol: string, isTestnet?: boolean, scriptTy
     const addressInfo = {
         address_n: entry.addressNListMaster,
         path:addressNListToBIP32(entry.addressNListMaster),
+        // @ts-ignore
         coin: COIN_MAP_KEEPKEY_LONG[symbol.toUpperCase()],
         script_type: scriptType || entry.script_type,
         showDisplay: entry.showDisplay

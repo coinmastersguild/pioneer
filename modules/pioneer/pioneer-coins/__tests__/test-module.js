@@ -38,9 +38,9 @@ let coin = 'LTC'
 // let coin = 'THOR'
 // let coin = 'GAIA'
 // let coin = 'ARB'
-let addressInfo = addressInfoForCoin(coin, false, 'p2wpkh')
-// let addressInfo = addressInfoForCoin(coin, false)
-console.log("addressInfo: ",addressInfo)
+// let addressInfo = addressInfoForCoin(coin, false, 'p2wpkh')
+// // let addressInfo = addressInfoForCoin(coin, false)
+// console.log("addressInfo: ",addressInfo)
 
 // let addressNList = [
 //     2147483692,
@@ -70,6 +70,7 @@ console.log("addressInfo: ",addressInfo)
 
 // console.log(PoSchains['Osmosis'])
 
+// let addressNlist = [2147483692, 2147483708, 2147483648, 0, 0]
 
 // let addressNlist = [
 //     2147483732,
@@ -79,18 +80,22 @@ console.log("addressInfo: ",addressInfo)
 //     18
 // ]
 
-// let addressNlist = [
-//         2147483692,
-//         2147483648,
-//         2147483648,
-//         0,
-//         0
-//     ]
+let addressNlist = [
+        2147483692,
+        2147483648,
+        2147483648,
+        0,
+        0
+    ]
 
 // let addressNlist = [2147483692, 2147483648, 2147483648, 0, 0]
 // // let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
 // //
-// console.log(addressNListToBIP32(addressNlist))
+
+// let addressNlist = [
+//     2147483732, 2147483648, 2147483648, 0, 0
+// ]
+console.log(addressNListToBIP32(addressNlist))
 
 // let bip32 = `m/44'/144'/0'/0/0`
 // let bip32 = `m/44'/714'/0'/0/0`

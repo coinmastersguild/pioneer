@@ -165,6 +165,61 @@ export enum HDWALLETS {
     'ledger'
 }
 
+export const THORCHAIN_NETWORKS = [
+    {
+        "symbol": "ARB",
+        "image": "https://pioneers.dev/coins/arbitrum.png"
+    },
+    {
+        "symbol": "AVAX",
+        "image": "https://pioneers.dev/coins/avalanche.png"
+    },
+    {
+        "symbol": "BNB",
+        "image": "https://pioneers.dev/coins/binance.png"
+    },
+    {
+        "symbol": "BSC",
+        "image": "https://pioneers.dev/coins/binance.png"
+    },
+    {
+        "symbol": "BTC",
+        "image": "https://pioneers.dev/coins/bitcoin.png"
+    },
+    {
+        "symbol": "BCH",
+        "image": "https://pioneers.dev/coins/bitcoincash.png"
+    },
+    {
+        "symbol": "GAIA",
+        "image": "https://pioneers.dev/coins/cosmos.png"
+    },
+    {
+        "symbol": "DOGE",
+        "image": "https://pioneers.dev/coins/dogecoin.png"
+    },
+    {
+        "symbol": "ETH",
+        "image": "https://pioneers.dev/coins/ethereum.png"
+    },
+    {
+        "symbol": "LTC",
+        "image": "https://pioneers.dev/coins/litecoin.png"
+    },
+    {
+        "symbol": "OP",
+        "image": "https://pioneers.dev/coins/optimism.png"
+    },
+    {
+        "symbol": "MATIC",
+        "image": "https://pioneers.dev/coins/polygon.png"
+    },
+    {
+        "symbol": "THOR",
+        "image": "https://pioneers.dev/coins/undefined.png"
+    }
+]
+
 /*
 
 
@@ -184,6 +239,7 @@ export const UTXO_COINS = [
     Name maps
  */
 export const COIN_MAP = {
+    arbitrum: "ARB",
     bitcoin: "BTC",
     cosmos: "ATOM",
     osmosis: "OSMO",
@@ -195,7 +251,7 @@ export const COIN_MAP = {
     dogecoin: "DOGE",
     ethereum: "ETH",
     avalanche: "AVAX",
-    poly: "MATIC",
+    polygon: "MATIC",
     cardano: "ADA",
     binance: "BNB",
     thorchain: "RUNE",
@@ -203,49 +259,56 @@ export const COIN_MAP = {
     fio: "FIO",
 };
 
-export const COIN_MAP_LONG:any = {
+export const COIN_MAP_LONG = {
     BTC: "bitcoin",
     ATOM: "cosmos",
+    GAIA: "cosmos",
+    ARB: "arbitrum",
     OSMO: "osmosis",
-    BTCT: "testnet",
+    TEST: "testnet",
     BCH: "bitcoincash",
+    BSC: "binance",
     LTC: "litecoin",
     DASH: "dash",
-    DGB: "digiByte",
+    DGB: "digibyte",
     DOGE: "dogecoin",
     RUNE: "thorchain",
+    THOR: "thorchain",
     ETH: "ethereum",
     AVAX: "avalanche",
     ADA: "cardano",
+    MATIC: "polygon",
     BNB: "binance",
     EOS: "eos",
     FIO: "fio",
 };
 
-export const COIN_MAP_LONG_XCHAIN:any = {
+export const COIN_MAP_LONG_XCHAIN = {
     BTC: "bitcoin",
     ATOM: "cosmos",
     OSMO: "osmosis",
-    BTCT: "testnet",
-    BCH: "bitcoinCash",
+    TEST: "testnet",
+    BCH: "bitcoincash",
     LTC: "litecoin",
     DASH: "dash",
-    DGB: "digiByte",
+    DGB: "digibyte",
     DOGE: "dogecoin",
     RUNE: "thorchain",
     ETH: "ethereum",
     ADA: "cardano",
+    MATIC: "polygon",
     BNB: "binance",
     EOS: "eos",
     FIO: "fio",
 };
 
-export const COIN_MAP_KEEPKEY_LONG:any = {
+export const COIN_MAP_KEEPKEY_LONG = {
     BTC: "Bitcoin",
-    ATOM: "Cosmos",
     GAIA: "Cosmos",
-    OSMO: "osmosis",
-    BTCT: "testnet",
+    ATOM: "Cosmos",
+    ARB: "Arbitrum",
+    OSMO: "Osmosis",
+    TEST: "Testnet",
     BCH: "BitcoinCash",
     LTC: "Litecoin",
     DASH: "Dash",
@@ -255,6 +318,8 @@ export const COIN_MAP_KEEPKEY_LONG:any = {
     THOR: "Thorchain",
     ETH: "Ethereum",
     ADA: "Cardano",
+    MATIC: "Polygon",
+    BSC: "Binance",
     BNB: "Binance",
     AVAX: "Avalanche",
     EOS: "Eos",
@@ -362,92 +427,43 @@ export function getNativeAssetForBlockchain(blockchain:string){
 export const supportedBlockchains:any = [];
 export const supportedAssets:any = [];
 
-if(process.env['FEATURE_BITCOIN_BLOCKCHAIN']) {
-    supportedBlockchains.push("Bitcoin")
-    supportedAssets.push("BTC")
-}
+supportedBlockchains.push(
+    "Bitcoin",
+    "Ethereum",
+    "Thorchain",
+    "Secret",
+    "Kava",
+    "Terra",
+    "BinanceSmartChain",
+    "Cardano",
+    "Eos",
+    "Fio",
+    "Cosmos",
+    "Osmosis",
+    "Binance",
+    "BitcoinCash",
+    "Litecoin",
+    "Avalanche"
+);
 
-if(process.env['FEATURE_ETHEREUM_BLOCKCHAIN']) {
-    supportedBlockchains.push("Ethereum")
-    supportedAssets.push("ETH")
-    //TODO get token list from npm
-    //add all supported
-}
-
-if(process.env['FEATURE_THORCHAIN_BLOCKCHAIN']) {
-    supportedBlockchains.push("Thorchain")
-    supportedAssets.push("RUNE")
-}
-
-if(process.env['FEATURE_SECRET_BLOCKCHAIN']){
-    supportedBlockchains.push("Secret")
-    supportedAssets.push("SCRT")
-}
-
-if(process.env['FEATURE_KAVA_BLOCKCHAIN']){
-    supportedBlockchains.push("Kava")
-    supportedAssets.push("KAVA")
-}
-
-if(process.env['FEATURE_TERRA_BLOCKCHAIN']){
-    supportedBlockchains.push("Terra")
-    supportedAssets.push("LUNA")
-}
-
-if(process.env['FEATURE_BSC_BLOCKCHAIN']){
-    supportedBlockchains.push("BinanceSmartChain")
-    supportedAssets.push("BNB")
-}
-
-if(process.env['FEATURE_CARDANO_BLOCKCHAIN']){
-    supportedBlockchains.push("Cardano")
-    supportedAssets.push("ADA")
-}
-
-if(process.env['FEATURE_BNB_BLOCKCHAIN']){
-    supportedBlockchains.push("Thorchain")
-    supportedAssets.push("RUNE")
-}
-
-if(process.env['FEATURE_EOS_BLOCKCHAIN']){
-    supportedBlockchains.push("Eos")
-    supportedAssets.push("EOS")
-}
-
-if(process.env['FEATURE_FIO_BLOCKCHAIN']){
-    supportedBlockchains.push("Fio")
-    supportedAssets.push("FIO")
-}
-
-if(process.env['FEATURE_COSMOS_BLOCKCHAIN']){
-    supportedBlockchains.push("Cosmos")
-    supportedAssets.push("ATOM")
-}
-
-if(process.env['FEATURE_OSMOSIS_BLOCKCHAIN']){
-    supportedBlockchains.push("Osmosis")
-    supportedAssets.push("OSMO")
-}
-
-if(process.env['FEATURE_BINANCE_BLOCKCHAIN']){
-    supportedBlockchains.push("Binance")
-    supportedAssets.push("BNB")
-}
-
-if(process.env['FEATURE_BITCOINCASH_BLOCKCHAIN']){
-    supportedBlockchains.push("BitcoinCash")
-    supportedAssets.push("BCH")
-}
-
-if(process.env['FEATURE_LITECOIN_BLOCKCHAIN']){
-    supportedBlockchains.push("Litecoin")
-    supportedAssets.push("LTC")
-}
-
-if(process.env['FEATURE_AVALANCHE_BLOCKCHAIN']){
-    supportedBlockchains.push("Avalanche")
-    supportedAssets.push("AVAX")
-}
+supportedAssets.push(
+    "BTC",
+    "ETH",
+    "RUNE",
+    "SCRT",
+    "KAVA",
+    "LUNA",
+    "BNB",
+    "ADA",
+    "EOS",
+    "FIO",
+    "ATOM",
+    "OSMO",
+    "BNB",
+    "BCH",
+    "LTC",
+    "AVAX"
+);
 
 // (only 1 native assets for each enabled blockchain)
 export const COIN_ICONS_BY_SYMBOL = {

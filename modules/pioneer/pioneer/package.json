@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer",
-  "version": "8.2.24",
+  "version": "8.2.26",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -25,6 +25,7 @@
     "@pioneer-platform/cointools": "^8.1.72",
     "@pioneer-platform/loggerdog": "^8.1.31",
     "@pioneer-platform/pioneer-caip": "^8.1.79",
+    "@pioneer-platform/pioneer-coins": "^8.1.86",
     "@pioneer-platform/redis-queue": "^8.1.24",
     "@pioneer-platform/unchained": "^8.1.66",
     "@pioneer-platform/zapper-client": "^8.1.26",

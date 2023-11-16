@@ -70,204 +70,236 @@ module.exports = {
         return get_prices_in_quote(assets,quote);
     },
     buildBalances:function(marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any, context:string){
-        return build_balances(marketInfoCoinCap,marketInfoCoinGecko,pubkeys, context)
+        return build_balances(marketInfoCoinCap,marketInfoCoinGecko,pubkeys)
     }
 }
 
-let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any, context:string) {
+let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any) {
     let tag = TAG + ' | build_balances | '
     try {
         if(!pubkeys) throw Error("No pubkeys given!")
-        if(!context) throw Error("No context given!")
         //GLOBAL_RATES
         if(!marketInfoCoinCap) marketInfoCoinCap = await get_assets_coincap()
         if(!marketInfoCoinGecko) marketInfoCoinGecko = await get_assets_coingecko()
-
+        // console.log(Object.keys(marketInfoCoinCap))
+        // console.log(Object.keys(marketInfoCoinGecko))
+        // console.log(Object.keys(marketInfoCoinCap).length)
+        // console.log(Object.keys(marketInfoCoinGecko).length)
         let valuesUsd:any = {}
         let totalValueUsd = 0
+        let outputBalances:any = []
+        let unknownTokens:any = []
+        let unPricedTokens:any = []
 
-        let allNames = []
-        let balances = []
-        let hydratedPubkeys:any = []
         for(let i = 0; i < pubkeys.length; i++){
-            let pubkey:Pubkey = pubkeys[i]
-            pubkey.context = context
-            if(!pubkey.balances) { // @ts-ignore
-                pubkey.balances = []
+            let entry:any = pubkeys[i]
+            // console.log("entry: ",entry)
+            //clone
+
+            //get hit on symbol
+            let coincap = marketInfoCoinCap[entry.ticker]
+            let coingecko = marketInfoCoinGecko[entry.ticker]
+            
+            // log.info("coincap: ",coincap)
+            // log.info("coingecko: ",coingecko)
+
+            if(!coincap && !coingecko) {
+                console.error("unknown token! ",entry.symbol)
+                unknownTokens.push(entry)
             }
-            log.debug(tag,"pubkey: ",pubkey)
-            let hydratedPubkey = JSON.parse(JSON.stringify(pubkey));
-            hydratedPubkey.balances = []
-            for(let j = 0; j < pubkey.balances.length; j++){
-                let entry:any = pubkey.balances[j]
-
-                //clone
-                log.debug(tag,"entry: ",entry)
-                let symbol = entry.asset
-
-                //network from asset
-                let network = COIN_MAP_LONG[symbol]
-                if(network){
-                    //address explorer URL
-                    entry.addressUrl = getExplorerAddressUrl(entry.address,network,symbol,false)
-                    // needsMemo
-                    let needsMemo = needsMemoByNetwork(network)
-                    if(needsMemo) entry.needsMemo = true
-                }
-
-
-                //log.debug(tag,"entry: ",entry)
-                //coinInfo
-                let coinInfoCoinCap = marketInfoCoinCap[symbol]
-                log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
-
-                //log.debug(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
-                let coinInfoCoinGecko = marketInfoCoinGecko[symbol]
-                log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
-
-                let rateUsdCoinCap = 0
-                if(coinInfoCoinCap && coinInfoCoinCap.priceUsd){
-                    rateUsdCoinCap = coinInfoCoinCap.priceUsd
-                } else {
-                    //log.error(tag," COINCAP Missing rate data for "+symbol)
-                }
-
-                //
-                let rateUsdCoinGecko = 0
-                if(coinInfoCoinGecko && coinInfoCoinGecko.current_price){
-                    rateUsdCoinGecko = coinInfoCoinGecko.current_price
-                } else {
-                    //log.error(tag," COINGECKO Missing rate data for "+symbol)
-                }
-
-                log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
-                log.debug(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
-
-                let relDiff = function(a:number, b:number) {
-                    return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
-                }
-
-                //if either = 0, then accept other price
-                //flag Danger
-
-                //Calculate the percent.
-                var percent = relDiff(Number(rateUsdCoinCap),Number(rateUsdCoinGecko))
-                log.debug(symbol," percent: ",percent)
-                //percent diff
-
-                /*
-                    Algo
-                    if any are 0, use other
-                    if both, choose lowest
-                 */
-
-                let chosenRate = 0
-                if(rateUsdCoinCap === 0){
-                    chosenRate = rateUsdCoinGecko
-                } else if(rateUsdCoinGecko === 0){
-                    chosenRate = rateUsdCoinCap
-                } else if(rateUsdCoinGecko > rateUsdCoinCap){
-                    chosenRate = rateUsdCoinCap
-                } else {
-                    chosenRate = rateUsdCoinGecko
-                }
-                chosenRate = Number(chosenRate)
-                entry.priceUsd = String(chosenRate)
-                let valueUsd = entry.balance * chosenRate
+            
+            if(coincap && coincap.priceUsd){
+                entry.priceUsd = coincap.priceUsd
+                entry.rank = coincap.rank
+                entry.name = coincap.name
+                // entry.marketInfo = coincap
+                entry.source = "coincap"
+            }
+            //preference coinGecko as more accurate
+            if(coingecko && coingecko.current_price){
+                entry.alias = []
+                if(entry.name)entry.alias.push(entry.name)
+                entry.priceUsd = coingecko.current_price
+                entry.name = coingecko.id
+                entry.alias = entry.alias.push(coingecko.name)
+                entry.rank = coingecko.market_cap_rank
+                entry.source = "coingecko"
+            }
+            
+            if(entry.priceUsd){
+                let valueUsd = entry.balance * entry.priceUsd
                 entry.valueUsd = String(valueUsd)
-
                 //valueUsd
                 totalValueUsd = Number(totalValueUsd) + Number(valueUsd)
-
-                //TODO if quote !== USD
-                //calc conversion
-
-                let balance:any = JSON.parse(JSON.stringify(pubkey))
-                delete balance.balances
-                balance = {...balance,...entry}
-                log.debug(tag,"context: at (init):",context)
-                log.debug(tag,"pubkey: at (init):",pubkey)
-                log.debug(tag,"balance: (init):",balance)
-                if(!balance.context) {
-                    balance.context = context
-                }
-
-                if(coinInfoCoinCap){
-                    balance.onCoinCap = true
-                    if(balance.symbol && balance.symbol !== coinInfoCoinCap.symbol){
-                        //symbol mismatch
-                        balance.coincapAgreeSymbol = false
-                        balance.coincapSymbol = coinInfoCoinCap.symbol
-                    }
-                    let coincapInfo = {
-                        id_coincap: coinInfoCoinCap.id,
-                        rank_coincap: coinInfoCoinCap.rank,
-                        name_coincap: coinInfoCoinCap.name,
-                        supply: coinInfoCoinCap.supply,
-                        maxSupply: coinInfoCoinCap.maxSupply,
-                        marketCapUsd: coinInfoCoinCap.marketCapUsd,
-                        volumeUsd24Hr: coinInfoCoinCap.volumeUsd24Hr,
-                        priceUsd: coinInfoCoinCap.priceUsd,
-                        changePercent24Hr: coinInfoCoinCap.changePercent24Hr,
-                        vwap24Hr: coinInfoCoinCap.vwap24Hr,
-                        explorer: coinInfoCoinCap.explorer,
-                    }
-                    balance = {...balance,...coincapInfo}
-                }else{
-                    balance.onCoinCap = false
-                }
-
-                if(coinInfoCoinGecko){
-                    log.debug(coinInfoCoinGecko.symbol," cginfo: ",coinInfoCoinGecko)
-                    balance.onCoinGecko = true
-                    if(balance.symbol && balance.symbol !== coinInfoCoinGecko.symbol){
-                        //symbol mismatch
-                        balance.coinGeckoAgreeSymbol = false
-                        balance.coinGeckoSymbol = coinInfoCoinGecko.symbol
-                    }
-                    let coinGeckoInfo = {
-                        name_coingecko: coinInfoCoinGecko.name,
-                        rank_coingecko: coinInfoCoinGecko.market_cap_rank,
-                        id_coingecko: coinInfoCoinGecko.id,
-                        image: coinInfoCoinGecko.image,
-                        current_price: coinInfoCoinGecko.current_price,
-                        market_cap: coinInfoCoinGecko.market_cap,
-                        fully_diluted_valuation: coinInfoCoinGecko.fully_diluted_valuation,
-                        total_volume: coinInfoCoinGecko.total_volume,
-                        high_24h: coinInfoCoinGecko.high_24h,
-                        low_24h: coinInfoCoinGecko.low_24h,
-                        price_change_24h: coinInfoCoinGecko.price_change_24h,
-                        price_change_percentage_24h: coinInfoCoinGecko.price_change_percentage_24h,
-                        market_cap_change_24h: coinInfoCoinGecko.market_cap_change_24h,
-                        market_cap_change_percentage_24h: coinInfoCoinGecko.market_cap_change_percentage_24h,
-                        circulating_supply: coinInfoCoinGecko.circulating_supply,
-                        total_supply: coinInfoCoinGecko.total_supply,
-                        max_supply: coinInfoCoinGecko.max_supply,
-                        ath: coinInfoCoinGecko.ath,
-                        ath_change_percentage: coinInfoCoinGecko.ath_change_percentage,
-                        ath_date: coinInfoCoinGecko.ath_date,
-                        atl: coinInfoCoinGecko.atl,
-                        atl_change_percentage: coinInfoCoinGecko.atl_change_percentage,
-                        atl_date: coinInfoCoinGecko.atl_date,
-                        roi: coinInfoCoinGecko.roi,
-                        last_updated: coinInfoCoinGecko.last_updated
-                    }
-                    balance = {...balance,...coinGeckoInfo}
-                }else{
-                    balance.onCoinCap = false
-                }
-
-                //figure out icon
-                if(!balance.image){
-                    //TODO lookup if icon exists, else use network icon
-                    //use network image? coincap
-                    balance.image = `https://static.coincap.io/assets/icons/${balance.symbol.toLowerCase()}@2x.png`
-                }
-                balances.push(balance)
+                outputBalances.push(entry)
+            } else {
+                unPricedTokens.push(entry)
             }
+            //get value
+            
+            //get hit on ticker
+            
+            //validate on chain
+
+            // //network from asset
+            // let network = COIN_MAP_LONG[symbol]
+            // if(network){
+            //     //address explorer URL
+            //     entry.addressUrl = getExplorerAddressUrl(entry.address,network,symbol,false)
+            //     // needsMemo
+            //     let needsMemo = needsMemoByNetwork(network)
+            //     if(needsMemo) entry.needsMemo = true
+            // }
+            //
+            //
+            // //log.debug(tag,"entry: ",entry)
+            // //coinInfo
+            // let coinInfoCoinCap = marketInfoCoinCap[symbol]
+            // log.debug(tag,"coinInfoCoinCap: ",coinInfoCoinCap)
+            //
+            // //log.debug(tag,"marketInfoCoinGecko: ",marketInfoCoinGecko)
+            // let coinInfoCoinGecko = marketInfoCoinGecko[symbol]
+            // log.debug(tag,"coinInfoCoinGecko: ",coinInfoCoinGecko)
+            //
+            // let rateUsdCoinCap = 0
+            // if(coinInfoCoinCap && coinInfoCoinCap.priceUsd){
+            //     rateUsdCoinCap = coinInfoCoinCap.priceUsd
+            // } else {
+            //     //log.error(tag," COINCAP Missing rate data for "+symbol)
+            // }
+            //
+            // //
+            // let rateUsdCoinGecko = 0
+            // if(coinInfoCoinGecko && coinInfoCoinGecko.current_price){
+            //     rateUsdCoinGecko = coinInfoCoinGecko.current_price
+            // } else {
+            //     //log.error(tag," COINGECKO Missing rate data for "+symbol)
+            // }
+            //
+            // log.debug(symbol," rateUsdCoinCap: ",rateUsdCoinCap)
+            // log.debug(symbol," rateUsdCoinGecko: ",rateUsdCoinGecko)
+            //
+            // let relDiff = function(a:number, b:number) {
+            //     return  100 * Math.abs( ( a - b ) / ( (a+b)/2 ) );
+            // }
+            //
+            // //if either = 0, then accept other price
+            // //flag Danger
+            //
+            // //Calculate the percent.
+            // var percent = relDiff(Number(rateUsdCoinCap),Number(rateUsdCoinGecko))
+            // log.debug(symbol," percent: ",percent)
+            // //percent diff
+            //
+            // /*
+            //     Algo
+            //     if any are 0, use other
+            //     if both, choose lowest
+            //  */
+            //
+            // let chosenRate = 0
+            // if(rateUsdCoinCap === 0){
+            //     chosenRate = rateUsdCoinGecko
+            // } else if(rateUsdCoinGecko === 0){
+            //     chosenRate = rateUsdCoinCap
+            // } else if(rateUsdCoinGecko > rateUsdCoinCap){
+            //     chosenRate = rateUsdCoinCap
+            // } else {
+            //     chosenRate = rateUsdCoinGecko
+            // }
+            // chosenRate = Number(chosenRate)
+            // entry.priceUsd = String(chosenRate)
+            // let valueUsd = entry.balance * chosenRate
+            // entry.valueUsd = String(valueUsd)
+            //
+            // //valueUsd
+            // totalValueUsd = Number(totalValueUsd) + Number(valueUsd)
+            //
+            // //TODO if quote !== USD
+            // //calc conversion
+            //
+            // let balance:any = JSON.parse(JSON.stringify(pubkey))
+            // delete balance.balances
+            // balance = {...balance,...entry}
+            // log.debug(tag,"pubkey: at (init):",pubkey)
+            // log.debug(tag,"balance: (init):",balance)
+            //
+            //
+            // if(coinInfoCoinCap){
+            //     balance.onCoinCap = true
+            //     if(balance.symbol && balance.symbol !== coinInfoCoinCap.symbol){
+            //         //symbol mismatch
+            //         balance.coincapAgreeSymbol = false
+            //         balance.coincapSymbol = coinInfoCoinCap.symbol
+            //     }
+            //     let coincapInfo = {
+            //         id_coincap: coinInfoCoinCap.id,
+            //         rank_coincap: coinInfoCoinCap.rank,
+            //         name_coincap: coinInfoCoinCap.name,
+            //         supply: coinInfoCoinCap.supply,
+            //         maxSupply: coinInfoCoinCap.maxSupply,
+            //         marketCapUsd: coinInfoCoinCap.marketCapUsd,
+            //         volumeUsd24Hr: coinInfoCoinCap.volumeUsd24Hr,
+            //         priceUsd: coinInfoCoinCap.priceUsd,
+            //         changePercent24Hr: coinInfoCoinCap.changePercent24Hr,
+            //         vwap24Hr: coinInfoCoinCap.vwap24Hr,
+            //         explorer: coinInfoCoinCap.explorer,
+            //     }
+            //     balance = {...balance,...coincapInfo}
+            // }else{
+            //     balance.onCoinCap = false
+            // }
+            //
+            // if(coinInfoCoinGecko){
+            //     log.debug(coinInfoCoinGecko.symbol," cginfo: ",coinInfoCoinGecko)
+            //     balance.onCoinGecko = true
+            //     if(balance.symbol && balance.symbol !== coinInfoCoinGecko.symbol){
+            //         //symbol mismatch
+            //         balance.coinGeckoAgreeSymbol = false
+            //         balance.coinGeckoSymbol = coinInfoCoinGecko.symbol
+            //     }
+            //     let coinGeckoInfo = {
+            //         name_coingecko: coinInfoCoinGecko.name,
+            //         rank_coingecko: coinInfoCoinGecko.market_cap_rank,
+            //         id_coingecko: coinInfoCoinGecko.id,
+            //         image: coinInfoCoinGecko.image,
+            //         current_price: coinInfoCoinGecko.current_price,
+            //         market_cap: coinInfoCoinGecko.market_cap,
+            //         fully_diluted_valuation: coinInfoCoinGecko.fully_diluted_valuation,
+            //         total_volume: coinInfoCoinGecko.total_volume,
+            //         high_24h: coinInfoCoinGecko.high_24h,
+            //         low_24h: coinInfoCoinGecko.low_24h,
+            //         price_change_24h: coinInfoCoinGecko.price_change_24h,
+            //         price_change_percentage_24h: coinInfoCoinGecko.price_change_percentage_24h,
+            //         market_cap_change_24h: coinInfoCoinGecko.market_cap_change_24h,
+            //         market_cap_change_percentage_24h: coinInfoCoinGecko.market_cap_change_percentage_24h,
+            //         circulating_supply: coinInfoCoinGecko.circulating_supply,
+            //         total_supply: coinInfoCoinGecko.total_supply,
+            //         max_supply: coinInfoCoinGecko.max_supply,
+            //         ath: coinInfoCoinGecko.ath,
+            //         ath_change_percentage: coinInfoCoinGecko.ath_change_percentage,
+            //         ath_date: coinInfoCoinGecko.ath_date,
+            //         atl: coinInfoCoinGecko.atl,
+            //         atl_change_percentage: coinInfoCoinGecko.atl_change_percentage,
+            //         atl_date: coinInfoCoinGecko.atl_date,
+            //         roi: coinInfoCoinGecko.roi,
+            //         last_updated: coinInfoCoinGecko.last_updated
+            //     }
+            //     balance = {...balance,...coinGeckoInfo}
+            // }else{
+            //     balance.onCoinCap = false
+            // }
+            //
+            // //figure out icon
+            // if(!balance.image){
+            //     //TODO lookup if icon exists, else use network icon
+            //     //use network image? coincap
+            //     balance.image = `https://static.coincap.io/assets/icons/${balance.symbol.toLowerCase()}@2x.png`
+            // }
+            // balances.push(balance)
         }
 
-        return {balances,total:totalValueUsd}
+        return {outputBalances,unPricedTokens, unknownTokens, total:totalValueUsd}
     } catch (e) {
         console.error(tag, 'Error: ', e)
         throw e

@@ -30,6 +30,7 @@ export const shortListSymbolToCaip = {
     DGB: 'bip122:digibytes-hash/slip44:20',
     DOGE: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
     RUNE: 'cosmos:thorchain-mainnet-v1/slip44:931',
+    THOR: 'cosmos:thorchain-mainnet-v1/slip44:931',
     ETH: 'eip155:1/slip44:60',
     GNO: 'eip155:100/slip44:60',
     MATIC: 'eip155:137/slip44:60',
@@ -61,4 +62,63 @@ export const shortListNameToCaip = {
     binance: 'placeholder:caip:binance:native:bnb-beacon-chain',
     eos: 'eip155:1:/erc20:0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0',
     fio: 'placeholder:caip:fio:native:fio-protocol'
+}
+
+//Primary blockchain caips
+export const primaryBlockchains = {
+    "eip155:1/slip44:60":{
+        name: 'ethereum',
+        type: 'coin',
+        caip: 'eip155:1/slip44:60',
+        tags: [
+            'ethereum',
+            'isAsset',
+            'isNative',
+            'KeepKeySupport',
+            'DappSupport',
+            'WalletConnectSupport'
+        ],
+        blockchain: 'ethereum',
+        symbol: 'ETH',
+        decimals: 18,
+        image: 'https://pioneers.dev/coins/ethereum.png',
+        description: 'Open source platform to write and distribute decentralized applications.',
+        website: 'https://ethereum.org/',
+        explorer: 'https://etherscan.io/',
+        rank: 2
+    }
+}
+
+export const primaryAssets = {
+    "eip155:1/slip44:60":{
+        blockchain: 'ethereum',
+        caip: 'eip155:1/slip44:60',
+        chainId: 1,
+        description: 'more info here: https://ethereum.org This is a EVM network with chainId: 1 Follows EIP:155',
+        explorer: 'https://ethereum.org',
+        faucets: [],
+        feeAssetCaip: 'eip155:1/slip44:60',
+        feeAssetName: 'ethereum',
+        feeAssetRank: 2,
+        feeAssetSymbol: 'ETH',
+        image: 'https://pioneers.dev/coins/ethereum-mainnet.png',
+        isCharted: false,
+        name: 'ethereum',
+        network: 'ETH',
+        service: null,
+        symbol: 'ETH',
+        tags: [
+            'KeepKeySupport',
+            'DappSupport',
+            'WalletConnectSupport',
+            'EVM',
+            'EIP:155',
+            'ethereum',
+            'Ether',
+            'ETH',
+            1,
+            null
+        ],
+        type: 'EVM'
+    }
 }

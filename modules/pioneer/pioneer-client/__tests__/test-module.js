@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -17,12 +17,15 @@ const runTest = async () => {
         let pioneer = new Pioneer(spec, config);
         pioneer = await pioneer.init();
 
-        // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
-        // console.log("info: ",info.data.length)
-        let address = "0xC8FFf0D944406A40475a0A8264328AAC8D64927B"
-        const user = await pioneer.GetPortfolio({address});
-        // // const user = await pioneer.GetNfts({address});
-        console.log("user: ", user);
+        const developers = await pioneer.GetTransactionsByAffiliate({address:"kk"});
+        console.log("developers: ", developers.data);
+
+        // // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
+        // // console.log("info: ",info.data.length)
+        // let address = "0xC8FFf0D944406A40475a0A8264328AAC8D64927B"
+        // const user = await pioneer.GetPortfolio({address});
+        // // // const user = await pioneer.GetNfts({address});
+        // console.log("user: ", user);
         
         // const user = await pioneer.User();
         // console.log("user: ", user.data);
@@ -48,6 +51,24 @@ const runTest = async () => {
         // let result = await pioneer.SearchNodesByType({type:"unchained"});
         // result = result.data
         // console.log("result: ",result)
+        // let caip = "eip155:137/slip44:60"
+        // let caip = "eip155:1/slip44:60"
+        //
+        // let result1 = await pioneer.GetFeeInfoByCaip({caip});
+        // console.log("result1: ",result1)
+        //
+        // let address = "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        // let result = await pioneer.GetAddressInfoByCaip({caip,address});
+        // console.log("result: ",result.data)
+        
+        //tx
+        // let tx = {
+        //     invocationId:"0x0",
+        //     caip:"eip155:1/slip44:60",
+        //     serialized:"0x02f8980181b68459682f00850969cba224830f424094360e2f3d92d23de8e5d8a461c2544aaf01eba549871550f7dca70000a4659dd2b40000000000000000000000000000000000000000000000000000000000000015c001a05232728aaf905697c36a300a9605019e7ae762cf750a18fcb83004e0f9d9baeea02814423f5243d8b07e109757c41c031e01c3d4576ee4096cb5d2157ef78f1917"
+        // }
+        // let data = await pioneer.Broadcast(tx)
+        // console.log("data: ",data.data)
 
         //GetFeeInfo
         // let result = await pioneer.GetFeeInfo({coin:"BTC"});
@@ -183,7 +204,365 @@ const runTest = async () => {
         // }
         // let result = await pioneer.Register(register);
         // console.log("result: ",result.data)
-        
+
+        //swapkit v2 register
+        // let register = {
+        //     "username":"user:2f706dde",
+        //     "publicAddress":"none",
+        //     "blockchains":['fuck','off'],
+        //     "context":"none",
+        //     "walletDescription":{
+        //         "context":"none",
+        //         "type":"none"
+        //     },
+        //     "data":{
+        //         "pubkeys":
+        //             [
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"ARB",
+        //                     "blockchain":"arbitrum",
+        //                     "type":"address",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"AVAX",
+        //                     "blockchain":"avalanche",
+        //                     "type":"address",
+        //                     "caip":"placeholder:caip:avalanchec:native:avalanche-c-chain",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"BNB",
+        //                     "blockchain":"binance",
+        //                     "type":"address",
+        //                     "caip":"eip155:56/slip44:60",
+        //                     "master":"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw",
+        //                     "pubkey":"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw",
+        //                     "address":"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"BSC",
+        //                     "blockchain":"unknown",
+        //                     "type":"address",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"BTC",
+        //                     "blockchain":"bitcoin",
+        //                     "type":"address",
+        //                     "caip":"bip122:000000000019d6689c085ae165831e93/slip44:0",
+        //                     "master":"bc1qsppjaxn9lgp9g0raxqej97r22w4z9kt5fh8jj2",
+        //                     "pubkey":"bc1qsppjaxn9lgp9g0raxqej97r22w4z9kt5fh8jj2",
+        //                     "address":"bc1qsppjaxn9lgp9g0raxqej97r22w4z9kt5fh8jj2"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"BCH",
+        //                     "blockchain":"bitcoincash",
+        //                     "type":"address",
+        //                     "caip":"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        //                     "master":"bitcoincash:qzlkgzpc2wx7f9pvvnkecc97mw0xqnhupgn44sx4wu",
+        //                     "pubkey":"bitcoincash:qzlkgzpc2wx7f9pvvnkecc97mw0xqnhupgn44sx4wu",
+        //                     "address":"bitcoincash:qzlkgzpc2wx7f9pvvnkecc97mw0xqnhupgn44sx4wu"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"GAIA",
+        //                     "blockchain":"unknown",
+        //                     "type":"address",
+        //                     "master":"cosmos1yc6dftwdhgt96k8yty8djga88f3knhznfyh26k",
+        //                     "pubkey":"cosmos1yc6dftwdhgt96k8yty8djga88f3knhznfyh26k",
+        //                     "address":"cosmos1yc6dftwdhgt96k8yty8djga88f3knhznfyh26k"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"DOGE",
+        //                     "blockchain":"dogecoin",
+        //                     "type":"address",
+        //                     "caip":"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+        //                     "master":"D8fBewYDtBFxgwrhx4NWADDcn7gXmN2pUz",
+        //                     "pubkey":"D8fBewYDtBFxgwrhx4NWADDcn7gXmN2pUz",
+        //                     "address":"D8fBewYDtBFxgwrhx4NWADDcn7gXmN2pUz"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"ETH",
+        //                     "blockchain":"ethereum",
+        //                     "type":"address",
+        //                     "caip":"eip155:1/slip44:60",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"LTC",
+        //                     "blockchain":"litecoin",
+        //                     "type":"address",
+        //                     "caip":"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+        //                     "master":"ltc1q3ec4unagxqrft52fj2k8lh2uqkktlypgm6dx6x",
+        //                     "pubkey":"ltc1q3ec4unagxqrft52fj2k8lh2uqkktlypgm6dx6x",
+        //                     "address":"ltc1q3ec4unagxqrft52fj2k8lh2uqkktlypgm6dx6x"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"MAYA",
+        //                     "blockchain":"unknown",
+        //                     "type":"address",
+        //                     "master":"",
+        //                     "pubkey":"",
+        //                     "address":""
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"OP",
+        //                     "blockchain":"optimism",
+        //                     "type":"address",
+        //                     "caip":"eip155:10/slip44:60",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"MATIC",
+        //                     "blockchain":"polygon",
+        //                     "type":"address",
+        //                     "caip":"eip155:137/slip44:60",
+        //                     "master":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "pubkey":"0x2356A15042F98f0a53784F42237bd4b2873AADCF",
+        //                     "address":"0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+        //                 },
+        //                 {
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet",
+        //                     "symbol":"THOR",
+        //                     "blockchain":"thorchain",
+        //                     "type":"address",
+        //                     "caip":"cosmos:thorchain-mainnet-v1/slip44:931",
+        //                     "master":"thor1pffne8g05rjuexvtmxxppc0xhhdg7hyuj9krc3",
+        //                     "pubkey":"thor1pffne8g05rjuexvtmxxppc0xhhdg7hyuj9krc3",
+        //                     "address":"thor1pffne8g05rjuexvtmxxppc0xhhdg7hyuj9krc3"
+        //                 }
+        //             ]
+        //         ,
+        //         "balances":
+        //             [
+        //                 {
+        //                     "symbol":"AVAX",
+        //                     "chain":"AVAX",
+        //                     "ticker":"AVAX",
+        //                     "type":"Native",
+        //                     "balance":"0.00018375",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"AvaxClassic",
+        //                     "chain":"AVAX",
+        //                     "ticker":"AvaxClassic",
+        //                     "type":"AVAX",
+        //                     "balance":"74.04175",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"$ Free Claim and Play-0xd23345e0e6340616b1cf7200762d0289547ccf87",
+        //                     "chain":"AVAX",
+        //                     "ticker":"$ Free Claim and Play",
+        //                     "type":"AVAX",
+        //                     "balance":"500",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"AVAX-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        //                     "chain":"AVAX",
+        //                     "ticker":"AVAX",
+        //                     "type":"AVAX",
+        //                     "balance":"0.00018375",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"BNB",
+        //                     "chain":"BNB",
+        //                     "ticker":"BNB",
+        //                     "type":"Native",
+        //                     "balance":"0.03075992",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"BABYDOGE-0x43f102bbd52259f2cfd0ef82e8807e3610ae3e40",
+        //                     "chain":"BSC",
+        //                     "ticker":"BABYDOGE",
+        //                     "type":"BEP20",
+        //                     "balance":"391197565.47720093",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"ETH",
+        //                     "chain":"ETH",
+        //                     "ticker":"ETH",
+        //                     "type":"Native",
+        //                     "balance":"0.00537313",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"UNIV2Claim",
+        //                     "chain":"ETH",
+        //                     "ticker":"UNIV2Claim",
+        //                     "type":"ERC20",
+        //                     "balance":"400.4",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"DAI-0x6b175474e89094c44da98b954eedeac495271d0f",
+        //                     "chain":"ETH",
+        //                     "ticker":"DAI",
+        //                     "type":"ERC20",
+        //                     "balance":"2.89999991",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"$ Visit NFTGiftX",
+        //                     "chain":"ETH",
+        //                     "ticker":"$ Visit NFTGiftX",
+        //                     "type":"ERC20",
+        //                     "balance":"4000.4",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"NOUNBR-0x36b2aa1795d8cdef4b784fe34045fadc45d61e8c",
+        //                     "chain":"ETH",
+        //                     "ticker":"NOUNBR",
+        //                     "type":"ERC20",
+        //                     "balance":"1.1",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"FAU-0xfab46e002bbf0b4509813474841e0716e6730136",
+        //                     "chain":"ETH",
+        //                     "ticker":"FAU",
+        //                     "type":"ERC20",
+        //                     "balance":"1000",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"LUSD-0x5f98805a4e8be255a32880fdec7f6728c6568ba0",
+        //                     "chain":"ETH",
+        //                     "ticker":"LUSD",
+        //                     "type":"ERC20",
+        //                     "balance":"2",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"OP",
+        //                     "chain":"OP",
+        //                     "ticker":"OP",
+        //                     "type":"Native",
+        //                     "balance":"0.00000089",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"ETH-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        //                     "chain":"OP",
+        //                     "ticker":"ETH",
+        //                     "type":"OPTIMISM",
+        //                     "balance":"0.00000089",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"ETH-0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000",
+        //                     "chain":"OP",
+        //                     "ticker":"ETH",
+        //                     "type":"OPTIMISM",
+        //                     "balance":"0.00000089",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"MATIC",
+        //                     "chain":"MATIC",
+        //                     "ticker":"MATIC",
+        //                     "type":"Native",
+        //                     "balance":"2.83077868",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"MATIC-0x0000000000000000000000000000000000001010",
+        //                     "chain":"MATIC",
+        //                     "ticker":"MATIC",
+        //                     "type":"POLYGON",
+        //                     "balance":"2.83077868",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"DAI-0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+        //                     "chain":"MATIC",
+        //                     "ticker":"DAI",
+        //                     "type":"POLYGON",
+        //                     "balance":"0.97610475",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"MaticX-0xfa68fb4628dff1028cfec22b4162fccd0d45efb6",
+        //                     "chain":"MATIC",
+        //                     "ticker":"MaticX",
+        //                     "type":"POLYGON",
+        //                     "balance":"0.93538774",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"AAVE-0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        //                     "chain":"MATIC",
+        //                     "ticker":"AAVE",
+        //                     "type":"POLYGON",
+        //                     "balance":"0.00011825",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"uni-router",
+        //                     "chain":"MATIC",
+        //                     "ticker":"uni",
+        //                     "type":"POLYGON",
+        //                     "balance":"10",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"BalancerV2",
+        //                     "chain":"MATIC",
+        //                     "ticker":"BalancerV2",
+        //                     "type":"POLYGON",
+        //                     "balance":"325",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 },
+        //                 {
+        //                     "symbol":"RUNE",
+        //                     "chain":"THOR",
+        //                     "ticker":"RUNE",
+        //                     "type":"Native",
+        //                     "balance":"1.9004648",
+        //                     "context":"keepkey:0x2356A15042F98f0a53784F42237bd4b2873AADCF.wallet"
+        //                 }
+        //
+        //         ]
+        //     },
+        //     "queryKey":"key:33826151-e44b-4ea1-b226-5851a88f0e5e",
+        //     "auth":"lol",
+        //     "provider":"lol"
+        // }
+        // let result = await pioneer.Register(register);
+        // console.log("result: ",result.data)
+
+        // let result = await pioneer.Register(register);
+        // console.log("result: ",result.data)
+
         //register keepkey
 
         // let register = {

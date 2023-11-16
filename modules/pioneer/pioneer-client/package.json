@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-client",
-  "version": "9.0.18",
+  "version": "9.0.19",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "swagger-client": "^3.19.8"
+    "swagger-client": "^3.23.1"
   },
   "gitHead": "bc0fcffd1ceb16cb7db6e63664dc78361ccb783e"
 }

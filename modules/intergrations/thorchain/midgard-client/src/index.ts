@@ -23,8 +23,9 @@ let SEED_TESTNET = "https://testnet-seed.thorchain.info/"
 // const MIDGARD_API = 'http://174.138.103.9:8080/v1'
 // let MIDGARD_API_RAW = 'https://testnet.thornode.thorchain.info'
 
-const MIDGARD_API = process.env['URL_MIDGARD'] ||'https://midgard.thorchain.info/v2'
-const URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.thorchain.info'
+//const MIDGARD_API = process.env['URL_MIDGARD'] ||'https://midgard.ninerealms.com/v2'
+const MIDGARD_API = process.env['URL_MIDGARD'] ||'https://indexer.thorchain.shapeshift.com/v2'
+const URL_THORNODE = process.env['URL_THORNODE'] || 'https://thornode.ninerealms.com'
 log.debug("URL_THORNODE: ",URL_THORNODE)
 log.debug("MIDGARD_API: ",MIDGARD_API)
 
@@ -47,6 +48,9 @@ module.exports = {
     getPools: function () {
         return get_pools();
     },
+    getOutboundQueue: function () {
+        return get_outbound_queue();
+    },
     getPrice: function (asset:string) {
         return get_price(asset);
     },
@@ -59,31 +63,133 @@ module.exports = {
     getNewAddress: function () {
         return get_new_addresses();
     },
+    getActions: function () {
+        return get_actions();
+    },
+    getActionsByAddress: function (address:string) {
+        return get_actions_by_address(address);
+    },
     getTransaction: function (txid:string) {
         return get_transaction(txid);
+    },
+    getTransactionsByAffiliate: function (address:string) {
+        return get_transactions_by_affiliate(address);
+    },
+    getTransactionsByAddress: function (address:string) {
+        return get_transactions_by_address(address);
+    }
+}
+
+const get_transactions_by_address = async function (address:string) {
+    let tag = TAG + " | get_transactions_by_address | "
+    try {
+
+        //params
+        let params = {
+            address,
+        }
+        console.log(params)
+        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+const get_transactions_by_affiliate = async function (address:string) {
+    let tag = TAG + " | get_transactions_by_affiliate | "
+    try {
+
+        //params
+        let params = {
+            affiliate:address,
+        }
+        console.log(params)
+        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+const get_outbound_queue = async function () {
+    let tag = TAG + " | get_outbound_queue | "
+    try {
+            //URL_THORNODE
+        const outboundReq = await axios.get(`${URL_THORNODE}/thorchain/queue/outbound`);
+
+        return outboundReq
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+
+
+const get_actions = async function () {
+    let tag = TAG + " | get_transaction | "
+    try {
+
+        //params
+        let params = {
+            // txid,
+            // address,
+            // type:"swap",
+            fromHeight:12169490,
+            // offset:1,
+            // limit:10
+        }
+        console.log(params)
+        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+const get_actions_by_address = async function (address:string) {
+    let tag = TAG + " | get_transaction | "
+    try {
+
+        //params
+        let params = {
+            // txid,
+            address,
+            // type:"swap",
+            // fromHeight:12169490,
+            // offset:1,
+            // limit:1000
+        }
+        console.log(params)
+        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
     }
 }
 
 const get_transaction = async function (txid:string) {
     let tag = TAG + " | get_transaction | "
     try {
-        if(txid.substring(0,2) == '0x'){
-            txid = txid.replace('0x','')
-        }
-        txid = txid.toUpperCase()
-        log.debug(tag,"txid formatted: ",txid)
-
-        //params
-        let params = {
-            txid,
-            offset:0,
-            limit:1
-        }
-
-        let resp = await axios.get(MIDGARD_API+"/actions",{params})
+        const inDetails = (
+            await axios.get(`${URL_THORNODE}/thorchain/tx/details/${txid}`)
+        ).data;
 
 
-        return resp.data
+        return inDetails
     } catch (e) {
         log.error(tag, "e: ", e)
         throw e
@@ -192,6 +298,17 @@ const get_info = async function () {
             // json: true
         };
 
+        const outboundReq = await axios.get(`${URL_THORNODE}/thorchain/queue/outbound`);
+        const scheduledReq = await axios.get(
+            `${URL_THORNODE}/thorchain/queue/scheduled`
+        );
+        const streamingReq = await axios.get(
+            `${URL_THORNODE}/thorchain/swaps/streaming`
+        );
+        output.outboundReq = outboundReq.data
+        output.scheduledReq = scheduledReq.data
+        output.streamingReq = streamingReq.data
+        
         log.debug(bodyStats)
         let respStats = await axios(bodyStats)
         log.debug(tag,"respStats: ",respStats.data)

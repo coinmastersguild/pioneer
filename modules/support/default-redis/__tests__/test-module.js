@@ -10,87 +10,87 @@ const {redis,redisQueue} = require("../index")
  */
 
 
-redis.info()
-    .then(function(resp){
-        console.log(resp)
-    })
-
-let run_test = async function(){
-    try{
-
-        let insert = [
-            {blal:"pw1"},
-            {blal1:"pw1"},
-            {blal2:"pw12"},
-            {blal3:"pw1asda"},
-        ]
-
-
-        //add to set
-        for(let i = 0; i < insert.length; i++){
-            await redis.hset("TEST_ACCOUNTS",i)
-        }
-
-        let cursor = 0
-
-        let is_killing = true
-
-        let timeStart = new Date().getTime()
-
-        while(is_killing){
-            //murder keys marked for death
-
-            //get
-            let batch = await redis.scan(cursor)
-            console.log("batch: ",batch)
-
-            let keys = batch[1]
-            cursor = batch[0]
-            console.log(tag,"cursor: ",cursor)
-
-            //check keys
-            await check_keys(keys)
-
-            //wait
-            await sleep(300)
-
-            //
-            if(cursor == 0){
-                is_killing = false
-            }
-
-        }
-
-        let timeFinish = new Date().getTime()
-
-        let duration = timeFinish - timeStart
-        log.debug(tag,"duration: ",duration / 1000)
-
-        //get all
-        //scan
-
-
-        //get highest
-
-        //find missing
-
-        //add missing
-
-        //refify
-
-    }catch(e){
-        console.error(e)
-    }
-}
-run_test()
-
-
-// let setReady = async function(){
-//     console.log("online!")
-//     let result = await redis.setex("ATOM:tx:signer:status",5,'online')
-//     console.log("result: ",result)
+// redis.info()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+//
+// let run_test = async function(){
+//     try{
+//
+//         let insert = [
+//             {blal:"pw1"},
+//             {blal1:"pw1"},
+//             {blal2:"pw12"},
+//             {blal3:"pw1asda"},
+//         ]
+//
+//
+//         //add to set
+//         for(let i = 0; i < insert.length; i++){
+//             await redis.hset("TEST_ACCOUNTS",i)
+//         }
+//
+//         let cursor = 0
+//
+//         let is_killing = true
+//
+//         let timeStart = new Date().getTime()
+//
+//         while(is_killing){
+//             //murder keys marked for death
+//
+//             //get
+//             let batch = await redis.scan(cursor)
+//             console.log("batch: ",batch)
+//
+//             let keys = batch[1]
+//             cursor = batch[0]
+//             console.log(tag,"cursor: ",cursor)
+//
+//             //check keys
+//             await check_keys(keys)
+//
+//             //wait
+//             await sleep(300)
+//
+//             //
+//             if(cursor == 0){
+//                 is_killing = false
+//             }
+//
+//         }
+//
+//         let timeFinish = new Date().getTime()
+//
+//         let duration = timeFinish - timeStart
+//         log.debug(tag,"duration: ",duration / 1000)
+//
+//         //get all
+//         //scan
+//
+//
+//         //get highest
+//
+//         //find missing
+//
+//         //add missing
+//
+//         //refify
+//
+//     }catch(e){
+//         console.error(e)
+//     }
 // }
-// setInterval(setReady,5000)
+// run_test()
+
+
+let setReady = async function(){
+    console.log("online!")
+    let result = await redis.setex("ATOM:tx:signer:status",5,'online')
+    console.log("result: ",result)
+}
+setInterval(setReady,5000)
 
 
 
