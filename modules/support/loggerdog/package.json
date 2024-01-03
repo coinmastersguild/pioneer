@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/loggerdog",
-  "version": "8.3.0",
+  "version": "8.3.1",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

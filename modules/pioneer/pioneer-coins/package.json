@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-coins",
-  "version": "9.2.0",
+  "version": "9.2.1",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -14,7 +14,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@pioneer-platform/loggerdog": "^8.3.0",
+    "@pioneer-platform/loggerdog": "^8.3.1",
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",
     "bitcoin-regex": "^2.0.0",
