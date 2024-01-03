@@ -31,11 +31,20 @@ let run_test = async function(){
         //sub to address
 
         //
-        let utxos = await network.utxosByXpub('DGB',"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG")
-        console.log(utxos)
+        // let utxos = await network.utxosByXpub('DGB',"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG")
+        // console.log(utxos)
         
         // let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
         // console.log(utxos)
+
+        //e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925
+        network.getTransaction('DGB',"e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925")
+            .then(function(resp){
+                console.log(resp)
+                console.log(JSON.stringify(resp))
+            })
+
+
     }catch(e){
         console.error(e)
     }

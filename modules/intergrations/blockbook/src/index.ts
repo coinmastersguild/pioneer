@@ -316,12 +316,11 @@ let get_transaction = async function(coin:string,txid:string){
     try{
 
         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/tx/"+txid
-
+        console.log("url: ",url)
         let body = {
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
