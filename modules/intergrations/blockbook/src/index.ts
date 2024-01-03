@@ -136,7 +136,7 @@ let get_fees = async function (coin: string){
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -163,7 +163,7 @@ let get_info_by_pubkey = async function (coin: string, pubkey: string, page?: st
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -191,7 +191,7 @@ let get_txids_by_address = async function(coin:string,address:string,page?:numbe
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -218,7 +218,7 @@ let get_info_by_address = async function(coin:string,address:string,filter?:stri
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -245,7 +245,7 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
             method: 'GET',
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
@@ -270,7 +270,7 @@ let broadcast_transaction = async function(coin:string,hex:string){
         let body = {
             url,
             headers: {
-                'api-key': process.env['NOW_NODES_API'],
+
                 'content-type': 'application/json',
                 'User-Agent': fakeUa()
             },
