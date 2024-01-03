@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-caip",
-  "version": "8.1.81",
+  "version": "9.0.14",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {

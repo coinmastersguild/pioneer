@@ -498,7 +498,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
             balance = balance + parseInt(uxto.value)
         }
 
-        return balance / 100000000
+        return balance
     }catch(e){
         console.error(tag,e)
     }

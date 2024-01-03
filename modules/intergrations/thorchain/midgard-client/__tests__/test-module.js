@@ -20,8 +20,8 @@ let run_test = async function(){
         // let info = await midgard.getInfo()
         // console.log("info: ",info)
 
-        // let pools = await midgard.getPools()
-        // console.log("pools: ",pools)
+        let pools = await midgard.getPools()
+        console.log("pools: ",pools)
         
         // let queue = await midgard.getOutboundQueue()
         // console.log("queue: ",queue)
@@ -52,7 +52,7 @@ let run_test = async function(){
         // let address = "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
         // let address = "thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx"
         //let txid = "95E617AA12E5523A909BADCF56783801ED65254589F0542CC9F2391B749C9D06"
-        let txid = "9FBE472CD6226300C038260E7A525260C8FB4582E7165D824E2ADA6EAF96CA0E"
+        // let txid = "9FBE472CD6226300C038260E7A525260C8FB4582E7165D824E2ADA6EAF96CA0E"
         //let txid = ""
         // txid = txid.toUpperCase()
         // txid = txid.replace("0X","")
@@ -78,8 +78,8 @@ let run_test = async function(){
         // let txInfo = await midgard.getTransaction(txid)
         // console.log("txInfo: ",JSON.stringify(txInfo))
 
-        let txInfo = await midgard.getTransactionsByAddress('0x141D9959cAe3853b035000490C03991eB70Fc4aC')
-        console.log("txInfo: ",JSON.stringify(txInfo))
+        // let txInfo = await midgard.getTransactionsByAddress('0x141D9959cAe3853b035000490C03991eB70Fc4aC')
+        // console.log("txInfo: ",JSON.stringify(txInfo))
         
         // let txInfo = await midgard.getTransactionsByAffiliate('kk')
         // console.log("txInfo: ",JSON.stringify(txInfo))

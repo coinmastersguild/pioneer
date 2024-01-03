@@ -28,10 +28,30 @@ let {
     addressInfoForCoin,
 } = require('../lib/index.js')
 
+//
+let blockchains = [
+    // "eip155:42161/slip44:60",
+    // "eip155:43114/slip44:60",
+    // "binance:bnb-beacon-chain/slip44:118",
+    // "eip155:56/slip44:60",
+    // "bip122:000000000019d6689c085ae165831e93/slip44:0",
+    // "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+    // "cosmos:cosmoshub-4/slip44:118",
+    // "bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+    // "eip155:1/slip44:118",
+    // "bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+    // "eip155:10/slip44:60",
+    // "eip155:137/slip44:60",
+    // "cosmos:thorchain-mainnet-v1/slip44:931",
+    "bip122:000007d91d1254d60e2dd1ae58038307"
+]
+let paths = getPaths(blockchains)
+console.log(paths)
+
 //addressInfo
 // let coin = 'ETH'
 // let coin = 'BTC'
-let coin = 'LTC'
+let coin = 'BASE'
 // let coin = 'DOGE'
 // let coin = 'DASH'
 // let coin = 'RUNE'
@@ -39,7 +59,7 @@ let coin = 'LTC'
 // let coin = 'GAIA'
 // let coin = 'ARB'
 // let addressInfo = addressInfoForCoin(coin, false, 'p2wpkh')
-// // let addressInfo = addressInfoForCoin(coin, false)
+// // // let addressInfo = addressInfoForCoin(coin, false)
 // console.log("addressInfo: ",addressInfo)
 
 // let addressNList = [
@@ -95,13 +115,13 @@ let addressNlist = [
 // let addressNlist = [
 //     2147483732, 2147483648, 2147483648, 0, 0
 // ]
-console.log(addressNListToBIP32(addressNlist))
+// console.log(addressNListToBIP32(addressNlist))
 
 // let bip32 = `m/44'/144'/0'/0/0`
 // let bip32 = `m/44'/714'/0'/0/0`
 // console.log(bip32ToAddressNList(bip32))
-
-
+// let xpub = "xpub6CXCeiZ5e1zPKopayq7h2eu7aySmywGeekdqHwae5YGbaArPs7i2UwEnjRaAbaQDgo2EWF99QXa1T2HX8nDFEH4jZxipv41NyKwM9SNZT3K"
+// console.log("zpub",xpubConvert(xpub,'zpub'))
 //convert
 //console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
 //console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
@@ -110,10 +130,10 @@ console.log(addressNListToBIP32(addressNlist))
 // console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 //
-// let paths = getPaths(['osmosis'])
-// let paths = getPaths(['cosmos'])
-
-// let paths = getPaths(['terra'])
+// let paths = getPaths(['bip122:000007d91d1254d60e2dd1ae58038307'])
+// // let paths = getPaths(['cosmos'])
+//
+// // let paths = getPaths(['terra'])
 // console.log("paths: ",paths)
 
 // let paths = getPaths(['osmosis'])

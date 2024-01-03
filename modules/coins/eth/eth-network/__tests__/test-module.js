@@ -45,11 +45,11 @@ network.getAllPioneers()
         console.log(resp)
     })
 
-let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
-network.getNonce(address)
-    .then(function(resp){
-        console.log(resp)
-    })
+// let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+// network.getNonce(address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // network.checkAirdropClaim(address)
 //     .then(function(resp){

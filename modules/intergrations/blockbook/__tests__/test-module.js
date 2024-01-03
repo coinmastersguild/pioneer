@@ -30,6 +30,10 @@ let run_test = async function(){
         // ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
         //sub to address
 
+        //
+        let utxos = await network.utxosByXpub('DGB',"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG")
+        console.log(utxos)
+        
         // let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
         // console.log(utxos)
     }catch(e){
@@ -54,11 +58,11 @@ run_test()
 //         console.log("txid: ",resp)
 //     })
 
-network.getAddressInfo('ETH',"0x33b35c665496bA8E71B22373843376740401F106")
-    .then(function(resp){
-        console.log(resp)
-        console.log(JSON.stringify(resp))
-    })
+// network.getAddressInfo('ETH',"0x33b35c665496bA8E71B22373843376740401F106")
+//     .then(function(resp){
+//         console.log(resp)
+//         console.log(JSON.stringify(resp))
+//     })
 
 // let address = ""
 // network.getAddressInfo('BTC',"1BToRvt4zvTCrAb4WXLErvbaKNCh9Vpo8w")

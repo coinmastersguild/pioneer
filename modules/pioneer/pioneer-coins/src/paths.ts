@@ -1,17 +1,40 @@
 const log = require('@pioneer-platform/loggerdog')()
-export const blockchains = ['bitcoin','ethereum','thorchain','bitcoincash','litecoin','binance','cosmos','dogecoin','osmosis']
-
+export const blockchains = [
+    'eip155:42161',
+    'eip155:43114',
+    'eip155:56',
+    'binance:bnb-beacon-chain',
+    'bip122:000000000000000000651ef99cb9fcbe',
+    'bip122:000000000019d6689c085ae165831e93',
+    'eip155:8453',
+    'cosmos:cosmoshub-4',
+    'bip122:dash-hash',
+    'bip122:digibytes-hash',
+    'bip122:00000000001a91e3dace36e2be3bf030',
+    'cosmos:kaiyo-1',
+    'eos:cf057bbfb72640471fd910bcb67639c2',
+    'eip155:1',
+    'bip122:12a765e31ffd4059bada1e25190f6e98',
+    'cosmos:maya-mainnet-v1',
+    'eip155:10',
+    'cosmos:osmosis-1',
+    'eip155:137',
+    'ripple:unknown',
+    'cosmos:thorchain-mainnet-v1',
+    'bip122:0000000000196a45'
+]
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
     if(!blockchains) blockchains = []
-    if(blockchains.indexOf('bitcoin') >= 0){
+    if(blockchains.indexOf('bip122:000000000019d6689c085ae165831e93') >= 0){
         if(isTestnet){
             output.push({
                 note:"Bitcoin testnet account 0",
                 blockchain: 'bitcoin',
                 testnet:true,
                 symbol: 'BTC',
-                network: 'BTC',
+                symbolSwapKit: 'BTC',
+                network: 'bip122:000000000019d6689c085ae165831e93',
                 script_type:"p2wpkh", //bech32
                 available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
                 type:"zpub",
@@ -26,7 +49,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
                 note:"Bitcoin account 0",
                 blockchain: 'bitcoin',
                 symbol: 'BTC',
-                network: 'BTC',
+                symbolSwapKit: 'BTC',
+                network: 'bip122:000000000019d6689c085ae165831e93',
                 script_type:"p2pkh",
                 available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
                 type:"xpub",
@@ -42,7 +66,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
                 note:"Bitcoin account Native Segwit (Bech32)",
                 blockchain: 'bitcoin',
                 symbol: 'BTC',
-                network: 'BTC',
+                symbolSwapKit: 'BTC',
+                network: 'bip122:000000000019d6689c085ae165831e93',
                 script_type:"p2wpkh", //bech32
                 available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
                 type:"zpub",
@@ -54,11 +79,12 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         }
     }
 
-    if(blockchains.indexOf('ethereum') >= 0){
+    if(blockchains.indexOf('eip155:1') >= 0){
         let entry:any = {
             note:" ETH primary (default)",
             symbol: 'ETH',
-            network: 'ETH',
+            symbolSwapKit: 'ETH',
+            network: 'eip155:1',
             script_type:"ethereum",
             available_scripts_types:['ethereum'],
             type:"address",
@@ -72,11 +98,12 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('avalanche') >= 0){
+    if(blockchains.indexOf('eip155:43114') >= 0){
         let entry:any = {
             note:" AVAX primary (default)",
             symbol: 'AVAX',
-            network: 'AVAX',
+            symbolSwapKit: 'AVAX',
+            network: 'eip155:43114',
             script_type:"avalanche",
             available_scripts_types:['avalanche'],
             type:"address",
@@ -90,7 +117,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('thorchain') >= 0){
+    if(blockchains.indexOf('cosmos:thorchain-mainnet-v1') >= 0){
         let entry:any = {
             note:" Default RUNE path ",
             type:"address",
@@ -101,7 +128,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'thorchain',
             symbol: 'RUNE',
-            network: 'RUNE',
+            symbolSwapKit: 'RUNE',
+            network: 'cosmos:thorchain-mainnet-v1',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -109,18 +137,19 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('secret') >= 0){
+    if(blockchains.indexOf('cosmos:secret-mainnet-v1') >= 0){
         let entry:any = {
             note:" Default Secret path ",
             type:"address",
             addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
-            script_type:"thorchain",
+            script_type:"secret",
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            blockchain: 'thorchain',
-            symbol: 'RUNE',
-            network: 'RUNE',
+            blockchain: 'secret',
+            symbol: 'SCRT',
+            symbolSwapKit: 'SCRT',
+            network: 'cosmos:secret-mainnet-v1',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -128,7 +157,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('cosmos') >= 0){
+    if(blockchains.indexOf('cosmos:cosmoshub-4') >= 0){
         let entry:any = {
             note:" Default ATOM path ",
             type:"address",
@@ -140,7 +169,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'cosmos',
             symbol: 'ATOM',
-            network: 'ATOM',
+            symbolSwapKit: 'GAIA',
+            network: 'cosmos:cosmoshub-4',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -148,7 +178,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('osmosis') >= 0){
+    if(blockchains.indexOf('cosmos:osmosis-1') >= 0){
         let entry:any = {
             note:" Default OSMO path ",
             type:"address",
@@ -160,7 +190,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'osmosis',
             symbol: 'OSMO',
-            network: 'OSMO',
+            symbolSwapKit: 'OSMO',
+            network: 'cosmos:osmosis-1',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -168,7 +199,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('binance') >= 0){
+    if(blockchains.indexOf('binance:bnb-beacon-chain') >= 0){
         let entry:any = {
             note:"Binance default path",
             type:"address",
@@ -180,7 +211,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'binance',
             symbol: 'BNB',
-            network: 'BNB',
+            symbolSwapKit: 'BNB',
+            network: 'binance:bnb-beacon-chain',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -188,7 +220,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('bitcoincash') >= 0){
+    if(blockchains.indexOf('bip122:000000000000000000651ef99cb9fcbe') >= 0){
         let entry:any = {
             note:"Bitcoin Cash Default path",
             type:"xpub",
@@ -200,7 +232,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'bitcoincash',
             symbol: 'BCH',
-            network: 'BCH',
+            symbolSwapKit: 'BCH',
+            network: 'bip122:000000000000000000651ef99cb9fcbe',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -208,7 +241,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('litecoin') >= 0){
+    if(blockchains.indexOf('bip122:12a765e31ffd4059bada1e25190f6e98') >= 0){
         let entry:any = {
             note:"Litecoin Default path",
             type:"xpub",
@@ -220,7 +253,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'litecoin',
             symbol: 'LTC',
-            network: 'LTC',
+            symbolSwapKit: 'LTC',
+            network: 'bip122:12a765e31ffd4059bada1e25190f6e98',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -232,7 +266,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             note:"Litecoin account Native Segwit (Bech32)",
             blockchain: 'litecoin',
             symbol: 'LTC',
-            network: 'LTC',
+            symbolSwapKit: 'LTC',
+            network: 'bip122:12a765e31ffd4059bada1e25190f6e98',
             script_type:"p2wpkh", //bech32
             available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
             type:"zpub",
@@ -244,7 +279,7 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('dogecoin') >= 0){
+    if(blockchains.indexOf('bip122:00000000001a91e3dace36e2be3bf030') >= 0){
         let entry:any = {
             note:"Dogecoin Default path",
             type:"xpub",
@@ -256,7 +291,8 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             blockchain: 'dogecoin',
             symbol: 'DOGE',
-            network: 'DOGE',
+            symbolSwapKit: 'DOGE',
+            network: 'bip122:00000000001a91e3dace36e2be3bf030',
         }
         if(isTestnet) {
             entry.testnet = true
@@ -264,14 +300,14 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
     
-    if(blockchains.indexOf('dash') >= 0){
-
+    if(blockchains.indexOf('bip122:000007d91d1254d60e2dd1ae58038307') >= 0){
         let entry:any = {
             note:"Default dash path",
             type:"xpub",
             coin: 'Dash',
             symbol: 'DASH',
-            network: 'DASH',
+            symbolSwapKit: 'DASH',
+            network: 'bip122:000007d91d1254d60e2dd1ae58038307',
             blockchain: 'dash',
             script_type:"p2pkh",
             available_scripts_types:['p2pkh'],
@@ -280,10 +316,28 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             curve: 'secp256k1',
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
         }
-
         output.push(entry)
     }
-    
+
+    if(blockchains.indexOf('ripple:4109C6F2045FC7EFF4CDE8F9905D19C2') >= 0){
+        let entry:any = {
+            note:"Default ripple path",
+            type:"address",
+            coin: 'Ripple',
+            symbol: 'XRP',
+            symbolSwapKit: 'XRP',
+            network: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2',
+            blockchain: 'ripple',
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 144, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 144, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+        }
+        output.push(entry)
+    }
+
     return output
 }
 

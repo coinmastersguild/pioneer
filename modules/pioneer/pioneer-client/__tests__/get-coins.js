@@ -8,12 +8,13 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'./../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
-let pioneerApi = require("../lib")
+const Pioneer = require("../lib").default;
+
 const semver = require('semver')
 // let signer = require("eth_mnemonic_signer")
 
 //force
-process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:4000/spec/swagger.json"
 
@@ -46,13 +47,19 @@ let run_test = async function(){
 
         //get config
         console.log("spec: ",spec)
-        let pioneer = new pioneerApi(spec,config)
-        pioneer = await pioneer.init()
+        // Initialize the Pioneer instance
+        let pioneer = new Pioneer(spec, config);
+        pioneer = await pioneer.init();
         // pioneer = await pioneer.Health()
 
-        let networks = await pioneer.AtlasNetwork({ start: 1, stop: 10, limit: 5 })
-        console.log("networks: ",networks.data)
-        console.log("networks: ",networks.data.length)
+        //ListAssetsPageniate
+        let Top = await pioneer.ListAssetsPageniate({ limit: 1, skip: 0 })
+        console.log("Top: ",Top.data)
+        console.log("Top: ",Top.data.length)
+
+        // let networks = await pioneer.AtlasNetwork({ start: 1, stop: 10, limit: 5 })
+        // console.log("networks: ",networks.data)
+        // console.log("networks: ",networks.data.length)
 
         // console.log(signer)
         // let globals = await pioneer.Globals()
@@ -144,7 +151,7 @@ let run_test = async function(){
         // console.log("info: ",info.data[1])
 
 
-        // let info = await pioneer.SearchByNetworkName("polygon")
+        // let info = await pioneer.SearchByName({name:"Bitcoin"})
         // console.log("info: ",info.data)
         // console.log("info: ",info.data[0])
         // console.log("info: ",info.data[1])
@@ -370,8 +377,8 @@ let run_test = async function(){
         // let info = await pioneer.SearchByBlockchainName('dash')
         // console.log("onStart: info: ",info.data[0])
 
-        let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
-        console.log("info: ",info.data.length)
+        // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
+        // console.log("info: ",info.data.length)
 
         // let info = await pioneer.SearchAssetsListByChainId({chainId:56,limit:10000,skip:0})
         // console.log("info: ",info.data)

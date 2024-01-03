@@ -68,7 +68,7 @@ export const blockbooks = [
         blockchain:"dash",
         caip:"bip122:000007d91d1254d60e2dd1ae58038307/slip44:5",
         type:"blockbook",
-        service:"https://dashbook.nownodes.io",
+        service:"https://dashbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
         websocket:"wss://dash.nownodes.io/wss"
     },
     {
@@ -76,64 +76,64 @@ export const blockbooks = [
         blockchain:"digibytes",
         caip:"bip122:4da631f2ac1bed857bd968c67c913978/slip44:20",
         type:"blockbook",
-        service:"https://dashbook.nownodes.io",
-        websocket:"wss://dash.nownodes.io/wss"
+        service:"https://dgbbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
+        websocket:"wss://dgb.nownodes.io/wss"
     },
     {
         symbol:"BSV",
         blockchain:"bitcoin sv",
         caip:"bip122:0000000000000000018b0da51421703b/slip44:1",
         type:"blockbook",
-        service:"https://bsvbook.nownodes.io"
+        service:"https://bsvbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"GRS",
         blockchain:"Groestlcoin",
         caip:"bip122:00000ac5927c594d49cc0bdb81759d0d/slip44:17",
         type:"blockbook",
-        service:"https://grsbook.nownodes.io"
+        service:"https://grsbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"DCR",
         blockchain:"decred",
         caip:"bip122:00000ac5927c594d49cc0bdb81759d0d/slip44:42",
         type:"blockbook",
-        service:"https://dcr-blockbook.nownodes.io"
+        service:"https://dcr-blockbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"DCR",
         blockchain:"decred",
         caip:"bip122:00000ac5927c594d49cc0bdb81759d0d/slip44:42",
         type:"blockbook",
-        service:"https://dcr-blockbook.nownodes.io"
+        service:"https://dcr-blockbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"BTG",
         blockchain:"bitcoin gold",
         caip:"bip122:00069578d7a76f82b2c7117c1334c7ef/slip44:1",
         type:"blockbook",
-        service:"https://btg.nownodes.io"
+        service:"https://btg.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"KMD",
         blockchain:"Komodo",
         caip:"bip122:027e3758c3a65b12aa1046462b486d0a/slip44:1",
         type:"blockbook",
-        service:"https://kmdbook.nownodes.io"
+        service:"https://kmdbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"ZEC",
         blockchain:"zcash",
         caip:"bip122:00040fe8ec8471911baa1db1266ea15d/slip44:133",
         type:"blockbook",
-        service:"https://zecbook.nownodes.io"
+        service:"https://zecbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     {
         symbol:"ARB",
         blockchain:"Arbitrum",
         caip:"eip155:42161/slip44:60",
         type:"blockbook",
-        service:"arb-blockbook.nownodes.io"
+        service:"arb-blockbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     //SHAPESHIFT
     {

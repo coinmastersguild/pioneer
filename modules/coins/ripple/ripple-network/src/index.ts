@@ -213,7 +213,12 @@ let get_account_info = async function(address:string){
             "account": address,
             "ledger_index": "validated"
         })
-        return response.result.account_data
+        
+        //get recent ledger as well
+        let ledgerIndexCurrent = await client.getLedgerIndex()
+        let output:any = response.result.account_data
+        output.ledger_index_current = ledgerIndexCurrent
+        return output
     }catch(e){
         log.error(tag,"e: ",e)
         throw e

@@ -17,8 +17,12 @@ const runTest = async () => {
         let pioneer = new Pioneer(spec, config);
         pioneer = await pioneer.init();
 
-        const developers = await pioneer.GetTransactionsByAffiliate({address:"kk"});
-        console.log("developers: ", developers.data);
+        // const developers = await pioneer.GetTransactionsByAffiliate({address:"kk"});
+        // console.log("developers: ", developers.data);
+
+        //get pools
+        const pools = await pioneer.Pools();
+        console.log("pools: ", pools.data);
 
         // // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // // console.log("info: ",info.data.length)

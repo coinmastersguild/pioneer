@@ -37,14 +37,19 @@ export interface AddressInfo {
     show_display: boolean;
 }
 
+let EVM_COINS = ["AVAX", "ARB", "MATIC", "AVAX","BASE"]
+
 export const addressInfoForCoin = (symbol: string, isTestnet?: boolean, scriptType?:string, showDisplay?:boolean, path?:any): any => {
     if(!isTestnet) isTestnet = false
     if(!showDisplay) showDisplay = false
     const paths = getPaths(blockchains);
+    console.log("paths: ", paths)
     //thorswap hack
     if(symbol === "THOR") symbol = "RUNE"
     if(symbol === "GAIA") symbol = "ATOM"
-
+    //if any EVM
+    if(EVM_COINS.includes(symbol)) symbol = "ETH"
+    
     // log.info('paths', paths)
     symbol = symbol.toUpperCase()
     const blockchainEntries = paths.filter((entry: any) => entry.symbol === symbol.toUpperCase());
@@ -60,7 +65,7 @@ export const addressInfoForCoin = (symbol: string, isTestnet?: boolean, scriptTy
         entry = blockchainEntries[0]
     }
     //validate script type options
-    
+    if(!entry) throw new Error(`Blockchain symbol '${symbol}' not found.`);
     const addressInfo = {
         address_n: entry.addressNListMaster,
         path:addressNListToBIP32(entry.addressNListMaster),

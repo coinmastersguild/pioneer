@@ -265,6 +265,8 @@ export const COIN_MAP_LONG = {
     GAIA: "cosmos",
     ARB: "arbitrum",
     OSMO: "osmosis",
+    BASE: "base",
+    OP: "optimism",
     TEST: "testnet",
     BCH: "bitcoincash",
     BSC: "binance",

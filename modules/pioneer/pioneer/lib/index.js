@@ -242,7 +242,7 @@ var get_pubkey_balances = function (pubkey) {
                     tag = TAG + " | get_pubkey_balances | ";
                     _d.label = 1;
                 case 1:
-                    _d.trys.push([1, 35, , 36]);
+                    _d.trys.push([1, 37, , 38]);
                     output = {};
                     if (!pubkey.symbol && pubkey.asset)
                         pubkey.symbol = pubkey.asset;
@@ -250,10 +250,8 @@ var get_pubkey_balances = function (pubkey) {
                         pubkey.type = "address";
                     if (!pubkey.context)
                         throw Error("100: invalid pubkey! missing context");
-                    if (!pubkey.symbol)
-                        throw Error("101: invalid pubkey! missing symbol");
-                    if (!pubkey.username)
-                        throw Error("102: invalid pubkey! missing username");
+                    // if (!pubkey.symbol) throw Error("101: invalid pubkey! missing symbol");
+                    // if (!pubkey.username) throw Error("102: invalid pubkey! missing username");
                     if (!pubkey.pubkey)
                         throw Error("103: invalid pubkey! missing pubkey");
                     if (!pubkey.type)
@@ -297,9 +295,9 @@ var get_pubkey_balances = function (pubkey) {
                         lastUpdated: new Date().getTime(),
                         balance: balance
                     });
-                    return [3 /*break*/, 33];
+                    return [3 /*break*/, 35];
                 case 7:
-                    if (!(pubkey.type === "address")) return [3 /*break*/, 33];
+                    if (!(pubkey.type === "address")) return [3 /*break*/, 35];
                     _c = pubkey.symbol;
                     switch (_c) {
                         case "ETH": return [3 /*break*/, 8];
@@ -448,8 +446,9 @@ var get_pubkey_balances = function (pubkey) {
                             }
                         });
                     }
-                    return [3 /*break*/, 33];
+                    return [3 /*break*/, 35];
                 case 27:
+                    if (!(pubkey.symbol && networks[pubkey.symbol])) return [3 /*break*/, 33];
                     cacheKeyNetwork = "balances:".concat(pubkey.symbol, ":getBalance:").concat(pubkey.pubkey);
                     return [4 /*yield*/, getFromCache(cacheKeyNetwork)];
                 case 28:
@@ -481,9 +480,13 @@ var get_pubkey_balances = function (pubkey) {
                         context: pubkey.context,
                         source: "pioneer-network-" + pubkey.symbol
                     });
-                    return [3 /*break*/, 33];
-                case 33: return [4 /*yield*/, pubkeysDB.findOne({ pubkey: pubkey.pubkey })];
-                case 34:
+                    return [3 /*break*/, 34];
+                case 33:
+                    console.error("Unhandled Pubkey: ", pubkey);
+                    _d.label = 34;
+                case 34: return [3 /*break*/, 35];
+                case 35: return [4 /*yield*/, pubkeysDB.findOne({ pubkey: pubkey.pubkey })];
+                case 36:
                     pubkeyInfo = _d.sent();
                     if (!pubkeyInfo || !pubkeyInfo.balances) {
                         pubkeyInfo = {
@@ -509,11 +512,11 @@ var get_pubkey_balances = function (pubkey) {
                     output.nfts = nfts;
                     output.success = true;
                     return [2 /*return*/, output];
-                case 35:
+                case 37:
                     e_2 = _d.sent();
                     console.error(tag, "e: ", e_2);
                     throw e_2;
-                case 36: return [2 /*return*/];
+                case 38: return [2 /*return*/];
             }
         });
     });

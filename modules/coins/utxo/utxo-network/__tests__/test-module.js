@@ -26,11 +26,17 @@ let run_test = async function(){
         await network.init(servers)
 
         //getPubkeyInfo
-        network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
-            .then(function(resp){
-                console.log("resp: ",resp)
-                //console.log("resp: ",JSON.stringify(resp))
-            })
+        // network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
+
+        // network.getBalanceByXpub("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
 
         // network.getFee("DASH")
         //     .then(function(resp){
@@ -44,7 +50,8 @@ let run_test = async function(){
         //         //console.log("resp: ",JSON.stringify(resp))
         //     })
 
-
+        //let xpub = "zpub6rBjG3tuwP5M2QCpeYgwSq67vujfsBFeUygGrjNQqZ2MgNUrNS39j4Z4mqVLbPi4W5Fr1CLGKrH7DbWeaB3GpkRwJe7g5seMWn4dvZDVWxD"
+        // let xpub = "xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL"
         // let xpub = "xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL"
         // network.utxosByXpub("BCH",xpub)
         //     .then(function(resp){
@@ -73,6 +80,13 @@ let run_test = async function(){
         //         console.log("resp: ",resp)
         //         //console.log("resp: ",JSON.stringify(resp))
         //     })
+
+        let xpub = "xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"
+        network.getBalanceByXpub("DGB",xpub)
+            .then(function(resp){
+                console.log("resp: ",resp)
+                //console.log("resp: ",JSON.stringify(resp))
+            })
 
         // let xpub = "ypub6Wev4wL7q61rBeyLc7GpHF3z3nsSz2LXCga32o5ChbEQSaiSGvg7dQqRWv6Md2FzhefZhHP7NpTz4sYUeCsqxs6brzqoeRb81t7YQpVsy5H"
         // // network.getBalanceByXpub("BTC",xpub)

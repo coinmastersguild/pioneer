@@ -340,7 +340,7 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
     let tag = TAG + " | FA get_utxos_by_xpub | "
     try{
         log.info(tag,"get_utxos_by_xpub: ",BLOCKBOOK_URLS)
-        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/"+NOW_NODES_API+"/api/v2/utxo/"+xpub+"?confirmed=false"
+        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/utxo/"+xpub+"?confirmed=false"
         console.log("url: ",url)
         
         

@@ -155,8 +155,8 @@ let get_pubkey_balances = async function (pubkey: any) {
         if (!pubkey.symbol && pubkey.asset) pubkey.symbol = pubkey.asset;
         if (!pubkey.type && pubkey.address) pubkey.type = "address";
         if (!pubkey.context) throw Error("100: invalid pubkey! missing context");
-        if (!pubkey.symbol) throw Error("101: invalid pubkey! missing symbol");
-        if (!pubkey.username) throw Error("102: invalid pubkey! missing username");
+        // if (!pubkey.symbol) throw Error("101: invalid pubkey! missing symbol");
+        // if (!pubkey.username) throw Error("102: invalid pubkey! missing username");
         if (!pubkey.pubkey) throw Error("103: invalid pubkey! missing pubkey");
         if (!pubkey.type) throw Error("105: invalid pubkey! missing type");
         // if(!pubkey.queueId) throw Error("106: invalid pubkey! missing queueId");
@@ -322,30 +322,34 @@ let get_pubkey_balances = async function (pubkey: any) {
 
                     break;
                 default:
-                    let cacheKeyNetwork = `balances:${pubkey.symbol}:getBalance:${pubkey.pubkey}`;
-                    let cachedDataNetwork = await getFromCache(cacheKeyNetwork);
-                    let balanceNetwork;
-                    if (cachedDataNetwork) {
-                        balanceNetwork = JSON.parse(cachedDataNetwork);
-                    } else {
-                        balanceNetwork = await networks[pubkey.symbol].getBalance(pubkey.pubkey);
-                        log.debug(tag, "balance: ", balanceNetwork);
-                        await setInCache(cacheKeyNetwork, JSON.stringify(balanceNetwork), 60 * 60 * 1);
-                    }
+                    if(pubkey.symbol && networks[pubkey.symbol]){
+                        let cacheKeyNetwork = `balances:${pubkey.symbol}:getBalance:${pubkey.pubkey}`;
+                        let cachedDataNetwork = await getFromCache(cacheKeyNetwork);
+                        let balanceNetwork;
+                        if (cachedDataNetwork) {
+                            balanceNetwork = JSON.parse(cachedDataNetwork);
+                        } else {
+                            balanceNetwork = await networks[pubkey.symbol].getBalance(pubkey.pubkey);
+                            log.debug(tag, "balance: ", balanceNetwork);
+                            await setInCache(cacheKeyNetwork, JSON.stringify(balanceNetwork), 60 * 60 * 1);
+                        }
 
-                    if (!balanceNetwork) balanceNetwork = 0;
-                    balances.push({
-                        network: pubkey.symbol,
-                        asset: pubkey.symbol,
-                        symbol: pubkey.symbol,
-                        blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
-                        assetCaip: shortListSymbolToCaip[pubkey.symbol],
-                        isToken: false,
-                        lastUpdated: new Date().getTime(), //TODO use block heights
-                        balance: balanceNetwork,
-                        context: pubkey.context,
-                        source: "pioneer-network-"+pubkey.symbol
-                    });
+                        if (!balanceNetwork) balanceNetwork = 0;
+                        balances.push({
+                            network: pubkey.symbol,
+                            asset: pubkey.symbol,
+                            symbol: pubkey.symbol,
+                            blockchainCaip: shortListSymbolToCaip[pubkey.symbol],
+                            assetCaip: shortListSymbolToCaip[pubkey.symbol],
+                            isToken: false,
+                            lastUpdated: new Date().getTime(), //TODO use block heights
+                            balance: balanceNetwork,
+                            context: pubkey.context,
+                            source: "pioneer-network-"+pubkey.symbol
+                        });
+                    }else{
+                        console.error("Unhandled Pubkey: ",pubkey)
+                    }
                     break;
             }
         }

@@ -10,7 +10,7 @@ require("dotenv").config({path:'../../../../.env'})
 let pioneerApi = require("../lib").default
 
 //force
-// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 
 let spec = process.env['URL_PIONEER_SPEC']
@@ -212,6 +212,9 @@ let run_test = async function(){
         // let insight = await pioneer.SmartInsight("",tx)
         // console.log("insight: ",insight.data)
 
+        // let balance = await pioneer.GetBalance({network:'DGB',xpub:"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"})
+        // console.log("balance: ",balance.data)
+
         //xpub6CATRPS62YpY2nkgRqqV87CXk4eUBgZTiBkCmAPVAi6NRATPhYpW9RWyNhvHTiapi73KwBJa2mxPAJZ4RyVyCUGysudbszRwN33RyUK9Y1X
         // let balance = await pioneer.GetBalance({network:'DASH',xpub:"xpub6C8H3AP8ssoEyzZY42b7G7H6SC341757ASVbpsfDLf3U1Qdc6RP6rnutQ9W9Gk8NWdGR29BFQKP65dzvsf69QtiWe3YPGn4qBQwQCL3HuUV"})
         // console.log("balance: ",balance.data)
@@ -234,6 +237,11 @@ let run_test = async function(){
         // let xpub = ""
         // console.log("pioneer.instance: ",pioneer.instance)
 
+        let data = await pioneer.ListUnspent({network:'DGB',xpub:"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"})
+        data = data.data
+        console.log("txData: ",data)
+        console.log("txData: ",JSON.stringify(data))
+        
         // let data = await pioneer.instance.ListUnspent({network:'LTC',xpub:"xpub6CaVVRYQmMfrGNjbREjgJG83zuS9AmSE4w3F3oTT1n3vjxc8KiUGz37ieXHGEtWEtfnYwUg6iHksGu5577kfVdQMCR6ZU4nAr6NkCMc6pcf"})
         // data = data.data
         // console.log("txData: ",data)
@@ -376,12 +384,12 @@ let run_test = async function(){
         //broadcast
         // let broadcast = {
         //     "network":"DASH",
-        //     "serialized":"010000000165ce629fd426eb6e40f094438cadfdebc3c6f452c82090e4cf7199a2db7ba388010000006a47304402200a67d2d5208815bd8df90cdcd48f4a773db3a2823124439da86696f78d7c7b6c02206c34b3b460d125e12da564fc35f24df1d50ccfcce8ab14be5b9d1dd7f889b06c01210303a4b3e9810496902cc2333564a4768f3c74160e9178424068debe7b4e04ceacffffffff02c0f71000000000001976a914e2e74abdea3612eeb9def06e9c54bbb62b74daf688ac7c851408000000001976a914e2e74abdea3612eeb9def06e9c54bbb62b74daf688ac00000000",
+        //     "serialized":"0100000001bfc43ef5b78d089f3c5b0d279cd0a15df5a9a8f98dda45c7fe0fd93c1668859c010000006a473044022059d36982520a2254679860123aa6b9667dd58e908954518c62e39d2f6f3d7309022068d7f7d63011b36657bacb731d6f494c423f8c01810c07f1051fadc438a976bc01210320d77aff1ebe4e738fba63f8c8d6dcf18eb1bb7f1fd548f65b8b2a06267f74dfffffffff02a0860100000000001976a91435a2331952bc4864661b5976c0ebcc006378a0e188aca2029700000000001976a914d2502c5faeb74c2a5b01d6995f12cccc544ace9488ac00000000",
         //     "txid":"",
         //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
         //     "noBroadcast":false
         // }
-        // let data = await pioneer.Broadcast(null, broadcast)
+        // let data = await pioneer.Broadcast(broadcast)
         // data = data.data
         // console.log("data: ",data)
 
