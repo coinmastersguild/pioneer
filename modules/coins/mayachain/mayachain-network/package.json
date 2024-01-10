@@ -1,19 +1,18 @@
 {
-  "name": "@pioneer-platform/osmosis-network",
-  "version": "8.3.2",
+  "name": "@pioneer-platform/maya-network",
+  "version": "8.3.1",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
     "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -rf lib && npm run build",
+    "prepublish": "rm -R lib && npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@keplr-wallet/unit": "^0.10.2",
     "@pioneer-platform/loggerdog": "^8.3.1",
-    "@tendermint/amino-js": "^0.6.2",
+    "axios-retry": "^3.3.1",
     "bech32": "^1.1.4",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",

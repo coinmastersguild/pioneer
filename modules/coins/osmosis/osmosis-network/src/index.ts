@@ -618,8 +618,8 @@ let get_account_info = async function(address:string){
     let tag = TAG + " | get_account_info | "
     try{
         //
-        console.log("URL ",URL_OSMO_LCD+'/auth/accounts/'+address)
-        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/auth/accounts/'+address})
+        console.log("URL ",URL_OSMO_LCD+'cosmos/auth/v1beta1/accounts/'+address)
+        let txInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/auth/v1beta1/accounts/'+address})
         log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data

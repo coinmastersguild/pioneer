@@ -73,7 +73,7 @@ let network = require("../lib/index")
 // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
-//let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
+// let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 // let address = 'osmo1g33z2rn60acm3e897gmnjfpttfs4hfxzwu8pf6'
 // network.getAccount(address)
 //     .then(function(resp){
@@ -112,16 +112,16 @@ let network = require("../lib/index")
 
 
 
-let address = 'osmo1t4z6hdx07qfcjt66llgg7kv8grr9usgtdm62j7'
+let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
 network.getBalance(address)
     .then(function(resp){
         console.log("resp: ",resp)
     })
 
-network.getBalances(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getBalances(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 let poolId = 'gamm/pool/1'
 
