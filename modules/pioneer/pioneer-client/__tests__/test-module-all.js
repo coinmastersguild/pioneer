@@ -382,14 +382,14 @@ let run_test = async function(){
         // console.log("data: ",data)
 
         //broadcast
-        // let broadcast = {
-        //     "network":"DASH",
-        //     "serialized":"0100000001bfc43ef5b78d089f3c5b0d279cd0a15df5a9a8f98dda45c7fe0fd93c1668859c010000006a473044022059d36982520a2254679860123aa6b9667dd58e908954518c62e39d2f6f3d7309022068d7f7d63011b36657bacb731d6f494c423f8c01810c07f1051fadc438a976bc01210320d77aff1ebe4e738fba63f8c8d6dcf18eb1bb7f1fd548f65b8b2a06267f74dfffffffff02a0860100000000001976a91435a2331952bc4864661b5976c0ebcc006378a0e188aca2029700000000001976a914d2502c5faeb74c2a5b01d6995f12cccc544ace9488ac00000000",
-        //     "txid":"",
-        //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
-        //     "noBroadcast":false
-        // }
-        // let data = await pioneer.Broadcast(broadcast)
+        let broadcast = {
+            "network":"OSMO",
+            "serialized":"",
+            "txid":"",
+            "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
+            "noBroadcast":false
+        }
+        let data = await pioneer.Broadcast(broadcast)
         // data = data.data
         // console.log("data: ",data)
 

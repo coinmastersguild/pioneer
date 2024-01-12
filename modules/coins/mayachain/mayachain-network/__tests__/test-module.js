@@ -17,7 +17,7 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let txid = "F1D115CD4F80E57D5F366EAAFDB5268FB3B64313EAF1DC677A5C79077E77CA16"
+// let txid = "F1D115CD4F80E57D5F366EAAFDB5268FB3B64313EAF1DC677A5C79077E77CA16"
 // let txid = "0E25B52AAA700D538931BD7D14A4A2B1F6B601BBD648FE488609BF4C5274C956"
 network.getTransaction(txid)
     .then(function(resp){

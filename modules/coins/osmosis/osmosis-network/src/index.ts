@@ -53,8 +53,8 @@ const axios = Axios.create({
         rejectUnauthorized: false
     })
 });
-import { marshalTx, unmarshalTx } from '@tendermint/amino-js';
-import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
+// import { marshalTx, unmarshalTx } from '@tendermint/amino-js';
+// import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 
 const request = require("request-promise")
 const log = require('@pioneer-platform/loggerdog')()
@@ -806,7 +806,7 @@ let get_balances = async function(address:string){
         let output = []
 
         try{
-            let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
+            let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/bank/v1beta1/balances/'+address})
             log.debug(tag,"accountInfo: ",accountInfo.data)
 
             //
@@ -931,14 +931,14 @@ let get_balance = async function(address:string){
         let output = 0
 
         try{
-            console.log("URL: ",URL_OSMO_LCD+'/bank/balances/'+address)
-            let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            console.log("URL: ",URL_OSMO_LCD+'/cosmos/bank/v1beta1/balances/'+address)
+            let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/bank/v1beta1/balances/'+address})
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
-            if(accountInfo.data?.result){
-                for(let i = 0; i < accountInfo.data.result.length; i++){
-                    let entry = accountInfo.data.result[i]
+            if(accountInfo.data){
+                for(let i = 0; i < accountInfo.data.balances.length; i++){
+                    let entry = accountInfo.data.balances[i]
                     if(entry.denom === 'uosmo'){
                         output = entry.amount
                     }

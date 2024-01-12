@@ -74,7 +74,7 @@ let network = require("../lib/index")
 // let address = 'osmo1k0kzs2ygjsext3hx7mf00dfrfh8hl3e85s23kn'
 //let address = 'osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq'
 // let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
-// let address = 'osmo1g33z2rn60acm3e897gmnjfpttfs4hfxzwu8pf6'
+// // let address = 'osmo1g33z2rn60acm3e897gmnjfpttfs4hfxzwu8pf6'
 // network.getAccount(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
@@ -112,7 +112,7 @@ let network = require("../lib/index")
 
 
 
-let address = 'osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6'
+let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
 network.getBalance(address)
     .then(function(resp){
         console.log("resp: ",resp)
@@ -240,6 +240,8 @@ let poolId = 'gamm/pool/1'
 //let tx = 'Cr4BCrsBCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SjAEKK29zbW8xaGQ3ZDltaDA2dW1xMmx4em1ubTN4dGU1eHA0cXRmdXI1ODl4cHcSSAgBEkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhoQCgV1b3NtbxIHMjAwMDAwMCIBMRJZClEKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED13f5y1BWmvlBsjHbXZWjTmLHEzyGgGlVYGHydAW1YvESBAoCCAEYiAESBBDgpxIaQH6pkb5Dfk+is0m0cXT8h91t/lzr5N6Frpgw83eQMxieZSJGi9A3NbuTSQyNTcF4kxQIXJDwq839X4knaeiVtVU='
 //let tx = 'Co0BCooBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmoKK29zbW8xemprOWRraHp6MndheG10dnRsM2hubmwwdDNhYzBrNXV0eWh4Z3oSK29zbW8xemprOWRraHp6MndheG10dnRsM2hubmwwdDNhYzBrNXV0eWh4Z3oaDgoFdW9zbW8SBTEwMDAwEmcKUApGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQJXUh95YUvA24cuby95qg7t813ucN3jU/LoP6q7ljlCuxIECgIIfxhCEhMKDQoFdW9zbW8SBDIyOTEQ8csFGkBm22+OEW5Si/+i38zAEZhuF0fZKRe9P/MgZBSU+whoR0/LBdRjDiuz8NO2C80eiwThlGdxsbh5nomanNRmJZwB'
 // let tx = 'Cr4BCrsBCiovb3Ntb3Npcy5nYW1tLnYxYmV0YTEuTXNnU3dhcEV4YWN0QW1vdW50SW4SjAEKK29zbW8xcnM3ZmNrZ3pua2F4czRzcTAycGV4d2pnYXI0M3A1d25reDlzOTISCQgBEgV1b3NtbxpPCkRpYmMvMjczOTRGQjA5MkQyRUNDRDU2MTIzQzc0RjM2RTRDMUY5MjYwMDFDRUFEQTlDQTk3RUE2MjJCMjVGNDFFNUVCMhIHMzEwMDAwMCIBMRJkClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiECKBTqQdDCZkV4bNWuNYUjOlRv7M9W2kNzhSPoiInO04ASBAoCCH8YAhIQCgoKBXVvc21vEgEwENDZERpAg1hLXZ/inNiqqlhrE44dMxWeqaP303EgKl6rS62nVE4h6KUtyuKmuFyH9+3vmgCSIF5gAlfiyWT+Mr3LBwi3cg=='
+
+// let tx = 'CowBCokBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmkKK29zbW8xcnM3ZmNrZ3pua2F4czRzcTAycGV4d2pnYXI0M3A1d25reDlzOTISK29zbW8xN2h0bHZjZTV5czhocWh4bGthdHl1aHY4cXd0eDcyYXlnZ3NncXoaDQoFdW9zbW8SBDEwMDASZgpQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAigU6kHQwmZFeGzVrjWFIzpUb+zPVtpDc4Uj6IiJztOAEgQKAgh/GA0SEgoMCgV1YXRvbRIDNTAwEMCaDBpAdRLX9/e+CmYtjY+/N+SyWMIaPI0TqXf0yCO4Rs2AVOYUa/1rv8BlyBlfFuiVIMLTDZ9vACZe9+VlmxMVEU8zQg=='
 // network.broadcast(tx)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
