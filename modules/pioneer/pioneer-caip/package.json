@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-caip",
-  "version": "9.2.10",
+  "version": "9.2.11",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -12,8 +12,6 @@
     "test": "npm run build && node __tests__/tests-common.js",
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build"
-  },
-  "dependencies": {
   },
   "devDependencies": {
     "@types/express": "^4.17.6",

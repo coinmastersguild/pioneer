@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/shapeshift",
-  "version": "8.3.1",
+  "version": "8.3.2",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@pioneer-platform/nodes": "^8.3.1",
-    "@pioneer-platform/pioneer-client": "^9.2.1",
+    "@pioneer-platform/pioneer-client": "^9.2.2",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",
     "axios": "^0.21.4",
