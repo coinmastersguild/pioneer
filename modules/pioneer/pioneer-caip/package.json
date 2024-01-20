@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-caip",
-  "version": "9.2.2",
+  "version": "9.2.10",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -9,7 +9,7 @@
   "scripts": {
     "npm": "npm i",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
+    "test": "npm run build && node __tests__/tests-common.js",
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build"
   },

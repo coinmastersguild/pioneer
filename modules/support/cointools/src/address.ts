@@ -1,6 +1,0 @@
-/*
-        Validate universial addresses
-
- */
-
-

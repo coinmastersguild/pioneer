@@ -1,12 +1,12 @@
 const log = require('@pioneer-platform/loggerdog')()
 export const blockchains = [
-    'eip155:42161',
-    'eip155:43114',
-    'eip155:56',
+    // 'eip155:42161',
+    // 'eip155:43114',
+    // 'eip155:56',
     'binance:bnb-beacon-chain',
     'bip122:000000000000000000651ef99cb9fcbe',
     'bip122:000000000019d6689c085ae165831e93',
-    'eip155:8453',
+    // 'eip155:8453',
     'cosmos:cosmoshub-4',
     'bip122:dash-hash',
     'bip122:digibytes-hash',
@@ -16,9 +16,9 @@ export const blockchains = [
     'eip155:1',
     'bip122:12a765e31ffd4059bada1e25190f6e98',
     'cosmos:maya-mainnet-v1',
-    'eip155:10',
+    // 'eip155:10',
     'cosmos:osmosis-1',
-    'eip155:137',
+    // 'eip155:137',
     'ripple:unknown',
     'cosmos:thorchain-mainnet-v1',
     'bip122:0000000000196a45'
@@ -98,24 +98,24 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('eip155:43114') >= 0){
-        let entry:any = {
-            note:" AVAX primary (default)",
-            symbol: 'AVAX',
-            symbolSwapKit: 'AVAX',
-            network: 'eip155:43114',
-            script_type:"avalanche",
-            available_scripts_types:['avalanche'],
-            type:"address",
-            addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0],
-            addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
-            curve: 'secp256k1',
-            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
-            blockchain: 'avalanche'
-        }
-        if(isTestnet) entry.testnet = true
-        output.push(entry)
-    }
+    // if(blockchains.indexOf('eip155:43114') >= 0){
+    //     let entry:any = {
+    //         note:" AVAX primary (default)",
+    //         symbol: 'AVAX',
+    //         symbolSwapKit: 'AVAX',
+    //         network: 'eip155:43114',
+    //         script_type:"avalanche",
+    //         available_scripts_types:['avalanche'],
+    //         type:"address",
+    //         addressNList: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0],
+    //         addressNListMaster: [0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0],
+    //         curve: 'secp256k1',
+    //         showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+    //         blockchain: 'avalanche'
+    //     }
+    //     if(isTestnet) entry.testnet = true
+    //     output.push(entry)
+    // }
 
     if(blockchains.indexOf('cosmos:thorchain-mainnet-v1') >= 0){
         let entry:any = {

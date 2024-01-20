@@ -95,6 +95,12 @@ export const ChainToNetworkId: Record<string, string> = {
     'ZEC': 'bip122:0000000000196a45',
 };
 
+export const NetworkIdToChain: Record<string, string> = Object.entries(ChainToNetworkId)
+    .reduce((acc, [key, value]) => {
+        acc[value] = key;
+        return acc;
+    }, {} as Record<string, string>);
+
 export function getChainEnumValue(chainStr: string) {
     switch (chainStr) {
         case 'ARB':
@@ -201,10 +207,81 @@ export const shortListNameToCaip = {
     bnbsmartchain: 'eip155:56/slip44:60',
     ripple: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
     optimism: 'eip155:10/slip44:60',
+    kuji: 'cosmos:kaiyo-1/slip44:118',
     cardano: 'placeholder:caip:cardano:native:cardano',
     binance: 'placeholder:caip:binance:native:bnb-beacon-chain',
     eos: 'eip155:1:/erc20:0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0',
     fio: 'placeholder:caip:fio:native:fio-protocol'
+}
+
+export const shortListRangoNameToNetworkId = {
+    COSMOS: 'cosmos:cosmoshub-4',
+    OSMOSIS: 'cosmos:osmosis-1',
+    AVAX_CCHAIN: 'eip155:43114',
+    ETH: 'eip155:1',
+    THOR: 'cosmos:thorchain-mainnet-v1',
+    BCH: 'bip122:000000000000000000651ef99cb9fcbe',
+    LTC: 'bip122:12a765e31ffd4059bada1e25190f6e98',
+    DASH: 'bip122:000007d91d1254d60e2dd1ae58038307',
+    DGB: 'bip122:digibytes-hash',
+    DOGE: 'bip122:00000000001a91e3dace36e2be3bf030'
+};
+
+export const NetworkIdToRangoName = function (networkId:string) {
+    try {
+        // Inverting the mapping to find the Rango name based on networkId
+        for (const [rangoName, rangoNetworkId] of Object.entries(shortListRangoNameToNetworkId)) {
+            if (rangoNetworkId === networkId) {
+                return rangoName;
+            }
+        }
+
+        console.error('Rango name not found for networkId:', networkId);
+        return null;
+    } catch (e) {
+        console.error("Error processing networkId to Rango Name", e);
+        return null;
+    }
+};
+
+let tokenToCaip = function(token:any){
+    try{
+        // Handle identifiers with an extra period
+        let parts = token.identifier.split('.');
+        let chain, symbol;
+        if (parts.length >= 2) {
+            chain = parts[0];
+            symbol = parts.slice(1).join('.'); // Re-join the remaining parts excluding the first
+        } else {
+            // Fallback to the original method if there's only one or no period
+            chain = token.identifier.split('.')[0];
+            symbol = token.identifier.split('.')[1];
+        }
+
+        let type, ticker;
+        if(token.address){
+            ticker = symbol.split('-')[0];
+            type = 'token';
+        } else {
+            type = 'native';
+            ticker = symbol
+        }
+        let caip = thorchainToCaip(
+            chain,
+            symbol,
+            ticker,
+            type,
+        );
+        token.networkId = ChainToNetworkId[chain];
+        token.caip = caip;
+        token.symbol = symbol;
+        token.ticker = ticker;
+        token.type = type;
+        // Get pubkey for chain
+        return token;
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 let thorchainToCaip = function(chain:string, symbol:string, ticker:string, type:string){
@@ -231,6 +308,9 @@ let thorchainToCaip = function(chain:string, symbol:string, ticker:string, type:
         }  else if(chain == "THOR" || symbol == "RUNE"){
             //if chain and symbol are the same, then we have a native token
             caip = shortListNameToCaip['thorchain']
+        } else if(chain == "KUJI" || symbol == "USK"){
+            //if chain and symbol are the same, then we have a native token
+            caip = shortListNameToCaip['kuji']
         } else if(chain == symbol){
             //if chain and symbol are the same, then we have a native token
             caip = ChainToCaip[chain]
@@ -241,7 +321,7 @@ let thorchainToCaip = function(chain:string, symbol:string, ticker:string, type:
             //if token
             if(symbol.indexOf("-") > -1){
                 let contract = symbol.split("-")[1]
-                caip = `${networkId}:erc20:${contract}`
+                caip = `${networkId}/erc20:${contract}`
             } else {
                 console.error({chain, symbol, ticker, type})
                 throw Error("Unable to parse CAIP! TODO!")
@@ -253,64 +333,73 @@ let thorchainToCaip = function(chain:string, symbol:string, ticker:string, type:
         throw e
     }
 }
-export { thorchainToCaip };
 
+//NOTE THIS IS IMPOSSIBLE to do well!
+// Caips do NOT include the token tickers!
+let caipToThorchain = function (caip:string, ticker:string) {
+    try {
+        var networkId = caip.split('/')[0]; // Splitting off the network ID from the CAIP
+        console.log("networkId: ", networkId);
+        if (!networkId) throw Error("Invalid CAIP!");
 
-//Primary blockchain caips
-export const primaryBlockchains = {
-    "eip155:1/slip44:60":{
-        name: 'ethereum',
-        type: 'coin',
-        caip: 'eip155:1/slip44:60',
-        tags: [
-            'ethereum',
-            'isAsset',
-            'isNative',
-            'KeepKeySupport',
-            'DappSupport',
-            'WalletConnectSupport'
-        ],
-        blockchain: 'ethereum',
-        symbol: 'ETH',
-        decimals: 18,
-        image: 'https://pioneers.dev/coins/ethereum.png',
-        description: 'Open source platform to write and distribute decentralized applications.',
-        website: 'https://ethereum.org/',
-        explorer: 'https://etherscan.io/',
-        rank: 2
+        var chain = exports.NetworkIdToChain[networkId];
+        if (!chain) {
+            console.error("No matching chain symbol found for network ID", networkId);
+            return null;
+        }
+
+        // Handling contract tokens
+        if (caip.includes('erc20')) {
+            if (!ticker) {
+                console.error("Ticker is undefined for ERC20 token");
+                return null;
+            }
+            var parts = caip.split('/');
+            var contractPart = parts[1];
+            var contractAddress = contractPart.split(':')[1];
+            if (!contractAddress) {
+                console.error("Contract address is undefined for ERC20 token");
+                return null;
+            }
+            // Use the ticker as is without converting to uppercase
+            return `${chain}.${ticker}-${contractAddress.toUpperCase()}`;
+        } else {
+            // Handling native tokens
+            return chain + "." + chain;
+        }
+    } catch (e) {
+        console.error("Error processing network ID to THORChain", e);
+        return null;
     }
-}
+};
 
-export const primaryAssets = {
-    "eip155:1/slip44:60":{
-        blockchain: 'ethereum',
-        caip: 'eip155:1/slip44:60',
-        chainId: 1,
-        description: 'more info here: https://ethereum.org This is a EVM network with chainId: 1 Follows EIP:155',
-        explorer: 'https://ethereum.org',
-        faucets: [],
-        feeAssetCaip: 'eip155:1/slip44:60',
-        feeAssetName: 'ethereum',
-        feeAssetRank: 2,
-        feeAssetSymbol: 'ETH',
-        image: 'https://pioneers.dev/coins/ethereum-mainnet.png',
-        isCharted: false,
-        name: 'ethereum',
-        network: 'ETH',
-        service: null,
-        symbol: 'ETH',
-        tags: [
-            'KeepKeySupport',
-            'DappSupport',
-            'WalletConnectSupport',
-            'EVM',
-            'EIP:155',
-            'ethereum',
-            'Ether',
-            'ETH',
-            1,
-            null
-        ],
-        type: 'EVM'
+let caipToRango = function (caip:string, ticker:string) { // Default to null instead of an empty string
+    try {
+        const [networkId, tokenInfo] = caip.split('/');
+        let rangoName = NetworkIdToRangoName(networkId); // Get the Rango name from the network ID
+
+        // Extracting the symbol and address
+        let symbol = ticker;
+        let address:any = null;
+
+        // For ERC20 tokens, the contract address is included in the CAIP
+        if (tokenInfo && tokenInfo.startsWith('erc20:')) {
+            address = tokenInfo.split(':')[1];
+        }
+
+        // Check if the Rango name is found
+        if (!rangoName) {
+            console.error('Rango name not found for networkId:', networkId);
+            return null;
+        }
+
+        return { blockchain: rangoName, symbol, address };
+    } catch (e) {
+        console.error("Error processing CAIP to Rango", e);
+        return null;
     }
-}
+};
+
+
+export { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango };
+
