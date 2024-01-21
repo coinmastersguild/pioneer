@@ -6,8 +6,7 @@
     OSMO version of cosmoSDK
     https://v1.cosmos.network/rpc/v0.41.4
 
-
-https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/query
+        https://github.com/osmosis-labs/osmosis-frontend/tree/master/src/stores/osmosis/query
 
     endpoints
     '/osmosis/gamm/v1beta1/num_pools'
@@ -433,7 +432,9 @@ let get_pool = async function(pair:string){
         if(assets[1]==='OSMO') assets[1] = "uosmo"
 
 
-        let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pools'})
+        // let poolInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/osmosis/gamm/v1beta1/pools'})
+        let poolInfo = await get_pools()
+        
         // log.debug(tag,"poolInfo: ",poolInfo.data)
 
 

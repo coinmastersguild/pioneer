@@ -186,7 +186,9 @@ async function get_quote(quote:Swap) {
         let buyChain = quote.buyAsset.caip;
         let integrations = Object.keys(NetworksByIntegration);
         let quotes = [];
-
+        log.info("sellChain: ",sellChain)
+        log.info("buyChain: ",buyChain)
+        
         for (let integration of integrations) {
             let supportedNetworks = NetworksByIntegration[integration];
             if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {

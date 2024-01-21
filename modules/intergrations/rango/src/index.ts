@@ -30,7 +30,7 @@ let networkSupport = [
     //shortListSymbolToCaip["TRON"], TODO
     //shortListSymbolToCaip["SOLANA"], TODO
     shortListSymbolToCaip["DASH"],
-    shortListSymbolToCaip["OSMO"],
+    // shortListSymbolToCaip["OSMO"], //TODO Rango uses WASM for osmosis, not support by KK
     shortListSymbolToCaip["GAIA"],
     shortListSymbolToCaip["BNB"],
     shortListSymbolToCaip["DOGE"],

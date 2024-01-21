@@ -49,10 +49,54 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-// network.getGammPoolInfo()
+// function quote(amountAtomSwap, amountAtomPool, amountOsmoPool) {
+//     // Convert string inputs to numbers
+//     amountAtomSwap = parseFloat(amountAtomSwap * 1000000);
+//     amountAtomPool = parseFloat(amountAtomPool);
+//     amountOsmoPool = parseFloat(amountOsmoPool);
+//
+//     // Calculate the constant product
+//     const k = amountAtomPool * amountOsmoPool;
+//
+//     // New amount of ATOM in the pool after the swap
+//     const newAmountAtomPool = amountAtomPool + amountAtomSwap;
+//
+//     // Calculate the amount of OSMO received
+//     const newAmountOsmoPool = k / newAmountAtomPool;
+//     const amountOsmoReceived = amountOsmoPool - newAmountOsmoPool;
+//
+//     // Calculate the actual rate of the swap
+//     const actualRate = amountOsmoReceived / amountAtomSwap;
+//
+//     // Calculate the ideal rate
+//     const idealRate = amountOsmoPool / amountAtomPool;
+//
+//     // Calculate the slippage
+//     const slippage = ((idealRate - actualRate) / idealRate) * 100;
+//
+//     return {
+//         amountOsmoReceived: amountOsmoReceived,
+//         slippage: Math.max(slippage, 0).toFixed(6) // Ensure non-negative slippage
+//     };
+// }
+//
+// network.getPools()
 //     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+//         console.log("resp: ",resp.pools[0].pool_assets)
+//
+//         let amountAtom = resp.pools[0].pool_assets[0].token.amount; // ATOM amount
+//         let amountOsmo = resp.pools[0].pool_assets[1].token.amount; // OSMO amount
+//
+//         let rate = amountOsmo / amountAtom;
+//         console.log("rate: ", rate);
+//
+//         let result = quote(1, amountAtom, amountOsmo);
+//         console.log("result 1 : ", result);
+//
+//         let result2 = quote(100000, amountAtom, amountOsmo);
+//         console.log("result 100000: ", result2);
+//
+//     });
 
 // network.getDistrobution()
 //     .then(function(resp){
@@ -112,11 +156,11 @@ let network = require("../lib/index")
 
 
 
-let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
-network.getBalance(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.getBalances(address)
 //     .then(function(resp){

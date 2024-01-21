@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.4",
+  "version": "8.4.6",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@pioneer-platform/changelly-client": "^8.3.2",
+    "@pioneer-platform/pioneer-caip": "^9.2.11",
     "@pioneer-platform/rango-client": "^8.3.7",
     "@pioneer-platform/thorswap-client": "^8.3.3",
     "dotenv": "^8.2.0",
