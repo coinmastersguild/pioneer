@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-client",
-  "version": "9.2.2",
+  "version": "9.2.3",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {

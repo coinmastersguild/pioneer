@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/crypto-regex",
-  "version": "9.2.3",
+  "version": "9.2.4",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
