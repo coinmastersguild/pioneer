@@ -10,12 +10,13 @@ const TAG = " | osmosis | "
 
 
 const log = require('@pioneer-platform/loggerdog')()
-let {shortListSymbolToCaip} = require("@pioneer-platform/pioneer-caip")
+let {shortListSymbolToCaip, ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
 let networkOsmo = require("@pioneer-platform/osmosis-network")
 let networkAtom = require("@pioneer-platform/cosmos-network")
+const { uuid } = require('uuidv4');
 let networkSupport = [
-    shortListSymbolToCaip["OSMO"], 
-    shortListSymbolToCaip["GAIA"],
+    ChainToNetworkId["OSMO"],
+    ChainToNetworkId["GAIA"],
 ]
 
 
@@ -71,116 +72,6 @@ function quoteFromPool(amountAtomSwap: string, amountAtomPool: string, amountOsm
     };
 }
 
-//
-const build_swap_tx = async function (from:string, tokenIn:string, tokenOut:string, amountIn:string, tokenOutMinAmount:string) {
-    let tag = TAG + " | build_swap_tx | "
-    try{
-        //get account info
-        let accountInfo = await networkOsmo.getAccount(from)
-        log.info(tag,"accountInfo: ",accountInfo)
-        if(!accountInfo.account.account_number) throw new Error("missing account_number")
-        
-        let tx = {
-            "account_number": accountInfo.account.account_number,
-            "chain_id": 'osmosis-1',
-            "fee": {
-                "amount": [
-                    {
-                        "amount": "2291",
-                        "denom": "uosmo"
-                    }
-                ],
-                "gas": "100000"
-            },
-            "memo": "memo",
-            "msg": [
-                {
-                    "type": "osmosis/gamm/swap-exact-amount-in",
-                    "value": {
-                        "routes": [
-                            {
-                                "pool_id": "1",
-                                "token_out_denom": tokenOut
-                            }
-                        ],
-                        "sender": from,
-                        "token_in": {
-                            "amount": amountIn,
-                            "denom": tokenIn
-                        },
-                        "token_out_min_amount": "8204"
-                    }
-                }
-            ],
-            "sequence": "90"
-        }
-        
-        return tx
-    }catch(e){
-        log.error(e)
-    }
-}
-
-const build_ibc_tx = async function (from:string, to:string, amount:string) {
-    let tag = TAG + " | build_ibc_tx | "
-    try{
-        log.info(tag,"from: ",from)
-        log.info(tag,"to: ",to)
-        log.info(tag,"amount: ",amount)
-        
-        //switch depending on pair
-        
-        //get account info
-        let accountInfo = await networkAtom.getAccount(to)
-        log.info(tag,"accountInfo: ",accountInfo)
-        if(!accountInfo.result.value.account_number) throw new Error("missing account_number")
-        if(!accountInfo.result.value.sequence) throw new Error("missing account_number")
-        
-        let currentHeight = accountInfo.height
-        let expireBlockHeight = parseInt(currentHeight) + 10000
-        
-        let tx = {
-            "account_number": accountInfo.result.value.account_number,
-            "chain_id": "cosmoshub-4",
-            "fee": {
-                "amount": [
-                    {
-                        "amount": "2800",
-                        "denom": "uatom"
-                    }
-                ],
-                "gas": "290000"
-            },
-            "memo": "",
-            "msg": [
-                {
-                    "type": "cosmos-sdk/MsgTransfer",
-                    "value": {
-                        "receiver": to,
-                        "sender": from,
-                        "source_channel": "channel-141",
-                        "source_port": "transfer",
-                        "timeout_height": {
-                            "revision_height": expireBlockHeight.toString(),
-                            "revision_number": "1"
-                        },
-                        "token": {
-                            "amount": amount,
-                            "denom": "uatom"
-                        }
-                    }
-                }
-            ],
-            "signatures": [],
-            "sequence": accountInfo.result.value.sequence
-        }
-
-        return tx
-    }catch(e){
-        log.error(e)
-    }
-}
-
 
 const get_quote = async function (quote:any) {
     let tag = TAG + " | get_quote | "
@@ -199,46 +90,94 @@ const get_quote = async function (quote:any) {
         let amountAtom = pools.pools[0].pool_assets[0].token.amount; // ATOM amount
         let amountOsmo = pools.pools[0].pool_assets[1].token.amount; // OSMO amount
         let rate = amountOsmo / amountAtom;
+        output.rate = rate
         log.info(tag,"rate: ", rate);
-
+        
         //issue invocationId
-
+        let invocationId = uuid()
+        output.invocationId = invocationId
+        
+        output.meta = {
+            quoteMode: "OSMOSIS-IBC"
+        }
+        
         // get amountOut
         //2 steps
+        output.steps = 2
+        output.complete = true
         let result;
         if (quote.sellAsset === shortListSymbolToCaip["OSMO"]) {
             result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo);
-
+            output.result = result
             //build first TX
             //swap osmo for Atom IBC
-            let tx1 = await build_swap_tx(quote.senderAddress, quote.sellAsset, quote.buyAsset, quote.sellAmount, result.amountOut)
+            let tx1 = {
+                type:"sendSwapTx",
+                chain:shortListSymbolToCaip["OSMO"],
+                txParams: {
+                    senderAddress: quote.senderAddress,
+                    sellAsset: quote.sellAsset,
+                    buyAsset: quote.buyAsset,
+                    sellAmount: quote.sellAmount,
+                    buyAmountMin: result.amountOut
+                }
+            };
             log.info(tag,"tx1: ",tx1)
             
             //get balance ibc?
             
             //IBC withdrawal from osmo:atom to atom
-            let tx2 = await build_ibc_tx(quote.senderAddress, quote.recipientAddress, result.amountOut)
-            log.info(tag,"tx2: ",tx2)
-            
+            let tx2 = {
+                type: "ibcTransfer",
+                chain: shortListSymbolToCaip["ATOM"], // Assuming ATOM is the target chain for the IBC withdrawal
+                txParams: {
+                    senderAddress: quote.senderAddress, // Address initiating the IBC withdrawal
+                    recipientAddress: quote.recipientAddress, // Destination address for the ATOM tokens
+                    amount: result.amountOut, // Amount of ATOM tokens to withdraw
+                    // Other parameters required for the IBC withdrawal can be added here
+                }
+            };
+            log.info(tag, "tx2: ", tx2);
 
+            output.txs = [tx1,tx2]
         } else if (quote.sellAsset === shortListSymbolToCaip["ATOM"]) {
             result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo);
-            
+            output.result = result
             //TODO audit this
             //deposit atom to osmo:atom IBC
-            let tx2 = await build_ibc_tx(quote.recipientAddress, quote.senderAddress, result.amountOut)
-            log.info(tag,"tx2: ",tx2)
-            
-            //swap atom for osmo
-            let tx1 = await build_swap_tx(quote.senderAddress, quote.sellAsset, quote.buyAsset, quote.sellAmount, result.amountOut)
-            log.info(tag,"tx1: ",tx1)
-            
+            // Deposit ATOM to osmo:atom IBC
+            let tx1 = {
+                type: "ibcTransfer",
+                chain: shortListSymbolToCaip["ATOM"],
+                txParams: {
+                    senderAddress: quote.senderAddress, // Address initiating the IBC deposit
+                    recipientAddress: quote.recipientAddress, // Osmosis address to receive ATOM
+                    amount: quote.sellAmount, // Amount of ATOM tokens to deposit
+                    // Other parameters for the IBC deposit can be added here
+                }
+            };
+            log.info(tag, "tx1: ", tx1);
+
+            // Swap ATOM for OSMO
+            let tx2 = {
+                type: "sendSwapTx",
+                chain: shortListSymbolToCaip["OSMO"],
+                txParams: {
+                    senderAddress: quote.senderAddress,
+                    sellAsset: shortListSymbolToCaip["ATOM"],
+                    buyAsset: quote.buyAsset,
+                    sellAmount: result.amountOut, // Amount of ATOM obtained from the IBC deposit
+                    buyAmountMin: quote.sellAmount // Minimum amount of OSMO to buy
+                }
+            };
+            log.info(tag, "tx2: ", tx2);
+
+            output.txs = [tx1, tx2];
         } else {
             throw Error("Asset not supported! asset:" + quote.sellAsset);
         }
-
         
-        return result
+        return output
     } catch (e) {
         console.error(tag, "e: ", e)
     }

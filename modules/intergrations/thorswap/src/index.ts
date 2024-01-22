@@ -18,20 +18,20 @@ const axios = Axios.create({
         referer: 'https://sk.thorswap.net', // Correct header key is 'referer'
     }
 });
-let {shortListSymbolToCaip} = require("@pioneer-platform/pioneer-caip")
+let {ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
 
 let networkSupport = [
-    shortListSymbolToCaip["GAIA"],
-    shortListSymbolToCaip["BNB"],
-    shortListSymbolToCaip["DOGE"],
-    shortListSymbolToCaip["BTC"],
-    shortListSymbolToCaip["ETH"],
-    shortListSymbolToCaip["LTC"],
-    shortListSymbolToCaip["THOR"],
-    shortListSymbolToCaip["BCH"],
-    shortListSymbolToCaip["GNO"],
-    shortListSymbolToCaip["MATIC"],
-    shortListSymbolToCaip["AVAX"],
+    ChainToNetworkId["GAIA"],
+    ChainToNetworkId["BNB"],
+    ChainToNetworkId["DOGE"],
+    ChainToNetworkId["BTC"],
+    ChainToNetworkId["ETH"],
+    ChainToNetworkId["LTC"],
+    ChainToNetworkId["THOR"],
+    ChainToNetworkId["BCH"],
+    ChainToNetworkId["GNO"],
+    ChainToNetworkId["MATIC"],
+    ChainToNetworkId["AVAX"],
 ]
 
 module.exports = {

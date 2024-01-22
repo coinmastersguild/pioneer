@@ -393,21 +393,22 @@ export const shapeshift = [
         protocol: "websocket",
         type: "unchained"
     },
-    {
-        key: "REACT_APP_UNCHAINED_OSMOSIS_HTTP_URL",
-        value: "https://api.osmosis.shapeshift.com",
-        swagger: "https://api.osmosis.shapeshift.com/swagger",
-        network: "osmosis",
-        protocol: "http",
-        type: "unchained"
-    },
-    {
-        key: "REACT_APP_UNCHAINED_OSMOSIS_WS_URL",
-        value: "wss://api.osmosis.shapeshift.com",
-        network: "osmosis",
-        protocol: "websocket",
-        type: "unchained"
-    },
+    // fu shapeshift
+    // {
+    //     key: "REACT_APP_UNCHAINED_OSMOSIS_HTTP_URL",
+    //     value: "https://api.osmosis.shapeshift.com",
+    //     swagger: "https://api.osmosis.shapeshift.com/swagger",
+    //     network: "osmosis",
+    //     protocol: "http",
+    //     type: "unchained"
+    // },
+    // {
+    //     key: "REACT_APP_UNCHAINED_OSMOSIS_WS_URL",
+    //     value: "wss://api.osmosis.shapeshift.com",
+    //     network: "osmosis",
+    //     protocol: "websocket",
+    //     type: "unchained"
+    // },
     {
         key: "REACT_APP_UNCHAINED_THORCHAIN_HTTP_URL",
         value: "https://api.thorchain.shapeshift.com",

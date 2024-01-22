@@ -22,6 +22,8 @@ let run_test = async function(){
         
         let result = await osmosis.getQuote(swap)
         console.log("result: ",result)
+        console.log("result: ",result.txs[0])
+        console.log("result: ",result.txs[1])
     }catch(e){
         console.error(e)
     }

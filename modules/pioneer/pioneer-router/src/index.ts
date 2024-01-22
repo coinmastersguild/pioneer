@@ -42,12 +42,15 @@ const TAG = " | Pioneer-router | "
 const log = require('@pioneer-platform/loggerdog')()
 //thorswap
 let thorswap = require("@pioneer-platform/thorswap-client")
-const { caipToRango } = require("@pioneer-platform/pioneer-caip");
+const { caipToRango, caipToNetworkId } = require("@pioneer-platform/pioneer-caip");
 //rango
 let rango = require("@pioneer-platform/rango-client")
 
 //changelly
 let changelly = require("@pioneer-platform/changelly-client")
+
+//osmosis
+let osmosis = require("@pioneer-platform/osmosis-client")
 
 //TODO 1inch/0x
 
@@ -100,9 +103,11 @@ module.exports = {
         await thorswap.init()
         await rango.init()
         await changelly.init()
+        await osmosis.init()
         NetworksByIntegration['changelly'] = changelly.networkSupport()
         NetworksByIntegration['thorswap'] = thorswap.networkSupport()
         NetworksByIntegration['rango'] = rango.networkSupport()
+        NetworksByIntegration['osmosis'] = osmosis.networkSupport()
         return true;
     },
     routes: function(){
@@ -164,6 +169,17 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 let quoteRango = await rango.getQuote(payloadRango)
                 return quoteRango
             break
+            case "osmosis":
+                let payloadOsmosis = {
+                    sellAsset: quote.sellAsset.caip,
+                    buyAsset: quote.buyAsset.caip,
+                    sellAmount: quote.sellAmount,
+                    senderAddress: quote.senderAddress,
+                    recipientAddress: quote.recipientAddress,
+                    slippage: quote.slippage
+                }
+                let quoteOsmosis = await osmosis.getQuote(payloadOsmosis)
+                return quoteOsmosis
             case "changelly":
                 let from = quote.sellAsset.ticker
                 let to = quote.buyAsset.ticker
@@ -182,8 +198,8 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
 async function get_quote(quote:Swap) {
     try {
 
-        let sellChain = quote.sellAsset.caip;
-        let buyChain = quote.buyAsset.caip;
+        let sellChain = caipToNetworkId(quote.sellAsset.caip);
+        let buyChain = caipToNetworkId(quote.buyAsset.caip);
         let integrations = Object.keys(NetworksByIntegration);
         let quotes = [];
         log.info("sellChain: ",sellChain)

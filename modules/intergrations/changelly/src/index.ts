@@ -9,27 +9,27 @@ if (!CHANGELLY_API_SECRET) throw new Error('CHANGELLY_API_SECRET not set');
 
 let changelly: any;
 
-let {shortListSymbolToCaip} = require("@pioneer-platform/pioneer-caip")
+let {ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
 
 
 let networkSupport = [
-    shortListSymbolToCaip["XRP"],
-    shortListSymbolToCaip["DASH"],
-    shortListSymbolToCaip["ZEC"],
+    ChainToNetworkId["XRP"],
+    ChainToNetworkId["DASH"],
+    ChainToNetworkId["ZEC"],
     // shortListSymbolToCaip["BSV"], //TODO
     // shortListSymbolToCaip["ADA"], //TODO
     // shortListSymbolToCaip["EOS"], //TODO
-    shortListSymbolToCaip["GAIA"],
-    shortListSymbolToCaip["BNB"],
-    shortListSymbolToCaip["DOGE"],
-    shortListSymbolToCaip["BTC"],
-    shortListSymbolToCaip["ETH"],
-    shortListSymbolToCaip["LTC"],
-    shortListSymbolToCaip["THOR"],
-    shortListSymbolToCaip["BCH"],
-    shortListSymbolToCaip["GNO"],
-    shortListSymbolToCaip["MATIC"],
-    shortListSymbolToCaip["AVAX"],
+    ChainToNetworkId["GAIA"],
+    ChainToNetworkId["BNB"],
+    ChainToNetworkId["DOGE"],
+    ChainToNetworkId["BTC"],
+    ChainToNetworkId["ETH"],
+    ChainToNetworkId["LTC"],
+    ChainToNetworkId["THOR"],
+    ChainToNetworkId["BCH"],
+    ChainToNetworkId["GNO"],
+    ChainToNetworkId["MATIC"],
+    ChainToNetworkId["AVAX"],
 ]
 
 module.exports = {

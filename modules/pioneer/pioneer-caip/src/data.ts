@@ -1,3 +1,8 @@
+
+const caipToNetworkId = function(caip:string){
+    return caip.split('/')[0]
+}
+
 export const evmCaips = {
     ethereum: 'eip155:1/slip44:60',
     base: 'eip155:8453/slip44:60',
@@ -401,5 +406,5 @@ let caipToRango = function (caip:string, ticker:string) { // Default to null ins
 };
 
 
-export { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango };
+export { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango, caipToNetworkId };
 
