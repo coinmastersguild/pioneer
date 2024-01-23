@@ -156,16 +156,16 @@ let network = require("../lib/index")
 
 
 
-// let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
+let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
 // network.getBalance(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
 
-// network.getBalances(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getBalances(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 let poolId = 'gamm/pool/1'
 

@@ -139,6 +139,9 @@ module.exports = {
     getBalances:function (address:string) {
         return get_balances(address);
     },
+    getVoucherInfo:function (voucher:string) {
+        return get_voucher_info(voucher);
+    },
     getBlock:function (height:string) {
         return get_block(height);
     },
@@ -249,7 +252,10 @@ let get_balance = async function(address:string){
 let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
     try{
-        let url = URL_GAIAD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
+        let url = URL_GAIAD+'/ibc/apps/transfer/v1/denom_traces/'+voucher
+        // let url = URL_GAIAD + '/cosmos/bank/v1beta1/denoms_metadata/' + voucher;
+        // let url = URL_GAIAD + '/cosmos/bank/v1beta1/denoms_metadata/' + voucher;
+
         log.debug(tag,"url: ",url)
         let txInfo = await axios({method:'GET',url})
         log.debug(tag,"txInfo: ",txInfo.data)
@@ -267,7 +273,7 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
             if(accountInfo.data?.result){
@@ -287,24 +293,18 @@ let get_balances = async function(address:string){
                     if(entry.denom.indexOf('ibc/') >= 0){
                         //lookup on each
                         let voucher = entry.denom.replace('ibc/','')
-                        log.debug(tag,"voucher: ",voucher)
+                        log.info(tag,"voucher: ",voucher)
                         let voucherInfo = await get_voucher_info(voucher)
-                        log.debug(tag,"voucherInfo: ",voucherInfo)
-                        if(voucherInfo.denom_trace.base_denom === 'uatom'){
-                            let balance = {
-                                type:'ibcChannel',
-                                ibc:true,
-                                voucherId: entry.denom,
-                                asset:'ATOM',
-                                denom:voucherInfo.denom_trace.base_denom,
-                                channel:voucherInfo.denom_trace.path,
-                                balance:entry.amount / 1000000
-                            }
-                            output.push(balance)
-                        } else {
-                            //TODO lookup base_denum to asset
-                            //handle more assets
+                        log.info(tag,"voucherInfo: ",voucherInfo)
+                        let balance = {
+                            type:'ibcChannel',
+                            ibc:true,
+                            voucher: voucher,
+                            denom:voucherInfo.denom_trace.base_denom,
+                            channel:voucherInfo.denom_trace.path,
+                            balance:entry.amount / 1000000
                         }
+                        output.push(balance)
                     }
                 }
             }

@@ -30,6 +30,18 @@ const tokens = [
             address:null
         }
     },
+    
+    {
+        chain: "OSMO",
+        identifier: "OSMO.ATOM",
+        decimals: 8,
+        caip: "cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620",
+        rangoName: {
+            blockchain:'OSMOSIS',
+            symbol:'ATOM',
+            address:null
+        }
+    },
     // Add more token objects here
 ];
 

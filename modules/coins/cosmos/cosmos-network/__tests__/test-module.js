@@ -67,18 +67,25 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-let address = "cosmos1k0kzs2ygjsext3hx7mf00dfrfh8hl3e8utepqp"
-// network.getBalance(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+let address = "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc"
+// // network.getBalance(address)
+// //     .then(function(resp){
+// //         console.log("resp: ",resp)
+// //         //console.log("resp: ",JSON.stringify(resp))
+// //     })
 
 network.getBalances(address)
     .then(function(resp){
         console.log("resp: ",resp)
         //console.log("resp: ",JSON.stringify(resp))
     })
+
+// let voucher = 'B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620'
+// network.getVoucherInfo(voucher)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.getTransaction("94920F209DA7AAE23ED88A404B269C1EAEFCCD55AB9E3C5F0F483CB5906984CE\n")
 //     .then(function(resp){
@@ -117,12 +124,12 @@ network.getBalances(address)
 
 
 //let tx = 'CpABCo0BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm0KLWNvc21vczF5YzZkZnR3ZGhndDk2azh5dHk4ZGpnYTg4ZjNrbmh6bmZ5aDI2axItY29zbW9zMTdodGx2Y2U1eXM4aHFoeGxrYXR5dWh2OHF3dHg3MmF5cW5yY2tzGg0KBXVhdG9tEgQxMDAwEmcKUApGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQP0piWVTmBW2Hfxq94XvZNCPqCG6+Rkqzp8KkeCry8MyRIECgIIARgNEhMKDQoFdWF0b20SBDEwMDAQoI0GGkDW2fYGutl2sTw6JUMlC/LDBfB716TYKsq4K8yssQlVkSgWhaQ02Mvzm9qBXHo4gNFnQIAsj7DiWyKnPdfPeYS9'
-let tx = 'CpEBCo4BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm4KLWNvc21vczFyczdmY2tnem5rYXhzNHNxMDJwZXh3amdhcjQzcDV3bjdha3FuYxItY29zbW9zMTdodGx2Y2U1eXM4aHFoeGxrYXR5dWh2OHF3dHg3MmF5cW5yY2tzGg4KBXVhdG9tEgUxMDAwMBJjClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiECKBTqQdDCZkV4bNWuNYUjOlRv7M9W2kNzhSPoiInO04ASBAoCCH8YEBIPCg0KBXVhdG9tEgQxMDAwGkAGodkOJXQn8O/oTjo3yD6iYa1G+iAJpZckKdiORXD3sFgxrbaOqdodgqsWRh175K7jazNqLuPNNFWZMI9pvO/O'
-network.broadcast(tx)
-    .then(function(resp){
-        console.log("resp: ",resp)
-        console.log("resp: ",JSON.stringify(resp))
-    })
+// let tx = 'CpEBCo4BChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEm4KLWNvc21vczFyczdmY2tnem5rYXhzNHNxMDJwZXh3amdhcjQzcDV3bjdha3FuYxItY29zbW9zMTdodGx2Y2U1eXM4aHFoeGxrYXR5dWh2OHF3dHg3MmF5cW5yY2tzGg4KBXVhdG9tEgUxMDAwMBJjClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiECKBTqQdDCZkV4bNWuNYUjOlRv7M9W2kNzhSPoiInO04ASBAoCCH8YEBIPCg0KBXVhdG9tEgQxMDAwGkAGodkOJXQn8O/oTjo3yD6iYa1G+iAJpZckKdiORXD3sFgxrbaOqdodgqsWRh175K7jazNqLuPNNFWZMI9pvO/O'
+// network.broadcast(tx)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.broadcastLegacy(tx)
 //     .then(function(resp){

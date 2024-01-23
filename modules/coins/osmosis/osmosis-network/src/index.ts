@@ -326,10 +326,12 @@ let get_epochs = async function(){
 let get_voucher_info = async function(voucher:string) {
     let tag = TAG + " | get_voucher_info | "
     try{
-        let url = URL_OSMO_LCD+'/ibc/applications/transfer/v1beta1/denom_traces/'+voucher
-        log.debug(tag,"url: ",url)
+        // let url = URL_OSMO_LCD+'/ibc/apps/transfer/v1beta1/denom_traces/'+voucher
+        let url = URL_OSMO_LCD+'/ibc/apps/transfer/v1/denom_traces/'+voucher
+
+        log.info(tag,"url: ",url)
         let txInfo = await axios({method:'GET',url})
-        log.debug(tag,"txInfo: ",txInfo.data)
+        log.info(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
     }catch(e){
@@ -808,18 +810,18 @@ let get_balances = async function(address:string){
 
         try{
             let accountInfo = await axios({method:'GET',url: URL_OSMO_LCD+'/cosmos/bank/v1beta1/balances/'+address})
-            log.debug(tag,"accountInfo: ",accountInfo.data)
+            log.info(tag,"accountInfo: ",accountInfo.data)
 
             //
-            if(accountInfo.data?.result){
-                for(let i = 0; i < accountInfo.data.result.length; i++){
-                    let entry = accountInfo.data.result[i]
+            if(accountInfo.data){
+                for(let i = 0; i < accountInfo.data.balances.length; i++){
+                    let entry = accountInfo.data.balances[i]
                     if(entry.denom === 'uosmo'){
                         let balance = {
                             type:'balance',
                             asset:'OSMO',
                             denom:'uosmo',
-                            balance:entry.amount
+                            balance:parseFloat(entry.amount) / 1000000
                         }
                         output.push(balance)
                     }
@@ -828,9 +830,9 @@ let get_balances = async function(address:string){
                     if(entry.denom.indexOf('ibc/') >= 0){
                         //lookup on each
                         let voucher = entry.denom.replace('ibc/','')
-                        log.debug(tag,"voucher: ",voucher)
+                        log.info(tag,"voucher: ",voucher)
                         let voucherInfo = await get_voucher_info(voucher)
-                        log.debug(tag,"voucherInfo: ",voucherInfo)
+                        log.info(tag,"voucherInfo: ",voucherInfo)
                         if(voucherInfo.denom_trace.base_denom === 'uatom'){
                             let balance = {
                                 type:'ibcChannel',

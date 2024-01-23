@@ -289,55 +289,58 @@ let tokenToCaip = function(token:any){
     }
 }
 
-let thorchainToCaip = function(chain:string, symbol:string, ticker:string, type:string){
-    try{
-        let caip
-        //get networkId
-        // let chainEnumValue = getChainEnumValue(chain)
-        // console.log("chainEnumValue: ", chainEnumValue)
-        if(chain == "AVAX" && symbol == "WETH"){
-            console.log("WETH detected")
-            caip = ChainToCaip[chain]
-        } else if(chain == "BSC" && symbol == "BNB"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['bnbsmartchain']
-        } else if(chain == "GAIA" && symbol == "ATOM"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['cosmos']
-        }  else if(chain == "ARB" && symbol == "ETH"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['arbitrum']
-        }else if(chain == "OP" && symbol == "ETH"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['optimism']
-        }  else if(chain == "THOR" || symbol == "RUNE"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['thorchain']
-        } else if(chain == "KUJI" || symbol == "USK"){
-            //if chain and symbol are the same, then we have a native token
-            caip = shortListNameToCaip['kuji']
-        } else if(chain == symbol){
-            //if chain and symbol are the same, then we have a native token
-            caip = ChainToCaip[chain]
-        } else {
-            //attach symbol to chain
-            let networkId = ChainToNetworkId[chain]
-            console.log("networkId: ", networkId)
-            //if token
-            if(symbol.indexOf("-") > -1){
-                let contract = symbol.split("-")[1]
-                caip = `${networkId}/erc20:${contract}`
-            } else {
-                console.error({chain, symbol, ticker, type})
-                throw Error("Unable to parse CAIP! TODO!")
-            }
+let thorchainToCaip = function(chain: string, symbol: string, ticker: any, type: string) {
+    try {
+        let caip;
+        let key = chain + '.' + symbol; // Concatenate chain and symbol
+        console.log("key:",key)
+        switch (key) {
+            case "OSMO.ATOM":
+                // Specific case for OSMO.ATOM
+                caip = 'cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620';
+                break;
+            case "AVAX.WETH":
+                console.log("WETH detected");
+                caip = ChainToCaip[chain];
+                break;
+            case "BSC.BNB":
+                caip = shortListNameToCaip['bnbsmartchain'];
+                break;
+            case "GAIA.ATOM":
+                caip = shortListNameToCaip['cosmos'];
+                break;
+            case "ARB.ETH":
+                caip = shortListNameToCaip['arbitrum'];
+                break;
+            case "OP.ETH":
+                caip = shortListNameToCaip['optimism'];
+                break;
+            case "THOR.RUNE":
+            case "KUJI.USK":
+                // @ts-ignore
+                caip = shortListNameToCaip[chain.toLowerCase()];
+                break;
+            default:
+                if (chain === symbol) {
+                    caip = ChainToCaip[chain];
+                } else {
+                    let networkId = ChainToNetworkId[chain];
+                    console.log("networkId: ", networkId);
+                    if (symbol.indexOf(".") > -1) {
+                        let contract = symbol.split("-")[1];
+                        caip = `${networkId}/erc20:${contract}`;
+                    } else {
+                        console.error({chain, symbol, ticker, type});
+                        throw Error("Unable to parse CAIP! TODO!");
+                    }
+                }
+                break;
         }
-        //build caip
-        return caip
-    }catch(e){
-        throw e
+        return caip;
+    } catch (e) {
+        throw e;
     }
-}
+};
 
 //NOTE THIS IS IMPOSSIBLE to do well!
 // Caips do NOT include the token tickers!
@@ -351,6 +354,11 @@ let caipToThorchain = function (caip:string, ticker:string) {
         if (!chain) {
             console.error("No matching chain symbol found for network ID", networkId);
             return null;
+        }
+
+        // Special handling for 'OSMO.ATOM'
+        if (networkId === 'cosmos:osmosis-1' && ticker === 'ATOM') {
+            return 'OSMO.ATOM';
         }
 
         // Handling contract tokens
