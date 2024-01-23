@@ -10,8 +10,8 @@ let run_test = async function(){
         //
         await changelly.init()
 
-        let result = await changelly.getCurrenciesAsync()
-        console.log("result: ",JSON.stringify(result))
+        // let result = await changelly.getCurrenciesAsync()
+        // console.log("result: ",JSON.stringify(result))
 
         // let changellyBody = {
         //     from: "BCH",
@@ -28,7 +28,42 @@ let run_test = async function(){
         // let result = await changelly.getQuote(from, to, address, amount)
         // console.log("result: ",JSON.stringify(result))
 
+        // let changellyBody = {
+        //     from: 'ETH',
+        //     to: 'XRP',
+        //     address: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB',
+        //     amount: '0.0200'
+        // }
+        //
+        // from = changellyBody.from
+        // to = changellyBody.to
+        // address = changellyBody.address
+        // amount = changellyBody.amount
+        //
+        // let result = await changelly.getQuote(from, to, address, amount)
+        // console.log("result: ",JSON.stringify(result))
 
+        // let id = 'm3sdxe9k9s0mkegx'
+        // let id = '3byam0qy7xjojb2j'
+        // //"f7e4c6e8c6c1"
+        // let info = await changelly.getTransactionsAsync(100,0)
+        // console.log("info: ",info)
+        
+        // //lookup tx
+        // // // let id = 'm3sdxe9k9s0mkegx'
+        // let id = '9xuz5tlu7wor9kaq'
+        // //"f7e4c6e8c6c1"
+        // let info = await changelly.getStatusAsync(id)
+        //
+        // /*
+        //     waiting
+        //     confirming
+        //     exchanging
+        //     sending
+        //
+        //  */
+        //
+        // console.log("info: ",info)
     }catch(e){
         console.error(e)
     }

@@ -48,48 +48,90 @@ let run_test = async function(){
         //     slippage: '3'
         // }
         
+        // let swap = {
+        //     sellAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:osmosis-1/slip44:118',
+        //         identifier: 'OSMO.OSMO',
+        //         address: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92',
+        //         symbol: 'OSMO',
+        //         chain: 'OSMO',
+        //         ticker: 'OSMO',
+        //         type: 'Native',
+        //         balance: '20.797169',
+        //         priceUsd: 1.61,
+        //         rank: 70,
+        //         name: 'osmosis',
+        //         source: 'coingecko',
+        //         alias: 2,
+        //         valueUsd: '33.483442090000004'
+        //     },
+        //     sellAmount: '0.0100',
+        //     buyAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:cosmoshub-4/slip44:118',
+        //         identifier: 'GAIA.GAIA',
+        //         address: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc',
+        //         symbol: 'ATOM',
+        //         chain: 'GAIA',
+        //         ticker: 'ATOM',
+        //         type: 'Native',
+        //         balance: '0.186822',
+        //         priceUsd: 9.79,
+        //         rank: 24,
+        //         name: 'cosmos',
+        //         source: 'coingecko',
+        //         alias: 2,
+        //         valueUsd: '1.8289873799999998'
+        //     },
+        //     senderAddress: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92',
+        //     recipientAddress: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc',
+        //     slippage: 3
+        // }
+        //
+        
         let swap = {
             sellAsset: {
                 context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
-                caip: 'cosmos:osmosis-1/slip44:118',
-                identifier: 'OSMO.OSMO',
-                address: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92',
-                symbol: 'OSMO',
-                chain: 'OSMO',
-                ticker: 'OSMO',
+                caip: 'eip155:1/slip44:60',
+                identifier: 'ETH.ETH',
+                address: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+                symbol: 'ETH',
+                chain: 'ETH',
+                ticker: 'ETH',
                 type: 'Native',
-                balance: '20.797169',
-                priceUsd: 1.61,
-                rank: 70,
-                name: 'osmosis',
+                balance: '0.02000275',
+                priceUsd: 2310.31,
+                rank: 2,
+                name: 'ethereum',
                 source: 'coingecko',
                 alias: 2,
-                valueUsd: '33.483442090000004'
+                valueUsd: '46.212553352499995'
             },
-            sellAmount: '0.0100',
+            sellAmount: '0.0200',
             buyAsset: {
                 context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
-                caip: 'cosmos:cosmoshub-4/slip44:118',
-                identifier: 'GAIA.GAIA',
-                address: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc',
-                symbol: 'ATOM',
-                chain: 'GAIA',
-                ticker: 'ATOM',
+                caip: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
+                identifier: 'XRP.XRP',
+                address: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB',
+                symbol: 'XRP',
+                chain: 'XRP',
+                ticker: 'XRP',
                 type: 'Native',
-                balance: '0.186822',
-                priceUsd: 9.79,
-                rank: 24,
-                name: 'cosmos',
+                balance: '10.796',
+                priceUsd: 0.52817,
+                rank: 6,
+                name: 'ripple',
                 source: 'coingecko',
                 alias: 2,
-                valueUsd: '1.8289873799999998'
+                valueUsd: '5.70212332'
             },
-            senderAddress: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92',
-            recipientAddress: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc',
+            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            recipientAddress: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB',
             slippage: 3
         }
-        
-        
+
+
         //get router options
         let result = await client.quote(swap)
         console.log("result: ",result)

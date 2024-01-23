@@ -185,6 +185,12 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 let to = quote.buyAsset.ticker
                 let address = quote.buyAsset.address
                 let amount = quote.sellAmount
+                log.info({
+                    from,
+                    to,
+                    address,
+                    amount
+                })
                 let quoteChangelly = await changelly.getQuote(from, to, address, amount)
                 return quoteChangelly
             default:

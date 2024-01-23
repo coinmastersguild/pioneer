@@ -10,7 +10,7 @@ const TAG = " | osmosis | "
 
 
 const log = require('@pioneer-platform/loggerdog')()
-let {shortListSymbolToCaip, ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
+let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
 let networkOsmo = require("@pioneer-platform/osmosis-network")
 let networkAtom = require("@pioneer-platform/cosmos-network")
 const { uuid } = require('uuidv4');
@@ -34,11 +34,12 @@ module.exports = {
 
 
 interface QuoteResult {
+    amountOutMin: string;
     amountOut: string;
     slippage: string;
 }
 
-function quoteFromPool(amountAtomSwap: string, amountAtomPool: string, amountOsmoPool: string): QuoteResult {
+function quoteFromPool(amountAtomSwap: string, amountAtomPool: string, amountOsmoPool: string, maxSlippage: number): QuoteResult {
     // Convert string inputs to numbers and scale the swap amount
     const swapAmount = parseFloat(amountAtomSwap) * 1e6;
     const atomPoolAmount = parseFloat(amountAtomPool);
@@ -66,7 +67,11 @@ function quoteFromPool(amountAtomSwap: string, amountAtomPool: string, amountOsm
     // Calculate the slippage
     const slippage = ((idealRate - actualRate) / idealRate) * 100;
 
+    // Calculate amountOutMin considering the maximum slippage
+    const amountOutMin = scaledOsmoReceived * (1 - maxSlippage / 100);
+
     return {
+        amountOutMin:amountOutMin.toFixed(6).toString(),
         amountOut: scaledOsmoReceived.toFixed(6),
         slippage: Math.max(slippage, 0).toFixed(6)
     };
@@ -82,7 +87,8 @@ const get_quote = async function (quote:any) {
         if(!quote.sellAmount) throw new Error("missing sellAmount")
         if(!quote.senderAddress) throw new Error("missing senderAddress")
         if(!quote.recipientAddress) throw new Error("missing recipientAddress")
-        
+        if(!quote.slippage) throw new Error("missing slippage")
+
         //get pools
         let pools = await networkOsmo.getPools()
         if(!pools.pools[0]) throw Error("Unable to get pools from network!")
@@ -107,19 +113,19 @@ const get_quote = async function (quote:any) {
         output.complete = true
         let result;
         if (quote.sellAsset === shortListSymbolToCaip["OSMO"]) {
-            result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo);
+            result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo, quote.slippage);
             output.result = result
             //build first TX
             //swap osmo for Atom IBC
             let tx1 = {
                 type:"sendSwapTx",
-                chain:shortListSymbolToCaip["OSMO"],
+                chain:caipToNetworkId(shortListSymbolToCaip["OSMO"]),
                 txParams: {
                     senderAddress: quote.senderAddress,
-                    sellAsset: quote.sellAsset,
-                    buyAsset: quote.buyAsset,
-                    sellAmount: quote.sellAmount,
-                    buyAmountMin: result.amountOut
+                    tokenIn:'uosmo',
+                    tokenOut:'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
+                    amountIn:quote.sellAmount,
+                    amountOutMin:result.amountOutMin,
                 }
             };
             log.info(tag,"tx1: ",tx1)
@@ -129,19 +135,19 @@ const get_quote = async function (quote:any) {
             //IBC withdrawal from osmo:atom to atom
             let tx2 = {
                 type: "ibcTransfer",
-                chain: shortListSymbolToCaip["ATOM"], // Assuming ATOM is the target chain for the IBC withdrawal
+                chain: caipToNetworkId(shortListSymbolToCaip["ATOM"]), // Assuming ATOM is the target chain for the IBC withdrawal
                 txParams: {
                     senderAddress: quote.senderAddress, // Address initiating the IBC withdrawal
                     recipientAddress: quote.recipientAddress, // Destination address for the ATOM tokens
                     amount: result.amountOut, // Amount of ATOM tokens to withdraw
-                    // Other parameters required for the IBC withdrawal can be added here
+                    token: 'uatom'// Other parameters required for the IBC withdrawal can be added here
                 }
             };
             log.info(tag, "tx2: ", tx2);
 
             output.txs = [tx1,tx2]
         } else if (quote.sellAsset === shortListSymbolToCaip["ATOM"]) {
-            result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo);
+            result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo, quote.slippage);
             output.result = result
             //TODO audit this
             //deposit atom to osmo:atom IBC

@@ -1,6 +1,6 @@
 let Changelly = require('@bithighlander/changelly');
 
-const TAG = " | blocknative | ";
+const TAG = " | Changelly | ";
 const CHANGELLY_API_KEY = process.env['CHANGELLY_API_KEY'];
 const CHANGELLY_API_SECRET = process.env['CHANGELLY_API_SECRET'];
 
@@ -9,7 +9,7 @@ if (!CHANGELLY_API_SECRET) throw new Error('CHANGELLY_API_SECRET not set');
 
 let changelly: any;
 
-let {ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
+let {ChainToNetworkId, caipToNetworkId, shortListSymbolToCaip} = require("@pioneer-platform/pioneer-caip")
 
 
 let networkSupport = [
@@ -78,12 +78,40 @@ async function get_currencies(): Promise<any> {
 
 async function create_transaction(from: string, to: string, address: string, amount: number, extraId?: string): Promise<any> {
     try {
-        return new Promise((resolve, reject) => {
+        let output:any = {}
+        output.steps = 1
+        output.complete = true
+        output.meta = {
+            quoteMode: "CHANGELLY"
+        }
+        output.complete = true
+        let data:any = await new Promise((resolve, reject) => {
             changelly.createTransaction(from, to, address, amount, extraId, (err: any, data: any) => {
-                if (err) reject(err);
-                else resolve(data);
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
             });
         });
+        console.log("data:",data)
+        data = data.result
+        if(!data) throw Error("Failed to create quote@changelly")
+        if(!data.payinAddress) throw Error("Failed to create quote@changelly")
+        if(!data.id) throw Error("Failed to create quote@changelly")
+        output.id = data.id
+        let tx = {
+            type:"transfer",
+            chain:caipToNetworkId(shortListSymbolToCaip[from]),
+            txParams: {
+                address: data.payinAddress,
+                amount: amount,
+                memo: data.payinExtraId,
+            }
+        }
+        output.tx = tx
+        output.raw = data
+        return output
     } catch (e) {
         console.error(TAG, "create_transaction error:", e);
         throw e;
