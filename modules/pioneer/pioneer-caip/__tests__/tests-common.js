@@ -3,7 +3,7 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
-const { tokenToCaip, caipToThorchain, caipToRango } = require("../lib");
+const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("../lib");
 
 // Test data for multiple tokens
 const tokens = [
@@ -30,7 +30,7 @@ const tokens = [
             address:null
         }
     },
-    
+
     {
         chain: "OSMO",
         identifier: "OSMO.ATOM",
@@ -40,6 +40,19 @@ const tokens = [
             blockchain:'OSMOSIS',
             symbol:'ATOM',
             address:null
+        }
+    },
+    {
+        chain: "ETH",
+        identifier: "ETH.WBTC-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        ticker: "WBTC",
+        decimals: 8,
+        caip: "eip155:1/erc20:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        rangoName: {
+            blockchain:'ETH',
+            symbol:'WBTC',
+            address:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
         }
     },
     // Add more token objects here
@@ -56,6 +69,9 @@ function runTests() {
 
         const thorchainIdent = caipToThorchain(expandedInfo.caip, expandedInfo.ticker);
         console.log(`Token ${index + 1} thorchainIdent: `, thorchainIdent);
+
+        const caipFromThorchain = thorchainToCaip(token.identifier);
+        console.log(`Token ${index + 1} caipFromThorchain: `, caipFromThorchain);
 
         rangoName = caipToRango(expandedInfo.caip, expandedInfo.ticker, expandedInfo.address);
         console.log(`Token ${index + 1} rangoName: `, rangoName);
@@ -76,6 +92,16 @@ function runTests() {
         } catch (error) {
             console.error("caipToRango Error: ", error);
             console.error(`Test ${index + 1} failed: Expected '${token.identifier}', got '${thorchainIdent}'`);
+            failed++;
+        }
+
+        try {
+            assert.strictEqual(caipFromThorchain, token.caip);
+            console.log(`Test ${index + 1} passed: CAIP from thorchainToCaip is correct.`);
+            passed++;
+        } catch (error) {
+            console.error("thorchainToCaip Error: ", error);
+            console.error(`Test ${index + 1} failed: Expected '${token.caip}', got '${caipFromThorchain}'`);
             failed++;
         }
     });

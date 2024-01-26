@@ -52,6 +52,9 @@ let changelly = require("@pioneer-platform/changelly-client")
 //osmosis
 let osmosis = require("@pioneer-platform/osmosis-client")
 
+//osmosis
+let mayachain = require("@pioneer-platform/mayachain-client")
+
 //TODO 1inch/0x
 
 
@@ -104,6 +107,8 @@ module.exports = {
         await rango.init()
         await changelly.init()
         await osmosis.init()
+        await mayachain.init()
+        NetworksByIntegration['mayachain'] = mayachain.networkSupport()
         NetworksByIntegration['changelly'] = changelly.networkSupport()
         NetworksByIntegration['thorswap'] = thorswap.networkSupport()
         NetworksByIntegration['rango'] = rango.networkSupport()
@@ -193,11 +198,24 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 })
                 let quoteChangelly = await changelly.getQuote(from, to, address, amount)
                 return quoteChangelly
+            case "mayachain":
+                let payloadMayachain = {
+                    sellAsset: quote.sellAsset.identifier,
+                    buyAsset: quote.buyAsset.identifier,
+                    sellAmount: quote.sellAmount,
+                    senderAddress: quote.senderAddress,
+                    recipientAddress: quote.recipientAddress,
+                    slippage: quote.slippage
+                }
+                log.info(tag,"payloadMayachain: ",payloadMayachain)
+                let quoteMayachain = await mayachain.getQuote(payloadMayachain)
+                return quoteMayachain
             default:
                 throw new Error("Intergration not found")
         }
     }catch(e){
-        throw e
+        log.error(tag,"Error: ",e)
+        return null
     }
 }
 
@@ -216,7 +234,7 @@ async function get_quote(quote:Swap) {
             if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {
                 console.log(TAG, "Found supported integration for both networks:", integration);
                 let integrationQuote = await get_quote_from_integration(integration, quote);
-                quotes.push({ integration, quote: integrationQuote });
+                if(integrationQuote) quotes.push({ integration, quote: integrationQuote });
             }
         }
         //return applicable intergrations

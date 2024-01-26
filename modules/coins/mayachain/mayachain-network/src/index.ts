@@ -42,7 +42,7 @@ axiosRetry(axios, {
 const log = require('@pioneer-platform/loggerdog')()
 
 let URL_THORNODE = 'https://mayanode.mayachain.info'
-let URL_MIDGARD = 'https://midgard.mayachain.info/v2/pools'
+let URL_MIDGARD = 'https://midgard.mayachain.info/v2'
 
 let BASE_THOR = 100000000
 
@@ -75,6 +75,15 @@ module.exports = {
     getAccountInfo:function (address:string) {
         return get_account_info(address);
     },
+    getPools: function () {
+        return get_pools();
+    },
+    getPool: function (poolId:string) {
+        return get_pool(poolId);
+    },
+    getPoolAddress: function () {
+        return get_pool_addresses();
+    },
     txs: function (address:string) {
         return get_txs_by_address(address);
     },
@@ -93,6 +102,83 @@ module.exports = {
 /**********************************
  // Lib
  //**********************************/
+
+const get_pool = async function (poolId:string) {
+    let tag = TAG + " | get_pool | "
+    try {
+        //
+
+
+        // full /simple /balances
+        let params = {
+            view:"full",
+            asset:poolId
+        }
+
+        let body = {
+            method: 'GET',
+            url: URL_MIDGARD+"/pools/detail",
+            headers: {'content-type': 'application/json'},
+            params
+        };
+
+        log.debug(body)
+        let resp = await axios(body)
+
+        return resp.data
+
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+const get_pools = async function () {
+    let tag = TAG + " | get_pools | "
+    try {
+        //
+        let body = {
+            method: 'GET',
+            url: URL_MIDGARD+"/pools",
+            headers: {'content-type': 'application/json'},
+            // body: {account_name: actor},
+            // json: true
+        };
+
+        log.debug(body.url)
+        let resp = await axios(body)
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+        throw e
+    }
+}
+
+//https://testnet.thornode.thorchain.info/thorchain/inbound_addresses
+const get_pool_addresses = async function () {
+    let tag = TAG + " | get_pool_addresses | "
+    try {
+        let output = {}
+
+        let body = {
+            method: 'GET',
+            url: URL_THORNODE+"/thorchain/inbound_addresses",
+            headers: {'content-type': 'application/json'},
+            // body: {account_name: actor},
+            // json: true
+        };
+
+        log.debug(body)
+        let resp = await axios(body)
+
+
+        return resp.data
+    } catch (e) {
+        log.error(tag, "e: ", e)
+    }
+}
 
 let get_last_block = async function(){
     let tag = TAG + " | get_last_block | "

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-coins",
-  "version": "9.2.4",
+  "version": "9.2.7",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -10,6 +10,7 @@
     "npm": "npm i",
     "build": "tsc -p .",
     "test": "npm run build && node __tests__/test-module.js",
+    "test-suite": "npm run build && node __tests__/tests-common.js",
     "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
     "prepublish": "npm run build"
   },

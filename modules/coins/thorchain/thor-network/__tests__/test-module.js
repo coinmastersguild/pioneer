@@ -26,10 +26,10 @@ let network = require("../lib/index")
 
 //thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5
 
-network.getLastBlock()
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
+// network.getLastBlock()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // network.getBlockHeight()
 //     .then(function(resp){

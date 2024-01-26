@@ -1,5 +1,11 @@
+/*
+       Caip tools
 
-const caipToNetworkId = function(caip:string){
+         This file contains tools for working with CAIP-10 and CAIP-19 identifiers. and transactions layres
+
+ */
+
+export const caipToNetworkId = function (caip: string) {
     return caip.split('/')[0]
 }
 
@@ -249,59 +255,62 @@ export const NetworkIdToRangoName = function (networkId:string) {
     }
 };
 
-let tokenToCaip = function(token:any){
-    try{
-        // Handle identifiers with an extra period
-        let parts = token.identifier.split('.');
-        let chain, symbol;
-        if (parts.length >= 2) {
-            chain = parts[0];
-            symbol = parts.slice(1).join('.'); // Re-join the remaining parts excluding the first
-        } else {
-            // Fallback to the original method if there's only one or no period
-            chain = token.identifier.split('.')[0];
-            symbol = token.identifier.split('.')[1];
-        }
-
-        let type, ticker;
-        if(token.address){
-            ticker = symbol.split('-')[0];
-            type = 'token';
-        } else {
-            type = 'native';
-            ticker = symbol
-        }
-        let caip = thorchainToCaip(
-            chain,
-            symbol,
-            ticker,
-            type,
-        );
-        token.networkId = ChainToNetworkId[chain];
-        token.caip = caip;
-        token.symbol = symbol;
-        token.ticker = ticker;
-        token.type = type;
-        // Get pubkey for chain
-        return token;
-    } catch(e) {
-        console.error(e);
-    }
-}
-
-let thorchainToCaip = function(chain: string, symbol: string, ticker: any, type: string) {
+let tokenToCaip = function (token: any) {
     try {
         let caip;
-        let key = chain + '.' + symbol; // Concatenate chain and symbol
-        console.log("key:",key)
-        switch (key) {
+        console.log("token",token)
+        if (token.address) {
+            // For ERC20 tokens
+            let networkId = ChainToNetworkId[token.chain];
+            if (!networkId) throw new Error(`Unsupported chain: ${token.chain}`);
+            caip = `${networkId}/erc20:${token.address}`;
+            token.type = 'token';
+        } else {
+            // For native tokens, use the identifier as it is
+            caip = thorchainToCaip(token.identifier);
+            token.type = 'native';
+        }
+
+        token.networkId = ChainToNetworkId[token.chain];
+        token.caip = caip;
+        token.symbol = token.identifier.split('.')[1]; // Assuming the symbol is the second part of the identifier
+
+        // Keeping the original ticker unchanged
+        // token.ticker = token.address ? token.identifier.split('.')[1].split('-')[0] : token.identifier.split('.')[1];
+
+        return token;
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+};
+
+
+let thorchainToCaip = function(identifier: string): string {
+    try {
+        let caip: string;
+        let parts = identifier.split('.');
+
+        let chain = parts[0];
+        let rest = parts.length > 1 ? parts.slice(1).join('.') : null;
+        let symbolAndContract = rest ? rest.split('-') : [null, null];
+        let symbol = symbolAndContract[0];
+        let contract = symbolAndContract[1];
+
+        if (contract) {
+            let networkId = ChainToNetworkId[chain];
+            if (!networkId) throw new Error(`Unsupported chain: ${chain}`);
+            caip = `${networkId}/erc20:${contract}`;
+            return caip;
+        }
+
+        console.log("key:", identifier);
+        switch (identifier) {
             case "OSMO.ATOM":
-                // Specific case for OSMO.ATOM
                 caip = 'cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620';
                 break;
             case "AVAX.WETH":
-                console.log("WETH detected");
-                caip = ChainToCaip[chain];
+                caip = ChainToCaip['AVAX'];
                 break;
             case "BSC.BNB":
                 caip = shortListNameToCaip['bnbsmartchain'];
@@ -321,27 +330,17 @@ let thorchainToCaip = function(chain: string, symbol: string, ticker: any, type:
                 caip = shortListNameToCaip[chain.toLowerCase()];
                 break;
             default:
-                if (chain === symbol) {
-                    caip = ChainToCaip[chain];
-                } else {
-                    let networkId = ChainToNetworkId[chain];
-                    console.log("networkId: ", networkId);
-                    if (symbol.indexOf(".") > -1) {
-                        let contract = symbol.split("-")[1];
-                        caip = `${networkId}/erc20:${contract}`;
-                    } else {
-                        console.error({chain, symbol, ticker, type});
-                        throw Error("Unable to parse CAIP! TODO!");
-                    }
-                }
+                let networkId = ChainToNetworkId[chain];
+                if (!networkId) throw new Error(`Unsupported chain: ${chain}`);
+                caip = ChainToCaip[chain] || networkId; // Fallback to networkId if no direct mapping
                 break;
         }
+
         return caip;
     } catch (e) {
         throw e;
     }
 };
-
 //NOTE THIS IS IMPOSSIBLE to do well!
 // Caips do NOT include the token tickers!
 let caipToThorchain = function (caip:string, ticker:string) {
@@ -375,7 +374,7 @@ let caipToThorchain = function (caip:string, ticker:string) {
                 return null;
             }
             // Use the ticker as is without converting to uppercase
-            return `${chain}.${ticker}-${contractAddress.toUpperCase()}`;
+            return `${chain}.${ticker}-${contractAddress}`;
         } else {
             // Handling native tokens
             return chain + "." + chain;
@@ -386,21 +385,19 @@ let caipToThorchain = function (caip:string, ticker:string) {
     }
 };
 
-let caipToRango = function (caip:string, ticker:string) { // Default to null instead of an empty string
+let caipToRango = function (caip:string, ticker:string) {
     try {
         const [networkId, tokenInfo] = caip.split('/');
-        let rangoName = NetworkIdToRangoName(networkId); // Get the Rango name from the network ID
+        let rangoName = NetworkIdToRangoName(networkId);
 
-        // Extracting the symbol and address
         let symbol = ticker;
-        let address:any = null;
+        let address = null; // Default to null
 
         // For ERC20 tokens, the contract address is included in the CAIP
         if (tokenInfo && tokenInfo.startsWith('erc20:')) {
             address = tokenInfo.split(':')[1];
         }
 
-        // Check if the Rango name is found
         if (!rangoName) {
             console.error('Rango name not found for networkId:', networkId);
             return null;
@@ -413,6 +410,5 @@ let caipToRango = function (caip:string, ticker:string) { // Default to null ins
     }
 };
 
-
-export { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango, caipToNetworkId };
+export { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango };
 
