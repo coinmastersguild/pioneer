@@ -104,7 +104,7 @@ const get_quote = async function (quote:any) {
         log.info(tag, "pools: ", pools)
 
         output.meta = {
-            quoteMode: "MAYA-OUT"
+            quoteMode: "MAYA_SUPPORTED_TO_MAYA_SUPPORTED"
         }
         output.steps = 1
         output.complete = true
