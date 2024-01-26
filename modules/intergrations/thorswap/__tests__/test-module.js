@@ -20,8 +20,12 @@ let run_test = async function(){
         }
         
         let result = await thorswap.getQuote(swap)
-        console.log("result: ",result)
+        console.log("result: ",result.length)
 
+        for(let i = 0; i < result.length; i++){
+            console.log("result: ",result[i])
+        }
+        
     } catch (e) {
         console.error(e)
     }

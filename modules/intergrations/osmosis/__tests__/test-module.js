@@ -13,7 +13,7 @@ let run_test = async function(){
 
         let swap = {
             sellAsset: 'cosmos:osmosis-1/slip44:118',
-            sellAmount: '0.0100',
+            sellAmount: '1000000',
             buyAsset: 'cosmos:cosmoshub-4/slip44:118',
             senderAddress: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92',
             recipientAddress: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc',

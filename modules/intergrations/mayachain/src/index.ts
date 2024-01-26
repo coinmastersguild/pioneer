@@ -98,39 +98,43 @@ const get_quote = async function (quote:any) {
         if(!quote.recipientAddress) throw new Error("missing recipientAddress")
         if(!quote.slippage) throw new Error("missing slippage")
 
-        // Get pools from network
+        //Get pools from network
         let pools = await network.getPools()
         if(!pools) throw Error("Unable to get pools from network!")
         log.info(tag, "pools: ", pools)
+
+        //get poolIn
+        let poolIn = pools.find((p:any)=>p.asset == quote.sellAsset)
+        log.info(tag,"poolIn: ",poolIn)
+
+        //get poolOut
+        let poolOut = pools.find((p:any)=>p.asset == quote.buyAsset)
 
         output.meta = {
             quoteMode: "MAYA_SUPPORTED_TO_MAYA_SUPPORTED"
         }
         output.steps = 1
         output.complete = true
+        output.id = uuid()
+
+        let BASE_UNIT = 1e6; //TODO dynamic by asset?
+        const DECIMALS = 6;
+        const sellAmountInBaseUnits = parseFloat(quote.sellAmount) * BASE_UNIT;
+
+
+        //get quote
+        let quoteFromNode:any
+        quoteFromNode = await nodeRequest(
+            `/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`,
+        )
+        log.info("quoteFromNode: ",quoteFromNode)
         
-        // Find the relevant pool
-        // let relevantPool = pools.find((pool: { asset: any; }) => pool.asset === quote.sellAsset);
-        // if (!relevantPool) throw new Error("Relevant pool not found");
-        //
-        // // Calculate quote from the pool
-        // let quoteResult = quoteFromPool(
-        //     quote.sellAmount,
-        //     relevantPool.assetDepth,
-        //     relevantPool.runeDepth,
-        //     quote.slippage
-        // );
-
-        // // Assign results to output
-        // output.amountOutMin = quoteResult.amountOutMin;
-        // output.amountOut = quoteResult.amountOut;
-        // output.slippage = quoteResult.slippage;
-        // output.invocationId = uuid();
-        // output.meta = { quoteMode: "MAYA-OUT" };
-        //
-        // // Build memo for transaction (adjust as needed)
-        // output.memo = `Swap:${quote.sellAsset}:${quote.buyAsset}:${quoteResult.amountOutMin}:Slippage:${output.slippage}`;
-
+        // let amountOutEstimated = quoteFromNode.expected_amount_out
+        let amountOutMin = quoteFromNode.amount_out_min
+        let inboundAddress = quoteFromNode.inbound_address
+        let amountOutEstimated = (parseInt(quoteFromNode.expected_amount_out) / BASE_UNIT).toFixed(DECIMALS);
+        output.amountOut = amountOutEstimated
+        
         let memoInput = {
             type: 'SWAP',
             asset: quote.buyAsset,
@@ -152,7 +156,7 @@ const get_quote = async function (quote:any) {
             chain: quote.sellAsset.split(".")[0],
             txParams: {
                 senderAddress: quote.senderAddress, 
-                recipientAddress: quote.recipientAddress, 
+                recipientAddress: quote.inboundAddress,
                 amount: quote.sellAmount, 
                 token: quote.sellAsset.split(".")[1],
                 memo

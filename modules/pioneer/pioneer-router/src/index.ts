@@ -172,7 +172,7 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 }
                 log.info(tag,"payloadRango: ",JSON.stringify(payloadRango))
                 let quoteRango = await rango.getQuote(payloadRango)
-                return quoteRango
+                return [quoteRango]
             break
             case "osmosis":
                 let payloadOsmosis = {
@@ -184,7 +184,7 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                     slippage: quote.slippage
                 }
                 let quoteOsmosis = await osmosis.getQuote(payloadOsmosis)
-                return quoteOsmosis
+                return [quoteOsmosis]
             case "changelly":
                 let from = quote.sellAsset.ticker
                 let to = quote.buyAsset.ticker
@@ -197,7 +197,7 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                     amount
                 })
                 let quoteChangelly = await changelly.getQuote(from, to, address, amount)
-                return quoteChangelly
+                return [quoteChangelly]
             case "mayachain":
                 let payloadMayachain = {
                     sellAsset: quote.sellAsset.identifier,
@@ -209,7 +209,7 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 }
                 log.info(tag,"payloadMayachain: ",payloadMayachain)
                 let quoteMayachain = await mayachain.getQuote(payloadMayachain)
-                return quoteMayachain
+                return [quoteMayachain]
             default:
                 throw new Error("Intergration not found")
         }
@@ -234,9 +234,20 @@ async function get_quote(quote:Swap) {
             if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {
                 console.log(TAG, "Found supported integration for both networks:", integration);
                 let integrationQuote = await get_quote_from_integration(integration, quote);
-                if(integrationQuote) quotes.push({ integration, quote: integrationQuote });
+                if(integrationQuote) {
+                    //get USD value of sell asset
+                    //get USD value of buy asset
+                    //get USD value of PRO token earned
+                    
+                    quotes.push({ integration, quote: integrationQuote });
+                }
             }
         }
+        
+        //
+        
+
+        
         //return applicable intergrations
 
         //for each intergration get quote

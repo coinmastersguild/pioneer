@@ -134,10 +134,8 @@ const get_quote = async function (quote:any) {
     let tag = TAG + " | submit_address | "
     try {
         log.info(tag,"quote: ",quote)
-        
+        let output:any = []
         //caip to thorchain identifier
-        
-        
         const entry:any = {
             sellAsset: quote.sellAsset,
             sellAmount: quote.sellAmount,
@@ -149,8 +147,28 @@ const get_quote = async function (quote:any) {
 
         // @ts-ignore
         const result = await SwapKitApi.getQuote(entry);
-        let output = result;
+        // output.result = result;
+        
         console.log('result: ', result);
+        for(let i = 0; i < result.routes.length; i++){
+            let route = result.routes[i]
+            
+            let quote:any = {}
+            //amountOut
+            quote.id = result.quoteId
+            // @ts-ignore
+            quote.meta = route.meta
+            quote.amountOut = route.expectedOutput
+            quote.txs = route.transaction
+            quote.complete = true
+            quote.inboundAddress = route.inboundAddress
+            // @ts-ignore
+            quote.timeEstimates = route.timeEstimates
+            quote.route = route
+            output.push(quote)
+        }
+
+        //txs
         
         return output
     } catch (e) {

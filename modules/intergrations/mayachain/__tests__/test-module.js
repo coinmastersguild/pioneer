@@ -13,7 +13,7 @@ let run_test = async function(){
 
         let swap = {
             sellAsset: 'DASH.DASH',
-            sellAmount: '0.1',
+            sellAmount: '1',
             buyAsset: 'MAYA.CACAO',
             senderAddress: 'Xursn5XQzLEa2J91uEWeAVsKpLsBTf393x',
             recipientAddress: 'maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj',

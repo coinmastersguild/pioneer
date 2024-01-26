@@ -96,6 +96,9 @@ async function create_transaction(from: string, to: string, address: string, amo
         });
         console.log("data:",data)
         data = data.result
+        output.id = data.id
+        output.amountOut = data.amountExpectedTo
+        output.inboundAddress = data.payinAddress
         if(!data) throw Error("Failed to create quote@changelly")
         if(!data.payinAddress) throw Error("Failed to create quote@changelly")
         if(!data.id) throw Error("Failed to create quote@changelly")
