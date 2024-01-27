@@ -128,7 +128,7 @@ const get_quote = async function (quote:any) {
             `/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`,
         )
         log.info("quoteFromNode: ",quoteFromNode)
-        
+        if(quoteFromNode.error) throw Error(quoteFromNode.error)
         // let amountOutEstimated = quoteFromNode.expected_amount_out
         let amountOutMin = quoteFromNode.amount_out_min
         let inboundAddress = quoteFromNode.inbound_address

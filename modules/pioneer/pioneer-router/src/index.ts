@@ -55,7 +55,7 @@ let osmosis = require("@pioneer-platform/osmosis-client")
 //osmosis
 let mayachain = require("@pioneer-platform/mayachain-client")
 
-//TODO 1inch/0x
+//1inch/0x
 
 
 interface Swap {
@@ -233,21 +233,31 @@ async function get_quote(quote:Swap) {
             let supportedNetworks = NetworksByIntegration[integration];
             if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {
                 console.log(TAG, "Found supported integration for both networks:", integration);
-                let integrationQuote = await get_quote_from_integration(integration, quote);
-                if(integrationQuote) {
-                    //get USD value of sell asset
-                    //get USD value of buy asset
-                    //get USD value of PRO token earned
-                    
-                    quotes.push({ integration, quote: integrationQuote });
+                let integrationQuotes = await get_quote_from_integration(integration, quote);
+                if(integrationQuotes) {
+                    for(let i = 0; i < integrationQuotes.length; i++){
+                        let integrationQuote = integrationQuotes[i]
+                        integrationQuote.sellAsset = quote.sellAsset.caip
+                        integrationQuote.sellAmount = quote.sellAmount
+                        integrationQuote.buyAsset = quote.buyAsset.caip
+                        integrationQuote.buyAmount = integrationQuote.amountOut
+                        if(integrationQuote.amountOut > 0){
+                            log.info("integrationQuote.amountOut: ",integrationQuote.amountOut)
+                            let sellAssetValueUsd = parseFloat(quote.sellAmount) * quote.sellAsset.priceUsd;
+                            let buyAssetValueUsd = parseFloat(integrationQuote.amountOut) * quote.buyAsset.priceUsd;
+                            let proTokenEarned = sellAssetValueUsd * 0.1; // For every 1 USD, they earn 0.01 PRO token
+                            integrationQuote.proTokenEarned = proTokenEarned;
+                            integrationQuote.proTokenEarnedUsd = proTokenEarned * 1 //TODO get dynamic price
+                            integrationQuote.sellAssetValueUsd = sellAssetValueUsd;
+                            integrationQuote.buyAssetValueUsd = buyAssetValueUsd;
+                            quotes.push({ integration, quote: integrationQuote });    
+                        }
+                    }
                 }
             }
         }
         
-        //
-        
 
-        
         //return applicable intergrations
 
         //for each intergration get quote

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.25",
+  "version": "8.4.26",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
