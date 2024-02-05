@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.30",
+  "version": "8.4.31",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,12 +20,12 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/changelly-client": "^8.3.9",
-    "@pioneer-platform/mayachain-client": "^0.0.18",
-    "@pioneer-platform/osmosis-client": "^0.0.11",
-    "@pioneer-platform/pioneer-caip": "^9.2.20",
-    "@pioneer-platform/rango-client": "8.3.15",
-    "@pioneer-platform/thorswap-client": "^8.3.6",
+    "@pioneer-platform/changelly-client": "^8.3.10",
+    "@pioneer-platform/mayachain-client": "^0.0.19",
+    "@pioneer-platform/osmosis-client": "^0.0.12",
+    "@pioneer-platform/pioneer-caip": "^9.2.23",
+    "@pioneer-platform/rango-client": "^8.3.16",
+    "@pioneer-platform/thorswap-client": "^8.3.7",
     "dotenv": "^8.2.0",
     "short-uuid": "^4.2.2"
   },
