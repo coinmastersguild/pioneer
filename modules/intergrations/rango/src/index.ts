@@ -21,7 +21,7 @@ let {
 } = require('@pioneer-platform/pioneer-coins')
 
 const log = require('@pioneer-platform/loggerdog')()
-let {shortListSymbolToCaip} = require("@pioneer-platform/pioneer-caip")
+let {shortListSymbolToCaip, caipToNetworkId} = require("@pioneer-platform/pioneer-caip")
 
 let rango:any
 
@@ -29,19 +29,22 @@ let networkSupport = [
     //shortListSymbolToCaip["TON"], TODO
     //shortListSymbolToCaip["TRON"], TODO
     //shortListSymbolToCaip["SOLANA"], TODO
-    shortListSymbolToCaip["DASH"],
+    caipToNetworkId(shortListSymbolToCaip["DASH"]),
     // shortListSymbolToCaip["OSMO"], //TODO Rango uses WASM for osmosis, not support by KK
-    shortListSymbolToCaip["GAIA"],
-    shortListSymbolToCaip["BNB"],
-    shortListSymbolToCaip["DOGE"],
-    shortListSymbolToCaip["BTC"],
-    shortListSymbolToCaip["ETH"],
-    shortListSymbolToCaip["LTC"],
-    shortListSymbolToCaip["THOR"],
-    shortListSymbolToCaip["BCH"],
-    shortListSymbolToCaip["GNO"],
-    shortListSymbolToCaip["MATIC"],
-    shortListSymbolToCaip["AVAX"],
+    caipToNetworkId(shortListSymbolToCaip["BASE"]),
+    caipToNetworkId(shortListSymbolToCaip["ARB"]),
+    caipToNetworkId(shortListSymbolToCaip["GAIA"]),
+    // shortListSymbolToCaip["BNB"],
+    // caipToNetworkId(shortListSymbolToCaip["BSC"]),
+    caipToNetworkId(shortListSymbolToCaip["DOGE"]),
+    caipToNetworkId(shortListSymbolToCaip["BTC"]),
+    caipToNetworkId(shortListSymbolToCaip["ETH"]),
+    caipToNetworkId(shortListSymbolToCaip["LTC"]),
+    caipToNetworkId(shortListSymbolToCaip["THOR"]),
+    caipToNetworkId(shortListSymbolToCaip["BCH"]),
+    caipToNetworkId(shortListSymbolToCaip["GNO"]),
+    caipToNetworkId(shortListSymbolToCaip["MATIC"]),
+    caipToNetworkId(shortListSymbolToCaip["AVAX"]),
 ]
 
 
@@ -83,13 +86,37 @@ const create_transaction = async function (id:any, step: number, validateBalance
 const get_quote = async function (quote:any) {
     let tag = TAG + " | get_quote | "
     try {
-        let output = await rango.getBestRoute(quote)
-        log.info(tag,"output: ",output)
+        let output:any = {}
+        let quoteRango = await rango.getBestRoute(quote)
+        log.info(tag,"quoteRango: ",quoteRango)
 
-        let unsignedTx = await create_transaction(output.requestId, 1, false, false)
+        let unsignedTx = await create_transaction(quoteRango.requestId, 1, false, false)
         log.info(tag,"unsignedTx: ",unsignedTx)
-        output.unsignedTx = unsignedTx
-        
+
+        output.meta = {
+            quoteMode: "RANGO"
+        }
+        output.id = quoteRango.requestId
+        output.complete = true
+        output.amountOut = quoteRango.result.outputAmount
+        output.inboundAddress = unsignedTx.transaction.to
+        output.tx = {
+            type:"evm",
+            chain:caipToNetworkId(shortListSymbolToCaip[quote.from.blockchain]),
+            txParams:{
+                to:unsignedTx.transaction.to,
+                from:unsignedTx.transaction.from,
+                data:unsignedTx.transaction.data,
+                value:unsignedTx.transaction.value,
+                gasLimit:unsignedTx.transaction.gasLimit,
+                gasPrice: unsignedTx.transaction.gasPrice,
+                maxPriorityFeePerGas: unsignedTx.transaction.maxPriorityFeePerGas,
+                maxFeePerGas: unsignedTx.transaction.maxFeePerGas,
+                nonce: unsignedTx.transaction.nonce
+            }
+        }
+        output.rawUnsigned = unsignedTx
+        output.raw = quoteRango
         return output
     } catch (e) {
         console.error(tag, "e: ", e)

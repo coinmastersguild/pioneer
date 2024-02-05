@@ -8,53 +8,79 @@ const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("
 // Test data for multiple tokens
 const tokens = [
     {
-        address: "0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
         chain: "AVAX",
-        identifier: "AVAX.IMX.a-0XEA6887E4A9CDA1B77E70129E5FBA830CDB5CDDEF",
-        decimals: 18,
-        caip: "eip155:43114/erc20:0XEA6887E4A9CDA1B77E70129E5FBA830CDB5CDDEF",
+        identifier: "MAYA.CACAO",
+        ticker: "CACAO",
+        decimals: 10,
+        caip: "cosmos:maya-mainnet-v1/slip44:931",
         rangoName: {
-            blockchain:'AVAX_CCHAIN',
-            symbol:'IMX.a',
-            address:'0XEA6887E4A9CDA1B77E70129E5FBA830CDB5CDDEF'
-        }
-    },
-    {
-        chain: "BCH",
-        identifier: "BCH.BCH",
-        decimals: 8,
-        caip: "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-        rangoName: {
-            blockchain:'BCH',
-            symbol:'BCH',
+            blockchain:'MAYA',
+            symbol:'CACAO',
             address:null
         }
     },
-
-    {
-        chain: "OSMO",
-        identifier: "OSMO.ATOM",
-        decimals: 8,
-        caip: "cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620",
-        rangoName: {
-            blockchain:'OSMOSIS',
-            symbol:'ATOM',
-            address:null
-        }
-    },
-    {
-        chain: "ETH",
-        identifier: "ETH.WBTC-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-        address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-        ticker: "WBTC",
-        decimals: 8,
-        caip: "eip155:1/erc20:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-        rangoName: {
-            blockchain:'ETH',
-            symbol:'WBTC',
-            address:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
-        }
-    },
+    // {
+    //     address: "0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
+    //     chain: "AVAX",
+    //     identifier: "AVAX.IMX.a-0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
+    //     ticker: "IMX.a",
+    //     decimals: 18,
+    //     caip: "eip155:43114/erc20:0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
+    //     rangoName: {
+    //         blockchain:'AVAX_CCHAIN',
+    //         symbol:'IMX.a',
+    //         address:'0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef'
+    //     }
+    // },
+    // {
+    //     chain: "BCH",
+    //     identifier: "BCH.BCH",
+    //     decimals: 8,
+    //     ticker: "BCH",
+    //     caip: "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+    //     rangoName: {
+    //         blockchain:'BCH',
+    //         symbol:'BCH',
+    //         address:null
+    //     }
+    // },
+    // {
+    //     chain: "OSMO",
+    //     identifier: "OSMO.ATOM",
+    //     ticker: "ATOM",
+    //     decimals: 8,
+    //     caip: "cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620",
+    //     rangoName: {
+    //         blockchain:'OSMOSIS',
+    //         symbol:'ATOM',
+    //         address:null
+    //     }
+    // },
+    // {
+    //     chain: "ETH",
+    //     identifier: "ETH.WBTC-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    //     address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    //     ticker: "WBTC",
+    //     decimals: 8,
+    //     caip: "eip155:1/erc20:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    //     rangoName: {
+    //         blockchain:'ETH',
+    //         symbol:'WBTC',
+    //         address:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    //     }
+    // },
+    // {
+    //     chain: "BASE",
+    //     identifier: "BASE.ETH",
+    //     ticker: "ETH",
+    //     decimals: 18,
+    //     caip: "eip155:8453/slip44:60",
+    //     rangoName: {
+    //         blockchain:'BASE',
+    //         symbol:'ETH',
+    //         address:null
+    //     }
+    // },
     // Add more token objects here
 ];
 

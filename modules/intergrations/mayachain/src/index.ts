@@ -4,7 +4,7 @@
  */
 
 const TAG = " | maya | "
-
+import { BaseDecimal } from '@coinmasters/types';
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
@@ -13,7 +13,7 @@ const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
 
 let networkSupport = [
     ChainToNetworkId["BTC"],
-    ChainToNetworkId["CACAO"],
+    ChainToNetworkId["MAYA"],
     ChainToNetworkId["ETH"],
     ChainToNetworkId["THOR"],
     ChainToNetworkId["DASH"],
@@ -101,11 +101,11 @@ const get_quote = async function (quote:any) {
         //Get pools from network
         let pools = await network.getPools()
         if(!pools) throw Error("Unable to get pools from network!")
-        log.info(tag, "pools: ", pools)
+        // log.info(tag, "pools: ", pools)
 
         //get poolIn
         let poolIn = pools.find((p:any)=>p.asset == quote.sellAsset)
-        log.info(tag,"poolIn: ",poolIn)
+        // log.info(tag,"poolIn: ",poolIn)
 
         //get poolOut
         let poolOut = pools.find((p:any)=>p.asset == quote.buyAsset)
@@ -117,15 +117,48 @@ const get_quote = async function (quote:any) {
         output.complete = true
         output.id = uuid()
 
-        let BASE_UNIT = 1e6; //TODO dynamic by asset?
-        const DECIMALS = 6;
-        const sellAmountInBaseUnits = parseFloat(quote.sellAmount) * BASE_UNIT;
+        let BaseDecimal = {
+            ARB:18,
+            AVAX:18,
+            BCH:8,
+            BNB:8,
+            BSC:18,
+            BTC:8,
+            DASH:8,
+            DGB:8,
+            DOGE:8,
+            ETH:18,
+            BASE:18,
+            EOS:6,
+            GAIA:6,
+            KUJI:6,
+            LTC:8,
+            MATIC:18,
+            MAYA:10,
+            OP:18,
+            OSMO:6,
+            XRP:6,
+            THOR:8,
+            ZEC:8
+        }
 
+        let asset = quote.sellAsset.split(".")[0]
+        if(!asset) throw Error("unable to pasre asset from quote.sellAsset")
+        // @ts-ignore
+        const DECIMALS = BaseDecimal[asset];
+        if(!DECIMALS) throw Error("unable to get DECIMALS for asset: "+asset)
+        let BASE_UNIT = Math.pow(10, DECIMALS); // Dynamically set BASE_UNIT based on asset
+
+        //TODO dynamic by asset?
+
+        const sellAmountInBaseUnits = parseFloat(quote.sellAmount) * BASE_UNIT;
 
         //get quote
         let quoteFromNode:any
+        let URL = `/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`
+        log.info("URL: ",URL)
         quoteFromNode = await nodeRequest(
-            `/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`,
+            URL,
         )
         log.info("quoteFromNode: ",quoteFromNode)
         if(quoteFromNode.error) throw Error(quoteFromNode.error)

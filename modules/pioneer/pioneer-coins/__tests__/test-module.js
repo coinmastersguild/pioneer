@@ -43,6 +43,7 @@ let blockchains = [
     // "eip155:10/slip44:60",
     // "eip155:137/slip44:60",
     // "cosmos:thorchain-mainnet-v1/slip44:931",
+    'cosmos:mayachain-mainnet-v1',
     "bip122:000007d91d1254d60e2dd1ae58038307"
 ]
 let paths = getPaths(blockchains)
@@ -100,13 +101,13 @@ let coin = 'BASE'
 //     18
 // ]
 
-let addressNlist = [
-        2147483692,
-        2147483648,
-        2147483648,
-        0,
-        0
-    ]
+// let addressNlist = [
+//         2147483692,
+//         2147483648,
+//         2147483648,
+//         0,
+//         0
+//     ]
 
 // let addressNlist = [2147483692, 2147483648, 2147483648, 0, 0]
 // // let addressNlist =    [ 2147483692, 2147483708, 2147483648, 0, 0 ]
@@ -118,7 +119,7 @@ let addressNlist = [
 // console.log(addressNListToBIP32(addressNlist))
 
 // let bip32 = `m/44'/144'/0'/0/0`
-// let bip32 = `m/44'/714'/0'/0/0`
+// let bip32 = `m/44'/914'/0'/0/0`
 // console.log(bip32ToAddressNList(bip32))
 // let xpub = "xpub6CXCeiZ5e1zPKopayq7h2eu7aySmywGeekdqHwae5YGbaArPs7i2UwEnjRaAbaQDgo2EWF99QXa1T2HX8nDFEH4jZxipv41NyKwM9SNZT3K"
 // console.log("zpub",xpubConvert(xpub,'zpub'))
@@ -130,13 +131,14 @@ let addressNlist = [
 // console.log("base: ",baseAmountToNative("BTC",amountNative))
 // console.log("base: ",nativeToBaseAmount("ETH",amountNative))
 //
-// let paths = getPaths(['bip122:000007d91d1254d60e2dd1ae58038307'])
-// // let paths = getPaths(['cosmos'])
+// let paths = getPaths(['mayachain-mainnet-v1'])
 //
-// // let paths = getPaths(['terra'])
-// console.log("paths: ",paths)
-
-// let paths = getPaths(['osmosis'])
+// // // let paths = getPaths(['cosmos'])
+// //
+// // // let paths = getPaths(['terra'])
+// // console.log("paths: ",paths)
+//
+// // let paths = getPaths(['osmosis'])
 // console.log("paths: ",paths)
 
 // let address = "1Fmmv93JHmMDF7FwZraQtMSyDjGe7SiXAL"

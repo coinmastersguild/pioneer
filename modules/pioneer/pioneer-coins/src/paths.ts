@@ -3,6 +3,7 @@ export const blockchains = [
     // 'eip155:42161',
     // 'eip155:43114',
     // 'eip155:56',
+    'cosmos:maya-mainnet-v1',
     'binance:bnb-beacon-chain',
     'bip122:000000000000000000651ef99cb9fcbe',
     'bip122:000000000019d6689c085ae165831e93',
@@ -116,6 +117,26 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
     //     if(isTestnet) entry.testnet = true
     //     output.push(entry)
     // }
+
+    if(blockchains.indexOf('cosmos:mayachain-mainnet-v1') >= 0){
+        let entry:any = {
+            note:" Default COCAO path ",
+            type:"address",
+            addressNList: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 931, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            script_type:"mayachain",
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            blockchain: 'mayachain',
+            symbol: 'CACAO',
+            symbolSwapKit: 'CACAO',
+            network: 'cosmos:mayachain-mainnet-v1',
+        }
+        if(isTestnet) {
+            entry.testnet = true
+        }
+        output.push(entry)
+    }
 
     if(blockchains.indexOf('cosmos:thorchain-mainnet-v1') >= 0){
         let entry:any = {

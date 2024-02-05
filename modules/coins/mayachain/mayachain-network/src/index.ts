@@ -44,7 +44,7 @@ const log = require('@pioneer-platform/loggerdog')()
 let URL_THORNODE = 'https://mayanode.mayachain.info'
 let URL_MIDGARD = 'https://midgard.mayachain.info/v2'
 
-let BASE_THOR = 100000000
+let BASE_THOR = 10000000000
 
 /**********************************
  // Module
@@ -466,7 +466,7 @@ let get_balance = async function(address:string){
             if(accountInfo.data?.result){
                 for(let i = 0; i < accountInfo.data.result.length; i++){
                     let entry = accountInfo.data.result[i]
-                    if(entry.denom === 'rune'){
+                    if(entry.denom === 'cacao'){
                         output = entry.amount
                     }
                 }

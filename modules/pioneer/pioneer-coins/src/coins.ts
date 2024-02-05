@@ -238,6 +238,8 @@ export const COIN_MAP_LONG = {
     DOGE: "dogecoin",
     RUNE: "thorchain",
     THOR: "thorchain",
+    MAYA: "mayachain",
+    CACAO: "mayachain",
     ETH: "ethereum",
     AVAX: "avalanche",
     ADA: "cardano",

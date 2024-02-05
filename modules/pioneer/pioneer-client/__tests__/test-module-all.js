@@ -381,15 +381,24 @@ let run_test = async function(){
         // data = data.data
         // console.log("data: ",data)
 
-        //broadcast
         let broadcast = {
-            "network":"OSMO",
+            "network":"MAYA",
             "serialized":"",
             "txid":"",
             "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
             "noBroadcast":false
         }
         let data = await pioneer.Broadcast(broadcast)
+        
+        //broadcast
+        // let broadcast = {
+        //     "network":"OSMO",
+        //     "serialized":"",
+        //     "txid":"",
+        //     "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
+        //     "noBroadcast":false
+        // }
+        // let data = await pioneer.Broadcast(broadcast)
         // data = data.data
         // console.log("data: ",data)
 

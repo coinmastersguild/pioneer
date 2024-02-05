@@ -12,9 +12,10 @@ const ethereum = require('@pioneer-platform/eth-network')
 const ripple = require('@pioneer-platform/ripple-network')
 const cosmos = require('@pioneer-platform/cosmos-network')
 const binance = require('@pioneer-platform/binance-network')
-const thor = require('@pioneer-platform/thor-network')
+const thorchain = require('@pioneer-platform/thor-network')
 const osmosis = require('@pioneer-platform/osmosis-network')
 const midgard = require("@pioneer-platform/midgard-client")
+const mayachain = require('@pioneer-platform/maya-network')
 
 export class Network {
     private blockchains: [];
@@ -29,9 +30,10 @@ export class Network {
             ripple,
             cosmos,
             binance,
-            thor,
+            thorchain,
             osmosis,
-            midgard
+            midgard,
+            mayachain
         }
         this.init = async function () {
             let tag = TAG + " | init_network | "
@@ -46,7 +48,8 @@ export class Network {
                 await ripple.init()
                 await cosmos.init()
                 await binance.init()
-                await thor.init()
+                await thorchain.init()
+                await mayachain.init()
                 await osmosis.init()
                 // await midgard.init() //TODO add init
 

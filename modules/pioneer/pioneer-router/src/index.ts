@@ -220,6 +220,7 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
 }
 
 async function get_quote(quote:Swap) {
+    let tag = " | get_quote | "
     try {
 
         let sellChain = caipToNetworkId(quote.sellAsset.caip);
@@ -231,6 +232,7 @@ async function get_quote(quote:Swap) {
         
         for (let integration of integrations) {
             let supportedNetworks = NetworksByIntegration[integration];
+            log.info(tag,integration+" supportedNetworks: ",supportedNetworks)
             if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {
                 console.log(TAG, "Found supported integration for both networks:", integration);
                 let integrationQuotes = await get_quote_from_integration(integration, quote);

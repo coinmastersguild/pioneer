@@ -117,9 +117,44 @@ let run_test = async function(){
         //     "checkPrerequisites":false,
         //     "affiliateRef":null
         // }
-        //
-        // let output = await rango.getQuote(body)
-        // console.log("output: ",output)
+
+        let body = {
+            "from":{
+                "blockchain":"ETH",
+                "symbol":"ETH",
+                "address":null
+            },
+            "to":{
+                "blockchain":"BASE",
+                "symbol":"ETH",
+                "address":null
+            },
+            "amount":"0.05",
+            "connectedWallets":[
+                {
+                    "blockchain":"ETH",
+                    "addresses":[
+                        "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+                    ]
+                },
+                {
+                    "blockchain":"BASE",
+                    "addresses":[
+                        "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+                    ]
+                }
+            ],
+            "selectedWallets":{
+                "ETH":"0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+                "BASE":"0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+            },
+            "checkPrerequisites":false,
+            "affiliateRef":null
+        }
+
+        let output = await rango.getQuote(body)
+        console.log("output: ",output)
+        console.log("output: ",JSON.stringify(output))
         // console.log("id: ",id)
         
         // let output = await rango.createTransaction(id)
