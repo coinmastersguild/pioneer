@@ -207,20 +207,43 @@ let run_test = async function(){
         //     slippage: '3'
         // }
         
+        // let swap = {
+        //     sellAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
+        //         identifier: 'MAYA.CACAO',
+        //         address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //         symbol: 'CACAO',
+        //         chain: 'MAYA',
+        //         ticker: 'CACAO',
+        //         type: 'Native',
+        //         balance: '28.8000000101'
+        //     },
+        //     sellAmount: '30.0100',
+        //     buyAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
+        //         identifier: 'THOR.RUNE',
+        //         address: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+        //         symbol: 'RUNE',
+        //         chain: 'THOR',
+        //         ticker: 'RUNE',
+        //         type: 'Native',
+        //         balance: '3.03832433',
+        //         priceUsd: 4.28,
+        //         rank: 57,
+        //         name: 'thorchain',
+        //         source: 'coingecko',
+        //         alias: 2,
+        //         valueUsd: '13.0040281324'
+        //     },
+        //     senderAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //     recipientAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+        //     slippage: 3
+        // }
+
         let swap = {
             sellAsset: {
-                context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
-                caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
-                identifier: 'MAYA.CACAO',
-                address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
-                symbol: 'CACAO',
-                chain: 'MAYA',
-                ticker: 'CACAO',
-                type: 'Native',
-                balance: '28.8000000101'
-            },
-            sellAmount: '30.0100',
-            buyAsset: {
                 context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
                 caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
                 identifier: 'THOR.RUNE',
@@ -229,23 +252,36 @@ let run_test = async function(){
                 chain: 'THOR',
                 ticker: 'RUNE',
                 type: 'Native',
-                balance: '3.03832433',
-                priceUsd: 4.28,
+                balance: '21.03883663',
+                priceUsd: 4.38,
                 rank: 57,
                 name: 'thorchain',
                 source: 'coingecko',
                 alias: 2,
-                valueUsd: '13.0040281324'
+                valueUsd: '92.1501044394'
             },
-            senderAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
-            recipientAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
-            slippage: 3
+            sellAmount: '6.00',
+            buyAsset: {
+                context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+                caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
+                identifier: 'MAYA.CACAO',
+                address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+                symbol: 'CACAO',
+                chain: 'MAYA',
+                ticker: 'CACAO',
+                type: 'Native',
+                balance: '3.3000000101'
+            },
+            senderAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+            recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+            slippage: '3'
         }
-        
+
         //get router options
         let result = await client.quote(swap)
         console.log("result: ",result)
-        console.log("result: ",JSON.stringify(result))
+        console.log("result: ",result[0].quote.txs[0])
+        // console.log("result: ",JSON.stringify(result.quote.txs[0]))
         //get quote
 
         //get tx

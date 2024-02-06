@@ -184,15 +184,25 @@ const get_quote = async function (quote:any) {
         const memo = createMemo(memoInput);
         log.info(tag,"memo: ",memo)
 
+        let type:string
+
+        //if input is thor or maya
+        let chain = quote.sellAsset.split(".")[0]
+        if(chain == "MAYA"){
+            type = 'deposit'
+        } else {
+            type = 'transfer'
+        }
+
         let tx = {
-            type: "transfer",
-            chain: quote.sellAsset.split(".")[0],
+            type,
+            chain: ChainToNetworkId[quote.sellAsset.split(".")[0]],
             txParams: {
                 senderAddress: quote.senderAddress, 
-                recipientAddress: quote.inboundAddress,
+                recipientAddress: quoteFromNode.inbound_address,
                 amount: quote.sellAmount, 
                 token: quote.sellAsset.split(".")[1],
-                memo
+                memo:quoteFromNode.memo || memo
             }
         }
         output.txs = [

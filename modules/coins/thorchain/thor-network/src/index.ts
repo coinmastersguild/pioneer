@@ -175,30 +175,54 @@ let broadcast_transaction = async function(tx:string){
             // log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             // if(result2.data.txhash) output.txid = result2.data.txhash
 
-            //push to seed
-            let urlRemote = URL_THORNODE+ '/txs'
-            log.debug(tag,"urlRemote: ",urlRemote)
+            let payload = {
+                // "tx_bytes": btoa(tx),
+                // "tx_bytes":broadcastTx,
+                "tx_bytes":tx,
+                "mode": "BROADCAST_MODE_SYNC"
+            }
+
+
+            let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'
+            // let urlRemote = URL_GAIAD+ '/txs'
+            log.info(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
+                headers: {
+                    'api-key': process.env['NOW_NODES_API'],
+                    'Content-Type': 'application/json'
+                },
                 method: 'POST',
-                data: tx,
+                data: payload,
             })
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            if(result2 && result2.data && result2.data.txhash) output.txid = result2.data.txhash
-
-            //verify success
-            if(result2.data.raw_log && result2.data.raw_log !== '[]'){
-                let logSend = result2.data.raw_log
-                log.debug(tag,"logSend: ",logSend)
-                output.success = false
-                output.error = logSend
-            } else {
-                output.success = true
-            }
-            output.height = result2.height
-            output.gas_wanted = result2.gas_wanted
-            output.gas_used = result2.gas_used
-            output.raw = result2.data
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            if(result2.data.txhash) output.txid = result2.data.txhash
+            
+            //push to seed
+            // let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'
+            // log.debug(tag,"urlRemote: ",urlRemote)
+            // let result2 = await axios({
+            //     url: urlRemote,
+            //     method: 'POST',
+            //     data: tx,
+            // })
+            // log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            // if(result2 && result2.data && result2.data.txhash) output.txid = result2.data.txhash
+            //
+            // //verify success
+            // if(result2.data.raw_log && result2.data.raw_log !== '[]'){
+            //     let logSend = result2.data.raw_log
+            //     log.debug(tag,"logSend: ",logSend)
+            //     output.success = false
+            //     output.error = logSend
+            // } else {
+            //     output.success = true
+            // }
+            // output.height = result2.height
+            // output.gas_wanted = result2.gas_wanted
+            // output.gas_used = result2.gas_used
+            // output.raw = result2.data
 
         }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)

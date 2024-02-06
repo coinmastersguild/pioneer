@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/mayachain-client",
-  "version": "0.0.19",
+  "version": "0.0.26",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
