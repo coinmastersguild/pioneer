@@ -8,7 +8,7 @@ const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("
 // Test data for multiple tokens
 const tokens = [
     {
-        chain: "AVAX",
+        chain: "MAYA",
         identifier: "MAYA.CACAO",
         ticker: "CACAO",
         decimals: 10,
