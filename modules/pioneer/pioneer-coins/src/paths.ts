@@ -24,6 +24,33 @@ export const blockchains = [
     'cosmos:thorchain-mainnet-v1',
     'bip122:0000000000196a45'
 ]
+
+/*
+    Create paths from user input
+
+    blockchainchain
+
+    script type
+
+    account number
+
+
+    //custom paths
+
+    if evm
+
+ */
+
+
+export function createPath(entry:any){
+    try{
+
+    }catch(e){
+
+    }
+}
+
+
 export function getPaths(blockchains?:any,isTestnet?:boolean) {
     let output = []
     if(!blockchains) blockchains = []
@@ -353,6 +380,25 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
             available_scripts_types:['p2pkh'],
             addressNList: [0x80000000 + 44, 0x80000000 + 144, 0x80000000 + 0],
             addressNListMaster: [0x80000000 + 44, 0x80000000 + 144, 0x80000000 + 0, 0, 0],
+            curve: 'secp256k1',
+            showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+        }
+        output.push(entry)
+    }
+
+    if(blockchains.indexOf('bip122:0000000000196a45') >= 0){
+        let entry:any = {
+            note:"Default zcash path",
+            type:"address",
+            coin: 'Zcash',
+            symbol: 'ZEC',
+            symbolSwapKit: 'ZEC',
+            network: 'bip122:0000000000196a45',
+            blockchain: 'zcash',
+            script_type:"p2pkh",
+            available_scripts_types:['p2pkh'],
+            addressNList: [0x80000000 + 44, 0x80000000 + 133, 0x80000000 + 0],
+            addressNListMaster: [0x80000000 + 44, 0x80000000 + 133, 0x80000000 + 0, 0, 0],
             curve: 'secp256k1',
             showDisplay: false, // Not supported by TrezorConnect or Ledger, but KeepKey should do it
         }

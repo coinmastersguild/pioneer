@@ -1,8 +1,8 @@
 const io = require("socket.io-client");
 const { parse } = require("cookie"); // Import the parse function from the 'cookie' package
 
-const socket = io("wss://pioneers.dev");
-// const socket = io("ws://127.0.0.1:9001");
+// const socket = io("wss://pioneers.dev");
+const socket = io("ws://127.0.0.1:9001");
 // const socket = io("wss://deployfast.co", {
 //     transports: ['websocket'],  // This will disable long polling and use only WebSocket
 // });

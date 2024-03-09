@@ -7,12 +7,13 @@ require("dotenv").config({path:'../../../../.env'})
 require("dotenv").config({path:'../../../../../.env'})
 let network = require("../lib/index")
 
-let address = "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap"
+// let address = "bnb1ch6u3y3yc7aazgrlpx75ej2k9fh20m7gwvskap"
+let address = 'bnb1ffm69vl732y59tdm69d83ddjz3h4j5lqjaqxnf'
 // let address = "bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"
-// network.getAccount(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+network.getAccount(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 
 // let address = "bnb1nzx5sycdzpfa446u3nep6yn9z9x5xdnmn3hf7c"

@@ -10,12 +10,15 @@ import { SwapKitApi } from '@coinmasters/api';
 const log = require('@pioneer-platform/loggerdog')()
 const Axios = require('axios')
 const https = require('https')
+if(!process.env.THORSWAP_API_KEY)throw Error("Missing THORSWAP_API_KEY")
+console.log("THORSWAP_API_KEY: ",process.env.THORSWAP_API_KEY)
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
     }),
     headers: {
-        referer: 'https://sk.thorswap.net', // Correct header key is 'referer'
+        referer: 'kttps://sk.thorswap.net',
+        ['x-api-key']: process.env.THORSWAP_API_KEY
     }
 });
 let {ChainToNetworkId} = require("@pioneer-platform/pioneer-caip")
@@ -149,17 +152,42 @@ const get_quote = async function (quote:any) {
         const result = await SwapKitApi.getQuote(entry);
         // output.result = result;
         
+        
         console.log('result: ', result);
         for(let i = 0; i < result.routes.length; i++){
             let route = result.routes[i]
             
             let quote:any = {}
+            
+            
+            
             //amountOut
             quote.id = result.quoteId
             // @ts-ignore
             quote.meta = route.meta
             quote.amountOut = route.expectedOutput
-            quote.txs = route.transaction
+            
+            // @ts-ignore
+            // if(route.transaction && Object.keys(route.transaction).length > 0){
+            //     //TODO detect if deposit or transfer
+            //     let tx:any = {
+            //         type: "transfer",
+            //         chain:caipToNetworkId(shortListSymbolToCaip[from]),
+            //         txParams: {
+            //             address: data.payinAddress,
+            //             amount: amount,
+            //             memo: data.payinExtraId,
+            //         }
+            //     }
+            //    
+            //    
+            //     quote.txs = [route.transaction]    
+            // } else if(route.streamingSwap && Object.keys(route.streamingSwap).length > 0){
+            //     quote.txs = [route.streamingSwap]
+            // } else {
+            //     throw Error("unable to build tx")
+            // }
+            
             quote.complete = true
             quote.inboundAddress = route.inboundAddress
             // @ts-ignore

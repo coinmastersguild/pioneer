@@ -25,7 +25,7 @@ let run_test = async function(){
         //         alias: 2,
         //         valueUsd: '22.4623084662'
         //     },
-        //     sellAmount: '1',
+        //     sellAmount: '0.9',
         //     buyAsset: {
         //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
         //         caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
@@ -242,45 +242,125 @@ let run_test = async function(){
         //     slippage: 3
         // }
 
+        // let swap = {
+        //     sellAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
+        //         identifier: 'THOR.RUNE',
+        //         address: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+        //         symbol: 'RUNE',
+        //         chain: 'THOR',
+        //         ticker: 'RUNE',
+        //         type: 'Native',
+        //         balance: '21.03883663',
+        //         priceUsd: 4.38,
+        //         rank: 57,
+        //         name: 'thorchain',
+        //         source: 'coingecko',
+        //         alias: 2,
+        //         valueUsd: '92.1501044394'
+        //     },
+        //     sellAmount: '6.00',
+        //     buyAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
+        //         identifier: 'MAYA.CACAO',
+        //         address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //         symbol: 'CACAO',
+        //         chain: 'MAYA',
+        //         ticker: 'CACAO',
+        //         type: 'Native',
+        //         balance: '3.3000000101'
+        //     },
+        //     senderAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+        //     recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //     slippage: '3'
+        // }
+        
+        // let swap = {
+        //     sellAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'eip155:1/slip44:60',
+        //         identifier: 'ETH.ETH',
+        //         networkId: 'eip155:1',
+        //         address: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //         symbol: 'ETH',
+        //         chain: 'ETH',
+        //         ticker: 'ETH',
+        //         type: 'Native',
+        //         balance: '0.0370636',
+        //         priceUsd: 2615.56,
+        //         rank: 2,
+        //         name: 'ethereum',
+        //         source: 'coingecko',
+        //         alias: 2,
+        //         valueUsd: '96.942069616'
+        //     },
+        //     sellAmount: '0.0100',
+        //     buyAsset: {
+        //         context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
+        //         caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
+        //         identifier: 'MAYA.CACAO',
+        //         networkId: 'cosmos:mayachain-mainnet-v1',
+        //         address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //         symbol: 'CACAO',
+        //         chain: 'MAYA',
+        //         ticker: 'CACAO',
+        //         type: 'Native',
+        //         balance: '3.4807905749'
+        //     },
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //     slippage: '3'
+        // }
+
         let swap = {
-            sellAsset: {
-                context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
-                caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
-                identifier: 'THOR.RUNE',
-                address: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
-                symbol: 'RUNE',
-                chain: 'THOR',
-                ticker: 'RUNE',
-                type: 'Native',
-                balance: '21.03883663',
-                priceUsd: 4.38,
-                rank: 57,
-                name: 'thorchain',
-                source: 'coingecko',
-                alias: 2,
-                valueUsd: '92.1501044394'
+            "sellAsset": {
+                "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+                "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+                "identifier": "BCH.BCH",
+                "networkId": "bip122:000000000000000000651ef99cb9fcbe",
+                "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+                "symbol": "BCH",
+                "chain": "BCH",
+                "ticker": "BCH",
+                "type": "Native",
+                "balance": "0.23086101",
+                "priceUsd": 427.85,
+                "rank": 20,
+                "name": "bitcoin-cash",
+                "source": "coingecko",
+                "alias": 2,
+                "valueUsd": "98.7738831285"
             },
-            sellAmount: '6.00',
-            buyAsset: {
-                context: 'keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet',
-                caip: 'cosmos:mayachain-mainnet-v1/slip44:118',
-                identifier: 'MAYA.CACAO',
-                address: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
-                symbol: 'CACAO',
-                chain: 'MAYA',
-                ticker: 'CACAO',
-                type: 'Native',
-                balance: '3.3000000101'
+            "sellAmount": "0.115",
+            "buyAsset": {
+                "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+                "caip": "eip155:1/slip44:60",
+                "identifier": "ETH.ETH",
+                "networkId": "eip155:1",
+                "address": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+                "symbol": "ETH",
+                "chain": "ETH",
+                "ticker": "ETH",
+                "type": "Native",
+                "balance": "0.01117763",
+                "priceUsd": 3876.51,
+                "rank": 2,
+                "name": "ethereum",
+                "source": "coingecko",
+                "alias": 2,
+                "valueUsd": "43.3301944713"
             },
-            senderAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
-            recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
-            slippage: '3'
+            "senderAddress": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+            "recipientAddress": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+            "slippage": "3"
         }
 
         //get router options
         let result = await client.quote(swap)
         console.log("result: ",result)
-        console.log("result: ",result[0].quote.txs[0])
+        // console.log("result: ",result[0].quote.txs[0])
         // console.log("result: ",JSON.stringify(result.quote.txs[0]))
         //get quote
 

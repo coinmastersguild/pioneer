@@ -1,3 +1,7 @@
+/*
+    This is v1, need to migrate to v2
+ */
+
 let Changelly = require('@bithighlander/changelly');
 
 const TAG = " | Changelly | ";
@@ -112,7 +116,7 @@ async function create_transaction(from: string, to: string, address: string, amo
                 memo: data.payinExtraId,
             }
         }
-        output.tx = tx
+        output.txs = [tx]
         output.raw = data
         return output
     } catch (e) {

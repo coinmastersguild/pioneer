@@ -18,7 +18,8 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let txid = "B0D28188CB98BAB2FA883DDCAABBD5C2F29C651CF2920E24AF6AAB9772C78403"
+// let txid = "B0D28188CB98BAB2FA883DDCAABBD5C2F29C651CF2920E24AF6AAB9772C78403"
+let txid = "BF59300BB68455BC2B620905A14427BA131C8F00F1547E32552391351A7E2962"
 network.getTransaction(txid)
     .then(function(resp){
         console.log("resp: ",JSON.stringify(resp))

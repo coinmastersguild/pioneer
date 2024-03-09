@@ -63,6 +63,9 @@ module.exports = {
     getBalance:function (address:string) {
         return get_balance(address);
     },
+    getBalances:function (address:string) {
+        return get_balances(address);
+    },
     getAccount:function (address:string) {
         return get_account_info(address);
     },
@@ -477,6 +480,51 @@ let get_balance = async function(address:string){
             //TODO stupid node 404's on new addresses!
             //if !404
                 //really thow
+        }
+
+
+        return output
+    }catch(e){
+        log.error(tag,"e: ",e)
+        throw e
+    }
+}
+
+let get_balances = async function(address:string){
+    let tag = TAG + " | get_balances | "
+    try{
+        let output = []
+
+        try{
+            let accountInfo = await axios({method:'GET',url: URL_THORNODE+'/bank/balances/'+address})
+            log.info(tag,"accountInfo: ",accountInfo.data)
+
+            //
+            if(accountInfo.data?.result){
+                for(let i = 0; i < accountInfo.data.result.length; i++){
+                    let entry = accountInfo.data.result[i]
+                    if(entry.denom === 'cacao'){
+                        output.push({
+                            denom: entry.denom,
+                            amountBase: entry.amount,
+                            amount: entry.amount / 10000000000,
+                            decimals: 10
+                        })
+                    }
+                    if(entry.denom === 'maya'){
+                        output.push({
+                            denom: entry.denom,
+                            amountBase: entry.amount,
+                            amount: entry.amount / 10000,
+                            decimals: 4
+                        })
+                    }
+                }
+            }
+        }catch(e){
+            //TODO stupid node 404's on new addresses!
+            //if !404
+            //really thow
         }
 
 

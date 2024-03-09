@@ -2,8 +2,8 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-//process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
     queryKey:'key:261f0935-c025-475c-b630-b3d010a9e0de',
@@ -21,8 +21,8 @@ const runTest = async () => {
         // console.log("developers: ", developers.data);
 
         //get pools
-        const pools = await pioneer.Pools();
-        console.log("pools: ", pools.data);
+        // const pools = await pioneer.Pools();
+        // console.log("pools: ", pools.data);
 
         // // let info = await pioneer.SearchAssetsList({limit:10000,skip:0})
         // // console.log("info: ",info.data.length)
@@ -57,10 +57,10 @@ const runTest = async () => {
         // console.log("result: ",result)
         // let caip = "eip155:137/slip44:60"
         // let caip = "eip155:1/slip44:60"
-        //
-        // let result1 = await pioneer.GetFeeInfoByCaip({caip});
-        // console.log("result1: ",result1)
-        //
+        // //
+        // // let result1 = await pioneer.GetFeeInfoByCaip({caip});
+        // // console.log("result1: ",result1)
+        // //
         // let address = "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
         // let result = await pioneer.GetAddressInfoByCaip({caip,address});
         // console.log("result: ",result.data)

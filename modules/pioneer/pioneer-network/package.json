@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-network",
-  "version": "8.3.16",
+  "version": "8.3.17",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -17,7 +17,7 @@
     "@pioneer-platform/binance-network": "^8.3.2",
     "@pioneer-platform/cosmos-network": "^8.3.5",
     "@pioneer-platform/eth-network": "^8.3.1",
-    "@pioneer-platform/maya-network": "^8.3.7",
+    "@pioneer-platform/maya-network": "^8.3.8",
     "@pioneer-platform/midgard-client": "^8.3.1",
     "@pioneer-platform/osmosis-network": "^8.3.11",
     "@pioneer-platform/pioneer-caip": "^9.2.23",

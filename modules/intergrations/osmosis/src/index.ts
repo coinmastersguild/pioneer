@@ -102,7 +102,6 @@ const get_quote = async function (quote:any) {
         //issue invocationId
         let invocationId = uuid()
         output.invocationId = invocationId
-        
         output.meta = {
             quoteMode: "OSMOSIS-IBC"
         }
@@ -114,6 +113,8 @@ const get_quote = async function (quote:any) {
         let result;
         if (quote.sellAsset === shortListSymbolToCaip["OSMO"]) {
             result = quoteFromPool(quote.sellAmount, amountAtom, amountOsmo, quote.slippage);
+            if(!result || !result.amountOut) throw new Error("Unable to get result from quoteFromPool")
+            output.amountOut = result.amountOut
             output.result = result
             //build first TX
             //swap osmo for Atom IBC

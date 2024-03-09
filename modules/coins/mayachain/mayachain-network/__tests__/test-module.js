@@ -23,13 +23,14 @@ let network = require("../lib/index")
 //         console.log("resp: ",resp)
 //     })
 
-let txid = "A77E61DE200C32FC9BD75245A4728DFF84A4242199A9F83623C2E67B4B49466A"
-// // let txid = "92B8BF227A4AB56A720CE61E42D6DD0F54EB97F73A21A39867D91C30F408F9D7"
-network.getTransaction(txid)
-    .then(function(resp){
-        console.log("resp: ",JSON.stringify(resp))
-        console.log("resp: ",resp)
-    })
+// let txid = '436B3A7653824973B3B289F81113F57ACF0E23BDD29FDB533402F8C08E1BF359'
+// // let txid = "A77E61DE200C32FC9BD75245A4728DFF84A4242199A9F83623C2E67B4B49466A"
+// // // // let txid = "92B8BF227A4AB56A720CE61E42D6DD0F54EB97F73A21A39867D91C30F408F9D7"
+// network.getTransaction(txid)
+//     .then(function(resp){
+//         console.log("resp: ",JSON.stringify(resp))
+//         console.log("resp: ",resp)
+//     })
 
 //thor1wy58774wagy4hkljz9mchhqtgk949zdwwe80d5
 
@@ -49,7 +50,7 @@ network.getTransaction(txid)
 //     })
 
 
-// // let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
+let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
 // let address = "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj"
 // network.getBalance(address)
 //     .then(function(resp){
@@ -58,11 +59,11 @@ network.getTransaction(txid)
 //
 // // let address = process.env['TEST_THOR_MASTER']
 // // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
-// // console.log("address: ",address)
-// network.getAccount(address)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+// console.log("address: ",address)
+network.getAccount(address)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 //let signedTx
 
@@ -87,11 +88,9 @@ network.getTransaction(txid)
 //         console.log("resp: ",resp)
 //     })
 
-// let address = process.env['TEST_THOR_MASTER']
-// // let address = "tthor1jhv0vuygfazfvfu5ws6m80puw0f80kk67cp4eh" //test seed
-// if(!address) throw Error("must add TEST_THOR_MASTER to .env")
+// let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
 // console.log("address: ",address)
-// network.getBalance(address)
+// network.getBalances(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })

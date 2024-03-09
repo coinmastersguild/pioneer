@@ -29,19 +29,19 @@ let networkSupport = [
     //shortListSymbolToCaip["TON"], TODO
     //shortListSymbolToCaip["TRON"], TODO
     //shortListSymbolToCaip["SOLANA"], TODO
-    caipToNetworkId(shortListSymbolToCaip["DASH"]),
+    // caipToNetworkId(shortListSymbolToCaip["DASH"]),
     // shortListSymbolToCaip["OSMO"], //TODO Rango uses WASM for osmosis, not support by KK
     caipToNetworkId(shortListSymbolToCaip["BASE"]),
     caipToNetworkId(shortListSymbolToCaip["ARB"]),
-    caipToNetworkId(shortListSymbolToCaip["GAIA"]),
+    // caipToNetworkId(shortListSymbolToCaip["GAIA"]),
     // shortListSymbolToCaip["BNB"],
     // caipToNetworkId(shortListSymbolToCaip["BSC"]),
-    caipToNetworkId(shortListSymbolToCaip["DOGE"]),
-    caipToNetworkId(shortListSymbolToCaip["BTC"]),
+    // caipToNetworkId(shortListSymbolToCaip["DOGE"]),
+    // caipToNetworkId(shortListSymbolToCaip["BTC"]),
     caipToNetworkId(shortListSymbolToCaip["ETH"]),
-    caipToNetworkId(shortListSymbolToCaip["LTC"]),
-    caipToNetworkId(shortListSymbolToCaip["THOR"]),
-    caipToNetworkId(shortListSymbolToCaip["BCH"]),
+    // caipToNetworkId(shortListSymbolToCaip["LTC"]),
+    // caipToNetworkId(shortListSymbolToCaip["THOR"]),
+    // caipToNetworkId(shortListSymbolToCaip["BCH"]),
     caipToNetworkId(shortListSymbolToCaip["GNO"]),
     caipToNetworkId(shortListSymbolToCaip["MATIC"]),
     caipToNetworkId(shortListSymbolToCaip["AVAX"]),
@@ -65,6 +65,20 @@ module.exports = {
     createTransaction: function (id:any, step: number, validateBalance?: boolean, validateFee?: boolean) {
         return create_transaction(id, step, validateBalance, validateFee);
     },
+    getTransactionStatus: function (requestId:string, step:number, txid:string) {
+        return get_transaction_status(requestId, step, txid);
+    }
+}
+
+const get_transaction_status = async function (requestId:string, step:number, txid:string) {
+    let tag = TAG + " | get_transaction_status | "
+    try {
+        console.log("rango: ", rango)
+        const transactionStatusResponse = await rango.checkStatus({requestId, step, txId:txid})
+        return transactionStatusResponse
+    } catch (e) {
+        console.error(tag, "e: ", e)
+    }
 }
 
 const create_transaction = async function (id:any, step: number, validateBalance?: boolean, validateFee?: boolean) {
@@ -92,7 +106,12 @@ const get_quote = async function (quote:any) {
 
         let unsignedTx = await create_transaction(quoteRango.requestId, 1, false, false)
         log.info(tag,"unsignedTx: ",unsignedTx)
+        
+        //validate that input is in supported network
+        if(!networkSupport.includes(caipToNetworkId(shortListSymbolToCaip[quote.from.blockchain]))) throw new Error("Unsupported input network: "+quote.from.blockchain)
+        if(!networkSupport.includes(caipToNetworkId(shortListSymbolToCaip[quote.to.blockchain]))) throw new Error("Unsupported output network: "+quote.from.blockchain)
 
+        
         output.meta = {
             quoteMode: "RANGO"
         }
@@ -100,7 +119,7 @@ const get_quote = async function (quote:any) {
         output.complete = true
         output.amountOut = quoteRango.result.outputAmount
         output.inboundAddress = unsignedTx.transaction.to
-        output.tx = {
+        output.txs = [{
             type:"evm",
             chain:caipToNetworkId(shortListSymbolToCaip[quote.from.blockchain]),
             txParams:{
@@ -114,11 +133,12 @@ const get_quote = async function (quote:any) {
                 maxFeePerGas: unsignedTx.transaction.maxFeePerGas,
                 nonce: unsignedTx.transaction.nonce
             }
-        }
+        }]
         output.rawUnsigned = unsignedTx
         output.raw = quoteRango
         return output
     } catch (e) {
         console.error(tag, "e: ", e)
+        throw e
     }
 }

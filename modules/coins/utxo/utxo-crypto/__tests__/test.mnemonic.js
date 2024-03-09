@@ -15,7 +15,8 @@ let TEST_SEED_MASTER_BTC_BECH32 = process.env['TEST_SEED_MASTER_BTC'] || 'bc1q7l
 let hash = "0x29f7212ecc1c76cea81174af267b67506f754ea8c73f144afa900a0d85b24b21319621aeb062903e856352f38305710190869c3ce5a1425d65ef4fa558d0fc251b"
 
 //generateSeedFromHash
-crypto.generateSeedFromHash(hash)
+console.log("")
+crypto.generateSeed()
     .then(function(resp){
         console.log("resp: ",resp)
     })

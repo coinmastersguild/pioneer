@@ -10,12 +10,21 @@ let run_test = async function(){
         let support = thorswap.networkSupport()
         console.log("support: ",support)
 
+        // let swap = {
+        //     sellAsset: 'BCH.BCH',
+        //     sellAmount: '100',
+        //     buyAsset: 'ETH.ETH',
+        //     senderAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
+        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     slippage: 3
+        // }
+
         let swap = {
-            sellAsset: 'BCH.BCH',
-            sellAmount: '0.01',
-            buyAsset: 'DOGE.DOGE',
-            senderAddress: 'bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
-            recipientAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
+            sellAsset: 'ETH.ETH',
+            sellAmount: '0.04',
+            buyAsset: 'BCH.BCH',
+            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
             slippage: 3
         }
         
@@ -23,7 +32,7 @@ let run_test = async function(){
         console.log("result: ",result.length)
 
         for(let i = 0; i < result.length; i++){
-            console.log("result: ",result[i])
+            console.log("result: ",result[i].txs[0])
         }
         
     } catch (e) {

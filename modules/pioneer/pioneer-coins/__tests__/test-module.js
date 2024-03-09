@@ -121,8 +121,8 @@ let coin = 'BASE'
 // let bip32 = `m/44'/144'/0'/0/0`
 // let bip32 = `m/44'/914'/0'/0/0`
 // console.log(bip32ToAddressNList(bip32))
-// let xpub = "xpub6CXCeiZ5e1zPKopayq7h2eu7aySmywGeekdqHwae5YGbaArPs7i2UwEnjRaAbaQDgo2EWF99QXa1T2HX8nDFEH4jZxipv41NyKwM9SNZT3K"
-// console.log("zpub",xpubConvert(xpub,'zpub'))
+let xpub = "xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS"
+console.log("zpub",xpubConvert(xpub,'zpub'))
 //convert
 //console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
 //console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
