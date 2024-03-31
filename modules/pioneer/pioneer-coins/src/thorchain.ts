@@ -1,7 +1,7 @@
 /*
     Thorchain Memo Toolkit
     ----------------------
- */
+*/
 
 const assetShortCodeMap:any = {
     'r': 'THOR.RUNE',

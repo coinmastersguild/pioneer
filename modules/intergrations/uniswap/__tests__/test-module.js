@@ -18,9 +18,9 @@ let run_test = async function(){
 
 
         let swap = {
-            sellAsset: 'THOR.RUNE',
-            sellAmount: '30',
-            buyAsset: 'MAYA.CACAO',
+            sellAsset: 'eip155:8453/slip44:60',
+            sellAmount: '0.01',
+            buyAsset: '',
             senderAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
             recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
             slippage: 3

@@ -18,8 +18,8 @@ let run_test = async function(){
         //     })
         
         //
-        // let utxos = await network.utxosByXpub('LTC',"zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj")
-        // console.log(utxos)
+        let utxos = await network.utxosByXpub('ZEC',"xpub6CKNxyxUckJaggvmby1J1U5jR9zmRBd7aQh6LdaNsAdPJ6A6tfUqeesERcjHsQsLtzcG8mT3EUxroeBP6CrkucELXbqH5dQkQSyPgSxdFfX")
+        console.log(utxos)
 
         // let ALL_SOCKETS = network.getBlockbookSockets()
         // let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
@@ -38,11 +38,11 @@ let run_test = async function(){
         // console.log(utxos)
 
         //e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925
-        network.getTransaction('DGB',"e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925")
-            .then(function(resp){
-                console.log(resp)
-                console.log(JSON.stringify(resp))
-            })
+        // network.getTransaction('DGB',"e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925")
+        //     .then(function(resp){
+        //         console.log(resp)
+        //         console.log(JSON.stringify(resp))
+        //     })
 
 
     }catch(e){

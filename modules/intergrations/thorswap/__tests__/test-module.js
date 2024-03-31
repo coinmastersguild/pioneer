@@ -30,10 +30,12 @@ let run_test = async function(){
         
         let result = await thorswap.getQuote(swap)
         console.log("result: ",result.length)
-
-        for(let i = 0; i < result.length; i++){
-            console.log("result: ",result[i].txs[0])
-        }
+        console.log("result: ",JSON.stringify(result))
+        // for(let i = 0; i < result.length; i++){
+        //     console.log("result: ",result[i].routes[0].swap)
+        //    
+        //    
+        // }
         
     } catch (e) {
         console.error(e)

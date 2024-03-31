@@ -8,17 +8,41 @@ const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("
 // Test data for multiple tokens
 const tokens = [
     {
-        chain: "AVAX",
-        identifier: "MAYA.CACAO",
-        ticker: "CACAO",
-        decimals: 10,
-        caip: "cosmos:maya-mainnet-v1/slip44:931",
+        chain: "BASE",
+        identifier: "BASE.PRO-0XEF743DF8EDA497BCF1977393C401A636518DD630",
+        ticker: "PRO",
+        decimals: 18,
+        caip: "ceip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630",
         rangoName: {
-            blockchain:'MAYA',
-            symbol:'CACAO',
-            address:null
+            blockchain:'BASE',
+            symbol:'PRO',
+            address:'0XEF743DF8EDA497BCF1977393C401A636518DD630'
         }
     },
+    // {
+    //     chain: "AVAX",
+    //     identifier: "MAYA.CACAO",
+    //     ticker: "CACAO",
+    //     decimals: 10,
+    //     caip: "cosmos:maya-mainnet-v1/slip44:931",
+    //     rangoName: {
+    //         blockchain:'MAYA',
+    //         symbol:'CACAO',
+    //         address:null
+    //     }
+    // },
+    // {
+    //     chain: "THOR",
+    //     identifier: "THOR.RUNE",
+    //     ticker: "RUNE",
+    //     decimals: 10,
+    //     caip: "cosmos:thorchain-mainnet-v1",
+    //     rangoName: {
+    //         blockchain:'THOR',
+    //         symbol:'RUNE',
+    //         address:null
+    //     }
+    // },
     // {
     //     address: "0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
     //     chain: "AVAX",

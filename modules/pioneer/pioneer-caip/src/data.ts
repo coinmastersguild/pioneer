@@ -220,6 +220,7 @@ export const shortListNameToCaip = {
     bnbsmartchain: 'eip155:56/slip44:60',
     ripple: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
     optimism: 'eip155:10/slip44:60',
+    base: 'eip155:10/slip44:60',
     kuji: 'cosmos:kaiyo-1/slip44:118',
     cardano: 'placeholder:caip:cardano:native:cardano',
     binance: 'placeholder:caip:binance:native:bnb-beacon-chain',
@@ -253,16 +254,42 @@ export const NetworkIdToRangoName = function (networkId: string): string | null 
     return null;
 };
 
+//TODO balance to caip
+let balanceToCaip = function (balance: any) {
+    try {
+        let caip
+        if (balance.type !== 'Native') {
+            // For ERC20 tokens
+            let networkId = ChainToNetworkId[balance.chain];
+            if (!networkId) throw new Error(`Unsupported chain: ${balance.chain}`);
+            caip = `${networkId}/erc20:${balance.address}`;
+        } else {
+            //assume native?
+            
+            // For native tokens, use the identifier as it is
+            // @ts-ignore
+            caip = shortListSymbolToCaip[balance.chain];
+        }
+        if(!caip) {
+            console.error("Failed to convert balance to caip: ", balance)
+        }
+
+        return caip;
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+};
+
 let tokenToCaip = function (token: any) {
     try {
         let caip;
-        console.log("token",token)
+        // console.log("token",token)
         if (token.address) {
             // For ERC20 tokens
             let networkId = ChainToNetworkId[token.chain];
             if (!networkId) throw new Error(`Unsupported chain: ${token.chain}`);
             caip = `${networkId}/erc20:${token.address}`;
-            token.type = 'token';
         } else {
             // For native tokens, use the identifier as it is
             caip = thorchainToCaip(token.identifier);
@@ -283,7 +310,7 @@ let tokenToCaip = function (token: any) {
     }
 };
 
-
+//NOTE - this function needs to support ALL assets pioneer supports! (not just thorchain assets)
 let thorchainToCaip = function(identifier: string): string {
     try {
         let caip: string;
@@ -302,7 +329,7 @@ let thorchainToCaip = function(identifier: string): string {
             return caip;
         }
 
-        console.log("key:", identifier);
+        // console.log("key:", identifier);
         switch (identifier) {
             case "OSMO.ATOM":
                 caip = 'cosmos:osmosis-1/ibc:B011C1A0AD5E717F674BA59FD8E05B2F946E4FD41C9CB3311C95F7ED4B815620';
@@ -322,14 +349,17 @@ let thorchainToCaip = function(identifier: string): string {
             case "ARB.ETH":
                 caip = shortListNameToCaip['arbitrum'];
                 break;
+            case "BASE.ETH":
+                caip = shortListNameToCaip['base'];
+                break;
             case "OP.ETH":
                 caip = shortListNameToCaip['optimism'];
                 break;
-            case "THOR.RUNE":
-            case "KUJI.USK":
-                // @ts-ignore
-                caip = shortListNameToCaip[chain.toLowerCase()];
-                break;
+            // case "THOR.RUNE":
+            // case "KUJI.USK":
+            //     // @ts-ignore
+            //     caip = ChainToCaip[chain.toLowerCase()];
+            //     break;
             default:
                 let networkId = ChainToNetworkId[chain];
                 if (!networkId) throw new Error(`Unsupported chain: ${chain}`);
@@ -347,7 +377,7 @@ let thorchainToCaip = function(identifier: string): string {
 let caipToThorchain = function (caip:string, ticker:string) {
     try {
         const networkId = caip.split('/')[0]; // Splitting off the network ID from the CAIP
-        console.log("networkId: ", networkId);
+        // console.log("networkId: ", networkId);
         if (!networkId) throw Error("Invalid CAIP!");
 
         const chain = exports.NetworkIdToChain[networkId];

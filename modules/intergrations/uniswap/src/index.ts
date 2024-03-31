@@ -1,5 +1,5 @@
 /*
-        Maya Swap Integration 
+        Uniswap Integration
                 - Highlander
  */
 
@@ -9,9 +9,13 @@ const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
-import { ethers } from 'ethers'
+
+// import { ethers } from 'ethers'
+import { TradeType } from '@uniswap/sdk-core';
+import { RouterTrade } from '@uniswap/universal-router-sdk';
 
 
+//TODO - add all networks
 let networkSupport = [
     ChainToNetworkId["ETH"],
     ChainToNetworkId["BASE"],

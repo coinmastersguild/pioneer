@@ -1,0 +1,36 @@
+{
+  "name": "@pioneer-platform/evm-network",
+  "version": "0.0.1",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "testfile": "cross-env WALLETPACK_TESTING=true mocha --require @babel/register --require @babel/polyfill --exit --timeout 1000000",
+    "test-babel": "npm run testfile \"__tests__/test-module.js*/*.test.js\"",
+    "test": "npm run build && node __tests__/test-module.js",
+    "test-dev": "npm run build && node lib/index.js",
+    "start": "npm run build:live",
+    "build": "tsc -p .",
+    "prepublish": "npm run build",
+    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
+  },
+  "dependencies": {
+    "@pioneer-platform/blockbook": "8.1.55",
+    "@pioneer-platform/loggerdog": "^8.3.1",
+    "@types/node": "^20.11.30",
+    "@xchainjs/xchain-util": "^0.2.6",
+    "axios": "^0.21.4",
+    "dotenv": "^8.2.0",
+    "ethers": "^6.11.1",
+    "request-promise": "^4.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  },
+  "devDependencies": {},
+  "description": "",
+  "keywords": [
+    ""
+  ],
+  "author": "Bithighlander <pioneer@gmail.com>",
+  "license": "GPL",
+  "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
+}

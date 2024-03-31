@@ -314,55 +314,158 @@ let run_test = async function(){
         //     slippage: '3'
         // }
 
+        // let swap = {
+        //     "sellAsset": {
+        //         "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+        //         "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        //         "identifier": "BCH.BCH",
+        //         "networkId": "bip122:000000000000000000651ef99cb9fcbe",
+        //         "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+        //         "symbol": "BCH",
+        //         "chain": "BCH",
+        //         "ticker": "BCH",
+        //         "type": "Native",
+        //         "balance": "0.23086101",
+        //         "priceUsd": 427.85,
+        //         "rank": 20,
+        //         "name": "bitcoin-cash",
+        //         "source": "coingecko",
+        //         "alias": 2,
+        //         "valueUsd": "98.7738831285"
+        //     },
+        //     "sellAmount": "0.115",
+        //     "buyAsset": {
+        //         "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
+        //         "caip": "eip155:1/slip44:60",
+        //         "identifier": "ETH.ETH",
+        //         "networkId": "eip155:1",
+        //         "address": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //         "symbol": "ETH",
+        //         "chain": "ETH",
+        //         "ticker": "ETH",
+        //         "type": "Native",
+        //         "balance": "0.01117763",
+        //         "priceUsd": 3876.51,
+        //         "rank": 2,
+        //         "name": "ethereum",
+        //         "source": "coingecko",
+        //         "alias": 2,
+        //         "valueUsd": "43.3301944713"
+        //     },
+        //     "senderAddress": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+        //     "recipientAddress": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //     "slippage": "3"
+        // }
+
+        // let swap = {
+        //     "affiliate": "0x658DE0443259a1027caA976ef9a42E6982037A03",
+        //     "sellAsset": {
+        //         "chain": "BCH",
+        //         "identifier": "BCH.BCH",
+        //         "decimals": 8,
+        //         "type": "native",
+        //         "networkId": "bip122:000000000000000000651ef99cb9fcbe",
+        //         "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        //         "symbol": "BCH",
+        //         "sourceList": "ThorchainList",
+        //         "assetId": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        //         "chainId": "bip122:000000000000000000651ef99cb9fcbe",
+        //         "name": "Bitcoin Cash",
+        //         "networkName": "Bitcoin Cash",
+        //         "precision": 8,
+        //         "color": "#8BC34A",
+        //         "icon": "https://assets.coincap.io/assets/icons/256/bch.png",
+        //         "explorer": "https://blockchair.com",
+        //         "explorerAddressLink": "https://blockchair.com/bitcoin-cash/address/",
+        //         "explorerTxLink": "https://blockchair.com/bitcoin-cash/transaction/",
+        //         "valueUsd": 25.5591912895,
+        //         "balance": "0.05262883",
+        //         "pubkey": "xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL",
+        //         "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"
+        //     },
+        //     "sellAmount": "0.015788649",
+        //     "buyAsset": {
+        //         "chain": "DOGE",
+        //         "identifier": "DOGE.DOGE",
+        //         "decimals": 8,
+        //         "type": "native",
+        //         "networkId": "bip122:00000000001a91e3dace36e2be3bf030",
+        //         "caip": "bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+        //         "symbol": "DOGE",
+        //         "sourceList": "ThorchainList",
+        //         "assetId": "bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+        //         "chainId": "bip122:00000000001a91e3dace36e2be3bf030",
+        //         "name": "Dogecoin",
+        //         "networkName": "Dogecoin",
+        //         "precision": 8,
+        //         "color": "#FFC107",
+        //         "icon": "https://assets.coincap.io/assets/icons/256/doge.png",
+        //         "explorer": "https://live.blockcypher.com",
+        //         "explorerAddressLink": "https://live.blockcypher.com/doge/address/",
+        //         "explorerTxLink": "https://live.blockcypher.com/doge/tx/",
+        //         "valueUsd": 1.7691322796533202,
+        //         "balance": "10.08926409",
+        //         "pubkey": "xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs",
+        //         "address": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54"
+        //     },
+        //     "senderAddress": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
+        //     "recipientAddress": "DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54",
+        //     "slippage": "3"
+        // }
+        
         let swap = {
-            "sellAsset": {
-                "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
-                "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-                "identifier": "BCH.BCH",
-                "networkId": "bip122:000000000000000000651ef99cb9fcbe",
-                "address": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
-                "symbol": "BCH",
-                "chain": "BCH",
-                "ticker": "BCH",
-                "type": "Native",
-                "balance": "0.23086101",
-                "priceUsd": 427.85,
-                "rank": 20,
-                "name": "bitcoin-cash",
-                "source": "coingecko",
-                "alias": 2,
-                "valueUsd": "98.7738831285"
+            sellAsset: {
+                context: 'keepkey:device.wallet',
+                caip: 'eip155:8453/slip44:60',
+                identifier: 'BASE.ETH',
+                networkId: 'eip155:8453',
+                address: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+                symbol: 'ETH',
+                chain: 'BASE',
+                ticker: 'ETH',
+                type: 'Native',
+                balance: '0.033834470385070390',
+                priceUsd: 3505.45,
+                rank: 2,
+                name: 'ethereum',
+                source: 'coingecko',
+                alias: 2,
+                valueUsd: '118.60504421134499'
             },
-            "sellAmount": "0.115",
-            "buyAsset": {
-                "context": "keepkey:0x141D9959cAe3853b035000490C03991eB70Fc4aC.wallet",
-                "caip": "eip155:1/slip44:60",
-                "identifier": "ETH.ETH",
-                "networkId": "eip155:1",
-                "address": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
-                "symbol": "ETH",
-                "chain": "ETH",
-                "ticker": "ETH",
-                "type": "Native",
-                "balance": "0.01117763",
-                "priceUsd": 3876.51,
-                "rank": 2,
-                "name": "ethereum",
-                "source": "coingecko",
-                "alias": 2,
-                "valueUsd": "43.3301944713"
+            sellAmount: '0.0900',
+            buyAsset: {
+                context: 'keepkey:device.wallet',
+                caip: 'eip155:8453/slip44:60',
+                identifier: 'BASE.PRO',
+                networkId: 'eip155:8453',
+                address: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+                symbol: 'PRO-0xef743df8eda497bcf1977393c401a636518dd630',
+                chain: 'BASE',
+                ticker: 'PRO',
+                type: 'Native',
+                balance: '999413.288871116238912035',
+                priceUsd: '2.0702081555633331',
+                rank: '473',
+                name: 'Propy',
+                source: 'coincap',
+                valueUsd: '2068993.541399358'
             },
-            "senderAddress": "bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p",
-            "recipientAddress": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
-            "slippage": "3"
+            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            slippage: '3'
         }
+
 
         //get router options
         let result = await client.quote(swap)
         console.log("result: ",result)
-        // console.log("result: ",result[0].quote.txs[0])
-        // console.log("result: ",JSON.stringify(result.quote.txs[0]))
+        console.log("result: ",result[0].quote.txs[0])
+        console.log("result: ",JSON.stringify(result.quote.txs[0]))
         //get quote
+
+        //get route
+
+        //
 
         //get tx
     } catch (e) {

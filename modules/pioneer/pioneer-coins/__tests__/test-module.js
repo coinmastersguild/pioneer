@@ -72,8 +72,9 @@ let coin = 'BASE'
 // ]
 // let addressNList = [2147483732, 2147483648, 2147483648, 0, 0]
 // let addressNList = [2147483692, 2147483648, 2147483648, 0, 0]
-// let path = addressNListToBIP32(addressNList)
-// console.log(path)
+let addressNList =    [2147483692, 2147483708, 2147483648, 0, 0]
+let path = addressNListToBIP32(addressNList)
+console.log(path)
 
 //cosmos
 // let network = 'cosmos'

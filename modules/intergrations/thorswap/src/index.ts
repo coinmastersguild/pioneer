@@ -134,7 +134,7 @@ const logErrorDetails = (error:any, tag:any) => {
 }
 
 const get_quote = async function (quote:any) {
-    let tag = TAG + " | submit_address | "
+    let tag = TAG + " | get_quote | "
     try {
         log.info(tag,"quote: ",quote)
         let output:any = []
@@ -166,33 +166,41 @@ const get_quote = async function (quote:any) {
             // @ts-ignore
             quote.meta = route.meta
             quote.amountOut = route.expectedOutput
-            
-            // @ts-ignore
-            // if(route.transaction && Object.keys(route.transaction).length > 0){
-            //     //TODO detect if deposit or transfer
-            //     let tx:any = {
-            //         type: "transfer",
-            //         chain:caipToNetworkId(shortListSymbolToCaip[from]),
-            //         txParams: {
-            //             address: data.payinAddress,
-            //             amount: amount,
-            //             memo: data.payinExtraId,
-            //         }
-            //     }
-            //    
-            //    
-            //     quote.txs = [route.transaction]    
-            // } else if(route.streamingSwap && Object.keys(route.streamingSwap).length > 0){
-            //     quote.txs = [route.streamingSwap]
-            // } else {
-            //     throw Error("unable to build tx")
-            // }
-            
             quote.complete = true
             quote.inboundAddress = route.inboundAddress
             // @ts-ignore
             quote.timeEstimates = route.timeEstimates
             quote.route = route
+            
+            console.log("quote: ",quote)
+            console.log("quote: ",JSON.stringify(quote))
+            
+            //memo intercept
+            if(quote.meta && quote.meta.thornodeMeta && quote.meta.thornodeMeta.memo){
+                quote.meta.thornodeMeta.memo = quote.meta.thornodeMeta.memo.replace(":t:",":kk:")
+            }
+            if(quote.meta && quote.meta.route && quote.meta.route.meta && quote.meta.route.meta.thornodeMeta && quote.meta.route.meta.thornodeMeta.memo){
+                quote.meta.route.meta.thornodeMeta.memo = quote.meta.route.meta.thornodeMeta.memo.replace(":t:",":kk:")
+            }
+            if(quote.route && quote.route.calldata && quote.route.calldata.memo){
+                quote.route.calldata.memo = quote.route.calldata.memo.replace(":t:",":kk:")
+            }
+            if(quote.route && quote.route.calldata && quote.route.calldata.memoStreamingSwap){
+                quote.route.calldata.memoStreamingSwap = quote.route.calldata.memoStreamingSwap.replace(":t:",":kk:")
+            }
+            if(quote.route && quote.route.evmTransactionDetails && quote.route.evmTransactionDetails.contractParams){
+                quote.route.evmTransactionDetails.contractParams[4] = quote.route.evmTransactionDetails.contractParams[4].replace(":t:",":kk:")
+            }
+            let safeReplace = function(input:any) {
+                return typeof input === 'string' ? input.replace(":t:", ":kk:") : input;
+            }
+            // Assuming contractParamsStreaming is an array of strings that might contain ":t:"
+            if (quote.route && quote.route.evmTransactionDetails && Array.isArray(quote.route.evmTransactionDetails.contractParamsStreaming)) {
+                // Apply the safeReplace to each element in the array that is a string.
+                quote.route.evmTransactionDetails.contractParamsStreaming = quote.route.evmTransactionDetails.contractParamsStreaming.map((param: any) => safeReplace(param));
+            }
+
+
             output.push(quote)
         }
 
