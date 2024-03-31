@@ -20,9 +20,9 @@ const { Pair, WETH, Route, Trade, TokenAmount } = require('@uniswap/v2-sdk'); //
 import { BaseProvider } from '@ethersproject/providers'
 import JSBI from 'jsbi'
 // import { ethers } from 'ethers'
-import { TradeType, Token, CurrencyAmount, BigintIsh, ChainId } from '@uniswap/sdk-core'
+import { Percent, TradeType, Token, CurrencyAmount, BigintIsh, ChainId } from '@uniswap/sdk-core'
 import { Trade as V2TradeSDK } from '@uniswap/v2-sdk'
-import { Trade as V3TradeSDK } from '@uniswap/v3-sdk'
+import { Trade as V3TradeSDK, FeeOptions, toHex } from '@uniswap/v3-sdk'
 import { SwapRouter, MixedRouteTrade, MixedRouteSDK, Trade as RouterTrade } from '@uniswap/router-sdk'
 import {
     UNIVERSAL_ROUTER_ADDRESS,
@@ -268,58 +268,68 @@ enum SwapRouterNativeAssets {
     ETH = 'ETH',
 }
 
+// interface SwapOptions {
+//     slippageTolerance: Percent
+//     deadline?: BigNumber
+//     permit?: PermitSignature
+//     feeOptions?: FeeOptions
+// }
 
-const getMinAmountOut = async function({
-                                           path,
+const getRoute = async function({
+                                    sellToken,
+                                    buyToken,
                                            chainId,
                                            amountIn,
-                                           slippageTolerance,
                                            provider
                                        }:any) {
     const tag = " | getMinAmountOut | ";
     try {
-        // Ensure addresses are checksummed
-        const [sellTokenAddress, buyTokenAddress] = path.map((address: any) => ethers.utils.getAddress(address));
-        console.info(`${tag} sellTokenAddress: ${sellTokenAddress}, buyTokenAddress: ${buyTokenAddress}`);
-
-        // Fetch decimals for tokens dynamically, defaulting to 18 for ETH
-        const sellTokenDecimals = sellTokenAddress !== ethers.constants.AddressZero ?
-            await new ethers.Contract(sellTokenAddress, ERC20_ABI, provider).decimals() : 18;
-        const buyTokenDecimals = buyTokenAddress !== ethers.constants.AddressZero ?
-            await new ethers.Contract(buyTokenAddress, ERC20_ABI, provider).decimals() : 18;
-
-       log.info(`${tag} sellTokenDecimals: ${sellTokenDecimals}, buyTokenDecimals: ${buyTokenDecimals}`);
-
-        // Parse amountIn to BigNumber using sell token's decimals
-        const amountInBigNumber = ethers.utils.parseUnits(amountIn.toString(), sellTokenDecimals);
-        log.info(`${tag} amountInBigNumber: ${amountInBigNumber.toString()}`)
-
-        let chainIdInt = parseInt(chainId.replace('eip155:',''))
-        log.info(tag,"chainIdInt: ",chainIdInt)
-
-        // Create Token instances for Uniswap SDK
-        const sellToken = sellTokenAddress === ethers.constants.AddressZero ?
-            WETH[ChainId.MAINNET] : new Token(chainIdInt, sellTokenAddress, sellTokenDecimals);
-
-        const buyToken = buyTokenAddress === ethers.constants.AddressZero ?
-            WETH[ChainId.MAINNET] : new Token(chainIdInt, buyTokenAddress, buyTokenDecimals);
 
         log.info(tag,"sellToken: ",sellToken)
         log.info(tag,"buyToken: ",buyToken)
-        const router = getRouter(chainIdInt, provider)
+        const router = getRouter(chainId, provider)
         // log.info(tag,"router: ",router)
-        const amount = CurrencyAmount.fromRawAmount(buyToken, JSBI.BigInt(amountInBigNumber ?? '1')) // a null amountRaw should initialize the route
+        const amount = CurrencyAmount.fromRawAmount(buyToken, JSBI.BigInt(amountIn ?? '1')) // a null amountRaw should initialize the route
         log.info(tag,"amount: ",amount)
         
         const route = await router.route(amount, sellToken, TradeType.EXACT_INPUT, /*swapConfig=*/ undefined, { protocols })
         log.info(tag,"route: ",route)
 
-
+        return route
     } catch (e) {
         console.error(tag, "Error in getMinAmountOut: ", e);
         throw e;
     }
 };
+
+let  isZero = function isZero(hexNumberString: string) {
+    return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
+}
+
+
+const buildTx = async function({trade, from, chainId}:any){
+    try{
+        //buildTx
+        const BIPS_BASE = JSBI.BigInt(10000)
+        const { calldata: data, value } = SwapRouter.swapCallParameters(trade, {
+            slippageTolerance: new Percent(JSBI.BigInt(200), BIPS_BASE),
+            // deadlineOrPreviousBlockhash: options.deadline?.toString(),
+            // inputTokenPermit: options.permit,
+            // fee: options.feeOptions,
+        })
+        const tx = {
+            from,
+            to: UNIVERSAL_ROUTER_ADDRESS(chainId),
+            data,
+            // TODO: universal-router-sdk returns a non-hexlified value.
+            ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+        }
+        return tx
+    }catch(e){
+        console.error(e)
+    }
+}
+
 const get_quote = async function (quote:any) {
     let tag = TAG + " | get_quote | "
     try {
@@ -338,6 +348,7 @@ const get_quote = async function (quote:any) {
         let inputChain = caipToNetworkId(quote.sellAsset)
         let outputChain = caipToNetworkId(quote.buyAsset)
         if(inputChain != outputChain) throw new Error("Cross Chain not supported")
+        log.info("inputChain: ",inputChain)
         let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
         if(!providerUrl) throw new Error("missing providerUrl")
         log.info("providerUrl: ",providerUrl)
@@ -388,18 +399,7 @@ const get_quote = async function (quote:any) {
         if ((path[0] !== undefined && path[1] !== undefined) && path[0] === path[1]) {
             throw new Error("Both tokens are the same");
         }
-        //get minOut based on spread. quote.slippage is a percentage sent as int
-        let minAmountOut = await getMinAmountOut(            {
-            path,
-            chainId:inputChain,
-            sellTokenContract,
-            buyTokenContract,
-            amountIn: quote.sellAmount,
-            slippageTolerance: quote.slippage,
-            provider
-        })
-        console.log("minAmountOut: ",minAmountOut)
-        
+        if(!path) throw new Error("missing path")
         //this is ONLY on input token
         //before we begin we need to check if the token is approved
         if(sellTokenContract){
@@ -416,30 +416,56 @@ const get_quote = async function (quote:any) {
                 throw Error("TODO write code for allowance!")
             }
         }
-
-
-
-        // Uniswap V2 Factory Address (on Ethereum Mainnet)
-        // planner.addCommand(CommandType.V3_SWAP_EXACT_IN, [
-        //     MSG_SENDER,
-        //     sellAmountBigNumber,
-        //     minAmountOut,
-        //     path,
-        //     quote.senderAddress,
-        // ])
         //
-        //TODO build call data
+        // Ensure addresses are checksummed
+        const [sellTokenAddress, buyTokenAddress] = path.map((address: any) => ethers.utils.getAddress(address));
+        console.info(`${tag} sellTokenAddress: ${sellTokenAddress}, buyTokenAddress: ${buyTokenAddress}`);
+
+        // Fetch decimals for tokens dynamically, defaulting to 18 for ETH
+        const sellTokenDecimals = sellTokenAddress !== ethers.constants.AddressZero ?
+            await new ethers.Contract(sellTokenAddress, ERC20_ABI, provider).decimals() : 18;
+        const buyTokenDecimals = buyTokenAddress !== ethers.constants.AddressZero ?
+            await new ethers.Contract(buyTokenAddress, ERC20_ABI, provider).decimals() : 18;
+
+        log.info(`${tag} sellTokenDecimals: ${sellTokenDecimals}, buyTokenDecimals: ${buyTokenDecimals}`);
+
+        // Parse amountIn to BigNumber using sell token's decimals
+        const amountInBigNumber = ethers.utils.parseUnits(quote.sellAmount.toString(), sellTokenDecimals);
+        log.info(`${tag} amountInBigNumber: ${amountInBigNumber.toString()}`)
+
+        let chainIdInt = parseInt(inputChain.replace('eip155:',''))
+        log.info(tag,"chainIdInt: ",chainIdInt)
+
+        // Create Token instances for Uniswap SDK
+        const sellToken = sellTokenAddress === ethers.constants.AddressZero ?
+            WETH[ChainId.MAINNET] : new Token(chainIdInt, sellTokenAddress, sellTokenDecimals);
+
+        const buyToken = buyTokenAddress === ethers.constants.AddressZero ?
+            WETH[ChainId.MAINNET] : new Token(chainIdInt, buyTokenAddress, buyTokenDecimals);
         
+        //get minOut based on spread. quote.slippage is a percentage sent as int
+        let route = await getRoute(            {
+            sellToken,
+            buyToken,
+            chainId:chainIdInt,
+            amountIn:amountInBigNumber,
+            provider
+        })
+        console.log("route: ",route)
+        if(!route) throw new Error("missing route, failed to find route")
 
-        // const options = { slippageTolerance, recipient }
-        // const tradeType = TradeType.EXACT_INPUT;
-        //
-        // const routerTrade = new RouterTrade({
-        //     v2Routes,
-        //     v3Routes,
-        //     mixedRoutes,
-        //     tradeType
-        // }, options);
+        
+        
+        let trade = route.trade
+        log.info(tag,"trade: ",trade)
+        
+        //amountOutMin
+        let tx = await buildTx({trade,from:quote.senderAddress, chainId:chainIdInt})
+        log.info(tag,"tx: ",tx)
+        
+        output.type = 'EVM'
+        output.id = quote.id
+        output.tx = tx
         
         return output;
     } catch (e) {
