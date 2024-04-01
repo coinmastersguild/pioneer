@@ -55,6 +55,9 @@ let osmosis = require("@pioneer-platform/osmosis-client")
 //osmosis
 let mayachain = require("@pioneer-platform/mayachain-client")
 
+//uniswap
+let uniswap = require("@pioneer-platform/uniswap-client")
+
 //1inch/0x
 
 
@@ -108,11 +111,13 @@ module.exports = {
         await changelly.init()
         await osmosis.init()
         await mayachain.init()
+        await uniswap.init()
         NetworksByIntegration['mayachain'] = mayachain.networkSupport()
         NetworksByIntegration['changelly'] = changelly.networkSupport()
         NetworksByIntegration['thorswap'] = thorswap.networkSupport()
         NetworksByIntegration['rango'] = rango.networkSupport()
         NetworksByIntegration['osmosis'] = osmosis.networkSupport()
+        NetworksByIntegration['uniswap'] = uniswap.networkSupport()
         return true;
     },
     routes: function(){
@@ -210,6 +215,18 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 log.info(tag,"payloadMayachain: ",payloadMayachain)
                 let quoteMayachain = await mayachain.getQuote(payloadMayachain)
                 return [quoteMayachain]
+            case "uniswap":
+                let payloadUniswap = {
+                    sellAsset: quote.sellAsset.caip,
+                    buyAsset: quote.buyAsset.caip,
+                    sellAmount: quote.sellAmount,
+                    senderAddress: quote.senderAddress,
+                    recipientAddress: quote.recipientAddress,
+                    slippage: quote.slippage
+                }
+                log.info(tag,"payloadUniswap: ",payloadUniswap)
+                let quoteUniswap = await uniswap.getQuote(payloadUniswap)
+                return [quoteUniswap]
             default:
                 throw new Error("Intergration not found")
         }

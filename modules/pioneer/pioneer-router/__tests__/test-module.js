@@ -457,10 +457,11 @@ let run_test = async function(){
 
 
         //get router options
+        console.log("swap: ",swap)
         let result = await client.quote(swap)
         console.log("result: ",result)
         console.log("result: ",result[0].quote.txs[0])
-        console.log("result: ",JSON.stringify(result.quote.txs[0]))
+        // console.log("result: ",JSON.stringify(result.quote.txs[0]))
         //get quote
 
         //get route

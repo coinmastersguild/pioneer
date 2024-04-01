@@ -16,15 +16,16 @@ const log = require('@pioneer-platform/loggerdog')()
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
 const { Pair, WETH, Route, Trade, TokenAmount } = require('@uniswap/v2-sdk'); // Import necessary components from v2-sdk
-
+import { L2_CHAIN_IDS, L2_DEADLINE_FROM_NOW, DEFAULT_DEADLINE_FROM_NOW } from './constants'
 import { BaseProvider } from '@ethersproject/providers'
-import JSBI from 'jsbi'
+// import JSBI from 'jsbi'
 // import { ethers } from 'ethers'
 import { Percent, TradeType, Token, CurrencyAmount, BigintIsh, ChainId } from '@uniswap/sdk-core'
 import { Trade as V2TradeSDK } from '@uniswap/v2-sdk'
 import { Trade as V3TradeSDK, FeeOptions, toHex } from '@uniswap/v3-sdk'
-import { SwapRouter, MixedRouteTrade, MixedRouteSDK, Trade as RouterTrade } from '@uniswap/router-sdk'
+import { MixedRouteTrade, MixedRouteSDK, Trade as RouterTrade } from '@uniswap/router-sdk'
 import {
+    SwapRouter,
     UNIVERSAL_ROUTER_ADDRESS,
     ROUTER_AS_RECIPIENT,
     PERMIT2_ADDRESS,
@@ -35,7 +36,7 @@ import {
     SeaportData
 } from "@uniswap/universal-router-sdk";
 
-const { ethers } = require('ethers');
+const { ethers, BigNumber } = require('ethers');
 
 let PERMIT2_BASE = '0x000000000022D473030F116dDEE9F6B43aC78BA3'
 
@@ -130,7 +131,7 @@ let ETH_UNIVERSIAL_ROUTER = {
 
 const BASE_CONTRACTS = {
     Permit2: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-    UniversalRouter: "0x198EF79F1F515F02dFE9e3115eD9fC07183f02fC",
+    UniversalRouter: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
     V3CoreFactory: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
     Multicall: "0x091e99cb1C49331a94dD62755D168E941AbD0693",
     ProxyAdmin: "0x3334d83e224aF5ef9C2E7DDA7c7C98Efd9621fA9",
@@ -153,7 +154,9 @@ const EIP155_MAINNET_CHAINS: any = {
         logo: '/chain-logos/eip155-1.png',
         rgb: '99, 125, 234',
         permit2: PERMIT2_ADDRESS,
+        universalRouter: UNIVERSAL_ROUTER_ADDRESS,
         rpc: 'https://eth.llamarpc.com',
+        defaultGasLimit: 250000,
         namespace: 'eip155'
     },
     // 'eip155:43114': {
@@ -195,7 +198,9 @@ const EIP155_MAINNET_CHAINS: any = {
         logo: '/chain-logos/base.png',
         rgb: '242, 242, 242',
         permit2: BASE_CONTRACTS.Permit2,
+        universalRouter: BASE_CONTRACTS.UniversalRouter,
         rpc: 'https://mainnet.base.org',
+        defaultGasLimit: 135120,
         namespace: 'eip155'
     }
 }
@@ -289,7 +294,8 @@ const getRoute = async function({
         log.info(tag,"buyToken: ",buyToken)
         const router = getRouter(chainId, provider)
         // log.info(tag,"router: ",router)
-        const amount = CurrencyAmount.fromRawAmount(buyToken, JSBI.BigInt(amountIn ?? '1')) // a null amountRaw should initialize the route
+        const amount = CurrencyAmount.fromRawAmount(buyToken, BigNumber.from(amountIn ?? '1')); // Using BigNumber
+        // const amount = CurrencyAmount.fromRawAmount(buyToken, JSBI.BigInt(amountIn ?? '1')) // a null amountRaw should initialize the route
         log.info(tag,"amount: ",amount)
         
         const route = await router.route(amount, sellToken, TradeType.EXACT_INPUT, /*swapConfig=*/ undefined, { protocols })
@@ -306,23 +312,133 @@ let  isZero = function isZero(hexNumberString: string) {
     return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
 }
 
+/** Returns the default transaction TTL for the chain, in minutes. */
+export function getDefaultTransactionTtl(chainId: any): number {
+    if (chainId && L2_CHAIN_IDS.includes(chainId)) return L2_DEADLINE_FROM_NOW / 60
+    return DEFAULT_DEADLINE_FROM_NOW / 60
+}
 
-const buildTx = async function({trade, from, chainId}:any){
+const buildTx = async function({trade, from, chainId, provider}:any){
+    let tag = TAG + " | buildTx | "
     try{
+        const BIPS_BASE = BigNumber.from(10000); // For basis points calculations
+        // const BIPS_BASE = JSBI.BigInt(10000)
+        const slippageTolerance = new Percent(BigNumber.from(200), BIPS_BASE);
+        log.info(tag,"slippageTolerance: ",slippageTolerance)
+        
         //buildTx
-        const BIPS_BASE = JSBI.BigInt(10000)
-        const { calldata: data, value } = SwapRouter.swapCallParameters(trade, {
-            slippageTolerance: new Percent(JSBI.BigInt(200), BIPS_BASE),
-            // deadlineOrPreviousBlockhash: options.deadline?.toString(),
+        log.info(tag,"trade: ",trade.tradeType)
+        log.info(tag,"swaps: ",trade.swaps[0])
+        log.info(tag,"routes: ",trade.routes[0])
+        /*
+            Trade
+        
+         */
+        
+        
+        /*
+            Reference Options
+
+        {
+            "slippageTolerance": {
+                "numerator": [
+                    50
+                ],
+                "denominator": [
+                    10000
+                ],
+                "isPercent": true
+            },
+            "deadlineOrPreviousBlockhash": "1711945055",
+            "inputTokenPermit": {
+                "details": {
+                    "token": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "amount": {
+                        "type": "BigNumber",
+                        "hex": "0xffffffffffffffffffffffffffffffffffffffff"
+                    },
+                    "expiration": 1714535266,
+                    "nonce": 0
+                },
+                "spender": "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
+                "sigDeadline": 1711945066,
+                "signature": "0x05d619af01420eaf9e42177db34210d11bd00416b4fb538849b55dbbe8c47761503a5cfda9933914ea96a3542acdf8a5c865f6c8278b748f5db8a24e73a52a351b"
+            }
+        }
+
+         */
+
+        const responseRouter = SwapRouter.swapERC20CallParameters(trade, {
+            recipient: from,
+            slippageTolerance,
+            // deadlineOrPreviousBlockhash: getDefaultTransactionTtl(chainId),
             // inputTokenPermit: options.permit,
             // fee: options.feeOptions,
         })
+        log.info(tag,"responseRouter: ",responseRouter)
+        // let { callData: data, value} = responseRouter
+        let data = responseRouter.calldata
+        let value = responseRouter.value
+        //get fee's
+        const nonce = await provider.getTransactionCount(from, "latest");
+
+        // Estimate gas limit for the transaction
+        // const estimatedGasLimit = await provider.estimateGas({
+        //     from: from,
+        //     to: UNIVERSAL_ROUTER_ADDRESS(chainId), // Uniswap Router address
+        //     data: data,
+        //     value: ethers.utils.parseEther("0"), // Value for token swaps
+        // });
+
+        let gas = `0x${BigInt("135120").toString(16)}`
+        try{
+            const estimatedGas = await provider.estimateGas({
+                from: from,
+                to: EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter, // Uniswap Router address
+                data: data,
+                value: ethers.utils.parseEther("0"), // Value for token swaps
+            });
+            console.log("estimatedGas: ", estimatedGas);
+            gas = `0x${estimatedGas.toString(16)}`;
+        }catch(e){
+            console.error("Error in estimateGas: ", e);
+            //@TODO get custom gas limit defaults per chain
+            gas = `0x${BigInt("135120").toString(16)}`;
+        }
+
+
+        // Get current gas price from the network
+        const gasPrice = await provider.getGasPrice();
+
+        // Optional: Adjust gas price based on your strategy (e.g., increase for faster confirmation)
+        const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+        /*
+            Reference tx
+
+            {
+                "from": "0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+                "to": "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
+                "data": "0x3593564c000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000660a355f00000000000000000000000000000000000000000000000000000000000000030a080c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001600000000000000000000000006b175474e89094c44da98b954eedeac495271d0f000000000000000000000000ffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000006631bb6200000000000000000000000000000000000000000000000000000000000000000000000000000000000000003fc91a3afd70395cd496c647d5a6cc9d4b2b7fad00000000000000000000000000000000000000000000000000000000660a356a00000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000004105d619af01420eaf9e42177db34210d11bd00416b4fb538849b55dbbe8c47761503a5cfda9933914ea96a3542acdf8a5c865f6c8278b748f5db8a24e73a52a351b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000637cb504ec6d5b7c9000000000000000000000000000000000000000000000000006ffba3ca9cf62000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000006b175474e89094c44da98b954eedeac495271d0f000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000006ffba3ca9cf620"
+            }
+
+         */
+
+        /*
+            Nonce
+
+            Fee's
+            @TODO make sure +1 if creationg multiple tx's
+         */
         const tx = {
             from,
-            to: UNIVERSAL_ROUTER_ADDRESS(chainId),
+            to: EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
+            chainId,
             data,
             // TODO: universal-router-sdk returns a non-hexlified value.
             ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+            gas,
+            gasPrice: toHex(adjustedGasPrice),
+            nonce: toHex(nonce),
         }
         return tx
     }catch(e){
@@ -453,19 +569,30 @@ const get_quote = async function (quote:any) {
         })
         console.log("route: ",route)
         if(!route) throw new Error("missing route, failed to find route")
-
-        
         
         let trade = route.trade
         log.info(tag,"trade: ",trade)
         
-        //amountOutMin
-        let tx = await buildTx({trade,from:quote.senderAddress, chainId:chainIdInt})
-        log.info(tag,"tx: ",tx)
+        let amountOut = trade.swaps[0].outputAmount
+        log.info(tag,"amountOut: ",amountOut)
+        output.amountOut = amountOut.toFixed(18)
         
+        //amountOutMin
+        let tx = await buildTx({trade,from:quote.senderAddress, chainId:chainIdInt, provider})
+        log.info(tag,"tx: ",tx)
+
+        output.meta = {
+            quoteMode: "ERC20-ERC20"
+        }
+        output.steps = 1
+        output.complete = true
         output.type = 'EVM'
-        output.id = quote.id
-        output.tx = tx
+        output.id = uuid()
+        output.txs = [{
+            type:"evm",
+            chain:inputChain,
+            txParams:tx
+        }]
         
         return output;
     } catch (e) {
