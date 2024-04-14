@@ -60,6 +60,9 @@ let uniswap = require("@pioneer-platform/uniswap-client")
 
 //1inch/0x
 
+//bridge
+let across = require("@pioneer-platform/across-client")
+
 
 interface Swap {
     sellAsset: {
@@ -118,6 +121,7 @@ module.exports = {
         NetworksByIntegration['rango'] = rango.networkSupport()
         NetworksByIntegration['osmosis'] = osmosis.networkSupport()
         NetworksByIntegration['uniswap'] = uniswap.networkSupport()
+        NetworksByIntegration['across'] = across.networkSupport()
         return true;
     },
     routes: function(){
@@ -227,6 +231,18 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 log.info(tag,"payloadUniswap: ",payloadUniswap)
                 let quoteUniswap = await uniswap.getQuote(payloadUniswap)
                 return [quoteUniswap]
+            case "across":
+                let payloadAcross = {
+                    sellAsset: quote.sellAsset.caip,
+                    buyAsset: quote.buyAsset.caip,
+                    sellAmount: quote.sellAmount,
+                    senderAddress: quote.senderAddress,
+                    recipientAddress: quote.recipientAddress,
+                    slippage: quote.slippage
+                }
+                log.info(tag,"payloadAcross: ",payloadAcross)
+                let quotedAcross = await uniswap.getQuote(payloadAcross)
+                return [quotedAcross]
             default:
                 throw new Error("Intergration not found")
         }

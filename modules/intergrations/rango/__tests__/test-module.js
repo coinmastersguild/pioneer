@@ -189,11 +189,80 @@ let run_test = async function(){
         //     "affiliateRef":null
         // }
 
-        let body = {"from":{"blockchain":"BCH","symbol":"BCH","address":null},"to":{"blockchain":"ETH","symbol":"ETH","address":null},"amount":"0.115","connectedWallets":[{"blockchain":"BCH","addresses":["bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"]},{"blockchain":"ETH","addresses":["0x141D9959cAe3853b035000490C03991eB70Fc4aC"]}],"selectedWallets":{"ETH":"0x141D9959cAe3853b035000490C03991eB70Fc4aC","BCH":"bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"},"checkPrerequisites":false,"affiliateRef":null}
+        //let body = {"from":{"blockchain":"BCH","symbol":"BCH","address":null},"to":{"blockchain":"ETH","symbol":"ETH","address":null},"amount":"0.115","connectedWallets":[{"blockchain":"BCH","addresses":["bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"]},{"blockchain":"ETH","addresses":["0x141D9959cAe3853b035000490C03991eB70Fc4aC"]}],"selectedWallets":{"ETH":"0x141D9959cAe3853b035000490C03991eB70Fc4aC","BCH":"bitcoincash:qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p"},"checkPrerequisites":false,"affiliateRef":null}
 
-        let output = await rango.getQuote(body)
-        console.log("output: ",output)
-        console.log("output: ",JSON.stringify(output))
+        // let body = {
+        //     "from":{
+        //         "blockchain":"ETH",
+        //         "symbol":"ETH",
+        //         "address":null
+        //     },
+        //     "to":{
+        //         "blockchain":"BASE",
+        //         "symbol":"ETH",
+        //         "address":null
+        //     },
+        //     "amount":"0.100",
+        //     "connectedWallets":[
+        //         {
+        //             "blockchain":"ETH",
+        //             "addresses":[
+        //                 "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //             ]
+        //         },
+        //         {
+        //             "blockchain":"BASE",
+        //             "addresses":[
+        //                 "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //             ]
+        //         }
+        //     ],
+        //     "selectedWallets":{
+        //         "BASE":"0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //         "ETH":"0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //     },
+        //     "checkPrerequisites":false,
+        //     "affiliateRef":null
+        // }
+
+        // let body = {
+        //     "from":{
+        //         "blockchain":"BASE",
+        //         "symbol":"ETH",
+        //         "address":null
+        //     },
+        //     "to":{
+        //         "blockchain":"BASE",
+        //         "symbol":"PRO",
+        //         "address":"0xef743df8eda497bcf1977393c401a636518dd630"
+        //     },
+        //     "amount":"0.100",
+        //     "connectedWallets":[
+        //         {
+        //             "blockchain":"ETH",
+        //             "addresses":[
+        //                 "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //             ]
+        //         },
+        //         {
+        //             "blockchain":"BASE",
+        //             "addresses":[
+        //                 "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //             ]
+        //         }
+        //     ],
+        //     "selectedWallets":{
+        //         "BASE":"0x141D9959cAe3853b035000490C03991eB70Fc4aC",
+        //         "ETH":"0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        //     },
+        //     "checkPrerequisites":false,
+        //     "affiliateRef":null
+        // }
+        //
+        //
+        // let output = await rango.getQuote(body)
+        // console.log("output: ",output)
+        // console.log("output: ",JSON.stringify(output))
         // console.log("id: ",id)
         
         // let id = '9ac24a87-3a6f-4d3d-89d7-1dbf57c974d5'
@@ -210,13 +279,13 @@ let run_test = async function(){
               step: number
               txId: string
          */
-        // let payload = {
-        //     requestId: "309fc149-700d-4a93-b83d-c36aae1bceb5",
-        //     step: 1,
-        //     txId: "0x2b7ffbf7fbf377f266a7ef118762494a63ffbff7bd27b970aab0b5d09ccfdce9"
-        // }
-        // let status = await rango.getTransactionStatus(payload.requestId, payload.step, payload.txId)
-        // console.log("status: ", status)
+        let payload = {
+            requestId: "5a27dcb0-887a-42eb-a110-14108d60e82f",
+            step: 1,
+            txId: "0xdf53e8ef1cd631078107e8be8ee715adb7ebba3bd296fda6d585d339733ccd58"
+        }
+        let status = await rango.getTransactionStatus(payload.requestId, payload.step, payload.txId)
+        console.log("status: ", status)
     }catch(e){
         console.error(e)
     }

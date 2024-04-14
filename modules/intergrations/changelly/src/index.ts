@@ -28,6 +28,7 @@ let networkSupport = [
     ChainToNetworkId["DOGE"],
     ChainToNetworkId["BTC"],
     ChainToNetworkId["ETH"],
+    ChainToNetworkId["BASE"],
     ChainToNetworkId["LTC"],
     ChainToNetworkId["THOR"],
     ChainToNetworkId["BCH"],

@@ -19,6 +19,11 @@ const axios = Axios.create({
 });
 const axiosRetry = require('axios-retry');
 
+const { ethers, BigNumber } = require('ethers');
+const { Token, Fetcher, WETH, Route, Trade, TradeType, TokenAmount } = require('@uniswap/sdk');
+
+
+
 axiosRetry(axios, {
     retries: 5, // number of retries
     retryDelay: (retryCount: number) => {
@@ -63,6 +68,9 @@ module.exports = {
     getAssetsCoingecko: function (limit:number,skip:number){
         return get_assets_coingecko(limit,skip);
     },
+    getRatePro: function (){
+        return get_pro_rate();
+    },
     getPrice: function (asset:string) {
         return get_price(asset);
     },
@@ -73,6 +81,17 @@ module.exports = {
         return build_balances(marketInfoCoinCap,marketInfoCoinGecko,pubkeys)
     }
 }
+
+const get_pro_rate = async function() {
+    try {
+        const url = 'https://pioneers.dev/api/v1/uniswap/rateEth/0xef743df8eda497bcf1977393c401a636518dd630/8453';
+        let ratePro = await axios.get(url)
+        return ratePro.data
+    } catch(e) {
+        console.error(e);
+        return undefined;
+    }
+};
 
 let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any) {
     let tag = TAG + ' | build_balances | '
@@ -91,54 +110,84 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
         let unknownTokens:any = []
         let unPricedTokens:any = []
 
+        let proRate = await get_pro_rate()
+
         for(let i = 0; i < pubkeys.length; i++){
             let entry:any = pubkeys[i]
             // console.log("entry: ",entry)
             //clone
-
-            //get hit on symbol
-            let coincap = marketInfoCoinCap[entry.ticker]
-            let coingecko = marketInfoCoinGecko[entry.ticker]
-            
-            // log.info("coincap: ",coincap)
-            // log.info("coingecko: ",coingecko)
-
-            if(!coincap && !coingecko) {
-                console.error("unknown token! ",entry.symbol)
-                unknownTokens.push(entry)
-            }
-            
-            if(coincap && coincap.priceUsd){
-                entry.priceUsd = coincap.priceUsd
-                entry.rank = coincap.rank
-                entry.name = coincap.name
-                // entry.marketInfo = coincap
-                entry.source = "coincap"
-            }
-            //preference coinGecko as more accurate
-            if(coingecko && coingecko.current_price){
+            if(entry.ticker === 'PRO'){
+                console.log("proRate: ",proRate)
+                //pro rate is rate in ETH
+                let ethToUsdRate = marketInfoCoinCap['ETH'].priceUsd || marketInfoCoinGecko['ETH'].current_price; // Example, adjust based on your actual data structure
+                console.log("ethToUsdRate: ",ethToUsdRate)
+                let proToUsdRate = (1/proRate) * ethToUsdRate; // Calculating PRO to USD rate
+                console.log("proToUsdRate: ",proToUsdRate)
+                entry.priceUsd = proToUsdRate;
+                //TODO get rate in USD
+                entry.rank = 10
                 entry.alias = []
-                if(entry.name)entry.alias.push(entry.name)
-                entry.priceUsd = coingecko.current_price
-                entry.name = coingecko.id
-                entry.alias = entry.alias.push(coingecko.name)
-                entry.rank = coingecko.market_cap_rank
-                entry.source = "coingecko"
+                entry.alias.push('PRO')
+                entry.source = "uniswap"
+                entry.symbol = "PRO"
+            }else{
+                //get hit on symbol @TODO FUCK THIS SHIT DONT DO THIS, caip slug something
+                let coincap = marketInfoCoinCap[entry.ticker]
+                let coingecko = marketInfoCoinGecko[entry.ticker]
+                // log.info("coincap: ",coincap)
+                // log.info("coingecko: ",coingecko)
+
+                if(!coincap && !coingecko) {
+                    console.error("unknown token! ",entry.symbol)
+                    unknownTokens.push(entry)
+                }
+
+                if(coincap && coincap.priceUsd){
+                    entry.priceUsd = coincap.priceUsd
+                    entry.rank = coincap.rank
+                    entry.alias = []
+                    if(!entry.name) entry.name = coincap.name
+                    if(entry.name) entry.alias.push(entry.name)
+                    // entry.marketInfo = coincap
+                    entry.source = "coincap"
+                }
+                //preference coinGecko as more accurate
+                if(coingecko && coingecko.current_price){
+                    entry.alias = []
+                    if(entry.name) entry.alias.push(entry.name)
+                    entry.priceUsd = coingecko.current_price
+                    if(!entry.name) entry.name = coingecko.id
+                    entry.alias = entry.alias.push(coingecko.name)
+                    entry.rank = coingecko.market_cap_rank
+                    entry.source = "coingecko"
+                }
             }
-            
-            if(entry.priceUsd){
-                let valueUsd = entry.balance * entry.priceUsd
-                entry.valueUsd = String(valueUsd)
-                //valueUsd
-                totalValueUsd = Number(totalValueUsd) + Number(valueUsd)
-                outputBalances.push(entry)
+
+            const priceUsd = Number(entry.priceUsd);
+            if (!isNaN(priceUsd) && priceUsd !== 0) {
+                // Convert entry.balance to a number, defaulting to 0 if NaN
+                const balance = Number(entry.balance) || 0;
+
+                // Calculate valueUsd
+                const valueUsd = balance * priceUsd;
+
+                // Convert valueUsd to string and store back on the entry
+                entry.valueUsd = String(valueUsd);
+
+                // Add valueUsd to totalValueUsd, ensure totalValueUsd is a number
+                totalValueUsd += valueUsd;
+
+                // Push the entry to the output balances
+                outputBalances.push(entry);
             } else {
-                unPricedTokens.push(entry)
+                // Push the entry to unPricedTokens if priceUsd is not valid
+                unPricedTokens.push(entry);
             }
+
             //get value
-            
+
             //get hit on ticker
-            
+
             //validate on chain
 
             // //network from asset

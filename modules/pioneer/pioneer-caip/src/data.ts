@@ -220,7 +220,7 @@ export const shortListNameToCaip = {
     bnbsmartchain: 'eip155:56/slip44:60',
     ripple: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
     optimism: 'eip155:10/slip44:60',
-    base: 'eip155:10/slip44:60',
+    base: 'eip155:8453/slip44:60',
     kuji: 'cosmos:kaiyo-1/slip44:118',
     cardano: 'placeholder:caip:cardano:native:cardano',
     binance: 'placeholder:caip:binance:native:bnb-beacon-chain',

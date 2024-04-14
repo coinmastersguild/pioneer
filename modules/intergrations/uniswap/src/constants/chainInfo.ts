@@ -1,15 +1,47 @@
+import { ChainId } from '@uniswap/sdk-core'
 // @ts-ignore
-// import ms from 'ms.macro'
+import ms from 'ms'
+// import { darkTheme } from 'theme/colors'
 
-import { SupportedChainId, SupportedL1ChainId, SupportedL2ChainId } from './chains'
+import { SupportedL1ChainId, SupportedL2ChainId } from './chains'
+import { ARBITRUM_LIST, AVALANCHE_LIST, BASE_LIST, CELO_LIST, OPTIMISM_LIST, PLASMA_BNB_LIST } from './lists'
 
-export const STANDARD_L1_BLOCK_TIME = 12 * 1000;
+export const AVERAGE_L1_BLOCK_TIME = ms(`12s`)
+export const DEFAULT_MS_BEFORE_WARNING = ms(`10m`)
+
+/**
+ *
+ * @param chainId
+ * @returns The approximate whole number of blocks written to the corresponding chainId per Ethereum mainnet epoch.
+ */
+export function getBlocksPerMainnetEpochForChainId(chainId: number | undefined): number {
+  // Average block times were pulled from https://dune.com/jacobdcastro/avg-block-times on 2024-03-14,
+  // and corroborated with that chain's documentation/explorer.
+  // Blocks per mainnet epoch is computed as `Math.floor(12s / AVG_BLOCK_TIME)` and hard-coded.
+  switch (chainId) {
+    case ChainId.ARBITRUM_ONE:
+      return 46
+    case ChainId.OPTIMISM:
+      return 6
+    case ChainId.POLYGON:
+      return 5
+    case ChainId.BASE:
+      return 6
+    case ChainId.BNB:
+      return 4
+    case ChainId.AVALANCHE:
+      return 6
+    case ChainId.CELO:
+      return 2
+    default:
+      return 1
+  }
+}
 
 export enum NetworkType {
   L1,
   L2,
 }
-
 interface BaseChainInfo {
   readonly networkType: NetworkType
   readonly blockWaitMsBeforeWarning?: number
@@ -17,264 +49,252 @@ interface BaseChainInfo {
   readonly bridge?: string
   readonly explorer: string
   readonly infoLink: string
-  // readonly //logoUrl: string
-  /*
-   * The label and native currency symbol as listed on the "safe" list used by MetaMask: https://chainid.network/chains.json.
-   * If undefined, label and nativeCurrency.symbol may be safely used.
-   * MetaMask shows a warning when adding a chain using anything but its "safe" label.
-   */
-  readonly safe?: {
-    label?: string
-    symbol?: string
-  }
   readonly label: string
   readonly helpCenterUrl?: string
   readonly nativeCurrency: {
-    name: string // e.g. 'Goerli ETH'
-    symbol: string // e.g. 'gorETH'
-    decimals: 18 // e.g. 18
+    name: string // e.g. 'Goerli ETH',
+    symbol: string // e.g. 'gorETH',
+    decimals: number // e.g. 18,
   }
   readonly color?: string
   readonly backgroundColor?: string
 }
 
-export interface L1ChainInfo extends BaseChainInfo {
+interface L1ChainInfo extends BaseChainInfo {
   readonly networkType: NetworkType.L1
+  readonly defaultListUrl?: string
 }
 
 export interface L2ChainInfo extends BaseChainInfo {
   readonly networkType: NetworkType.L2
   readonly bridge: string
   readonly statusPage?: string
+  readonly defaultListUrl: string
 }
 
-export type ChainInfoMap = { readonly [chainId: number]: L1ChainInfo | L2ChainInfo } & {
+type ChainInfoMap = { readonly [chainId: number]: L1ChainInfo | L2ChainInfo } & {
   readonly [chainId in SupportedL2ChainId]: L2ChainInfo
-} &
-  { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
+} & { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
 
 const CHAIN_INFO: ChainInfoMap = {
-  [SupportedChainId.MAINNET]: {
+  [ChainId.MAINNET]: {
     networkType: NetworkType.L1,
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://etherscan.io/',
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Ethereum',
-    //logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-    color: '#627EEA',
+    color: '#fcfc03',
   },
-  [SupportedChainId.RINKEBY]: {
-    networkType: NetworkType.L1,
-    docs: 'https://docs.uniswap.org/',
-    explorer: 'https://rinkeby.etherscan.io/',
-    infoLink: 'https://info.uniswap.org/#/',
-    label: 'Rinkeby',
-    //logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Rinkeby Ether', symbol: 'rETH', decimals: 18 },
-    color: '#FB118E',
-  },
-  [SupportedChainId.ROPSTEN]: {
-    networkType: NetworkType.L1,
-    docs: 'https://docs.uniswap.org/',
-    explorer: 'https://ropsten.etherscan.io/',
-    infoLink: 'https://info.uniswap.org/#/',
-    label: 'Ropsten',
-    //logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
-    color: '#A08116',
-  },
-  [SupportedChainId.KOVAN]: {
-    networkType: NetworkType.L1,
-    docs: 'https://docs.uniswap.org/',
-    explorer: 'https://kovan.etherscan.io/',
-    infoLink: 'https://info.uniswap.org/#/',
-    label: 'Kovan',
-    //logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Kovan Ether', symbol: 'kovETH', decimals: 18 },
-    color: '#FF0420',
-  },
-  [SupportedChainId.GOERLI]: {
+  [ChainId.GOERLI]: {
     networkType: NetworkType.L1,
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://goerli.etherscan.io/',
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Görli',
-    //logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
-    color: '#209853',
+    color: '#fcfc03',
   },
-  [SupportedChainId.OPTIMISM]: {
+  [ChainId.SEPOLIA]: {
+    networkType: NetworkType.L1,
+    docs: 'https://docs.uniswap.org/',
+    explorer: 'https://sepolia.etherscan.io/',
+    infoLink: 'https://info.uniswap.org/#/',
+    label: 'Sepolia',
+    nativeCurrency: { name: 'Sepolia Ether', symbol: 'SepoliaETH', decimals: 18 },
+    color: '#fcfc03',
+  },
+  [ChainId.OPTIMISM]: {
     networkType: NetworkType.L2,
-    blockWaitMsBeforeWarning: 1500000,
+    blockWaitMsBeforeWarning: ms(`25m`),
     bridge: 'https://app.optimism.io/bridge',
+    defaultListUrl: OPTIMISM_LIST,
     docs: 'https://optimism.io/',
     explorer: 'https://optimistic.etherscan.io/',
     infoLink: 'https://info.uniswap.org/#/optimism/',
     label: 'Optimism',
-    //logoUrl: optimismLogoUrl,
     statusPage: 'https://optimism.io/status',
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-    color: '#FF0420',
-    backgroundColor: '#ff042029',
+    color: '#fcfc03',
+    backgroundColor: '#fcfc03',
   },
-  [SupportedChainId.OPTIMISM_GOERLI]: {
+  [ChainId.OPTIMISM_GOERLI]: {
     networkType: NetworkType.L2,
-    blockWaitMsBeforeWarning: 1500000,
+    blockWaitMsBeforeWarning: ms(`25m`),
     bridge: 'https://app.optimism.io/bridge',
+    defaultListUrl: OPTIMISM_LIST,
     docs: 'https://optimism.io/',
     explorer: 'https://goerli-optimism.etherscan.io/',
     infoLink: 'https://info.uniswap.org/#/optimism/',
-    safe: { label: 'Optimism Goerli Testnet', symbol: 'ETH' },
     label: 'Optimism Görli',
-    //logoUrl: optimismLogoUrl,
     statusPage: 'https://optimism.io/status',
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ',
     nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'görOpETH', decimals: 18 },
-    color: '#FF0420',
-    backgroundColor: '#ff042029',
+    color: '#fcfc03',
   },
-  [SupportedChainId.ARBITRUM_ONE]: {
+  [ChainId.ARBITRUM_ONE]: {
     networkType: NetworkType.L2,
-    blockWaitMsBeforeWarning: 600000,
+    blockWaitMsBeforeWarning: ms(`10m`),
     bridge: 'https://bridge.arbitrum.io/',
     docs: 'https://offchainlabs.com/',
     explorer: 'https://arbiscan.io/',
     infoLink: 'https://info.uniswap.org/#/arbitrum',
     label: 'Arbitrum',
-    //logoUrl: arbitrumLogoUrl,
+    defaultListUrl: ARBITRUM_LIST,
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137787-uniswap-on-arbitrum',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-    color: '#28A0F0',
-    backgroundColor: '#28a0f029',
+    color: '#fcfc03',
+    backgroundColor: '#fcfc03',
   },
-  [SupportedChainId.ARBITRUM_RINKEBY]: {
+  [ChainId.ARBITRUM_GOERLI]: {
     networkType: NetworkType.L2,
-    blockWaitMsBeforeWarning: 600000,
+    blockWaitMsBeforeWarning: ms(`10m`),
     bridge: 'https://bridge.arbitrum.io/',
     docs: 'https://offchainlabs.com/',
-    explorer: 'https://rinkeby-explorer.arbitrum.io/',
+    explorer: 'https://goerli.arbiscan.io/',
     infoLink: 'https://info.uniswap.org/#/arbitrum/',
-    label: 'Arbitrum Rinkeby',
-    //logoUrl: arbitrumLogoUrl,
+    label: 'Arbitrum Goerli',
+    defaultListUrl: ARBITRUM_LIST, // TODO: use arbitrum goerli token list
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137787-uniswap-on-arbitrum',
-    nativeCurrency: { name: 'Rinkeby Arbitrum Ether', symbol: 'rinkArbETH', decimals: 18 },
-    color: '#28A0F0',
-    backgroundColor: '#28a0f029',
+    nativeCurrency: { name: 'Goerli Arbitrum Ether', symbol: 'goerliArbETH', decimals: 18 },
+    color: '#fcfc03',
   },
-  [SupportedChainId.POLYGON]: {
+  [ChainId.POLYGON]: {
     networkType: NetworkType.L1,
-    blockWaitMsBeforeWarning: 600000,
-    bridge: 'https://wallet.polygon.technology/login?redirectTo=%2Fpolygon%2Fbridge',
+    blockWaitMsBeforeWarning: ms(`10m`),
+    bridge: 'https://wallet.polygon.technology/polygon/bridge',
     docs: 'https://polygon.io/',
     explorer: 'https://polygonscan.com/',
     infoLink: 'https://info.uniswap.org/#/polygon/',
-    safe: { label: 'Polygon Mainnet' },
     label: 'Polygon',
-    //logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
-    color: '#A457FF',
-    backgroundColor: '#a457ff29',
+    color: '#fcfc03',
+    backgroundColor: '#fcfc03',
   },
-  [SupportedChainId.POLYGON_MUMBAI]: {
+  [ChainId.POLYGON_MUMBAI]: {
     networkType: NetworkType.L1,
-    blockWaitMsBeforeWarning: 600000,
-    bridge: 'https://wallet.polygon.technology/login?redirectTo=%2Fpolygon%2Fbridge',
+    blockWaitMsBeforeWarning: ms(`10m`),
+    bridge: 'https://wallet.polygon.technology/polygon/bridge/deposit',
     docs: 'https://polygon.io/',
     explorer: 'https://mumbai.polygonscan.com/',
     infoLink: 'https://info.uniswap.org/#/polygon/',
-    safe: { symbol: 'MATIC' },
     label: 'Polygon Mumbai',
-    //logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Mumbai Matic', symbol: 'mMATIC', decimals: 18 },
-    color: '#A457FF',
-    backgroundColor: '#a457ff29',
   },
-  [SupportedChainId.CELO]: {
+  [ChainId.CELO]: {
     networkType: NetworkType.L1,
-    blockWaitMsBeforeWarning: 600000,
+    blockWaitMsBeforeWarning: ms(`10m`),
     bridge: 'https://www.portalbridge.com/#/transfer',
     docs: 'https://docs.celo.org/',
     explorer: 'https://celoscan.io/',
-    infoLink: 'https://info.uniswap.org/#/celo',
-    safe: { label: 'Celo Mainnet' },
+    infoLink: 'https://info.uniswap.org/#/celo/',
     label: 'Celo',
-    //logoUrl: celoLogo,
     nativeCurrency: { name: 'Celo', symbol: 'CELO', decimals: 18 },
-    color: '#35D07F',
-    backgroundColor: '#34d07f1f',
+    defaultListUrl: CELO_LIST,
   },
-  [SupportedChainId.CELO_ALFAJORES]: {
+  [ChainId.CELO_ALFAJORES]: {
     networkType: NetworkType.L1,
-    blockWaitMsBeforeWarning: 600000,
+    blockWaitMsBeforeWarning: ms(`10m`),
     bridge: 'https://www.portalbridge.com/#/transfer',
     docs: 'https://docs.celo.org/',
-    explorer: 'https://alfajores.celoscan.io/',
-    infoLink: 'https://info.uniswap.org/#/celo',
-    safe: { label: 'Celo Alfajores Testnet', symbol: 'CELO' },
+    explorer: 'https://alfajores-blockscout.celo-testnet.org/',
+    infoLink: 'https://info.uniswap.org/#/celo/',
     label: 'Celo Alfajores',
-    //logoUrl: celoLogo,
-    nativeCurrency: { name: 'Celo', symbol: 'aCELO', decimals: 18 },
-    color: '#35D07F',
-    backgroundColor: '#34d07f1f',
+    nativeCurrency: { name: 'Celo', symbol: 'CELO', decimals: 18 },
+    defaultListUrl: CELO_LIST,
   },
-  [SupportedChainId.BNB]: {
+  [ChainId.BNB]: {
     networkType: NetworkType.L1,
-    blockWaitMsBeforeWarning: 600000,
+    blockWaitMsBeforeWarning: ms(`10m`),
     bridge: 'https://cbridge.celer.network/1/56',
     docs: 'https://docs.bnbchain.org/',
     explorer: 'https://bscscan.com/',
     infoLink: 'https://info.uniswap.org/#/bnb/',
     label: 'BNB Chain',
-    //logoUrl: bnbLogo,
     nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-    color: '#F0B90B',
-    backgroundColor: '#F0B90B',
+    defaultListUrl: PLASMA_BNB_LIST,
+    color: '#fcfc03',
+    backgroundColor: '#fcfc03',
   },
-  [SupportedChainId.BASE]: {
+  [ChainId.AVALANCHE]: {
+    networkType: NetworkType.L1,
+    blockWaitMsBeforeWarning: ms(`10m`),
+    bridge: 'https://core.app/bridge/',
+    docs: 'https://docs.avax.network/',
+    explorer: 'https://snowtrace.io/',
+    infoLink: 'https://info.uniswap.org/#/avax/', // TODO(WEB-2336): Add avax support to info site
+    label: 'Avalanche',
+    nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
+    defaultListUrl: AVALANCHE_LIST,
+    color: '#fcfc03',
+    backgroundColor: '#fcfc03',
+  },
+  [ChainId.BASE]: {
     networkType: NetworkType.L2,
-    blockWaitMsBeforeWarning: 1500000,
-    bridge: 'https://bridge.base.org/',
-    docs: 'https://docs.base.org/',
+    blockWaitMsBeforeWarning: ms(`25m`),
+    bridge: 'https://bridge.base.org/deposit',
+    defaultListUrl: BASE_LIST,
+    docs: 'https://docs.base.org',
     explorer: 'https://basescan.org/',
     infoLink: 'https://info.uniswap.org/#/base/',
     label: 'Base',
-    //logoUrl: baseLogo,
+    statusPage: 'https://status.base.org/',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-    color: '#0152ff',
-    backgroundColor: '#0152ff',
+    color: '#fcfc03',
   },
-}
+  [ChainId.BLAST]: {
+    networkType: NetworkType.L2,
+    bridge: 'https://blast.io/bridge',
+    defaultListUrl: '',
+    docs: 'https://docs.blast.io',
+    explorer: 'https://blastscan.io/',
+    infoLink: 'https://info.uniswap.org/#/blast/',
+    label: 'Blast',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    color: '#fcfc03', //'#fcfc03'
+  },
+} as const
 
-export function getChainInfo(chainId: SupportedL1ChainId): L1ChainInfo
-export function getChainInfo(chainId: SupportedL2ChainId): L2ChainInfo
-export function getChainInfo(chainId: SupportedChainId): L1ChainInfo | L2ChainInfo
 export function getChainInfo(
-  chainId: SupportedChainId | SupportedL1ChainId | SupportedL2ChainId | number | undefined
+  chainId: SupportedL1ChainId,
+  featureFlags?: Record<ChainId | SupportedL1ChainId | SupportedL2ChainId | number, boolean>
+): L1ChainInfo
+export function getChainInfo(
+  chainId: SupportedL2ChainId,
+  featureFlags?: Record<ChainId | SupportedL1ChainId | SupportedL2ChainId | number, boolean>
+): L2ChainInfo
+export function getChainInfo(
+  chainId: ChainId,
+  featureFlags?: Record<ChainId | SupportedL1ChainId | SupportedL2ChainId | number, boolean>
+): L1ChainInfo | L2ChainInfo
+export function getChainInfo(
+  chainId: ChainId | SupportedL1ChainId | SupportedL2ChainId | number | undefined,
+  featureFlags?: Record<ChainId | SupportedL1ChainId | SupportedL2ChainId | number, boolean>
 ): L1ChainInfo | L2ChainInfo | undefined
 
 /**
  * Overloaded method for returning ChainInfo given a chainID
  * Return type varies depending on input type:
  * number | undefined -> returns chaininfo | undefined
- * SupportedChainId -> returns L1ChainInfo | L2ChainInfo
+ * ChainId -> returns L1ChainInfo | L2ChainInfo
  * SupportedL1ChainId -> returns L1ChainInfo
  * SupportedL2ChainId -> returns L2ChainInfo
  */
-export function getChainInfo(chainId: any): any {
+export function getChainInfo(
+  chainId: any,
+  featureFlags?: Record<ChainId | SupportedL1ChainId | SupportedL2ChainId | number, boolean>
+): any {
+  if (featureFlags && chainId in featureFlags) {
+    return featureFlags[chainId] ? CHAIN_INFO[chainId] : undefined
+  }
   if (chainId) {
     return CHAIN_INFO[chainId] ?? undefined
   }
   return undefined
 }
 
-export const MAINNET_INFO = CHAIN_INFO[SupportedChainId.MAINNET]
-export function getChainInfoOrDefault(chainId: number | undefined) {
-  return getChainInfo(chainId) ?? MAINNET_INFO
-}
-
-export function isSupportedChainId(chainId: number | undefined): chainId is SupportedChainId {
-  if (chainId === undefined) return false
-  return !!SupportedChainId[chainId]
+const MAINNET_INFO = CHAIN_INFO[ChainId.MAINNET]
+export function getChainInfoOrDefault(chainId: number | undefined, featureFlags?: Record<number, boolean>) {
+  return getChainInfo(chainId, featureFlags) ?? MAINNET_INFO
 }

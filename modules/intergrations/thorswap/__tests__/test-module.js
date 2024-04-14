@@ -19,13 +19,22 @@ let run_test = async function(){
         //     slippage: 3
         // }
 
+        // let swap = {
+        //     sellAsset: 'ETH.ETH',
+        //     sellAmount: '0.04',
+        //     buyAsset: 'BCH.BCH',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
+        //     slippage: 3
+        // }
+        
         let swap = {
-            sellAsset: 'ETH.ETH',
-            sellAmount: '0.04',
+            sellAsset: 'DOGE.DOGE',
             buyAsset: 'BCH.BCH',
-            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            sellAmount: '200.0',
+            senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
             recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
-            slippage: 3
+            slippage: '3'
         }
         
         let result = await thorswap.getQuote(swap)

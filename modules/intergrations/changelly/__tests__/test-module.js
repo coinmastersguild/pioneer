@@ -10,8 +10,8 @@ let run_test = async function(){
         //
         await changelly.init()
 
-        // let result = await changelly.getCurrenciesAsync()
-        // console.log("result: ",JSON.stringify(result))
+        let result = await changelly.getCurrenciesAsync()
+        console.log("result: ",JSON.stringify(result))
 
         // let changellyBody = {
         //     from: "BCH",
@@ -28,20 +28,27 @@ let run_test = async function(){
         // let result = await changelly.getQuote(from, to, address, amount)
         // console.log("result: ",JSON.stringify(result))
 
-        let changellyBody = {
-            from: 'ETH',
-            to: 'XRP',
-            address: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB',
-            amount: '0.0200'
-        }
+        // let changellyBody = {
+        //     from: 'ETH',
+        //     to: 'BASE',
+        //     address: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     amount: '0.1'
+        // }
 
-        from = changellyBody.from
-        to = changellyBody.to
-        address = changellyBody.address
-        amount = changellyBody.amount
+        // let changellyBody = {
+        //     from: 'ETH',
+        //     to: 'XRP',
+        //     address: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB',
+        //     amount: '0.0200'
+        // }
 
-        let result = await changelly.getQuote(from, to, address, amount)
-        console.log("result: ",JSON.stringify(result))
+        // from = changellyBody.from
+        // to = changellyBody.to
+        // address = changellyBody.address
+        // amount = changellyBody.amount
+        //
+        // let result = await changelly.getQuote(from, to, address, amount)
+        // console.log("result: ",JSON.stringify(result))
 
         // let id = 'm3sdxe9k9s0mkegx'
         // let id = '3byam0qy7xjojb2j'

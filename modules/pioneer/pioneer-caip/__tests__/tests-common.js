@@ -7,18 +7,18 @@ const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("
 
 // Test data for multiple tokens
 const tokens = [
-    {
-        chain: "BASE",
-        identifier: "BASE.PRO-0XEF743DF8EDA497BCF1977393C401A636518DD630",
-        ticker: "PRO",
-        decimals: 18,
-        caip: "ceip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630",
-        rangoName: {
-            blockchain:'BASE',
-            symbol:'PRO',
-            address:'0XEF743DF8EDA497BCF1977393C401A636518DD630'
-        }
-    },
+    // {
+    //     chain: "BASE",
+    //     identifier: "BASE.PRO-0XEF743DF8EDA497BCF1977393C401A636518DD630",
+    //     ticker: "PRO",
+    //     decimals: 18,
+    //     caip: "ceip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630",
+    //     rangoName: {
+    //         blockchain:'BASE',
+    //         symbol:'PRO',
+    //         address:'0XEF743DF8EDA497BCF1977393C401A636518DD630'
+    //     }
+    // },
     // {
     //     chain: "AVAX",
     //     identifier: "MAYA.CACAO",
@@ -93,18 +93,18 @@ const tokens = [
     //         address:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
     //     }
     // },
-    // {
-    //     chain: "BASE",
-    //     identifier: "BASE.ETH",
-    //     ticker: "ETH",
-    //     decimals: 18,
-    //     caip: "eip155:8453/slip44:60",
-    //     rangoName: {
-    //         blockchain:'BASE',
-    //         symbol:'ETH',
-    //         address:null
-    //     }
-    // },
+    {
+        chain: "BASE",
+        identifier: "BASE.ETH",
+        ticker: "ETH",
+        decimals: 18,
+        caip: "eip155:8453/slip44:60",
+        rangoName: {
+            blockchain:'BASE',
+            symbol:'ETH',
+            address:null
+        }
+    },
     // Add more token objects here
 ];
 

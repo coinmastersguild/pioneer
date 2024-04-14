@@ -6,7 +6,6 @@ export const SUPPORTED_LOCALES = [
   'ca-ES',
   'cs-CZ',
   'da-DK',
-  'de-DE',
   'el-GR',
   'es-ES',
   'fi-FI',
@@ -33,7 +32,7 @@ export const SUPPORTED_LOCALES = [
   'zh-CN',
   'zh-TW',
 ]
-export type SupportedLocale = typeof SUPPORTED_LOCALES[number] | 'pseudo'
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
 
 export const DEFAULT_LOCALE: SupportedLocale = 'en-US'
 
@@ -43,7 +42,6 @@ export const LOCALE_LABEL: { [locale in SupportedLocale]: string } = {
   'ca-ES': 'Català',
   'cs-CZ': 'čeština',
   'da-DK': 'dansk',
-  'de-DE': 'Deutsch',
   'el-GR': 'ελληνικά',
   'en-US': 'English',
   'es-ES': 'Español',
@@ -70,5 +68,4 @@ export const LOCALE_LABEL: { [locale in SupportedLocale]: string } = {
   'vi-VN': 'Tiếng Việt',
   'zh-CN': '简体中文',
   'zh-TW': '繁体中文',
-  pseudo: 'ƥƨèúδô',
 }
