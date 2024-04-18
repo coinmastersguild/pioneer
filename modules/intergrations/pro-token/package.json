@@ -1,6 +1,6 @@
 {
-  "name": "@pioneer-platform/uniswap-client",
-  "version": "0.0.26",
+  "name": "@pioneer-platform/pro-token",
+  "version": "0.0.4",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
@@ -30,7 +30,6 @@
   "scripts": {
     "npm": "npm i",
     "test": "npm run build && node __tests__/test-module.js",
-    "test-sdk": "npm run build && node __tests__/test-module-sdk.js",
     "build": "tsc -p .",
     "prepublish": "npm run build",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"

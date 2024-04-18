@@ -7,6 +7,8 @@
  */
 
 const TAG = " | market-module | "
+// @ts-ignore
+import { assetData } from '@pioneer-platform/pioneer-discovery';
 const Axios = require('axios')
 const https = require('https')
 const axios = Axios.create({
@@ -36,7 +38,7 @@ axiosRetry(axios, {
         return error.response.status === 503;
     },
 });
-
+let ProToken = require("@pioneer-platform/pro-token")
 import {
     Pubkey,
 } from "@pioneer-platform/pioneer-types";
@@ -47,6 +49,7 @@ let {
     needsMemoByNetwork,
     COIN_MAP_LONG
 } = require("@pioneer-platform/pioneer-coins")
+const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 
 const URL_COINCAP = "https://api.coincap.io/v2/"
 let URL_COINGECKO = "https://api.coingecko.com/api/v3/"
@@ -69,7 +72,10 @@ module.exports = {
         return get_assets_coingecko(limit,skip);
     },
     getRatePro: function (){
-        return get_pro_rate();
+        return ProToken.getRateProUsd();
+    },
+    updateCache: function (){
+        return update_cache();
     },
     getPrice: function (asset:string) {
         return get_price(asset);
@@ -82,16 +88,90 @@ module.exports = {
     }
 }
 
-const get_pro_rate = async function() {
-    try {
-        const url = 'https://pioneers.dev/api/v1/uniswap/rateEth/0xef743df8eda497bcf1977393c401a636518dd630/8453';
-        let ratePro = await axios.get(url)
-        return ratePro.data
-    } catch(e) {
-        console.error(e);
-        return undefined;
+const update_cache = async function() {
+    let tag = TAG + ' | update_cache | '
+    try{
+        // log.debug(tag,"assetData: ",assetData)
+        // let entries = Object.values(assetData)
+        // @ts-ignore
+        let entries = Object.entries(assetData).map(([caip, asset]) => ({...asset, caip}));
+
+        // log.debug(tag,"entries: ",entries)
+        
+        let url = URL_COINCAP + 'assets?limit=2000'
+        log.debug(tag,"url: ",url)
+        let result = await axios({
+            url: url,
+            method: 'GET'
+        })
+
+        //parse into keys array off ticker
+        let allCoinsArray = result.data.data
+        log.debug(tag,"allCoinsArray: ",allCoinsArray.length)
+
+        // let marketInfoCoinGecko = await get_assets_coingecko()
+        for(let i = 0; i < allCoinsArray.length; i++){
+            let entry = allCoinsArray[i]
+            // log.debug(tag,"entry: ",entry)
+
+            //hits by symbol
+            // @ts-ignore
+            let assetsMatchSymbol = entries.filter(asset => asset.symbol === entry.symbol);
+            //for now ignore this stuffs
+            // if(assetsMatchSymbol.length > 1){ // @ts-ignore
+            //     console.log(assetsMatchSymbol[0].symbol+ " assetsMatchSymbol: ",assetsMatchSymbol.length)
+            //     console.log("0: ",assetsMatchSymbol[0])
+            //     console.log("1: ",assetsMatchSymbol[1])
+            // }
+
+            for(let j = 0; j < assetsMatchSymbol.length; j++){
+                let asset = assetsMatchSymbol[j]
+                // log.debug(tag,"asset: ",asset)
+                // @ts-ignore
+                let key = "coincap:"+asset.caip
+                // log.debug(tag,"key: ",key)
+                //save cache by caip with 1hour cache
+                let result = await redis.setex(key, 3600, JSON.stringify(entry))
+                log.debug(tag,"saved: "+key+" result: ",result)
+            }
+        }
+
+        // Handling pagination for CoinGecko
+        const limit = 250; // assets per request
+        const totalAssets = 2000; // total assets to fetch
+        const totalPages = Math.ceil(totalAssets / limit); // calculate total pages needed
+
+        for (let page = 1; page <= totalPages; page++) {
+            let url = `${URL_COINGECKO}coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=false`;
+            log.debug(tag, "Fetching URL: ", url);
+
+            let result = await axios.get(url);
+            let allCoinsArray = result.data;
+            log.debug(tag, `Fetched ${allCoinsArray.length} coins for page ${page}`);
+            // log.debug(tag,"allCoinsArray: ",allCoinsArray)
+            // Process each coin
+            for (let coin of allCoinsArray) {
+                // log.debug(tag,"coin: ",coin)
+                let matchingAssets = entries.filter(asset => asset.symbol === coin.symbol.toUpperCase());
+                for (let matchingAsset of matchingAssets) {
+                    let key = `coingecko:${matchingAsset.caip}`;
+                    await redis.setex(key, 3600, JSON.stringify(coin));
+                    log.debug(tag, `Saved ${coin.symbol} under ${key}`);
+                }
+            }
+
+            // Wait 10 seconds before the next page request if it's not the last page
+            if (page < totalPages) {
+                log.debug(tag, `Waiting 10 seconds before next query...`);
+                await new Promise(resolve => setTimeout(resolve, 30000));
+            }
+        }
+
+    }catch(e){
+        log.error(e)
     }
-};
+}
+
 
 let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:any, pubkeys:any) {
     let tag = TAG + ' | build_balances | '
@@ -110,20 +190,15 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
         let unknownTokens:any = []
         let unPricedTokens:any = []
 
-        let proRate = await get_pro_rate()
-
         for(let i = 0; i < pubkeys.length; i++){
             let entry:any = pubkeys[i]
             // console.log("entry: ",entry)
             //clone
             if(entry.ticker === 'PRO'){
-                console.log("proRate: ",proRate)
-                //pro rate is rate in ETH
-                let ethToUsdRate = marketInfoCoinCap['ETH'].priceUsd || marketInfoCoinGecko['ETH'].current_price; // Example, adjust based on your actual data structure
-                console.log("ethToUsdRate: ",ethToUsdRate)
-                let proToUsdRate = (1/proRate) * ethToUsdRate; // Calculating PRO to USD rate
-                console.log("proToUsdRate: ",proToUsdRate)
-                entry.priceUsd = proToUsdRate;
+                let proUsdRate = await ProToken.getRateProUsd()
+                redis.set('proUsdRate', proUsdRate)
+                console.log("proToUsdRate: ",proUsdRate)
+                entry.priceUsd = proUsdRate;
                 //TODO get rate in USD
                 entry.rank = 10
                 entry.alias = []
@@ -134,11 +209,11 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
                 //get hit on symbol @TODO FUCK THIS SHIT DONT DO THIS, caip slug something
                 let coincap = marketInfoCoinCap[entry.ticker]
                 let coingecko = marketInfoCoinGecko[entry.ticker]
-                // log.info("coincap: ",coincap)
-                // log.info("coingecko: ",coingecko)
+                // log.debug("coincap: ",coincap)
+                // log.debug("coingecko: ",coingecko)
 
                 if(!coincap && !coingecko) {
-                    console.error("unknown token! ",entry.symbol)
+                    //console.error("unknown token! ",entry.symbol)
                     unknownTokens.push(entry)
                 }
 

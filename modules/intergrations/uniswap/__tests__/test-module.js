@@ -15,23 +15,23 @@ let run_test = async function(){
     try{
         
 
-        // let swap = {
-        //     sellAsset: 'eip155:8453/slip44:60',
-        //     sellAmount: '0.01',
-        //     buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
-        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-        //     slippage: 3
-        // }
-
         let swap = {
-            buyAsset: 'eip155:8453/slip44:60',
-            sellAmount: '10',
-            sellAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
+            sellAsset: 'eip155:8453/slip44:60',
+            sellAmount: '0.01',
+            buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
             senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
             recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
             slippage: 3
         }
+
+        // let swap = {
+        //     buyAsset: 'eip155:8453/slip44:60',
+        //     sellAmount: '10',
+        //     sellAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     slippage: 3
+        // }
         
         // let swap = {
         //     sellAsset: 'eip155:8453/erc20:0xef743df8eda497bcf1977393c401a636518dd630',

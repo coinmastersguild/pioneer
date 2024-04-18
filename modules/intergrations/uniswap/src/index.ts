@@ -10,7 +10,6 @@
  */
 
 const TAG = " | Uniswap | "
-import JSBI from 'jsbi'
 import axios from 'axios';
 import { BaseDecimal } from '@coinmasters/types';
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
@@ -20,10 +19,6 @@ const log = require('@pioneer-platform/loggerdog')()
 const { ethers, BigNumber } = require('ethers');
 import { utils, Wallet } from 'ethers'
 import { CurrencyAmount, TradeType, Ether, Token, Percent, Currency } from '@uniswap/sdk-core'
-import { buildTrade } from './utils/uniswapData'
-import { transformQuoteToTrade } from './routing/utils'
-import { QuoteMethod, URAQuoteResponse } from './routing/types'
-import { getRouter, getClientSideQuote } from './routing/clientSideSmartOrderRouter'
 import {
     SwapRouter,
 } from "@uniswap/universal-router-sdk";
@@ -87,111 +82,6 @@ module.exports = {
     },
     getQuote: function (quote:any) {
         return get_quote(quote);
-    },
-    buildPermitTx: function (input:any) {
-        return build_permit_tx(input);
-    }
-}
-
-function toDeadline(expiration: number): number {
-    return Math.floor((Date.now() + expiration) / 1000)
-}
-
-const PERMIT_EXPIRATION = 2592000000; // 30 days in milliseconds
-const PERMIT_SIG_EXPIRATION = 1800000; // 30 minutes in milliseconds
-
-const build_permit_tx = async function({from, token, amount, chainId}:any){
-    try{
-        // console.log("input: ", from, contract, address, chainId, provider)
-
-
-        let providerUrl = EIP155_MAINNET_CHAINS['eip155:'+chainId].rpc
-        if(!providerUrl) throw new Error("missing providerUrl")
-        log.info("providerUrl: ",providerUrl)
-        const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
-
-        // Get the current nonce for the account
-        const nonce = await provider.getTransactionCount(from, "latest");
-
-        const permit: any = {
-            details: {
-                token,
-                amount:'1000000000000000000000000',
-                expiration: toDeadline(PERMIT_EXPIRATION),
-                nonce:0,
-            },
-            spender:EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
-            sigDeadline: toDeadline(PERMIT_SIG_EXPIRATION),
-        }
-        console.log("permit: ", permit)
-        const fullResponse = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, chainId)
-        log.info("fullResponse: ",fullResponse)
-        let { domain, types, values } = fullResponse;
-
-        // Ensure 'EIP712Domain' is included in the types definitions
-        // If it's not already present or not recognized for some reason, define it explicitly
-        if (!types['EIP712Domain']) {
-            types['EIP712Domain'] = [
-                { name: "name", type: "string" },
-                { name: "chainId", type: "uint256" },
-                { name: "verifyingContract", type: "address" },
-            ];
-        }
-
-        let typedData = {
-            domain: domain,
-            types: types,
-            message: values, // Use 'values' as the 'message' for EIP712 signing
-            primaryType: "PermitSingle" // Assuming 'PermitSingle' as the primaryType based on your types definition
-        };
-
-        let tx = {
-            type: 'signTypedData',
-            txParams: typedData // Ensuring txParams contains the correctly formatted EIP-712 data
-        };
-        return tx
-    }catch(e){
-        console.error(e)
-    }
-}
-
-let get_pool = async function (tokenA: Token, tokenB: Token, feeAmount: FeeAmount, blockNumber = 16075500, provider: any) {
-    try{
-        //
-        log.info('Checking Pool: ', tokenA, tokenB, feeAmount, blockNumber, provider)
-        
-        const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA] // does safety checks
-        
-        // const poolAddress = Pool.getAddress(token0, token1, feeAmount)
-        // log.info('poolAddress: ', poolAddress)
-        let poolAddress = '0x93dd076ec59b6ae883f15d1d538435debf28b82c'
-        
-        const contract = new ethers.Contract(poolAddress, IUniswapV3Pool.abi, provider)
-        // log.info('contract: ', contract)
-        
-        let liquidity = await contract.liquidity()
-        // log.info('liquidity: ', liquidity.toString())
-        
-        let { sqrtPriceX96, tick } = await contract.slot0()
-        // log.info('sqrtPriceX96: ', sqrtPriceX96.toString())
-        // log.info('tick: ', tick.toString())
-        liquidity = JSBI.BigInt(liquidity.toString())
-        sqrtPriceX96 = JSBI.BigInt(sqrtPriceX96.toString())
-
-        return new Pool(token0, token1, feeAmount, sqrtPriceX96, liquidity, tick, [
-            {
-                index: nearestUsableTick(TickMath.MIN_TICK, TICK_SPACINGS[feeAmount]),
-                liquidityNet: liquidity,
-                liquidityGross: liquidity,
-            },
-            {
-                index: nearestUsableTick(TickMath.MAX_TICK, TICK_SPACINGS[feeAmount]),
-                liquidityNet: JSBI.multiply(liquidity, JSBI.BigInt('-1')),
-                liquidityGross: liquidity,
-            },
-        ])
-    }catch(e){
-        console.error(e)
     }
 }
 
@@ -210,7 +100,12 @@ const get_quote = async function (quote:any) {
         let from = quote.senderAddress
         // let slippageTolerance = quote.slippage
         let recipient = quote.recipientAddress
-
+        output.sellAsset = {}
+        output.sellAsset.caip = quote.sellAsset
+        output.sellAmount = quote.sellAmount
+        output.buyAsset = {}
+        output.buyAsset.caip = quote.buyAsset
+        
         //NO CROSS CHAIN
         let inputChain = caipToNetworkId(quote.sellAsset)
         let outputChain = caipToNetworkId(quote.buyAsset)
@@ -276,40 +171,6 @@ const get_quote = async function (quote:any) {
 
         const inputPRO = utils.parseUnits('1000', 18).toString()
         
-        // const trade:any = await V3Trade.fromRoute(
-        //     new RouteV3([POOL_PRO], SELL_TOKEN, BUY_TOKEN),
-        //     CurrencyAmount.fromRawAmount(SELL_TOKEN, inputPRO),
-        //     TradeType.EXACT_INPUT
-        // )
-        //
-        //
-        // const BIPS_BASE = BigNumber.from(10000); // For basis points calculations
-        // // const BIPS_BASE = JSBI.BigInt(10000)
-        // const slippageTolerance = new Percent(BigNumber.from(200), BIPS_BASE);
-        //
-        // const permit: any = {
-        //     details: {
-        //         token:quote.sellAsset.split(":")[2].toLowerCase(),
-        //         amount:'1000000000000000000000000',
-        //         expiration: toDeadline(PERMIT_EXPIRATION),
-        //         nonce:0,
-        //     },
-        //     spender:EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
-        //     sigDeadline: toDeadline(PERMIT_SIG_EXPIRATION),
-        //     signature:quote.permit2
-        // }
-        //
-        // // @ts-ignore
-        // let uniswapTrade:any = buildTrade([trade])
-        // uniswapTrade.swaps[0].route.protocol = 'V3'
-        // log.info("uniswapTrade: ",uniswapTrade)
-        // uniswapTrade.approveInfo = {
-        //     "needsApprove":false
-        // },
-        // uniswapTrade.fillType = 'classic'
-        // uniswapTrade.quoteMethod = 'ROUTING_API'
-        // log.info("uniswapTrade: ",JSON.stringify(uniswapTrade))
-
         //let mockedTrade = {"swaps":[{"route":{"_midPrice":{"numerator":[0,0,0,0,0,0,4096],"denominator":[61675844,569729604,374875920,86073376,789779649,857607051,27312043],"baseCurrency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"quoteCurrency":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"scalar":{"numerator":[660865024,931322574],"denominator":[660865024,931322574]}},"pools":[{"token0":{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"},"token1":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"fee":3000,"sqrtRatioX96":[976906734,801624171,99421808,5226],"liquidity":[669390988,785588334,1],"tickCurrent":88055,"tickDataProvider":{},"_token1Price":{"numerator":[0,0,0,0,0,0,4096],"denominator":[61675844,569729604,374875920,86073376,789779649,857607051,27312043],"baseCurrency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"quoteCurrency":{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"},"scalar":{"numerator":[660865024,931322574],"denominator":[660865024,931322574]}}}],"tokenPath":[{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"}],"input":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"output":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"protocol":"V3","path":[{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"}]},"inputAmount":{"numerator":[166199296,723291154,8],"denominator":[1],"currency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"decimalScale":[660865024,931322574]},"outputAmount":{"numerator":[711636223,1308984],"denominator":[1],"currency":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"decimalScale":[660865024,931322574]}}],"routes":[{"_midPrice":{"numerator":[0,0,0,0,0,0,4096],"denominator":[61675844,569729604,374875920,86073376,789779649,857607051,27312043],"baseCurrency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"quoteCurrency":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"scalar":{"numerator":[660865024,931322574],"denominator":[660865024,931322574]}},"pools":[{"token0":{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"},"token1":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"fee":3000,"sqrtRatioX96":[976906734,801624171,99421808,5226],"liquidity":[669390988,785588334,1],"tickCurrent":88055,"tickDataProvider":{},"_token1Price":{"numerator":[0,0,0,0,0,0,4096],"denominator":[61675844,569729604,374875920,86073376,789779649,857607051,27312043],"baseCurrency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"quoteCurrency":{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"},"scalar":{"numerator":[660865024,931322574],"denominator":[660865024,931322574]}}}],"tokenPath":[{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"}],"input":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"output":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"protocol":"V3","path":[{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},{"chainId":8453,"decimals":18,"symbol":"WETH","isNative":false,"isToken":true,"address":"0x4200000000000000000000000000000000000006"}]}],"tradeType":0,"fillType":"classic","approveInfo":{"needsApprove":false},"gasUseEstimate":164000,"gasUseEstimateUSD":0.005144,"blockNumber":"13097036","requestId":"747525fe-2ccf-494b-b0d3-677e2ebda037","quoteMethod":"ROUTING_API","swapFee":{"recipient":"0x067170777BA8027cED27E034102D54074d062d71","percent":{"numerator":[25],"denominator":[10000],"isPercent":true},"amount":"3522585411987"},"_outputAmount":{"numerator":[711636223,1308984],"denominator":[1],"currency":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"decimalScale":[660865024,931322574]},"_inputAmount":{"numerator":[166199296,723291154,8],"denominator":[1],"currency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"decimalScale":[660865024,931322574]},"_priceImpact":{"numerator":[941165072,174164585,107079465,969784123,796584146,369125678,162674660,985493716,122670731,392389178,573847026,872116559,752945511,679526963,814010822,56],"denominator":[0,0,0,0,0,0,0,706548328,653255527,1067448068,1064290579,550590138,219848419,764239412,729848924,903],"isPercent":true},"_executionPrice":{"numerator":[711636223,1308984],"denominator":[166199296,723291154,8],"baseCurrency":{"chainId":8453,"decimals":18,"symbol":"PRO","isNative":false,"isToken":true,"address":"0xEF743df8eDa497bCf1977393c401A636518DD630"},"quoteCurrency":{"chainId":8453,"decimals":18,"symbol":"ETH","name":"Ethereum","isNative":true,"isToken":false},"scalar":{"numerator":[660865024,931322574],"denominator":[660865024,931322574]}}}
         let args:any = {
             tokenInAddress: SELL_TOKEN_ADDRESS,
@@ -319,7 +180,7 @@ const get_quote = async function (quote:any) {
             amount:
                 "10000000000000000000",
             tradeType:'EXACT_INPUT',
-            sendPortionEnabled:false,
+            sendPortionEnabled:true,
         }
         enum Protocol {
             V2 = "V2",
@@ -368,7 +229,8 @@ const get_quote = async function (quote:any) {
             ],
         }
         // const UNISWAP_GATEWAY_DNS_URL = 'https://interface.gateway.uniswap.org/v2'
-
+        log.info("requestBody: ", requestBody)
+        log.info("requestBody: ", JSON.stringify(requestBody))
         let response:any = await axios({
             method: 'POST',
             url: 'https://interface.gateway.uniswap.org/v2/quote',
@@ -383,55 +245,18 @@ const get_quote = async function (quote:any) {
             }
         });
         log.info(tag,'response', response.data)
-        // const response = await fetch({
-        //     method: 'POST',
-        //     url: UNISWAP_GATEWAY_DNS_URL + `/quote`,
-        //     // @ts-ignore
-        //     body: JSON.stringify(requestBody),
-        //     headers: {
-        //         // @ts-ignore
-        //         'x-request-source': 'uniswap-web',
-        //         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-        //         'Origin': 'http://localhost:3000',
-        //         'Referer': 'http://localhost:3000',
-        //         'Accept': 'application/json, text/plain, */*',
-        //         'Content-Type': 'application/json'
-        //     },
-        // })
-        // @ts-ignore
-        const uraQuoteResponse = response.data as URAQuoteResponse
+        const uraQuoteResponse = response.data as any
         log.info(tag,'uraQuoteResponse', uraQuoteResponse)
-        
+        output.amountOut = uraQuoteResponse.quote.quoteDecimals
+        output.gas = uraQuoteResponse.quote.gasUseEstimate
+        output.gasUsd = uraQuoteResponse.quote.gasUseEstimateUSD
+        output.id = uraQuoteResponse.quote.requestId
+        output.slippage = uraQuoteResponse.quote.slippage
         // @ts-ignore
         let calldata = uraQuoteResponse.quote.methodParameters.calldata
         // @ts-ignore
         let value = uraQuoteResponse.quote.methodParameters.value
-        
-        // const trade = await transformQuoteToTrade(args, uraQuoteResponse, QuoteMethod.ROUTING_API)
-        // log.info(tag,'trade', trade)
-        //
-        // // const router = getRouter(args.tokenInChainId)
-        // // // log.info(tag,'router: ',router)
-        // // log.info(tag,'args: ',args)
-        // // const quoteResult = await getClientSideQuote(args, router, CLIENT_PARAMS)
-        // // log.info(tag,'quoteResult: ',quoteResult)
-        // // if(!quoteResult) throw Error("quoteResult is undefined")
-        // // // @ts-ignore
-        // // const trade = await transformQuoteToTrade(args, quoteResult.data, QuoteMethod.CLIENT_SIDE_FALLBACK)
-        // // if(!trade) throw Error("trade is undefined")
-        // // log.info(tag,'trade: ',trade)
-        //
-        // // @ts-ignore
-        // const { calldata, value } = SwapRouter.swapERC20CallParameters(trade, {
-        //     // recipient: from,
-        //     // @ts-ignore
-        //     slippageTolerance,
-        //     // deadlineOrPreviousBlockhash: deadline,
-        //     inputTokenPermit: undefined,
-        //     // @ts-ignore
-        //     // inputTokenPermit: permit,
-        //     // fee: options.feeOptions,
-        // })
+ 
         log.info("calldata: ",calldata)
         log.info("value: ",value)
         const nonce = await provider.getTransactionCount(from, "latest");
@@ -467,7 +292,7 @@ const get_quote = async function (quote:any) {
         output.steps = 1
         output.complete = true
         output.type = 'EVM'
-        output.id = uuid()
+
         return output;
     } catch (e) {
         console.error(tag, "e: ", e)

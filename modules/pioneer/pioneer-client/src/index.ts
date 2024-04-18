@@ -28,7 +28,7 @@ function customHttpClient(req: HttpRequest): Promise<HttpResponse> {
     return new Promise<HttpResponse>((resolve, reject) => {
         const timer = setTimeout(() => {
             reject(new Error('Request timed out'));
-        }, 10000); // 10 seconds
+        }, 60000); // 60 seconds
 
         Swagger.http(req)
             .then((response: HttpResponse) => {

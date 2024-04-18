@@ -40,6 +40,9 @@
 
 const TAG = " | Pioneer-router | "
 const log = require('@pioneer-platform/loggerdog')()
+const { redis } = require('@pioneer-platform/default-redis')
+let proToken = require("@pioneer-platform/pro-token")
+
 //thorswap
 let thorswap = require("@pioneer-platform/thorswap-client")
 const { caipToRango, caipToNetworkId } = require("@pioneer-platform/pioneer-caip");
@@ -58,13 +61,21 @@ let mayachain = require("@pioneer-platform/mayachain-client")
 //uniswap
 let uniswap = require("@pioneer-platform/uniswap-client")
 
+//
+let chainflip = require("@pioneer-platform/chainflip-client")
+
 //1inch/0x
 
 //bridge
 let across = require("@pioneer-platform/across-client")
 
+let MEMOLESS_SUPPORT:any = {
+    "changelly": true,
+    "chainflip": true,
+}
 
 interface Swap {
+    memoless?: boolean,
     sellAsset: {
         context: string,
         caip: string,
@@ -122,6 +133,7 @@ module.exports = {
         NetworksByIntegration['osmosis'] = osmosis.networkSupport()
         NetworksByIntegration['uniswap'] = uniswap.networkSupport()
         NetworksByIntegration['across'] = across.networkSupport()
+        NetworksByIntegration['chainflip'] = chainflip.networkSupport()
         return true;
     },
     routes: function(){
@@ -131,7 +143,6 @@ module.exports = {
         return get_quote(quote);
     }
 }
-
 
 async function get_quote_from_integration(integration:string, quote: Swap) {
     let tag = TAG + " | get_quote_from_integration | "
@@ -195,8 +206,8 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 let quoteOsmosis = await osmosis.getQuote(payloadOsmosis)
                 return [quoteOsmosis]
             case "changelly":
-                let from = quote.sellAsset.ticker
-                let to = quote.buyAsset.ticker
+                let from = quote.sellAsset.ticker || quote.sellAsset.symbol
+                let to = quote.buyAsset.ticker || quote.buyAsset.symbol
                 let address = quote.buyAsset.address
                 let amount = quote.sellAmount
                 log.info({
@@ -230,25 +241,53 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
                 }
                 log.info(tag,"payloadUniswap: ",payloadUniswap)
                 let quoteUniswap = await uniswap.getQuote(payloadUniswap)
+                log.info(tag,"quoteUniswap: ",quoteUniswap)
                 return [quoteUniswap]
-            case "across":
-                let payloadAcross = {
+            case "chainflip":
+                let payloadChainflip = {
                     sellAsset: quote.sellAsset.caip,
                     buyAsset: quote.buyAsset.caip,
                     sellAmount: quote.sellAmount,
-                    senderAddress: quote.senderAddress,
                     recipientAddress: quote.recipientAddress,
                     slippage: quote.slippage
                 }
-                log.info(tag,"payloadAcross: ",payloadAcross)
-                let quotedAcross = await uniswap.getQuote(payloadAcross)
-                return [quotedAcross]
+                log.info(tag,"payloadChainflip: ",payloadChainflip)
+                let quoteChainflip = await chainflip.getQuote(payloadChainflip)
+                return [quoteChainflip]
+            // case "across":
+            //     let payloadAcross = {
+            //         sellAsset: quote.sellAsset.caip,
+            //         buyAsset: quote.buyAsset.caip,
+            //         sellAmount: quote.sellAmount,
+            //         senderAddress: quote.senderAddress,
+            //         recipientAddress: quote.recipientAddress,
+            //         slippage: quote.slippage
+            //     }
+            //     log.info(tag,"payloadAcross: ",payloadAcross)
+            //     let quotedAcross = await accross.getQuote(payloadAcross)
+            //     return [quotedAcross]
             default:
                 throw new Error("Intergration not found")
         }
     }catch(e){
         log.error(tag,"Error: ",e)
         return null
+    }
+}
+
+let get_pro_rate_usd = async function(){
+    try{
+        let cacheValue = await redis.get('proRateUsd')
+        if(cacheValue){
+            return parseFloat(cacheValue);  // Convert string to float if necessary
+        } else {
+            let proRateUsd = await proToken.getRateProUsd();
+            await redis.setex('proRateUsd', 300, proRateUsd.toString());  // Expiry time in seconds, value as string
+            return proRateUsd;
+        }
+    }catch(e){
+        log.error(e)
+        return 1
     }
 }
 
@@ -262,7 +301,12 @@ async function get_quote(quote:Swap) {
         let quotes = [];
         log.info("sellChain: ",sellChain)
         log.info("buyChain: ",buyChain)
-        
+
+        //if memoless filter
+        if (quote.memoless) {
+            integrations = integrations.filter(integration => MEMOLESS_SUPPORT[integration]);
+        }
+
         for (let integration of integrations) {
             let supportedNetworks = NetworksByIntegration[integration];
             log.info(tag,integration+" supportedNetworks: ",supportedNetworks)
@@ -282,10 +326,12 @@ async function get_quote(quote:Swap) {
                             let buyAssetValueUsd = parseFloat(integrationQuote.amountOut) * quote.buyAsset.priceUsd;
                             let proTokenEarned = sellAssetValueUsd * 0.1; // For every 1 USD, they earn 0.01 PRO token
                             integrationQuote.proTokenEarned = proTokenEarned;
-                            integrationQuote.proTokenEarnedUsd = proTokenEarned * 1 //TODO get dynamic price
+                            integrationQuote.proTokenEarnedUsd = proTokenEarned * await get_pro_rate_usd() //TODO get dynamic price
                             integrationQuote.sellAssetValueUsd = sellAssetValueUsd;
                             integrationQuote.buyAssetValueUsd = buyAssetValueUsd;
                             quotes.push({ integration, quote: integrationQuote });    
+                        } else {
+                            log.error("Failed to get amountOut from integration: ",integration)
                         }
                     }
                 }
