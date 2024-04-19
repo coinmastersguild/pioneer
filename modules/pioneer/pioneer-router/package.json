@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.76",
+  "version": "8.4.82",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@pioneer-platform/across-client": "^0.0.2",
+    "@pioneer-platform/chainflip-client": "^0.0.8",
     "@pioneer-platform/changelly-client": "^8.3.10",
     "@pioneer-platform/mayachain-client": "^0.0.34",
     "@pioneer-platform/osmosis-client": "^0.0.14",

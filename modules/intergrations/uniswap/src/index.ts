@@ -95,6 +95,12 @@ const get_quote = async function (quote:any) {
         if(!quote.senderAddress) throw new Error("missing senderAddress")
         if(!quote.recipientAddress) throw new Error("missing recipientAddress")
         if(!quote.slippage) throw new Error("missing slippage")
+        if (!networkSupport.includes(caipToNetworkId(quote.buyAsset))) {
+            throw new Error("unsupported buyAsset");
+        }
+        if (!networkSupport.includes(caipToNetworkId(quote.sellAsset))) {
+            throw new Error("unsupported sellAsset");
+        }
         // if(!quote.permit2) throw new Error("missing permit2, required for uniswap")
         output.txs = []
         let from = quote.senderAddress

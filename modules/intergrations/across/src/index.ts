@@ -172,6 +172,12 @@ const get_quote = async function (quote:any) {
         if(!quote.senderAddress) throw new Error("missing senderAddress")
         if(!quote.recipientAddress) throw new Error("missing recipientAddress")
         if(!quote.slippage) throw new Error("missing slippage")
+        if (!networkSupport.includes(caipToNetworkId(quote.buyAsset))) {
+            throw new Error("unsupported buyAsset");
+        }
+        if (!networkSupport.includes(caipToNetworkId(quote.sellAsset))) {
+            throw new Error("unsupported sellAsset");
+        }
         output.txs = []
         log.info(tag,"quote.sellAsset: ",quote.sellAsset)
         let originChainId = caipToNetworkId(quote.sellAsset).replace('eip155:', '');

@@ -11,7 +11,7 @@ const TAG = " | chainflip | "
 import { BaseDecimal } from '@coinmasters/types';
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
-let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
+let { Chain, caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId, NetworkIdToChain, getChainEnumValue } = require("@pioneer-platform/pioneer-caip")
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
 import { ApiPromise, WsProvider } from "@polkadot/api";
 const axios = require('axios');
@@ -32,6 +32,26 @@ module.exports = {
     getQuote: function (quote:any) {
         return get_quote(quote);
     },
+    lookupTx: function (quoteId:string) {
+        return get_quote_info(quoteId);
+    },
+}
+
+const get_quote_info = async function (quoteId:string) {
+    let tag = TAG + " | get_quote_info | "
+    try {
+        let output:any = {}
+        // Make a GET request using Axios
+        const response = await axios.get(`https://chainflip-swap.chainflip.io/swaps/${quoteId}`);
+
+        // Assuming the response data is what you want to use
+        output.data = response.data;
+
+        return output;
+    } catch (e) {
+        console.error(tag, "e: ", e)
+        throw e;
+    }
 }
 
 const get_quote = async function (quote:any) {
@@ -50,40 +70,79 @@ const get_quote = async function (quote:any) {
         if(!quote.sellAmount) throw new Error("missing sellAmount")
         if(!quote.recipientAddress) throw new Error("missing recipientAddress")
         if(!quote.slippage) throw new Error("missing slippage")
-        // let providerUrl = "wss://rpc.polkadot.io"
-        // const provider = new WsProvider(providerUrl);
-        // const api = await ApiPromise.create({ provider });
-
-        //https://chainflip-swap.chainflip.io/quote?amount=100000000&srcChain=Bitcoin&srcAsset=BTC&destChain=Ethereum&destAsset=ETH
-        //get quote
-        const responseQuote = await axios.get('https://chainflip-swap.chainflip.io/quote', {
-            params: {
-                amount: 100000000,
-                srcChain: 'Bitcoin',
-                srcAsset: 'BTC',
-                destChain: 'Ethereum',
-                destAsset: 'ETH'
-            }
-        });
-        // console.log(responseQuote.data); // Handle the response data as needed
+        if (!networkSupport.includes(caipToNetworkId(quote.buyAsset))) {
+            throw new Error("unsupported buyAsset");
+        }
+        if (!networkSupport.includes(caipToNetworkId(quote.sellAsset))) {
+            throw new Error("unsupported sellAsset");
+        }
+        output.sellAsset = {}
+        output.sellAsset.caip = quote.sellAsset
+        output.sellAmount = quote.sellAmount
+        output.buyAsset = {}
+        output.buyAsset.caip = quote.buyAsset
         
+        let chainSell = NetworkIdToChain[caipToNetworkId(quote.sellAsset)]
+        let chainBuy = NetworkIdToChain[caipToNetworkId(quote.buyAsset)]
+        log.info(tag,"chainSell: ",chainSell)
+        log.info(tag,"chainBuy: ",chainBuy)
+        let longNameSell = Object.keys(Chain).find(key => Chain[key] === chainSell)
+        let longNameBuy = Object.keys(Chain).find(key => Chain[key] === chainBuy)
+        log.info(tag,"chainSell: ",longNameSell)
+        log.info(tag,"chainBuy: ",longNameBuy)
+        const decimals:any = {
+            'BTC': 8,   // Bitcoin uses 8 decimal places
+            'ETH': 18,  // Ethereum uses 18 decimal places
+        };
+
+        // Helper function to scale the amount by the number of decimals
+        function scaleAmount(amount:any, decimals:any) {
+            return amount * Math.pow(10, decimals);
+        }
+
+        // Adjusting the amount according to the asset's decimals
+        const amountToQuote = scaleAmount(quote.sellAmount, decimals[chainSell]);  // Assumes 1 unit of the selling asset
+        log.info(tag,"amountToQuote: ",amountToQuote)
+
+        //get quote
+        let params = {
+            amount: amountToQuote,
+            srcChain: longNameSell,
+            srcAsset: chainSell,
+            destChain: longNameBuy,
+            destAsset: chainBuy
+        }
+        log.info(tag,"params: ",params)
+        const responseQuote = await axios.get('https://chainflip-swap.chainflip.io/quote', {
+            params
+        });
+
+        function convertToReadableAmount(amount:any, decimals:any) {
+            return amount / Math.pow(10, decimals);
+        }
+        console.log("responseQuote: ",responseQuote.data); // Handle the response data as needed
+        const egressAmountReadable = convertToReadableAmount(responseQuote.data.egressAmount, decimals[chainBuy]);
+        log.info(tag,"egressAmountReadable: ",egressAmountReadable)
+        output.amountOut = egressAmountReadable
 
 
-        //https://chainflip-swap.chainflip.io/trpc/openSwapDepositChannel?batch=1
+
+        // //https://chainflip-swap.chainflip.io/trpc/openSwapDepositChannel?batch=1
         const url = 'https://chainflip-swap.chainflip.io/trpc/openSwapDepositChannel?batch=1';
         const data = {
             "0": {
                 "json": {
-                    "srcChain": "Ethereum",
-                    "destChain": "Bitcoin",
-                    "srcAsset": "ETH",
-                    "destAsset": "BTC",
-                    "amount": "20427368230548824399",
+                    "srcChain": longNameSell,
+                    "destChain": longNameBuy,
+                    "srcAsset": chainSell,
+                    "destAsset": chainBuy,
+                    "amount": amountToQuote.toString(),
                     "quote": responseQuote.data,
-                    "destAddress": "bc1qu3ghkz8788ysk7gqcvke5l0mr7skhgvpuk6dk4"
+                    "destAddress": quote.recipientAddress,
                 }
             }
         };
+        log.info("data good: ",data)    
         const headers = {
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br, zstd',
@@ -104,25 +163,14 @@ const get_quote = async function (quote:any) {
         // console.log(response); // Log the response data
         // console.log(response.data); // Log the response data
         // console.log(JSON.stringify(response.data)); // Log the response data
-        
+
         let result = response.data[0].result.data.json;
         log.info(tag,"result: ",result)
-        
+
         output.id = result.id
         output.source = 'chainflip'
+        output.inboundAddress = result.depositAddress
         output.estimatedExpiryTime = result.estimatedExpiryTime
-        output.amountOut = responseQuote.data.egressAmount;
-        console.log("caipToNetworkId(ChainToNetworkId[\"BTC\"]): ",caipToNetworkId(ChainToNetworkId["BTC"]))
-        console.log("caipToNetworkId(quote.sellAsset): ",caipToNetworkId(quote.sellAsset))
-        if (caipToNetworkId(quote.sellAsset) == caipToNetworkId(ChainToNetworkId["BTC"])) {
-            // Convert from satoshis to BTC
-            output.amountOut /= 1e8;
-        } else if (caipToNetworkId(quote.sellAsset) == caipToNetworkId(ChainToNetworkId["ETH"])) {
-            // Convert from wei to ETH
-            output.amountOut /= 1e18;
-        } else {
-            throw Error("Chain not supported!")
-        }
         let tx = {
             type:"transfer",
             chain:caipToNetworkId(quote.sellAsset),
@@ -133,10 +181,11 @@ const get_quote = async function (quote:any) {
         }
         output.txs = [tx]
         output.raw = data
-        
+
         return output;
     } catch (e) {
         console.error(tag, "e: ", e)
+        console.error(tag, "e: ", JSON.stringify(e))
         throw e;
     }
 }

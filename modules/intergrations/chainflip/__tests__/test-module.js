@@ -31,17 +31,29 @@ let run_test = async function(){
 
         let swap = {
             sellAsset: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            sellAmount: '0.01',
-            buyAsset: 'eip155:8453/slip44:60',
-            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            recipientAddress: 'bc1qu3ghkz8788ysk7gqcvke5l0mr7skhgvpuk6dk4',
+            sellAmount: '0.007',
+            buyAsset: 'eip155:1/slip44:60',
+            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
             slippage: 3
         }
+
+        // let swap = {
+        //     sellAsset: 'eip155:1/slip44:60',
+        //     sellAmount: '0.1',
+        //     buyAsset: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: 'bc1qu3ghkz8788ysk7gqcvke5l0mr7skhgvpuk6dk4',
+        //     slippage: 3
+        // }
 
         let result = await client.getQuote(swap)
         console.log("result: ",result)
         // console.log("result: ",result.txs[0])
 
+        // let quoteId = '2258444-Ethereum-141'
+        // let result = await client.lookupTx(quoteId)
+        // console.log("result: ",result)
+        
     }catch(e){
         console.error(e)
     }
