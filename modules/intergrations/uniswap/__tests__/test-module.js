@@ -13,16 +13,18 @@ let client = require("../lib/index")
 // console.log("servers: ",servers)
 let run_test = async function(){
     try{
-        
 
-        let swap = {
-            sellAsset: 'eip155:8453/slip44:60',
-            sellAmount: '0.01',
-            buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
-            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            slippage: 3
-        }
+        let assetSupport = await client.assetSupport()
+        console.log("assetSupport: ",assetSupport)
+
+        // let swap = {
+        //     sellAsset: 'eip155:8453/slip44:60',
+        //     sellAmount: '0.01',
+        //     buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     slippage: 3
+        // }
 
         // let swap = {
         //     buyAsset: 'eip155:8453/slip44:60',
@@ -52,11 +54,11 @@ let run_test = async function(){
         // }
         // console.log("swao: ",swap)
         
-        console.log("swap: ",swap)
-        let result = await client.getQuote(swap)
-        console.log("result: ",result)
-        console.log("result: ",result.txs[0])
-        console.log("result: ",JSON.stringify(result.txs[0]))
+        // console.log("swap: ",swap)
+        // let result = await client.getQuote(swap)
+        // console.log("result: ",result)
+        // console.log("result: ",result.txs[0])
+        // console.log("result: ",JSON.stringify(result.txs[0]))
 
         
     }catch(e){

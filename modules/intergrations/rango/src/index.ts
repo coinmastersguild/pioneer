@@ -35,18 +35,29 @@ let networkSupport = [
     caipToNetworkId(shortListSymbolToCaip["ARB"]),
     // caipToNetworkId(shortListSymbolToCaip["GAIA"]),
     // shortListSymbolToCaip["BNB"],
-    // caipToNetworkId(shortListSymbolToCaip["BSC"]),
-    // caipToNetworkId(shortListSymbolToCaip["DOGE"]),
-    // caipToNetworkId(shortListSymbolToCaip["BTC"]),
+    caipToNetworkId(shortListSymbolToCaip["BSC"]),
+    caipToNetworkId(shortListSymbolToCaip["DOGE"]),
+    caipToNetworkId(shortListSymbolToCaip["BTC"]),
     caipToNetworkId(shortListSymbolToCaip["ETH"]),
     // caipToNetworkId(shortListSymbolToCaip["LTC"]),
     // caipToNetworkId(shortListSymbolToCaip["THOR"]),
-    // caipToNetworkId(shortListSymbolToCaip["BCH"]),
+    caipToNetworkId(shortListSymbolToCaip["BCH"]),
     caipToNetworkId(shortListSymbolToCaip["GNO"]),
     caipToNetworkId(shortListSymbolToCaip["MATIC"]),
     caipToNetworkId(shortListSymbolToCaip["AVAX"]),
 ]
 
+let assetSupport = [
+    shortListSymbolToCaip["SOLANA"],
+    shortListSymbolToCaip["BTC"],
+    shortListSymbolToCaip["ETH"],
+    shortListSymbolToCaip["BASE"],
+    shortListSymbolToCaip["GNO"],
+    shortListSymbolToCaip["MATIC"],
+    shortListSymbolToCaip["AVAX"],
+    shortListSymbolToCaip["DOGE"],
+    shortListSymbolToCaip["BCH"],
+]
 
 module.exports = {
     init:function(settings:any){
@@ -55,6 +66,9 @@ module.exports = {
     },
     networkSupport: function () {
         return networkSupport
+    },
+    assetSupport: function () {
+        return assetSupport
     },
     getChains: async function () {
         return rango.getAllMetadata()

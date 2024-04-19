@@ -14,11 +14,16 @@ let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId} = require("@pion
 let networkOsmo = require("@pioneer-platform/osmosis-network")
 let networkAtom = require("@pioneer-platform/cosmos-network")
 const { uuid } = require('uuidv4');
+
 let networkSupport = [
     ChainToNetworkId["OSMO"],
     ChainToNetworkId["GAIA"],
 ]
 
+let assetSupport = [
+    shortListSymbolToCaip["OSMO"],
+    shortListSymbolToCaip["GAIA"],
+]
 
 module.exports = {
     init:function(settings:any){
@@ -26,6 +31,9 @@ module.exports = {
     },
     networkSupport: function () {
         return networkSupport
+    },
+    assetSupport: function () {
+        return assetSupport
     },
     getQuote: function (quote:any) {
         return get_quote(quote);

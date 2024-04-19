@@ -22,6 +22,16 @@ let networkSupport = [
     ChainToNetworkId["ETH"],
     ChainToNetworkId["THOR"],
     ChainToNetworkId["DASH"],
+    ChainToNetworkId["ARB"],
+]
+
+let assetSupport = [
+    shortListSymbolToCaip["BTC"],
+    shortListSymbolToCaip["ETH"],
+    shortListSymbolToCaip["MAYA"],
+    shortListSymbolToCaip["THOR"],
+    shortListSymbolToCaip["DASH"],
+    shortListSymbolToCaip["ARB"],
 ]
 
 // Function to make a request to the node
@@ -43,53 +53,12 @@ module.exports = {
     networkSupport: function () {
         return networkSupport;
     },
+    assetSupport: function () {
+        return assetSupport;
+    },
     getQuote: function (quote:any) {
         return get_quote(quote);
     },
-}
-
-interface QuoteResult {
-    amountOutMin: string;
-    amountOut: string;
-    slippage: string;
-}
-
-function quoteFromPool(sellAmount: string, assetPoolAmount: string, runePoolAmount: string, maxSlippage: number): QuoteResult {
-    // Convert string inputs to numbers and scale the sell amount
-    const swapAmount = parseFloat(sellAmount) * 1e8; // Assuming 1e6 is the scaling factor for Maya
-    const assetDepth = parseFloat(assetPoolAmount);
-    const runeDepth = parseFloat(runePoolAmount);
-
-    // Calculate the constant product
-    const k = assetDepth * runeDepth;
-
-    // New amount of the asset in the pool after the swap
-    const newAssetDepth = assetDepth + swapAmount;
-
-    // Calculate the amount of Rune received (or the other asset in the pool)
-    const newRuneDepth = k / newAssetDepth;
-    const runeReceived = runeDepth - newRuneDepth;
-
-    // Scale back down the amount of Rune received
-    const scaledRuneReceived = runeReceived / 1e6; // Adjust as per Rune's scaling factor
-
-    // Calculate the actual rate of the swap
-    const actualRate = scaledRuneReceived / (swapAmount / 1e6);
-
-    // Calculate the ideal rate
-    const idealRate = runeDepth / assetDepth;
-
-    // Calculate the slippage
-    const slippage = ((idealRate - actualRate) / idealRate) * 100;
-
-    // Calculate amountOutMin considering the maximum slippage
-    const amountOutMin = scaledRuneReceived * (1 - maxSlippage / 100);
-
-    return {
-        amountOutMin: amountOutMin.toFixed(6).toString(),
-        amountOut: scaledRuneReceived.toFixed(6),
-        slippage: Math.max(slippage, 0).toFixed(6)
-    };
 }
 
 const get_quote = async function (quote:any) {
@@ -107,13 +76,6 @@ const get_quote = async function (quote:any) {
         let pools = await network.getPools()
         if(!pools) throw Error("Unable to get pools from network!")
         // log.info(tag, "pools: ", pools)
-
-        //get poolIn
-        let poolIn = pools.find((p:any)=>p.asset == quote.sellAsset)
-        // log.info(tag,"poolIn: ",poolIn)
-
-        //get poolOut
-        let poolOut = pools.find((p:any)=>p.asset == quote.buyAsset)
 
         output.meta = {
             quoteMode: "MAYA_SUPPORTED_TO_MAYA_SUPPORTED"
@@ -168,8 +130,8 @@ const get_quote = async function (quote:any) {
         log.info("quoteFromNode: ",quoteFromNode)
         if(quoteFromNode.error) throw Error(quoteFromNode.error)
         // let amountOutEstimated = quoteFromNode.expected_amount_out
-        let amountOutMin = quoteFromNode.amount_out_min
-        let inboundAddress = quoteFromNode.inbound_address
+        // let amountOutMin = quoteFromNode.amount_out_min
+        // let inboundAddress = quoteFromNode.inbound_address
         let amountOutEstimated = (parseInt(quoteFromNode.expected_amount_out) / BASE_UNIT).toFixed(DECIMALS);
         output.amountOut = amountOutEstimated
         

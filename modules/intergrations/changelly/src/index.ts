@@ -37,12 +37,31 @@ let networkSupport = [
     ChainToNetworkId["AVAX"],
 ]
 
+let assetSupport = [
+    shortListSymbolToCaip["BTC"],
+    shortListSymbolToCaip["ETH"],
+    shortListSymbolToCaip["XRP"],
+    shortListSymbolToCaip["DASH"],
+    shortListSymbolToCaip["ZEC"],
+    shortListSymbolToCaip["BASE"],
+    shortListSymbolToCaip["LTC"],
+    shortListSymbolToCaip["BCH"],
+    shortListSymbolToCaip["MATIC"],
+    shortListSymbolToCaip["AVAX"],
+    shortListSymbolToCaip["BSV"], //TODO
+    shortListSymbolToCaip["ADA"], //TODO
+    shortListSymbolToCaip["EOS"], //TODO
+]
+
 module.exports = {
     init: function(settings: any): void {
         changelly = new Changelly(CHANGELLY_API_KEY, CHANGELLY_API_SECRET);
     },
     networkSupport: function () {
         return networkSupport
+    },
+    assetSupport: function () {
+        return assetSupport
     },
     getCurrenciesAsync: function(): Promise<any> {
         return get_currencies();

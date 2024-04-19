@@ -12,6 +12,8 @@
 const TAG = " | Uniswap | "
 import axios from 'axios';
 import { BaseDecimal } from '@coinmasters/types';
+// @ts-ignore
+import { assetData } from '@pioneer-platform/pioneer-discovery';
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
 import { MaxUint160, AllowanceTransfer, MaxAllowanceTransferAmount, PERMIT2_ADDRESS, PermitSingle } from '@uniswap/permit2-sdk'
 const { uuid } = require('uuidv4');
@@ -80,10 +82,36 @@ module.exports = {
     networkSupport: function () {
         return networkSupport;
     },
+    assetSupport: function () {
+        return getAssetSupport();
+    },
     getQuote: function (quote:any) {
         return get_quote(quote);
     }
 }
+
+let getAssetSupport = function(){
+    let tag = TAG + " | getAssetSupport | "
+    try{
+        //iterate over chains
+        let allAssets = Object.keys(assetData)
+        log.info(tag,"allAssets: ",allAssets)
+
+        let supportedAssets:any = []
+        for(let i =0; i < allAssets.length; i++){
+            let asset = allAssets[i]
+            let networkId = caipToNetworkId(asset)
+            // console.log("networkId: ",networkId)
+            if(networkSupport.indexOf(networkId) > -1){
+                supportedAssets.push(asset)
+            }
+        }
+        return supportedAssets
+    }catch(e){
+        console.error(e)
+    }
+}
+
 
 const get_quote = async function (quote:any) {
     let tag = TAG + " | get_quote | "

@@ -21,6 +21,10 @@ let networkSupport = [
     ChainToNetworkId["ETH"],
 ]
 
+let assetSupport = [
+    shortListSymbolToCaip["BTC"],
+    shortListSymbolToCaip["ETH"],
+]
 
 module.exports = {
     init:function(settings:any){
@@ -28,6 +32,9 @@ module.exports = {
     },
     networkSupport: function () {
         return networkSupport;
+    },
+    assetSupport: function () {
+        return assetSupport;
     },
     getQuote: function (quote:any) {
         return get_quote(quote);
