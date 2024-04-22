@@ -80,6 +80,30 @@ export const blockbooks = [
         websocket:"wss://dgb.nownodes.io/wss"
     },
     {
+        symbol:"DOGE",
+        blockchain:"dogecoin",
+        caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+        type:"blockbook",
+        service:"https://dogebook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
+        websocket:"wss://doge.nownodes.io/wss"
+    },
+    {
+        symbol:"LTC",
+        blockchain:"litecoin",
+        caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+        type:"blockbook",
+        service:"https://ltcbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
+        websocket:"wss://ltc.nownodes.io/wss"
+    },
+    {
+        symbol:"BCH",
+        blockchain:"bitcoincash",
+        caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+        type:"blockbook",
+        service:"https://bchbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
+        websocket:"wss://bch.nownodes.io/wss"
+    },
+    {
         symbol:"BSV",
         blockchain:"bitcoin sv",
         caip:"bip122:0000000000000000018b0da51421703b/slip44:1",
@@ -176,14 +200,15 @@ export const blockbooks = [
         service:"https://indexer.ethereum.shapeshift.com",
         websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
     },
-    {
-        symbol:"DOGE",
-        blockchain:"dogecoin",
-        caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
-        type:"blockbook",
-        service:"https://indexer.dogecoin.shapeshift.com",
-        websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
-    },
+    //NUKED
+    // {
+    //     symbol:"DOGE",
+    //     blockchain:"dogecoin",
+    //     caip:"bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+    //     type:"blockbook",
+    //     service:"https://indexer.dogecoin.shapeshift.com",
+    //     websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
+    // },
     {
         symbol:"BNB",
         blockchain:"bnbsmartchain",
@@ -192,14 +217,14 @@ export const blockbooks = [
         service:"https://indexer.bnbsmartchain.shapeshift.com",
         websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
     },
-    {
-        symbol:"BCH",
-        blockchain:"bitcoincash",
-        caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-        type:"blockbook",
-        service:"https://indexer.bitcoincash.shapeshift.com",
-        websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
-    },
+    // {
+    //     symbol:"BCH",
+    //     blockchain:"bitcoincash",
+    //     caip:"bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+    //     type:"blockbook",
+    //     service:"https://indexer.bitcoincash.shapeshift.com",
+    //     websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
+    // },
     {
         symbol:"BTC",
         blockchain:"bitcoin",
@@ -208,22 +233,22 @@ export const blockbooks = [
         service:"https://indexer.bitcoin.shapeshift.com",
         websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
     },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    },
-    {
-        symbol:"AVAX",
-        blockchain:"avalanche",
-        caip:"eip155:43114/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.avalanche.shapeshift.com",
-        websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
-    }
+    // {
+    //     symbol:"AVAX",
+    //     blockchain:"avalanche",
+    //     caip:"eip155:43114/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.avalanche.shapeshift.com",
+    //     websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"AVAX",
+    //     blockchain:"avalanche",
+    //     caip:"eip155:43114/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.avalanche.shapeshift.com",
+    //     websocket:"wss://indexer.avalanche.shapeshift.com/websocket"
+    // }
 ]
 
 

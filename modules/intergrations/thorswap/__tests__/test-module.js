@@ -7,9 +7,12 @@ let run_test = async function(){
     try {
         thorswap.init()
         //
-        let support = thorswap.networkSupport()
-        console.log("support: ",support)
+        // let support = thorswap.networkSupport()
+        // console.log("support: ",support)
 
+        let assetSupport = thorswap.assetSupport()
+        console.log("assetSupport: ",assetSupport)
+        
         // let swap = {
         //     sellAsset: 'BCH.BCH',
         //     sellAmount: '100',
@@ -28,18 +31,18 @@ let run_test = async function(){
         //     slippage: 3
         // }
         
-        let swap = {
-            sellAsset: 'DOGE.DOGE',
-            buyAsset: 'BCH.BCH',
-            sellAmount: '200.0',
-            senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
-            recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
-            slippage: '3'
-        }
-        
-        let result = await thorswap.getQuote(swap)
-        console.log("result: ",result.length)
-        console.log("result: ",JSON.stringify(result))
+        // let swap = {
+        //     sellAsset: 'DOGE.DOGE',
+        //     buyAsset: 'BCH.BCH',
+        //     sellAmount: '200.0',
+        //     senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
+        //     recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
+        //     slippage: '3'
+        // }
+        //
+        // let result = await thorswap.getQuote(swap)
+        // console.log("result: ",result.length)
+        // console.log("result: ",JSON.stringify(result))
         // for(let i = 0; i < result.length; i++){
         //     console.log("result: ",result[i].routes[0].swap)
         //    

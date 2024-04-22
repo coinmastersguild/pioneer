@@ -113,6 +113,7 @@ const get_quote = async function (quote:any) {
         }
         output.steps = 1
         output.complete = true
+        output.source = 'thorchain'
         output.id = uuid()
 
         let BaseDecimal = {

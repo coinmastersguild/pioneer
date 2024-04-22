@@ -8,8 +8,11 @@
 const TAG = " | thorswap | "
 import { SwapKitApi } from '@coinmasters/api';
 const log = require('@pioneer-platform/loggerdog')()
+let { caipToNetworkId } = require("@pioneer-platform/pioneer-caip")
 const Axios = require('axios')
 const https = require('https')
+// @ts-ignore
+import { assetData } from '@pioneer-platform/pioneer-discovery';
 if(!process.env.THORSWAP_API_KEY)throw Error("Missing THORSWAP_API_KEY")
 console.log("THORSWAP_API_KEY: ",process.env.THORSWAP_API_KEY)
 const axios = Axios.create({
@@ -37,12 +40,17 @@ let networkSupport = [
     ChainToNetworkId["AVAX"],
 ]
 
+
+
 module.exports = {
     init:function(settings:any){
         return true
     },
     networkSupport: function () {
       return networkSupport
+    },
+    assetSupport: function () {
+        return getAssetSupport()
     },
     getQuote: function (quote:any) {
         return get_quote(quote);
@@ -52,6 +60,28 @@ module.exports = {
     },
     getInfo: function (hash:string) {
         return get_info(hash);
+    }
+}
+
+let getAssetSupport = function(){
+    let tag = TAG + " | getAssetSupport | "
+    try{
+        //iterate over chains
+        let allAssets = Object.keys(assetData)
+        log.info(tag,"allAssets: ",allAssets)
+
+        let supportedAssets:any = []
+        for(let i =0; i < allAssets.length; i++){
+            let asset = allAssets[i]
+            let networkId = caipToNetworkId(asset)
+            // console.log("networkId: ",networkId)
+            if(networkSupport.indexOf(networkId) > -1){
+                supportedAssets.push(asset)
+            }
+        }
+        return supportedAssets
+    }catch(e){
+        console.error(e)
     }
 }
 
@@ -167,6 +197,7 @@ const get_quote = async function (quote:any) {
             quote.meta = route.meta
             quote.amountOut = route.expectedOutput
             quote.complete = true
+            quote.source = 'thorswap'
             quote.inboundAddress = route.inboundAddress
             // @ts-ignore
             quote.timeEstimates = route.timeEstimates

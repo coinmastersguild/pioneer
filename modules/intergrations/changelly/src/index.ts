@@ -43,6 +43,7 @@ let assetSupport = [
     shortListSymbolToCaip["XRP"],
     shortListSymbolToCaip["DASH"],
     shortListSymbolToCaip["ZEC"],
+    shortListSymbolToCaip["DOGE"],
     shortListSymbolToCaip["BASE"],
     shortListSymbolToCaip["LTC"],
     shortListSymbolToCaip["BCH"],
@@ -78,6 +79,9 @@ module.exports = {
     getExchangeAmountAsync: function(from: string, to: string, amount: number): Promise<any> {
         return get_exchange_amount(from, to, amount);
     },
+    getTransactionAsync: function(id: string): Promise<any> {
+        return get_transaction(id);
+    },
     getTransactionsAsync: function(limit: number, offset: number, currency?: string, address?: string, extraId?: string): Promise<any> {
         return get_transactions(limit, offset, currency, address, extraId);
     },
@@ -105,6 +109,7 @@ async function create_transaction(from: string, to: string, address: string, amo
         let output:any = {}
         output.steps = 1
         output.complete = true
+        output.source = 'chaingelly'
         output.meta = {
             quoteMode: "CHANGELLY"
         }
@@ -168,6 +173,20 @@ async function get_exchange_amount(from: string, to: string, amount: number): Pr
         });
     } catch (e) {
         console.error(TAG, "get_exchange_amount error:", e);
+        throw e;
+    }
+}
+
+async function get_transaction(orderId?: string): Promise<any> {
+    try {
+        return new Promise((resolve, reject) => {
+            changelly.getTransaction(orderId, (err: any, data: any) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
+    } catch (e) {
+        console.error(TAG, "get_transactions error:", e);
         throw e;
     }
 }

@@ -110,6 +110,7 @@ const get_quote = async function (quote:any) {
         //issue invocationId
         let invocationId = uuid()
         output.invocationId = invocationId
+        output.source = 'osmosis'
         output.meta = {
             quoteMode: "OSMOSIS-IBC"
         }

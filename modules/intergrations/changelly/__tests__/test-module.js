@@ -10,8 +10,8 @@ let run_test = async function(){
         //
         await changelly.init()
 
-        let result = await changelly.getCurrenciesAsync()
-        console.log("result: ",JSON.stringify(result))
+        // let result = await changelly.getCurrenciesAsync()
+        // console.log("result: ",JSON.stringify(result))
 
         // let changellyBody = {
         //     from: "BCH",
@@ -50,9 +50,13 @@ let run_test = async function(){
         // let result = await changelly.getQuote(from, to, address, amount)
         // console.log("result: ",JSON.stringify(result))
 
-        // let id = 'm3sdxe9k9s0mkegx'
+        let id = 'm3sdxe9k9s0mkegx'
         // let id = '3byam0qy7xjojb2j'
         // //"f7e4c6e8c6c1"
+
+        let info = await changelly.getTransactionAsync(id)
+        console.log("info: ",info)
+
         // let info = await changelly.getTransactionsAsync(100,0)
         // console.log("info: ",info)
         

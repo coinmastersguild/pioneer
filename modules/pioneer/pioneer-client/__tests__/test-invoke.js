@@ -18,7 +18,7 @@ const runTest = async () => {
         pioneer = await pioneer.init();
 
 
-        let invocationId = '2258444-Ethereum-141a'
+        let invocationId = 'unk4imcb04oannfr'
         let info = await pioneer.Invocation({invocationId})
         console.log("info: ",info.data)
 

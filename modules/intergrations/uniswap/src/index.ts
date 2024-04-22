@@ -135,6 +135,7 @@ const get_quote = async function (quote:any) {
         // let slippageTolerance = quote.slippage
         let recipient = quote.recipientAddress
         output.sellAsset = {}
+        output.source = 'uniswap'
         output.sellAsset.caip = quote.sellAsset
         output.sellAmount = quote.sellAmount
         output.buyAsset = {}

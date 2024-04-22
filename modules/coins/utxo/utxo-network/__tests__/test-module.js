@@ -24,12 +24,19 @@ let servers = [
 let run_test = async function(){
     try{
         await network.init(servers)
-        //zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX
-        network.getPubkeyInfo("BTC","zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX")
+
+        network.utxosByXpub("DOGE","xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
             .then(function(resp){
                 console.log("resp: ",resp)
                 //console.log("resp: ",JSON.stringify(resp))
             })
+
+        //zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX
+        // network.getPubkeyInfo("BTC","zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX")
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
 
         //getPubkeyInfo
         // network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")

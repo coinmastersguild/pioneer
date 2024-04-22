@@ -413,47 +413,47 @@ let run_test = async function(){
         //     "slippage": "3"
         // }
         
-        // let swap = {
-        //     sellAsset: {
-        //         context: 'keepkey:device.wallet',
-        //         caip: 'eip155:8453/slip44:60',
-        //         identifier: 'BASE.ETH',
-        //         networkId: 'eip155:8453',
-        //         address: '0xef743df8eda497bcf1977393c401a636518dd630',
-        //         symbol: 'ETH',
-        //         chain: 'BASE',
-        //         ticker: 'ETH',
-        //         type: 'Native',
-        //         balance: '0.033834470385070390',
-        //         priceUsd: 3538.78,
-        //         rank: 2,
-        //         name: 'ethereum',
-        //         source: 'coingecko',
-        //         alias: 2,
-        //         valueUsd: '119.7327471092794'
-        //     },
-        //     sellAmount: '0.0900',
-        //     buyAsset: {
-        //         context: 'keepkey:device.wallet',
-        //         caip: 'eip155:8453/erc20:0xef743df8eda497bcf1977393c401a636518dd630',
-        //         identifier: 'BASE.PRO-0xef743df8eda497bcf1977393c401a636518dd630',
-        //         networkId: 'eip155:8453',
-        //         address: '0xef743df8eda497bcf1977393c401a636518dd630',
-        //         symbol: 'PRO-0xef743df8eda497bcf1977393c401a636518dd630',
-        //         chain: 'BASE',
-        //         ticker: 'PRO',
-        //         type: 'ERC20',
-        //         balance: '999413.288871116238912035',
-        //         priceUsd: '2.1571749312169294',
-        //         rank: '472',
-        //         name: 'Propy',
-        //         source: 'coincap',
-        //         valueUsd: '2155909.292677835'
-        //     },
-        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-        //     slippage: '3'
-        // }
+        let swap = {
+            sellAsset: {
+                context: 'keepkey:device.wallet',
+                caip: 'eip155:8453/slip44:60',
+                identifier: 'BASE.ETH',
+                networkId: 'eip155:8453',
+                address: '0xef743df8eda497bcf1977393c401a636518dd630',
+                symbol: 'ETH',
+                chain: 'BASE',
+                ticker: 'ETH',
+                type: 'Native',
+                balance: '0.033834470385070390',
+                priceUsd: 3538.78,
+                rank: 2,
+                name: 'ethereum',
+                source: 'coingecko',
+                alias: 2,
+                valueUsd: '119.7327471092794'
+            },
+            sellAmount: '0.0900',
+            buyAsset: {
+                context: 'keepkey:device.wallet',
+                caip: 'eip155:8453/erc20:0xef743df8eda497bcf1977393c401a636518dd630',
+                identifier: 'BASE.PRO-0xef743df8eda497bcf1977393c401a636518dd630',
+                networkId: 'eip155:8453',
+                address: '0xef743df8eda497bcf1977393c401a636518dd630',
+                symbol: 'PRO-0xef743df8eda497bcf1977393c401a636518dd630',
+                chain: 'BASE',
+                ticker: 'PRO',
+                type: 'ERC20',
+                balance: '999413.288871116238912035',
+                priceUsd: '2.1571749312169294',
+                rank: '472',
+                name: 'Propy',
+                source: 'coincap',
+                valueUsd: '2155909.292677835'
+            },
+            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            slippage: '3'
+        }
 
         // let swap = {
         //     sellAsset: {
@@ -751,68 +751,73 @@ let run_test = async function(){
         //     permit2Sig: '0x3e1d72164c5656b61bb438fd0527cf317451d334e54468ab58dfd54eb12cae6f3aafdff7d8f7952e6935a463a7920c1a16298694a976496d40918d718260cc781b'
         // }
 
-        let swap = {
-            "affiliate":"0x658DE0443259a1027caA976ef9a42E6982037A03",
-            "sellAsset":{
-                "chain":"BTC",
-                "identifier":"BTC.BTC",
-                "decimals":8,
-                "type":"native",
-                "networkId":"bip122:000000000019d6689c085ae165831e93",
-                "caip":"bip122:000000000019d6689c085ae165831e93/slip44:0",
-                "symbol":"BTC",
-                "sourceList":"ThorchainList",
-                "assetId":"bip122:000000000019d6689c085ae165831e93/slip44:0",
-                "chainId":"bip122:000000000019d6689c085ae165831e93",
-                "name":"Bitcoin",
-                "networkName":"Bitcoin",
-                "precision":8,
-                "color":"#FF9800",
-                "icon":"https://assets.coincap.io/assets/icons/256/btc.png",
-                "explorer":"https://live.blockcypher.com",
-                "explorerAddressLink":"https://live.blockcypher.com/btc/address/",
-                "explorerTxLink":"https://live.blockcypher.com/btc/tx/",
-                "valueUsd":0,
-                "balance":"",
-                "pubkey":null,
-                "address":null,
-                "priceUsd":62752,
-                "context":"external"
-            },
-            "sellAmount":"1.0000000",
-            "buyAsset":{
-                "chain":"ETH",
-                "identifier":"ETH.ETH",
-                "decimals":18,
-                "type":"native",
-                "networkId":"eip155:1",
-                "caip":"eip155:1/slip44:60",
-                "symbol":"ETH",
-                "sourceList":"ThorchainList",
-                "assetId":"eip155:1/slip44:60",
-                "chainId":"eip155:1",
-                "name":"Ethereum",
-                "networkName":"Ethereum",
-                "precision":18,
-                "color":"#5C6BC0",
-                "icon":"https://assets.coincap.io/assets/icons/256/eth.png",
-                "explorer":"https://etherscan.io",
-                "explorerAddressLink":"https://etherscan.io/address/",
-                "explorerTxLink":"https://etherscan.io/tx/",
-                "relatedAssetKey":"eip155:1/slip44:60",
-                "valueUsd":0,
-                "balance":"",
-                "pubkey":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
-                "address":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
-                "context":"external",
-                "priceUsd":3057.1,
-                "label":""
-            },
-            "recipientAddress":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
-            "slippage":"3",
-            "memoless":true
-        }
+        // let swap = {
+        //     "affiliate":"0x658DE0443259a1027caA976ef9a42E6982037A03",
+        //     "sellAsset":{
+        //         "chain":"BTC",
+        //         "identifier":"BTC.BTC",
+        //         "decimals":8,
+        //         "type":"native",
+        //         "networkId":"bip122:000000000019d6689c085ae165831e93",
+        //         "caip":"bip122:000000000019d6689c085ae165831e93/slip44:0",
+        //         "symbol":"BTC",
+        //         "sourceList":"ThorchainList",
+        //         "assetId":"bip122:000000000019d6689c085ae165831e93/slip44:0",
+        //         "chainId":"bip122:000000000019d6689c085ae165831e93",
+        //         "name":"Bitcoin",
+        //         "networkName":"Bitcoin",
+        //         "precision":8,
+        //         "color":"#FF9800",
+        //         "icon":"https://assets.coincap.io/assets/icons/256/btc.png",
+        //         "explorer":"https://live.blockcypher.com",
+        //         "explorerAddressLink":"https://live.blockcypher.com/btc/address/",
+        //         "explorerTxLink":"https://live.blockcypher.com/btc/tx/",
+        //         "valueUsd":0,
+        //         "balance":"",
+        //         "pubkey":null,
+        //         "address":null,
+        //         "priceUsd":62752,
+        //         "context":"external"
+        //     },
+        //     "sellAmount":"1.0000000",
+        //     "buyAsset":{
+        //         "chain":"ETH",
+        //         "identifier":"ETH.ETH",
+        //         "decimals":18,
+        //         "type":"native",
+        //         "networkId":"eip155:1",
+        //         "caip":"eip155:1/slip44:60",
+        //         "symbol":"ETH",
+        //         "sourceList":"ThorchainList",
+        //         "assetId":"eip155:1/slip44:60",
+        //         "chainId":"eip155:1",
+        //         "name":"Ethereum",
+        //         "networkName":"Ethereum",
+        //         "precision":18,
+        //         "color":"#5C6BC0",
+        //         "icon":"https://assets.coincap.io/assets/icons/256/eth.png",
+        //         "explorer":"https://etherscan.io",
+        //         "explorerAddressLink":"https://etherscan.io/address/",
+        //         "explorerTxLink":"https://etherscan.io/tx/",
+        //         "relatedAssetKey":"eip155:1/slip44:60",
+        //         "valueUsd":0,
+        //         "balance":"",
+        //         "pubkey":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
+        //         "address":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
+        //         "context":"external",
+        //         "priceUsd":3057.1,
+        //         "label":""
+        //     },
+        //     "recipientAddress":"0xC3aFFff54122658b89C31183CeC4F15514F34624",
+        //     "slippage":"3",
+        //     "memoless":true
+        // }
 
+        //memoless
+
+        // let assetSupport = await client.assetSupport()
+        // console.log("assetSupport: ",assetSupport)
+        
         //get router options
         console.log("swap: ",swap)
         let result = await client.quote(swap)

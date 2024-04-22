@@ -80,6 +80,7 @@ const get_quote = async function (quote:any) {
         output.meta = {
             quoteMode: "MAYA_SUPPORTED_TO_MAYA_SUPPORTED"
         }
+        output.source = 'mayachain'
         output.steps = 1
         output.complete = true
         output.id = uuid()

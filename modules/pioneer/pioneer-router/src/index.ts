@@ -118,6 +118,8 @@ interface Swap {
 
 let NetworksByIntegration:any = {}
 
+let AssetsByIntegration:any = {}
+
 module.exports = {
     init: async function () {
         await thorswap.init()
@@ -132,9 +134,24 @@ module.exports = {
         NetworksByIntegration['rango'] = rango.networkSupport()
         NetworksByIntegration['osmosis'] = osmosis.networkSupport()
         NetworksByIntegration['uniswap'] = uniswap.networkSupport()
-        NetworksByIntegration['across'] = across.networkSupport()
+        // NetworksByIntegration['across'] = across.networkSupport()
         NetworksByIntegration['chainflip'] = chainflip.networkSupport()
+        //get assets
+        AssetsByIntegration['mayachain'] = mayachain.assetSupport()
+        AssetsByIntegration['changelly'] = changelly.assetSupport()
+        AssetsByIntegration['thorswap'] = thorswap.assetSupport()
+        AssetsByIntegration['rango'] = rango.assetSupport()
+        AssetsByIntegration['osmosis'] = osmosis.assetSupport()
+        AssetsByIntegration['uniswap'] = uniswap.assetSupport()
+        // AssetsByIntegration['across'] = across.assetSupport()
+        AssetsByIntegration['chainflip'] = chainflip.assetSupport()
         return true;
+    },
+    memoless: function(){
+        return MEMOLESS_SUPPORT
+    },
+    assetSupport: function(){
+        return AssetsByIntegration
     },
     routes: function(){
         return NetworksByIntegration
@@ -308,10 +325,10 @@ async function get_quote(quote:Swap) {
         }
 
         for (let integration of integrations) {
-            let supportedNetworks = NetworksByIntegration[integration];
-            log.info(tag,integration+" supportedNetworks: ",supportedNetworks)
-            if (supportedNetworks.includes(sellChain) && supportedNetworks.includes(buyChain)) {
-                console.log(TAG, "Found supported integration for both networks:", integration);
+            let supportedAssets = AssetsByIntegration[integration];
+            log.info(tag,integration+" supportedAssets: ",supportedAssets)
+            if (supportedAssets.includes(quote.sellAsset.caip) && supportedAssets.includes(quote.buyAsset.caip)) {
+                console.log(TAG, "Found supported integration for both assets:", integration);
                 let integrationQuotes = await get_quote_from_integration(integration, quote);
                 if(integrationQuotes) {
                     for(let i = 0; i < integrationQuotes.length; i++){

@@ -35,7 +35,7 @@ let networkSupport = [
     caipToNetworkId(shortListSymbolToCaip["ARB"]),
     // caipToNetworkId(shortListSymbolToCaip["GAIA"]),
     // shortListSymbolToCaip["BNB"],
-    caipToNetworkId(shortListSymbolToCaip["BSC"]),
+    // caipToNetworkId(shortListSymbolToCaip["BSC"]),
     caipToNetworkId(shortListSymbolToCaip["DOGE"]),
     caipToNetworkId(shortListSymbolToCaip["BTC"]),
     caipToNetworkId(shortListSymbolToCaip["ETH"]),
@@ -58,6 +58,8 @@ let assetSupport = [
     shortListSymbolToCaip["DOGE"],
     shortListSymbolToCaip["BCH"],
 ]
+
+
 
 module.exports = {
     init:function(settings:any){

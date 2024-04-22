@@ -18,9 +18,13 @@ let run_test = async function(){
         //     })
         
         //
-        let utxos = await network.utxosByXpub('ZEC',"xpub6CKNxyxUckJaggvmby1J1U5jR9zmRBd7aQh6LdaNsAdPJ6A6tfUqeesERcjHsQsLtzcG8mT3EUxroeBP6CrkucELXbqH5dQkQSyPgSxdFfX")
+        // let utxos = await network.utxosByXpub('ZEC',"xpub6CKNxyxUckJaggvmby1J1U5jR9zmRBd7aQh6LdaNsAdPJ6A6tfUqeesERcjHsQsLtzcG8mT3EUxroeBP6CrkucELXbqH5dQkQSyPgSxdFfX")
+        // console.log(utxos)
+        
+        //xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs
+        let utxos = await network.utxosByXpub('DOGE',"xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
         console.log(utxos)
-
+        
         // let ALL_SOCKETS = network.getBlockbookSockets()
         // let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
         // let address2 = "0xc3affff54122658b89c31183cec4f15514f34624"
