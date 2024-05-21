@@ -30,16 +30,26 @@ let run_test = async function(){
 
         //
         await client.init({})
-
-
-        let swap = {
-            sellAsset: 'eip155:8453/slip44:60',
-            sellAmount: '0.01',
-            buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
-            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            slippage: 3
+        
+        //LP create
+        let input = {
+            fromAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+            chain: 'eip155:8453',
         }
+        let result = await client.buildLpTx(input)
+        console.log("result: ",result)
+        
+        //Burn LP and redeem
+        
+
+        // let swap = {
+        //     sellAsset: 'eip155:8453/slip44:60',
+        //     sellAmount: '0.01',
+        //     buyAsset: 'eip155:8453/erc20:0XEF743DF8EDA497BCF1977393C401A636518DD630',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     slippage: 3
+        // }
 
         //Uniswap buy pro working
         //uniswap data
@@ -61,7 +71,7 @@ let run_test = async function(){
 
         // let swap = {
         //     sellAsset: 'eip155:8453/erc20:0xef743df8eda497bcf1977393c401a636518dd630',
-        //     sellAmount: '0.01',
+        //     sellAmount: '3',
         //     buyAsset: 'eip155:8453/erc20:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
         //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
         //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
@@ -83,21 +93,25 @@ let run_test = async function(){
         // console.log("result: ",result)
 
 
-
+        //eth_signTypedData_v4
         // let from = swap.senderAddress
         // let token = '0xEF743df8eDa497bCf1977393c401A636518DD630'
-        // let amount = '1000000000000000000000000'
-        // let chainId = 8453
+        // let amount = '1461501637330902918203684832716283019655932542975'
+        // let router = 'universalRouter'
+        // let expiry = '1716521188'
+        // let sigDeadline = '1716521188'
+        // let chainId = '8453'
+        // let nonce = '1'
         // let address = '0x141D9959cAe3853b035000490C03991eB70Fc4aC'
         // //build permit tx
         // let permit = {
-        //     from, token, amount, chainId
+        //     from, token, amount, chainId, expiry, sigDeadline, nonce, router
         // }
         // console.log("permit: ",permit)
         // let resultPermit = await client.buildPermitTx(permit)
         // console.log("resultPermit: ",resultPermit)
-        //
-        // //sign with kk
+        
+        //sign with kk
         // let input = {
         //     "addressNList":[
         //         2147483692,
@@ -107,48 +121,53 @@ let run_test = async function(){
         //         0
         //     ],
         //     address,
-        //     "typedData":resultPermit.txParams
+        //     "typedData":resultPermit
         // }
         // console.log("input: ",input)
         // console.log("input: ",JSON.stringify(input))
-        // let responseSign = await sdk.eth.ethSignTypedData(input)
-        // console.log("responseSign: ",responseSign)
+
+        //let responseSign = await sdk.eth.ethSignTypedData(input)
+        //console.log("responseSign: ",responseSign)
+        //swap.permit2 = responseSign
+        //0x7767b83cd7c92630e7a0d8f9dca99cd7d3567c888162f1abdf5e63aa4ab593a601c3fdefe8ef24a78a7f7938fc7ce7b9e6f42246f59550732f0536d8175e6f7a1c
+
+        //swap.permit2 = '0x7767b83cd7c92630e7a0d8f9dca99cd7d3567c888162f1abdf5e63aa4ab593a601c3fdefe8ef24a78a7f7938fc7ce7b9e6f42246f59550732f0536d8175e6f7a1c'
+        // console.log("swap: ",swap)
+        // let result = await client.getQuote(swap)
+        // console.log("result: ",result)
+        // console.log("result: ",result.txs[0])
+        // console.log("result: ",JSON.stringify(result.txs[0]))
         //
-        // swap.permit2 = responseSign
-        console.log("swap: ",swap)
-        let result = await client.getQuote(swap)
-        console.log("result: ",result)
-        console.log("result: ",result.txs[0])
-        console.log("result: ",JSON.stringify(result.txs[0]))
 
-        let txParams = result.txs[0].txParams
-        console.log("txParams: ",txParams)
-        //sign
-        let unsignedTx = {
-            "addressNList": [
-                2147483692,
-                2147483708,
-                2147483648,
-                0,
-                0
-            ],
-            "from": txParams.from,
-            "chainId": txParams.chainId,
-            "nonce": txParams.nonce,
-            "value": txParams.value || '0x0',
-            "data": txParams.data,
-            "gasLimit": txParams.gas,
-            "gas": txParams.gas,
-            "to": txParams.to,
-            "gasPrice": txParams.gasPrice,
-            // "maxFeePerGas": txParams.maxFeePerGas,
-            // "maxPriorityFeePerGas": txParams.maxPriorityFeePerGas
-        }
-        //push tx to api
-        console.log("unsignedTx: ",unsignedTx)
-
-        let responseSignTx = await sdk.eth.ethSignTransaction(unsignedTx)
-        console.log("responseSignTx: ", responseSignTx)
+        // let txParams = result.txs[0].txParams
+        //
+        // console.log("txParams: ",txParams)
+        // // //sign
+        // let unsignedTx = {
+        //     "addressNList": [
+        //         2147483692,
+        //         2147483708,
+        //         2147483648,
+        //         0,
+        //         0
+        //     ],
+        //     "from": txParams.from,
+        //     "chainId": txParams.chainId,
+        //     "nonce": txParams.nonce,
+        //     "value": txParams.value || '0x0',
+        //     "data": txParams.data,
+        //     "gasLimit": txParams.gas,
+        //     "gas": txParams.gas,
+        //     "to": txParams.to,
+        //     "gasPrice": txParams.gasPrice,
+        //     // "maxFeePerGas": txParams.maxFeePerGas,
+        //     // "maxPriorityFeePerGas": txParams.maxPriorityFeePerGas
+        // }
+        // //push tx to api
+        // console.log("unsignedTx: ",unsignedTx)
+        //
+        // let responseSignTx = await sdk.eth.ethSignTransaction(unsignedTx)
+        // console.log("responseSignTx: ", responseSignTx)
 
         //broadcast
 

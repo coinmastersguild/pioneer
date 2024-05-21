@@ -132,6 +132,7 @@ const get_quote = async function (quote:any) {
             quoteMode: "RANGO"
         }
         output.id = quoteRango.requestId
+        output.source = 'rango'
         output.complete = true
         output.amountOut = quoteRango.result.outputAmount
         output.inboundAddress = unsignedTx.transaction.to

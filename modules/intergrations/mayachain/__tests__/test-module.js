@@ -29,18 +29,18 @@ let run_test = async function(){
         //     slippage: 3
         // }
 
-        let swap = {
-            sellAsset: 'ETH.ETH',
-            sellAmount: '0.01',
-            buyAsset: 'MAYA.CACAO',
-            senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
-            slippage: 3
-        }
-
-        let result = await client.getQuote(swap)
-        console.log("result: ",result)
-        console.log("result: ",result.txs[0])
+        // let swap = {
+        //     sellAsset: 'ETH.ETH',
+        //     sellAmount: '0.01',
+        //     buyAsset: 'MAYA.CACAO',
+        //     senderAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     recipientAddress: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k',
+        //     slippage: 3
+        // }
+        //
+        // let result = await client.getQuote(swap)
+        // console.log("result: ",result)
+        // console.log("result: ",result.txs[0])
 
     }catch(e){
         console.error(e)

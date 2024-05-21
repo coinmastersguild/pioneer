@@ -1,4 +1,88 @@
 /*
+scratch
+
+// let getAllPubkeys = async function(wallet:any){
+//   try{
+//     let allChains = {
+//       'bip122:000000000019d6689c085ae165831e93/slip44:0':{
+//         name: 'Bitcoin',
+//         type: 'xpub',
+//         addressNlist: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'bip122:000000000000000000651ef99cb9fcbe/slip44:145':{
+//         name: 'Bitcoin Cash',
+//         type: 'xpub',
+//         addressNlist: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2':{
+//         name: 'Litecoin',
+//         type: 'xpub',
+//         addressNlist: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'bip122:000007d91d1254d60e2dd1ae58038307/slip44:5':{
+//         name: 'Dash',
+//         type: 'xpub',
+//         addressNlist: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'bip122:000007d91d1254d60e2dd1ae58038307/slip44:5':{
+//         name: 'Doge',
+//         type: 'xpub',
+//         addressNlist: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'cosmos:cosmoshub-4/slip44:118':{
+//         name: 'Cosmos',
+//         type: 'address',
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'cosmos:osmosis-1/slip44:118':{
+//         name: 'Osmosis',
+//         type: 'address',
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144':{
+//         name: 'Ripple',
+//         type: 'address',
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//       'cosmos:thorchain-mainnet-v1/slip44:931':{
+//         name: 'Thorchain',
+//         type: 'address',
+//         addressNlistMaster: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0],
+//       },
+//     }
+//
+//     Object.keys(allChains).forEach(async (chain) => {
+//         let chainData = allChains[chain]
+//       /*
+//       binanceGetAddress
+//       utxoGetAddress
+//        script_type
+//        */
+//         let pubKey = await wallet.ethGetAddress({
+//             addressNList: chainData.addressNlist,
+//             showDisplay: false,
+//         })
+//         console.log('pubKey: ', pubKey)
+//       //if xpub get master as well
+//     }
+//
+//     format into final object
+//     let final = {
+//       type: 'keepkey',
+//       wallet: wallet.masterAddress+".wallet.json",
+//       paths: allChains,
+//       pubkeys
+//     }
+//     return final
+//   }catch(e){
+//     console.error(e)
+//   }
+// }
 
 
  */

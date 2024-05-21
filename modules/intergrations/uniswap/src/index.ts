@@ -21,6 +21,7 @@ const log = require('@pioneer-platform/loggerdog')()
 const { ethers, BigNumber } = require('ethers');
 import { utils, Wallet } from 'ethers'
 import { CurrencyAmount, TradeType, Ether, Token, Percent, Currency } from '@uniswap/sdk-core'
+import { getRouter, getClientSideQuote } from './routing/clientSideSmartOrderRouter'
 import {
     SwapRouter,
 } from "@uniswap/universal-router-sdk";
@@ -75,6 +76,13 @@ const ERC20_ABI = [
     "function decimals() view returns (uint8)"
 ];
 
+function toDeadline(expiration: number): number {
+    return Math.floor((Date.now() + expiration) / 1000)
+}
+
+const PERMIT_EXPIRATION = 2592000000; // 30 days in milliseconds
+const PERMIT_SIG_EXPIRATION = 1800000; // 30 minutes in milliseconds
+
 module.exports = {
     init:function(settings:any){
         return true;
@@ -85,8 +93,594 @@ module.exports = {
     assetSupport: function () {
         return getAssetSupport();
     },
+    buildPermitTx: function (permit:any) {
+        return get_permit(permit);
+    },
+    buildLpTx: function (quote:any) {
+        return build_lp_tx(quote);
+    },
     getQuote: function (quote:any) {
-        return get_quote(quote);
+        return get_quote_local(quote);
+    }
+    //ProvideLP
+
+    // getQuote: function (quote:any) {
+    //     return get_quote_api(quote);
+    // }
+}
+
+const build_lp_tx = async function (input: any) {
+    let tag = "build_lp_tx | ";
+    try {
+        log.info("input: ", input);
+        let output: any = {};
+
+        let inputChain = input.chain;
+        let fromAddress = input.fromAddress;
+        log.info("inputChain: ", inputChain);
+        let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc;
+        if (!providerUrl) throw new Error("missing providerUrl");
+        log.info("providerUrl: ", providerUrl);
+
+        const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+
+        const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
+        const positionManagerABI = [
+            "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
+        ];
+
+        const walletPrivateKey = process.env.WALLET_PRIVATE_KEY; // Ensure you have the private key in environment variables
+        if (!walletPrivateKey) throw new Error("missing wallet private key");
+
+        const wallet = new ethers.Wallet(walletPrivateKey, provider);
+        const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI, wallet);
+
+        const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
+        const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
+        const fee = 3000; // Fee tier, for example 0.3%
+        const tickLower = -60000; // Lower tick
+        const tickUpper = 60000; // Upper tick
+        const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
+        const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
+        const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
+        const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
+        const recipient = fromAddress; // Recipient address
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
+
+        const params = {
+            token0,
+            token1,
+            fee,
+            tickLower,
+            tickUpper,
+            amount0Desired,
+            amount1Desired,
+            amount0Min,
+            amount1Min,
+            recipient,
+            deadline
+        };
+        log.info(tag, "params: ", params);
+
+        const txData = await positionManager.populateTransaction.mint(params);
+        log.info(tag, "Transaction data prepared:", txData);
+
+        const value = token0 === ethers.constants.AddressZero ? amount0Desired : ethers.BigNumber.from(0); // Assuming token0 is ETH
+        log.info("calldata: ", txData.data);
+        log.info("value: ", value);
+
+        const nonce = await provider.getTransactionCount(fromAddress, "latest");
+        log.info("nonce: ", nonce);
+        let gas = ethers.BigNumber.from("935120"); // 935120
+        const gasPrice = await provider.getGasPrice();
+        log.info("gasPrice: ", gasPrice.toString());
+        const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+
+        let isZero = function isZero(hexNumberString: string) {
+            return hexNumberString === '0' || /^0x0*$/.test(hexNumberString);
+        };
+
+        output.txs = [];
+        const tx = {
+            from: fromAddress,
+            to: positionManagerAddress,
+            chainId: parseInt(inputChain.split(':')[1]),
+            data: txData.data,
+            ...(value && !isZero(value.toString()) ? { value: value } : {}),
+            gasLimit: gas,
+            gasPrice: adjustedGasPrice,
+            nonce: nonce,
+        };
+
+        log.info(tag, "Transaction params:", tx);
+
+        // Send the transaction
+        const transactionResponse = await wallet.sendTransaction(tx);
+        log.info(tag, "Transaction response:", transactionResponse);
+
+        // Wait for the transaction to be mined
+        const receipt = await transactionResponse.wait();
+        log.info(tag, "Transaction receipt:", receipt);
+
+        output.txs.push({
+            type: "evm",
+            description: 'mint PRO position',
+            chain: inputChain,
+            txParams: tx,
+            txHash: transactionResponse.hash,
+            receipt: receipt,
+        });
+
+        output.meta = {
+            quoteMode: "LP"
+        };
+        output.steps = 1;
+        output.complete = true;
+        output.type = 'EVM';
+        output.id = uuid();
+
+        return output;
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+
+
+// const build_lp_tx = async function (input: any) {
+//     let tag = "build_lp_tx | ";
+//     try {
+//         log.info("input: ", input);
+//         let output: any = {};
+//
+//         let inputChain = input.chain;
+//         let fromAddress = input.fromAddress;
+//         log.info("inputChain: ", inputChain);
+//         let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc;
+//         if (!providerUrl) throw new Error("missing providerUrl");
+//         log.info("providerUrl: ", providerUrl);
+//
+//         const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+//
+//         const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
+//         const positionManagerABI = [
+//             "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
+//         ];
+//
+//         const walletPrivateKey = process.env.WALLET_PRIVATE_KEY; // Ensure you have the private key in environment variables
+//         if (!walletPrivateKey) throw new Error("missing wallet private key");
+//
+//         const wallet = new ethers.Wallet(walletPrivateKey, provider);
+//         const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI, wallet);
+//
+//         const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
+//         const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
+//         const fee = 3000; // Fee tier, for example 0.3%
+//         const tickLower = -60000; // Lower tick
+//         const tickUpper = 60000; // Upper tick
+//         const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
+//         const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
+//         const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
+//         const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
+//         const recipient = fromAddress; // Recipient address
+//         const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
+//
+//         const params = {
+//             token0,
+//             token1,
+//             fee,
+//             tickLower,
+//             tickUpper,
+//             amount0Desired,
+//             amount1Desired,
+//             amount0Min,
+//             amount1Min,
+//             recipient,
+//             deadline
+//         };
+//         log.info(tag, "params: ", params);
+//
+//         const txData = await positionManager.populateTransaction.mint(params);
+//         log.info(tag, "Transaction data prepared:", txData);
+//
+//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
+//         log.info("calldata: ", txData.data);
+//         log.info("value: ", value);
+//
+//         const nonce = await provider.getTransactionCount(fromAddress, "latest");
+//         log.info("nonce: ", nonce);
+//         let gas = `0x${BigInt("935120").toString(16)}`; // 935120
+//         const gasPrice = await provider.getGasPrice();
+//         log.info("gasPrice: ", gasPrice.toString());
+//         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+//
+//         let isZero = function isZero(hexNumberString: string) {
+//             return hexNumberString === '0' || /^0x0*$/.test(hexNumberString);
+//         };
+//
+//         output.txs = [];
+//         const tx = {
+//             from: fromAddress,
+//             to: positionManagerAddress,
+//             chainId: inputChain.split(':')[1],
+//             data: txData.data,
+//             ...(value && !isZero(value) ? { value: ethers.utils.hexlify(value) } : {}),
+//             gas,
+//             gasPrice: ethers.utils.hexlify(adjustedGasPrice),
+//             nonce: ethers.utils.hexlify(nonce),
+//         };
+//
+//         output.txs.push({
+//             type: "evm",
+//             description: 'mint PRO position',
+//             chain: inputChain,
+//             txParams: tx
+//         });
+//
+//         output.meta = {
+//             quoteMode: "LP"
+//         };
+//         output.steps = 1;
+//         output.complete = true;
+//         output.type = 'EVM';
+//         output.id = uuid();
+//
+//         return output;
+//     } catch (e) {
+//         console.error(e);
+//     }
+// };
+
+
+// const build_lp_tx = async function (input:any) {
+//     let tag = TAG + " | build_lp_tx | "
+//     try{
+//         log.info("input: ",input)
+//         let output:any = {}
+//
+//         //
+//         let inputChain = input.chain
+//         let fromAddress = input.fromAddress
+//         log.info("inputChain: ",inputChain)
+//         let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
+//         if(!providerUrl) throw new Error("missing providerUrl")
+//         log.info("providerUrl: ",providerUrl)
+//
+//         //
+//         const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+//
+//         const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
+//         // const positionManagerABI = [
+//         //     // Include only the necessary part of the ABI for minting a position
+//         //     "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline))"
+//         // ];
+//         const positionManagerABI = [
+//             "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
+//         ];
+//         const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI);
+//
+//         // Define the parameters for the liquidity position
+//         //ETH
+//         const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
+//         //PRO
+//         const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
+//         const fee = 3000; // Fee tier, for example 0.3%
+//         const tickLower = -60000; // Lower tick
+//         const tickUpper = 60000; // Upper tick
+//         const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
+//         const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
+//         const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
+//         const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
+//         const recipient = fromAddress; // Recipient address
+//         const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
+//
+//         // Construct the mint parameters
+//         const params = {
+//             token0,
+//             token1,
+//             fee,
+//             tickLower,
+//             tickUpper,
+//             amount0Desired,
+//             amount1Desired,
+//             amount0Min,
+//             amount1Min,
+//             recipient,
+//             deadline
+//         };
+//         log.info(tag,"params: ",params)
+//         // const txData = await positionManager.populateTransaction.mint(params);
+//         const txData = await positionManager.mint.call(params);
+//
+//         log.info(tag, "Transaction data prepared:", txData);
+//
+//         //output.tx = tx; // Store the transaction data for future signing
+//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
+//
+//         log.info("calldata: ",txData.data)
+//         log.info("value: ",value)
+//         const nonce = await provider.getTransactionCount(fromAddress, "latest");
+//         log.info("nonce: ",nonce)
+//         let gas = `0x${BigInt("935120").toString(16)}` // 935120
+//         const gasPrice = await provider.getGasPrice();
+//         log.info("gasPrice: ",gasPrice.toString())
+//         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+//         let  isZero = function isZero(hexNumberString: string) {
+//             return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
+//         }
+//         output.txs = []
+//         const tx = {
+//             from:fromAddress,
+//             to: positionManagerAddress,
+//             chainId:inputChain.split(':')[1],
+//             data: txData.data,
+//             // TODO: universal-router-sdk returns a non-hexlified value.
+//             ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+//             gas,
+//             gasPrice: toHex(adjustedGasPrice),
+//             nonce: toHex(nonce),
+//         }
+//         output.txs.push({
+//             type:"evm",
+//             description:'mint PRO position',
+//             chain:inputChain,
+//             txParams: tx
+//         })
+//
+//         output.meta = {
+//             quoteMode: "LP"
+//         }
+//         output.steps = 1
+//         output.complete = true
+//         output.type = 'EVM'
+//         output.id = uuid()
+//
+//         return output;
+//     }catch(e){
+//         console.error(e)
+//     }
+// }
+
+
+
+// const build_lp_tx = async function (input: any) {
+//     let tag = TAG + " | build_lp_tx | ";
+//     try {
+//         log.info("input: ", input);
+//         let output: any = {};
+//
+//         const { chain, fromAddress } = input;
+//
+//         log.info("inputChain: ", chain);
+//         let providerUrl = EIP155_MAINNET_CHAINS[chain].rpc;
+//         if (!providerUrl) throw new Error("missing providerUrl");
+//         log.info("providerUrl: ", providerUrl);
+//
+//         const provider = new ethers.providers.JsonRpcProvider(providerUrl);
+//         const nonce = await provider.getTransactionCount(fromAddress, "latest");
+//
+//         // Ensure that the deadline, nonce, and other dynamic parameters are set correctly
+//         const updatedDeadline = Math.floor(Date.now() / 1000) + 60 * 20; // Adjust the deadline as required
+//
+//         let rawData = "0xac9650d8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000c4219f5d17000000000000000000000000000000000000000000000000000000000006e815" + updatedDeadline.toString(16).padStart(64, '0') + "00000000000000000000000000000000000000000000000000000000663daccf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000412210e8a00000000000000000000000000000000000000000000000000000000";
+//
+//         let gas = `0x3a345`; // Example gas limit, adjust as needed
+//         let value = `0x2386f26fc10000`; // 0.01 ETH in wei
+//         const gasPrice = await provider.getGasPrice();
+//         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+//
+//         output.txs = [{
+//             type: "evm",
+//             description: 'mint PRO position',
+//             chain,
+//             txParams: {
+//                 chainId:chain.split(':')[1],
+//                 from: fromAddress,
+//                 to: "0x03a520b32c04bf3beef7beb72e919cf822ed34f1",
+//                 data: rawData,
+//                 value: value,
+//                 gas,
+//                 gasPrice: toHex(adjustedGasPrice),
+//                 nonce: toHex(nonce),
+//             }
+//         }];
+//
+//         output.meta = {
+//             quoteMode: "LP"
+//         };
+//         output.steps = 1;
+//         output.complete = true;
+//         output.type = 'EVM';
+//         output.id = uuid();
+//
+//         return output;
+//     } catch (e) {
+//         console.error(tag, e);
+//     }
+// }
+
+// const build_lp_tx = async function (input:any) {
+//     let tag = TAG + " | build_lp_tx | "
+//     try{
+//         log.info("input: ",input)
+//         let output:any = {}
+//
+//         //
+//         let inputChain = input.chain
+//         let fromAddress = input.fromAddress
+//         log.info("inputChain: ",inputChain)
+//         let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
+//         if(!providerUrl) throw new Error("missing providerUrl")
+//         log.info("providerUrl: ",providerUrl)
+//
+//         //
+//         const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+//
+//         const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
+//         const positionManagerABI = [
+//             // Include only the necessary part of the ABI for minting a position
+//             "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline))"
+//         ];
+//         const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI);
+//
+//         // Define the parameters for the liquidity position
+//         //ETH
+//         const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
+//         //PRO
+//         const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
+//         const fee = 3000; // Fee tier, for example 0.3%
+//         const tickLower = -60000; // Lower tick
+//         const tickUpper = 60000; // Upper tick
+//         const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
+//         const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
+//         const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
+//         const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
+//         const recipient = fromAddress; // Recipient address
+//         const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
+//
+//         // Construct the mint parameters
+//         const params = {
+//             token0,
+//             token1,
+//             fee,
+//             tickLower,
+//             tickUpper,
+//             amount0Desired,
+//             amount1Desired,
+//             amount0Min,
+//             amount1Min,
+//             recipient,
+//             deadline
+//         };
+//         log.info(tag,"params: ",params)
+//         const txData = await positionManager.populateTransaction.mint(params);
+//         log.info(tag, "Transaction data prepared:", txData);
+//
+//         //output.tx = tx; // Store the transaction data for future signing
+//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
+//
+//         log.info("calldata: ",txData.data)
+//         log.info("value: ",value)
+//         const nonce = await provider.getTransactionCount(fromAddress, "latest");
+//         log.info("nonce: ",nonce)
+//         let gas = `0x${BigInt("935120").toString(16)}` // 935120
+//         const gasPrice = await provider.getGasPrice();
+//         log.info("gasPrice: ",gasPrice.toString())
+//         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+//         let  isZero = function isZero(hexNumberString: string) {
+//             return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
+//         }
+//         output.txs = []
+//         const tx = {
+//             from:fromAddress,
+//             to: EIP155_MAINNET_CHAINS[inputChain].universalRouter,
+//             chainId:inputChain.split(':')[1],
+//             data: txData.data,
+//             // TODO: universal-router-sdk returns a non-hexlified value.
+//             ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+//             gas,
+//             gasPrice: toHex(adjustedGasPrice),
+//             nonce: toHex(nonce),
+//         }
+//         output.txs.push({
+//             type:"evm",
+//             description:'mint PRO position',
+//             chain:inputChain,
+//             txParams: tx
+//         })
+//
+//         output.meta = {
+//             quoteMode: "LP"
+//         }
+//         output.steps = 1
+//         output.complete = true
+//         output.type = 'EVM'
+//         output.id = uuid()
+//
+//         return output;
+//     }catch(e){
+//         console.error(e)
+//     }
+// }
+
+let get_permit = function(permit:any){
+    let tag = TAG + " | get_permit | "
+    try{
+        let from = permit.from
+        let token = permit.token
+        let amount = permit.amount
+        let chainId = permit.chainId
+
+        //iterate over chains
+        let permit712 = {
+            "types": {
+                "PermitSingle": [
+                    {
+                        "name": "details",
+                        "type": "PermitDetails"
+                    },
+                    {
+                        "name": "spender",
+                        "type": "address"
+                    },
+                    {
+                        "name": "sigDeadline",
+                        "type": "uint256"
+                    }
+                ],
+                "PermitDetails": [
+                    {
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "uint160"
+                    },
+                    {
+                        "name": "expiration",
+                        "type": "uint48"
+                    },
+                    {
+                        "name": "nonce",
+                        "type": "uint48"
+                    }
+                ],
+                "EIP712Domain": [
+                    {
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "chainId",
+                        "type": "uint256"
+                    },
+                    {
+                        "name": "verifyingContract",
+                        "type": "address"
+                    }
+                ]
+            },
+            "domain": {
+                "name": "Permit2",
+                "chainId": permit.chainId,
+                "verifyingContract": "0x000000000022d473030f116ddee9f6b43ac78ba3"
+            },
+            "primaryType": "PermitSingle",
+            "message": {
+                "details": {
+                    "token": permit.token,
+                    "amount": permit.amount,
+                    "expiration": permit.expiry,
+                    "nonce": "1"
+                },
+                "spender": EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
+                "sigDeadline": permit.sigDeadline
+            }
+        }
+        return permit712
+    }catch(e){
+        console.error(e)
     }
 }
 
@@ -112,8 +706,220 @@ let getAssetSupport = function(){
     }
 }
 
+const get_quote_local = async function (quote:any) {
+    let tag = TAG + " | get_quote_local | "
+    try{
+        let output:any = {}
+        if(!quote.sellAsset) throw new Error("missing sellAsset")
+        if(!quote.buyAsset) throw new Error("missing buyAsset")
+        if(!quote.sellAmount) throw new Error("missing sellAmount")
+        if(!quote.senderAddress) throw new Error("missing senderAddress")
+        if(!quote.recipientAddress) throw new Error("missing recipientAddress")
+        if(!quote.slippage) throw new Error("missing slippage")
+        if (!networkSupport.includes(caipToNetworkId(quote.buyAsset))) {
+            throw new Error("unsupported buyAsset");
+        }
+        if (!networkSupport.includes(caipToNetworkId(quote.sellAsset))) {
+            throw new Error("unsupported sellAsset");
+        }
+        // if(!quote.permit2) throw new Error("missing permit2, required for uniswap")
+        output.txs = []
+        let from = quote.senderAddress
+        // let slippageTolerance = quote.slippage
+        let recipient = quote.recipientAddress
+        output.sellAsset = {}
+        output.source = 'uniswap'
+        output.sellAsset.caip = quote.sellAsset
+        output.sellAmount = quote.sellAmount
+        output.buyAsset = {}
+        output.buyAsset.caip = quote.buyAsset
 
-const get_quote = async function (quote:any) {
+        //NO CROSS CHAIN
+        let inputChain = caipToNetworkId(quote.sellAsset)
+        let outputChain = caipToNetworkId(quote.buyAsset)
+        if(inputChain != outputChain) throw new Error("Cross Chain not supported")
+        log.info("inputChain: ",inputChain)
+        let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
+        if(!providerUrl) throw new Error("missing providerUrl")
+        log.info("providerUrl: ",providerUrl)
+
+        let chainIdInt = parseInt(inputChain.replace('eip155:',''))
+        log.info(tag,"chainIdInt: ",chainIdInt)
+        let chainId = chainIdInt
+        //TODO TEST provider for liveness
+        //get procider for chain
+        const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+
+        // Initialize contracts based on whether they are tokens
+        let sellTokenContract, buyTokenContract;
+
+        //get pool for contract
+        let BUY_TOKEN, SELL_TOKEN;
+        let BUY_TOKEN_ADDRESS, SELL_TOKEN_ADDRESS;
+        if(quote.buyAsset.indexOf('erc20') > -1) {
+            //token input get pool for input
+            let buyTokenAddress = quote.buyAsset.split(":")[2].toLowerCase()
+            BUY_TOKEN_ADDRESS = buyTokenAddress
+            log.info("buyTokenAddress: ",buyTokenAddress)
+            buyTokenContract = new ethers.Contract(buyTokenAddress.toLowerCase(), ERC20_ABI, provider);
+            const symbolBuy = await buyTokenContract.symbol();
+            const decimalsBuy = await buyTokenContract.decimals();
+            log.info("symbolBuy: ",symbolBuy)
+            log.info("decimalsBuy: ",decimalsBuy)
+            
+            //get balance
+            let balance = await buyTokenContract.balanceOf(quote.senderAddress)
+            log.info("balance: ",balance.toString())
+            if(!symbolBuy) throw new Error("missing symbolBuy")
+            if(!decimalsBuy) throw new Error("missing decimalsBuy")
+            BUY_TOKEN = new Token(8453, buyTokenAddress, decimalsBuy, symbolBuy, symbolBuy.toLowerCase())
+            log.info("BUY_TOKEN: ",BUY_TOKEN)
+        } else {
+            BUY_TOKEN = new Token(8453, '0x4200000000000000000000000000000000000006', 18, 'WETH')
+            BUY_TOKEN_ADDRESS = '0x4200000000000000000000000000000000000006'
+            log.info("BUY_TOKEN: ",BUY_TOKEN)
+        }
+
+        if(quote.sellAsset.indexOf('erc20') > -1) {
+            //token output get pools for output
+            let sellTokenAddress = quote.sellAsset.split(":")[2].toLowerCase()
+            SELL_TOKEN_ADDRESS = sellTokenAddress
+            log.info("sellTokenAddress: ",sellTokenAddress)
+            sellTokenContract = new ethers.Contract(sellTokenAddress, ERC20_ABI, provider);
+            const symbolSell = await sellTokenContract.symbol();
+            const decimalsSell = await sellTokenContract.decimals();
+            if(!symbolSell) throw new Error("missing symbolSell")
+            if(!decimalsSell) throw new Error("missing decimalsSell")
+            SELL_TOKEN = new Token(8453, sellTokenAddress, decimalsSell, symbolSell, symbolSell.toLowerCase())
+            log.info("SELL_TOKEN: ",SELL_TOKEN)
+        } else {
+            //WETH
+            SELL_TOKEN = new Token(8453, '0x4200000000000000000000000000000000000006', 18, 'WETH')
+            SELL_TOKEN_ADDRESS = '0x4200000000000000000000000000000000000006'
+        }
+        const inputPRO = utils.parseUnits(quote.sellAmount, 18).toString()
+        
+        // @ts-ignore
+        // let POOL_PRO = await get_pool(BUY_TOKEN, SELL_TOKEN, FeeAmount.MEDIUM, 0, provider)
+        // if(!POOL_PRO) throw new Error("missing POOL_PRO")
+
+        let spender = EIP155_MAINNET_CHAINS['eip155:' + chainId].universalRouter;
+        let allowance = await sellTokenContract.allowance(from, spender)
+        log.info(tag,"inputPRO: ",inputPRO.toString())
+        log.info(tag,"allowance: ",allowance.toString())
+        if(allowance.lt(inputPRO)) {
+            log.info(tag,"allowance is less than sellAmount, approving...")
+            // build approval tx
+            throw Error('TODO APPROVE TOKENS')
+        }
+        
+        const FEE_AMOUNT = FeeAmount.MEDIUM
+
+
+
+        let args:any = {
+            tokenInAddress: SELL_TOKEN_ADDRESS,
+            tokenInDecimals: SELL_TOKEN.decimals,
+            tokenInChainId: chainIdInt,
+            tokenOutAddress: BUY_TOKEN_ADDRESS,
+            tokenOutChainId: chainIdInt,
+            tokenOutDecimals: BUY_TOKEN.decimals,
+            amount: inputPRO,
+            tradeType:'EXACT_INPUT',
+            sendPortionEnabled:false,
+        }
+        enum Protocol {
+            V2 = "V2",
+            V3 = "V3",
+            MIXED = "MIXED"
+        }
+        enum QuoteIntent {
+            Pricing = 'pricing',
+            Quote = 'quote',
+        }
+        const CLIENT_PARAMS = {
+            protocols: [Protocol.V2, Protocol.V3, Protocol.MIXED],
+        }
+
+        const router = getRouter(args.tokenInChainId)
+        // log.info(tag,'router: ',router)
+        log.info(tag,'args: ',args)
+        const quoteResult = await getClientSideQuote(args, router, CLIENT_PARAMS)
+        log.info(tag,'quoteResult: ',quoteResult)
+        if(!quoteResult) throw Error("quoteResult is undefined")
+        // @ts-ignore
+        const trade = await transformQuoteToTrade(args, quoteResult.data, QuoteMethod.CLIENT_SIDE_FALLBACK)
+        if(!trade) throw Error("trade is undefined")
+        log.info(tag,'trade: ',trade)
+
+        const permit: any = {
+            details: {
+                token:quote.sellAsset.split(":")[2].toLowerCase(),
+                amount:'1000000000000000000000000',
+                expiration: toDeadline(PERMIT_EXPIRATION),
+                nonce:0,
+            },
+            spender:EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
+            sigDeadline: toDeadline(PERMIT_SIG_EXPIRATION),
+            signature:quote.permit2
+        }
+
+        // @ts-ignore
+        const { calldata, value } = SwapRouter.swapERC20CallParameters(trade, {
+            // recipient: from,
+            // @ts-ignore
+            slippageTolerance,
+            // deadlineOrPreviousBlockhash: deadline,
+            // inputTokenPermit: undefined,
+            // @ts-ignore
+            inputTokenPermit: permit,
+            // fee: options.feeOptions,
+        })
+
+        log.info("calldata: ",calldata)
+        log.info("value: ",value)
+        const nonce = await provider.getTransactionCount(from, "latest");
+        log.info("nonce: ",nonce)
+        let gas = `0x${BigInt("935120").toString(16)}` // 935120
+        const gasPrice = await provider.getGasPrice();
+        log.info("gasPrice: ",gasPrice.toString())
+        const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+        let  isZero = function isZero(hexNumberString: string) {
+            return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
+        }
+        const tx = {
+            from,
+            to: EIP155_MAINNET_CHAINS['eip155:'+chainId].universalRouter,
+            chainId,
+            data: calldata,
+            // TODO: universal-router-sdk returns a non-hexlified value.
+            ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+            gas,
+            gasPrice: toHex(adjustedGasPrice),
+            nonce: toHex(nonce),
+        }
+        output.txs.push({
+            type:"evm",
+            description:'swap tokens',
+            chain:inputChain,
+            txParams: tx
+        })
+
+        output.meta = {
+            quoteMode: "ERC20-ERC20"
+        }
+        output.steps = 1
+        output.complete = true
+        output.type = 'EVM'
+        output.id = uuid()
+        return output;
+
+    }catch(e){
+        console.error(e)
+    }
+}
+
+const get_quote_api = async function (quote:any) {
     let tag = TAG + " | get_quote | "
     try {
         let output:any = {}
@@ -197,7 +1003,16 @@ const get_quote = async function (quote:any) {
             SELL_TOKEN = new Token(8453, '0x4200000000000000000000000000000000000006', 18, 'WETH')
             SELL_TOKEN_ADDRESS = '0x4200000000000000000000000000000000000006'
         }
-
+        
+        //check approval
+        // let spender = EIP155_MAINNET_CHAINS['eip155:' + chainId].universalRouter;
+        // let allowance = await sellTokenContract.allowance(from, spender)
+        // log.info(tag,"allowance: ",allowance.toString())
+        // if(allowance.lt(quote.sellAmount)) {
+        //     log.info(tag,"allowance is less than sellAmount, approving...")
+        //     // build approval tx
+        //    
+        // }
         // @ts-ignore
         // let POOL_PRO = await get_pool(BUY_TOKEN, SELL_TOKEN, FeeAmount.MEDIUM, 0, provider)
         // if(!POOL_PRO) throw new Error("missing POOL_PRO")
@@ -229,7 +1044,6 @@ const get_quote = async function (quote:any) {
         const CLIENT_PARAMS = {
             protocols: [Protocol.V2, Protocol.V3, Protocol.MIXED],
         }
-
 
         const {
             tokenInAddress: tokenIn,

@@ -279,11 +279,20 @@ let run_test = async function(){
               step: number
               txId: string
          */
+        //
+        // let payload = {
+        //     requestId: "5a27dcb0-887a-42eb-a110-14108d60e82f",
+        //     step: 1,
+        //     txId: "0xdf53e8ef1cd631078107e8be8ee715adb7ebba3bd296fda6d585d339733ccd58"
+        // }
+
+
         let payload = {
-            requestId: "5a27dcb0-887a-42eb-a110-14108d60e82f",
+            requestId: "de231ea5-0598-41a7-a43f-d8a50648f425",
             step: 1,
-            txId: "0xdf53e8ef1cd631078107e8be8ee715adb7ebba3bd296fda6d585d339733ccd58"
+            txId: ""
         }
+
         let status = await rango.getTransactionStatus(payload.requestId, payload.step, payload.txId)
         console.log("status: ", status)
     }catch(e){

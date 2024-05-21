@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/changelly-client",
-  "version": "8.3.18",
+  "version": "8.3.19",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

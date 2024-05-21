@@ -50,20 +50,20 @@ let network = require("../lib/index")
 //     })
 
 
-let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
-// let address = "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj"
-// network.getBalance(address)
+// let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
+// // let address = "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj"
+// // network.getBalance(address)
+// //     .then(function(resp){
+// //         console.log("resp: ",resp)
+// //     })
+// //
+// // // let address = process.env['TEST_THOR_MASTER']
+// // // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
+// // console.log("address: ",address)
+// network.getAccount(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
-//
-// // let address = process.env['TEST_THOR_MASTER']
-// // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
-// console.log("address: ",address)
-network.getAccount(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
 
 //let signedTx
 
