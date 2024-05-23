@@ -109,124 +109,6 @@ module.exports = {
     // }
 }
 
-const build_lp_tx = async function (input: any) {
-    let tag = "build_lp_tx | ";
-    try {
-        log.info("input: ", input);
-        let output: any = {};
-
-        let inputChain = input.chain;
-        let fromAddress = input.fromAddress;
-        log.info("inputChain: ", inputChain);
-        let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc;
-        if (!providerUrl) throw new Error("missing providerUrl");
-        log.info("providerUrl: ", providerUrl);
-
-        const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
-
-        const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
-        const positionManagerABI = [
-            "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
-        ];
-
-        const walletPrivateKey = process.env.WALLET_PRIVATE_KEY; // Ensure you have the private key in environment variables
-        if (!walletPrivateKey) throw new Error("missing wallet private key");
-
-        const wallet = new ethers.Wallet(walletPrivateKey, provider);
-        const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI, wallet);
-
-        const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
-        const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
-        const fee = 3000; // Fee tier, for example 0.3%
-        const tickLower = -60000; // Lower tick
-        const tickUpper = 60000; // Upper tick
-        const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
-        const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
-        const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
-        const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
-        const recipient = fromAddress; // Recipient address
-        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
-
-        const params = {
-            token0,
-            token1,
-            fee,
-            tickLower,
-            tickUpper,
-            amount0Desired,
-            amount1Desired,
-            amount0Min,
-            amount1Min,
-            recipient,
-            deadline
-        };
-        log.info(tag, "params: ", params);
-
-        const txData = await positionManager.populateTransaction.mint(params);
-        log.info(tag, "Transaction data prepared:", txData);
-
-        const value = token0 === ethers.constants.AddressZero ? amount0Desired : ethers.BigNumber.from(0); // Assuming token0 is ETH
-        log.info("calldata: ", txData.data);
-        log.info("value: ", value);
-
-        const nonce = await provider.getTransactionCount(fromAddress, "latest");
-        log.info("nonce: ", nonce);
-        let gas = ethers.BigNumber.from("935120"); // 935120
-        const gasPrice = await provider.getGasPrice();
-        log.info("gasPrice: ", gasPrice.toString());
-        const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
-
-        let isZero = function isZero(hexNumberString: string) {
-            return hexNumberString === '0' || /^0x0*$/.test(hexNumberString);
-        };
-
-        output.txs = [];
-        const tx = {
-            from: fromAddress,
-            to: positionManagerAddress,
-            chainId: parseInt(inputChain.split(':')[1]),
-            data: txData.data,
-            ...(value && !isZero(value.toString()) ? { value: value } : {}),
-            gasLimit: gas,
-            gasPrice: adjustedGasPrice,
-            nonce: nonce,
-        };
-
-        log.info(tag, "Transaction params:", tx);
-
-        // Send the transaction
-        const transactionResponse = await wallet.sendTransaction(tx);
-        log.info(tag, "Transaction response:", transactionResponse);
-
-        // Wait for the transaction to be mined
-        const receipt = await transactionResponse.wait();
-        log.info(tag, "Transaction receipt:", receipt);
-
-        output.txs.push({
-            type: "evm",
-            description: 'mint PRO position',
-            chain: inputChain,
-            txParams: tx,
-            txHash: transactionResponse.hash,
-            receipt: receipt,
-        });
-
-        output.meta = {
-            quoteMode: "LP"
-        };
-        output.steps = 1;
-        output.complete = true;
-        output.type = 'EVM';
-        output.id = uuid();
-
-        return output;
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-
-
 // const build_lp_tx = async function (input: any) {
 //     let tag = "build_lp_tx | ";
 //     try {
@@ -283,13 +165,13 @@ const build_lp_tx = async function (input: any) {
 //         const txData = await positionManager.populateTransaction.mint(params);
 //         log.info(tag, "Transaction data prepared:", txData);
 //
-//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
+//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : ethers.BigNumber.from(0); // Assuming token0 is ETH
 //         log.info("calldata: ", txData.data);
 //         log.info("value: ", value);
 //
 //         const nonce = await provider.getTransactionCount(fromAddress, "latest");
 //         log.info("nonce: ", nonce);
-//         let gas = `0x${BigInt("935120").toString(16)}`; // 935120
+//         let gas = ethers.BigNumber.from("935120"); // 935120
 //         const gasPrice = await provider.getGasPrice();
 //         log.info("gasPrice: ", gasPrice.toString());
 //         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
@@ -302,19 +184,31 @@ const build_lp_tx = async function (input: any) {
 //         const tx = {
 //             from: fromAddress,
 //             to: positionManagerAddress,
-//             chainId: inputChain.split(':')[1],
+//             chainId: parseInt(inputChain.split(':')[1]),
 //             data: txData.data,
-//             ...(value && !isZero(value) ? { value: ethers.utils.hexlify(value) } : {}),
-//             gas,
-//             gasPrice: ethers.utils.hexlify(adjustedGasPrice),
-//             nonce: ethers.utils.hexlify(nonce),
+//             ...(value && !isZero(value.toString()) ? { value: value } : {}),
+//             gasLimit: gas,
+//             gasPrice: adjustedGasPrice,
+//             nonce: nonce,
 //         };
+//
+//         log.info(tag, "Transaction params:", tx);
+//
+//         // Send the transaction
+//         const transactionResponse = await wallet.sendTransaction(tx);
+//         log.info(tag, "Transaction response:", transactionResponse);
+//
+//         // Wait for the transaction to be mined
+//         const receipt = await transactionResponse.wait();
+//         log.info(tag, "Transaction receipt:", receipt);
 //
 //         output.txs.push({
 //             type: "evm",
 //             description: 'mint PRO position',
 //             chain: inputChain,
-//             txParams: tx
+//             txParams: tx,
+//             txHash: transactionResponse.hash,
+//             receipt: receipt,
 //         });
 //
 //         output.meta = {
@@ -332,114 +226,115 @@ const build_lp_tx = async function (input: any) {
 // };
 
 
-// const build_lp_tx = async function (input:any) {
-//     let tag = TAG + " | build_lp_tx | "
-//     try{
-//         log.info("input: ",input)
-//         let output:any = {}
-//
-//         //
-//         let inputChain = input.chain
-//         let fromAddress = input.fromAddress
-//         log.info("inputChain: ",inputChain)
-//         let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
-//         if(!providerUrl) throw new Error("missing providerUrl")
-//         log.info("providerUrl: ",providerUrl)
-//
-//         //
-//         const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
-//
-//         const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
-//         // const positionManagerABI = [
-//         //     // Include only the necessary part of the ABI for minting a position
-//         //     "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline))"
-//         // ];
-//         const positionManagerABI = [
-//             "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
-//         ];
-//         const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI);
-//
-//         // Define the parameters for the liquidity position
-//         //ETH
-//         const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
-//         //PRO
-//         const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
-//         const fee = 3000; // Fee tier, for example 0.3%
-//         const tickLower = -60000; // Lower tick
-//         const tickUpper = 60000; // Upper tick
-//         const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
-//         const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
-//         const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
-//         const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
-//         const recipient = fromAddress; // Recipient address
-//         const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
-//
-//         // Construct the mint parameters
-//         const params = {
-//             token0,
-//             token1,
-//             fee,
-//             tickLower,
-//             tickUpper,
-//             amount0Desired,
-//             amount1Desired,
-//             amount0Min,
-//             amount1Min,
-//             recipient,
-//             deadline
-//         };
-//         log.info(tag,"params: ",params)
-//         // const txData = await positionManager.populateTransaction.mint(params);
-//         const txData = await positionManager.mint.call(params);
-//
-//         log.info(tag, "Transaction data prepared:", txData);
-//
-//         //output.tx = tx; // Store the transaction data for future signing
-//         const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
-//
-//         log.info("calldata: ",txData.data)
-//         log.info("value: ",value)
-//         const nonce = await provider.getTransactionCount(fromAddress, "latest");
-//         log.info("nonce: ",nonce)
-//         let gas = `0x${BigInt("935120").toString(16)}` // 935120
-//         const gasPrice = await provider.getGasPrice();
-//         log.info("gasPrice: ",gasPrice.toString())
-//         const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
-//         let  isZero = function isZero(hexNumberString: string) {
-//             return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
-//         }
-//         output.txs = []
-//         const tx = {
-//             from:fromAddress,
-//             to: positionManagerAddress,
-//             chainId:inputChain.split(':')[1],
-//             data: txData.data,
-//             // TODO: universal-router-sdk returns a non-hexlified value.
-//             ...(value && !isZero(value) ? { value: toHex(value) } : {}),
-//             gas,
-//             gasPrice: toHex(adjustedGasPrice),
-//             nonce: toHex(nonce),
-//         }
-//         output.txs.push({
-//             type:"evm",
-//             description:'mint PRO position',
-//             chain:inputChain,
-//             txParams: tx
-//         })
-//
-//         output.meta = {
-//             quoteMode: "LP"
-//         }
-//         output.steps = 1
-//         output.complete = true
-//         output.type = 'EVM'
-//         output.id = uuid()
-//
-//         return output;
-//     }catch(e){
-//         console.error(e)
-//     }
-// }
+
+const build_lp_tx = async function (input:any) {
+    let tag = TAG + " | build_lp_tx | "
+    try{
+        log.info("input: ",input)
+        let output:any = {}
+
+        //
+        let inputChain = input.chain
+        let fromAddress = input.fromAddress
+        log.info("inputChain: ",inputChain)
+        let providerUrl = EIP155_MAINNET_CHAINS[inputChain].rpc
+        if(!providerUrl) throw new Error("missing providerUrl")
+        log.info("providerUrl: ",providerUrl)
+
+        //
+        const provider = new ethers.providers.JsonRpcProvider(providerUrl); // Set your Ethereum RPC URL
+
+        const positionManagerAddress = '0x03a520b32c04bf3beef7beb72e919cf822ed34f1';
+        // const positionManagerABI = [
+        //     // Include only the necessary part of the ABI for minting a position
+        //     "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline))"
+        // ];
+        const positionManagerABI = [
+            "function mint((address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 amount0Desired, uint128 amount1Desired, uint128 amount0Min, uint128 amount1Min, address recipient, uint256 deadline)) external returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)"
+        ];
+        const positionManager = new ethers.Contract(positionManagerAddress, positionManagerABI);
+
+        // Define the parameters for the liquidity position
+        //ETH
+        const token0 = '0x4200000000000000000000000000000000000006'; // Address of token0
+        //PRO
+        const token1 = '0xef743df8eda497bcf1977393c401a636518dd630'; // Address of token1
+        const fee = 3000; // Fee tier, for example 0.3%
+        const tickLower = -60000; // Lower tick
+        const tickUpper = 60000; // Upper tick
+        const amount0Desired = ethers.utils.parseUnits("0.01", 18); // 10 token0
+        const amount1Desired = ethers.utils.parseUnits("41.2", 18); // 10 token1
+        const amount0Min = ethers.utils.parseUnits("0.001", 18); // Min token0
+        const amount1Min = ethers.utils.parseUnits(".9", 18); // Min token1
+        const recipient = fromAddress; // Recipient address
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // Transaction deadline
+
+        // Construct the mint parameters
+        const params = {
+            token0,
+            token1,
+            fee,
+            tickLower,
+            tickUpper,
+            amount0Desired,
+            amount1Desired,
+            amount0Min,
+            amount1Min,
+            recipient,
+            deadline
+        };
+        log.info(tag,"params: ",params)
+        // const txData = await positionManager.populateTransaction.mint(params);
+        const txData = await positionManager.mint.call(params);
+
+        log.info(tag, "Transaction data prepared:", txData);
+
+        //output.tx = tx; // Store the transaction data for future signing
+        const value = token0 === ethers.constants.AddressZero ? amount0Desired : '0x0'; // Assuming token0 is ETH
+
+        log.info("calldata: ",txData.data)
+        log.info("value: ",value)
+        const nonce = await provider.getTransactionCount(fromAddress, "latest");
+        log.info("nonce: ",nonce)
+        let gas = `0x${BigInt("935120").toString(16)}` // 935120
+        const gasPrice = await provider.getGasPrice();
+        log.info("gasPrice: ",gasPrice.toString())
+        const adjustedGasPrice = gasPrice.mul(ethers.BigNumber.from(110)).div(ethers.BigNumber.from(100)); // Example: Increase by 10%
+        let  isZero = function isZero(hexNumberString: string) {
+            return hexNumberString === '0' || /^0x0*$/.test(hexNumberString)
+        }
+        output.txs = []
+        const tx = {
+            from:fromAddress,
+            to: positionManagerAddress,
+            chainId:inputChain.split(':')[1],
+            data: txData.data,
+            // TODO: universal-router-sdk returns a non-hexlified value.
+            ...(value && !isZero(value) ? { value: toHex(value) } : {}),
+            gas,
+            gasPrice: toHex(adjustedGasPrice),
+            nonce: toHex(nonce),
+        }
+        output.txs.push({
+            type:"evm",
+            description:'mint PRO position',
+            chain:inputChain,
+            txParams: tx
+        })
+
+        output.meta = {
+            quoteMode: "LP"
+        }
+        output.steps = 1
+        output.complete = true
+        output.type = 'EVM'
+        output.id = uuid()
+
+        return output;
+    }catch(e){
+        console.error(e)
+    }
+}
 
 
 
