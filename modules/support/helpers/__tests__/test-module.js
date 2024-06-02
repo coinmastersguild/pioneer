@@ -38,7 +38,7 @@ let run_test = async function(){
         );
         console.log("assetValue: ",assetValue)
         console.log("assetValue: ",assetValue.getValue('string'))
-        
+
         
         //formatBigIntToSafeValue
         // let value = helpers.formatBigIntToSafeValue({

@@ -34,11 +34,17 @@ const bigintPow = (base: bigint, exponent: number): bigint => {
   }
 };
 
-const toMultiplier = (decimal: number): bigint => {
+export const toMultiplier = (decimal: number): bigint => {
   let tag = TAG + " | toMultiplier | ";
   console.log(tag + 'input decimal:', decimal);
   try {
-    const result = bigintPow(BigInt(10), decimal);
+    if (decimal < 0) {
+      throw new Error("Decimal must be non-negative");
+    }
+    let result = BigInt(1);
+    for (let i = 0; i < decimal; i++) {
+      result *= BigInt(10);
+    }
     console.log(tag + 'result:', result);
     return result;
   } catch (error) {
@@ -46,6 +52,19 @@ const toMultiplier = (decimal: number): bigint => {
     return BigInt(10);
   }
 };
+
+// const toMultiplier = (decimal: number): bigint => {
+//   let tag = TAG + " | toMultiplier | ";
+//   console.log(tag + 'input decimal:', decimal);
+//   try {
+//     const result = bigintPow(BigInt(10), decimal);
+//     console.log(tag + 'result:', result);
+//     return result;
+//   } catch (error) {
+//     console.error(tag + 'Error in toMultiplier:', error);
+//     return BigInt(10);
+//   }
+// };
 
 const decimalFromMultiplier = (multiplier: bigint): number => {
   let tag = TAG + " | decimalFromMultiplier | ";
@@ -59,59 +78,89 @@ const decimalFromMultiplier = (multiplier: bigint): number => {
 
 export function formatBigIntToSafeValue({
                                           value,
-                                          bigIntDecimal = DEFAULT_DECIMAL,
-                                          decimal = DEFAULT_DECIMAL,
+                                          bigIntDecimal,
+                                          decimal,
                                         }: {
   value: bigint;
-  bigIntDecimal?: number;
+  bigIntDecimal?: bigint;
   decimal?: number;
 }): string {
-  let tag = TAG + " | formatBigIntToSafeValue | ";
+  const tag = TAG+" | BigIntArithmetics | ";
   try {
-    console.log(tag, 'value:', value, 'bigIntDecimal:', bigIntDecimal, 'decimal:', decimal);
+    console.log(tag,'value:',value,'bigIntDecimal:',bigIntDecimal,'decimal:',decimal);
+    if(!decimal) decimal = DEFAULT_DECIMAL;
+    if(!bigIntDecimal) bigIntDecimal = toMultiplier(decimal);
+
     // Check if the value is negative and throw an error if true
     if (value < BigInt(0)) {
-      throw new Error(tag + 'Negative value is not allowed');
+      throw new Error(TAG + 'Negative value is not allowed');
     }
 
-    // Convert bigint to string and handle potential negative sign
+    // Convert bigint to string and then to number
     let valueString = value.toString();
+    console.log(tag,'valueString:',valueString);
+    console.log(tag,'valueString:',valueString.length);
 
-    // Calculate padding length required to match the specified decimal places
-    const padLength = decimal - valueString.length + 1;
-
-    // Pad the value string with leading zeros if necessary
-    if (padLength > 0) {
-      valueString = '0'.repeat(padLength) + valueString;
+    // Ensure the valueString has enough length for the decimal places
+    if (valueString.length <= decimal) {
+      valueString = '0'.repeat(decimal - valueString.length + 1) + valueString;
     }
 
-    // Determine the position of the decimal point
-    const decimalIndex = valueString.length - decimal;
+    // Determine the integer and decimal parts
+    const integerPart = valueString.slice(0, valueString.length - decimal) || '0';
+    const decimalPart = valueString.slice(valueString.length - decimal).padEnd(decimal, '0');
 
-    // Extract the decimal part of the value
-    let decimalString = valueString.slice(-decimal);
+    // Construct the final formatted value
+    const formattedValue = `${integerPart}.${decimalPart}`;
 
-    // Trim the decimal string to match the specified bigIntDecimal length
-    if (decimalString.length > bigIntDecimal) {
-      decimalString = decimalString.substring(0, bigIntDecimal);
-    }
-
-    // Construct the final string with the integer and decimal parts
-    const formattedValue = `${valueString.slice(0, decimalIndex)}.${decimalString}`.replace(
-        /\.?0*$/,
-        '',
-    );
-
-    // Log the formatted value for debugging
-    console.log(tag + 'Formatted Value:', formattedValue);
-
+    console.log(tag,"formattedValue:", formattedValue);
     return formattedValue;
   } catch (error) {
-    // Log any errors encountered during the process
-    console.error(tag + 'Error in formatBigIntToSafeValue:', error);
+    console.error(TAG + 'Error in formatBigIntToSafeValue:', error);
     return '';
   }
 }
+
+// export function formatBigIntToSafeValue({
+//                                           value,
+//                                           bigIntDecimal = DEFAULT_DECIMAL,
+//                                           decimal = DEFAULT_DECIMAL,
+//                                         }: {
+//   value: bigint;
+//   bigIntDecimal?: number;
+//   decimal?: number;
+// }): string {
+//   const TAG = " | BigIntArithmetics | ";
+//   const log = (message: string) => console.log(TAG + message);
+//
+//   try {
+//     log(`value: ${value}, bigIntDecimal: ${bigIntDecimal}, decimal: ${decimal}`);
+//
+//     // Check if the value is negative and throw an error if true
+//     if (value < BigInt(0)) {
+//       throw new Error(TAG + 'Negative value is not allowed');
+//     }
+//
+//     // Convert bigint to string
+//     let valueString = value.toString();
+//
+//     // Pad the value string with leading zeros if necessary
+//     valueString = valueString.padStart(decimal + 1, '0');
+//
+//     // Determine the position of the decimal point
+//     const integerPart = valueString.slice(0, -decimal) || '0';
+//     const decimalPart = valueString.slice(-decimal).padStart(decimal, '0').slice(0, bigIntDecimal);
+//
+//     // Construct the final formatted value
+//     const formattedValue = `${integerPart}.${decimalPart}`.replace(/\.?0*$/, '');
+//
+//     log(`Formatted Value: ${formattedValue}`);
+//     return formattedValue;
+//   } catch (error) {
+//     console.error(TAG + 'Error in formatBigIntToSafeValue:', error);
+//     return '';
+//   }
+// }
 
 // export function formatBigIntToSafeValue({
 //                                           value,
@@ -159,9 +208,11 @@ export class BigIntArithmetics {
   static fromBigInt(value: bigint, decimal?: number): BigIntArithmetics {
     let tag = TAG + " | fromBigInt | ";
     try {
+      console.log(tag,"Decimal: ", decimal);
+
       return new BigIntArithmetics({
         decimal,
-        value: formatBigIntToSafeValue({ value, bigIntDecimal: decimal, decimal }),
+        value: formatBigIntToSafeValue({ value, bigIntDecimal: toMultiplier(decimal || DEFAULT_DECIMAL), decimal }),
       });
     } catch (error) {
       console.error(tag + 'Error in fromBigInt:', error);
@@ -219,7 +270,7 @@ export class BigIntArithmetics {
       console.log(tag , 'Decimal:', this.decimal);
       console.log(tag , 'isComplex:', isComplex);
       if (isComplex) {
-        this.decimalMultiplier = this.decimal;
+        this.decimalMultiplier = toMultiplier(this.decimal || DEFAULT_DECIMAL);
       } else {
         const maxDecimals = Math.max(getFloatDecimals(toSafeValue(value)), this.decimal || 0);
         this.decimalMultiplier = toMultiplier(maxDecimals);
@@ -235,6 +286,34 @@ export class BigIntArithmetics {
       this.bigIntValue = BigInt(0);
     }
   }
+  
+  // constructor(params: SKBigIntParams) {
+  //   let tag = TAG + " | constructor | ";
+  //   try {
+  //     console.log(tag + 'Constructor Params:', params);
+  //     const value = getStringValue(params);
+  //     console.log(tag + 'String Value:', value);
+  //     const isComplex = typeof params === 'object' && params !== null;
+  //     this.decimal = isComplex ? (params as { decimal?: number }).decimal : undefined;
+  //     console.log(tag , 'Decimal:', this.decimal);
+  //     console.log(tag , 'isComplex:', isComplex);
+  //     if (isComplex) {
+  //       this.decimalMultiplier = this.decimal;
+  //     } else {
+  //       const maxDecimals = Math.max(getFloatDecimals(toSafeValue(value)), this.decimal || 0);
+  //       this.decimalMultiplier = toMultiplier(maxDecimals);
+  //     }
+  //     console.log(tag + 'Decimal Multiplier:', this.decimalMultiplier);
+  //
+  //     this.setValue(value);
+  //     //@ts-ignore
+  //     console.log(tag + 'BigInt Value:', this.bigIntValue);
+  //   } catch (error) {
+  //     console.error(tag + 'Error in constructor:', error);
+  //     this.decimalMultiplier = BigInt(1);
+  //     this.bigIntValue = BigInt(0);
+  //   }
+  // }
 
   set(value: SKBigIntParams): this {
     let tag = TAG + " | set | ";
@@ -344,7 +423,7 @@ export class BigIntArithmetics {
       console.log(tag,'decimalMultiplier: ', this.decimalMultiplier);
       const value = formatBigIntToSafeValue({
         value: this.bigIntValue,
-        bigIntDecimal: this.decimal || decimalFromMultiplier(this.decimalMultiplier),
+        bigIntDecimal: toMultiplier(this.decimal || DEFAULT_DECIMAL),
         decimal: this.decimalMultiplier,
       });
       console.log(tag,'value:', value);
@@ -542,7 +621,7 @@ export class BigIntArithmetics {
       );
 
       const formattedValue = formatBigIntToSafeValue({
-        bigIntDecimal: decimal,
+        bigIntDecimal: toMultiplier(decimal),
         decimal,
         value: result,
       });
@@ -583,10 +662,13 @@ export class BigIntArithmetics {
     }
   }
 
-  private setValue(value: InitialisationValueType): void {
+  private setValue(value: any): void {
     let tag = TAG + " | setValue | ";
     try {
-      const safeValue = toSafeValue(value) || '0';
+      console.log(tag, 'value:', value);
+      console.log(tag, ' this.decimal:',  this.decimal);
+      const safeValue = formatBigIntToSafeValue({value:value, decimal: this.decimal})
+      console.log(tag, 'safeValue:', safeValue);
       this.bigIntValue = this.toBigInt(safeValue);
     } catch (error) {
       console.error(tag + 'Error in setValue:', error);
