@@ -55,13 +55,24 @@ let run_test = async function(){
 
         //get online
         console.log("invoker: ",invoker)
-        //if username not online abort
-        let onlineUsers = await invoke.online()
-        console.log("onlineUsers: ",onlineUsers)
 
-        let isOnline = false
-        if(onlineUsers.indexOf(invoker) >= 0) isOnline = true
-        if(!isOnline) throw Error("User not connected!")
+        let asset = invoke.fromChainOrSignature(
+          Chain.Base,
+          "0.001",
+        );
+        console.log("asset: ",asset)
+        console.log("asset: ",asset.getValue('string'))
+
+
+        //assetValue
+        
+        // //if username not online abort
+        // let onlineUsers = await invoke.online()
+        // console.log("onlineUsers: ",onlineUsers)
+
+        // let isOnline = false
+        // if(onlineUsers.indexOf(invoker) >= 0) isOnline = true
+        // if(!isOnline) throw Error("User not connected!")
 
         // let txInput = {
         //     "asset":
@@ -201,25 +212,25 @@ let run_test = async function(){
         //     "invocationId":"pioneer:invocation:v0.01:OSMO:9cPFW69QNmoSjmmHVdzy12"
         // }
 
-        let invocation =  {
-            "type":"evm",
-            "context":"0x9a3a6824340baa81e2b7095a4d9d1a2c850879a9.wallet.json",
-            "username":"testerconfigenv",
-            "coin":"OSMO",
-            "fee":{
-                "priority":5
-            },
-            "network":"OSMO",
-            "asset":"OSMO",
-            "amount":"0.04",
-            "address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
-            "memo":"",
-            "noBroadcast":true,
-            "invocationId":"pioneer:invocation:v0.01:OSMO:9cPFW69QNmoSjmmHVdzy12"
-        }
-
-        let result = await invoke.invoke('transfer',invocation)
-        console.log("result: ",result.data)
+        // let invocation =  {
+        //     "type":"evm",
+        //     "context":"0x9a3a6824340baa81e2b7095a4d9d1a2c850879a9.wallet.json",
+        //     "username":"testerconfigenv",
+        //     "coin":"OSMO",
+        //     "fee":{
+        //         "priority":5
+        //     },
+        //     "network":"OSMO",
+        //     "asset":"OSMO",
+        //     "amount":"0.04",
+        //     "address":"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6",
+        //     "memo":"",
+        //     "noBroadcast":true,
+        //     "invocationId":"pioneer:invocation:v0.01:OSMO:9cPFW69QNmoSjmmHVdzy12"
+        // }
+        //
+        // let result = await invoke.invoke('transfer',invocation)
+        // console.log("result: ",result.data)
 
         //open invoke page
         // open("http://localhost:8080/#/invocation/"+result.data.invocationId)

@@ -13,7 +13,8 @@ require("dotenv").config({path:'../../../../.env'})
 let bip39 = require('../lib/index')
 
 //test seed
-let TEST_HASH = '0x061f9c04c904431e2568178e3cd42282'
+let TEST_HASH = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+// let TEST_HASH = '0x061f9c04c904431e2568178e3cd42282'
 let TEST_SEED = 'alcohol woman abuse must during monitor noble actual mixed trade anger aisle'
 
 let hash_seed = bip39.hashToMnemonic(TEST_HASH)

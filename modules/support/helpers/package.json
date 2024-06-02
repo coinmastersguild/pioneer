@@ -1,8 +1,8 @@
 {
-  "name": "@pioneer-platform/bip39",
-  "version": "0.0.3",
+  "name": "@pioneer-platform/helpers",
+  "version": "4.0.5",
   "main": "./lib/index.js",
-  "types": "./lib/main.d.ts",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "npm": "npm i",
     "test": "npm run build && node __tests__/test-module.js",
@@ -13,6 +13,8 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
+    "@coinmasters/tokens": "^3.7.28",
+    "@coinmasters/types": "^4.7.28",
     "@noble/hashes": "^1.4.0",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@types/node": "^18.15.11",
