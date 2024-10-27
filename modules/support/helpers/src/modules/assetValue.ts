@@ -26,7 +26,7 @@ const TAG = " | assetValue | ";
 
 type TokenTax = { buy: number; sell: number };
 
-function safeValue(value: NumberPrimitives, decimal: number) {
+export function safeValue(value: NumberPrimitives, decimal: number) {
   let tag = TAG + " | safeValue | ";
   try {
     if (typeof value === 'bigint') {
@@ -86,14 +86,14 @@ const createAssetValue = async (assetString: string, value: NumberPrimitives = 0
   let tag = TAG + " | createAssetValue | ";
   try {
     validateIdentifier(assetString);
-    console.log(tag + 'assetString', assetString);
+    //console.log(tag + 'assetString', assetString);
 
     //@ts-ignore
     const decimal = await getDecimal(getAssetInfo(assetString));
-    console.log(tag + 'decimal', decimal);
+    //console.log(tag + 'decimal', decimal);
 
     const parsedValue = safeValue(value, decimal);
-    console.log(tag + 'parsedValue', parsedValue);
+    //console.log(tag + 'parsedValue', parsedValue);
 
     // @ts-ignore
     return new AssetValue({ decimal, value: parsedValue, identifier: assetString });
@@ -105,6 +105,8 @@ const createAssetValue = async (assetString: string, value: NumberPrimitives = 0
 export class AssetValue extends BigIntArithmetics {
   address?: string;
   caip?: string;
+  pubkey?: string;
+  identifier?: string;
   //@ts-ignore
   chain: Chain;
   isGasAsset = false;
@@ -134,6 +136,7 @@ export class AssetValue extends BigIntArithmetics {
 
       const assetInfo:any = getAssetInfo(identifier);
       this.type = getAssetType(assetInfo);
+      this.identifier = identifier;
       this.chain = assetInfo.chain;
       this.ticker = assetInfo.ticker;
       this.symbol = assetInfo.symbol;
@@ -258,9 +261,9 @@ export class AssetValue extends BigIntArithmetics {
       const { decimal, identifier } = getCommonAssetInfo(assetString);
       if (!decimal || !identifier) throw Error('unknown coin! ' + assetString);
       const parsedValue = safeValue(value, decimal);
-      console.log(tag + "parsedValue: ", parsedValue);
-      console.log(tag + "decimal: ", decimal);
-      console.log(tag + "identifier: ", identifier);
+      //console.log(tag + "parsedValue: ", parsedValue);
+      //console.log(tag + "decimal: ", decimal);
+      //console.log(tag + "identifier: ", identifier);
 
       // @ts-ignore
       return new AssetValue({ value: parsedValue, decimal, identifier });

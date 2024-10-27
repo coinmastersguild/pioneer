@@ -13,13 +13,20 @@ let TEST_SEED = process.env['WALLET_MAIN'] || "alcohol woman abuse must during m
 let TEST_SEED_MASTER_BTC_BECH32 = process.env['TEST_SEED_MASTER_BTC'] || 'bc1q7l333k7tzpxlg5txh8jar7l8j92v37f2nvk2aw'
 
 let hash = "0x29f7212ecc1c76cea81174af267b67506f754ea8c73f144afa900a0d85b24b21319621aeb062903e856352f38305710190869c3ce5a1425d65ef4fa558d0fc251b"
+let trimmedHash = hash.slice(0, 64);
+console.log('trimmedHash: ',trimmedHash)
 
 //generateSeedFromHash
-console.log("")
-crypto.generateSeed()
+crypto.generateSeedFromHash(trimmedHash)
     .then(function(resp){
         console.log("resp: ",resp)
     })
+
+// console.log("")
+// crypto.generateSeed()
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
 
 // console.log("TEST_SEED: ",TEST_SEED)
 // crypto.generateWalletFromSeed(TEST_SEED)

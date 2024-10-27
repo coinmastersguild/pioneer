@@ -269,6 +269,8 @@ export const COIN_MAP_LONG_XCHAIN = {
     FIO: "fio",
 };
 
+
+
 export const COIN_MAP_KEEPKEY_LONG = {
     BTC: "Bitcoin",
     GAIA: "Cosmos",
@@ -291,6 +293,7 @@ export const COIN_MAP_KEEPKEY_LONG = {
     AVAX: "Avalanche",
     EOS: "Eos",
     FIO: "Fio",
+    ZEC: 'Zcash',
 };
 
 export const SLIP_44_BY_LONG:any = {

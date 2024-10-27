@@ -72,7 +72,10 @@ const https = require('https')
 const axios = Axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
-    })
+    }),
+    headers: {
+        'api-key': process.env['NOW_NODES_API'],
+    },
 });
 const log = require('@pioneer-platform/loggerdog')()
 let wait = require('wait-promise');
@@ -87,7 +90,8 @@ let nodes = require('@pioneer-platform/nodes')
 let publicNode = nodes.getNode('cosmos','gaiad')
 
 let ATOM_BASE = 1000000
-let URL_GAIAD = process.env['URL_GAIAD'] || publicNode
+let URL_GAIAD = 'https://atom.nownodes.io'
+// let URL_GAIAD = process.env['URL_GAIAD'] || 'https://atom.nownodes.io/cosmos'
 log.debug("URL_GAIAD: ",URL_GAIAD)
 let RUNTIME:any
 
@@ -616,6 +620,10 @@ let get_block = async function(height:string){
 		   }
 		}
 
+
+https://docs.cosmos.network/cosmos/auth/v1beta1/accounts/{address}
+
+
  */
 
 let get_account = async function(address:string){
@@ -623,11 +631,25 @@ let get_account = async function(address:string){
     let output:any = {}
     try{
         let txInfo
+        // let url = 'https://api.cosmos.shapeshift.com/api/v1/account/'+address
+        // //
+        // txInfo = await axios({method:'GET',url})
+        // log.debug(tag,"txInfo: ",txInfo.data)
 
-        //
-        txInfo = await axios({method:'GET',url: URL_GAIAD+'/auth/accounts/'+address})
-        log.debug(tag,"txInfo: ",txInfo.data)
 
+        txInfo = await axios({
+            method: 'GET',
+            url: `${URL_GAIAD}/cosmos/auth/v1beta1/accounts/${address}`,
+        });
+        
+        // txInfo = await axios({
+        //     method: 'GET',
+        //     url: `https://atom.nownodes.io/cosmos/auth/v1beta1/accounts/${address}`,
+        //     headers: {
+        //         'api-key': process.env['NOW_NODES_API'],
+        //     },
+        // });
+        
 
         return txInfo.data
     }catch(e){
@@ -641,7 +663,7 @@ let get_account_remote = async function(address:string){
     try{
         let txInfo
 
-        txInfo = await axios({method:'GET',url: URL_GAIAD+'/auth/accounts/'+address})
+        txInfo = await axios({method:'GET',url: URL_GAIAD+'/auth/v1beta1/accounts/'+address})
         log.debug(tag,"txInfo: ",txInfo.data)
 
         return txInfo.data
@@ -668,7 +690,7 @@ let encode_transaction = async function(tx:string){
             }
 
             let urlRemote = URL_GAIAD+ '/txs/encode'
-            log.debug(tag,"urlRemote: ",urlRemote)
+            log.info(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
                 headers: {
@@ -678,7 +700,7 @@ let encode_transaction = async function(tx:string){
                 method: 'POST',
                 data: payload,
             })
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
 
         // @ts-ignore
         }catch(e:any){
@@ -799,7 +821,7 @@ let broadcast_transaction = async function(tx:string){
 
             let urlRemote = URL_GAIAD+ '/cosmos/tx/v1beta1/txs'
             // let urlRemote = URL_GAIAD+ '/txs'
-            log.debug(tag,"urlRemote: ",urlRemote)
+            log.info(tag,"urlRemote: ",urlRemote)
             let result2 = await axios({
                 url: urlRemote,
                 headers: {
@@ -809,9 +831,10 @@ let broadcast_transaction = async function(tx:string){
                 method: 'POST',
                 data: payload,
             })
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
+            log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
+            log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
+            if(result2.data.tx_response.txhash) output.txid = result2.data.tx_response.txhash
 
             //push to seed
             // let urlRemote = URL_GAIAD+ '/broadcast_tx_sync?tx='+tx
@@ -867,7 +890,7 @@ let broadcast_transaction = async function(tx:string){
             //throw e
 
             output.success = false
-            output.error = e.response.data.error
+            output.error = e.response
 
         }
 

@@ -122,9 +122,18 @@ let coin = 'BASE'
 // let bip32 = `m/44'/144'/0'/0/0`
 // let bip32 = `m/44'/914'/0'/0/0`
 // console.log(bip32ToAddressNList(bip32))
+
 // let xpub = "xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS"
 // console.log("zpub",xpubConvert(xpub,'zpub'))
+
+let xpub = "zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX"
+console.log("xpub",xpubConvert(xpub,'xpub'))
+
+// let xpub = "xpub6BkW8yrmJs9VGCpxq92E9F7n5yvzT8v3f7bF27JqbC6RydpHaFVqWSBcCUATYpXxtcAR4BA9CUstk6c2cTABbHWUWT5ZwZuLma3Ab78RP1Y"
+// console.log("ypub",xpubConvert(xpub,'ypub'))
+
 //convert
+
 //console.log(xpubConvert("xpub6CKkkDxRtCu6RWh9VCs3p9N8SzgFspo9qDcXbUkSXfHstFGgAd3XwsYbgQK82m7wnEp1byQGFenCHNk5ndJ8nx9dch7miL44FZV1pVQe6K4",'zpub'))
 //console.log(xpubConvert(process.env['XPUB_TEST_BROKE'],'ypub'))
 

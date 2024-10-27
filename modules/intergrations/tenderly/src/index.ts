@@ -1,64 +1,99 @@
-/*
-    https://docs.blocknative.com/webhook-api
+import axios from "axios";
+import https from "https";
+import { ethers } from "ethers";
 
- */
+const TAG = " | tenderly | ";
 
+// Ensure API key is set
+const TENDERLY_ACCESS_KEY = process.env.TENDERLY_ACCESS_KEY;
+if (!TENDERLY_ACCESS_KEY) {
+    throw new Error("API key required! Set env TENDERLY_ACCESS_KEY");
+}
 
+const TENDERLY_USER = 'highlander2';
+const TENDERLY_PROJECT = 'project';
 
-const TAG = " | blocknative | "
-const Axios = require('axios')
-const https = require('https')
-const axios = Axios.create({
+// Axios instance with custom HTTPS agent
+const axiosInstance = axios.create({
     httpsAgent: new https.Agent({
         rejectUnauthorized: false
     })
 });
 
-let URL_HARPIE = "https://api.harpie.io"
-let TENDERLY_ACCESS_KEY = process.env['TENDERLY_ACCESS_KEY']
-if(!TENDERLY_ACCESS_KEY) throw Error("api key required! set env TENDERLY_ACCESS_KEY")
-
-let TENDERLY_USER = 'highlander2'
-let TENDERLY_PROJECT = 'keepkey'
-
-
 module.exports = {
-    validateTransaction: function (from:string,to:string,data:string) {
-        return submit_tx(from,to,data);
+    validateTransaction: function (tx:any) {
+        return simulateTransaction(tx);
     },
-}
+};
 
-const submit_tx = async function (from:string,to:string,data:string) {
-    let tag = TAG + " | submit_address | "
+
+// Function to simulate a transaction
+async function simulateTransaction(tx:any) {
+    let tag = " | simulateTransaction | "
     try {
-        const apiURL = `https://api.tenderly.co/api/v1/account/highlander2/project/keepkey/simulate`
-        const body = {
-            "network_id": "1",
-            "from": from,
-            "to": to,
-            "input": data,
-            "gas": 21204,
-            "gas_price": "0",
-            "value": 0,
-            "save_if_fails": true
+        const apiURL = `https://api.tenderly.co/api/v1/account/highlander2/project/project/simulate`;
+
+        const body:any = {
+            network_id: tx.chainId || "1",
+            from: tx.from,
+            to: tx.to,
+            input: tx.data,
+            value: tx.value || 0,
+            save_if_fails: true
+        };
+
+        //eip1559
+        if(tx.gas){
+            body.gas = tx.gas
+            body.gas_price = tx.gasPrice
         }
+        if(tx.maxPriorityFeePerGas){
+            body.max_priority_fee_per_gas = tx.maxPriorityFeePerGas
+            body.max_fee_per_gas = tx.maxFeePerGas
+        }
+        // gas: 21204,
+        //     gas_price: "0",
+
         const headers = {
             headers: {
-                'content-type': 'application/JSON',
+                'Content-Type': 'application/json',
                 'X-Access-Key': TENDERLY_ACCESS_KEY,
             }
-        }
-        const resp = await axios.post(apiURL, body, headers);
+        };
+        // console.log(tag,'apiURL: ',apiURL)
+        // console.log(tag,'headers: ',headers)
+        const response = await axiosInstance.post(apiURL, body, headers);
 
-        if (resp.data.simulation.status === false) {
-            // it failed, do as you please
-        }
+        // console.log(tag,'response: ',Object.keys(response.data))
+        // console.log(tag,'response simulation: ',Object.keys(response.data.simulation))
+        console.log(tag,'response simulation: ',response.data.simulation)
+        // // console.log(tag,'response simulation: ',response.data.contracts)
+        // console.log(tag,'response simulation status: ',response.data.simulation.status)
 
-        return resp.data
-    } catch (e) {
-        console.error(tag, "e: ", e)
-        // console.error(tag, "e: ", e?.response)
-        // console.error(tag, "e: ", e?.response?.status)
-        // console.error(tag, "e: ", JSON.stringify(e.data))
+        // if (!response.data.simulation.status) {
+        //     console.error("Simulation failed:", response.data);
+        // }
+
+        let summary:any = {
+            isValid: response.data.simulation.status,
+            method: response.data.simulation.method,
+            gas_used: response.data.simulation.gas_used,
+            nonce: response.data.simulation.nonce,
+            addresses: response.data.simulation.addresses,
+        }
+        if(!response.data.simulation.status){
+            summary.error = response.data.simulation.error_message
+        }
+        summary.raw = response.data.simulation
+
+        return summary;
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+            console.error(TAG, "Axios error in simulateTransaction:", error.response?.data || error.message);
+        } else {
+            console.error(TAG, "Unknown error in simulateTransaction:", error);
+        }
+        throw new Error("Transaction simulation failed.");
     }
 }
+

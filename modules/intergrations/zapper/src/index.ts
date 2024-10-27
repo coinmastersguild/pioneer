@@ -99,8 +99,12 @@ const get_portfolio = async function (address:string) {
                     let network = token.network
                     log.debug(tag,"network: ",token)
                     let caip = evmCaips[network]
-                    token.blockchainCaip = caip;
-                    token.assetCaip = caip + ":" +token.token.address
+                    token.networkId = caip;
+                    if(token.token.address !== '0x0000000000000000000000000000000000000000'){
+                        token.assetCaip = caip + ":" +token.token.address
+                    }else {
+                        token.assetCaip = caip
+                    }
                     log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
                     totalBalanceUsdTokens += token.token.balanceUSD;
                 });
@@ -295,11 +299,11 @@ const get_tokens = async function (address:string) {
 const get_nfts = async function (address:string) {
     let tag = TAG + " | get_tokens | "
     try {
-        let url = URL_SERVICE + "v2/nft/user/tokens?userAddress=" + address
+        let url = URL_SERVICE + "/v2/nft/user/tokens?userAddress=" + address
 
         let result = await axios({
             url,
-            method: 'GET'
+            method: 'GET',
         })
         return result.data
     } catch (e) {

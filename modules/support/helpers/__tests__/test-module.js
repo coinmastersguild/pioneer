@@ -25,16 +25,16 @@ let run_test = async function(){
         // console.log("assetValue: ",assetValue.getValue('string'))
 
         //get save value
-        let value = helpers.formatBigIntToSafeValue({
-            value: 62128117093292225n,
-            decimal: 18,
-        })
-        console.log("value: ",value)
+        // let value = helpers.formatBigIntToSafeValue({
+        //     value: 62128117093292225n,
+        //     decimal: 18,
+        // })
+        // console.log("value: ",value)
         // console.log("value: ",typeof(value))
 
         let assetValue = helpers.AssetValue.fromChainOrSignature(
             'BASE',
-            value,
+            '0.062128117093292224',
         );
         console.log("assetValue: ",assetValue)
         console.log("assetValue: ",assetValue.getValue('string'))

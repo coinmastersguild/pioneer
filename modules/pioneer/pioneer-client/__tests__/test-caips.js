@@ -169,7 +169,14 @@ const runTest = async () => {
         //get a blockchain by long name
         
         //get an asset by fuzzy long name
+        //
+        // let caip = 'bip122:000007d91d1254d60e2dd1ae58038307/slip44:5'
+
+        //coingecko:cosmos:mayachain-mainnet-v1/slip44:931
+        let caip = 'cosmos:mayachain-mainnet-v1/slip44:931'
         
+        let marketInfo = await pioneer.MarketInfo({caip})
+        console.log("marketInfo: ",marketInfo.data)
     } catch (e) {
         console.error(e);
     }

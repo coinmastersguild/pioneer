@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-discovery",
-  "version": "0.0.7",
+  "version": "0.0.15",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -20,5 +20,11 @@
     "nodemon": "^2.0.3",
     "typescript": "^5.0.2"
   },
-  "gitHead": "a76012f6693a12181c4744e53e977a9eaeef0ed3"
+  "gitHead": "a76012f6693a12181c4744e53e977a9eaeef0ed3",
+  "dependencies": {
+    "@coinmasters/tokens": "^3.7.33",
+    "@coinmasters/types": "^4.7.33",
+    "@pioneer-platform/loggerdog": "^8.3.1",
+    "@pioneer-platform/pioneer-caip": "^9.2.27"
+  }
 }

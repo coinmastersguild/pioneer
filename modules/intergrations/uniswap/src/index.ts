@@ -584,7 +584,7 @@ let getAssetSupport = function(){
     try{
         //iterate over chains
         let allAssets = Object.keys(assetData)
-        log.info(tag,"allAssets: ",allAssets)
+        // log.info(tag,"allAssets: ",allAssets)
 
         let supportedAssets:any = []
         for(let i =0; i < allAssets.length; i++){

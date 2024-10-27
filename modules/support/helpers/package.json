@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/helpers",
-  "version": "4.0.5",
+  "version": "4.0.12",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@coinmasters/tokens": "^3.7.28",
-    "@coinmasters/types": "^4.7.28",
+    "@coinmasters/types": "latest",
     "@noble/hashes": "^1.4.0",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@types/node": "^18.15.11",

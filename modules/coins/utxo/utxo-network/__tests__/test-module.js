@@ -25,18 +25,18 @@ let run_test = async function(){
     try{
         await network.init(servers)
 
-        network.utxosByXpub("DOGE","xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
-            .then(function(resp){
-                console.log("resp: ",resp)
-                //console.log("resp: ",JSON.stringify(resp))
-            })
-
-        //zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX
-        // network.getPubkeyInfo("BTC","zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX")
+        // network.utxosByXpub("DOGE","xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
         //     .then(function(resp){
         //         console.log("resp: ",resp)
         //         //console.log("resp: ",JSON.stringify(resp))
         //     })
+
+        //zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX
+        network.getPubkeyInfo("BTC","zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX")
+            .then(function(resp){
+                console.log("resp: ",resp)
+                //console.log("resp: ",JSON.stringify(resp))
+            })
 
         //getPubkeyInfo
         // network.getPubkeyInfo("DASH","xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
@@ -94,12 +94,12 @@ let run_test = async function(){
         //         //console.log("resp: ",JSON.stringify(resp))
         //     })
 
-        let xpub = "xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"
-        network.getBalanceByXpub("DGB",xpub)
-            .then(function(resp){
-                console.log("resp: ",resp)
-                //console.log("resp: ",JSON.stringify(resp))
-            })
+        // let xpub = "xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"
+        // network.getBalanceByXpub("DGB",xpub)
+        //     .then(function(resp){
+        //         console.log("resp: ",resp)
+        //         //console.log("resp: ",JSON.stringify(resp))
+        //     })
 
         // let xpub = "ypub6Wev4wL7q61rBeyLc7GpHF3z3nsSz2LXCga32o5ChbEQSaiSGvg7dQqRWv6Md2FzhefZhHP7NpTz4sYUeCsqxs6brzqoeRb81t7YQpVsy5H"
         // // network.getBalanceByXpub("BTC",xpub)

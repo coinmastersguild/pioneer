@@ -12,7 +12,12 @@ network.init()
 
 
 //get pioneers
-network.getAllPioneers()
+// network.getAllPioneers()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+network.getAllPioneersBase()
     .then(function(resp){
         console.log(resp)
     })

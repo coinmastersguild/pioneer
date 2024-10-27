@@ -18,6 +18,9 @@ const semver = require('semver')
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:4000/spec/swagger.json"
 
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+
 let spec = process.env['URL_PIONEER_SPEC']
 
 //const mnemonic = 'all all all all all all all all all all all all'
@@ -77,9 +80,9 @@ let run_test = async function(){
         // console.log("info: ",info.data[1])
         
         //get node searchNodesByNetworkId
-        // let info = await pioneer.SearchNodesByNetworkId("43114")
-        // // let info = await pioneer.SearchBlockchainByChainId({chainId:"43114"})
-        // console.log("info: ",info.data)
+        let info = await pioneer.SearchNodesByNetworkId({chainId:"43114"})
+        // let info = await pioneer.SearchBlockchainByChainId({chainId:"43114"})
+        console.log("info: ",info.data)
         
         // let info = await pioneer.SearchByNameNative("avalanche x-chain")
         // console.log("info: ",info.data.length)

@@ -55,6 +55,7 @@ let run_test = async function(){
             }
             clientEvents.send('message',event)
         }
+        send_message()
         setTimeout(send_message,6000)
         //Filter
         //blocks

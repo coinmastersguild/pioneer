@@ -37,8 +37,12 @@ read
 let run_test = async function(){
     try{
         console.log("test")
-        let resp = await attempts.findOne()
-        console.log("resp: ",resp)
+
+        
+
+
+        // let resp = await attempts.findOne()
+        // console.log("resp: ",resp)
 
         // let resp = await txsDB.findOne()
         // console.log(resp)

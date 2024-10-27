@@ -20,7 +20,7 @@ export const blockchains = [
     // 'eip155:10',
     'cosmos:osmosis-1',
     // 'eip155:137',
-    'ripple:unknown',
+    'ripple:4109c6f2045fc7eff4cde8f9905d19c2',
     'cosmos:thorchain-mainnet-v1',
     'bip122:0000000000196a45'
 ]
@@ -81,11 +81,23 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
                 curve: 'secp256k1',
                 showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
             })
+
             //TODO non-native segwit wraped p2sh
+            output.push({
+                note:"Bitcoin account 0 Segwit (p2sh-p2wpkh) (ypub) (bip49)",
+                networks: ['bip122:000000000019d6689c085ae165831e93'],
+                script_type:"p2sh-p2wpkh",
+                available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
+                type:"ypub",
+                addressNList: [0x80000000 + 49, 0x80000000 + 0, 0x80000000 + 0],
+                addressNListMaster: [0x80000000 + 49, 0x80000000 + 0, 0x80000000 + 0, 0, 0],
+                curve: 'secp256k1',
+                showDisplay: false // Not supported by TrezorConnect or Ledger, but KeepKey should do it
+            })
 
             //bech32 bip84
             output.push({
-                note:"Bitcoin account Native Segwit (Bech32)",
+                note:"Bitcoin account 0 Native Segwit (Bech32)",
                 networks: ['bip122:000000000019d6689c085ae165831e93'],
                 script_type:"p2wpkh", //bech32
                 available_scripts_types:['p2pkh','p2sh','p2wpkh','p2sh-p2wpkh'],
@@ -301,11 +313,11 @@ export function getPaths(blockchains?:any,isTestnet?:boolean) {
         output.push(entry)
     }
 
-    if(blockchains.indexOf('ripple:4109C6F2045FC7EFF4CDE8F9905D19C2') >= 0){
+    if(blockchains.indexOf('ripple:4109c6f2045fc7eff4cde8f9905d19c2') >= 0){
         let entry:any = {
             note:"Default ripple path",
             type:"address",
-            networks: ['ripple:4109C6F2045FC7EFF4CDE8F9905D19C2'],
+            networks: ['ripple:4109c6f2045fc7eff4cde8f9905d19c2'],
             blockchain: 'ripple',
             script_type:"p2pkh",
             available_scripts_types:['p2pkh'],

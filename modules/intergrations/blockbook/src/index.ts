@@ -21,7 +21,7 @@ const axios = Axios.create({
 });
 const axiosRetry = require('axios-retry');
 let NOW_NODES_API = process.env['NOW_NODES_API']
-if(!NOW_NODES_API) throw Error("NOW_NODES_API is required")
+
     
     
 axiosRetry(axios, {
@@ -42,7 +42,8 @@ let BLOCKBOOK_URLS:any = {}
 let BLOCKBOOK_SOCKETS:any = {}
 
 module.exports = {
-    init:function (servers?:any) {
+    init:function (servers?:any, ) {
+        
         return init_network(servers);
     },
     getInfo:function () {

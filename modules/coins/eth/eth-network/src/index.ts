@@ -75,6 +75,7 @@ let wait = require('wait-promise');
 let sleep = wait.sleep;
 //
 let web3:any
+let web3Base:any
 let ETHERSCAN:any
 let ETHPLORER:any
 let PROVIDER:any
@@ -95,6 +96,7 @@ import {
 	FOX_ETH_FARMING_ADDRESS,
 	FOX_AIRDROP_ADDRESS,
 	PIONEER_CONTRACT_ADDRESS,
+	PIONEER_CONTRACT_ADDRESS_BASE,
 	THORCHAIN_ROUTER_TESTNET,
 	AIRDROP_CONTRACT,
 	CLAIM_URL,
@@ -104,9 +106,11 @@ import {
 	AIRDROP_ABI,
 	ERC721_ABI,
 	METADATA_ABI,
-	PIONEER_METADATA_CONTRACT_ADDRESS
+	PIONEER_METADATA_CONTRACT_ADDRESS,
+	PIONEER_METADATA_CONTRACT_ADDRESS_BASE,
 } from './constant'; // Replace with your actual module file path
 
+const BASE_NODE = 'https://base.llamarpc.com'
 
 module.exports = {
 	init:function (settings:any) {
@@ -115,6 +119,7 @@ module.exports = {
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
+			web3Base = new Web3(process.env['BASE_NODE'] || 'https://base.llamarpc.com');
 			ETHERSCAN = new EtherscanProvider('mainnet', process.env['ETHERSCAN_API_KEY'])
 			PROVIDER = new ethers.providers.InfuraProvider('mainnet', process.env['INFURA_API_KEY'])
 			NODE_URL = process.env['PARITY_ARCHIVE_NODE']
@@ -173,6 +178,9 @@ module.exports = {
 	},
 	getAllPioneers:function () {
 		return get_all_pioneers();
+	},
+	getAllPioneersBase:function () {
+		return get_all_pioneers_base();
 	},
 	getAllTokensEth:function (address:string) {
 		return get_all_tokens_blockbook(address);
@@ -248,6 +256,49 @@ const get_all_pioneers = async function() {
 				//get images
 				const imageInfo = await metadataContract.methods.getAttributes(i).call();
 				//log.debug(tag,"imageInfo: ",imageInfo)				
+				// Parse the JSON string and get the image name
+				const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
+
+				// Build the full image URL by replacing the image name in the base URL
+				const baseImageUrl = "https://ipfs.io/ipfs/bafybeiezdzjofkcpiwy5hlvxwzkgcztxc6xtodh3q7eddfjmqsguqs47aa/0-backgrounds/";
+				const fullImageUrl = baseImageUrl + imageName + ".png";
+
+				// Add this image URL to the images array in output
+				output['images'].push({address:owner.toLowerCase(), image:fullImageUrl});
+			}catch(e){
+				log.debug("no image for: ",i)
+			}
+		}
+		return output;
+	} catch(e) {
+		console.error(tag, e);
+	}
+}
+
+const get_all_pioneers_base = async function() {
+	let tag = TAG + " | get_all_pioneers_base | ";
+	try {
+		let output:any = {};
+		log.info(tag,"PIONEER_CONTRACT_ADDRESS_BASE: ",PIONEER_CONTRACT_ADDRESS_BASE)
+		const nftContract = new web3Base.eth.Contract(ERC721_ABI, PIONEER_CONTRACT_ADDRESS_BASE);
+		const metadataContract = new web3Base.eth.Contract(METADATA_ABI, PIONEER_METADATA_CONTRACT_ADDRESS_BASE);
+		// Fetch the total supply of the NFTs
+		const totalSupply = await nftContract.methods.totalSupply().call();
+		log.info("totalSupply: ",totalSupply)
+
+		output['totalSupply'] = totalSupply;
+		output['owners'] = []
+		output['images'] = [] // add an images array to output
+		for (let i = 0; i < totalSupply; i++) {
+			//slow down
+			// await sleep(1000);
+			try{
+				const owner = await nftContract.methods.ownerOf(i).call();
+				log.info(tag,"owner: ",owner)
+				output['owners'].push(owner.toLowerCase())
+				//get images
+				const imageInfo = await metadataContract.methods.getAttributes(i).call();
+				log.info(tag,"imageInfo: ",imageInfo)
 				// Parse the JSON string and get the image name
 				const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
 

@@ -161,6 +161,14 @@ export const blockbooks = [
     },
     //SHAPESHIFT
     {
+        symbol:"BASE",
+        blockchain:"Base",
+        caip:"eip155:8453/slip44:60",
+        type:"blockbook",
+        service:"https://indexer.base.shapeshift.com",
+        websocket:"wss://indexer.base.shapeshift.com/websocket"
+    },
+    {
         symbol:"MATIC",
         blockchain:"polygon",
         caip:"eip155:137/slip44:60",

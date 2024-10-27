@@ -45,6 +45,7 @@ let run_test = async function(){
             console.log("message: ",request)
         })
 
+        clientEvents.send('event','hello world')
         //Filter
         //blocks
         //payments

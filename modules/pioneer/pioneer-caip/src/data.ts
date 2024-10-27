@@ -5,6 +5,24 @@
 
  */
 
+//networkIdToCaip
+export const networkIdToCaip = function (networkId: string) {
+    // Check if networkId includes 'eip155' and assume /slip44:60 if true
+    if (networkId.includes('eip155')) {
+        return `${networkId}/slip44:60`;
+    }
+
+    // Otherwise, attempt to get CAIP from ChainToCaip using the networkId
+    const caip = ChainToCaip[networkId] || ChainToNetworkId[networkId];
+
+    // Throw an error if no valid CAIP identifier was found
+    if (!caip) {
+        throw new Error(`Unable to convert networkId ${networkId} to CAIP.`);
+    }
+
+    return caip;
+};
+
 export const caipToNetworkId = function (caip: string) {
     return caip.split('/')[0]
 }
@@ -72,11 +90,11 @@ export const ChainToCaip: Record<string, string> = {
     'EOS': 'eos:cf057bbfb72640471fd910bcb67639c2/slip44:194',
     'ETH': 'eip155:1/slip44:60',
     'LTC': 'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2',
-    'MAYA': 'cosmos:mayachain-mainnet-v1/slip44:118',
+    'MAYA': 'cosmos:mayachain-mainnet-v1/slip44:931',
     'OP': 'eip155:10/slip44:60',
     'OSMO': 'cosmos:osmosis-1/slip44:118',
     'MATIC': 'eip155:137/slip44:60',
-    'XRP': 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
+    'XRP': 'ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144',
     'THOR': 'cosmos:thorchain-mainnet-v1/slip44:931',
     'ZEC': 'bip122:0000000000196a45/slip44:133',
 };
@@ -101,7 +119,7 @@ export const ChainToNetworkId: Record<string, string> = {
     'OP': 'eip155:10',
     'OSMO': 'cosmos:osmosis-1',
     'MATIC': 'eip155:137',
-    'XRP': 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2',
+    'XRP': 'ripple:4109c6f2045fc7eff4cde8f9905d19c2',
     'THOR': 'cosmos:thorchain-mainnet-v1',
     'ZEC': 'bip122:0000000000196a45',
 };
@@ -191,19 +209,20 @@ export const shortListSymbolToCaip = {
     MAYA: 'cosmos:mayachain-mainnet-v1/slip44:931',
     ETH: 'eip155:1/slip44:60',
     GNO: 'eip155:100/slip44:60',
-    XRP: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
+    XRP: 'ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144',
     MATIC: 'eip155:137/slip44:60',
     OP: 'eip155:10/slip44:60',
     AVAX: 'eip155:43114/slip44:60',
     ADA: 'placeholder:caip:cardano:native:cardano',
     BNB: 'eip155:56/slip44:60',
+    BSC: 'eip155:56/slip44:60',
     EOS: 'eos:cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f/slip44:194',
     FIO: 'placeholder:caip:fio:native:fio-protocol'
 }
 
 export const shortListNameToCaip = {
     bitcoin: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-    arbitrum: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+    arbitrum: 'eip155:42161/slip44:60',
     cosmos: 'cosmos:cosmoshub-4/slip44:118',
     osmosis: 'cosmos:osmosis-1/slip44:118',
     polygon: 'eip155:137/slip44:60',
@@ -218,7 +237,7 @@ export const shortListNameToCaip = {
     avalanche: 'eip155:43114/slip44:60',
     gnosis: 'eip155:100/slip44:60',
     bnbsmartchain: 'eip155:56/slip44:60',
-    ripple: 'ripple:4109C6F2045FC7EFF4CDE8F9905D19C2/slip44:144',
+    ripple: 'ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144',
     optimism: 'eip155:10/slip44:60',
     base: 'eip155:8453/slip44:60',
     kuji: 'cosmos:kaiyo-1/slip44:118',
@@ -412,6 +431,8 @@ let caipToThorchain = function (caip:string, ticker:string) {
             return ticker ? `${chain}.${ticker}` : `${chain}.${chain}`;
         }
     } catch (e) {
+        console.error("caip: ",caip)
+        console.error("ticker: ",ticker)
         console.error("Error processing network ID to THORChain", e);
         return null;
     }

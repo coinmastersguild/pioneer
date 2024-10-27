@@ -11,11 +11,20 @@ let run_test = async function(){
         //
         await client.init({})
 
+        // let swap = {
+        //     sellAsset: 'DOGE.DOGE',
+        //     sellAmount: '30',
+        //     buyAsset: 'BCH.BCH',
+        //     senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
+        //     recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
+        //     slippage: 3,
+        // }
+
         let swap = {
-            sellAsset: 'DOGE.DOGE',
+            sellAsset: 'GAIA.ATOM',
             sellAmount: '30',
             buyAsset: 'BCH.BCH',
-            senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
+            senderAddress: 'cosmos1hp7gnr07wprd75f4j4aze9a94aejfcqdsrnape',
             recipientAddress: 'qzfzukmpry8y4mdp6xz7cy65eagtwhajzvj749257p',
             slippage: 3,
         }

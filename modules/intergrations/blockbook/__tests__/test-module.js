@@ -18,20 +18,26 @@ let run_test = async function(){
         //     })
         
         //
-        // let utxos = await network.utxosByXpub('ZEC',"xpub6CKNxyxUckJaggvmby1J1U5jR9zmRBd7aQh6LdaNsAdPJ6A6tfUqeesERcjHsQsLtzcG8mT3EUxroeBP6CrkucELXbqH5dQkQSyPgSxdFfX")
-        // console.log(utxos)
-        
-        //xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs
-        let utxos = await network.utxosByXpub('DOGE',"xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
+        let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
         console.log(utxos)
         
+        //xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs
+        // let utxos = await network.utxosByXpub('DOGE',"xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
+        // console.log(utxos)
+        
         // let ALL_SOCKETS = network.getBlockbookSockets()
-        // let address1 = "0x33b35c665496bA8E71B22373843376740401F106"
-        // let address2 = "0xc3affff54122658b89c31183cec4f15514f34624"
-        // let ETH_SOCKET = ALL_SOCKETS["ETH"]
-        // await ETH_SOCKET.connect()
-        // ETH_SOCKET.subscribeAddresses([address1], ({ address, tx }) => console.log('new tx for address', address, tx))
-        // ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
+        // // console.log('ALL_SOCKETS: ',ALL_SOCKETS)
+        // console.log('ALL_SOCKETS: ',ALL_SOCKETS['BASE'])
+        // let address1 = "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+        // // let address2 = "0xc3affff54122658b89c31183cec4f15514f34624"
+        // let ETH_SOCKET = ALL_SOCKETS["BASE"]
+        // let resultConnect = await ETH_SOCKET.connect()
+        // console.log('resultConnect: ',resultConnect)
+        //
+        // let result2 = await ETH_SOCKET.subscribeAddresses([address1], ({ address, tx }) => console.log('new tx for address', address, tx))
+        // console.log('result2: ',result2)
+        
+        //ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
         //sub to address
 
         //

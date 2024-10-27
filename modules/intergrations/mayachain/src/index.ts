@@ -20,7 +20,7 @@ let networkSupport = [
     ChainToNetworkId["BTC"],
     ChainToNetworkId["MAYA"],
     ChainToNetworkId["ETH"],
-    ChainToNetworkId["THOR"],
+    // ChainToNetworkId["THOR"],
     ChainToNetworkId["DASH"],
     ChainToNetworkId["ARB"],
 ]
@@ -29,7 +29,7 @@ let assetSupport = [
     shortListSymbolToCaip["BTC"],
     shortListSymbolToCaip["ETH"],
     shortListSymbolToCaip["MAYA"],
-    shortListSymbolToCaip["THOR"],
+    // shortListSymbolToCaip["THOR"],  Eats money, need to handle msgDeposit?
     shortListSymbolToCaip["DASH"],
     shortListSymbolToCaip["ARB"],
 ]

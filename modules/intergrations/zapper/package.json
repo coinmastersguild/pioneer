@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/zapper-client",
-  "version": "8.3.1",
+  "version": "8.3.3",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

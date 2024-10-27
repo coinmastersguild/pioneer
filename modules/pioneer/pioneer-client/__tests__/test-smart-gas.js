@@ -2,7 +2,7 @@
 const Pioneer = require("../lib").default;
 
 // Configure the spec URL and query key
-//process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 let spec = process.env['URL_PIONEER_SPEC']
 const config = {
@@ -249,11 +249,16 @@ const runTest = async () => {
         // tx = example_3.original
         // tx = example_4
         // let tx = example_6.original
-        let tx = example_7.original
-        let result = await pioneer.SmartInsight(tx);
-        console.log("result: ",result.data)
+        let tx = example_6.original
 
-
+        console.log('tx: ', tx)
+        let source = 'https://sampleDapp'
+        // let result = await pioneer.SmartInsight(tx);
+        // console.log("result: ",result.data)
+        
+        let insight = await pioneer.Insight({tx});
+        console.log("insight: ",insight.data)
+        
     } catch (e) {
         console.error(e);
     }

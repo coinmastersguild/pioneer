@@ -68,7 +68,7 @@ let getAssetSupport = function(){
     try{
         //iterate over chains
         let allAssets = Object.keys(assetData)
-        log.info(tag,"allAssets: ",allAssets)
+        //log.info(tag,"allAssets: ",allAssets)
 
         let supportedAssets:any = []
         for(let i =0; i < allAssets.length; i++){
@@ -188,8 +188,6 @@ const get_quote = async function (quote:any) {
             let route = result.routes[i]
             
             let quote:any = {}
-            
-            
             
             //amountOut
             quote.id = result.quoteId

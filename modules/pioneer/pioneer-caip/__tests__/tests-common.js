@@ -154,6 +154,11 @@ function runTests() {
             console.error(`Test ${index + 1} failed: Expected '${token.caip}', got '${caipFromThorchain}'`);
             failed++;
         }
+        
+        //networkId to caip
+        const caipFromNetworkId = networkIdToCaip('eip155:8453');
+        assert(caipFromNetworkId)
+        
     });
 
     // Log the summary report
