@@ -67,6 +67,7 @@ export const blockbooks = [
         symbol:"DASH",
         blockchain:"dash",
         caip:"bip122:000007d91d1254d60e2dd1ae58038307/slip44:5",
+        networkId:"bip122:000007d91d1254d60e2dd1ae58038307",
         type:"blockbook",
         service:"https://dashbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
         websocket:"wss://dash.nownodes.io/wss"

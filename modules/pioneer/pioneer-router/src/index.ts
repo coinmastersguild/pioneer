@@ -66,8 +66,8 @@ let chainflip = require("@pioneer-platform/chainflip-client")
 
 //1inch/0x
 
-//bridge
-let across = require("@pioneer-platform/across-client")
+// //bridge
+// let across = require("@pioneer-platform/across-client")
 
 let MEMOLESS_SUPPORT:any = {
     "changelly": true,

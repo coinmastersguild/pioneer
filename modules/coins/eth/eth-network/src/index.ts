@@ -111,7 +111,7 @@ import {
 } from './constant'; // Replace with your actual module file path
 
 const BASE_NODE = 'https://base.llamarpc.com'
-
+const NODES:any = []
 module.exports = {
 	init:function (settings:any) {
 		//blockbook.init()
@@ -138,6 +138,22 @@ module.exports = {
 		}else{
 			//TODO if custom
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
+		}
+	},
+	getNodes:function () {
+		return NODES;
+	},
+	addNode:function (node:any) {
+		if(!node.networkId) throw Error('missing networkId')
+		if(!node.service) throw Error('missing networkId')
+		return NODES.push(node);
+	},
+	addNodes:function (nodes:any) {
+		for(let i = 0; i < nodes.length; i++){
+			let node = nodes[i]
+			if(!node.networkId) throw Error('missing networkId')
+			if(!node.service) throw Error('missing networkId')
+			return NODES.push(node);		
 		}
 	},
 	decodeTx:function (tx:string) {
@@ -226,6 +242,15 @@ module.exports = {
 	},
 	getBalanceTokens: function (address:string) {
 		return get_balance_tokens(address)
+	},
+	getBalanceAddressByNetwork: function (networkId:string, address:string) {
+		return get_balance_by_network(networkId,address)
+	},
+	getBalanceTokenByNetwork: function (networkId:string,address:string,token:string) {
+		return get_balance_token_by_network(networkId,address,token)
+	},
+	getBalanceTokensByNetwork: function (networkId:string,address:string) {
+		return get_balance_tokens_by_network(networkId,address)
 	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
@@ -1128,6 +1153,20 @@ let broadcast_transaction = async function(tx:any){
 	}
 }
 
+const get_balance_tokens_by_network = async function(networkId:string, address:string){
+	let tag = TAG + " | get_balance_tokens_by_network | "
+	try{
+		let output:any = {}
+		
+		//@TODO zapper? covalent?
+
+		return ""
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+
 const get_balance_tokens = async function(address:string){
 	let tag = TAG + " | get_balance_tokens | "
 	try{
@@ -1188,6 +1227,32 @@ const get_balance_tokens = async function(address:string){
 
 
 
+const get_balance_token_by_network = async function(networkId:string, address:string,token:string){
+	let tag = TAG + " | get_balance_token_by_network | "
+	try{
+		let output:any = {}
+		//find in node array node by networkId
+		let node = NODES.find((n:any)=>{return n.networkId == networkId})
+		if(!node) throw Error("101: missing node! for network "+networkId)
+
+		//init new web3
+		let web3 = new Web3(node.service);
+
+		//decimals
+		let contract = new web3.eth.Contract(ERC20ABI,token);
+		let decimals = await contract.methods.decimals().call()
+		//log.debug(tag,"decimals: ",decimals)
+
+		let balance = await contract.methods.balanceOf(address).call()
+		//log.debug(tag,"balance: ",balance)
+
+		return balance / Math.pow(10, decimals);
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+
 const get_balance_token = async function(address:string,token:string){
 	let tag = TAG + " | get_balance | "
 	try{
@@ -1200,6 +1265,26 @@ const get_balance_token = async function(address:string,token:string){
 		//log.debug(tag,"balance: ",balance)
 
 		return balance / Math.pow(10, decimals);
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+const get_balance_by_network = async function(networkId:string, address:string){
+	let tag = TAG + " | get_balance_by_network | "
+	try{
+		let output:any = {}
+		//find in node array node by networkId
+		let node = NODES.find((n:any)=>{return n.networkId == networkId})
+		if(!node) throw Error("101: missing node! for network "+networkId)
+		
+		//init new web3
+		let web3 = new Web3(node.service);
+		
+		//normal tx info
+		output = (await web3.eth.getBalance(address))/BASE
+
+		return output
 	}catch(e){
 		console.error(tag,e)
 	}

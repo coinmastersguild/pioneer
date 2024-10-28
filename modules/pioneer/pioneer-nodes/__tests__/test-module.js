@@ -13,9 +13,12 @@ let nodes = require('../lib/index.js')
 let run_test = async function(){
     try{
         //
-        let nodeUrl = nodes.getUnchaineds()
-        console.log(nodeUrl)
+        // let nodeUrl = nodes.getUnchaineds()
+        // console.log(nodeUrl)
 
+
+        let nodesData = nodes.getNodes()
+        console.log(nodesData)
 
     }catch(e){
         console.error(e)

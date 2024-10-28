@@ -25,12 +25,16 @@ import {
   CURRENT_CONTEXT_NODE_MAP
 } from './seeds'
 
+import {web3Seeds} from './web3'
 
-
+let NODES = web3Seeds
 
 module.exports = {
     init: function (type:string,config:any,isTestnet:boolean) {
         return init_nodes(type,config,isTestnet);
+    },
+    getNodes: function(){
+        return NODES
     },
     getNode: function (network:string,serviceId:string) {
         return get_node(network,serviceId);

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.96",
+  "version": "8.4.98",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,7 +20,6 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/across-client": "^0.0.2",
     "@pioneer-platform/chainflip-client": "^0.0.9",
     "@pioneer-platform/changelly-client": "^8.3.19",
     "@pioneer-platform/mayachain-client": "^0.0.36",

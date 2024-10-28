@@ -10,6 +10,21 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
+let nodeScroll = {
+    networkId:'eip155:534352',
+    service:'https://scroll.drpc.org',
+    protocol: 'EVM'
+}
+
+network.addNode(nodeScroll)
+
+//get balance by address by network
+let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
+let networkId = "eip155:534352"
+network.getBalanceAddressByNetwork(networkId,address)
+    .then(function(resp){
+        console.log(resp)
+    })
 
 //get pioneers
 // network.getAllPioneers()
@@ -17,10 +32,10 @@ network.init()
 //         console.log(resp)
 //     })
 
-network.getAllPioneersBase()
-    .then(function(resp){
-        console.log(resp)
-    })
+// network.getAllPioneersBase()
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 // let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
 // network.getNonce(address)
