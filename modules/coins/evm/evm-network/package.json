@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/evm-network",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -25,7 +25,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3"
   },
-  "devDependencies": {},
   "description": "",
   "keywords": [
     ""

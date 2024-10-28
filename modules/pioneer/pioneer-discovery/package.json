@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-discovery",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "_moduleAliases": {
@@ -25,6 +25,6 @@
     "@coinmasters/tokens": "^3.7.33",
     "@coinmasters/types": "^4.7.33",
     "@pioneer-platform/loggerdog": "^8.3.1",
-    "@pioneer-platform/pioneer-caip": "^9.2.27"
+    "@pioneer-platform/pioneer-caip": "^9.2.34"
   }
 }

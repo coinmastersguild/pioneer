@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/blockbook",
-  "version": "8.3.6",
+  "version": "8.3.7",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,8 +15,8 @@
   "dependencies": {
     "@altangent/lib-blockbook": "^0.12.9",
     "@pioneer-platform/loggerdog": "^8.3.1",
-    "@pioneer-platform/nodes": "^8.3.5",
-    "@pioneer-platform/pioneer-client": "^9.2.4",
+    "@pioneer-platform/nodes": "^8.3.10",
+    "@pioneer-platform/pioneer-client": "^9.2.6",
     "@types/request-promise-native": "^1.0.17",
     "@types/ws": "^7.4.2",
     "axios": "^0.21.4",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/covalent-client",
-  "version": "8.3.3",
+  "version": "8.3.4",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {

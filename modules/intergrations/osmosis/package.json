@@ -1,14 +1,14 @@
 {
   "name": "@pioneer-platform/osmosis-client",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@pioneer-platform/cosmos-network": "^8.3.5",
+    "@pioneer-platform/cosmos-network": "^8.3.8",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@pioneer-platform/osmosis-network": "^8.3.11",
-    "@pioneer-platform/pioneer-caip": "^9.2.23",
-    "@pioneer-platform/pioneer-coins": "^9.2.13",
+    "@pioneer-platform/pioneer-caip": "^9.2.34",
+    "@pioneer-platform/pioneer-coins": "^9.2.24",
     "axios": "^1.3.4",
     "dotenv": "^8.2.0",
     "rango-sdk": "^0.1.45",

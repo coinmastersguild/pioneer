@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-network",
-  "version": "8.3.23",
+  "version": "8.3.24",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -14,17 +14,17 @@
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
-    "@pioneer-platform/binance-network": "^8.3.2",
-    "@pioneer-platform/cosmos-network": "^8.3.7",
-    "@pioneer-platform/eth-network": "^8.4.1",
-    "@pioneer-platform/maya-network": "^8.3.8",
-    "@pioneer-platform/midgard-client": "^8.3.1",
+    "@pioneer-platform/binance-network": "^8.3.3",
+    "@pioneer-platform/cosmos-network": "^8.3.8",
+    "@pioneer-platform/eth-network": "^8.4.2",
+    "@pioneer-platform/maya-network": "^8.3.9",
+    "@pioneer-platform/midgard-client": "^8.3.2",
     "@pioneer-platform/osmosis-network": "^8.3.11",
-    "@pioneer-platform/pioneer-caip": "^9.2.23",
+    "@pioneer-platform/pioneer-caip": "^9.2.34",
     "@pioneer-platform/pioneer-types": "^8.3.1",
     "@pioneer-platform/ripple-network": "^8.3.1",
-    "@pioneer-platform/thor-network": "^8.3.2",
-    "@pioneer-platform/utxo-network": "^8.3.7",
+    "@pioneer-platform/thor-network": "^8.3.3",
+    "@pioneer-platform/utxo-network": "^8.3.8",
     "@types/node": "^18.15.11",
     "events": "^3.3.0",
     "socket.io-client": "^4.5.4",

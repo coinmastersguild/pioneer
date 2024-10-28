@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.98",
+  "version": "8.4.99",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -20,15 +20,15 @@
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "dependencies": {
-    "@pioneer-platform/chainflip-client": "^0.0.9",
-    "@pioneer-platform/changelly-client": "^8.3.19",
-    "@pioneer-platform/mayachain-client": "^0.0.36",
-    "@pioneer-platform/osmosis-client": "^0.0.15",
-    "@pioneer-platform/pioneer-caip": "^9.2.26",
+    "@pioneer-platform/chainflip-client": "^0.0.10",
+    "@pioneer-platform/changelly-client": "^8.3.20",
+    "@pioneer-platform/mayachain-client": "^0.0.37",
+    "@pioneer-platform/osmosis-client": "^0.0.16",
+    "@pioneer-platform/pioneer-caip": "^9.2.34",
     "@pioneer-platform/pro-token": "^0.0.3",
-    "@pioneer-platform/rango-client": "^8.3.22",
-    "@pioneer-platform/thorswap-client": "^8.3.12",
-    "@pioneer-platform/uniswap-client": "^0.0.28",
+    "@pioneer-platform/rango-client": "^8.3.23",
+    "@pioneer-platform/thorswap-client": "^8.3.13",
+    "@pioneer-platform/uniswap-client": "^0.0.29",
     "@uniswap/sdk-core": "^4.2.0",
     "@uniswap/universal-router-sdk": "^1.9.0",
     "dotenv": "^8.2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-coins",
-  "version": "9.2.23",
+  "version": "9.2.24",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "_moduleAliases": {
