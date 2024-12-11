@@ -33,6 +33,9 @@ module.exports = {
     init: function (type:string,config:any,isTestnet:boolean) {
         return init_nodes(type,config,isTestnet);
     },
+    getWeb3Nodes: function(){
+        return web3Seeds
+    },
     getNodes: function(){
         return NODES
     },
@@ -92,14 +95,6 @@ const get_unchaineds = function () {
         throw e;
     }
 };
-
-
-
-
-
-
-
-
 
 const get_node = function (network:string,serviceId:string) {
     let tag = TAG + " | get_node | "

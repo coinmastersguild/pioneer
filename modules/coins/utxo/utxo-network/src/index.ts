@@ -307,16 +307,9 @@ let broadcast_transaction = async function(coin:string,tx:string){
         let output:any = {
             success:false
         }
-        log.debug(tag,"coin: ",coin)
-        if(unchained[shortListSymbolToCaip[coin]]){
-            // log.debug("unchained[shortListSymbolToCaip[coin]]: ",unchained[shortListSymbolToCaip[coin]])
-            let result = await unchained[shortListSymbolToCaip[coin]].SendTx({hex:tx})
-            log.debug(tag,"result.data: ",result.data)
-            output.txid = result.data
-            output.success = true
-        } else {
+        try{
             let responseBroadcast = await blockbook.broadcast(coin,tx)
-            log.debug(tag,'responseBroadcast: ',responseBroadcast)
+            log.info(tag,'responseBroadcast: ',responseBroadcast)
             if(responseBroadcast.success && responseBroadcast.success !== false){
                 output.success = true
                 if(responseBroadcast.txid){
@@ -331,11 +324,11 @@ let broadcast_transaction = async function(coin:string,tx:string){
                 output.error = "unknown error"
                 output.debug = responseBroadcast
             }
-            // console.log("no unchained for coin: ",coin)
-            // //@TODO fall back to node
-            // output.success = false
-            // output.error = "no unchained for coin: "+coin
+        }catch(e:any){
+            console.log(tag,"e: ",e)
+            console.log(tag,"e: ",e.toString())
         }
+
 
 
         //Jesus fuck
@@ -462,20 +455,29 @@ let get_utxos_by_xpub = async function(coin:string,xpub:string){
         //
         let output:any = {}
 
-        if(unchained[shortListSymbolToCaip[coin]]){
-            // log.debug("unchained[SYMBOL_TshortListSymbolToCaipO_CAIP[coin]]: ",unchained[shortListSymbolToCaip[coin]])
-            let result = await unchained[shortListSymbolToCaip[coin]].GetUtxos({pubkey:xpub})
-            //console.log("result: ",result.data)
-            output = result.data
-        } else {
-            try{
-                output = await blockbook.utxosByXpub(coin,xpub)
-                log.debug(tag,"output: ",output)
-                //@TODO fall back to node                
-            }catch(e){
-                output.error = e
-            }
+        try{
+            output = await blockbook.utxosByXpub(coin,xpub)
+            log.debug(tag,"output: ",output)
+            //@TODO fall back to node                
+        }catch(e){
+            output.error = e
         }
+        
+        // if(unchained[shortListSymbolToCaip[coin]]){
+        //     log.info('USING UNCHAINED!@!!!!!! ')
+        //     log.info("unchained[SYMBOL_TshortListSymbolToCaipO_CAIP[coin]]: ",unchained[shortListSymbolToCaip[coin]])
+        //     let result = await unchained[shortListSymbolToCaip[coin]].GetUtxos({pubkey:xpub})
+        //     //console.log("result: ",result.data)
+        //     output = result.data
+        // } else {
+        //     try{
+        //         output = await blockbook.utxosByXpub(coin,xpub)
+        //         log.debug(tag,"output: ",output)
+        //         //@TODO fall back to node                
+        //     }catch(e){
+        //         output.error = e
+        //     }
+        // }
 
         return output
     }catch(e){
@@ -488,7 +490,7 @@ let get_balance_by_xpub = async function(coin:string,xpub:any){
     let tag = TAG + " | get_balance_by_xpub | "
     try{
         let output = await blockbook.utxosByXpub(coin,xpub)
-        log.debug(tag,"output: ",output)
+        log.info(tag,"output: ",output)
 
         let balance = 0
 

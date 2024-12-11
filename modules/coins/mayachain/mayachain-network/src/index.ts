@@ -263,32 +263,19 @@ let broadcast_transaction = async function(tx:string){
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
+            //tx_response
+            if(result2.data.tx_response.txhash) output.txid = result2.data.tx_response.txhash
 
-            //push to seed
-            // let urlRemote = URL_THORNODE+ '/txs'
-            // log.debug(tag,"urlRemote: ",urlRemote)
-            // let result2 = await axios({
-            //     url: urlRemote,
-            //     method: 'POST',
-            //     data: tx,
-            // })
-            // log.debug(tag,'** Broadcast ** REMOTE: result: ', result2.data)
-            // if(result2 && result2.data && result2.data.txhash) output.txid = result2.data.txhash
-            //
-            // //verify success
-            // if(result2.data.raw_log && result2.data.raw_log !== '[]'){
-            //     let logSend = result2.data.raw_log
-            //     log.debug(tag,"logSend: ",logSend)
-            //     output.success = false
-            //     output.error = logSend
-            // } else {
-            //     output.success = true
-            // }
-            // output.height = result2.height
-            // output.gas_wanted = result2.gas_wanted
-            // output.gas_used = result2.gas_used
-            // output.raw = result2.data
+            if(result2.data.tx_response.raw_log && result2.data.tx_response.raw_log !== '[]'){
+                let logSend = result2.data.tx_response.raw_log
+                log.debug(tag,"logSend: ",logSend)
+                output.success = false
+                output.error = logSend
+            } else {
+                output.success = true
+            }
 
+            return output
         }catch(e:any){
             //log.error(tag,"failed second broadcast e: ",e.response)
             log.error(tag,e)

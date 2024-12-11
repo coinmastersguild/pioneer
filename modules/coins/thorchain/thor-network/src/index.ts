@@ -198,6 +198,17 @@ let broadcast_transaction = async function(tx:string){
             log.info(tag,'** Broadcast ** REMOTE: result: ', result2.data)
             log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result2.data))
             if(result2.data.txhash) output.txid = result2.data.txhash
+            //tx_response
+            if(result2.data.tx_response.txhash) output.txid = result2.data.tx_response.txhash
+
+            if(result2.data.tx_response.raw_log && result2.data.tx_response.raw_log !== '[]'){
+                let logSend = result2.data.tx_response.raw_log
+                log.debug(tag,"logSend: ",logSend)
+                output.success = false
+                output.error = logSend
+            } else {
+                output.success = true
+            }
             
             //push to seed
             // let urlRemote = URL_THORNODE+ '/cosmos/tx/v1beta1/txs'

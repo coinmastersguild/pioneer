@@ -152,21 +152,21 @@ module.exports = {
 //     }
 // }
 
-let broadcast_transaction = async function(tx:string){
+let broadcast_transaction = async function(tx:string) {
     let tag = TAG + " | broadcast_transaction | "
     let output:any = {}
-    try{
+    try {
         log.debug(tag,"CHECKPOINT 1")
 
         const buffer = Buffer.from(tx, 'base64');
         const bufString = buffer.toString('hex');
 
         output.success = false
-       let data = {
-           'method': 'submit',
-           "id": 2,
-           "command":"submit",
-           "fail_hard":true,
+        let data = {
+            'method': 'submit',
+            "id": 2,
+            "command": "submit",
+            "fail_hard": true,
             'params': [
                 {
                     'tx_blob': bufString
@@ -174,34 +174,50 @@ let broadcast_transaction = async function(tx:string){
             ]
         }
 
-        let urlRemote = URL_NODE+ '/'
+        let urlRemote = URL_NODE + '/'
         log.debug(tag,"urlRemote: ",urlRemote)
         let result = await axios({
             url: urlRemote,
-            headers: {
-            },
+            headers: {},
             method: 'POST',
             data,
         })
-        log.debug(tag,'** Broadcast ** REMOTE: result: ', result.data)
-        log.debug(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result.data))
 
-        //submit payment
-        // let payload = {
-        //     command: 'submit',
-        //     tx_blob: tx,
-        //     fail_hard: true
-        // }
-        // const submitResponse = await client.submitAndWait(bufString)
-        // console.log(submitResponse)
+        log.info(tag,'** Broadcast ** REMOTE: result: ', result.data)
+        log.info(tag,'** Broadcast ** REMOTE: result: ', JSON.stringify(result.data))
 
+        const responseData = result.data || {};
+        const resultObject = responseData.result || {};
+        const txJson = resultObject.tx_json || {};
+
+        const txid = txJson.hash;
+        const engineResult = resultObject.engine_result;
+        const engineResultCode = resultObject.engine_result_code;
+        const engineResultMessage = resultObject.engine_result_message;
+        const validatedLedgerIndex = resultObject.validated_ledger_index;
+        const accountSequenceNext = resultObject.account_sequence_next;
+        const applied = resultObject.applied;
+
+        // Determine success based on known Ripple conditions:
+        // Typically, success is indicated by `engine_result = "tesSUCCESS"` and `engine_result_code = 0`.
+        const wasSuccessful = (engineResult === 'tesSUCCESS' && engineResultCode === 0);
+
+        output = {
+            success: wasSuccessful,
+            txid,
+            engineResult,
+            engineResultCode,
+            engineResultMessage,
+            validatedLedgerIndex,
+            accountSequenceNext,
+            applied
+        };
 
         return output
-    }catch(e){
-
-        console.error(tag,"throw error: ",e)
+    } catch (e) {
+        console.error(tag,"throw error: ", e)
+        // output.success is false by default here
         return output
-
     }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-router",
-  "version": "8.4.99",
+  "version": "8.4.104",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -27,7 +27,7 @@
     "@pioneer-platform/pioneer-caip": "^9.2.34",
     "@pioneer-platform/pro-token": "^0.0.3",
     "@pioneer-platform/rango-client": "^8.3.23",
-    "@pioneer-platform/thorswap-client": "^8.3.13",
+    "@pioneer-platform/thorchain-client": "^0.0.33",
     "@pioneer-platform/uniswap-client": "^0.0.29",
     "@uniswap/sdk-core": "^4.2.0",
     "@uniswap/universal-router-sdk": "^1.9.0",

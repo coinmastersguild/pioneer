@@ -237,10 +237,10 @@ let run_test = async function(){
         // let xpub = ""
         // console.log("pioneer.instance: ",pioneer.instance)
 
-        let data = await pioneer.ListUnspent({network:'DGB',xpub:"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"})
-        data = data.data
-        console.log("txData: ",data)
-        console.log("txData: ",JSON.stringify(data))
+        // let data = await pioneer.ListUnspent({network:'DGB',xpub:"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG"})
+        // data = data.data
+        // console.log("txData: ",data)
+        // console.log("txData: ",JSON.stringify(data))
         
         // let data = await pioneer.instance.ListUnspent({network:'LTC',xpub:"xpub6CaVVRYQmMfrGNjbREjgJG83zuS9AmSE4w3F3oTT1n3vjxc8KiUGz37ieXHGEtWEtfnYwUg6iHksGu5577kfVdQMCR6ZU4nAr6NkCMc6pcf"})
         // data = data.data
@@ -263,10 +263,12 @@ let run_test = async function(){
         // console.log("txData: ",JSON.stringify(data))
 
         //bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw BNB
-        // let data = await pioneer.instance.GetAccountInfo({network:'BNB',address:"bnb1ez03p4sd8lf985c0tghl9deham56692z94gthw"})
+        // let data = await pioneer.GetAccountInfo({network:'thorchain',address:"thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx"})
         // data = data.data
         // console.log("txData: ",data)
-
+        //
+        // let balance = await pioneer.GetPubkeyBalance({asset:'thorchain',pubkey:"thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx"})
+        // console.log("balance: ",balance.data)
 
         // let data = await pioneer.instance.GetAccountInfo({network:'OSMO',address:"osmo1a7xqkxa4wyjfllme9u3yztgsz363dalz3lxtj6"})
         // data = data.data
@@ -381,15 +383,31 @@ let run_test = async function(){
         // data = data.data
         // console.log("data: ",data)
 
+
+
+        // let broadcast = {
+        //     serialized:"0xf86d819d842467888682ee4894658de0443259a1027caa976ef9a42e6982037a0387038d7ea4c680008082422ea0e1238f0f3565a7265033c6ff9c481be5c2d03931085564b99cf09d2cee6e2d63a0484951f5a5b7329bf43ccb0c3b35fbf8857e913fa81999c793f9456506806adf",
+        //     networkId:"eip155:8453"
+        // }
+
+        // let broadcast = {
+        //     serialized:"010000000410aaef0faf25ed89d014e80ddd6aff2ae786c9c018aca19680462b5edca0e1ef000000006b483045022100c21c252bf896ca41bc3200bb10ec5ce1f25f6295820cad1c2dfa8ac40d0c0c490220384878813e467f6bb799d1f75b7461f6ef63e4e90e404765d8afae68d45717010121026e2fbec64003c6f2e6c968b231c1a1c7b858618d6ccc914334fca088156d97c2ffffffffe551cbc1cb8d1a17a7a8099f8c56719f2f3165cefb44b9ff8d560412e6b213dc000000006b483045022100d54cfd2f18282ea567a56c2ea5614b2f9cff6d121f192744c74c6f0b3f5165eb022069c9a5f1b54de3c483ce3e88a27aa4047d677b27c1145f142235cdcf363078560121026e2fbec64003c6f2e6c968b231c1a1c7b858618d6ccc914334fca088156d97c2ffffffffe419fbf1b5b9cde6fa8498a21e32b7cbf816160ae7f846e938b61a5ad448aae8000000006a47304402203714219f83548b7d3abb492b142e4a76e7b46aa36f3ba0786e7826b494f539350220700aa25a9dc3d7dc328036026551eafb1cb5ef2ae71b86702f1e4d6c754f1596012103c27ec108de30e58ca7d171c01d37219fe92ffc2b9423b8af2e188c937c3594a0ffffffff99d43279dffc8c373b3fa013eac0433ed824958cd16bce856e8eeaecaefa07fa010000006a473044022035109fc26796b8b820443d951ba793a8c223a3a4ebe42c9919f90fe1d0d9600a02200ae5ca011bab8c533bc3d23ce991e4d99af0c4cb1b09de4f56bfdf6bcc958fa201210314a641885742c88a48ee5a68a2592a26467abdb513e649c0347c3226fdd1638cffffffff01b2854800000000001976a9141a2952613ded60db06e849d3b942248c9c871b4688ac00000000",
+        //     networkId:"bip122:12a765e31ffd4059bada1e25190f6e98"
+        // }
+
+        // let broadcast = {
+        //     serialized:"ClYKUQoOL3R5cGVzLk1zZ1NlbmQSPwoUQXP/fFJ1yk5NWKykK5HlkU7LXSYSFISQohxi8dpWwxCWZsyiNoyXbhJVGhEKBHJ1bmUSCTc2NTg4ODE3OBIBIBJlClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED4uqhJsLFh7m0XYJu92bmh5b0v5posOVIeb6PCpQMGS8SBAoCCH8YNxIRCgkKBHJ1bmUSATAQgMq17gEaQL9QGVHuDa/l3uM5NSOna+R5H8g7XUOR/ERIp/fAwItUXfDaTshHvqPKsySidQL8G3NYpLQjSK7Czqn1pt11gOo=",
+        //     networkId:'cosmos:thorchain-mainnet-v1'
+        // }
+
         let broadcast = {
-            "network":"MAYA",
-            "serialized":"",
-            "txid":"",
-            "invocationId":"pioneer:invocation:v0.01:BNB:ukN1PtxgHozmanDsTrbdNB",
-            "noBroadcast":false
+            serialized:"Cl8KWgoOL3R5cGVzLk1zZ1NlbmQSSAoUQXP/fFJ1yk5NWKykK5HlkU7LXSYSFKy4u33VN3rmGeEr91pPg9V3u8hRGhoKCk1BWUEuQ0FDQU8SDDI2Njc2Njc2NDUzORIBIBJmClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED4uqhJsLFh7m0XYJu92bmh5b0v5posOVIeb6PCpQMGS8SBAoCCH8YNRISCgoKBWNhY2FvEgEwEIDKte4BGkAiFpjqA0ceOWkDsfwPhCMUPyPH+8jPujcBEdjx3n0kW1oV1tkiDw2MIH0ld3IZRuTK9IJtOFEXsA/wIPDHk0Na",
+            networkId:'cosmos:mayachain-mainnet-v1'
         }
-        let data = await pioneer.Broadcast(broadcast)
-        
+
+        let result = await pioneer.Broadcast(broadcast)
+        console.log("result: ",result)
+
         //broadcast
         // let broadcast = {
         //     "network":"OSMO",

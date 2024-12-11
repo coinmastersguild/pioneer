@@ -3,213 +3,265 @@
                 - Highlander
  */
 
-const TAG = " | maya | "
+const TAG = " | maya | ";
 import { BaseDecimal } from '@coinmasters/types';
 const { uuid } = require('uuidv4');
-const log = require('@pioneer-platform/loggerdog')()
-let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
-let network = require("@pioneer-platform/midgard-client")
+const log = require('@pioneer-platform/loggerdog')();
+let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip");
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
 
 let networkSupport = [
     ChainToNetworkId["BTC"],
     ChainToNetworkId["ETH"],
+    ChainToNetworkId["DOGE"],
+    ChainToNetworkId["BCH"],
+    ChainToNetworkId["LTC"],
     ChainToNetworkId["THOR"],
-]
+];
 
 // Function to make a request to the node
-async function nodeRequest(path: any) {
+async function nodeRequest(path: string) {
     try {
         const response = await fetch(`https://thornode.ninerealms.com${path}`);
+        if (!response.ok) {
+            throw new Error(`Node request failed with status: ${response.status}, message: ${response.statusText}`);
+        }
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error fetching from node:', error);
+        log.error(`${TAG} Error fetching from node:`, error);
         throw error;
     }
 }
 
+let assets = [
+    'bip122:000000000019d6689c085ae165831e93/slip44:0', // BTC
+    'eip155:1/slip44:60', // ETH
+    'cosmos:thorchain-mainnet-v1/slip44:931', // RUNE
+    'bip122:00000000001a91e3dace36e2be3bf030/slip44:3', // Doge
+    'bip122:000000000000000000651ef99cb9fcbe/slip44:145', // BCH
+];
+
 module.exports = {
-    init:function(settings:any){
+    init: function (settings: any) {
         return true;
     },
     networkSupport: function () {
         return networkSupport;
     },
-    getQuote: function (quote:any) {
-        return get_quote(quote);
+    assetSupport: function () {
+        return assets;
     },
-}
+    getQuote: async function (quote: any) {
+        return await get_quote(quote);
+    },
+};
 
-interface QuoteResult {
-    amountOutMin: string;
-    amountOut: string;
-    slippage: string;
-}
-
-function quoteFromPool(sellAmount: string, assetPoolAmount: string, runePoolAmount: string, maxSlippage: number): QuoteResult {
-    // Convert string inputs to numbers and scale the sell amount
-    const swapAmount = parseFloat(sellAmount) * 1e8; // Assuming 1e6 is the scaling factor for Maya
-    const assetDepth = parseFloat(assetPoolAmount);
-    const runeDepth = parseFloat(runePoolAmount);
-
-    // Calculate the constant product
-    const k = assetDepth * runeDepth;
-
-    // New amount of the asset in the pool after the swap
-    const newAssetDepth = assetDepth + swapAmount;
-
-    // Calculate the amount of Rune received (or the other asset in the pool)
-    const newRuneDepth = k / newAssetDepth;
-    const runeReceived = runeDepth - newRuneDepth;
-
-    // Scale back down the amount of Rune received
-    const scaledRuneReceived = runeReceived / 1e6; // Adjust as per Rune's scaling factor
-
-    // Calculate the actual rate of the swap
-    const actualRate = scaledRuneReceived / (swapAmount / 1e6);
-
-    // Calculate the ideal rate
-    const idealRate = runeDepth / assetDepth;
-
-    // Calculate the slippage
-    const slippage = ((idealRate - actualRate) / idealRate) * 100;
-
-    // Calculate amountOutMin considering the maximum slippage
-    const amountOutMin = scaledRuneReceived * (1 - maxSlippage / 100);
-
-    return {
-        amountOutMin: amountOutMin.toFixed(6).toString(),
-        amountOut: scaledRuneReceived.toFixed(6),
-        slippage: Math.max(slippage, 0).toFixed(6)
-    };
-}
-
-const get_quote = async function (quote:any) {
-    let tag = TAG + " | get_quote | "
+async function getPools() {
+    const tag = TAG + " | getPools | ";
     try {
-        let output:any = {}
-        if(!quote.sellAsset) throw new Error("missing sellAsset")
-        if(!quote.buyAsset) throw new Error("missing buyAsset")
-        if(!quote.sellAmount) throw new Error("missing sellAmount")
-        if(!quote.senderAddress) throw new Error("missing senderAddress")
-        if(!quote.recipientAddress) throw new Error("missing recipientAddress")
-        if(!quote.slippage) throw new Error("missing slippage")
-
-        //Get pools from network
-        let pools = await network.getPools()
-        if(!pools) throw Error("Unable to get pools from network!")
-        log.info(tag, "pools: ", pools)
-
-        //get poolIn
-        let poolIn = pools.find((p:any)=>p.asset == quote.sellAsset)
-        log.info(tag,"poolIn: ",poolIn)
-
-        //get poolOut
-        let poolOut = pools.find((p:any)=>p.asset == quote.buyAsset)
-
-        output.meta = {
-            quoteMode: "TC_SUPPORTED_TO_TC_SUPPORTED"
+        const pools = await nodeRequest('/thorchain/pools');
+        if (!pools || pools.length === 0) {
+            throw new Error("No pools fetched from network!");
         }
-        output.steps = 1
-        output.complete = true
-        output.source = 'thorchain'
-        output.id = uuid()
+        log.info(tag, "Pools fetched: ", pools.map((p: any) => p.asset));
+        return pools;
+    } catch (e) {
+        log.error(tag, "Error fetching pools: ", e);
+        throw new Error("Unable to fetch pools");
+    }
+}
 
-        let BaseDecimal = {
-            ARB:18,
-            AVAX:18,
-            BCH:8,
-            BNB:8,
-            BSC:18,
-            BTC:8,
-            DASH:8,
-            DGB:8,
-            DOGE:8,
-            ETH:18,
-            BASE:18,
-            EOS:6,
-            GAIA:6,
-            KUJI:6,
-            LTC:8,
-            MATIC:18,
-            MAYA:10,
-            OP:18,
-            OSMO:6,
-            XRP:6,
-            THOR:8,
-            ZEC:8
+const get_quote = async function (quote: any) {
+    const tag = TAG + " | get_quote | ";
+    try {
+        let output: any = {};
+        if (!quote.sellAsset) throw new Error("missing sellAsset");
+        if (!quote.buyAsset) throw new Error("missing buyAsset");
+        if (!quote.sellAmount) throw new Error("missing sellAmount");
+        if (!quote.senderAddress) throw new Error("missing senderAddress");
+        if (!quote.recipientAddress) throw new Error("missing recipientAddress");
+        if (!quote.slippage) throw new Error("missing slippage");
+
+        // Fetch pools
+        const pools = await getPools();
+
+        // Determine poolIn and poolOut
+        let poolIn = pools.find((p: any) => p.asset === quote.sellAsset);
+        let poolOut = pools.find((p: any) => p.asset === quote.buyAsset);
+
+        // If the sellAsset is RUNE, use the pool for the buyAsset
+        if (quote.sellAsset === 'THOR.RUNE') {
+            poolIn = null; // RUNE does not need an "in" pool, only "out"
+            poolOut = pools.find((p: any) => p.asset === quote.buyAsset);
         }
 
-        let asset = quote.sellAsset.split(".")[0]
-        if(!asset) throw Error("unable to pasre asset from quote.sellAsset")
-        // @ts-ignore
-        const DECIMALS = BaseDecimal[asset];
-        if(!DECIMALS) throw Error("unable to get DECIMALS for asset: "+asset)
-        let BASE_UNIT = Math.pow(10, DECIMALS); // Dynamically set BASE_UNIT based on asset
+        // If the buyAsset is RUNE, use the pool for the sellAsset
+        if (quote.buyAsset === 'THOR.RUNE') {
+            poolOut = null; // RUNE does not need an "out" pool, only "in"
+            poolIn = pools.find((p: any) => p.asset === quote.sellAsset);
+        }
 
-        //TODO dynamic by asset?
+        // Handle case where pools are not found
+        if (!poolIn && quote.sellAsset !== 'THOR.RUNE') {
+            log.error(tag, `Pool for sellAsset (${quote.sellAsset}) not found.`);
+            throw new Error(`Pool for sellAsset (${quote.sellAsset}) not found.`);
+        }
+        if (!poolOut && quote.buyAsset !== 'THOR.RUNE') {
+            log.error(tag, `Pool for buyAsset (${quote.buyAsset}) not found.`);
+            throw new Error(`Pool for buyAsset (${quote.buyAsset}) not found.`);
+        }
+
+        log.info(tag, "poolIn: ", poolIn, "poolOut: ", poolOut);
+
+        const sellAssetChain = quote.sellAsset.split(".")[0];
+        const DECIMALS = Number(BaseDecimal[sellAssetChain]);
+        if (isNaN(DECIMALS)) throw new Error(`Invalid DECIMALS value for asset: ${sellAssetChain}`);
+        const BASE_UNIT = Math.pow(10, DECIMALS);
         const sellAmountInBaseUnits = parseFloat(quote.sellAmount) * BASE_UNIT;
 
-        //get quote
-        let quoteFromNode:any
-        let URL = `/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`
-        log.info("URL: ",URL)
-        quoteFromNode = await nodeRequest(
-            URL,
-        )
-        log.info("quoteFromNode: ",quoteFromNode)
-        if(quoteFromNode.error) throw Error(quoteFromNode.error)
-        // let amountOutEstimated = quoteFromNode.expected_amount_out
-        let amountOutMin = quoteFromNode.amount_out_min
-        let inboundAddress = quoteFromNode.inbound_address
-        let amountOutEstimated = (parseInt(quoteFromNode.expected_amount_out) / BASE_UNIT).toFixed(DECIMALS);
-        output.amountOut = amountOutEstimated
-        
-        let memoInput = {
+        // Create URL for the API
+        const URL = `/thorchain/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`;
+        log.info(tag, "URL: ", URL);
+
+        const quoteFromNode = await nodeRequest(URL);
+        if (quoteFromNode.error) throw new Error(quoteFromNode.error);
+        log.info(tag, "quoteFromNode: ", quoteFromNode);
+        const amountOutMin = quoteFromNode.amount_out_min;
+        const amountOutEstimated = (parseInt(quoteFromNode.expected_amount_out) / BASE_UNIT).toFixed(DECIMALS);
+
+        output.amountOut = amountOutEstimated;
+
+        const memoInput = {
             type: 'SWAP',
             asset: quote.buyAsset,
             destAddr: quote.recipientAddress,
-            lim: null,
-            interval: null,
-            quantity: null,
-            affiliate: null,
-            fee: null,
-            dexAggregatorAddr: null,
-            finalAssetAddr: null,
-            minAmountOut: null
-        }
+            lim: amountOutMin,
+        };
         const memo = createMemo(memoInput);
-        log.info(tag,"memo: ",memo)
+        log.info(tag, "memo: ", memo);
 
-        let type:string
-
-        //if input is thor or maya
-        let chain = quote.sellAsset.split(".")[0]
-        if(chain == "MAYA"){
-            type = 'deposit'
-        } else {
-            type = 'transfer'
-        }
-
-        let tx = {
-            type,
-            chain: ChainToNetworkId[quote.sellAsset.split(".")[0]],
-            txParams: {
-                senderAddress: quote.senderAddress, 
-                recipientAddress: quoteFromNode.inbound_address,
-                amount: quote.sellAmount, 
-                token: quote.sellAsset.split(".")[1],
-                memo:quoteFromNode.memo || memo
-            }
-        }
+        const txType = sellAssetChain === "THOR" ? 'deposit' : 'transfer';
+        output.id = uuid();
         output.txs = [
-            tx
-        ]
+            {
+                type: txType,
+                chain: ChainToNetworkId[sellAssetChain],
+                txParams: {
+                    senderAddress: quote.senderAddress,
+                    recipientAddress: quoteFromNode.inbound_address,
+                    amount: quote.sellAmount,
+                    token: quote.sellAsset.split(".")[1],
+                    memo: quoteFromNode.memo || memo,
+                },
+            },
+        ];
+        output.meta = {
+            quoteMode: "TC_SUPPORTED_TO_TC_SUPPORTED",
+        };
+        output.steps = 1;
+        output.complete = true;
+        output.source = 'thorchain';
+        output.raw = quoteFromNode
         
         return output;
     } catch (e) {
-        console.error(tag, "e: ", e)
+        log.error(tag, "Error: ", e);
         throw e;
     }
-}
+};
+
+
+// const get_quote = async function (quote: any) {
+//     const tag = TAG + " | get_quote | ";
+//     try {
+//         let output: any = {};
+//         if (!quote.sellAsset) throw new Error("missing sellAsset");
+//         if (!quote.buyAsset) throw new Error("missing buyAsset");
+//         if (!quote.sellAmount) throw new Error("missing sellAmount");
+//         if (!quote.senderAddress) throw new Error("missing senderAddress");
+//         if (!quote.recipientAddress) throw new Error("missing recipientAddress");
+//         if (!quote.slippage) throw new Error("missing slippage");
+//
+//         // Get pools from network
+//         const pools = await getPools();
+//
+//         // Find the pool for the sellAsset
+//         const poolIn = pools.find((p: any) => p.asset === quote.sellAsset);
+//         if (!poolIn) {
+//             log.error(tag, `Pool for sellAsset (${quote.sellAsset}) not found.`);
+//             throw new Error(`Pool for sellAsset (${quote.sellAsset}) not found.`);
+//         }
+//
+//         let poolOut: any = null;
+//
+//         // Skip poolOut lookup if buyAsset is RUNE/THOR
+//         if (quote.buyAsset === 'THOR.RUNE' || quote.buyAsset === 'RUNE.RUNE') {
+//             log.info(tag, `BuyAsset (${quote.buyAsset}) is RUNE/THOR. Skipping poolOut lookup.`);
+//         } else {
+//             poolOut = pools.find((p: any) => p.asset === quote.buyAsset);
+//             if (!poolOut) {
+//                 log.error(tag, `Pool for buyAsset (${quote.buyAsset}) not found.`);
+//                 throw new Error(`Pool for buyAsset (${quote.buyAsset}) not found.`);
+//             }
+//         }
+//
+//         log.info(tag, "poolIn: ", poolIn, "poolOut: ", poolOut || 'N/A (RUNE/THOR as buyAsset)');
+//
+//         const sellAssetChain = quote.sellAsset.split(".")[0];
+//         const DECIMALS = Number(BaseDecimal[sellAssetChain]);
+//         if (isNaN(DECIMALS)) throw new Error(`Invalid DECIMALS value for asset: ${sellAssetChain}`);
+//         const BASE_UNIT = Math.pow(10, DECIMALS);
+//         const sellAmountInBaseUnits = parseFloat(quote.sellAmount) * BASE_UNIT;
+//
+//         // Create URL for the API
+//         const URL = `/thorchain/quote/swap?from_asset=${quote.sellAsset}&to_asset=${quote.buyAsset}&amount=${sellAmountInBaseUnits}&destination=${quote.recipientAddress}`;
+//         log.info(tag, "URL: ", URL);
+//
+//         const quoteFromNode = await nodeRequest(URL);
+//         if (quoteFromNode.error) throw new Error(quoteFromNode.error);
+//
+//         const amountOutMin = quoteFromNode.amount_out_min;
+//         const amountOutEstimated = (parseInt(quoteFromNode.expected_amount_out) / BASE_UNIT).toFixed(DECIMALS);
+//
+//         output.amountOut = amountOutEstimated;
+//
+//         const memoInput = {
+//             type: 'SWAP',
+//             asset: quote.buyAsset,
+//             destAddr: quote.recipientAddress,
+//             lim: amountOutMin,
+//         };
+//         const memo = createMemo(memoInput);
+//         log.info(tag, "memo: ", memo);
+//
+//         const txType = sellAssetChain === "MAYA" ? 'deposit' : 'transfer';
+//
+//         output.txs = [
+//             {
+//                 type: txType,
+//                 chain: ChainToNetworkId[sellAssetChain],
+//                 txParams: {
+//                     senderAddress: quote.senderAddress,
+//                     recipientAddress: quoteFromNode.inbound_address,
+//                     amount: quote.sellAmount,
+//                     token: quote.sellAsset.split(".")[1],
+//                     memo: quoteFromNode.memo || memo,
+//                 },
+//             },
+//         ];
+//
+//         output.meta = {
+//             quoteMode: "TC_SUPPORTED_TO_TC_SUPPORTED",
+//         };
+//         output.steps = 1;
+//         output.complete = true;
+//         output.source = 'thorchain';
+//         output.id = uuid();
+//
+//         return output;
+//     } catch (e) {
+//         log.error(tag, "Error: ", e);
+//         throw e;
+//     }
+// };

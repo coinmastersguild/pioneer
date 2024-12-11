@@ -156,16 +156,16 @@ let network = require("../lib/index")
 
 
 
-let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
-// network.getBalance(address)
+// let address = 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
+// // network.getBalance(address)
+// //     .then(function(resp){
+// //         console.log("resp: ",resp)
+// //     })
+//
+// network.getBalances(address)
 //     .then(function(resp){
 //         console.log("resp: ",resp)
 //     })
-
-network.getBalances(address)
-    .then(function(resp){
-        console.log("resp: ",resp)
-    })
 
 let poolId = 'gamm/pool/1'
 
@@ -205,12 +205,12 @@ let poolId = 'gamm/pool/1'
 
 //https://lcd-osmosis.keplr.app/txs?tx.height=1891147&page=1
 
-// network.getTransaction("208F7FDAD23C405261EAAB3BC6B8508B387375A8384812AF974046E600309B9B")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//         //console.log("resp: ",JSON.stringify(resp))
-//     })
+network.getTransaction("6FD1554D654B5F58D6D35CE1F9EE0EA0FCCEB5A20EA5E6B80CAA58F7302F22E5")
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+        //console.log("resp: ",JSON.stringify(resp))
+    })
 
 // network.txs("osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt")
 //     .then(function(resp){

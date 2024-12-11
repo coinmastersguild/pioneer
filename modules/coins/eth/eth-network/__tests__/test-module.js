@@ -10,21 +10,48 @@ require("dotenv").config({path:'../../../../../../.env'})
 let network = require("../lib/index")
 network.init()
 
-let nodeScroll = {
-    networkId:'eip155:534352',
-    service:'https://scroll.drpc.org',
+// let nodeScroll = {
+//     networkId:'eip155:534352',
+//     service:'https://scroll.drpc.org',
+//     protocol: 'EVM'
+// }
+
+let nodeMainnet = {
+    networkId:'eip155:1',
+    service:'https://eth.llamarpc.com',
     protocol: 'EVM'
 }
 
-network.addNode(nodeScroll)
+network.addNode(nodeMainnet)
+// network.addNode(nodeScroll)
 
 //get balance by address by network
-let address = "0x2356A15042F98f0a53784F42237bd4b2873AADCF"
-let networkId = "eip155:534352"
-network.getBalanceAddressByNetwork(networkId,address)
-    .then(function(resp){
-        console.log(resp)
-    })
+
+let address = "0x141D9959cAe3853b035000490C03991eB70Fc4aC"
+let networkId = "eip155:8453"
+
+//getTransactions
+// network.getTransactionsByNetwork(networkId,address, {fromBlock:'latest',toBlock:'latest'})
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+//broadcastByNetwork
+// network.broadcastByNetwork(networkId,"0xf86f81a5840493c176840493c17694658de0443259a1027caa976ef9a42e6982037a0387038d7ea4c680008082422da0cbee8e98c3e79171d47982ab89f94ff6b90f3fbcdc07ff944cfa9db4ffd0d3c3a03d14cdb5b37bf64ce82706dc51e6908e4ba49cdf3e0639d316c333ecc6727afa")
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+// network.getGasPriceByNetwork(networkId,address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
+
+
+// network.getBalanceAddressByNetwork(networkId,address)
+//     .then(function(resp){
+//         console.log(resp)
+//     })
 
 //get pioneers
 // network.getAllPioneers()

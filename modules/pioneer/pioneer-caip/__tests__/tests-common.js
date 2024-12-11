@@ -3,7 +3,7 @@ require("dotenv").config({path:'./../../.env'})
 require("dotenv").config({path:'../../../.env'})
 require("dotenv").config({path:'../../../../.env'})
 
-const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango } = require("../lib");
+const { thorchainToCaip, tokenToCaip, caipToThorchain, caipToRango, networkIdToCaip } = require("../lib");
 
 // Test data for multiple tokens
 const tokens = [
@@ -31,18 +31,18 @@ const tokens = [
     //         address:null
     //     }
     // },
-    // {
-    //     chain: "THOR",
-    //     identifier: "THOR.RUNE",
-    //     ticker: "RUNE",
-    //     decimals: 10,
-    //     caip: "cosmos:thorchain-mainnet-v1",
-    //     rangoName: {
-    //         blockchain:'THOR',
-    //         symbol:'RUNE',
-    //         address:null
-    //     }
-    // },
+    {
+        chain: "THOR",
+        identifier: "THOR.RUNE",
+        ticker: "RUNE",
+        decimals: 10,
+        caip: "cosmos:thorchain-mainnet-v1",
+        rangoName: {
+            blockchain:'THOR',
+            symbol:'RUNE',
+            address:null
+        }
+    },
     // {
     //     address: "0xeA6887e4a9CdA1B77E70129E5Fba830CdB5cdDef",
     //     chain: "AVAX",

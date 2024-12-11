@@ -11,9 +11,7 @@ export interface ThorchainMemoEncodedBody {
     toAddress:string
 }
 export interface BroadcastBody {
-    coin?:string
-    caip?:string,
-    network?:string,
+    networkId:string,
     asset?:string,
     isTestnet?:boolean,
     serialized:string
@@ -22,7 +20,7 @@ export interface BroadcastBody {
     txid?:string
     noBroadcast?:boolean
     description?:any
-    invocationId:string
+    invocationId?:string
 }
 export interface GetFeesWithMemoBody{
     network:string

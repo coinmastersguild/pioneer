@@ -5,4 +5,4 @@ let message = {
     queryKey:'adsfgdfgds3sdfsd'
 }
 
-publisher.publish('pairings',JSON.stringify(message))
+publisher.publish('clubmoon-events','Fuck you Joose, you are a fucking faggot. ill rape your bitch ass mouth')

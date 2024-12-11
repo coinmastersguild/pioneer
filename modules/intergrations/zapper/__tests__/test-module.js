@@ -19,9 +19,9 @@ let run_test = async function(){
 
         //getPortfolio
         let result = await client.getPortfolio(address.toLowerCase())
-        console.log("result: ",result)
-        console.log("result: ",result.tokens)
-        console.log("result: ",result.tokens[0])
+        console.log("result: ",result.balances)
+        console.log("result: ",result.balances.length)
+        // console.log("result: ",result.tokens[0])
         // console.log("result: ",result.nfts)
         // console.log("result: ",JSON.stringify(result.nfts))
 

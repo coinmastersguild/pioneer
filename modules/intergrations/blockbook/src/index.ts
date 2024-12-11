@@ -43,7 +43,6 @@ let BLOCKBOOK_SOCKETS:any = {}
 
 module.exports = {
     init:function (servers?:any, ) {
-        
         return init_network(servers);
     },
     getInfo:function () {
@@ -90,7 +89,7 @@ let init_network = async function (servers?: any[]) {
         log.debug(tag,"checkpoint: ")
 
         let SEED_NODES = await nodes.getBlockbooks()
-        log.debug(tag,"SEED_NODES: ",SEED_NODES)
+        log.info(tag,"SEED_NODES: ",SEED_NODES)
 
         let blockbooks = []
         if (servers && Array.isArray(servers)) { // Type checking for array
@@ -260,57 +259,59 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
     }
 }
 
-let broadcast_transaction = async function(coin:string,hex:string){
-    let tag = TAG + " | broadcast_transaction | "
-    try{
 
-        let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/sendtx/"
 
-        let data = hex
-
-        let body = {
-            url,
-            headers: {
-
-                'content-type': 'application/json',
-                'User-Agent': fakeUa()
-            },
-            method: 'POST',
-            json:false,
-            data,
-        }
-        let output:any = {
-            success:false
-        }
-        let resp
-        try{
-            resp = await axios(body)
-            output.resp = resp
-            output.success = true
-        }catch(e){
-            log.error(tag,"error: ",e)
-            //log.debug(tag,"data0: ",e)
-            //log.debug(tag,"resp: ",resp)
-            //log.debug(tag,"data0: ",Object.keys(e))
-            //log.debug(tag,"data1: ",e.response.req)
-            //log.debug(tag,"data2: ",e.response.data)
-            //log.debug(tag,"data2: ",e.response.data.error)
-            //log.debug(tag,"error3: ",e.toJSON().request)
-            //log.debug(tag,"erro4: ",e.toJSON().data)
-            //log.debug(tag,"error5: ",e.toJSON().code)
-            // if(e.response.data.error){
-            //     output.error = e.response.data.error
-            // }else{
-            //     output.error = e
-            // }
-        }
-
-        return output
-    }catch(e){
-        //console.error(tag,e)
-        throw e
-    }
-}
+// let broadcast_transaction = async function(coin:string,hex:string){
+//     let tag = TAG + " | broadcast_transaction | "
+//     try{
+//
+//         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/sendtx/"
+//
+//         let data = hex
+//
+//         let body = {
+//             url,
+//             headers: {
+//
+//                 'content-type': 'application/json',
+//                 'User-Agent': fakeUa()
+//             },
+//             method: 'POST',
+//             json:false,
+//             data,
+//         }
+//         let output:any = {
+//             success:false
+//         }
+//         let resp
+//         try{
+//             resp = await axios(body)
+//             output.resp = resp
+//             output.success = true
+//         }catch(e){
+//             log.error(tag,"error: ",e)
+//             //log.debug(tag,"data0: ",e)
+//             //log.debug(tag,"resp: ",resp)
+//             //log.debug(tag,"data0: ",Object.keys(e))
+//             //log.debug(tag,"data1: ",e.response.req)
+//             //log.debug(tag,"data2: ",e.response.data)
+//             //log.debug(tag,"data2: ",e.response.data.error)
+//             //log.debug(tag,"error3: ",e.toJSON().request)
+//             //log.debug(tag,"erro4: ",e.toJSON().data)
+//             //log.debug(tag,"error5: ",e.toJSON().code)
+//             // if(e.response.data.error){
+//             //     output.error = e.response.data.error
+//             // }else{
+//             //     output.error = e
+//             // }
+//         }
+//
+//         return output
+//     }catch(e){
+//         //console.error(tag,e)
+//         throw e
+//     }
+// }
 
 let get_transaction = async function(coin:string,txid:string){
     let tag = TAG + " | get_transaction | "

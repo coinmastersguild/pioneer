@@ -43,9 +43,8 @@ const log = require('@pioneer-platform/loggerdog')()
 const { redis } = require('@pioneer-platform/default-redis')
 let proToken = require("@pioneer-platform/pro-token")
 
-//thorswap
-let thorswap = require("@pioneer-platform/thorswap-client")
-const { caipToRango, caipToNetworkId } = require("@pioneer-platform/pioneer-caip");
+
+const { caipToRango, caipToNetworkId, caipToThorchain } = require("@pioneer-platform/pioneer-caip");
 //rango
 let rango = require("@pioneer-platform/rango-client")
 
@@ -54,6 +53,9 @@ let changelly = require("@pioneer-platform/changelly-client")
 
 //osmosis
 let osmosis = require("@pioneer-platform/osmosis-client")
+
+//
+let thorchain = require("@pioneer-platform/thorchain-client")
 
 //osmosis
 let mayachain = require("@pioneer-platform/mayachain-client")
@@ -122,27 +124,27 @@ let AssetsByIntegration:any = {}
 
 module.exports = {
     init: async function () {
-        await thorswap.init()
         await rango.init()
         await changelly.init()
         await osmosis.init()
         await mayachain.init()
         await uniswap.init()
+        await thorchain.init({})
         NetworksByIntegration['mayachain'] = mayachain.networkSupport()
         NetworksByIntegration['changelly'] = changelly.networkSupport()
-        NetworksByIntegration['thorswap'] = thorswap.networkSupport()
         NetworksByIntegration['rango'] = rango.networkSupport()
         NetworksByIntegration['osmosis'] = osmosis.networkSupport()
         NetworksByIntegration['uniswap'] = uniswap.networkSupport()
         // NetworksByIntegration['across'] = across.networkSupport()
         NetworksByIntegration['chainflip'] = chainflip.networkSupport()
+        NetworksByIntegration['thorchain'] = thorchain.networkSupport()
         //get assets
         AssetsByIntegration['mayachain'] = mayachain.assetSupport()
         AssetsByIntegration['changelly'] = changelly.assetSupport()
-        AssetsByIntegration['thorswap'] = thorswap.assetSupport()
         AssetsByIntegration['rango'] = rango.assetSupport()
         AssetsByIntegration['osmosis'] = osmosis.assetSupport()
         AssetsByIntegration['uniswap'] = uniswap.assetSupport()
+        AssetsByIntegration['thorchain'] = thorchain.assetSupport()
         // AssetsByIntegration['across'] = across.assetSupport()
         AssetsByIntegration['chainflip'] = chainflip.assetSupport()
         return true;
@@ -165,20 +167,30 @@ async function get_quote_from_integration(integration:string, quote: Swap) {
     let tag = TAG + " | get_quote_from_integration | "
     try{
         switch (integration){
-            case "thorswap":
+            case "thorchain":
+                log.info(tag,"thorchain quote: ",quote)
                 if(!quote.senderAddress) throw Error('invalid quote! missing senderAddress')
                 if(!quote.recipientAddress) throw Error('invalid quote! missing recipientAddress')
-                let payloadThorswap = {
-                    sellAsset: quote.sellAsset.identifier,
-                    buyAsset: quote.buyAsset.identifier,
+                
+                let thorchainNameSellAsset = caipToThorchain(quote.sellAsset.caip, quote.sellAsset.ticker || quote.sellAsset.symbol, null)
+                let thorchainBuyAsset = caipToThorchain(quote.buyAsset.caip, quote.buyAsset.ticker || quote.buyAsset.symbol, null)
+                log.info(tag,"thorchainBuyAsset: ",thorchainBuyAsset)
+                log.info(tag,"thorchainNameSellAsset: ",thorchainNameSellAsset)
+                if(thorchainBuyAsset === 'THOR.THOR') thorchainBuyAsset = 'THOR.RUNE'
+                if(thorchainNameSellAsset === 'THOR.THOR') thorchainNameSellAsset = 'THOR.RUNE'
+                if(!thorchainNameSellAsset) throw Error('invalid thorchainNameSellAsset')
+                if(!thorchainBuyAsset) throw Error('invalid thorchainBuyAsset')
+                let payloadThorchain = {
+                    sellAsset: thorchainNameSellAsset,
                     sellAmount: quote.sellAmount,
+                    buyAsset: thorchainBuyAsset,
                     senderAddress: quote.senderAddress,
                     recipientAddress: quote.recipientAddress,
-                    slippage: quote.slippage
+                    slippage: 3,
                 }
-                log.info(tag,"payloadThorswap: ",payloadThorswap)
-                let quoteThorswap = await thorswap.getQuote(payloadThorswap)
-                return quoteThorswap
+                log.info(tag,"payloadThorchain: ",payloadThorchain)
+                let quoteThorchain = await thorchain.getQuote(payloadThorchain)
+                return [quoteThorchain]
             break
             case "rango":
                 let rangoNameSellAsset = caipToRango(quote.sellAsset.caip, quote.sellAsset.ticker, null)
@@ -364,9 +376,9 @@ async function get_quote(quote: Swap) {
                             log.info("integrationQuote.amountOut: ", integrationQuote.amountOut);
                             let sellAssetValueUsd = parseFloat(quote.sellAmount) * quote.sellAsset.priceUsd;
                             let buyAssetValueUsd = parseFloat(integrationQuote.amountOut) * quote.buyAsset.priceUsd;
-                            let proTokenEarned = sellAssetValueUsd * 0.1; // For every 1 USD, they earn 0.01 PRO token
-                            integrationQuote.proTokenEarned = proTokenEarned;
-                            integrationQuote.proTokenEarnedUsd = proTokenEarned * await get_pro_rate_usd(); //TODO get dynamic price
+                            //let proTokenEarned = sellAssetValueUsd * 0.1; // For every 1 USD, they earn 0.01 PRO token
+                            //integrationQuote.proTokenEarned = proTokenEarned;
+                            //integrationQuote.proTokenEarnedUsd = proTokenEarned * await get_pro_rate_usd(); //TODO get dynamic price
                             integrationQuote.sellAssetValueUsd = sellAssetValueUsd;
                             integrationQuote.buyAssetValueUsd = buyAssetValueUsd;
                             quotes.push({ integration, quote: integrationQuote });
@@ -384,45 +396,46 @@ async function get_quote(quote: Swap) {
 
         //TODO if no quote found for both assets, find a pivot asset
         log.info(tag, "quotes: ", quotes);
-        if (quotes.length === 0) {
-            log.info(tag, "No direct quotes found. Searching for pivot trades...");
-
-            const PIVOT_ASSETS:any = [
-                { caip: 'eip155:1/slip44:60', name: 'ETH' },
-                { caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0', name: 'BTC' }
-            ];
-            
-            // Find pivot trades
-            for (let integration of supportsInput) {
-                for (let pivotAsset of PIVOT_ASSETS) {
-                    // @ts-ignore
-                    let pivotQuote = await get_quote_from_integration(integration, { ...quote, buyAsset: { caip: pivotAsset } });
-                    if (pivotQuote && pivotQuote.length > 0) {
-                        let pivotAmount = pivotQuote[0].amountOut;
-                        log.info(tag, "Pivot trade found: ", pivotAmount, " of ", pivotAsset);
-
-                        for (let outputIntegration of supportsOutput) {
-                            // @ts-ignore
-                            let finalQuote = await get_quote_from_integration(outputIntegration, { sellAsset: { caip: pivotAsset }, sellAmount: pivotAmount, buyAsset: quote.buyAsset });
-                            if (finalQuote && finalQuote.length > 0 && finalQuote[0].amountOut > 0) {
-                                let finalAmount = finalQuote[0].amountOut;
-                                quotes.push({
-                                    integration: integration + " -> " + outputIntegration,
-                                    quote: {
-                                        sellAsset: quote.sellAsset.caip,
-                                        sellAmount: quote.sellAmount,
-                                        buyAsset: quote.buyAsset.caip,
-                                        buyAmount: finalAmount,
-                                        pivotAsset: pivotAsset,
-                                        pivotAmount: pivotAmount
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //TODO FUTURE!
+        // if (quotes.length === 0) {
+        //     log.info(tag, "No direct quotes found. Searching for pivot trades...");
+        //
+        //     const PIVOT_ASSETS:any = [
+        //         { caip: 'eip155:1/slip44:60', name: 'ETH' },
+        //         { caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0', name: 'BTC' }
+        //     ];
+        //    
+        //     // Find pivot trades
+        //     for (let integration of supportsInput) {
+        //         for (let pivotAsset of PIVOT_ASSETS) {
+        //             // @ts-ignore
+        //             let pivotQuote = await get_quote_from_integration(integration, { ...quote, buyAsset: { caip: pivotAsset } });
+        //             if (pivotQuote && pivotQuote.length > 0) {
+        //                 let pivotAmount = pivotQuote[0].amountOut;
+        //                 log.info(tag, "Pivot trade found: ", pivotAmount, " of ", pivotAsset);
+        //
+        //                 for (let outputIntegration of supportsOutput) {
+        //                     // @ts-ignore
+        //                     let finalQuote = await get_quote_from_integration(outputIntegration, { sellAsset: { caip: pivotAsset }, sellAmount: pivotAmount, buyAsset: quote.buyAsset });
+        //                     if (finalQuote && finalQuote.length > 0 && finalQuote[0].amountOut > 0) {
+        //                         let finalAmount = finalQuote[0].amountOut;
+        //                         quotes.push({
+        //                             integration: integration + " -> " + outputIntegration,
+        //                             quote: {
+        //                                 sellAsset: quote.sellAsset.caip,
+        //                                 sellAmount: quote.sellAmount,
+        //                                 buyAsset: quote.buyAsset.caip,
+        //                                 buyAmount: finalAmount,
+        //                                 pivotAsset: pivotAsset,
+        //                                 pivotAmount: pivotAmount
+        //                             }
+        //                         });
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         return quotes;
     } catch (err) {

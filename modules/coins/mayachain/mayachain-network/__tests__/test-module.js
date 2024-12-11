@@ -51,11 +51,12 @@ let network = require("../lib/index")
 
 
 // let address = 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
-// // let address = "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj"
-// // network.getBalance(address)
-// //     .then(function(resp){
-// //         console.log("resp: ",resp)
-// //     })
+// let address = "maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k"
+// network.getBalances(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//     })
+
 // //
 // // // let address = process.env['TEST_THOR_MASTER']
 // // // if(!address) throw Error("must add TEST_THOR_MASTER to .env")
@@ -72,12 +73,12 @@ let network = require("../lib/index")
 //let signedTxKeepKey = 'ClQKSgoOL3R5cGVzLk1zZ1NlbmQSOAoU/CMekQrVt/W70pEpQMVIvKfXlEESFPwjHpEK1bf1u9KRKUDFSLyn15RBGgoKBWNhY2FvEgExEgZmb29iYXISZApQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAxUZcTuLQr3DZxEtMxMs8Uzt+SisV3HURLpFm5SXEXujEgQKAgh/GA0SEAoKCgVjYWNhbxIBMRDAmgwaQEhVNJ8wbs3VeTaQ9VT3LXLtXqXtMXghD4zs9DZP0NMIalBlTfZtY3785fl0dznCjGK/8qNl3vKLQ6S3UcyE9lQ='
 // let signedTxNative = 'ClQKSgoOL3R5cGVzLk1zZ1NlbmQSOAoU/CMekQrVt/W70pEpQMVIvKfXlEESFPwjHpEK1bf1u9KRKUDFSLyn15RBGgoKBWNhY2FvEgExEgZmb29iYXISZApQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAxUZcTuLQr3DZxEtMxMs8Uzt+SisV3HURLpFm5SXEXujEgQKAggBGA0SEAoKCgVjYWNhbxIBMRDAmgwaQJZv9v0Rc9M1LYGsl3egwJfpUN0i8Wr6ySwtumtaS33vAysw+ixFXOhrberMkKAyskeBl4qHn7cGlr53zPEWfQ0='
 // let signedTx = 'ClQKSgoOL3R5cGVzLk1zZ1NlbmQSOAoU/CMekQrVt/W70pEpQMVIvKfXlEESFPwjHpEK1bf1u9KRKUDFSLyn15RBGgoKBWNhY2FvEgExEgZmb29iYXISZApQCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohAxUZcTuLQr3DZxEtMxMs8Uzt+SisV3HURLpFm5SXEXujEgQKAgh/GA8SEAoKCgVjYWNhbxIBMRDAmgwaQON9jODyyT4iota+t7fsgRvc5/4phSNYhiftonUKntAGcdqBeqlON6Vdfl6GSugsSU4Ugbl+/MlFjcsVeacidKA='
-// let signedTx = 'ClQKSgoOL3R5cGVzLk1zZ1NlbmQSOAoUQXP/fFJ1yk5NWKykK5HlkU7LXSYSFPwjHpEK1bf1u9KRKUDFSLyn15RBGgoKBWNhY2FvEgExEgZmb29iYXISYgpOCkYKHy9jb3Ntb3MuY3J5cHRvLnNlY3AyNTZrMS5QdWJLZXkSIwohA+LqoSbCxYe5tF2Cbvdm5oeW9L+aaLDlSHm+jwqUDBkvEgQKAgh/EhAKCgoFY2FjYW8SATEQwJoMGkD8RONucMrE8f3ilS5RpbzohiEwb55o+jckXDfxGrQWs3QHuqEwiEPbgK2rWgDG01AbaUiOJZx6q3WrilF75tth'
-//
-// network.broadcast(signedTx)
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//     })
+let signedTx = 'ClMKTgoOL3R5cGVzLk1zZ1NlbmQSPAoUQXP/fFJ1yk5NWKykK5HlkU7LXSYSFKy4u33VN3rmGeEr91pPg9V3u8hRGg4KBWNhY2FvEgUxMDAwMBIBIBJmClAKRgofL2Nvc21vcy5jcnlwdG8uc2VjcDI1NmsxLlB1YktleRIjCiED4uqhJsLFh7m0XYJu92bmh5b0v5posOVIeb6PCpQMGS8SBAoCCH8YMxISCgoKBWNhY2FvEgEwEIDKte4BGkBv9zLDcMr/c/KhLjrcJRlunZieY+jSfM9VzXd4/+ra9wzsX6D/C3d+RhAfop98LXN7VGftemTwkHbLJvAKgTx4'
+
+network.broadcast(signedTx)
+    .then(function(resp){
+        console.log("resp: ",resp)
+    })
 
 // let address = process.env['TEST_THOR_MASTER']
 // if(!address) throw Error("must add TEST_THOR_MASTER to .env")

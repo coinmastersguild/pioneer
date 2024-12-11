@@ -16,7 +16,6 @@ import { JsonRpcProvider } from 'ethers'
 
 module.exports = {
 	init:function (settings:any) {
-		
 		return true
 	},
 	// getInfo:function () {

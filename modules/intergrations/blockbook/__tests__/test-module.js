@@ -10,7 +10,9 @@ let run_test = async function(){
     try{
         //
         await network.init()
-
+        
+        console.log(await network.getBlockbooks())
+        
         // network.txidsByAddress('DOGE',"DBzgF78jXBxGzL4JnGiSRgxW3iTCjgAotp")
         //     .then(function(resp){
         //         console.log(resp)
@@ -18,8 +20,8 @@ let run_test = async function(){
         //     })
         
         //
-        let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
-        console.log(utxos)
+        // let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+        // console.log(utxos)
         
         //xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs
         // let utxos = await network.utxosByXpub('DOGE',"xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
@@ -40,11 +42,17 @@ let run_test = async function(){
         //ETH_SOCKET.subscribeAddresses([address2], ({ address, tx }) => console.log('new tx for address', address, tx))
         //sub to address
 
+        // let utxos = await network.utxosByXpub('LTC',"xpub6CQaRj3ynJXpPXzx6tbRFXLqcUuVanKWkFusZ9P7cDYAAgMmdC89rq6aofxyp1fXvscxZF5HgWgZgD3VA6sYnJPKqWnCfUxCoD1YX9TpBkx")
+        // console.log(utxos)
+
         //
         // let utxos = await network.utxosByXpub('DGB',"xpub6CqeSKMnFCNL3iD4FMBXxec7dqwrqvgpHYX7fDKgWQLATp6HS1nNsWvMXKWNbPJ8s6ybHEGWJ6E8V2trZVrYtnZUMT1toFUppxXTpwKh1hG")
         // console.log(utxos)
-        
-        // let utxos = await network.utxosByXpub('DASH',"xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe")
+
+        // let utxos = await network.utxosByXpub('BTC',"ypub6WamSeXgTYgy7W25fVorMLDHFx5SPkuYaE7ToWCiyCUK2jdWpufQ8VqkDg83YjBtJFHDoekhf9ESdPDbL9aCPXC5NnmzXUiq3J6oycFShfS")
+        // console.log(utxos)
+
+        // let utxos = await network.utxosByXpub('DOGE',"xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs")
         // console.log(utxos)
 
         //e75d35b3cea88892f7c2e0014a32b39d005623aaf7146433326cafd10cdaa925
@@ -54,6 +62,11 @@ let run_test = async function(){
         //         console.log(JSON.stringify(resp))
         //     })
 
+
+        network.broadcast("BTC","0100000003f052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa4000000006a47304402200b004392d3d0a745360407205988d21d950bc366694edda156ab032fb26733f90220130e23fa3c74412c6ab69140e697684bc487bbe8da2e2e7859cee890f22c45aa0121031bdf27522ef952002e09decd17c66b271d719a272929a23773b1c43f5a377cb9fffffffff052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa4010000006b483045022100bdf1524c63adb0cb70060242be03b07d4647e1c4f49cc4118c0f5b6791799e69022048076dd969d3b240892bdee06650b0224f09e37df58e8a836da6c2498b521b9c01210329e088bf8f85dc3b2fe43505b41b991e716f8dc34dd4375e4974e1bbe721840ffffffffff052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa4020000006b483045022100e407102ceb5ca07b42b634de3257b015bfbe1646d0ce968e5c0a0e37258458d9022011487015a677ac0edea7da162d20ed2c0dd27e8b059b9ab950f366c18f17cd18012103fde631e44f8e64761119c8bd8f2d2fb74d50a1a0f73c28316a1512883537a5e5ffffffff018b1d010000000000160014e4517b08fe39c90b7900c32d9a7dfb1fa16ba18100000000")
+            .then(function(resp){
+                console.log("txid: ",resp)
+            })
 
     }catch(e){
         console.error(e)
@@ -70,6 +83,11 @@ run_test()
 //     .then(function(resp){
 //         console.log(resp)
 //         console.log(JSON.stringify(resp))
+//     })
+//
+// network.broadcast("BTC","01000000000103f052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa40000000000fffffffff052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa40100000000fffffffff052dc9907d5c0ec07c2692c9c8cd9bae85ae0aff843059bcc176f41ff607fa40200000000ffffffff018b1d010000000000160014e4517b08fe39c90b7900c32d9a7dfb1fa16ba181024730440220702b145a35b86cf6b4cdc62e2e87a72666fe8816c0673305f2677a519ff6e8f402201e602159d5767ed1668ea2dcf4683f535c6c91c414de1ccf87ec7f7843f211f00121031bdf27522ef952002e09decd17c66b271d719a272929a23773b1c43f5a377cb902483045022100e2da2d83e6b01c90607d825b7c6c5db982e119be51fdbb3d32010a2f11476629022048bf94136cf8b9d91c5a12f6727b00f09fddaa2415bfa91f1ef7f8f6f16b502b01210329e088bf8f85dc3b2fe43505b41b991e716f8dc34dd4375e4974e1bbe721840f02483045022100d978b23a57ab2a300cc87cc77048c58c19439e672633bfc0851bfd7724bdf74b02205a280b783af33d4f63fed0e599d776b5435ce2b41051a0c1fcc01f1e5f91cc35012103fde631e44f8e64761119c8bd8f2d2fb74d50a1a0f73c28316a1512883537a5e500000000")
+//     .then(function(resp){
+//         console.log("txid: ",resp)
 //     })
 
 // network.broadcast("ETH","0xf86e8202ab85028fa6ae008301388094c3affff54122658b89c31183cec4f15514f34624870aa87bee5380008025a04cbf2dc700925319439ae86413eb50a82a7250eff94a2e6e82b223ff8873ca16a04f2745e71c811889ca6a1fdb36ff33486c0f7b7796638d757a3af1adb3ce1afa")

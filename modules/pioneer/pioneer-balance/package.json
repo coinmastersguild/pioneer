@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/pioneer-balance",
-  "version": "8.3.24",
+  "version": "8.3.36",
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@pioneer-platform/pioneer-caip": "^9.2.34",
-    "@pioneer-platform/pioneer-network": "^8.3.24",
+    "@pioneer-platform/pioneer-network": "^8.3.28",
     "@types/node": "^18.15.11",
     "events": "^3.3.0",
     "socket.io-client": "^4.5.4",

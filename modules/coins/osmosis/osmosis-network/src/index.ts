@@ -74,6 +74,8 @@ let BASE_OSMO = 1000000
 
 module.exports = {
     init:function (url:string,settings:any) {
+        log.info(TAG,"init",url,settings)
+        URL_OSMO_RPC = url
         return true
     },
     isOnline:function () {
@@ -543,7 +545,7 @@ let get_validators = async function(){
 let get_transaction = async function(txid:string){
     let tag = TAG + " | get_transaction | "
     try{
-        let txInfo = await axios({method:'GET',url:  URL_OSMO_LCD+'/txs/'+txid})
+        let txInfo = await axios({method:'GET',url:  URL_OSMO_LCD+'/cosmos/tx/v1beta1/txs/'+txid})
         log.debug(tag,"txInfo: ",txInfo.data)
         return txInfo.data
     }catch(e){

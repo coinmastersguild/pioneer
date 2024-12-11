@@ -12,10 +12,16 @@ export const networkIdToCaip = function (networkId: string) {
         return `${networkId}/slip44:60`;
     }
 
-    // Otherwise, attempt to get CAIP from ChainToCaip using the networkId
-    const caip = ChainToCaip[networkId] || ChainToNetworkId[networkId];
+    // Get the chain symbol from NetworkIdToChain using the networkId
+    const chainSymbol = NetworkIdToChain[networkId];
 
-    // Throw an error if no valid CAIP identifier was found
+    if (!chainSymbol) {
+        throw new Error(`Unable to find chain symbol for networkId ${networkId}.`);
+    }
+
+    // Now get the CAIP from ChainToCaip using the chain symbol
+    const caip = ChainToCaip[chainSymbol];
+
     if (!caip) {
         throw new Error(`Unable to convert networkId ${networkId} to CAIP.`);
     }
@@ -37,7 +43,7 @@ export const evmCaips = {
     'gnosis': 'eip155:100/slip44:60',
     'binance-smart-chain': 'eip155:56/slip44:60',
     'smart-bitcoin-cash': 'eip155:10000/slip44:60',
-    'arbitrum': 'eip155:42161/slip44:60',
+    arbitrum: 'eip155:42161/slip44:60',
     fuse: 'eip155:122/slip44:60',
     'bittorrent-chain': 'eip155:199/slip44:60',
     celo: 'eip155:42220/slip44:60',
@@ -393,11 +399,10 @@ let thorchainToCaip = function(identifier: string): string {
 };
 //NOTE THIS IS IMPOSSIBLE to do well!
 // Caips do NOT include the token tickers!
-let caipToThorchain = function (caip:string, ticker:string) {
+let caipToThorchain = function (caip: string, ticker: string) {
     try {
         const networkId = caip.split('/')[0]; // Splitting off the network ID from the CAIP
-        // console.log("networkId: ", networkId);
-        if (!networkId) throw Error("Invalid CAIP!");
+        if (!networkId) throw new Error("Invalid CAIP!");
 
         const chain = exports.NetworkIdToChain[networkId];
         if (!chain) {
@@ -408,6 +413,11 @@ let caipToThorchain = function (caip:string, ticker:string) {
         // Special handling for 'OSMO.ATOM'
         if (networkId === 'cosmos:osmosis-1' && ticker === 'ATOM') {
             return 'OSMO.ATOM';
+        }
+
+        // Special handling for 'THOR.THOR' to return 'THOR.RUNE'
+        if (chain === 'THOR' && ticker === 'THOR') {
+            return 'THOR.RUNE';
         }
 
         // Handling contract tokens
@@ -427,12 +437,11 @@ let caipToThorchain = function (caip:string, ticker:string) {
             return `${chain}.${ticker}-${contractAddress}`;
         } else {
             // Handling native tokens
-            // return chain + "." + chain;
             return ticker ? `${chain}.${ticker}` : `${chain}.${chain}`;
         }
     } catch (e) {
-        console.error("caip: ",caip)
-        console.error("ticker: ",ticker)
+        console.error("caip: ", caip);
+        console.error("ticker: ", ticker);
         console.error("Error processing network ID to THORChain", e);
         return null;
     }

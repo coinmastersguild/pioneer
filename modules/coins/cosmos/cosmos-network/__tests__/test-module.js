@@ -63,19 +63,19 @@ let network = require("../lib/index")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-network.getAccount("cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc")
-    .then(function(resp){
-        console.log("resp: ",resp)
-        //console.log("resp: ",JSON.stringify(resp))
-    })
+// network.getAccount("cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc")
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
-// let address = "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc"
+let address = "cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc"
 
-// // network.getBalance(address)
-// //     .then(function(resp){
-// //         console.log("resp: ",resp)
-// //         //console.log("resp: ",JSON.stringify(resp))
-// //     })
+// network.getBalance(address)
+//     .then(function(resp){
+//         console.log("resp: ",resp)
+//         //console.log("resp: ",JSON.stringify(resp))
+//     })
 
 // network.getBalances(address)
 //     .then(function(resp){
@@ -90,11 +90,11 @@ network.getAccount("cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc")
 //         //console.log("resp: ",JSON.stringify(resp))
 //     })
 
-// network.getTransaction("94920F209DA7AAE23ED88A404B269C1EAEFCCD55AB9E3C5F0F483CB5906984CE\n")
-//     .then(function(resp){
-//         console.log("resp: ",resp)
-//         console.log("resp: ",JSON.stringify(resp))
-//     })
+network.getTransaction("9983F020670AF00CD24D6465A0E95767FC7688B4A3D9DD6483B07E3AB14C0D44")
+    .then(function(resp){
+        console.log("resp: ",resp)
+        console.log("resp: ",JSON.stringify(resp))
+    })
 
 
 // let tx = '{"tx":{"fee":{"amount":[{"amount":"1000","denom":"uatom"}],"gas":"100000"},"memo":"","msg":[{"type":"cosmos-sdk/MsgTransfer","value":{"sender":"cosmos1yc6dftwdhgt96k8yty8djga88f3knhznfyh26k","receiver":"osmo1yc6dftwdhgt96k8yty8djga88f3knhznply6vy","source_port":"transfer","source_channel":"channel-141","token":{"denom":"uatom","amount":"10000"},"timeout_height":{"revision_number":"1","revision_height":"8391940"}}}],"signatures":[{"signature":"iTUel+vTU922MBDhI7qOThPcoeoyRh+3Oso2vg6DfM1y8oQQRgkp7SVogj+RfPk5jBrBZfWJ4DB3EZ7DtH4LVQ==","pub_key":{"type":"tendermint/PubKeySecp256k1","value":"A/SmJZVOYFbYd/Gr3he9k0I+oIbr5GSrOnwqR4KvLwzJ"}}]},"type":"cosmos-sdk/StdTx","mode":"sync"}'

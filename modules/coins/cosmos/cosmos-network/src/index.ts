@@ -234,13 +234,14 @@ let get_balance = async function(address:string){
     let output:any = {}
     try{
         let output = 0
-        //
-        let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-        log.debug(tag,"accountInfo: ",accountInfo.data)
+        //bank/v1beta1/balances/{address}/by_denom
+        let url = URL_GAIAD+'/cosmos/bank/v1beta1/balances/'+address
+        let accountInfo = await axios({method:'GET',url})
+        log.info(tag,"accountInfo: ",accountInfo.data)
 
-        if(accountInfo && accountInfo.data && accountInfo.data.result){
-            for(let i = 0; i < accountInfo.data.result.length; i++){
-                let entry = accountInfo.data.result[i]
+        if(accountInfo && accountInfo.data && accountInfo.data.balances){
+            for(let i = 0; i < accountInfo.data.balances.length; i++){
+                let entry = accountInfo.data.balances[i]
                 if(entry.denom === 'uatom'){
                     output = entry.amount / ATOM_BASE
                 }
@@ -276,13 +277,16 @@ let get_balances = async function(address:string){
         let output = []
 
         try{
-            let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
-            log.info(tag,"accountInfo: ",accountInfo.data)
+            // let accountInfo = await axios({method:'GET',url: URL_GAIAD+'/bank/balances/'+address})
+            // log.info(tag,"accountInfo: ",accountInfo.data)
 
+            let url = URL_GAIAD+'/cosmos/bank/v1beta1/balances/'+address
+            let accountInfo = await axios({method:'GET',url})
+            
             //
-            if(accountInfo.data?.result){
-                for(let i = 0; i < accountInfo.data.result.length; i++){
-                    let entry = accountInfo.data.result[i]
+            if(accountInfo.data?.balances){
+                for(let i = 0; i < accountInfo.data.balances.length; i++){
+                    let entry = accountInfo.data.balances[i]
                     if(entry.denom === 'uosmo'){
                         let balance = {
                             type:'balance',

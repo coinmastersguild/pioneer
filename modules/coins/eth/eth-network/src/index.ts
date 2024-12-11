@@ -69,7 +69,7 @@ import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@
 import * as etherscanAPI from './etherscan-api'
 const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
-
+import nodes from '@pioneer-platform/nodes'
 import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
 let wait = require('wait-promise');
 let sleep = wait.sleep;
@@ -116,6 +116,17 @@ module.exports = {
 	init:function (settings:any) {
 		//blockbook.init()
 		//log.debug("node: ",process.env['PARITY_ARCHIVE_NODE'])
+		
+		//load
+		// @ts-ignore
+		let web3nodes = nodes.getWeb3Nodes()
+		for(let i = 0; i < web3nodes.length; i++){
+			let node = web3nodes[i]
+			if(!node.networkId) throw Error('missing networkId')
+			if(!node.service) throw Error('missing networkId')
+			NODES.push(node)
+		}
+		
 		if(!settings){
 			//use default
 			web3 = new Web3(process.env['PARITY_ARCHIVE_NODE']);
@@ -243,6 +254,30 @@ module.exports = {
 	getBalanceTokens: function (address:string) {
 		return get_balance_tokens(address)
 	},
+
+	//gasPrice by network
+	getGasPriceByNetwork: function (networkId: string) {
+		return get_gas_price_by_network(networkId);
+	},
+
+	// Nonce by network
+	getNonceByNetwork: function (networkId: string, address: string) {
+		return get_nonce_by_network(networkId, address);
+	},
+
+	// Estimate Gas by network
+	estimateGasByNetwork: function (networkId: string, transaction: any) {
+		return estimate_gas_by_network(networkId, transaction);
+	},
+
+	getTransactionByNetwork: function (networkId: string, transaction: any) {
+		return get_transaction_by_network(networkId, transaction);
+	},
+
+	getTransactionsByNetwork: function (networkId:string, address:string,options:any) {
+		return get_transactions_by_network(networkId, address,options)
+	},
+	//
 	getBalanceAddressByNetwork: function (networkId:string, address:string) {
 		return get_balance_by_network(networkId,address)
 	},
@@ -252,10 +287,265 @@ module.exports = {
 	getBalanceTokensByNetwork: function (networkId:string,address:string) {
 		return get_balance_tokens_by_network(networkId,address)
 	},
+	broadcastByNetwork: function (networkId: string, tx: any) {
+		return broadcast_transaction_by_network(networkId, tx);
+	},
 	broadcast:function (tx:any) {
 		return broadcast_transaction(tx);
 	}
 }
+
+const get_transactions_by_network = async function (
+	networkId: string,
+	address: string,
+	options:any = { fromBlock: 'latest', toBlock: 'latest' }
+) {
+	let tag = TAG + " | get_transactions_by_network | ";
+	try {
+		// Find the node in the NODES array
+		let node = NODES.find((n:any) => n.networkId === networkId);
+		if (!node) throw new Error("101: Missing node for network " + networkId);
+
+		// Initialize a new web3 instance
+		let web3 = new Web3(node.service);
+
+		const checksumAddress = web3.utils.toChecksumAddress(address);
+
+		// Get the current block height
+		const currentBlockHeight = await web3.eth.getBlockNumber();
+
+		// Define the block range
+		let fromBlock = options?.fromBlock || 0;
+		let toBlock = options?.toBlock || "latest";
+
+		if (toBlock === "latest") {
+			toBlock = currentBlockHeight;
+		}
+
+		if (fromBlock === "latest") {
+			fromBlock = currentBlockHeight;
+		}
+
+		// Adjust the range to ensure it scans only the last 100 blocks if the range is too large
+		if (fromBlock < toBlock - 100) {
+			fromBlock = toBlock - 100;
+		}
+
+		log.info(
+			tag,
+			`Scanning from block ${fromBlock} to block ${toBlock}`
+		);
+
+		let transactions = [];
+
+		// Loop through each block in the range
+		for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
+			let block = await web3.eth.getBlock(blockNumber, true); // Retrieve block with full transactions
+			log.info(tag, "block ", block.transactions.length);
+			if (block && block.transactions) {
+				for (let tx of block.transactions) {
+					// Check if the transaction is initiated by the specified address
+					if (tx.from?.toLowerCase() === checksumAddress.toLowerCase()) {
+						// Collect detailed transaction info
+						let receipt = await web3.eth.getTransactionReceipt(tx.hash);
+						transactions.push({
+							txHash: tx.hash,
+							from: tx.from,
+							to: tx.to,
+							value: tx.value,
+							gas: tx.gas,
+							gasPrice: tx.gasPrice,
+							blockNumber: tx.blockNumber,
+							receipt,
+						});
+					}
+				}
+			}
+		}
+
+		// Fetch current and pending nonces for the address
+		let currentNonce = await web3.eth.getTransactionCount(
+			checksumAddress,
+			"pending"
+		);
+		let confirmedNonce = await web3.eth.getTransactionCount(
+			checksumAddress,
+			"latest"
+		);
+
+		log.info(
+			tag,
+			`Current Nonce: ${currentNonce}, Confirmed Nonce: ${confirmedNonce}`
+		);
+
+		// Determine if there are pending transactions
+		const hasPendingTransactions = currentNonce > confirmedNonce;
+
+		if (hasPendingTransactions) {
+			log.info(tag, "Pending transactions detected");
+
+			// Fetch the pending transactions from the transaction pool
+			// Note: This requires access to the node's txpool, which may not be available on all nodes
+			let pendingBlock = await web3.eth.getBlock("pending", true);
+
+			if (pendingBlock && pendingBlock.transactions) {
+				for (let tx of pendingBlock.transactions) {
+					if (tx.from?.toLowerCase() === checksumAddress.toLowerCase()) {
+						// Collect detailed transaction info
+						transactions.push({
+							txHash: tx.hash,
+							from: tx.from,
+							to: tx.to,
+							value: tx.value,
+							gas: tx.gas,
+							gasPrice: tx.gasPrice,
+							blockNumber: tx.blockNumber, // This will be null for pending transactions
+							receipt: null, // Receipt is not available for pending transactions
+							pending: true,
+						});
+					}
+				}
+			}
+		} else {
+			log.info(tag, "No pending transactions detected");
+		}
+
+		return {
+			address,
+			networkId,
+			fromBlock,
+			toBlock,
+			currentBlockHeight,
+			currentNonce,
+			hasPendingTransactions,
+			transactions,
+		};
+	} catch (e) {
+		console.error(tag, e);
+		throw e; // Rethrow the error to handle it upstream
+	}
+};
+
+// Broadcast transaction by network
+const broadcast_transaction_by_network = async function (networkId: string, tx: any) {
+	let tag = TAG + " | broadcast_transaction_by_network | ";
+	try {
+		if (!tx) throw Error("Transaction data required!");
+
+		// Find the node in the NODES array by networkId
+		let node = NODES.find((n: any) => n.networkId === networkId);
+		if (!node) throw Error("101: missing node! for network " + networkId);
+
+		// Initialize new web3 instance with the node's service URL
+		let web3 = new Web3(node.service);
+
+		// Broadcast transaction and handle transaction lifecycle events
+		let result = await web3.eth.sendSignedTransaction(tx)
+			.on('transactionHash', function (hash: any) {
+				console.log("Transaction Hash:", hash);
+			})
+			.on('receipt', function (receipt: any) {
+				console.log("Receipt:", receipt);
+			})
+			.on('confirmation', function (confirmationNumber: any, receipt: any) {
+				console.log("Confirmation Number:", confirmationNumber, "Receipt:", receipt);
+			})
+			.on('error', function (error: any) {
+				console.error("Broadcast Error:", error);
+				throw error;
+			});
+
+		return result;
+	} catch (e) {
+		console.error(tag, e);
+		throw e;
+	}
+};
+
+const get_transaction_by_network = async function(networkId:string, txid:string){
+	let tag = TAG + " | get_transaction | "
+	try{
+		// Find the node in NODES array
+		let node = NODES.find((n: any) => n.networkId === networkId);
+		if (!node) throw Error("101: missing node! for network " + networkId);
+
+		// Initialize new web3 instance
+		let web3 = new Web3(node.service);
+		let output:any = {}
+
+		//normal tx info
+		output.txInfo = await web3.eth.getTransaction(txid)
+
+		//if contract
+		output.receipt = await web3.eth.getTransactionReceipt(txid)
+
+		return output
+	}catch(e){
+		console.error(tag,e)
+	}
+}
+
+
+const get_gas_price_by_network = async function (networkId: string) {
+	let tag = TAG + " | get_gas_price_by_network | ";
+	try {
+		// Find the node in NODES array
+		let node = NODES.find((n: any) => n.networkId === networkId);
+		if (!node) throw Error("101: missing node! for network " + networkId);
+
+		// Initialize new web3 instance
+		let web3 = new Web3(node.service);
+
+		// Get gas price
+		let gasPrice = await web3.eth.getGasPrice();
+		return gasPrice;
+	} catch (e) {
+		console.error(tag, e);
+		throw e;
+	}
+};
+
+const get_nonce_by_network = async function (networkId: string, address: string) {
+	let tag = TAG + " | get_nonce_by_network | ";
+	try {
+		if (!address) throw Error("Address required!");
+
+		// Find the node in NODES array
+		let node = NODES.find((n: any) => n.networkId === networkId);
+		if (!node) throw Error("101: missing node! for network " + networkId);
+
+		// Initialize new web3 instance
+		let web3 = new Web3(node.service);
+
+		// Get nonce (transaction count)
+		let nonce = await web3.eth.getTransactionCount(address, 'pending');
+		return nonce;
+	} catch (e) {
+		console.error(tag, e);
+		throw e;
+	}
+};
+
+const estimate_gas_by_network = async function (networkId: string, transaction: any) {
+	let tag = TAG + " | estimate_gas_by_network | ";
+	try {
+		if (!transaction) throw Error("Transaction object required!");
+
+		// Find the node in NODES array
+		let node = NODES.find((n: any) => n.networkId === networkId);
+		if (!node) throw Error("101: missing node! for network " + networkId);
+
+		// Initialize new web3 instance
+		let web3 = new Web3(node.service);
+
+		// Estimate gas
+		let gas = await web3.eth.estimateGas(transaction);
+		return gas;
+	} catch (e) {
+		console.error(tag, e);
+		throw e;
+	}
+};
 
 const get_all_pioneers = async function() {
 	let tag = TAG + " | get_all_pioneers | ";

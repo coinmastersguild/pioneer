@@ -64,6 +64,15 @@ export let CURRENT_CONTEXT_NODE_MAP = TIER_ONE_SEED
 export const blockbooks = [
     //NOWNODES
     {
+        symbol:"BTC",
+        blockchain:"bitcoin",
+        caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
+        networkId:"bip122:000000000019d6689c085ae165831e93",
+        type:"blockbook",
+        service:"https://btcbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6",
+        websocket:"wss://btc.nownodes.io/wss"
+    },
+    {
         symbol:"DASH",
         blockchain:"dash",
         caip:"bip122:000007d91d1254d60e2dd1ae58038307/slip44:5",
@@ -161,54 +170,54 @@ export const blockbooks = [
         service:"arb-blockbook.nownodes.io/cf522543-87e2-4dd6-b645-2fbfd0bc61f6"
     },
     //SHAPESHIFT
-    {
-        symbol:"BASE",
-        blockchain:"Base",
-        caip:"eip155:8453/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.base.shapeshift.com",
-        websocket:"wss://indexer.base.shapeshift.com/websocket"
-    },
-    {
-        symbol:"MATIC",
-        blockchain:"polygon",
-        caip:"eip155:137/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.polygon.shapeshift.com",
-        websocket:"wss://indexer.polygon.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"optimism",
-        caip:"eip155:10/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.optimism.shapeshift.com",
-        websocket:"wss://indexer.optimism.shapeshift.com/websocket"
-    },
-    {
-        symbol:"LTC",
-        blockchain:"litecoin",
-        caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
-        type:"blockbook",
-        service:"https://indexer.litecoin.shapeshift.com",
-        websocket:"wss://indexer.litecoin.shapeshift.com/websocket"
-    },
-    {
-        symbol:"xDAI",
-        blockchain:"gnosis",
-        caip:"eip155:100/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.gnosis.shapeshift.com",
-        websocket:"wss://indexer.gnosis.shapeshift.com/websocket"
-    },
-    {
-        symbol:"ETH",
-        blockchain:"ethereum",
-        caip:"eip155:1/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.ethereum.shapeshift.com",
-        websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
-    },
+    // {
+    //     symbol:"BASE",
+    //     blockchain:"Base",
+    //     caip:"eip155:8453/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.base.shapeshift.com",
+    //     websocket:"wss://indexer.base.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"MATIC",
+    //     blockchain:"polygon",
+    //     caip:"eip155:137/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.polygon.shapeshift.com",
+    //     websocket:"wss://indexer.polygon.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"ETH",
+    //     blockchain:"optimism",
+    //     caip:"eip155:10/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.optimism.shapeshift.com",
+    //     websocket:"wss://indexer.optimism.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"LTC",
+    //     blockchain:"litecoin",
+    //     caip:"bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+    //     type:"blockbook",
+    //     service:"https://indexer.litecoin.shapeshift.com",
+    //     websocket:"wss://indexer.litecoin.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"xDAI",
+    //     blockchain:"gnosis",
+    //     caip:"eip155:100/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.gnosis.shapeshift.com",
+    //     websocket:"wss://indexer.gnosis.shapeshift.com/websocket"
+    // },
+    // {
+    //     symbol:"ETH",
+    //     blockchain:"ethereum",
+    //     caip:"eip155:1/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.ethereum.shapeshift.com",
+    //     websocket:"wss://indexer.ethereum.shapeshift.com/websocket"
+    // },
     //NUKED
     // {
     //     symbol:"DOGE",
@@ -218,14 +227,14 @@ export const blockbooks = [
     //     service:"https://indexer.dogecoin.shapeshift.com",
     //     websocket:"wss://indexer.dogecoin.shapeshift.com/websocket"
     // },
-    {
-        symbol:"BNB",
-        blockchain:"bnbsmartchain",
-        caip:"eip155:56/slip44:60",
-        type:"blockbook",
-        service:"https://indexer.bnbsmartchain.shapeshift.com",
-        websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
-    },
+    // {
+    //     symbol:"BNB",
+    //     blockchain:"bnbsmartchain",
+    //     caip:"eip155:56/slip44:60",
+    //     type:"blockbook",
+    //     service:"https://indexer.bnbsmartchain.shapeshift.com",
+    //     websocket:"wss://indexer.bnbsmartchain.shapeshift.com/websocket"
+    // },
     // {
     //     symbol:"BCH",
     //     blockchain:"bitcoincash",
@@ -234,14 +243,14 @@ export const blockbooks = [
     //     service:"https://indexer.bitcoincash.shapeshift.com",
     //     websocket:"wss://indexer.bitcoincash.shapeshift.com/websocket"
     // },
-    {
-        symbol:"BTC",
-        blockchain:"bitcoin",
-        caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
-        type:"blockbook",
-        service:"https://indexer.bitcoin.shapeshift.com",
-        websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
-    },
+    // {
+    //     symbol:"BTC",
+    //     blockchain:"bitcoin",
+    //     caip:"bip122:000000000019d6689c085ae165831e93/slip44:0",
+    //     type:"blockbook",
+    //     service:"https://indexer.bitcoin.shapeshift.com",
+    //     websocket:"wss://indexer.bitcoin.shapeshift.com/websocket"
+    // },
     // {
     //     symbol:"AVAX",
     //     blockchain:"avalanche",

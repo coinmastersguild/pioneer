@@ -1005,62 +1005,123 @@ let run_test = async function(){
         //     "trader":"0x141D9959cAe3853b035000490C03991eB70Fc4aC"
         // }
         
+        // let swap = {
+        //     sellAsset: {
+        //         chain: 'THOR',
+        //         identifier: 'THOR.RUNE',
+        //         decimals: 8,
+        //         type: 'native',
+        //         networkId: 'cosmos:thorchain-mainnet-v1',
+        //         caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
+        //         symbol: 'RUNE',
+        //         sourceList: 'native-l1',
+        //         assetId: 'cosmos:thorchain-mainnet-v1/slip44:931',
+        //         chainId: 'cosmos:thorchain-mainnet-v1',
+        //         name: 'THORChain',
+        //         networkName: 'THORChain',
+        //         precision: 8,
+        //         color: '#33FF99',
+        //         icon: 'https://assets.coincap.io/assets/icons/rune@2x.png',
+        //         explorer: 'https://viewblock.io/thorchain',
+        //         explorerAddressLink: 'https://viewblock.io/thorchain/address/',
+        //         explorerTxLink: 'https://viewblock.io/thorchain/tx/',
+        //         integrations: [ 'mayachain', 'thorswap' ],
+        //         memoless: false
+        //     },
+        //     sellAmount: '48.187080',
+        //     buyAsset: {
+        //         chain: 'ETH',
+        //         identifier: 'ETH.ETH',
+        //         decimals: 18,
+        //         type: 'native',
+        //         networkId: 'eip155:1',
+        //         caip: 'eip155:1/slip44:60',
+        //         symbol: 'ETH',
+        //         sourceList: 'native-l1',
+        //         assetId: 'eip155:1/slip44:60',
+        //         chainId: 'eip155:1',
+        //         name: 'Ethereum',
+        //         networkName: 'Ethereum',
+        //         precision: 18,
+        //         color: '#5C6BC0',
+        //         icon: 'https://assets.coincap.io/assets/icons/256/eth.png',
+        //         explorer: 'https://etherscan.io',
+        //         explorerAddressLink: 'https://etherscan.io/address/',
+        //         explorerTxLink: 'https://etherscan.io/tx/',
+        //         relatedAssetKey: 'eip155:1/slip44:60',
+        //         integrations: [
+        //             'mayachain',
+        //             'changelly',
+        //             'thorswap',
+        //             'rango',
+        //             'uniswap',
+        //             'chainflip'
+        //         ],
+        //         memoless: false
+        //     },
+        //     recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
+        //     slippage: 3
+        // }
+        
+        // let swap = {
+        //     affiliate: '0x658DE0443259a1027caA976ef9a42E6982037A03',
+        //     sellAsset: {
+        //       caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
+        //     },
+        //     sellAmount: '50.000000',
+        //     buyAsset: {
+        //       caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
+        //     },
+        //     recipientAddress: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx',
+        //     senderAddress: 'DHxdwdZDchQMGP5B5HVmS1gEXEoKHQTS54',
+        //     slippage: '3'
+        // }
+        
         let swap = {
-            sellAsset: {
-                chain: 'THOR',
-                identifier: 'THOR.RUNE',
-                decimals: 8,
-                type: 'native',
-                networkId: 'cosmos:thorchain-mainnet-v1',
-                caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
-                symbol: 'RUNE',
-                sourceList: 'native-l1',
-                assetId: 'cosmos:thorchain-mainnet-v1/slip44:931',
-                chainId: 'cosmos:thorchain-mainnet-v1',
-                name: 'THORChain',
-                networkName: 'THORChain',
-                precision: 8,
-                color: '#33FF99',
-                icon: 'https://assets.coincap.io/assets/icons/rune@2x.png',
-                explorer: 'https://viewblock.io/thorchain',
-                explorerAddressLink: 'https://viewblock.io/thorchain/address/',
-                explorerTxLink: 'https://viewblock.io/thorchain/tx/',
-                integrations: [ 'mayachain', 'thorswap' ],
-                memoless: false
+            "affiliate": "0x658DE0443259a1027caA976ef9a42E6982037A03",
+            "sellAsset": {
+                "assetId": "cosmos:thorchain-mainnet-v1/slip44:931",
+                "chainId": "cosmos:thorchain-mainnet-v1",
+                "name": "THORChain",
+                "networkName": "THORChain",
+                "symbol": "RUNE",
+                "precision": 8,
+                "color": "#33FF99",
+                "icon": "https://assets.coincap.io/assets/icons/rune@2x.png",
+                "explorer": "https://viewblock.io/thorchain",
+                "explorerAddressLink": "https://viewblock.io/thorchain/address/",
+                "explorerTxLink": "https://viewblock.io/thorchain/tx/",
+                "caip": "cosmos:thorchain-mainnet-v1/slip44:931",
+                "networkId": "cosmos:thorchain-mainnet-v1",
+                "priceUsd": 5.19
             },
-            sellAmount: '48.187080',
-            buyAsset: {
-                chain: 'ETH',
-                identifier: 'ETH.ETH',
-                decimals: 18,
-                type: 'native',
-                networkId: 'eip155:1',
-                caip: 'eip155:1/slip44:60',
-                symbol: 'ETH',
-                sourceList: 'native-l1',
-                assetId: 'eip155:1/slip44:60',
-                chainId: 'eip155:1',
-                name: 'Ethereum',
-                networkName: 'Ethereum',
-                precision: 18,
-                color: '#5C6BC0',
-                icon: 'https://assets.coincap.io/assets/icons/256/eth.png',
-                explorer: 'https://etherscan.io',
-                explorerAddressLink: 'https://etherscan.io/address/',
-                explorerTxLink: 'https://etherscan.io/tx/',
-                relatedAssetKey: 'eip155:1/slip44:60',
-                integrations: [
-                    'mayachain',
-                    'changelly',
-                    'thorswap',
-                    'rango',
-                    'uniswap',
-                    'chainflip'
+            "sellAmount": "9.8265900",
+            "buyAsset": {
+                "assetId": "eip155:1/slip44:60",
+                "chainId": "eip155:1",
+                "symbol": "ETH",
+                "name": "Ethereum",
+                "networkName": "Ethereum",
+                "precision": 18,
+                "color": "#5C6BC0",
+                "icon": "https://assets.coincap.io/assets/icons/256/eth.png",
+                "explorer": "https://etherscan.io",
+                "explorerAddressLink": "https://etherscan.io/address/",
+                "explorerTxLink": "https://etherscan.io/tx/",
+                "relatedAssetKey": "eip155:1/slip44:60",
+                "caip": "eip155:1/slip44:60",
+                "networkId": "eip155:1",
+                "providers": [
+                    "https://rpc.mevblocker.io",
+                    "https://rpc.mevblocker.io",
+                    "https://rpc.mevblocker.io",
+                    "https://rpc.mevblocker.io"
                 ],
-                memoless: false
+                "priceUsd": 3307.37
             },
-            recipientAddress: '0x141D9959cAe3853b035000490C03991eB70Fc4aC',
-            slippage: 3
+            "recipientAddress": "0x27de622cc44c55b53caF299eCedccdAB29aC98A8",
+            "senderAddress": "thor1qnxqpu6a6m5wwsh4k2rt74xfunz259caqyqw27",
+            "slippage": "3"
         }
         
         //memoless
@@ -1072,7 +1133,7 @@ let run_test = async function(){
         console.log("swap: ",swap)
         let result = await client.quote(swap)
         console.log("result: ",result)
-        console.log("result: ",result[0].quote.txs[0])
+        // console.log("result: ",result[0].quote.txs[0])
         // console.log("result: ",JSON.stringify(result.quote.txs[0]))
         //get quote
 

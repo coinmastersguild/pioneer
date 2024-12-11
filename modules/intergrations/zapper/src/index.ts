@@ -57,7 +57,7 @@ const get_portfolio = async function (address:string) {
     let tag = TAG + " | get_portfolio | "
     try {
         let output:any = {
-
+            balances: []
         }
         // Call the '/apps' endpoint to get the balance in USD for app-related investments
         const appsResponse = await Axios.get(
@@ -75,6 +75,45 @@ const get_portfolio = async function (address:string) {
         apps.forEach((app: { balanceUSD: number }) => {
             totalBalanceUSDApp += app.balanceUSD;
         });
+
+        for(let i = 0; i < apps.length; i++){
+            let app = apps[i]
+            for(let j = 0; j < app.products.length; j++){
+                let product = app.products[j]
+                log.info(tag,"product: ",product)
+                for(let k = 0; k < product.assets.length; k++){
+                    let asset = product.assets[k]
+                    log.info(tag,"asset: ",asset)
+
+                    for(let l = 0; l < asset.tokens.length; l++){
+                        let token = asset.tokens[l]
+
+                        let balance:any = {}
+                        balance.pubkey = app.address
+                        balance.balance = token?.balance.toString()
+                        balance.chain = app.network;
+                        balance.networkId = evmCaips[app.network].split('/')[0];
+                        if(token.type !== 'base-token' && token.address !== '0x0000000000000000000000000000000000000000'){
+                            balance.caip = balance.networkId + "/erc20:"+token.address
+                        } else {
+                            balance.caip = balance.networkId + '/slip44:60'
+                        }
+                        balance.metaType = token.metaType || product.metaType
+                        balance.name = asset.displayProps.label
+                        balance.appId = app.appId
+                        balance.icon = asset.displayProps.images[0]
+                        balance.display = asset.displayProps.images
+                        balance.groupId = asset.groupId
+                        balance.symbol = token.symbol
+                        balance.ticker = token.symbol
+                        balance.priceUsd = token?.price?.toString() || '0'
+                        balance.valueUsd = token?.balanceUSD?.toString() || '0'
+                        output.balances.push(balance)
+                    }
+                }
+            }
+        }
+
         // Call the '/tokens' endpoint to get the balance in USD for tokens
         const tokensResponse = await Axios.get(
             `https://api.zapper.xyz/v2/balances/tokens?addresses%5B%5D=${address}`,
@@ -85,7 +124,7 @@ const get_portfolio = async function (address:string) {
                 },
             }
         );
-        // console.log("tokensResponse: ",tokensResponse.data)
+        console.log("tokensResponse: ",tokensResponse.data)
         let totalBalanceUsdTokens:any
         if(tokensResponse.data && tokensResponse.data[address.toLowerCase()]){
             let tokens = tokensResponse.data
@@ -97,20 +136,41 @@ const get_portfolio = async function (address:string) {
                 tokens.forEach((token: any) => {
                     log.debug(tag,"token: ",token)
                     let network = token.network
-                    log.debug(tag,"network: ",token)
+                    log.debug(tag,"network: ",network)
                     let caip = evmCaips[network]
-                    token.networkId = caip;
-                    if(token.token.address !== '0x0000000000000000000000000000000000000000'){
-                        token.assetCaip = caip + ":" +token.token.address
-                    }else {
-                        token.assetCaip = caip
+                    if(caip){
+                        token.networkId = caip.split('/')[0];
+                        if(token.token.address !== '0x0000000000000000000000000000000000000000'){
+                            token.assetCaip = token.networkId + "/erc20:" +token.token.address
+                        } else {
+                            token.assetCaip = caip
+                        }
+
+                        let balance = {
+                            balance: token.token.balance.toString(),
+                            networkId: token.networkId,
+                            chain: token.network,
+                            caip: token.assetCaip,
+                            type: 'erc20',
+                            name: token.token.name,
+                            symbol: token.token.symbol,
+                            ticker: token.token.symbol,
+                            decimals: token.token.decimals,
+                            priceUsd: token.token.price,
+                            valueUsd: token.token.balanceUSD.toString(),
+                        }
+
+
+                        output.balances.push(balance)
+                        log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
+                        totalBalanceUsdTokens += token.token.balanceUSD;                        
+                    } else {
+                        log.error(tag,"No caip found for network: ",network)
                     }
-                    log.debug(tag,"token.balanceUSD: ",token.token.balanceUSD)
-                    totalBalanceUsdTokens += token.token.balanceUSD;
+
                 });
-            }            
+            }
         } else {
-            output.tokens = []
             totalBalanceUsdTokens = 0
         }
 
