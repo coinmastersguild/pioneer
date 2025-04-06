@@ -1,0 +1,12 @@
+declare const TAG = " | unchained-client | ";
+declare let pioneerApi: any;
+declare const log: any;
+declare const fakeUa: any;
+declare const nodes: any;
+declare const Axios: any;
+declare const https: any;
+declare const axios: any;
+declare const axiosRetry: any;
+declare const ALL_UNCHAINED_APIS: any;
+declare let init_network: (servers?: any) => Promise<any>;
+declare let get_fees: (caip: string) => Promise<any>;

@@ -1,0 +1,26 @@
+declare const TAG = " | blockbook-client | ";
+declare const Blockbook: any;
+declare const log: any;
+declare const fakeUa: any;
+declare const Axios: any;
+declare const https: any;
+declare const nodes: any;
+declare const axios: any;
+declare const axiosRetry: any;
+declare let NOW_NODES_API: string | undefined;
+declare let BLOCKBOOK_URLS: any;
+declare let BLOCKBOOK_SOCKETS: any;
+declare let init_network: (servers?: any[]) => Promise<boolean>;
+declare let get_fees: (coin: string) => Promise<any>;
+declare let get_info_by_pubkey: (coin: string, pubkey: string, page?: string | undefined) => Promise<any>;
+declare let get_txids_by_address: (coin: string, address: string, page?: number) => Promise<any>;
+declare let get_info_by_address: (coin: string, address: string, filter?: string) => Promise<any>;
+declare let get_txs_by_xpub: (coin: string, xpub: string) => Promise<any>;
+declare let broadcast_transaction: (coin: string, hex: string) => Promise<{
+    txid: string;
+    success: boolean;
+}>;
+declare let get_transaction: (coin: string, txid: string) => Promise<any>;
+declare let get_utxos_by_xpub: (coin: string, xpub: string) => Promise<any>;
+declare let get_balance_by_xpub: (coin: string, xpub: any) => Promise<number>;
+declare let get_node_info: () => Promise<boolean>;

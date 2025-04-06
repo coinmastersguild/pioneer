@@ -1,0 +1,15 @@
+declare let Changelly: any;
+declare const TAG = " | Changelly | ";
+declare const CHANGELLY_API_KEY: string | undefined;
+declare const CHANGELLY_API_SECRET: string | undefined;
+declare let changelly: any;
+declare let ChainToNetworkId: any, caipToNetworkId: any, shortListSymbolToCaip: any;
+declare let networkSupport: any[];
+declare let assetSupport: any[];
+declare function get_currencies(): Promise<any>;
+declare function create_transaction(from: string, to: string, address: string, amount: number, extraId?: string): Promise<any>;
+declare function get_min_amount(from: string, to: string): Promise<any>;
+declare function get_exchange_amount(from: string, to: string, amount: number): Promise<any>;
+declare function get_transaction(orderId?: string): Promise<any>;
+declare function get_transactions(limit: number, offset: number, currency?: string, address?: string, extraId?: string): Promise<any>;
+declare function get_status(id: string): Promise<any>;

@@ -92,7 +92,7 @@ export const getETHTransactionHistory = async ({
  * @param {string} address The address.
  * @param {TransactionHistoryParam} params The search options.
  * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Array<Tx>} The token transaction history
+ * @returns {Array<Txs>} The token transaction history
  */
 export const getTokenTransactionHistory = async ({
   baseUrl,

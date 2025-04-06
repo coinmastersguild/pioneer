@@ -1,0 +1,15 @@
+declare const TAG = " | maya | ";
+type BaseDecimal = string | number;
+declare const uuid: any;
+declare const log: any;
+declare let caipToNetworkId: any, shortListSymbolToCaip: any, ChainToNetworkId: any;
+declare let network: any;
+declare const createMemo: any, parseMemo: any;
+declare const axios: any;
+declare let Web3: any;
+declare let service: string | undefined;
+declare let web3: any;
+declare let networkSupport: any[];
+declare let assetSupport: any[];
+declare function nodeRequest(path: any): Promise<any>;
+declare const get_quote: (quote: any) => Promise<any>;

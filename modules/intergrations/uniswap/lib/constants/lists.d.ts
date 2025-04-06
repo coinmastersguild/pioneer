@@ -1,0 +1,12 @@
+export declare const UNI_LIST = "https://cloudflare-ipfs.com/ipns/tokens.uniswap.org";
+export declare const UNI_EXTENDED_LIST = "https://cloudflare-ipfs.com/ipns/extendedtokens.uniswap.org";
+export declare const OPTIMISM_LIST = "https://static.optimism.io/optimism.tokenlist.json";
+export declare const ARBITRUM_LIST = "https://bridge.arbitrum.io/token-list-42161.json";
+export declare const CELO_LIST = "https://celo-org.github.io/celo-token-list/celo.tokenlist.json";
+export declare const PLASMA_BNB_LIST = "https://raw.githubusercontent.com/plasmadlt/plasma-finance-token-list/master/bnb.json";
+export declare const AVALANCHE_LIST = "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/token_list.json";
+export declare const BASE_LIST = "https://raw.githubusercontent.com/ethereum-optimism/ethereum-optimism.github.io/master/optimism.tokenlist.json";
+export declare const UNSUPPORTED_LIST_URLS: string[];
+export declare const DEFAULT_ACTIVE_LIST_URLS: string[];
+export declare const DEFAULT_INACTIVE_LIST_URLS: string[];
+export declare const DEFAULT_LIST_OF_LISTS: string[];

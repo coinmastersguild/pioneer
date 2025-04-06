@@ -1,0 +1,11 @@
+declare const TAG = " | chainflip | ";
+type BaseDecimal = string | number;
+declare const uuid: any;
+declare const log: any;
+declare let Chain: any, caipToNetworkId: any, shortListSymbolToCaip: any, ChainToNetworkId: any, NetworkIdToChain: any, getChainEnumValue: any;
+declare const createMemo: any, parseMemo: any;
+declare const axios: any;
+declare let networkSupport: any[];
+declare let assetSupport: any[];
+declare const get_quote_info: (quoteId: string) => Promise<any>;
+declare const get_quote: (quote: any) => Promise<any>;

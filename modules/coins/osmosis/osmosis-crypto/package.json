@@ -4,12 +4,12 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test-module": "npm run build && node __tests__/test-module.js",
-    "test": "npm run build && node __tests__/test.mnemonic.js",
-    "prepublish": "rm -R lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test-module": "pnpm run build && node __tests__/test-module.js",
+    "test": "pnpm run build && node __tests__/test.mnemonic.js",
+    "prepublish": "rm -R lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.3.1",
@@ -24,7 +24,7 @@
     "hdkey": "^1.1.2",
     "secp256k1": "^3.8.0",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
 }

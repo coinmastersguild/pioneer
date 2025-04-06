@@ -12,7 +12,8 @@
 
 const TAG = " | eth-network | "
 let Web3 = require('web3');
-import { ethers, BigNumberish, BigNumber } from 'ethers'
+// @ts-ignore
+import * as ethers from "ethers";
 // @ts-ignore
 const BigNumber = require('bignumber.js');
 
@@ -31,6 +32,7 @@ let blockbook = require("@pioneer-platform/blockbook")
 const Web3Utils = require('web3-utils');
 import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
 import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
+import { Interface } from '@ethersproject/abi'
 
 import {
 	GasOracleResponse,
@@ -38,7 +40,6 @@ import {
 	ExplorerUrl,
 	TxOverrides,
 	GasPrices,
-	FeesParams,
 	FeesWithGasPricesAndLimits,
 	InfuraCreds,
 } from './types'
@@ -58,19 +59,11 @@ import {
 	erc20ABI
 } from './utils'
 
-import {
-	Fees,
-	FeeOptionKey,
-	FeesParams as XFeesParams,
-} from '@xchainjs/xchain-client'
-
-
 import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
 import * as etherscanAPI from './etherscan-api'
 const log = require('@pioneer-platform/loggerdog')()
 let ETHPLORER_API_KEY = process.env['ETHPLORER_API_KEY'] || 'freekey'
 import nodes from '@pioneer-platform/nodes'
-import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
 let wait = require('wait-promise');
 let sleep = wait.sleep;
 //
@@ -83,7 +76,8 @@ let NODE_URL:any
 //TODO precision module
 let BASE = 1000000000000000000;
 
-import { Interface } from '@ethersproject/abi'
+// Remove deprecated import
+// import { Interface } from '@ethersproject/abi'
 
 import {
 	UNISWAP_V2_WETH_FOX_POOL_ADDRESS,
@@ -185,8 +179,55 @@ module.exports = {
 	getFees: function (params:any): Promise<any> {
 		return get_fees(params)
 	},
-	estimateFee: function (sourceAsset:any,params:any): Promise<any> {
-		return estimate_fee(sourceAsset,params)
+	estimateFee: async function (asset: any, params: any): Promise<any> {
+		if(!params) throw Error("params required")
+		if(!params.asset && !asset) throw Error("Asset or params.asset required")
+		//create asset locally with correct types
+		let assetForEstimate = asset ? asset : params.asset
+		
+		const { average: averageGP, fast: fastGP, fastest: fastestGP } = getDefaultGasPrices()
+		let assetAddress
+		// @ts-ignore
+		if (assetForEstimate && assetToString(assetForEstimate) !== assetToString(AssetETH)) {
+			// @ts-ignore
+			assetAddress = getTokenAddress(assetForEstimate)
+		}
+		
+		let gasLimit
+		if (assetAddress && assetAddress !== ETHAddress) {
+			if(!params.sender || !params.recipient) throw Error("missing params! need sender and recipient on token tx!")
+			let contract = new ethers.Contract(assetAddress, ERC20ABI, PROVIDER)
+			gasLimit = params.data
+				? await contract.estimateGas.transfer(params.recipient, params.data, { from: params.sender })
+				: await contract.estimateGas.transfer(params.recipient, 1, { from: params.sender }) // amount = 1 as a dummy value
+		} else {
+			// ETH transfer
+			if(!params.sender || !params.recipient) throw Error("missing params! need sender and recipient")
+			const gasEstimate = await PROVIDER.estimateGas({
+				from: params.sender,
+				to: params.recipient,
+				value: ethers.utils.parseEther('0.000001') // using dummy ETH amount for gas calculation
+			})
+			gasLimit = gasEstimate.add(0) // Add extra gas as buffer
+
+			console.log("ETH gasEstimate: ", gasEstimate.toString())
+			console.log("ETH gasEstimate + buffer: ", gasLimit.toString())
+		}
+
+		return {
+			gasPrices: {
+				average: averageGP,
+				fast: fastGP,
+				fastest: fastestGP
+			},
+			gasLimit,
+			fees: {
+				type: 'byte',
+				average: getFee({ gasPrice: averageGP, gasLimit }),
+				fast: getFee({ gasPrice: fastGP, gasLimit }),
+				fastest: getFee({ gasPrice: fastestGP, gasLimit })
+			}
+		}
 	},
 	getMemoEncoded: function (params:any): Promise<any> {
 		return get_memo_data(params)
@@ -1266,30 +1307,57 @@ let estimate_fee = async function(sourceAsset:any, params:any){
 		}
 		// Connect to the network
 		let provider = PROVIDER;
-		//
-		const contract = new ethers.Contract(THORCHAIN_ROUTER_TESTNET, TCRopstenAbi, provider);
 
-		console.log('checkppint estimateFee: params', params);
-		const estimateGas = await contract.estimateGas.deposit(...params);
-		console.log('checkppint estimateFee: params', params);
+		// Get the current block
+		let block = await provider.getBlockNumber();
+		log.debug(tag,"block: ",block)
 
-		let entry = {
-			asset: {
-				chain:"ETH",
-				symbol:"ETH",
-				ticker:"ETH",
-			},
-			amount: params[2],
-			recipient: params[0],
-			memo: params[3],
+		const { average: averageGP, fast: fastGP, fastest: fastestGP } = getDefaultGasPrices()
+		let assetAddress
+		// @ts-ignore
+		if (sourceAsset && assetToString(sourceAsset) !== assetToString(AssetETH)) {
+			// @ts-ignore
+			assetAddress = getTokenAddress(sourceAsset as any)
 		}
 
-		const {fees} = await get_fees(entry);
-		let minimumWeiCost = BigNumber.from(fees.average)
-		minimumWeiCost = minimumWeiCost.mul(estimateGas.toNumber())
-		return minimumWeiCost;
+		let gasLimit
+		if (assetAddress && assetAddress !== ETHAddress) {
+			if(!params.sender || !params.recipient) throw Error("missing params! need sender and recipient on token tx!")
+			let contract = new ethers.Contract(assetAddress, ERC20ABI, provider)
+			gasLimit = params.data
+				? await contract.estimateGas.transfer(params.recipient, params.data, { from: params.sender })
+				: await contract.estimateGas.transfer(params.recipient, 1, { from: params.sender }) // amount = 1 as a dummy value
+		} else {
+			// ETH transfer
+			if(!params.sender || !params.recipient) throw Error("missing params! need sender and recipient")
+			const gasEstimate = await provider.estimateGas({
+				from: params.sender,
+				to: params.recipient,
+				value: ethers.utils.parseEther('0.000001') // using dummy ETH amount for gas calculation
+			})
+			gasLimit = gasEstimate.add(0) // Add extra gas as buffer
+
+			console.log("ETH gasEstimate: ", gasEstimate.toString())
+			console.log("ETH gasEstimate + buffer: ", gasLimit.toString())
+		}
+
+		return {
+			gasPrices: {
+				average: averageGP,
+				fast: fastGP,
+				fastest: fastestGP
+			},
+			gasLimit,
+			fees: {
+				type: 'byte',
+				average: getFee({ gasPrice: averageGP, gasLimit }),
+				fast: getFee({ gasPrice: fastGP, gasLimit }),
+				fastest: getFee({ gasPrice: fastestGP, gasLimit })
+			}
+		}
+
 	}catch(e){
-		log.error(tag,e)
+		console.error(tag,"Error: ",e)
 		throw e
 	}
 }
@@ -1302,8 +1370,10 @@ let get_gas_limit = async function({ asset, recipient, amount, memo }: FeesParam
 		const txAmount = BigNumber.from(amount?.amount().toFixed())
 
 		let assetAddress
+		// @ts-ignore
 		if (asset && assetToString(asset) !== assetToString(AssetETH)) {
-			assetAddress = getTokenAddress(asset)
+			// @ts-ignore
+			assetAddress = getTokenAddress(asset as any)
 		}
 
 		let estimate
@@ -1670,4 +1740,23 @@ let check_online_status = async function(){
 	}catch(e){
 		console.error(tag,e)
 	}
+}
+
+// Helper functions for ethers v5 compatibility
+const parseUnits = (value: string, unit: string) => ethers.utils.parseUnits(value, unit);
+const toUtf8Bytes = (text: string) => ethers.utils.toUtf8Bytes(text);
+
+// Define our own FeesParams interface
+interface FeesParams {
+	asset: any;
+	amount: any;
+	recipient: string;
+	memo?: string;
+}
+
+// Define our own FeeOption enum
+enum FeeOption {
+	Average = 'average',
+	Fast = 'fast',
+	Fastest = 'fastest'
 }

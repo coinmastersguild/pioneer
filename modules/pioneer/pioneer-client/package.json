@@ -4,15 +4,15 @@
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
-    "npm": "npm i",
-    "test": "npm run build && node __tests__/test-module.js",
-    "test-login": "npm run build && node __tests__/test-login.js",
+    "npm": "pnpm i",
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "test-login": "pnpm run build && node __tests__/test-login.js",
     "lint": "prettier --write '**/**/*.ts'",
     "run-bridge": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts --auth",
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "prepublish": "npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "prepublish": "pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "swagger-client": "^3.23.1"

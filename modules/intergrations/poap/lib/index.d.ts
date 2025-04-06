@@ -1,0 +1,10 @@
+declare const TAG = " | blocknative | ";
+declare const Axios: any;
+declare const https: any;
+declare let POAP_API_KEY: string | undefined;
+declare let POAP_SECRET: string | undefined;
+declare let POAP_CLIENT_ID: string | undefined;
+declare const axios: any;
+declare let URL_SERVICE: string;
+declare const get_auth_token: () => Promise<any>;
+declare const get_nfts: (address: string) => Promise<any>;

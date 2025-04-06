@@ -4,12 +4,14 @@
  */
 
 const TAG = " | 0x | "
-import { BaseDecimal } from '@coinmasters/types';
+// Define a simple BaseDecimal type instead of importing from @coinmasters/types
+type BaseDecimal = string | number;
+
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
 let network = require("@pioneer-platform/maya-network")
-import axios from 'axios';
+const axios = require('axios');
 
 const API_KEY = process.env['0X_API_SECRET']
 if(!API_KEY) throw Error("Missing 0X_API_SECRET")

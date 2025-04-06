@@ -4,14 +4,14 @@
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
-    "npm": "npm i",
-    "test": "npm run build && node __tests__/test-module.js",
+    "npm": "pnpm i",
+    "test": "pnpm run build && node __tests__/test-module.js",
     "lint": "prettier --write '**/**/*.ts'",
-    "dev": "npm run build && npm run test",
+    "dev": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build",
-    "prepublish": "npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "build:watch": "pnpm run build && onchange 'src/**/*.ts' -- pnpm run build",
+    "prepublish": "pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@pioneer-platform/pioneer-types": "^8.3.1",
@@ -19,7 +19,7 @@
     "events": "^3.3.0",
     "socket.io-client": "^4.5.4",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "wait-promise": "^0.4.1"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"

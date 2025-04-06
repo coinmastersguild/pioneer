@@ -1,0 +1,62 @@
+declare const TAG = " | Pioneer-router | ";
+declare const log: any;
+declare const redis: any;
+declare let proToken: any;
+declare const caipToRango: any, caipToNetworkId: any, caipToThorchain: any;
+declare let rango: any;
+declare let changelly: any;
+declare let osmosis: any;
+declare let thorchain: any;
+declare let mayachain: any;
+declare let uniswap: any;
+declare let chainflip: any;
+declare let MEMOLESS_SUPPORT: any;
+interface Swap {
+    memoless?: boolean;
+    sellAsset: {
+        context: string;
+        caip: string;
+        identifier: string;
+        address: string;
+        symbol: string;
+        chain: string;
+        ticker: string;
+        type: string;
+        balance: string;
+        priceUsd: number;
+        rank: number;
+        name: string;
+        source: string;
+        alias: number;
+        valueUsd: string;
+    };
+    sellAmount: string;
+    buyAsset: {
+        context: string;
+        caip: string;
+        identifier: string;
+        address: string;
+        symbol: string;
+        chain: string;
+        ticker: string;
+        type: string;
+        balance: string;
+        priceUsd: number;
+        rank: number;
+        name: string;
+        source: string;
+        alias: number;
+        valueUsd: string;
+    };
+    senderAddress: string;
+    recipientAddress: string;
+    slippage: string;
+}
+declare let NetworksByIntegration: any;
+declare let AssetsByIntegration: any;
+declare function get_quote_from_integration(integration: string, quote: Swap): Promise<any[] | null>;
+declare let get_pro_rate_usd: () => Promise<any>;
+declare function get_quote(quote: Swap): Promise<{
+    integration: string;
+    quote: any;
+}[]>;

@@ -16,7 +16,8 @@ import {
   FeesWithGasPricesAndLimits,
   GasPrices,
 } from './types'
-import { ethers, BigNumber } from 'ethers'
+import { BigNumber } from '@ethersproject/bignumber'
+import { ethers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 
 export const ETH_DECIMAL = 18
@@ -24,8 +25,8 @@ export const ETHPLORER_FREEKEY = 'freekey'
 
 // from https://github.com/MetaMask/metamask-extension/blob/ee205b893fe61dc4736efc576e0663189a9d23da/ui/app/pages/send/send.constants.js#L39
 // and based on recommendations of https://ethgasstation.info/blog/gas-limit/
-export const SIMPLE_GAS_COST: ethers.BigNumber = BigNumber.from(21000)
-export const BASE_TOKEN_GAS_COST: ethers.BigNumber = BigNumber.from(100000)
+export const SIMPLE_GAS_COST = BigNumber.from(21000)
+export const BASE_TOKEN_GAS_COST = BigNumber.from(100000)
 
 // default gas price in gwei
 export const DEFAULT_GAS_PRICE = 50
@@ -48,6 +49,8 @@ export const xchainNetworkToEths = (network: XChainNetwork): EthNetwork => {
       return EthNetwork.MAIN
     case 'testnet':
       return EthNetwork.TEST
+    default:
+      return EthNetwork.MAIN
   }
 }
 

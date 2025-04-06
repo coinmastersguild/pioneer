@@ -1,0 +1,13 @@
+declare const TAG = " | Uniswap | ";
+declare const axios: any;
+type BaseDecimal = string | number;
+declare let caipToNetworkId: any, shortListSymbolToCaip: any, ChainToNetworkId: any;
+declare const uuid: any;
+declare const log: any;
+declare const ethers: any;
+declare let networkSupport: any[];
+declare const EIP155_MAINNET_CHAINS: any;
+declare const ERC20_ABI: string[];
+declare const get_rate_pro: () => Promise<string>;
+declare const get_rate_usdc: () => Promise<string>;
+declare const get_rate_eth: () => Promise<string>;

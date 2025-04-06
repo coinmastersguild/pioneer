@@ -4,7 +4,16 @@
  */
 
 const TAG = " | maya | ";
-import { BaseDecimal } from '@coinmasters/types';
+// Replace BaseDecimal import with local definition
+// Define BaseDecimal as a simple record of string chains to number values
+const BaseDecimal: Record<string, number> = {
+    "BTC": 8,
+    "ETH": 18,
+    "DOGE": 8,
+    "BCH": 8,
+    "LTC": 8,
+    "THOR": 8
+};
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')();
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip");

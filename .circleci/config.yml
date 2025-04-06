@@ -1,39 +1,101 @@
 version: 2.1
 
+orbs:
+  node: circleci/node@5.1.0
+
 executors:
-  pulumi:
+  node-executor:
     docker:
-      - image: node:18.2.0
+      - image: cimg/node:18.18.0
+    resource_class: large
+
+commands:
+  setup_pnpm:
+    description: "Setup pnpm and install dependencies"
+    steps:
+      - run:
+          name: Install pnpm
+          command: |
+            npm install -g pnpm@8.11.0
+            pnpm --version
+      - restore_cache:
+          name: Restore pnpm cache
+          keys:
+            - pnpm-deps-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-deps-
+      - run:
+          name: Install Dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm cache
+          key: pnpm-deps-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - node_modules
+            - ~/.pnpm-store
+
+  setup_turbo:
+    description: "Setup Turborepo cache"
+    steps:
+      - restore_cache:
+          name: Restore Turborepo cache
+          keys:
+            - turbo-{{ .Branch }}-{{ .Revision }}
+            - turbo-{{ .Branch }}-
+            - turbo-
+      - run:
+          name: Setup Turborepo cache
+          command: |
+            mkdir -p ~/.turbo
+            echo "TURBO_TOKEN=${TURBO_TOKEN}" >> .env
+            echo "TURBO_TEAM=${TURBO_TEAM}" >> .env
 
 jobs:
-  make:
-    resource_class: xlarge
-    executor: pulumi
-    parameters:
-      env:
-        description: stage or prod
-        type: string
+  build:
+    executor: node-executor
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+      - setup_pnpm
+      - setup_turbo
       - run:
-          name: Install dependencies
-          command: npm i
-      - run:
-          command: "make"
+          name: Build
+          command: pnpm run build
+      - save_cache:
+          name: Save Turborepo cache
+          key: turbo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/.turbo
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
       - run:
           name: Bump version and publish on master branch
           command: |
             if [ "$CIRCLE_BRANCH" == "master" ]; then
               make bump
-              make publish
+              pnpm changeset
+              pnpm version
+              pnpm publish
             fi
 
+  test:
+    executor: node-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_pnpm
+      - setup_turbo
+      - run:
+          name: Run Tests
+          command: pnpm run test
+
 workflows:
-  version: 2.1
-  build:
+  version: 2
+  build_and_test:
     jobs:
-      - make:
-          name: make
-          env: prod
+      - build
+      - test:
+          requires:
+            - build

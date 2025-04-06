@@ -13,27 +13,45 @@
   },
   "scripts": {
     "clean": "make clean",
-    "build": "lerna run build --include-dependencies",
+    "build": "make build",
     "refresh": "make clean && make",
-    "update": "pnpm -r update '@pioneer-platform/*' -f",
+    "update": "pnpm update '@pioneer-platform/*'",
     "up-dev": "make && make up=dev",
     "init-env": "cp .example-env .env",
     "test": "make test",
     "test-debug": "make test debug=true",
     "release": "make && make up=release",
-    "dev:watch:all": "npm run dev:watch:pioneer && npm run dev:watch:pioneer-app && npm run dev:watch:pioneer-sdk && npm run dev:watch:pioneer-xchain-client",
-    "dev:watch:pioneer": "cd modules/pioneer/pioneer && npm run build:watch",
-    "dev:watch:pioneer-app": "cd modules/pioneer/pioneer-app && npm run build:watch",
-    "dev:watch:pioneer-sdk": "cd modules/pioneer/pioneer-sdk && npm run build:watch",
-    "dev:watch:pioneer-xchain-client": "cd modules/pioneer/pioneer-xchain-client && npm run build:watch",
-    "version:patch": "lerna version patch --yes",
-    "version:minor": "lerna version minor --yes",
-    "version:major": "lerna version major --yes",
-    "publish:lerna": "lerna publish from-package --no-private --yes",
-    "build:rest": "cd services/pioneer-server && npm run docker:push:all",
-    "build:worker": "cd services/pioneer-pubkey-ingester && npm run docker:push:all"
+    "dev:watch:all": "pnpm -r --parallel run dev",
+    "dev:watch:pioneer": "cd modules/pioneer/pioneer && pnpm run build:watch",
+    "dev:watch:pioneer-app": "cd modules/pioneer/pioneer-app && pnpm run build:watch",
+    "dev:watch:pioneer-sdk": "cd modules/pioneer/pioneer-sdk && pnpm run build:watch",
+    "dev:watch:pioneer-xchain-client": "cd modules/pioneer/pioneer-xchain-client && pnpm run build:watch",
+    "build:rest": "cd services/pioneer-server && pnpm run docker:push:all",
+    "build:worker": "cd services/pioneer-pubkey-ingester && pnpm run docker:push:all",
+    "bootstrap": "pnpm install",
+    "postinstall": "echo \"Turborepo postinstall complete\"",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "publish": "changeset publish",
+    "dev": "pnpm -r --parallel run dev",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "build:all": "pnpm -r run build",
+    "build:turbo": "pnpm -r run build"
   },
-  "dependencies": {
-    "lerna": "^6.6.1"
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.11.0",
+  "devDependencies": {
+    "@changesets/cli": "^2.28.1",
+    "turbo": "^2.5.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^18.2.25",
+      "@types/react-dom": "^18.2.11"
+    }
   }
 }

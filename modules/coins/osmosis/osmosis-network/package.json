@@ -4,11 +4,11 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -rf lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -rf lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.3.1",
@@ -16,7 +16,7 @@
     "dotenv": "^8.2.0",
     "prettyjson": "^1.2.1",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "a76012f6693a12181c4744e53e977a9eaeef0ed3"
 }

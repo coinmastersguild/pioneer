@@ -1,19 +1,17 @@
 /*
        chainflip Integration 
                 - Highlander
-                
-      Notes:
-      lol polkadot cant ts bro, https://substrate.stackexchange.com/questions/4542/typescript-errors-when-using-polkadot-api          
-                
- */
+*/
 
 const TAG = " | chainflip | "
-import { BaseDecimal } from '@coinmasters/types';
+// Define a simple BaseDecimal type instead of importing from @coinmasters/types
+type BaseDecimal = string | number;
+
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
 let { Chain, caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId, NetworkIdToChain, getChainEnumValue } = require("@pioneer-platform/pioneer-caip")
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
-import { ApiPromise, WsProvider } from "@polkadot/api";
+// Remove Polkadot API imports
 const axios = require('axios');
 
 let networkSupport = [

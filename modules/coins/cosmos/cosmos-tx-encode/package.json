@@ -4,16 +4,20 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -rf lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -rf lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
-    "@cosmjs/proto-signing": "^0.27.0",
+    "prettyjson": "^1.2.5",
+    "@cosmjs/proto-signing": "^0.27.1",
     "cosmjs-types": "^0.4.1",
-    "prettyjson": "^1.2.5"
+    "long": "^5.3.1",
+    "protobufjs": "^7.4.0"
   },
-  "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
+  "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40",
+  "devDependencies": {
+  }
 }

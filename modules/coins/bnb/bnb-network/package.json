@@ -2,21 +2,21 @@
   "name": "@pioneer-platform/binance-network",
   "version": "8.3.3",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -Rf lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -Rf lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@crypto-hex-decoder/bnb": "^2.1.0",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@pioneer-platform/nodes": "^8.3.10",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
     "moment": "^2.29.1",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "wait-promise": "^0.4.1"
   },
   "description": "Cosmos events to redis pub/sub",

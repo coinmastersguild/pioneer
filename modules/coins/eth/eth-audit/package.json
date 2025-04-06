@@ -4,12 +4,12 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -R lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
-    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -R lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install",
+    "build:watch": "pnpm run build && onchange 'src/**/*.ts' -- pnpm run build"
   },
   "dependencies": {
     "@pioneer-platform/loggerdog": "^8.3.1",
@@ -21,11 +21,11 @@
     "coininfo": "^5.1.0",
     "crypto-js": "^3.3.0",
     "dotenv": "^8.2.0",
-    "ethereumjs-util": "^7.0.9",
+    "ethereumjs-util": "^7.1.5",
     "hdkey": "^1.1.2",
     "secp256k1": "^3.8.0",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "web3": "^1.5.1"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"

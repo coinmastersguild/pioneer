@@ -4,22 +4,23 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -rf lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -rf lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@cosmjs/launchpad": "^0.27.0",
-    "@cosmjs/proto-signing": "^0.27.0",
+    "@cosmjs/proto-signing": "^0.27.1",
     "@cosmjs/stargate": "^0.27.0",
+    "@keepkey/hdwallet-core": "^1.53.16",
     "@keplr-wallet/cosmos": "0.9.10",
     "@keplr-wallet/types": "^0.9.10",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "cosmjs-types": "^0.4.1",
-    "long": "^5.2.0",
-    "protobufjs": "^6.11.2",
+    "long": "^5.3.1",
+    "protobufjs": "^6.11.4",
     "tendermint-tx-codec": "^1.0.0"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"

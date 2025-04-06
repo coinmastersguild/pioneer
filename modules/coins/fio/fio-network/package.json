@@ -4,16 +4,16 @@
   "main": "./lib/index.js",
   "types": "./lib/main.d.ts",
   "scripts": {
-    "npm": "npm i",
-    "test": "npm run build && node __tests__/test-module.js",
-    "test-pretty": "npm run build && node __tests__/test-module.js",
+    "npm": "pnpm i",
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "test-pretty": "pnpm run build && node __tests__/test-module.js",
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts",
     "run-bridge": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts --auth",
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "prepublish": "npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "prepublish": "pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@fioprotocol/fiojs": "^1.0.1",
@@ -22,21 +22,21 @@
     "@scatterjs/core": "^2.7.54",
     "@scatterjs/fio": "^1.5.37",
     "@types/node": "^18.15.11",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "dotenv": "^8.2.0",
     "json-beautify": "^1.1.1",
     "json-colorizer": "^2.2.2",
     "request": "^2.88.2",
     "socket.io-client": "^2.3.0",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "when": "^3.7.8"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4",
+    "@types/node": "^18.16.0",
     "nodemon": "^2.0.3",
     "ts-node": "^8.8.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
 }

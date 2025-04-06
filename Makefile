@@ -11,16 +11,16 @@ clean::
 	sh scripts/clean.sh
 
 build::
-	yarn && yarn build
+	pnpm install && pnpm -r run build
 
 test::
 	sh scripts/test.sh $(env) $(debug) $(coin)
 
 bump::
-	lerna version patch --yes
+	pnpm changeset
 
 publish::
-	lerna publish from-package --no-private --yes
+	pnpm version && pnpm publish
 
 ## TODO start application
 up::

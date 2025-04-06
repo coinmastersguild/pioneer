@@ -1,0 +1,10 @@
+declare let TAG: string;
+declare const log: any;
+declare const util: any;
+declare const BASE = 1000000000000000000;
+declare let Web3: any;
+declare const audit_sablier_create: (contract: string, receipt: any) => boolean;
+declare const audit_receipt: (contract: string, receipt: any) => any;
+declare const audit_token_transfer: (tokenTxInfo: any) => any;
+declare const audit_transaction: (txInfo: any, source: any) => any;
+declare const audit_trace_receipt: (trace: any) => Promise<any>;

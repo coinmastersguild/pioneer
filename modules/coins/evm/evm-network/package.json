@@ -5,25 +5,25 @@
   "types": "./lib/index.d.ts",
   "scripts": {
     "testfile": "cross-env WALLETPACK_TESTING=true mocha --require @babel/register --require @babel/polyfill --exit --timeout 1000000",
-    "test-babel": "npm run testfile \"__tests__/test-module.js*/*.test.js\"",
-    "test": "npm run build && node __tests__/test-module.js",
-    "test-dev": "npm run build && node lib/index.js",
-    "start": "npm run build:live",
+    "test-babel": "pnpm run testfile \"__tests__/test-module.js*/*.test.js\"",
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "test-dev": "pnpm run build && node lib/index.js",
+    "start": "pnpm run build:live",
     "build": "tsc -p .",
-    "prepublish": "npm run build",
-    "build:watch": "npm run build && onchange 'src/**/*.ts' -- npm run build"
+    "prepublish": "pnpm run build",
+    "build:watch": "pnpm run build && onchange 'src/**/*.ts' -- pnpm run build"
   },
   "dependencies": {
     "@pioneer-platform/blockbook": "8.1.55",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@types/node": "^20.11.30",
     "@xchainjs/xchain-util": "^0.2.6",
-    "axios": "^0.21.4",
+    "axios": "^1.6.0",
     "dotenv": "^8.2.0",
-    "ethers": "^6.11.1",
+    "ethers": "^6.13.5",
     "request-promise": "^4.2.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.0.4"
   },
   "description": "",
   "keywords": [

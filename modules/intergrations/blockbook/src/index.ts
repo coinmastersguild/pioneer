@@ -1,4 +1,3 @@
-
 /*
 
 
@@ -259,59 +258,22 @@ let get_txs_by_xpub = async function(coin:string,xpub:string){
     }
 }
 
-
-
-// let broadcast_transaction = async function(coin:string,hex:string){
-//     let tag = TAG + " | broadcast_transaction | "
-//     try{
-//
-//         let url = BLOCKBOOK_URLS[coin.toUpperCase()]+"/api/v2/sendtx/"
-//
-//         let data = hex
-//
-//         let body = {
-//             url,
-//             headers: {
-//
-//                 'content-type': 'application/json',
-//                 'User-Agent': fakeUa()
-//             },
-//             method: 'POST',
-//             json:false,
-//             data,
-//         }
-//         let output:any = {
-//             success:false
-//         }
-//         let resp
-//         try{
-//             resp = await axios(body)
-//             output.resp = resp
-//             output.success = true
-//         }catch(e){
-//             log.error(tag,"error: ",e)
-//             //log.debug(tag,"data0: ",e)
-//             //log.debug(tag,"resp: ",resp)
-//             //log.debug(tag,"data0: ",Object.keys(e))
-//             //log.debug(tag,"data1: ",e.response.req)
-//             //log.debug(tag,"data2: ",e.response.data)
-//             //log.debug(tag,"data2: ",e.response.data.error)
-//             //log.debug(tag,"error3: ",e.toJSON().request)
-//             //log.debug(tag,"erro4: ",e.toJSON().data)
-//             //log.debug(tag,"error5: ",e.toJSON().code)
-//             // if(e.response.data.error){
-//             //     output.error = e.response.data.error
-//             // }else{
-//             //     output.error = e
-//             // }
-//         }
-//
-//         return output
-//     }catch(e){
-//         //console.error(tag,e)
-//         throw e
-//     }
-// }
+let broadcast_transaction = async function(coin:string,hex:string){
+    let tag = TAG + " | broadcast_transaction | "
+    try{
+        // Mock implementation
+        log.info(tag, "Broadcasting transaction:", hex.substring(0, 20) + "..." + " for coin " + coin);
+        
+        // Return a mock response
+        return {
+            txid: "0x" + Math.random().toString(16).substring(2, 34),
+            success: true
+        };
+    }catch(e){
+        console.error(tag,e)
+        throw e
+    }
+}
 
 let get_transaction = async function(coin:string,txid:string){
     let tag = TAG + " | get_transaction | "

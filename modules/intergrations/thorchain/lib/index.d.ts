@@ -1,0 +1,11 @@
+declare const TAG = " | maya | ";
+declare const BaseDecimal: Record<string, number>;
+declare const uuid: any;
+declare const log: any;
+declare let caipToNetworkId: any, shortListSymbolToCaip: any, ChainToNetworkId: any;
+declare const createMemo: any, parseMemo: any;
+declare let networkSupport: any[];
+declare function nodeRequest(path: string): Promise<any>;
+declare let assets: string[];
+declare function getPools(): Promise<any>;
+declare const get_quote: (quote: any) => Promise<any>;

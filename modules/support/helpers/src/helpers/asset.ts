@@ -85,7 +85,6 @@ export const isGasAsset = ({ chain, symbol }: { chain: Chain; symbol: string }) 
     case Chain.Ripple:
     case Chain.Litecoin:
     case Chain.Dogecoin:
-    case Chain.Binance:
     case Chain.Ethereum:
     case Chain.Avalanche:
       return symbol === chain;
@@ -144,7 +143,6 @@ export const getCommonAssetInfo = (
     case Chain.Dash:
     case Chain.Litecoin:
     case Chain.Dogecoin:
-    case Chain.Binance:
     case Chain.Polygon:
     case Chain.Bitcoin:
     case Chain.Ethereum:
@@ -172,10 +170,7 @@ export const getAssetType = ({ chain, symbol }: { chain: Chain; symbol: string }
       return symbol === 'ATOM' ? 'Native' : Chain.Cosmos;
     case Chain.Kujira:
       return symbol === Chain.Kujira ? 'Native' : Chain.Kujira;
-    case Chain.Binance:
-      return symbol === Chain.Binance ? 'Native' : 'BEP2';
     case Chain.BinanceSmartChain:
-      return symbol === Chain.Binance ? 'Native' : 'BEP20';
     case Chain.Ethereum:
       return symbol === Chain.Ethereum ? 'Native' : 'ERC20';
     case Chain.Avalanche:

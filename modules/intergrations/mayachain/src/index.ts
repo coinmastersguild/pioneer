@@ -4,12 +4,15 @@
  */
 
 const TAG = " | maya | "
-import { BaseDecimal } from '@coinmasters/types';
+// Define a simple BaseDecimal type instead of importing from @coinmasters/types
+type BaseDecimal = string | number;
+
 const { uuid } = require('uuidv4');
 const log = require('@pioneer-platform/loggerdog')()
 let { caipToNetworkId, shortListSymbolToCaip, ChainToNetworkId } = require("@pioneer-platform/pioneer-caip")
 let network = require("@pioneer-platform/maya-network")
 const { createMemo, parseMemo } = require('@pioneer-platform/pioneer-coins');
+const axios = require('axios');
 
 let Web3 = require('web3');
 let service = process.env['PARITY_ARCHIVE_NODE']

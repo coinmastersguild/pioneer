@@ -11,29 +11,29 @@
     "ts-node": "^9.1.1"
   },
   "scripts": {
-    "npm": "npm i",
-    "test": "rm -Rf lib && npm run build && ts-node __tests__/test-module.ts",
+    "npm": "pnpm i",
+    "test": "rm -Rf lib && pnpm run build && ts-node __tests__/test-module.ts",
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
     "build": "rm -Rf lib && tsc -p .",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install",
     "test-jest": "jest --coverage",
     "test:watch": "jest --coverage --watchAll",
-    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
+    "build:watch": "onchange 'src/**/*.ts' -- pnpm run build",
     "view:coverage": "serve coverage/lcov-report",
-    "prepublish": "rm -Rf lib && npm run build",
+    "prepublish": "rm -Rf lib && pnpm run build",
     "clean": "rm -rf coverage src/**/*.js src/**/*.map lib node_modules"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.34",
+    "@types/node": "^18.16.0",
     "@types/source-map-support": "^0.5.3",
     "jest": "^26.4.2",
     "onchange": "^7.0.2",
     "serve": "^11.3.2",
     "source-map-support": "^0.5.19",
     "ts-jest": "^29.0.5",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
 }

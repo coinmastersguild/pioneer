@@ -4,8 +4,8 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "test": "npm run build && node __tests__/test-module.js",
-    "start": "npm run build:live",
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "start": "pnpm run build:live",
     "build": "tsc -p .",
     "prepublish": "tsc -p .",
     "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
@@ -18,7 +18,7 @@
     "@xchainjs/xchain-client": "^0.7.0",
     "@xchainjs/xchain-util": "^0.2.6",
     "axiom": "^0.1.6",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "bitcoin-promise": "^1.3.1",
     "bitcoin-rpc-promise": "^2.1.6",
     "bitcoinjs-lib": "6.1.5",
@@ -27,9 +27,9 @@
     "request-promise-native": "^1.0.9"
   },
   "devDependencies": {
-    "@types/node": "^13.13.50",
+    "@types/node": "^18.16.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "a76012f6693a12181c4744e53e977a9eaeef0ed3"
 }

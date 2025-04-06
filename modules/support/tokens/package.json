@@ -4,13 +4,13 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "npm": "npm i",
-    "test": "npm run build && node __tests__/test-module.js",
+    "npm": "pnpm i",
+    "test": "pnpm run build && node __tests__/test-module.js",
     "lint": "prettier --write '**/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --exec ts-node __tests__node",
     "build": "tsc -p .",
-    "prepublish": "npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "prepublish": "pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@coinmasters/tokens": "^3.7.28",
@@ -19,7 +19,7 @@
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@types/node": "^18.15.11",
     "ts-node": "^8.10.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   },
   "gitHead": "aeae28273014ab69b42f22abec159c6693a56c40"
 }

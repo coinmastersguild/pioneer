@@ -2,20 +2,20 @@
   "name": "@pioneer-platform/cosmos-network",
   "version": "8.3.9",
   "scripts": {
-    "create": "npm run build && npm run test",
+    "create": "pnpm run build && pnpm run test",
     "build": "tsc -p .",
-    "test": "npm run build && node __tests__/test-module.js",
-    "prepublish": "rm -R lib && npm run build",
-    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+    "test": "pnpm run build && node __tests__/test-module.js",
+    "prepublish": "rm -R lib && pnpm run build",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && pnpm install"
   },
   "dependencies": {
     "@pioneer-platform/cosmos-tx-encoder": "^0.2.1",
     "@pioneer-platform/loggerdog": "^8.3.1",
     "@pioneer-platform/nodes": "^8.3.10",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "wait-promise": "^0.4.1"
   },
   "description": "Cosmos events to redis pub/sub",

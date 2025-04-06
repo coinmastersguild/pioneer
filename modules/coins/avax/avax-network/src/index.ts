@@ -14,7 +14,8 @@ import {ETH_DECIMAL} from "@pioneer-platform/eth-network/lib/utils";
 
 const TAG = " | avax-network | "
 let Web3 = require('web3');
-import { ethers, BigNumberish, BigNumber } from 'ethers'
+// Replace ethers import with require
+const ethers = require('ethers');
 //
 const Axios = require('axios')
 const https = require('https')
@@ -24,18 +25,58 @@ const axios = Axios.create({
 	})
 });
 const request = require("request-promise")
+// Add missing log import
+const log = require('@pioneer-platform/loggerdog')()
 //blockbook
 let blockbook = require("@pioneer-platform/blockbook")
 const Web3Utils = require('web3-utils');
-import { EtherscanProvider, getDefaultProvider } from '@ethersproject/providers'
+
+// Replace imports with requires
+const ethersproviders = require('@ethersproject/providers');
+const EtherscanProvider = ethersproviders.EtherscanProvider;
+const getDefaultProvider = ethersproviders.getDefaultProvider;
 
 
+// Replace imports with local type definitions
+// import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
+type Asset = {
+    chain: string;
+    symbol: string;
+    ticker: string;
+    synth?: boolean;
+};
 
-import { AssetETH, baseAmount, BaseAmount, assetToString, Asset, delay } from '@xchainjs/xchain-util'
-// import * as etherscanAPI from './etherscan-api'
-const log = require('@pioneer-platform/loggerdog')()
+type BaseAmount = {
+    amount: () => string;
+    decimal: number;
+};
 
-import { toUtf8Bytes, parseUnits } from 'ethers/lib/utils'
+// Helper functions to replace the imports
+function assetToString(asset: Asset): string {
+    return `${asset.chain}.${asset.symbol}`;
+}
+
+function baseAmount(amount: string | number, decimal: number): BaseAmount {
+    return {
+        amount: () => amount.toString(),
+        decimal
+    };
+}
+
+function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const AssetETH: Asset = {
+    chain: 'ETH',
+    symbol: 'ETH',
+    ticker: 'ETH'
+};
+
+// Replace ethers utils import with require
+const ethersUtils = require('ethers/lib/utils');
+const toUtf8Bytes = ethersUtils.toUtf8Bytes;
+const parseUnits = ethersUtils.parseUnits;
 
 //
 let web3:any
