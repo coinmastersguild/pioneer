@@ -53,5 +53,8 @@
       "@types/react": "^18.2.25",
       "@types/react-dom": "^18.2.11"
     }
+  },
+  "dependencies": {
+    "@pioneer-platform/default-redis": "^8.3.1"
   }
 }

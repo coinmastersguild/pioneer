@@ -85,12 +85,12 @@ const {redis,redisQueue} = require("../index")
 // run_test()
 
 
-let setReady = async function(){
-    console.log("online!")
-    let result = await redis.setex("ATOM:tx:signer:status",5,'online')
-    console.log("result: ",result)
-}
-setInterval(setReady,5000)
+// let setReady = async function(){
+//     console.log("online!")
+//     let result = await redis.setex("ATOM:tx:signer:status",5,'online')
+//     console.log("result: ",result)
+// }
+// setInterval(setReady,5000)
 
 
 
