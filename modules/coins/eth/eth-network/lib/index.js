@@ -346,12 +346,12 @@ const get_transactions_by_network = async function (networkId, address, options 
         if (fromBlock < toBlock - 100) {
             fromBlock = toBlock - 100;
         }
-        log.info(tag, `Scanning from block ${fromBlock} to block ${toBlock}`);
+        log.debug(tag, `Scanning from block ${fromBlock} to block ${toBlock}`);
         let transactions = [];
         // Loop through each block in the range
         for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
             let block = await web3.eth.getBlock(blockNumber, true); // Retrieve block with full transactions
-            log.info(tag, "block ", block.transactions.length);
+            log.debug(tag, "block ", block.transactions.length);
             if (block && block.transactions) {
                 for (let tx of block.transactions) {
                     // Check if the transaction is initiated by the specified address
@@ -375,11 +375,11 @@ const get_transactions_by_network = async function (networkId, address, options 
         // Fetch current and pending nonces for the address
         let currentNonce = await web3.eth.getTransactionCount(checksumAddress, "pending");
         let confirmedNonce = await web3.eth.getTransactionCount(checksumAddress, "latest");
-        log.info(tag, `Current Nonce: ${currentNonce}, Confirmed Nonce: ${confirmedNonce}`);
+        log.debug(tag, `Current Nonce: ${currentNonce}, Confirmed Nonce: ${confirmedNonce}`);
         // Determine if there are pending transactions
         const hasPendingTransactions = currentNonce > confirmedNonce;
         if (hasPendingTransactions) {
-            log.info(tag, "Pending transactions detected");
+            log.debug(tag, "Pending transactions detected");
             // Fetch the pending transactions from the transaction pool
             // Note: This requires access to the node's txpool, which may not be available on all nodes
             let pendingBlock = await web3.eth.getBlock("pending", true);
@@ -403,7 +403,7 @@ const get_transactions_by_network = async function (networkId, address, options 
             }
         }
         else {
-            log.info(tag, "No pending transactions detected");
+            log.debug(tag, "No pending transactions detected");
         }
         return {
             address,
@@ -577,12 +577,12 @@ const get_all_pioneers_base = async function () {
     let tag = TAG + " | get_all_pioneers_base | ";
     try {
         let output = {};
-        log.info(tag, "PIONEER_CONTRACT_ADDRESS_BASE: ", constant_1.PIONEER_CONTRACT_ADDRESS_BASE);
+        log.debug(tag, "PIONEER_CONTRACT_ADDRESS_BASE: ", constant_1.PIONEER_CONTRACT_ADDRESS_BASE);
         const nftContract = new web3Base.eth.Contract(constant_1.ERC721_ABI, constant_1.PIONEER_CONTRACT_ADDRESS_BASE);
         const metadataContract = new web3Base.eth.Contract(constant_1.METADATA_ABI, constant_1.PIONEER_METADATA_CONTRACT_ADDRESS_BASE);
         // Fetch the total supply of the NFTs
         const totalSupply = await nftContract.methods.totalSupply().call();
-        log.info("totalSupply: ", totalSupply);
+        log.debug("totalSupply: ", totalSupply);
         output['totalSupply'] = totalSupply;
         output['owners'] = [];
         output['images'] = []; // add an images array to output
@@ -591,11 +591,11 @@ const get_all_pioneers_base = async function () {
             // await sleep(1000);
             try {
                 const owner = await nftContract.methods.ownerOf(i).call();
-                log.info(tag, "owner: ", owner);
+                log.debug(tag, "owner: ", owner);
                 output['owners'].push(owner.toLowerCase());
                 //get images
                 const imageInfo = await metadataContract.methods.getAttributes(i).call();
-                log.info(tag, "imageInfo: ", imageInfo);
+                log.debug(tag, "imageInfo: ", imageInfo);
                 // Parse the JSON string and get the image name
                 const imageName = JSON.parse(imageInfo['0'])["0-backgrounds"];
                 // Build the full image URL by replacing the image name in the base URL
