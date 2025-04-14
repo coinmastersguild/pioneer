@@ -1,6 +1,6 @@
 {
   "name": "@pioneer-platform/mongo-atlas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Modern MongoDB Atlas connection manager for Pioneer platform",
   "main": "index.js",
   "scripts": {

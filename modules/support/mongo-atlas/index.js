@@ -52,10 +52,48 @@ const connection = {
    * @returns {object} - MongoDB collection with added helper methods
    */
   async get(collection, dbName, options = {}) {
-    const connectionString = process.env.MONGO_CONNECTION || 'mongodb://localhost:27017/pioneer';
+    // Get connection string from environment
+    let connectionString = process.env.MONGO_CONNECTION || 'mongodb://localhost:27017/pioneer';
     const targetDb = dbName || process.env.MONGO_DEFAULT_DB || 'pioneer';
     
-    debug(`Getting collection ${collection} from database ${targetDb}`);
+    // FIXED: Strip off any database name from the connection string to ensure dbName parameter is respected
+    if (connectionString.includes('/')) {
+      // Handle MongoDB+SRV format
+      if (connectionString.startsWith('mongodb+srv://')) {
+        // For srv format, we need to handle it differently
+        const srvParts = connectionString.split('?');
+        const hostPart = srvParts[0].split('/');
+        // Remove any database part after the last slash before query params
+        if (hostPart.length > 3) {
+          // Take only the protocol and auth+host parts
+          connectionString = hostPart.slice(0, 3).join('/');
+          // Add back query parameters if they existed
+          if (srvParts.length > 1) {
+            connectionString += '?' + srvParts[1];
+          }
+        }
+      } else {
+        // Standard mongodb:// format
+        const urlParts = connectionString.split('/');
+        // Check if there's a database name after the host:port
+        if (urlParts.length > 3) {
+          // Get everything up to the host:port
+          let baseUrl = urlParts.slice(0, 3).join('/');
+          
+          // Check if there are query parameters after the database name
+          let queryParams = '';
+          const dbAndParams = urlParts[3].split('?');
+          if (dbAndParams.length > 1) {
+            queryParams = '?' + dbAndParams[1];
+          }
+          
+          // Reconstruct URL without database name
+          connectionString = baseUrl + queryParams;
+        }
+      }
+    }
+    
+    debug(`Getting collection ${collection} from database ${targetDb} using connection: ${connectionString}`);
     
     try {
       const client = await getOrCreateClient(connectionString, options);
@@ -80,10 +118,48 @@ const connection = {
    * @returns {object} - MongoDB database instance
    */
   async getDb(dbName) {
-    const connectionString = process.env.MONGO_CONNECTION || 'mongodb://localhost:27017/pioneer';
+    // Get connection string from environment
+    let connectionString = process.env.MONGO_CONNECTION || 'mongodb://localhost:27017/pioneer';
     const targetDb = dbName || process.env.MONGO_DEFAULT_DB || 'pioneer';
     
-    debug(`Getting database ${targetDb}`);
+    // FIXED: Strip off any database name from the connection string to ensure dbName parameter is respected
+    if (connectionString.includes('/')) {
+      // Handle MongoDB+SRV format
+      if (connectionString.startsWith('mongodb+srv://')) {
+        // For srv format, we need to handle it differently
+        const srvParts = connectionString.split('?');
+        const hostPart = srvParts[0].split('/');
+        // Remove any database part after the last slash before query params
+        if (hostPart.length > 3) {
+          // Take only the protocol and auth+host parts
+          connectionString = hostPart.slice(0, 3).join('/');
+          // Add back query parameters if they existed
+          if (srvParts.length > 1) {
+            connectionString += '?' + srvParts[1];
+          }
+        }
+      } else {
+        // Standard mongodb:// format
+        const urlParts = connectionString.split('/');
+        // Check if there's a database name after the host:port
+        if (urlParts.length > 3) {
+          // Get everything up to the host:port
+          let baseUrl = urlParts.slice(0, 3).join('/');
+          
+          // Check if there are query parameters after the database name
+          let queryParams = '';
+          const dbAndParams = urlParts[3].split('?');
+          if (dbAndParams.length > 1) {
+            queryParams = '?' + dbAndParams[1];
+          }
+          
+          // Reconstruct URL without database name
+          connectionString = baseUrl + queryParams;
+        }
+      }
+    }
+    
+    debug(`Getting database ${targetDb} using connection: ${connectionString}`);
     
     try {
       const client = await getOrCreateClient(connectionString);
