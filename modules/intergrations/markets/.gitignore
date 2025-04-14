@@ -1,0 +1,22 @@
+# Compiled output
+/lib
+/dist
+/build
+
+# Dependencies
+/node_modules
+
+# IDE
+.idea
+.vscode
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+
+# Cache
+.npm
+.eslintcache 

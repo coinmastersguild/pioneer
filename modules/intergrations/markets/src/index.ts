@@ -19,10 +19,6 @@ const axios = Axios.create({
 });
 const axiosRetry = require('axios-retry');
 
-const { ethers, BigNumber } = require('ethers');
-const { Token, Fetcher, WETH, Route, Trade, TradeType, TokenAmount } = require('@uniswap/sdk');
-
-
 
 axiosRetry(axios, {
     retries: 5, // number of retries
