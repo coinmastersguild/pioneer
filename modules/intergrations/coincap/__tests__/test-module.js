@@ -6,10 +6,10 @@ let client = require('../index')
 //         console.log(JSON.stringify(resp))
 //     })
 
-client.getPrice("BTC")
-    .then(function(resp){
-        console.log(JSON.stringify(resp))
-    })
+// client.getPrice("BTC")
+//     .then(function(resp){
+//         console.log(JSON.stringify(resp))
+//     })
 
 // client.assets()
 //     .then(function(resp){

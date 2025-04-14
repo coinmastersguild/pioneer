@@ -97,30 +97,30 @@ const update_cache = async function() {
         log.info(tag, "entries: ", entries[0]);
         log.info(tag, "entries: ", entries.length);
 
-        // let url = URL_COINCAP + 'assets?limit=2000';
-        // log.debug(tag, "url: ", url);
-        // let result = await axios({
-        //     url: url,
-        //     method: 'GET'
-        // });
-        //
-        // let allCoinsArray = result.data.data;
-        // log.debug(tag, "allCoinsArray: ", allCoinsArray.length);
-        //
+        let url = URL_COINCAP + 'assets?limit=2000';
+        log.debug(tag, "url: ", url);
+        let result = await axios({
+            url: url,
+            method: 'GET'
+        });
+
+        let allCoinsArray = result.data.data;
+        log.debug(tag, "allCoinsArray: ", allCoinsArray.length);
+
 
         let populatedCaips = new Set<string>();
 
-        // for (let i = 0; i < allCoinsArray.length; i++) {
-        //     let entry = allCoinsArray[i];
-        //     let assetsMatchSymbol = entries.filter((asset:any) => asset.symbol === entry.symbol);
-        //     for (let j = 0; j < assetsMatchSymbol.length; j++) {
-        //         let asset = assetsMatchSymbol[j];
-        //         let key = "coincap:" + asset.caip;
-        //         await redis.setex(key, 3600, JSON.stringify(entry));
-        //         log.info(tag, "saved: " + key + " result: ", result);
-        //         populatedCaips.add(asset.caip);
-        //     }
-        // }
+        for (let i = 0; i < allCoinsArray.length; i++) {
+            let entry = allCoinsArray[i];
+            let assetsMatchSymbol = entries.filter((asset:any) => asset.symbol === entry.symbol);
+            for (let j = 0; j < assetsMatchSymbol.length; j++) {
+                let asset = assetsMatchSymbol[j];
+                let key = "coincap:" + asset.caip;
+                await redis.setex(key, 3600, JSON.stringify(entry));
+                log.info(tag, "saved: " + key + " result: ", result);
+                populatedCaips.add(asset.caip);
+            }
+        }
 
         const limit = 250;
         const totalAssets = 2000;

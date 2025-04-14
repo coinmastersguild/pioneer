@@ -83,143 +83,142 @@ let run_test = async function(){
 
 
         let ASSETS_TEST = [
-            // {
-            //     "caip": "bip122:000000000019d6689c085ae165831e93/slip44:0",
-            //     "pubkey": "bc1qu3ghkz8788ysk7gqcvke5l0mr7skhgvpuk6dk4"
-            // },
-            // {
-            //     "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
-            //     "pubkey": "qpd00ucur9gl7rzwe7lqmu9yljr9ajv92q09a0jdrl"
-            // },
-            // {
-            //     "caip": "bip122:000007d91d1254d60e2dd1ae58038307/slip44:5",
-            //     "pubkey": "XetjxEsGXKLV4mHiWPLscuNFABu9K5eVDd"
-            // },
-            // {
-            //     "caip": "bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
-            //     "pubkey": "DNchRDXhaW2uPusLVQWZZbQ5QQnzYmarWJ"
-            // },
-            // {
-            //     "caip": "bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
-            //     "pubkey": "LMcHLHjcAhMtM6SPQ7Da9acBQWcviaX2Fu"
-            // },
-            // {
-            //     "caip": "cosmos:mayachain-mainnet-v1/slip44:931",
-            //     "pubkey": "maya14jutklw4xaawvx0p90m45nur64mmhjz3mwmvvs"
-            // },
-            // {
-            //     "caip": "cosmos:osmosis-1/slip44:118",
-            //     "pubkey": "osmo1hp7gnr07wprd75f4j4aze9a94aejfcqdccqdht"
-            // },
-            // {
-            //     "caip": "cosmos:cosmoshub-4/slip44:118",
-            //     "pubkey": "cosmos1hp7gnr07wprd75f4j4aze9a94aejfcqdsrnape"
-            // },
-            // {
-            //     "caip": "cosmos:thorchain-mainnet-v1/slip44:931",
-            //     "pubkey": "thor10t3zmsks33mgf7ajkmzj2elt553ufrxgav90ms"
-            // },
-            // {
-            //     "caip": "eip155:1/slip44:60",
-            //     "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
-            // },
-            // {
-            //     "caip": "eip155:8453/slip44:60",
-            //     "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
-            // },
-            // {
-            //     "caip": "eip155:137/slip44:60",
-            //     "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
-            // },
-            // {
-            //     "caip": "eip155:10/slip44:60",
-            //     "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
-            // },
-            // {
-            //     "caip": "ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144",
-            //     "pubkey": "rGdMfVVZwUbqAxs5zucKHUpFgFTcPPj5Cn"
-            // }
-
-            // {
-            //     caip: 'eip155:1/slip44:60',
-            //     pubkey: '0x141D9959cAe3853b035000490C03991eB70Fc4aC'
-            // },
-            // {
-            //     caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
-            //     pubkey: 'xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'xpub6BxKtd6aAuz23XqtWXeSqxShJZn8yqiUmaTdvsPWS3riKkNRcXEPmn1CXmKM1M43mrWfN5QwjdLRghZLrgwMLCeRZqZNuYhVNXr6Pp7aDsH'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'zpub6rm1EEJg4JaskzruP7rmFkcABNR183DMmQqBgn26AQTj7ZBoK8apQ1iV41dSsgWsPCaDuCBKkECh47k4Ye7o11eoEf6pcAF98x61YvGudCS'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'xpub6BxKtd6aAuz2ApvP5F2YczuuqM1rTL6obPmr37fNyYJDyP9MFMTdr4p834s4MMYiM8rapDH8pnJDCBd2k9qWJLcAHf3vsc6FT1x3WMvPvfa'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'xpub6BxKtd6aAuz29Jkjqsow4x67N9bWaVMEkt7hZDE392soWcYY3AzTF6mxwaMZKtfDJaMChKznXND823bXGvMoRBxe8AwVfoNJpXTs6eT77sj'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'xpub6BxKtd6aAuz26ag4No8Z41wu4xpa9tgbPuEVhQ9RYCtrcGmRTYSUjPvG6JYeXFjFY1N7pfJ5tW94TG4aLF3u8Af3BkXxaXecUiXfNScdfJ8'
-            // },
-            // {
-            //     caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
-            //     pubkey: 'ypub6WamSeXgTYgy7W25fVorMLDHFx5SPkuYaE7ToWCiyCUK2jdWpufQ8VqkDg83YjBtJFHDoekhf9ESdPDbL9aCPXC5NnmzXUiq3J6oycFShfS'
-            // },
-            // {
-            //     caip: 'bip122:000000000000000000651ef99cb9fcbe/slip44:145',
-            //     pubkey: 'xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL'
-            // },
-            // {
-            //     caip: 'cosmos:cosmoshub-4/slip44:118',
-            //     pubkey: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc'
-            // },
-            // {
-            //     caip: 'cosmos:osmosis-1/slip44:118',
-            //     pubkey: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
-            // },
-            // {
-            //     caip: 'ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144',
-            //     pubkey: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB'
-            // },
-            // {
-            //     caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
-            //     pubkey: 'xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs'
-            // },
-            // {
-            //     caip: 'bip122:000007d91d1254d60e2dd1ae58038307/slip44:5',
-            //     pubkey: 'xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe'
-            // },
+            {
+                "caip": "bip122:000000000019d6689c085ae165831e93/slip44:0",
+                "pubkey": "bc1qu3ghkz8788ysk7gqcvke5l0mr7skhgvpuk6dk4"
+            },
+            {
+                "caip": "bip122:000000000000000000651ef99cb9fcbe/slip44:145",
+                "pubkey": "qpd00ucur9gl7rzwe7lqmu9yljr9ajv92q09a0jdrl"
+            },
+            {
+                "caip": "bip122:000007d91d1254d60e2dd1ae58038307/slip44:5",
+                "pubkey": "XetjxEsGXKLV4mHiWPLscuNFABu9K5eVDd"
+            },
+            {
+                "caip": "bip122:00000000001a91e3dace36e2be3bf030/slip44:3",
+                "pubkey": "DNchRDXhaW2uPusLVQWZZbQ5QQnzYmarWJ"
+            },
+            {
+                "caip": "bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2",
+                "pubkey": "LMcHLHjcAhMtM6SPQ7Da9acBQWcviaX2Fu"
+            },
+            {
+                "caip": "cosmos:mayachain-mainnet-v1/slip44:931",
+                "pubkey": "maya14jutklw4xaawvx0p90m45nur64mmhjz3mwmvvs"
+            },
+            {
+                "caip": "cosmos:osmosis-1/slip44:118",
+                "pubkey": "osmo1hp7gnr07wprd75f4j4aze9a94aejfcqdccqdht"
+            },
+            {
+                "caip": "cosmos:cosmoshub-4/slip44:118",
+                "pubkey": "cosmos1hp7gnr07wprd75f4j4aze9a94aejfcqdsrnape"
+            },
+            {
+                "caip": "cosmos:thorchain-mainnet-v1/slip44:931",
+                "pubkey": "thor10t3zmsks33mgf7ajkmzj2elt553ufrxgav90ms"
+            },
+            {
+                "caip": "eip155:1/slip44:60",
+                "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
+            },
+            {
+                "caip": "eip155:8453/slip44:60",
+                "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
+            },
+            {
+                "caip": "eip155:137/slip44:60",
+                "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
+            },
+            {
+                "caip": "eip155:10/slip44:60",
+                "pubkey": "0x658DE0443259a1027caA976ef9a42E6982037A03"
+            },
+            {
+                "caip": "ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144",
+                "pubkey": "rGdMfVVZwUbqAxs5zucKHUpFgFTcPPj5Cn"
+            },
+            {
+                caip: 'eip155:1/slip44:60',
+                pubkey: '0x141D9959cAe3853b035000490C03991eB70Fc4aC'
+            },
+            {
+                caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
+                pubkey: 'xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'xpub6BxKtd6aAuz23XqtWXeSqxShJZn8yqiUmaTdvsPWS3riKkNRcXEPmn1CXmKM1M43mrWfN5QwjdLRghZLrgwMLCeRZqZNuYhVNXr6Pp7aDsH'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'zpub6rm1EEJg4JasiTqacdouiUVncAc5ymhKReiPZfLTGnH2GSZquRn9reJhj6sfs73PoSJNXzpERKPVLYbwwUGHNF6jkMX5R58vWaLB9FVyJuX'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'zpub6rm1EEJg4JaskzruP7rmFkcABNR183DMmQqBgn26AQTj7ZBoK8apQ1iV41dSsgWsPCaDuCBKkECh47k4Ye7o11eoEf6pcAF98x61YvGudCS'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'xpub6BxKtd6aAuz2ApvP5F2YczuuqM1rTL6obPmr37fNyYJDyP9MFMTdr4p834s4MMYiM8rapDH8pnJDCBd2k9qWJLcAHf3vsc6FT1x3WMvPvfa'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'xpub6D6UctxqkwVv1sTLwvEfJJJnGEKC6XiKbRfwzsYgWmXGAEwPQ7T2cWzRggxVsHjYzA4m33d7VzgPZyNpW5SFmmjY1g8EFFVwy8CtN8xGhTS'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'xpub6BxKtd6aAuz29Jkjqsow4x67N9bWaVMEkt7hZDE392soWcYY3AzTF6mxwaMZKtfDJaMChKznXND823bXGvMoRBxe8AwVfoNJpXTs6eT77sj'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'xpub6BxKtd6aAuz26ag4No8Z41wu4xpa9tgbPuEVhQ9RYCtrcGmRTYSUjPvG6JYeXFjFY1N7pfJ5tW94TG4aLF3u8Af3BkXxaXecUiXfNScdfJ8'
+            },
+            {
+                caip: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+                pubkey: 'ypub6WamSeXgTYgy7W25fVorMLDHFx5SPkuYaE7ToWCiyCUK2jdWpufQ8VqkDg83YjBtJFHDoekhf9ESdPDbL9aCPXC5NnmzXUiq3J6oycFShfS'
+            },
+            {
+                caip: 'bip122:000000000000000000651ef99cb9fcbe/slip44:145',
+                pubkey: 'xpub6DPARGivQ6adLmcPV1Lg71tgmz8i3fwwy36hguPDFQyoTb2gvg1VkXpL9D2ero7ErGexbRfQ64PPufsS4oUCFrr4tEyobWmxkiyvB9MzEiL'
+            },
+            {
+                caip: 'cosmos:cosmoshub-4/slip44:118',
+                pubkey: 'cosmos1rs7fckgznkaxs4sq02pexwjgar43p5wn7akqnc'
+            },
+            {
+                caip: 'cosmos:osmosis-1/slip44:118',
+                pubkey: 'osmo1rs7fckgznkaxs4sq02pexwjgar43p5wnkx9s92'
+            },
+            {
+                caip: 'ripple:4109c6f2045fc7eff4cde8f9905d19c2/slip44:144',
+                pubkey: 'rLRYvj3RXU16THYgwhWR3ZN639XAE68RLB'
+            },
+            {
+                caip: 'bip122:00000000001a91e3dace36e2be3bf030/slip44:3',
+                pubkey: 'xpub6C2KZdjcbhfMzxsXRRUuVgr4ywWpjxnU2jF2pmBr9MizYWHE5Fx6PWA9gVaTv8Rq9KznkYKQ5X2agVe2qyNttro9T6VofuSYKXWCJi6BTLs'
+            },
+            {
+                caip: 'bip122:000007d91d1254d60e2dd1ae58038307/slip44:5',
+                pubkey: 'xpub6C32ZcmFoazJmhH5fojYAwHEggwzqo78UfbUXJjUHzxAp3k3373Yn6K56fVKkoTFehxgED6nxqeUvKX5vr8iQ3QMLcuv2pFHjJkFJ9yZMRe'
+            },
             {
                 caip: 'cosmos:mayachain-mainnet-v1/slip44:931',
                 pubkey: 'maya1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfqkl5k'
             },
-            // {
-            //     caip: 'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2',
-            //     pubkey: 'zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj'
-            // },
-            // {
-            //     caip: 'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2',
-            //     pubkey: 'xpub6CQaRj3ynJXpPXzx6tbRFXLqcUuVanKWkFusZ9P7cDYAAgMmdC89rq6aofxyp1fXvscxZF5HgWgZgD3VA6sYnJPKqWnCfUxCoD1YX9TpBkx'
-            // },
-            // {
-            //     caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
-            //     pubkey: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx'
-            // }
+            {
+                caip: 'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2',
+                pubkey: 'zpub6rQAwkqDw32JoeWfaE4Evmx1ZKWWyEscT1H7RNc5eJnndNEemaiRsvGHztrVVdowubaNEGNZ3x4LFpWyZUtkP6GmfVFX4hwHPXYFfeB68Pj'
+            },
+            {
+                caip: 'bip122:12a765e31ffd4059bada1e25190f6e98/slip44:2',
+                pubkey: 'xpub6CQaRj3ynJXpPXzx6tbRFXLqcUuVanKWkFusZ9P7cDYAAgMmdC89rq6aofxyp1fXvscxZF5HgWgZgD3VA6sYnJPKqWnCfUxCoD1YX9TpBkx'
+            },
+            {
+                caip: 'cosmos:thorchain-mainnet-v1/slip44:931',
+                pubkey: 'thor1g9el7lzjwh9yun2c4jjzhy09j98vkhfxfhgnzx'
+            }
 
         ]
         // console.log(pioneer)
