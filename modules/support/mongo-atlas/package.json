@@ -1,0 +1,28 @@
+{
+  "name": "@pioneer-platform/mongo-atlas",
+  "version": "1.0.0",
+  "description": "Modern MongoDB Atlas connection manager for Pioneer platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "mongodb",
+    "atlas",
+    "database",
+    "connection",
+    "pioneer"
+  ],
+  "author": "Pioneer Team",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^4.12.0",
+    "debug": "^4.3.4"
+  },
+  "devDependencies": {
+    "jest": "^29.2.2"
+  },
+  "directories": {
+    "test": "tests"
+  }
+}
