@@ -13,21 +13,62 @@ if(!process.env['MONGO_CONNECTION']) {
 }
 
 try{
-    connection = monk(process.env['MONGO_CONNECTION'])
+    // Fix MongoDB connection string format for newer Node.js versions
+    let connectionString = process.env['MONGO_CONNECTION']
+    
+    // Check if the connection string is in the old format (contains @ but not mongodb://)
+    if (connectionString.includes('@') && !connectionString.startsWith('mongodb://') && !connectionString.startsWith('mongodb+srv://')) {
+        // Parse the old connection string format
+        const [auth, hosts] = connectionString.split('@')
+        const [username, password] = auth.split(':')
+        
+        // Reconstruct in the new format
+        if (hosts && hosts.includes('/')) {
+            const [hostList, dbAndParams] = hosts.split('/', 2)
+            const [dbName, ...params] = dbAndParams ? dbAndParams.split('?') : ['pioneer']
+            const paramsStr = params.length ? `?${params.join('?')}` : ''
+            
+            // Create proper MongoDB connection string
+            connectionString = `mongodb://${username}:${password}@${hostList}/${dbName}${paramsStr}`
+            console.log("Reformatted MongoDB connection string to new format")
+        }
+    }
+    
+    connection = monk(connectionString)
     
     // Add a method to the connection to get a collection from a specific database
     connection.getFromDb = function(collection, dbName) {
         // Check if the connection string already has a database
         let connectionString = process.env['MONGO_CONNECTION']
-        if (!connectionString.includes('/')) {
+        
+        // Fix MongoDB connection string format for this method as well
+        if (connectionString.includes('@') && !connectionString.startsWith('mongodb://') && !connectionString.startsWith('mongodb+srv://')) {
+            const [auth, hosts] = connectionString.split('@')
+            const [username, password] = auth.split(':')
+            
+            if (hosts && hosts.includes('/')) {
+                const [hostList] = hosts.split('/', 1)
+                connectionString = `mongodb://${username}:${password}@${hostList}/${dbName || 'pioneer'}`
+            }
+        } else if (!connectionString.includes('/')) {
             connectionString = connectionString + '/pioneer'
+        } else {
+            // For properly formatted URLs, extract the host part
+            if (connectionString.startsWith('mongodb://') || connectionString.startsWith('mongodb+srv://')) {
+                // Extract the protocol and authority parts
+                const parts = connectionString.split('/')
+                // Reconstruct without database part
+                connectionString = parts.slice(0, 3).join('/')
+                connectionString += `/${dbName || 'pioneer'}`
+            } else {
+                // Extract the host part (without the database)
+                let host = connectionString.split('/')[0]
+                connectionString = `${host}/${dbName || 'pioneer'}`
+            }
         }
         
-        // Extract the host part (without the database)
-        let host = connectionString.split('/')[0]
-        
         // Connect to the specified database
-        const db = monk(`${host}/${dbName || 'pioneer'}`)
+        const db = monk(connectionString)
         return db.get(collection)
     }
     
