@@ -18,8 +18,8 @@ const semver = require('semver')
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
 // process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:4000/spec/swagger.json"
 
-process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
-// process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
+// process.env['URL_PIONEER_SPEC'] = "http://127.0.0.1:9001/spec/swagger.json"
+process.env['URL_PIONEER_SPEC'] = "https://pioneers.dev/spec/swagger.json"
 
 // let spec = process.env['URL_PIONEER_SPEC']
 
@@ -40,8 +40,8 @@ let queryKey = process.env['TEST_QUERY_KEY_2']
 
 let run_test = async function(){
     try{
-        // let spec = "https://pioneers.dev/spec/swagger.json"
-        let spec = "http://127.0.0.1:9001/spec/swagger.json"
+        let spec = "https://pioneers.dev/spec/swagger.json"
+        // let spec = "http://127.0.0.1:9001/spec/swagger.json"
         //get config
         let config = {
             queryKey:'key:cfd27e74asda',
