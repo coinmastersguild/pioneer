@@ -1,6 +1,7 @@
 /*
 
     https://www.coingecko.com/api/documentations/v3
+    https://rest.coincap.io/api-docs.json
 
  */
 
@@ -11,10 +12,7 @@ const Axios = require('axios')
 const https = require('https')
 const axios = Axios.create({
     httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-        headers: {
-            "Authorization": "Bearer "+process.env['COINCAP_API_KEY'],
-        }
+        rejectUnauthorized: false
     })
 });
 const axiosRetry = require('axios-retry');
@@ -45,9 +43,20 @@ let {
 } = require("@pioneer-platform/pioneer-coins")
 const {subscriber, publisher, redis, redisQueue} = require('@pioneer-platform/default-redis')
 
-const URL_COINCAP = "https://api.coincap.io/v2/"
+// API Documentation URLs
+// https://rest.coincap.io/api-docs.json
+
+// API Base URLs
+const URL_COINCAP = "https://rest.coincap.io/v3/"
 let URL_COINGECKO = "https://api.coingecko.com/api/v3/"
+
+// API Keys
+let COINCAP_API_KEY = process.env['COINCAP_API_KEY']
 let COINGECKO_API_KEY = process.env['COINGECKO_API_KEY']
+
+if (!COINCAP_API_KEY) {
+    console.warn("COINCAP_API_KEY not found in environment variables. CoinCap API 3.0 requires an API key.")
+}
 
 let GLOBAL_RATES_COINCAP:any
 let GLOBAL_RATES_COINGECKO:any
@@ -85,6 +94,12 @@ module.exports = {
 const update_cache = async function() {
     let tag = TAG + ' | update_cache | '
     try {
+        // Validate API key is available
+        if (!COINCAP_API_KEY) {
+            log.error(tag, "COINCAP_API_KEY is required for CoinCap API 3.0")
+            return ["COINCAP_API_KEY_MISSING"]
+        }
+        
         let entries = Object.entries(assetData).map(([caip, asset]) => {
             if (typeof asset === 'object' && asset !== null) {
                 return {...asset as object, caip};
@@ -97,16 +112,20 @@ const update_cache = async function() {
         log.info(tag, "entries: ", entries[0]);
         log.info(tag, "entries: ", entries.length);
 
-        let url = URL_COINCAP + 'assets?limit=2000';
+        // Use URL without API key in query parameter
+        let url = `${URL_COINCAP}assets?limit=2000`;
         log.debug(tag, "url: ", url);
         let result = await axios({
             url: url,
-            method: 'GET'
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${COINCAP_API_KEY}`
+            }
         });
 
         let allCoinsArray = result.data.data;
         log.debug(tag, "allCoinsArray: ", allCoinsArray.length);
-
 
         let populatedCaips = new Set<string>();
 
@@ -117,7 +136,7 @@ const update_cache = async function() {
                 let asset = assetsMatchSymbol[j];
                 let key = "coincap:" + asset.caip;
                 await redis.setex(key, 3600, JSON.stringify(entry));
-                log.info(tag, "saved: " + key + " result: ", result);
+                log.info(tag, "saved: " + key);
                 populatedCaips.add(asset.caip);
             }
         }
@@ -510,25 +529,36 @@ let build_balances = async function (marketInfoCoinCap:any, marketInfoCoinGecko:
 
 
 let get_assets_coincap = async function () {
-    let tag = TAG + ' | get_order | '
+    let tag = TAG + ' | get_assets_coincap | '
     try {
-        let output:any =  {}
+        let output:any = {}
 
-        let url = URL_COINCAP + 'assets?limit=2000'
-        log.debug(tag,"url: ",url)
+        // API 3.0 requires an API key
+        if (!COINCAP_API_KEY) {
+            log.error(tag, "COINCAP_API_KEY is required for CoinCap API 3.0")
+            return {}
+        }
+
+        // Use URL without API key in query parameter
+        let url = `${URL_COINCAP}assets?limit=2000`
+        log.debug(tag, "url: ", url)
+        
         let result = await axios({
             url: url,
-            method: 'GET'
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${COINCAP_API_KEY}`
+            }
         })
 
-        //parse into keys array off ticker
+        // Parse into keys array off ticker
         let allCoinsArray = result.data.data
-        log.debug(tag,"allCoinsArray: ",allCoinsArray.length)
+        log.debug(tag, "allCoinsArray: ", allCoinsArray.length)
 
         for(let i = 0; i < allCoinsArray.length; i++){
-            //
             let coinInfo = allCoinsArray[i]
-            log.debug(tag,"coinInfo: ",coinInfo)
+            log.debug(tag, "coinInfo: ", coinInfo)
 
             output[coinInfo.symbol] = coinInfo
         }
@@ -536,7 +566,8 @@ let get_assets_coincap = async function () {
 
         return output
     } catch (e) {
-        //handle error gracefully
+        log.error(TAG, "Error fetching CoinCap assets: ", e)
+        // Handle error gracefully
         return {}
     }
 }
@@ -579,14 +610,52 @@ const get_assets_coingecko = async function (limit?: number, skip?: number) {
 const get_prices_in_quote = async function (assets:[any], quote:string) {
     let tag = " | get_prices_in_quote | "
     try{
+        // Try CoinCap API first if we have an API key
+        if (COINCAP_API_KEY && quote.toLowerCase() === 'usd') {
+            try {
+                // CoinCap doesn't support multi-asset lookup in one call, so we need to build a result object
+                const result: Record<string, any> = {}
+                
+                for (const asset of assets) {
+                    try {
+                        const url = `${URL_COINCAP}assets/${asset}`
+                        const response = await axios({
+                            url: url,
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Authorization': `Bearer ${COINCAP_API_KEY}`
+                            }
+                        })
+                        
+                        if (response.data && response.data.data) {
+                            result[asset] = {
+                                usd: parseFloat(response.data.data.priceUsd)
+                            }
+                        }
+                    } catch (assetError) {
+                        log.error(tag, `Error fetching price for ${asset} from CoinCap: `, assetError)
+                    }
+                }
+                
+                // If we got at least one result, return it
+                if (Object.keys(result).length > 0) {
+                    return result
+                }
+            } catch (coincapError) {
+                log.error(tag, "CoinCap API error, falling back to CoinGecko: ", coincapError)
+            }
+        }
 
+        // Fallback to CoinGecko
         const { data }: { data: any } = await axios.get(
-            `${URL_COINGECKO}/simple/price?ids=`+assets.toString()+`&vs_currencies=`+quote
+            `${URL_COINGECKO}/simple/price?ids=${assets.toString()}&vs_currencies=${quote}`
         )
 
         return data
     } catch (e) {
-        log.error(tag, "e: ", e)
+        log.error(tag, "Error fetching prices: ", e)
+        return {}
     }
 }
 
@@ -595,11 +664,36 @@ const get_prices_in_quote = async function (assets:[any], quote:string) {
 const get_price = async function (asset:string) {
     let tag = " | get_price | "
     try{
-        // @ts-ignore
-        // const id = coingeckoIDMap[blockchain]
-        // const isToken = !!asset
-        // const contractUrl = isToken ? `/contract/${asset}` : ''
-
+        // Try CoinCap API first
+        if (COINCAP_API_KEY) {
+            try {
+                const url = `${URL_COINCAP}assets/${asset}`
+                log.debug(tag, "CoinCap URL: ", url)
+                
+                const result = await axios({
+                    url: url,
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${COINCAP_API_KEY}`
+                    }
+                })
+                
+                const coinInfo = result.data.data
+                
+                return {
+                    price: parseFloat(coinInfo.priceUsd),
+                    marketCap: parseFloat(coinInfo.marketCapUsd),
+                    changePercent24Hr: parseFloat(coinInfo.changePercent24Hr),
+                    volume: parseFloat(coinInfo.volumeUsd24Hr),
+                    icon: `https://assets.coincap.io/assets/icons/${coinInfo.symbol.toLowerCase()}@2x.png`
+                }
+            } catch (coincapError) {
+                log.error(tag, "CoinCap API error, falling back to CoinGecko: ", coincapError)
+            }
+        }
+        
+        // Fallback to CoinGecko if CoinCap fails or is not available
         const { data }: { data: any } = await axios.get(
             `${URL_COINGECKO}/coins/${asset}`
         )
@@ -612,9 +706,10 @@ const get_price = async function (asset:string) {
             marketCap: marketData?.market_cap?.[currency],
             changePercent24Hr: marketData?.price_change_percentage_24h,
             volume: marketData?.total_volume?.[currency],
-            icon:data?.image?.large
+            icon: data?.image?.large
         }
     } catch (e) {
-        log.error(tag, "e: ", e)
+        log.error(tag, "Error fetching price data: ", e)
+        return null
     }
 }
